@@ -17,14 +17,42 @@
     <meta name="twitter:image" content="https://ghumofiroo.com/logo.png" />
     
     <!-- Required custom CSS -->
-    <link rel="stylesheet" href="https://b2bta-production.s3.ap-south-1.amazonaws.com/whitelabel/style.css">
+    <link rel="stylesheet" href="https://b2bta-production.s3.ap-south-1.amazonaws.com/whitelabel/style.css" onerror="console.log('Failed to load custom CSS')">
+    
+    <!-- Add error handling for global errors -->
+    <script>
+      window.addEventListener('error', function(e) {
+        console.error('Global error caught:', e.error, e.filename, e.lineno, e.colno);
+      });
+      
+      window.addEventListener('unhandledrejection', function(e) {
+        console.error('Unhandled promise rejection:', e.reason);
+      });
+    </script>
   </head>
 
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
     
-    <!-- Required custom JavaScript -->
-    <script src="https://b2bta-production.s3.ap-south-1.amazonaws.com/whitelabel/custom.js"></script>
+    <!-- Load custom JavaScript with error handling -->
+    <script>
+      // Load the external script safely
+      (function() {
+        try {
+          var script = document.createElement('script');
+          script.src = 'https://b2bta-production.s3.ap-south-1.amazonaws.com/whitelabel/custom.js';
+          script.onerror = function() {
+            console.log('Failed to load custom JavaScript - continuing without it');
+          };
+          script.onload = function() {
+            console.log('Custom JavaScript loaded successfully');
+          };
+          document.body.appendChild(script);
+        } catch (error) {
+          console.log('Error loading custom script:', error);
+        }
+      })();
+    </script>
   </body>
 </html>
