@@ -27,7 +27,7 @@ const Navigation = () => {
             <Link to="/" className="flex items-center">
               <img
                 className="h-10 w-auto"
-                src="https://ghumofiroo.com/logo.png"
+                src="/lovable-uploads/dc7c4d6f-9ccd-4614-abea-77d7936b921b.png"
                 alt="Ghumo Firoo Travels"
               />
               <span className="ml-2 text-xl font-bold text-blue-900">Ghumo Firoo Travels</span>
