@@ -51,8 +51,8 @@ const Navigation = () => {
                   {item.name}
                 </Link>
               ))}
-              {/* Desktop Login Button with ID */}
-              <Button id="b2bLoginButton" className="ml-4">
+              {/* ✅ Desktop Login Button with required attributes */}
+              <Button id="b2bLoginButton" data-b2b-login className="ml-4">
                 Login
               </Button>
             </div>
@@ -64,11 +64,7 @@ const Navigation = () => {
               onClick={() => setIsMenuOpen(!isMenuOpen)}
               className="inline-flex items-center justify-center p-2 rounded-md text-gray-700 hover:text-blue-900 hover:bg-gray-100"
             >
-              {isMenuOpen ? (
-                <X className="h-6 w-6" />
-              ) : (
-                <Menu className="h-6 w-6" />
-              )}
+              {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
             </button>
           </div>
         </div>
@@ -92,8 +88,8 @@ const Navigation = () => {
                 </Link>
               ))}
               <div className="px-3 py-2">
-                {/* Mobile Login Button WITHOUT id */}
-                <Button className="w-full">
+                {/* ✅ Mobile Login Button with required attributes */}
+                <Button id="b2bLoginButtonMobile" data-b2b-login className="w-full">
                   Login
                 </Button>
               </div>
