@@ -16,65 +16,70 @@
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:image" content="https://ghumofiroo.com/logo.png" />
     
-    <!-- Required custom CSS with better error handling -->
-    <link rel="stylesheet" href="https://b2bta-production.s3.ap-south-1.amazonaws.com/whitelabel/style.css" onerror="console.warn('Failed to load custom CSS - continuing without it')">
-    
-    <!-- Enhanced error handling -->
+    <!-- Load external CSS with complete error isolation -->
     <script>
-      // Prevent external scripts from breaking the app
-      window.addEventListener('error', function(e) {
-        console.error('Global error caught:', e.error, e.filename, e.lineno, e.colno);
-        
-        // Don't let external script errors break the app
-        if (e.filename && e.filename.includes('b2bta-production')) {
-          console.warn('External script error - continuing without custom functionality');
-          e.preventDefault();
-          return true;
-        }
-      });
-      
-      window.addEventListener('unhandledrejection', function(e) {
-        console.error('Unhandled promise rejection:', e.reason);
-        // Don't let promise rejections break the app
-        e.preventDefault();
-      });
-
-      // Track when DOM is ready
-      document.addEventListener('DOMContentLoaded', function() {
-        console.log('DOM fully loaded');
-      });
-
-      // Ensure React always loads
-      window.addEventListener('load', function() {
-        console.log('Window loaded - React should be mounting');
-      });
+      // Completely isolate external CSS loading
+      try {
+        var link = document.createElement('link');
+        link.rel = 'stylesheet';
+        link.href = 'https://b2bta-production.s3.ap-south-1.amazonaws.com/whitelabel/style.css';
+        link.onerror = function() {
+          console.warn('External CSS failed to load - continuing without custom styles');
+        };
+        link.onload = function() {
+          console.log('External CSS loaded successfully');
+        };
+        document.head.appendChild(link);
+      } catch (error) {
+        console.warn('Failed to load external CSS:', error);
+      }
     </script>
   </head>
 
   <body>
     <div id="root"></div>
     
-    <!-- Load React first -->
+    <!-- Load React first and ensure it always works -->
     <script type="module" src="/src/main.tsx"></script>
     
-    <!-- Load custom JavaScript after React with enhanced error handling -->
+    <!-- Load external script with complete isolation and delay -->
     <script>
-      // Load external script safely without blocking React
-      (function() {
-        try {
-          var script = document.createElement('script');
-          script.src = 'https://b2bta-production.s3.ap-south-1.amazonaws.com/whitelabel/custom.js';
-          script.onerror = function() {
-            console.warn('Failed to load custom JavaScript - login button will not have custom functionality');
-          };
-          script.onload = function() {
-            console.log('Custom JavaScript loaded successfully');
-          };
-          document.body.appendChild(script);
-        } catch (error) {
-          console.warn('Error loading custom script:', error);
-        }
-      })();
+      // Wait for React to fully mount before loading external scripts
+      window.addEventListener('load', function() {
+        // Add additional delay to ensure React is fully rendered
+        setTimeout(function() {
+          try {
+            console.log('Attempting to load external script...');
+            
+            // Create script element with maximum error isolation
+            var script = document.createElement('script');
+            script.src = 'https://b2bta-production.s3.ap-south-1.amazonaws.com/whitelabel/custom.js';
+            script.async = true;
+            script.defer = true;
+            
+            script.onerror = function(event) {
+              console.warn('External script failed to load - login button will not have custom functionality');
+              // Prevent the error from propagating
+              event.preventDefault();
+              return true;
+            };
+            
+            script.onload = function() {
+              console.log('External script loaded successfully');
+            };
+            
+            // Wrap the script loading in try-catch
+            try {
+              document.body.appendChild(script);
+            } catch (appendError) {
+              console.warn('Failed to append external script:', appendError);
+            }
+            
+          } catch (error) {
+            console.warn('Error in external script loading process:', error);
+          }
+        }, 2000); // 2 second delay to ensure React is fully mounted
+      });
     </script>
   </body>
 </html>
