@@ -16,70 +16,17 @@
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:image" content="https://ghumofiroo.com/logo.png" />
     
-    <!-- Load external CSS with complete error isolation -->
-    <script>
-      // Completely isolate external CSS loading
-      try {
-        var link = document.createElement('link');
-        link.rel = 'stylesheet';
-        link.href = 'https://b2bta-production.s3.ap-south-1.amazonaws.com/whitelabel/style.css';
-        link.onerror = function() {
-          console.warn('External CSS failed to load - continuing without custom styles');
-        };
-        link.onload = function() {
-          console.log('External CSS loaded successfully');
-        };
-        document.head.appendChild(link);
-      } catch (error) {
-        console.warn('Failed to load external CSS:', error);
-      }
-    </script>
+    <!-- B2B Login Modal CSS as per integration guide -->
+    <link rel="stylesheet" href="https://b2bta-production.s3.ap-south-1.amazonaws.com/whitelabel/style.css">
   </head>
 
   <body>
     <div id="root"></div>
     
-    <!-- Load React first and ensure it always works -->
+    <!-- Load React application -->
     <script type="module" src="/src/main.tsx"></script>
     
-    <!-- Load external script with complete isolation and delay -->
-    <script>
-      // Wait for React to fully mount before loading external scripts
-      window.addEventListener('load', function() {
-        // Add additional delay to ensure React is fully rendered
-        setTimeout(function() {
-          try {
-            console.log('Attempting to load external script...');
-            
-            // Create script element with maximum error isolation
-            var script = document.createElement('script');
-            script.src = 'https://b2bta-production.s3.ap-south-1.amazonaws.com/whitelabel/custom.js';
-            script.async = true;
-            script.defer = true;
-            
-            script.onerror = function(event) {
-              console.warn('External script failed to load - login button will not have custom functionality');
-              // Prevent the error from propagating
-              event.preventDefault();
-              return true;
-            };
-            
-            script.onload = function() {
-              console.log('External script loaded successfully');
-            };
-            
-            // Wrap the script loading in try-catch
-            try {
-              document.body.appendChild(script);
-            } catch (appendError) {
-              console.warn('Failed to append external script:', appendError);
-            }
-            
-          } catch (error) {
-            console.warn('Error in external script loading process:', error);
-          }
-        }, 2000); // 2 second delay to ensure React is fully mounted
-      });
-    </script>
+    <!-- B2B Login Modal JavaScript as per integration guide -->
+    <script src="https://b2bta-production.s3.ap-south-1.amazonaws.com/whitelabel/custom.js"></script>
   </body>
 </html>
