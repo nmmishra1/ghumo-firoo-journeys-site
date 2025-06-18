@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Menu, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -6,6 +6,23 @@ import { Button } from '@/components/ui/button';
 const Navigation = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const location = useLocation();
+
+  useEffect(() => {
+    const btn = document.getElementById('b2bLoginButton');
+    if (btn) {
+      btn.addEventListener('click', () => {
+        // Try to dispatch a click event in case the script listens for it globally
+        const event = new CustomEvent('openB2BLoginModal');
+        window.dispatchEvent(event);
+
+        // Optional fallback: try to click the modal directly if it exists
+        const modal = document.querySelector('.b2b-login-wrapper');
+        if (modal) {
+          modal.classList.add('open');
+        }
+      });
+    }
+  }, []);
 
   const navigationItems = [
     { name: 'Home', path: '/' },
@@ -21,7 +38,6 @@ const Navigation = () => {
     <nav className="bg-white shadow-lg sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
-          {/* Logo */}
           <div className="flex-shrink-0">
             <Link to="/" className="flex items-center">
               <img
@@ -51,8 +67,7 @@ const Navigation = () => {
                   {item.name}
                 </Link>
               ))}
-              {/* ✅ Desktop Login Button with required attributes */}
-              <Button id="b2bLoginButton" data-b2b-login className="ml-4">
+              <Button id="b2bLoginButton" className="ml-4">
                 Login
               </Button>
             </div>
@@ -88,8 +103,7 @@ const Navigation = () => {
                 </Link>
               ))}
               <div className="px-3 py-2">
-                {/* ✅ Mobile Login Button with required attributes */}
-                <Button id="b2bLoginButtonMobile" data-b2b-login className="w-full">
+                <Button id="b2bLoginButton" className="w-full">
                   Login
                 </Button>
               </div>
