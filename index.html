@@ -27,36 +27,5 @@
     <script type="module" src="/src/main.tsx"></script>
     
     <!-- B2B Login Modal JavaScript with error isolation -->
-    <script>
-      // Wait for DOM to be fully loaded before attempting to load external script
-      document.addEventListener('DOMContentLoaded', function() {
-        // Add a delay to ensure React has mounted
-        setTimeout(function() {
-          try {
-            console.log('Loading B2B login script...');
-            
-            var script = document.createElement('script');
-            script.src = 'https://b2bta-production.s3.ap-south-1.amazonaws.com/whitelabel/custom.js';
-            script.async = true;
-            
-            script.onload = function() {
-              console.log('B2B login script loaded successfully');
-            };
-            
-            script.onerror = function(error) {
-              console.warn('B2B login script failed to load:', error);
-              // Prevent error from propagating to the main application
-              return true;
-            };
-            
-            document.body.appendChild(script);
-            
-          } catch (error) {
-            console.warn('Error loading B2B script:', error);
-            // Don't let this error crash the app
-          }
-        }, 1000); // 1 second delay to ensure React is mounted
-      });
-    </script>
   </body>
 </html>
