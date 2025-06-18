@@ -104,7 +104,7 @@ const Products = () => {
         <div className="flex justify-between items-center">
           <span className="text-lg font-bold text-orange-600">{pkg.price}</span>
           <Button asChild>
-            <Link to="/contact">Enquire Now</Link>
+            <Link to="/enquire-now">Enquire Now</Link>
           </Button>
         </div>
       </div>

@@ -10,6 +10,7 @@ import Products from "./pages/Products";
 import Career from "./pages/Career";
 import Contact from "./pages/Contact";
 import CustomTourPackages from "./pages/CustomTourPackages";
+import EnquireNow from "./pages/EnquireNow";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsOfService from "./pages/TermsOfService";
 import TermsConditions from "./pages/TermsConditions";
@@ -29,6 +30,7 @@ const App = () => (
           <Route path="/about" element={<About />} />
           <Route path="/products" element={<Products />} />
           <Route path="/products/custom-tour-packages" element={<CustomTourPackages />} />
+          <Route path="/enquire-now" element={<EnquireNow />} />
           <Route path="/career" element={<Career />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/privacy-policy" element={<PrivacyPolicy />} />
