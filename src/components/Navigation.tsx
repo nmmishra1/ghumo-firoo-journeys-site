@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Menu, X } from 'lucide-react';
@@ -30,7 +29,9 @@ const Navigation = () => {
                 src="/lovable-uploads/dc7c4d6f-9ccd-4614-abea-77d7936b921b.png"
                 alt="Ghumo Firoo Travels"
               />
-              <span className="ml-2 text-xl font-bold text-blue-900">Ghumo Firoo Travels</span>
+              <span className="ml-2 text-xl font-bold text-blue-900">
+                Ghumo Firoo Travels
+              </span>
             </Link>
           </div>
 
@@ -50,6 +51,7 @@ const Navigation = () => {
                   {item.name}
                 </Link>
               ))}
+              {/* Desktop Login Button with ID */}
               <Button id="b2bLoginButton" className="ml-4">
                 Login
               </Button>
@@ -62,7 +64,11 @@ const Navigation = () => {
               onClick={() => setIsMenuOpen(!isMenuOpen)}
               className="inline-flex items-center justify-center p-2 rounded-md text-gray-700 hover:text-blue-900 hover:bg-gray-100"
             >
-              {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+              {isMenuOpen ? (
+                <X className="h-6 w-6" />
+              ) : (
+                <Menu className="h-6 w-6" />
+              )}
             </button>
           </div>
         </div>
@@ -86,7 +92,8 @@ const Navigation = () => {
                 </Link>
               ))}
               <div className="px-3 py-2">
-                <Button id="b2bLoginButton" className="w-full">
+                {/* Mobile Login Button WITHOUT id */}
+                <Button className="w-full">
                   Login
                 </Button>
               </div>
