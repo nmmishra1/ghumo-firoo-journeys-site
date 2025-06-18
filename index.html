@@ -16,36 +16,65 @@
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:image" content="https://ghumofiroo.com/logo.png" />
     
-    <!-- Required custom CSS -->
-    <link rel="stylesheet" href="https://b2bta-production.s3.ap-south-1.amazonaws.com/whitelabel/style.css" onerror="console.log('Failed to load custom CSS')">
+    <!-- Required custom CSS with better error handling -->
+    <link rel="stylesheet" href="https://b2bta-production.s3.ap-south-1.amazonaws.com/whitelabel/style.css" onerror="console.warn('Failed to load custom CSS - continuing without it')">
     
-    <!-- Add error handling for global errors -->
+    <!-- Enhanced error handling -->
     <script>
+      // Prevent external scripts from breaking the app
       window.addEventListener('error', function(e) {
         console.error('Global error caught:', e.error, e.filename, e.lineno, e.colno);
         
-        // Additional logging for script errors
+        // Don't let external script errors break the app
         if (e.filename && e.filename.includes('b2bta-production')) {
-          console.error('External script error detected from:', e.filename);
+          console.warn('External script error - continuing without custom functionality');
+          e.preventDefault();
+          return true;
         }
       });
       
       window.addEventListener('unhandledrejection', function(e) {
         console.error('Unhandled promise rejection:', e.reason);
+        // Don't let promise rejections break the app
+        e.preventDefault();
       });
 
       // Track when DOM is ready
       document.addEventListener('DOMContentLoaded', function() {
         console.log('DOM fully loaded');
       });
+
+      // Ensure React always loads
+      window.addEventListener('load', function() {
+        console.log('Window loaded - React should be mounting');
+      });
     </script>
   </head>
 
   <body>
     <div id="root"></div>
+    
+    <!-- Load React first -->
     <script type="module" src="/src/main.tsx"></script>
     
-    <!-- Load custom JavaScript -->
-    <script src="https://b2bta-production.s3.ap-south-1.amazonaws.com/whitelabel/custom.js" onerror="console.warn('Failed to load custom JavaScript - continuing without it.')"></script>
+    <!-- Load custom JavaScript after React with enhanced error handling -->
+    <script>
+      // Load external script safely without blocking React
+      (function() {
+        try {
+          var script = document.createElement('script');
+          script.src = 'https://b2bta-production.s3.ap-south-1.amazonaws.com/whitelabel/custom.js';
+          script.onerror = function() {
+            console.warn('Failed to load custom JavaScript - login button will not have custom functionality');
+          };
+          script.onload = function() {
+            console.log('Custom JavaScript loaded successfully');
+          };
+          document.body.appendChild(script);
+        } catch (error) {
+          console.warn('Error loading custom script:', error);
+        }
+      })();
+    </script>
   </body>
 </html>
