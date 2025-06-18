@@ -314,6 +314,9 @@ ${data.fullName}
                 </p>
                 <p>Call us at: <a href="tel:+919876543210" className="text-orange-600 font-semibold">+91 98765 43210</a></p>
                 <p>Email us at: <a href="mailto:booking@ghumofiroo.com" className="text-orange-600 font-semibold">booking@ghumofiroo.com</a></p>
+                <p className="text-sm text-gray-500 mt-4">
+                  Note: Form data is sent via email and not stored in any database
+                </p>
               </div>
             </div>
           </div>
