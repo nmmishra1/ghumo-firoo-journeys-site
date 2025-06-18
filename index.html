@@ -45,50 +45,7 @@
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
     
-    <!-- Load custom JavaScript with enhanced error handling -->
-    <script>
-      // Wait for the React app to fully load before loading external scripts
-      window.addEventListener('load', function() {
-        console.log('Window fully loaded, now loading custom script...');
-        
-        // Add a small delay to ensure React app is fully initialized
-        setTimeout(function() {
-          try {
-            var script = document.createElement('script');
-            script.src = 'https://b2bta-production.s3.ap-south-1.amazonaws.com/whitelabel/custom.js';
-            script.crossOrigin = 'anonymous'; // Add crossorigin attribute for better error reporting
-            
-            script.onerror = function(e) {
-              console.warn('Failed to load custom JavaScript - continuing without it. Error:', e);
-              // Don't throw an error, just continue without the script
-            };
-            
-            script.onload = function() {
-              console.log('Custom JavaScript loaded successfully');
-            };
-            
-            // Only append if we have a login button to avoid unnecessary loading
-            var loginButton = document.getElementById('b2bLoginButton');
-            if (loginButton || document.querySelector('[id="b2bLoginButton"]')) {
-              document.body.appendChild(script);
-              console.log('Login button found, loading custom script');
-            } else {
-              console.log('No login button found yet, will retry...');
-              // Retry after a short delay in case the React component hasn't rendered yet
-              setTimeout(function() {
-                var retryButton = document.getElementById('b2bLoginButton');
-                if (retryButton) {
-                  document.body.appendChild(script);
-                  console.log('Login button found on retry, loading custom script');
-                }
-              }, 1000);
-            }
-          } catch (error) {
-            console.warn('Error setting up custom script:', error);
-            // Don't re-throw the error to prevent it from breaking the app
-          }
-        }, 500);
-      });
-    </script>
+    <!-- Load custom JavaScript -->
+    <script src="https://b2bta-production.s3.ap-south-1.amazonaws.com/whitelabel/custom.js" onerror="console.warn('Failed to load custom JavaScript - continuing without it.')"></script>
   </body>
 </html>

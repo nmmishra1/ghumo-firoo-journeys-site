@@ -131,9 +131,13 @@ const TermsConditions = () => {
             <h2 className="text-2xl font-semibold text-gray-900 mb-4">10. Contact Us</h2>
             <p className="text-gray-700">
               For any queries regarding these terms and conditions, please contact us at:
-              <br />Email: info@ghumofiroo.com
-              <br />Phone: +91 12345 67890
-              <br />Office: 123 Travel Street, Mumbai, Maharashtra 400001
+              <br /><strong>Ghumo Firoo Travels</strong>
+              <br /><strong>Address:</strong> Shop No. 210, 2nd Floor, Pratap Complex
+              <br />Metro Gate Number 3, near Munirka
+              <br />Baba Gangnath Market, Munirka
+              <br />New Delhi, Delhi 110067
+              <br /><strong>Phone:</strong> 9910987264
+              <br /><strong>Email:</strong> info@ghumofiroo.com
             </p>
           </section>
         </div>

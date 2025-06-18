@@ -168,7 +168,7 @@ const Products = () => {
             we can craft the perfect journey just for you.
           </p>
           <Button asChild size="lg" className="bg-orange-500 hover:bg-orange-600">
-            <Link to="/contact">Plan My Custom Trip</Link>
+            <Link to="/products/custom-tour-packages">Plan My Custom Trip</Link>
           </Button>
         </div>
       </section>
