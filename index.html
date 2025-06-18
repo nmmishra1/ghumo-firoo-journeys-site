@@ -3,16 +3,19 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Ghumo Firoo Travels</title>
+    <title>Ghumo Firoo Travels - Your Journey Begins Here</title>
 
+    <!-- SEO Meta -->
     <meta name="description" content="Ghumo Firoo Travels: Explore Char Dham, Turkey, Dubai & more." />
     <meta name="author" content="Ghumo Firoo Travels" />
 
-    <!-- Social sharing -->
+    <!-- Open Graph / Facebook -->
     <meta property="og:title" content="Ghumo Firoo Travels - Your Journey Begins Here" />
     <meta property="og:description" content="Explore unforgettable travel experiences with Ghumo Firoo." />
     <meta property="og:type" content="website" />
     <meta property="og:image" content="https://ghumofiroo.com/logo.png" />
+
+    <!-- Twitter -->
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:image" content="https://ghumofiroo.com/logo.png" />
 
@@ -21,12 +24,32 @@
   </head>
 
   <body>
+    <!-- React Root -->
     <div id="root"></div>
 
-    <!-- ✅ React app entry point (this stays as-is) -->
+    <!-- ✅ React Application Entry -->
     <script type="module" src="/src/main.tsx"></script>
 
-    <!-- ✅ B2B Modal JS -->
-    <script src="https://b2bta-production.s3.ap-south-1.amazonaws.com/whitelabel/custom.js"></script>
+    <!-- ✅ Safe B2B Modal Script Injection -->
+    <script>
+      window.addEventListener('load', function () {
+        setTimeout(function () {
+          const loginBtn = document.getElementById('b2bLoginButton');
+          if (!loginBtn) {
+            console.warn('Login button with ID "b2bLoginButton" not found.');
+            return;
+          }
+
+          const script = document.createElement('script');
+          script.src = 'https://b2bta-production.s3.ap-south-1.amazonaws.com/whitelabel/custom.js';
+          script.async = true;
+
+          script.onload = () => console.log('✅ B2B login script loaded successfully');
+          script.onerror = (e) => console.warn('❌ B2B login script failed:', e);
+
+          document.body.appendChild(script);
+        }, 1000); // 1 second delay ensures React is mounted
+      });
+    </script>
   </body>
 </html>
