@@ -1,28 +1,21 @@
+
 import React, { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Menu, X } from 'lucide-react';
+import { Menu, X, LogOut, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useAuth } from '@/hooks/useAuth';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 const Navigation = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const location = useLocation();
-
-  useEffect(() => {
-    const btn = document.getElementById('b2bLoginButton');
-    if (btn) {
-      btn.addEventListener('click', () => {
-        // Try to dispatch a click event in case the script listens for it globally
-        const event = new CustomEvent('openB2BLoginModal');
-        window.dispatchEvent(event);
-
-        // Optional fallback: try to click the modal directly if it exists
-        const modal = document.querySelector('.b2b-login-wrapper');
-        if (modal) {
-          modal.classList.add('open');
-        }
-      });
-    }
-  }, []);
+  const { user, signOut } = useAuth();
 
   const navigationItems = [
     { name: 'Home', path: '/' },
@@ -33,6 +26,10 @@ const Navigation = () => {
   ];
 
   const isActivePath = (path: string) => location.pathname === path;
+
+  const handleSignOut = async () => {
+    await signOut();
+  };
 
   return (
     <nav className="bg-white shadow-lg sticky top-0 z-50">
@@ -67,9 +64,29 @@ const Navigation = () => {
                   {item.name}
                 </Link>
               ))}
-              <Button id="b2bLoginButton" className="ml-4">
-                Login
-              </Button>
+              
+              {user ? (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline" className="ml-4">
+                      <User className="w-4 h-4 mr-2" />
+                      Account
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem onClick={handleSignOut}>
+                      <LogOut className="w-4 h-4 mr-2" />
+                      Sign Out
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              ) : (
+                <Link to="/auth">
+                  <Button className="ml-4">
+                    Login
+                  </Button>
+                </Link>
+              )}
             </div>
           </div>
 
@@ -103,9 +120,18 @@ const Navigation = () => {
                 </Link>
               ))}
               <div className="px-3 py-2">
-                <Button id="b2bLoginButton" className="w-full">
-                  Login
-                </Button>
+                {user ? (
+                  <Button onClick={handleSignOut} variant="outline" className="w-full">
+                    <LogOut className="w-4 h-4 mr-2" />
+                    Sign Out
+                  </Button>
+                ) : (
+                  <Link to="/auth">
+                    <Button className="w-full">
+                      Login
+                    </Button>
+                  </Link>
+                )}
               </div>
             </div>
           </div>
