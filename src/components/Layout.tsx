@@ -1,5 +1,6 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import Navigation from './Navigation';
 import Footer from './Footer';
 
@@ -8,11 +9,20 @@ interface LayoutProps {
 }
 
 const Layout = ({ children }: LayoutProps) => {
+  const location = useLocation();
+
+  // Scroll to top whenever the route changes
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [location.pathname]);
+
   return (
     <div className="min-h-screen flex flex-col">
       <Navigation />
-      <main className="flex-1">
-        {children}
+      <main className="flex-1 w-full">
+        <div className="min-h-screen">
+          {children}
+        </div>
       </main>
       <Footer />
     </div>
