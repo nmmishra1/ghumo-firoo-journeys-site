@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -19,8 +20,30 @@
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:image" content="https://ghumofiroo.com/logo.png" />
 
-    <!-- ✅ B2B Modal CSS -->
-    <link rel="stylesheet" href="https://b2bta-production.s3.ap-south-1.amazonaws.com/whitelabel/style.css" />
+    <!-- ✅ B2B Modal CSS - Load with error isolation -->
+    <style id="fallback-css">
+      /* Fallback styles in case external CSS fails */
+      .b2b-login-wrapper { display: none; }
+    </style>
+    <script>
+      // Load external CSS safely
+      (function() {
+        try {
+          const link = document.createElement('link');
+          link.rel = 'stylesheet';
+          link.href = 'https://b2bta-production.s3.ap-south-1.amazonaws.com/whitelabel/style.css';
+          link.onerror = function() {
+            console.warn('External CSS failed to load - using fallback styles');
+          };
+          link.onload = function() {
+            console.log('External CSS loaded successfully');
+          };
+          document.head.appendChild(link);
+        } catch (e) {
+          console.warn('Failed to load external CSS:', e);
+        }
+      })();
+    </script>
   </head>
 
   <body>
@@ -30,26 +53,78 @@
     <!-- ✅ React Application Entry -->
     <script type="module" src="/src/main.tsx"></script>
 
-    <!-- ✅ Safe B2B Modal Script Injection -->
+    <!-- ✅ Completely Isolated B2B Modal Script -->
     <script>
-      window.addEventListener('load', function () {
-        setTimeout(function () {
-          const loginBtn = document.getElementById('b2bLoginButton');
-          if (!loginBtn) {
-            console.warn('Login button with ID "b2bLoginButton" not found.');
-            return;
+      // Enhanced error isolation for external scripts
+      (function() {
+        'use strict';
+        
+        // Prevent external script errors from affecting React
+        const originalOnError = window.onerror;
+        const originalOnUnhandledRejection = window.onunhandledrejection;
+        
+        window.onerror = function(message, source, lineno, colno, error) {
+          // If error is from external B2B script, log it but don't propagate
+          if (source && source.includes('b2bta-production')) {
+            console.warn('External B2B script error (isolated):', {
+              message: message,
+              source: source,
+              lineno: lineno,
+              colno: colno
+            });
+            return true; // Prevent default error handling
           }
+          
+          // For other errors, use original handler
+          if (originalOnError) {
+            return originalOnError.apply(this, arguments);
+          }
+          return false;
+        };
+        
+        window.onunhandledrejection = function(event) {
+          console.warn('Promise rejection (isolated):', event.reason);
+          if (originalOnUnhandledRejection) {
+            return originalOnUnhandledRejection.apply(this, arguments);
+          }
+        };
 
-          const script = document.createElement('script');
-          script.src = 'https://b2bta-production.s3.ap-south-1.amazonaws.com/whitelabel/custom.js';
-          script.async = true;
+        // Wait for React app to be fully loaded
+        window.addEventListener('load', function() {
+          setTimeout(function() {
+            const loginBtn = document.getElementById('b2bLoginButton');
+            if (!loginBtn) {
+              console.log('Login button not found - B2B script not needed');
+              return;
+            }
 
-          script.onload = () => console.log('✅ B2B login script loaded successfully');
-          script.onerror = (e) => console.warn('❌ B2B login script failed:', e);
+            // Create isolated script loading
+            try {
+              const script = document.createElement('script');
+              script.src = 'https://b2bta-production.s3.ap-south-1.amazonaws.com/whitelabel/custom.js';
+              script.async = true;
+              script.defer = true;
+              
+              // Wrap script execution in try-catch
+              script.onload = function() {
+                try {
+                  console.log('✅ B2B login script loaded successfully');
+                } catch (e) {
+                  console.warn('B2B script loaded but execution failed:', e);
+                }
+              };
+              
+              script.onerror = function(e) {
+                console.warn('❌ B2B login script failed to load:', e);
+              };
 
-          document.body.appendChild(script);
-        }, 1000); // 1 second delay ensures React is mounted
-      });
+              document.body.appendChild(script);
+            } catch (e) {
+              console.warn('Failed to create B2B script element:', e);
+            }
+          }, 1500); // Increased delay to ensure React is fully mounted
+        });
+      })();
     </script>
   </body>
 </html>

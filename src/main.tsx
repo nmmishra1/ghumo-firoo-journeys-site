@@ -4,7 +4,7 @@ import { createRoot } from 'react-dom/client'
 import App from './App.tsx'
 import './index.css'
 
-// Ultra-robust error boundary
+// Ultra-robust error boundary with better error isolation
 class ErrorBoundary extends React.Component<{children: React.ReactNode}, {hasError: boolean, error?: Error}> {
   constructor(props: {children: React.ReactNode}) {
     super(props);
@@ -63,7 +63,7 @@ class ErrorBoundary extends React.Component<{children: React.ReactNode}, {hasErr
   }
 }
 
-// Global error handlers to prevent any script errors from breaking the app
+// Enhanced global error handlers with better isolation
 window.addEventListener('error', function(event) {
   console.error('Global error intercepted:', {
     message: event.message,
@@ -73,23 +73,30 @@ window.addEventListener('error', function(event) {
     error: event.error
   });
   
-  // Prevent external script errors from breaking React
+  // Prevent external script errors from breaking React app
   if (event.filename && (
     event.filename.includes('b2bta-production') || 
     event.filename.includes('s3.ap-south-1.amazonaws.com')
   )) {
     console.warn('External script error detected - preventing app crash');
     event.preventDefault();
+    event.stopPropagation();
     return true;
   }
 });
 
 window.addEventListener('unhandledrejection', function(event) {
   console.error('Unhandled promise rejection intercepted:', event.reason);
-  event.preventDefault();
+  
+  // Check if rejection is from external script
+  if (event.reason && event.reason.toString && event.reason.toString().includes('b2bta')) {
+    console.warn('External script promise rejection - preventing app crash');
+    event.preventDefault();
+    return;
+  }
 });
 
-console.log('Initializing React application...');
+console.log('🚀 Initializing React application...');
 
 try {
   const rootElement = document.getElementById("root");
@@ -98,22 +105,24 @@ try {
     throw new Error('Root element not found');
   }
   
-  console.log('Creating React root...');
+  console.log('✅ Creating React root...');
   const root = createRoot(rootElement);
   
-  console.log('Rendering application...');
+  console.log('✅ Rendering application...');
   root.render(
-    <ErrorBoundary>
-      <App />
-    </ErrorBoundary>
+    <React.StrictMode>
+      <ErrorBoundary>
+        <App />
+      </ErrorBoundary>
+    </React.StrictMode>
   );
   
-  console.log('React application rendered successfully');
+  console.log('✅ React application rendered successfully');
   
 } catch (error) {
-  console.error('Critical error during React initialization:', error);
+  console.error('❌ Critical error during React initialization:', error);
   
-  // Fallback rendering
+  // Enhanced fallback rendering
   const rootElement = document.getElementById("root");
   if (rootElement) {
     rootElement.innerHTML = `
@@ -123,6 +132,9 @@ try {
         <button onclick="window.location.reload()" style="padding: 12px 24px; background-color: #007bff; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 16px;">
           Refresh Page
         </button>
+        <div style="margin-top: 20px; padding: 15px; background-color: #fff3cd; border: 1px solid #ffeaa7; border-radius: 4px; max-width: 500px;">
+          <strong>Error Details:</strong> ${error.message || 'Unknown error'}
+        </div>
       </div>
     `;
   }
