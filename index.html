@@ -7,43 +7,22 @@
     <title>Ghumo Firoo Travels - Your Journey Begins Here</title>
 
     <!-- SEO Meta -->
-    <meta name="description" content="Ghumo Firoo Travels: Explore Char Dham, Turkey, Dubai & more." />
+    <meta name="description" content="Ghumo Firoo Travels – Your Journey, Our Expertise. Trusted Indian travel agency offering tailor-made tour packages, Char Dham Yatra, and global vacations." />
     <meta name="author" content="Ghumo Firoo Travels" />
+    <meta name="keywords" content="travel agency, holiday planner, Char Dham Yatra, tour packages, Indian travel, Turkey tours, Dubai tours, Georgia tours, Europe tours" />
 
     <!-- Open Graph / Facebook -->
-    <meta property="og:title" content="Ghumo Firoo Travels - Your Journey Begins Here" />
-    <meta property="og:description" content="Explore unforgettable travel experiences with Ghumo Firoo." />
+    <meta property="og:title" content="Ghumo Firoo Travels - Your Journey, Our Expertise" />
+    <meta property="og:description" content="Trusted Indian travel agency offering tailor-made tour packages, Char Dham Yatra, and global vacations. Your Journey, Our Expertise." />
     <meta property="og:type" content="website" />
     <meta property="og:image" content="https://ghumofiroo.com/logo.png" />
 
     <!-- Twitter -->
     <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Ghumo Firoo Travels - Your Journey, Our Expertise" />
+    <meta name="twitter:description" content="Trusted Indian travel agency offering tailor-made tour packages, Char Dham Yatra, and global vacations." />
     <meta name="twitter:image" content="https://ghumofiroo.com/logo.png" />
 
-    <!-- ✅ B2B Modal CSS - Load with error isolation -->
-    <style id="fallback-css">
-      /* Fallback styles in case external CSS fails */
-      .b2b-login-wrapper { display: none; }
-    </style>
-    <script>
-      // Load external CSS safely
-      (function() {
-        try {
-          const link = document.createElement('link');
-          link.rel = 'stylesheet';
-          link.href = 'https://b2bta-production.s3.ap-south-1.amazonaws.com/whitelabel/style.css';
-          link.onerror = function() {
-            console.warn('External CSS failed to load - using fallback styles');
-          };
-          link.onload = function() {
-            console.log('External CSS loaded successfully');
-          };
-          document.head.appendChild(link);
-        } catch (e) {
-          console.warn('Failed to load external CSS:', e);
-        }
-      })();
-    </script>
   </head>
 
   <body>
@@ -53,78 +32,5 @@
     <!-- ✅ React Application Entry -->
     <script type="module" src="/src/main.tsx"></script>
 
-    <!-- ✅ Completely Isolated B2B Modal Script -->
-    <script>
-      // Enhanced error isolation for external scripts
-      (function() {
-        'use strict';
-        
-        // Prevent external script errors from affecting React
-        const originalOnError = window.onerror;
-        const originalOnUnhandledRejection = window.onunhandledrejection;
-        
-        window.onerror = function(message, source, lineno, colno, error) {
-          // If error is from external B2B script, log it but don't propagate
-          if (source && source.includes('b2bta-production')) {
-            console.warn('External B2B script error (isolated):', {
-              message: message,
-              source: source,
-              lineno: lineno,
-              colno: colno
-            });
-            return true; // Prevent default error handling
-          }
-          
-          // For other errors, use original handler
-          if (originalOnError) {
-            return originalOnError.apply(this, arguments);
-          }
-          return false;
-        };
-        
-        window.onunhandledrejection = function(event) {
-          console.warn('Promise rejection (isolated):', event.reason);
-          if (originalOnUnhandledRejection) {
-            return originalOnUnhandledRejection.apply(this, arguments);
-          }
-        };
-
-        // Wait for React app to be fully loaded
-        window.addEventListener('load', function() {
-          setTimeout(function() {
-            const loginBtn = document.getElementById('b2bLoginButton');
-            if (!loginBtn) {
-              console.log('Login button not found - B2B script not needed');
-              return;
-            }
-
-            // Create isolated script loading
-            try {
-              const script = document.createElement('script');
-              script.src = 'https://b2bta-production.s3.ap-south-1.amazonaws.com/whitelabel/custom.js';
-              script.async = true;
-              script.defer = true;
-              
-              // Wrap script execution in try-catch
-              script.onload = function() {
-                try {
-                  console.log('✅ B2B login script loaded successfully');
-                } catch (e) {
-                  console.warn('B2B script loaded but execution failed:', e);
-                }
-              };
-              
-              script.onerror = function(e) {
-                console.warn('❌ B2B login script failed to load:', e);
-              };
-
-              document.body.appendChild(script);
-            } catch (e) {
-              console.warn('Failed to create B2B script element:', e);
-            }
-          }, 1500); // Increased delay to ensure React is fully mounted
-        });
-      })();
-    </script>
   </body>
 </html>

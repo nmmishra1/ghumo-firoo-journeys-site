@@ -32,7 +32,10 @@ const HeroSection = () => {
             Awaits
           </h1>
           
-          <p className="text-xl md:text-2xl text-white/90 mb-8 max-w-3xl mx-auto leading-relaxed">
+          <p className="text-xl md:text-2xl text-white/90 mb-4 max-w-3xl mx-auto leading-relaxed">
+            Your Journey, Our Expertise – Trusted Indian Travel Agency
+          </p>
+          <p className="text-lg md:text-xl text-white/75 mb-8 max-w-3xl mx-auto leading-relaxed">
             Discover breathtaking destinations and create unforgettable memories with our expertly crafted travel experiences
           </p>
 
