@@ -147,7 +147,7 @@ const RefundPolicy = () => {
               <br />Metro Gate Number 3, near Munirka
               <br />Baba Gangnath Market, Munirka
               <br />New Delhi, Delhi 110067
-              <br /><strong>Phone:</strong> 9910987264
+              <br /><strong>Phone:</strong> 9910987264 | 9870229792
               <br /><strong>Email:</strong> info@ghumofiroo.com
               <br /><strong>Office Hours:</strong> Monday - Saturday, 9:00 AM - 6:00 PM
             </p>

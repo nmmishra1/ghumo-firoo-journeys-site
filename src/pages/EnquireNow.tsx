@@ -312,7 +312,7 @@ ${data.fullName}
                 <p className="mb-2">
                   <strong>Need immediate assistance?</strong>
                 </p>
-                <p>Call us at: <a href="tel:+919910987264" className="text-orange-600 font-semibold">+91 98765 43210</a></p>
+                <p>Call us at: <a href="tel:+919910987264" className="text-orange-600 font-semibold">+91 9910987264</a> | <a href="tel:+919870229792" className="text-orange-600 font-semibold">+91 9870229792</a></p>
                 <p>Email us at: <a href="mailto:booking@ghumofiroo.com" className="text-orange-600 font-semibold">booking@ghumofiroo.com</a></p>
                 <p className="text-sm text-gray-500 mt-4">
                   Note: Form data is sent via email and not stored in any database

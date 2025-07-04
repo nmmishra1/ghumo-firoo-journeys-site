@@ -5,25 +5,25 @@ import { Star, Quote } from 'lucide-react';
 
 const testimonials = [
   {
-    name: 'Priya Sharma',
-    location: 'Mumbai, India',
-    rating: 5,
-    text: 'Our Char Dham Yatra was absolutely divine! The arrangements were perfect and our guide was incredibly knowledgeable. Thank you Ghumo Firoo for making this spiritual journey so memorable.',
-    image: 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=80&h=80&fit=crop&crop=face'
-  },
-  {
-    name: 'Rajesh Gupta',
+    name: 'Sanjay Kumar',
     location: 'Delhi, India',
     rating: 5,
-    text: 'The Kashmir trip exceeded all our expectations! The hotels were amazing, the scenery was breathtaking, and the entire experience was flawlessly organized.',
+    text: 'Excellent service from Ghumo Firoo Travels! They organized our family trip to Kedarnath and Badrinath perfectly. The driver was professional, hotels were clean, and the entire journey was hassle-free. Highly recommend their Char Dham packages!',
     image: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=80&h=80&fit=crop&crop=face'
   },
   {
-    name: 'Anita Patel',
-    location: 'Ahmedabad, India',
+    name: 'Neha Verma',
+    location: 'Mumbai, India',
     rating: 5,
-    text: 'Dubai was magical! From the Burj Khalifa to the desert safari, every moment was perfect. The team took care of every detail. Highly recommended!',
-    image: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=80&h=80&fit=crop&crop=face'
+    text: 'Amazing experience with Ghumo Firoo! Their Kashmir package was beyond our expectations. From Dal Lake stay to Gulmarg snow activities, everything was perfectly planned. Great value for money and excellent customer service.',
+    image: 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=80&h=80&fit=crop&crop=face'
+  },
+  {
+    name: 'Rakesh Sharma',
+    location: 'Jaipur, India',
+    rating: 5,
+    text: 'Best travel agency in Delhi! Booked Turkey tour through Ghumo Firoo and it was fantastic. Professional staff, timely responses, and excellent arrangements. The Cappadocia balloon ride was a dream come true. Will definitely book again!',
+    image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&h=80&fit=crop&crop=face'
   }
 ];
 
