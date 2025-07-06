@@ -19,11 +19,21 @@ type Lead = {
   name: string;
   email: string | null;
   phone: string | null;
+  travel_interest: string | null;
   discussion_notes: string | null;
   follow_up_date: string | null;
-  status: 'New' | 'In Progress' | 'Converted' | 'Lost';
+  status: 'New' | 'Contacted' | 'Converted' | 'Dropped';
+  created_by: string;
   created_at: string;
   updated_at: string;
+};
+
+type LeadComment = {
+  id: string;
+  lead_id: string;
+  comment: string;
+  created_by: string;
+  created_at: string;
 };
 
 const CRM = () => {
@@ -35,6 +45,7 @@ const CRM = () => {
     name: '',
     email: '',
     phone: '',
+    travel_interest: '',
     discussion_notes: '',
     follow_up_date: '',
     status: 'New' as Lead['status']
@@ -80,8 +91,10 @@ const CRM = () => {
       const leadData = {
         ...formData,
         user_id: user.id,
+        created_by: user.id,
         email: formData.email || null,
         phone: formData.phone || null,
+        travel_interest: formData.travel_interest || null,
         discussion_notes: formData.discussion_notes || null,
         follow_up_date: formData.follow_up_date || null
       };
@@ -126,6 +139,7 @@ const CRM = () => {
       name: '',
       email: '',
       phone: '',
+      travel_interest: '',
       discussion_notes: '',
       follow_up_date: '',
       status: 'New'
@@ -140,6 +154,7 @@ const CRM = () => {
         name: lead.name,
         email: lead.email || '',
         phone: lead.phone || '',
+        travel_interest: lead.travel_interest || '',
         discussion_notes: lead.discussion_notes || '',
         follow_up_date: lead.follow_up_date || '',
         status: lead.status
@@ -153,9 +168,9 @@ const CRM = () => {
   const getStatusColor = (status: Lead['status']) => {
     switch (status) {
       case 'New': return 'bg-blue-500';
-      case 'In Progress': return 'bg-yellow-500';
+      case 'Contacted': return 'bg-yellow-500';
       case 'Converted': return 'bg-green-500';
-      case 'Lost': return 'bg-red-500';
+      case 'Dropped': return 'bg-red-500';
       default: return 'bg-gray-500';
     }
   };
@@ -163,7 +178,7 @@ const CRM = () => {
   const stats = {
     total: leads.length,
     new: leads.filter(l => l.status === 'New').length,
-    inProgress: leads.filter(l => l.status === 'In Progress').length,
+    contacted: leads.filter(l => l.status === 'Contacted').length,
     converted: leads.filter(l => l.status === 'Converted').length
   };
 
@@ -228,8 +243,8 @@ const CRM = () => {
                 <div className="flex items-center">
                   <MessageCircle className="h-8 w-8 text-yellow-600" />
                   <div className="ml-4">
-                    <p className="text-sm font-medium text-gray-600">In Progress</p>
-                    <p className="text-2xl font-bold text-gray-900">{stats.inProgress}</p>
+                     <p className="text-sm font-medium text-gray-600">Contacted</p>
+                     <p className="text-2xl font-bold text-gray-900">{stats.contacted}</p>
                   </div>
                 </div>
               </CardContent>
@@ -357,18 +372,27 @@ const CRM = () => {
                   onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                 />
               </div>
-              <div>
+               <div>
+                 <Label htmlFor="travel_interest">Travel Interest</Label>
+                 <Input
+                   id="travel_interest"
+                   value={formData.travel_interest}
+                   onChange={(e) => setFormData({ ...formData, travel_interest: e.target.value })}
+                   placeholder="Destination preference, travel type, etc."
+                 />
+               </div>
+               <div>
                 <Label htmlFor="status">Status</Label>
                 <Select value={formData.status} onValueChange={(value: Lead['status']) => setFormData({ ...formData, status: value })}>
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="New">New</SelectItem>
-                    <SelectItem value="In Progress">In Progress</SelectItem>
-                    <SelectItem value="Converted">Converted</SelectItem>
-                    <SelectItem value="Lost">Lost</SelectItem>
-                  </SelectContent>
+                   <SelectContent>
+                     <SelectItem value="New">New</SelectItem>
+                     <SelectItem value="Contacted">Contacted</SelectItem>
+                     <SelectItem value="Converted">Converted</SelectItem>
+                     <SelectItem value="Dropped">Dropped</SelectItem>
+                   </SelectContent>
                 </Select>
               </div>
               <div>

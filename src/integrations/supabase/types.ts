@@ -9,9 +9,42 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      lead_comments: {
+        Row: {
+          comment: string
+          created_at: string
+          created_by: string
+          id: string
+          lead_id: string
+        }
+        Insert: {
+          comment: string
+          created_at?: string
+          created_by: string
+          id?: string
+          lead_id: string
+        }
+        Update: {
+          comment?: string
+          created_at?: string
+          created_by?: string
+          id?: string
+          lead_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lead_comments_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       leads: {
         Row: {
           created_at: string
+          created_by: string
           discussion_notes: string | null
           email: string | null
           follow_up_date: string | null
@@ -19,11 +52,13 @@ export type Database = {
           name: string
           phone: string | null
           status: string | null
+          travel_interest: string | null
           updated_at: string
           user_id: string
         }
         Insert: {
           created_at?: string
+          created_by: string
           discussion_notes?: string | null
           email?: string | null
           follow_up_date?: string | null
@@ -31,11 +66,13 @@ export type Database = {
           name: string
           phone?: string | null
           status?: string | null
+          travel_interest?: string | null
           updated_at?: string
           user_id: string
         }
         Update: {
           created_at?: string
+          created_by?: string
           discussion_notes?: string | null
           email?: string | null
           follow_up_date?: string | null
@@ -43,6 +80,7 @@ export type Database = {
           name?: string
           phone?: string | null
           status?: string | null
+          travel_interest?: string | null
           updated_at?: string
           user_id?: string
         }
