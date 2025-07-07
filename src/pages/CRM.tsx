@@ -9,10 +9,14 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Plus, Edit, Phone, Mail, Calendar, Users, TrendingUp, MessageCircle } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Plus, Edit, Phone, Mail, Calendar, Users, TrendingUp, MessageCircle, UserPlus, BarChart3, Filter, Search } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
+import { KanbanBoard } from '@/components/crm/KanbanBoard';
+import { CommentsDialog } from '@/components/crm/CommentsDialog';
+import { UserManagementDialog } from '@/components/crm/UserManagementDialog';
 
 type Lead = {
   id: string;
@@ -22,7 +26,7 @@ type Lead = {
   travel_interest: string | null;
   discussion_notes: string | null;
   follow_up_date: string | null;
-  status: 'New' | 'Contacted' | 'Converted' | 'Dropped';
+  status: 'New' | 'Contacted' | 'Quote Sent' | 'Quote Approved' | 'Converted' | 'Dropped';
   created_by: string;
   created_at: string;
   updated_at: string;
@@ -38,9 +42,17 @@ type LeadComment = {
 
 const CRM = () => {
   const [leads, setLeads] = useState<Lead[]>([]);
+  const [filteredLeads, setFilteredLeads] = useState<Lead[]>([]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingLead, setEditingLead] = useState<Lead | null>(null);
   const [loading, setLoading] = useState(true);
+  const [currentView, setCurrentView] = useState<'table' | 'kanban'>('table');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [commentsDialogOpen, setCommentsDialogOpen] = useState(false);
+  const [selectedLeadForComments, setSelectedLeadForComments] = useState<{ id: string; name: string } | null>(null);
+  const [userManagementOpen, setUserManagementOpen] = useState(false);
+  const [userProfile, setUserProfile] = useState<{ role: string | null } | null>(null);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -57,8 +69,48 @@ const CRM = () => {
   useEffect(() => {
     if (user) {
       fetchLeads();
+      fetchUserProfile();
     }
   }, [user]);
+
+  useEffect(() => {
+    filterLeads();
+  }, [leads, searchTerm, statusFilter]);
+
+  const fetchUserProfile = async () => {
+    if (!user) return;
+    
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', user.id)
+        .single();
+        
+      if (error) throw error;
+      setUserProfile(data);
+    } catch (error) {
+      console.error('Error fetching user profile:', error);
+    }
+  };
+
+  const filterLeads = () => {
+    let filtered = leads;
+    
+    if (searchTerm) {
+      filtered = filtered.filter(lead => 
+        lead.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (lead.email && lead.email.toLowerCase().includes(searchTerm.toLowerCase())) ||
+        (lead.phone && lead.phone.includes(searchTerm))
+      );
+    }
+    
+    if (statusFilter !== 'all') {
+      filtered = filtered.filter(lead => lead.status === statusFilter);
+    }
+    
+    setFilteredLeads(filtered);
+  };
 
   const fetchLeads = async () => {
     try {
@@ -115,10 +167,23 @@ const CRM = () => {
         if (error) throw error;
         toast({ title: "Success", description: "Lead created successfully" });
         
-        // Send WhatsApp welcome message
+        // Send WhatsApp welcome message via edge function
         if (formData.phone) {
           const message = `Welcome to Ghumo Firoo Travels! 🌟 Thank you for your interest in our travel packages. Our team will contact you soon to help plan your perfect journey. For immediate assistance, call us at 9910987264 or 9870229792.`;
-          window.open(`https://wa.me/91${formData.phone.replace(/\D/g, '')}?text=${encodeURIComponent(message)}`, '_blank');
+          
+          try {
+            await supabase.functions.invoke('whatsapp-webhook', {
+              body: {
+                phone: formData.phone,
+                message: message,
+                leadId: null // Will be set after lead creation if needed
+              }
+            });
+          } catch (error) {
+            console.error('WhatsApp message failed:', error);
+            // Fallback to browser WhatsApp
+            window.open(`https://wa.me/91${formData.phone.replace(/\D/g, '')}?text=${encodeURIComponent(message)}`, '_blank');
+          }
         }
       }
 
@@ -165,10 +230,40 @@ const CRM = () => {
     setIsDialogOpen(true);
   };
 
+  const handleStatusChange = async (leadId: string, newStatus: Lead['status']) => {
+    try {
+      const { error } = await supabase
+        .from('leads')
+        .update({ status: newStatus })
+        .eq('id', leadId);
+
+      if (error) throw error;
+      
+      fetchLeads();
+      toast({ title: "Success", description: "Lead status updated successfully" });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to update lead status",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const openCommentsDialog = (leadId: string) => {
+    const lead = leads.find(l => l.id === leadId);
+    if (lead) {
+      setSelectedLeadForComments({ id: lead.id, name: lead.name });
+      setCommentsDialogOpen(true);
+    }
+  };
+
   const getStatusColor = (status: Lead['status']) => {
     switch (status) {
       case 'New': return 'bg-blue-500';
       case 'Contacted': return 'bg-yellow-500';
+      case 'Quote Sent': return 'bg-purple-500';
+      case 'Quote Approved': return 'bg-indigo-500';
       case 'Converted': return 'bg-green-500';
       case 'Dropped': return 'bg-red-500';
       default: return 'bg-gray-500';
@@ -179,7 +274,10 @@ const CRM = () => {
     total: leads.length,
     new: leads.filter(l => l.status === 'New').length,
     contacted: leads.filter(l => l.status === 'Contacted').length,
-    converted: leads.filter(l => l.status === 'Converted').length
+    quoteSent: leads.filter(l => l.status === 'Quote Sent').length,
+    quoteApproved: leads.filter(l => l.status === 'Quote Approved').length,
+    converted: leads.filter(l => l.status === 'Converted').length,
+    dropped: leads.filter(l => l.status === 'Dropped').length
   };
 
   if (!user) {
@@ -208,132 +306,264 @@ const CRM = () => {
               <h1 className="text-3xl font-bold text-gray-900">Travel CRM Dashboard</h1>
               <p className="text-gray-600">Manage your travel leads and customer relationships</p>
             </div>
-            <Button onClick={() => openDialog()} className="bg-blue-600 hover:bg-blue-700 text-white">
-              <Plus className="w-4 h-4 mr-2" />
-              Add New Lead
-            </Button>
+            <div className="flex gap-2">
+              {userProfile?.role === 'admin' && (
+                <Button variant="outline" onClick={() => setUserManagementOpen(true)}>
+                  <UserPlus className="w-4 h-4 mr-2" />
+                  Manage Users
+                </Button>
+              )}
+              <Button onClick={() => openDialog()}>
+                <Plus className="w-4 h-4 mr-2" />
+                Add New Lead
+              </Button>
+            </div>
           </div>
 
           {/* Stats Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+          <div className="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-7 gap-4 mb-8">
             <Card>
-              <CardContent className="p-6">
+              <CardContent className="p-4">
                 <div className="flex items-center">
-                  <Users className="h-8 w-8 text-blue-600" />
-                  <div className="ml-4">
-                    <p className="text-sm font-medium text-gray-600">Total Leads</p>
-                    <p className="text-2xl font-bold text-gray-900">{stats.total}</p>
+                  <Users className="h-6 w-6 text-blue-600" />
+                  <div className="ml-3">
+                    <p className="text-xs font-medium text-gray-600">Total</p>
+                    <p className="text-xl font-bold text-gray-900">{stats.total}</p>
                   </div>
                 </div>
               </CardContent>
             </Card>
             <Card>
-              <CardContent className="p-6">
+              <CardContent className="p-4">
                 <div className="flex items-center">
-                  <TrendingUp className="h-8 w-8 text-green-600" />
-                  <div className="ml-4">
-                    <p className="text-sm font-medium text-gray-600">Converted</p>
-                    <p className="text-2xl font-bold text-gray-900">{stats.converted}</p>
+                  <div className="h-6 w-6 bg-blue-500 rounded-full" />
+                  <div className="ml-3">
+                    <p className="text-xs font-medium text-gray-600">New</p>
+                    <p className="text-xl font-bold text-gray-900">{stats.new}</p>
                   </div>
                 </div>
               </CardContent>
             </Card>
             <Card>
-              <CardContent className="p-6">
+              <CardContent className="p-4">
                 <div className="flex items-center">
-                  <MessageCircle className="h-8 w-8 text-yellow-600" />
-                  <div className="ml-4">
-                     <p className="text-sm font-medium text-gray-600">Contacted</p>
-                     <p className="text-2xl font-bold text-gray-900">{stats.contacted}</p>
+                  <div className="h-6 w-6 bg-yellow-500 rounded-full" />
+                  <div className="ml-3">
+                    <p className="text-xs font-medium text-gray-600">Contacted</p>
+                    <p className="text-xl font-bold text-gray-900">{stats.contacted}</p>
                   </div>
                 </div>
               </CardContent>
             </Card>
             <Card>
-              <CardContent className="p-6">
+              <CardContent className="p-4">
                 <div className="flex items-center">
-                  <Calendar className="h-8 w-8 text-blue-600" />
-                  <div className="ml-4">
-                    <p className="text-sm font-medium text-gray-600">New Leads</p>
-                    <p className="text-2xl font-bold text-gray-900">{stats.new}</p>
+                  <div className="h-6 w-6 bg-purple-500 rounded-full" />
+                  <div className="ml-3">
+                    <p className="text-xs font-medium text-gray-600">Quote Sent</p>
+                    <p className="text-xl font-bold text-gray-900">{stats.quoteSent}</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-4">
+                <div className="flex items-center">
+                  <div className="h-6 w-6 bg-indigo-500 rounded-full" />
+                  <div className="ml-3">
+                    <p className="text-xs font-medium text-gray-600">Approved</p>
+                    <p className="text-xl font-bold text-gray-900">{stats.quoteApproved}</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-4">
+                <div className="flex items-center">
+                  <TrendingUp className="h-6 w-6 text-green-600" />
+                  <div className="ml-3">
+                    <p className="text-xs font-medium text-gray-600">Converted</p>
+                    <p className="text-xl font-bold text-gray-900">{stats.converted}</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-4">
+                <div className="flex items-center">
+                  <div className="h-6 w-6 bg-red-500 rounded-full" />
+                  <div className="ml-3">
+                    <p className="text-xs font-medium text-gray-600">Dropped</p>
+                    <p className="text-xl font-bold text-gray-900">{stats.dropped}</p>
                   </div>
                 </div>
               </CardContent>
             </Card>
           </div>
 
-          {/* Leads Table */}
-          <Card>
-            <CardHeader>
-              <CardTitle>All Leads</CardTitle>
-            </CardHeader>
-            <CardContent>
+          {/* Filters and View Toggle */}
+          <div className="flex flex-col sm:flex-row gap-4 mb-6">
+            <div className="flex-1">
+              <div className="relative">
+                <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Search leads by name, email, or phone..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-9"
+                />
+              </div>
+            </div>
+            <div className="flex gap-2">
+              <Select value={statusFilter} onValueChange={setStatusFilter}>
+                <SelectTrigger className="w-40">
+                  <Filter className="w-4 h-4 mr-2" />
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Status</SelectItem>
+                  <SelectItem value="New">New</SelectItem>
+                  <SelectItem value="Contacted">Contacted</SelectItem>
+                  <SelectItem value="Quote Sent">Quote Sent</SelectItem>
+                  <SelectItem value="Quote Approved">Quote Approved</SelectItem>
+                  <SelectItem value="Converted">Converted</SelectItem>
+                  <SelectItem value="Dropped">Dropped</SelectItem>
+                </SelectContent>
+              </Select>
+              <Tabs value={currentView} onValueChange={(value: string) => setCurrentView(value as 'table' | 'kanban')}>
+                <TabsList>
+                  <TabsTrigger value="table">Table</TabsTrigger>
+                  <TabsTrigger value="kanban">Pipeline</TabsTrigger>
+                </TabsList>
+              </Tabs>
+            </div>
+          </div>
+
+          {/* Main Content */}
+          {currentView === 'table' ? (
+            <Card>
+              <CardHeader>
+                <CardTitle>Leads ({filteredLeads.length})</CardTitle>
+              </CardHeader>
+              <CardContent>
+                {loading ? (
+                  <div className="text-center py-8">Loading leads...</div>
+                ) : filteredLeads.length === 0 ? (
+                  <div className="text-center py-8">
+                    <p className="text-gray-600">
+                      {searchTerm || statusFilter !== 'all' 
+                        ? 'No leads match your filters' 
+                        : 'No leads found. Add your first lead to get started!'
+                      }
+                    </p>
+                  </div>
+                ) : (
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Name</TableHead>
+                        <TableHead>Contact</TableHead>
+                        <TableHead>Travel Interest</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead>Follow-up</TableHead>
+                        <TableHead>Created</TableHead>
+                        <TableHead>Actions</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {filteredLeads.map((lead) => (
+                        <TableRow key={lead.id}>
+                          <TableCell className="font-medium">{lead.name}</TableCell>
+                          <TableCell>
+                            <div className="space-y-1">
+                              {lead.email && (
+                                <div className="flex items-center text-sm">
+                                  <Mail className="w-3 h-3 mr-1" />
+                                  <span className="truncate max-w-32">{lead.email}</span>
+                                </div>
+                              )}
+                              {lead.phone && (
+                                <div className="flex items-center text-sm">
+                                  <Phone className="w-3 h-3 mr-1" />
+                                  {lead.phone}
+                                </div>
+                              )}
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <span className="text-sm text-muted-foreground max-w-32 truncate block">
+                              {lead.travel_interest || '-'}
+                            </span>
+                          </TableCell>
+                          <TableCell>
+                            <Select
+                              value={lead.status}
+                              onValueChange={(value: Lead['status']) => handleStatusChange(lead.id, value)}
+                            >
+                              <SelectTrigger className="w-32">
+                                <Badge className={`${getStatusColor(lead.status)} text-white text-xs`}>
+                                  {lead.status}
+                                </Badge>
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="New">New</SelectItem>
+                                <SelectItem value="Contacted">Contacted</SelectItem>
+                                <SelectItem value="Quote Sent">Quote Sent</SelectItem>
+                                <SelectItem value="Quote Approved">Quote Approved</SelectItem>
+                                <SelectItem value="Converted">Converted</SelectItem>
+                                <SelectItem value="Dropped">Dropped</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </TableCell>
+                          <TableCell>
+                            <span className="text-sm">
+                              {lead.follow_up_date ? new Date(lead.follow_up_date).toLocaleDateString() : '-'}
+                            </span>
+                          </TableCell>
+                          <TableCell>
+                            <span className="text-sm text-muted-foreground">
+                              {new Date(lead.created_at).toLocaleDateString()}
+                            </span>
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex gap-1">
+                              <Button 
+                                variant="ghost" 
+                                size="sm"
+                                onClick={() => openCommentsDialog(lead.id)}
+                              >
+                                <MessageCircle className="w-3 h-3" />
+                              </Button>
+                              <Button 
+                                variant="ghost" 
+                                size="sm" 
+                                onClick={() => openDialog(lead)}
+                              >
+                                <Edit className="w-3 h-3" />
+                              </Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                )}
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="h-[600px]">
               {loading ? (
                 <div className="text-center py-8">Loading leads...</div>
-              ) : leads.length === 0 ? (
-                <div className="text-center py-8">
-                  <p className="text-gray-600">No leads found. Add your first lead to get started!</p>
-                </div>
               ) : (
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Name</TableHead>
-                      <TableHead>Contact</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead>Follow-up Date</TableHead>
-                      <TableHead>Created</TableHead>
-                      <TableHead>Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {leads.map((lead) => (
-                      <TableRow key={lead.id}>
-                        <TableCell className="font-medium">{lead.name}</TableCell>
-                        <TableCell>
-                          <div className="space-y-1">
-                            {lead.email && (
-                              <div className="flex items-center text-sm">
-                                <Mail className="w-3 h-3 mr-1" />
-                                {lead.email}
-                              </div>
-                            )}
-                            {lead.phone && (
-                              <div className="flex items-center text-sm">
-                                <Phone className="w-3 h-3 mr-1" />
-                                {lead.phone}
-                              </div>
-                            )}
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <Badge className={`${getStatusColor(lead.status)} text-white`}>
-                            {lead.status}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          {lead.follow_up_date ? new Date(lead.follow_up_date).toLocaleDateString() : '-'}
-                        </TableCell>
-                        <TableCell>
-                          {new Date(lead.created_at).toLocaleDateString()}
-                        </TableCell>
-                        <TableCell>
-                          <Button 
-                            variant="outline" 
-                            size="sm" 
-                            onClick={() => openDialog(lead)}
-                          >
-                            <Edit className="w-3 h-3 mr-1" />
-                            Edit
-                          </Button>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+                <KanbanBoard 
+                  leads={filteredLeads}
+                  onEditLead={openDialog}
+                  onStatusChange={handleStatusChange}
+                  onAddComment={openCommentsDialog}
+                />
               )}
-            </CardContent>
-          </Card>
+            </div>
+          )}
         </div>
 
         {/* Add/Edit Lead Dialog */}
@@ -387,12 +617,14 @@ const CRM = () => {
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
-                   <SelectContent>
-                     <SelectItem value="New">New</SelectItem>
-                     <SelectItem value="Contacted">Contacted</SelectItem>
-                     <SelectItem value="Converted">Converted</SelectItem>
-                     <SelectItem value="Dropped">Dropped</SelectItem>
-                   </SelectContent>
+                    <SelectContent>
+                      <SelectItem value="New">New</SelectItem>
+                      <SelectItem value="Contacted">Contacted</SelectItem>
+                      <SelectItem value="Quote Sent">Quote Sent</SelectItem>
+                      <SelectItem value="Quote Approved">Quote Approved</SelectItem>
+                      <SelectItem value="Converted">Converted</SelectItem>
+                      <SelectItem value="Dropped">Dropped</SelectItem>
+                    </SelectContent>
                 </Select>
               </div>
               <div>
@@ -424,6 +656,25 @@ const CRM = () => {
             </form>
           </DialogContent>
         </Dialog>
+
+        {/* Comments Dialog */}
+        {selectedLeadForComments && (
+          <CommentsDialog 
+            isOpen={commentsDialogOpen}
+            onClose={() => {
+              setCommentsDialogOpen(false);
+              setSelectedLeadForComments(null);
+            }}
+            leadId={selectedLeadForComments.id}
+            leadName={selectedLeadForComments.name}
+          />
+        )}
+
+        {/* User Management Dialog */}
+        <UserManagementDialog 
+          isOpen={userManagementOpen}
+          onClose={() => setUserManagementOpen(false)}
+        />
       </div>
     </Layout>
   );
