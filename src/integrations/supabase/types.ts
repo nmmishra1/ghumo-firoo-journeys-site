@@ -48,51 +48,84 @@ export type Database = {
       }
       leads: {
         Row: {
+          assigned_to: string | null
+          call_follow_up: string | null
+          call_summary: string | null
+          contact_number: string | null
           created_at: string
           created_by: string
+          customer_name: string
+          customer_type: string | null
           discussion_notes: string | null
           email: string | null
+          enquiry_number: string | null
           follow_up_date: string | null
           id: string
-          name: string
-          phone: string | null
+          lead_prospect: string | null
+          next_call_time: string | null
           status: string | null
+          tour_description: string | null
           travel_interest: string | null
           updated_at: string
           user_id: string
         }
         Insert: {
+          assigned_to?: string | null
+          call_follow_up?: string | null
+          call_summary?: string | null
+          contact_number?: string | null
           created_at?: string
           created_by: string
+          customer_name: string
+          customer_type?: string | null
           discussion_notes?: string | null
           email?: string | null
+          enquiry_number?: string | null
           follow_up_date?: string | null
           id?: string
-          name: string
-          phone?: string | null
+          lead_prospect?: string | null
+          next_call_time?: string | null
           status?: string | null
+          tour_description?: string | null
           travel_interest?: string | null
           updated_at?: string
           user_id: string
         }
         Update: {
+          assigned_to?: string | null
+          call_follow_up?: string | null
+          call_summary?: string | null
+          contact_number?: string | null
           created_at?: string
           created_by?: string
+          customer_name?: string
+          customer_type?: string | null
           discussion_notes?: string | null
           email?: string | null
+          enquiry_number?: string | null
           follow_up_date?: string | null
           id?: string
-          name?: string
-          phone?: string | null
+          lead_prospect?: string | null
+          next_call_time?: string | null
           status?: string | null
+          tour_description?: string | null
           travel_interest?: string | null
           updated_at?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "leads_assigned_to_fkey"
+            columns: ["assigned_to"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       profiles: {
         Row: {
+          approved: boolean
           created_at: string
           full_name: string | null
           id: string
@@ -100,6 +133,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          approved?: boolean
           created_at?: string
           full_name?: string | null
           id: string
@@ -107,6 +141,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          approved?: boolean
           created_at?: string
           full_name?: string | null
           id?: string
@@ -120,6 +155,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      generate_enquiry_number: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
       get_current_user_role: {
         Args: Record<PropertyKey, never>
         Returns: string

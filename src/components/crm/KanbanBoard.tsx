@@ -6,9 +6,17 @@ import { Phone, Mail, Edit, MessageCircle } from 'lucide-react';
 
 type Lead = {
   id: string;
-  name: string;
+  enquiry_number: string | null;
+  customer_name: string;
   email: string | null;
-  phone: string | null;
+  contact_number: string | null;
+  customer_type: 'Direct Customer' | 'Phone' | 'Facebook' | 'Insta' | null;
+  assigned_to: string | null;
+  tour_description: string | null;
+  call_follow_up: 'Call picked' | 'Switched off' | 'Not reachable' | null;
+  lead_prospect: 'Hot' | 'Cold' | null;
+  call_summary: string | null;
+  next_call_time: string | null;
   travel_interest: string | null;
   discussion_notes: string | null;
   follow_up_date: string | null;
@@ -90,7 +98,7 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
               >
                 <CardContent className="p-3">
                   <div className="space-y-2">
-                    <h4 className="font-medium text-sm">{lead.name}</h4>
+                    <h4 className="font-medium text-sm">{lead.customer_name}</h4>
                     
                     {lead.travel_interest && (
                       <p className="text-xs text-muted-foreground line-clamp-2">
@@ -105,10 +113,10 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
                           <span className="truncate">{lead.email}</span>
                         </div>
                       )}
-                      {lead.phone && (
+                      {lead.contact_number && (
                         <div className="flex items-center text-xs text-muted-foreground">
                           <Phone className="w-3 h-3 mr-1" />
-                          <span>{lead.phone}</span>
+                          <span>{lead.contact_number}</span>
                         </div>
                       )}
                     </div>
