@@ -16,6 +16,7 @@ type Profile = {
   id: string;
   full_name: string | null;
   role: string | null;
+  approved: boolean;
   created_at: string;
 };
 
@@ -143,6 +144,49 @@ export const UserManagementDialog: React.FC<UserManagementDialogProps> = ({
     }
   };
 
+  const handleApproveUser = async (userId: string, approved: boolean) => {
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .update({ approved })
+        .eq('id', userId);
+
+      if (error) throw error;
+      
+      // Find the user profile to get email and details
+      const userProfile = profiles.find(p => p.id === userId);
+      if (userProfile && approved) {
+        // Send approval notification
+        try {
+          await supabase.functions.invoke('send-user-notification', {
+            body: {
+              email: 'user@example.com', // You'll need to get the actual email from auth.users
+              fullName: userProfile.full_name || 'User',
+              role: userProfile.role || 'user',
+              approved: true,
+              type: 'approval'
+            }
+          });
+        } catch (emailError) {
+          console.error('Failed to send notification email:', emailError);
+        }
+      }
+      
+      toast({
+        title: "Success",
+        description: `User ${approved ? 'approved' : 'rejected'} successfully`
+      });
+      
+      fetchProfiles();
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to update user approval",
+        variant: "destructive"
+      });
+    }
+  };
+
   const getRoleBadgeColor = (role: string | null) => {
     switch (role) {
       case 'admin': return 'bg-red-100 text-red-800';
@@ -187,47 +231,72 @@ export const UserManagementDialog: React.FC<UserManagementDialogProps> = ({
                 </div>
               ) : (
                 <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Name</TableHead>
-                      <TableHead>Role</TableHead>
-                      <TableHead>Created</TableHead>
-                      <TableHead>Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {profiles.map((profile) => (
-                      <TableRow key={profile.id}>
-                        <TableCell className="font-medium">
-                          {profile.full_name || 'Unnamed User'}
-                        </TableCell>
-                        <TableCell>
-                          <Badge className={getRoleBadgeColor(profile.role)}>
-                            {profile.role || 'user'}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          {new Date(profile.created_at).toLocaleDateString()}
-                        </TableCell>
-                        <TableCell>
-                          <Select
-                            value={profile.role || 'user'}
-                            onValueChange={(value) => handleUpdateRole(profile.id, value)}
-                            disabled={profile.id === user?.id}
-                          >
-                            <SelectTrigger className="w-24">
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="admin">Admin</SelectItem>
-                              <SelectItem value="agent">Agent</SelectItem>
-                              <SelectItem value="user">User</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
+                   <TableHeader>
+                     <TableRow>
+                       <TableHead>Name</TableHead>
+                       <TableHead>Role</TableHead>
+                       <TableHead>Status</TableHead>
+                       <TableHead>Created</TableHead>
+                       <TableHead>Actions</TableHead>
+                     </TableRow>
+                   </TableHeader>
+                   <TableBody>
+                     {profiles.map((profile) => (
+                       <TableRow key={profile.id}>
+                         <TableCell className="font-medium">
+                           {profile.full_name || 'Unnamed User'}
+                         </TableCell>
+                         <TableCell>
+                           <Badge className={getRoleBadgeColor(profile.role)}>
+                             {profile.role || 'user'}
+                           </Badge>
+                         </TableCell>
+                         <TableCell>
+                           <Badge variant={profile.approved ? 'default' : 'secondary'}>
+                             {profile.approved ? 'Approved' : 'Pending'}
+                           </Badge>
+                         </TableCell>
+                         <TableCell>
+                           {new Date(profile.created_at).toLocaleDateString()}
+                         </TableCell>
+                         <TableCell>
+                           <div className="flex gap-2 items-center">
+                             <Select
+                               value={profile.role || 'user'}
+                               onValueChange={(value) => handleUpdateRole(profile.id, value)}
+                               disabled={profile.id === user?.id}
+                             >
+                               <SelectTrigger className="w-24">
+                                 <SelectValue />
+                               </SelectTrigger>
+                               <SelectContent>
+                                 <SelectItem value="admin">Admin</SelectItem>
+                                 <SelectItem value="agent">Agent</SelectItem>
+                                 <SelectItem value="user">User</SelectItem>
+                               </SelectContent>
+                             </Select>
+                             {profile.id !== user?.id && !profile.approved && (
+                               <Button
+                                 size="sm"
+                                 onClick={() => handleApproveUser(profile.id, true)}
+                               >
+                                 Approve
+                               </Button>
+                             )}
+                             {profile.id !== user?.id && profile.approved && (
+                               <Button
+                                 size="sm"
+                                 variant="outline"
+                                 onClick={() => handleApproveUser(profile.id, false)}
+                               >
+                                 Revoke
+                               </Button>
+                             )}
+                           </div>
+                         </TableCell>
+                       </TableRow>
+                     ))}
+                   </TableBody>
                 </Table>
               )}
             </div>

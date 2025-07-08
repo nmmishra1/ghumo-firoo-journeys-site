@@ -17,6 +17,7 @@ import { CommentsDialog } from '@/components/crm/CommentsDialog';
 import { UserManagementDialog } from '@/components/crm/UserManagementDialog';
 import { LeadForm } from '@/components/crm/LeadForm';
 import { CSVImport } from '@/components/crm/CSVImport';
+import { DashboardStats } from '@/components/crm/DashboardStats';
 
 type Lead = {
   id: string;
@@ -58,6 +59,9 @@ const CRM = () => {
   const [currentView, setCurrentView] = useState<'table' | 'kanban'>('table');
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [assignedToFilter, setAssignedToFilter] = useState<string>('all');
+  const [customerTypeFilter, setCustomerTypeFilter] = useState<string>('all');
+  const [prospectFilter, setProspectFilter] = useState<string>('all');
   const [commentsDialogOpen, setCommentsDialogOpen] = useState(false);
   const [selectedLeadForComments, setSelectedLeadForComments] = useState<{ id: string; name: string } | null>(null);
   const [userManagementOpen, setUserManagementOpen] = useState(false);
@@ -81,7 +85,7 @@ const CRM = () => {
 
   useEffect(() => {
     filterLeads();
-  }, [leads, searchTerm, statusFilter]);
+  }, [leads, searchTerm, statusFilter, assignedToFilter, customerTypeFilter, prospectFilter]);
 
   const fetchUserProfile = async () => {
     if (!user) return;
@@ -135,6 +139,18 @@ const CRM = () => {
       filtered = filtered.filter(lead => lead.status === statusFilter);
     }
     
+    if (assignedToFilter !== 'all') {
+      filtered = filtered.filter(lead => lead.assigned_to === assignedToFilter);
+    }
+    
+    if (customerTypeFilter !== 'all') {
+      filtered = filtered.filter(lead => lead.customer_type === customerTypeFilter);
+    }
+    
+    if (prospectFilter !== 'all') {
+      filtered = filtered.filter(lead => lead.lead_prospect === prospectFilter);
+    }
+    
     setFilteredLeads(filtered);
   };
 
@@ -146,7 +162,7 @@ const CRM = () => {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setLeads(data || []);
+      setLeads((data || []) as Lead[]);
     } catch (error) {
       console.error('Error fetching leads:', error);
       toast({
@@ -268,6 +284,10 @@ const CRM = () => {
     return profile?.full_name || 'Unknown';
   };
 
+  // Calculate user-specific stats
+  const userLeads = userProfile?.role === 'admin' ? leads : leads.filter(l => l.assigned_to === user?.id);
+  const nextCallsCount = userLeads.filter(l => l.next_call_time && new Date(l.next_call_time) > new Date()).length;
+  
   const stats = {
     total: leads.length,
     new: leads.filter(l => l.status === 'New').length,
@@ -277,7 +297,9 @@ const CRM = () => {
     converted: leads.filter(l => l.status === 'Converted').length,
     dropped: leads.filter(l => l.status === 'Dropped').length,
     hot: leads.filter(l => l.lead_prospect === 'Hot').length,
-    cold: leads.filter(l => l.lead_prospect === 'Cold').length
+    cold: leads.filter(l => l.lead_prospect === 'Cold').length,
+    assigned: userLeads.length,
+    nextCalls: nextCallsCount
   };
 
   // Check if user is approved
@@ -343,108 +365,8 @@ const CRM = () => {
             </div>
           </div>
 
-          {/* Stats Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-9 gap-4 mb-8">
-            <Card>
-              <CardContent className="p-4">
-                <div className="flex items-center">
-                  <Users className="h-6 w-6 text-blue-600" />
-                  <div className="ml-3">
-                    <p className="text-xs font-medium text-gray-600">Total</p>
-                    <p className="text-xl font-bold text-gray-900">{stats.total}</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="p-4">
-                <div className="flex items-center">
-                  <div className="h-6 w-6 bg-blue-500 rounded-full" />
-                  <div className="ml-3">
-                    <p className="text-xs font-medium text-gray-600">New</p>
-                    <p className="text-xl font-bold text-gray-900">{stats.new}</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="p-4">
-                <div className="flex items-center">
-                  <div className="h-6 w-6 bg-yellow-500 rounded-full" />
-                  <div className="ml-3">
-                    <p className="text-xs font-medium text-gray-600">Contacted</p>
-                    <p className="text-xl font-bold text-gray-900">{stats.contacted}</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="p-4">
-                <div className="flex items-center">
-                  <div className="h-6 w-6 bg-purple-500 rounded-full" />
-                  <div className="ml-3">
-                    <p className="text-xs font-medium text-gray-600">Quote Sent</p>
-                    <p className="text-xl font-bold text-gray-900">{stats.quoteSent}</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="p-4">
-                <div className="flex items-center">
-                  <div className="h-6 w-6 bg-indigo-500 rounded-full" />
-                  <div className="ml-3">
-                    <p className="text-xs font-medium text-gray-600">Approved</p>
-                    <p className="text-xl font-bold text-gray-900">{stats.quoteApproved}</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="p-4">
-                <div className="flex items-center">
-                  <TrendingUp className="h-6 w-6 text-green-600" />
-                  <div className="ml-3">
-                    <p className="text-xs font-medium text-gray-600">Converted</p>
-                    <p className="text-xl font-bold text-gray-900">{stats.converted}</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="p-4">
-                <div className="flex items-center">
-                  <div className="h-6 w-6 bg-red-500 rounded-full" />
-                  <div className="ml-3">
-                    <p className="text-xs font-medium text-gray-600">Dropped</p>
-                    <p className="text-xl font-bold text-gray-900">{stats.dropped}</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="p-4">
-                <div className="flex items-center">
-                  <div className="h-6 w-6 bg-orange-500 rounded-full" />
-                  <div className="ml-3">
-                    <p className="text-xs font-medium text-gray-600">Hot</p>
-                    <p className="text-xl font-bold text-gray-900">{stats.hot}</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="p-4">
-                <div className="flex items-center">
-                  <div className="h-6 w-6 bg-gray-500 rounded-full" />
-                  <div className="ml-3">
-                    <p className="text-xs font-medium text-gray-600">Cold</p>
-                    <p className="text-xl font-bold text-gray-900">{stats.cold}</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+          {/* Dashboard Stats */}
+          <DashboardStats userRole={userProfile?.role || 'user'} stats={stats} />
 
           {/* Filters and View Toggle */}
           <div className="flex flex-col sm:flex-row gap-4 mb-6">
@@ -459,11 +381,11 @@ const CRM = () => {
                 />
               </div>
             </div>
-            <div className="flex gap-2">
+            <div className="flex gap-2 flex-wrap">
               <Select value={statusFilter} onValueChange={setStatusFilter}>
                 <SelectTrigger className="w-40">
                   <Filter className="w-4 h-4 mr-2" />
-                  <SelectValue />
+                  <SelectValue placeholder="All Status" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Status</SelectItem>
@@ -475,6 +397,49 @@ const CRM = () => {
                   <SelectItem value="Dropped">Dropped</SelectItem>
                 </SelectContent>
               </Select>
+              
+              {userProfile?.role === 'admin' && (
+                <Select value={assignedToFilter} onValueChange={setAssignedToFilter}>
+                  <SelectTrigger className="w-40">
+                    <User className="w-4 h-4 mr-2" />
+                    <SelectValue placeholder="Assigned To" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Users</SelectItem>
+                    <SelectItem value="">Unassigned</SelectItem>
+                    {profiles.filter(p => p.approved).map(profile => (
+                      <SelectItem key={profile.id} value={profile.id}>
+                        {profile.full_name || 'Unnamed User'}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
+              
+              <Select value={customerTypeFilter} onValueChange={setCustomerTypeFilter}>
+                <SelectTrigger className="w-40">
+                  <SelectValue placeholder="Customer Type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Types</SelectItem>
+                  <SelectItem value="Direct Customer">Direct Customer</SelectItem>
+                  <SelectItem value="Phone">Phone</SelectItem>
+                  <SelectItem value="Facebook">Facebook</SelectItem>
+                  <SelectItem value="Insta">Instagram</SelectItem>
+                </SelectContent>
+              </Select>
+              
+              <Select value={prospectFilter} onValueChange={setProspectFilter}>
+                <SelectTrigger className="w-40">
+                  <SelectValue placeholder="Prospect" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Prospects</SelectItem>
+                  <SelectItem value="Hot">Hot</SelectItem>
+                  <SelectItem value="Cold">Cold</SelectItem>
+                </SelectContent>
+              </Select>
+              
               <Tabs value={currentView} onValueChange={(value: string) => setCurrentView(value as 'table' | 'kanban')}>
                 <TabsList>
                   <TabsTrigger value="table">Table</TabsTrigger>
