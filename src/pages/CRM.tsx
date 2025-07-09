@@ -98,6 +98,18 @@ const CRM = () => {
         .single();
         
       if (error) throw error;
+      
+      // Check if user is approved
+      if (!data.approved) {
+        toast({
+          title: "Access Denied",
+          description: "Your account is pending admin approval. Please wait for approval.",
+          variant: "destructive"
+        });
+        await supabase.auth.signOut();
+        return;
+      }
+      
       setUserProfile(data);
     } catch (error) {
       console.error('Error fetching user profile:', error);

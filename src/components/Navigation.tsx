@@ -80,14 +80,21 @@ const Navigation = () => {
                       Sign Out
                     </DropdownMenuItem>
                   </DropdownMenuContent>
-                </DropdownMenu>
-              ) : (
-                <Link to="/auth">
-                  <Button className="ml-4">
-                    Login
-                  </Button>
-                </Link>
-              )}
+                 </DropdownMenu>
+               ) : (
+                 <div className="flex gap-2">
+                   <Link to="/auth">
+                     <Button variant="outline" className="ml-4">
+                       Login
+                     </Button>
+                   </Link>
+                   <Link to="/auth">
+                     <Button className="ml-2">
+                       Sign Up
+                     </Button>
+                   </Link>
+                 </div>
+               )}
             </div>
           </div>
 

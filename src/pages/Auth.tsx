@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -24,7 +23,7 @@ const Auth = () => {
     const checkUser = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (session) {
-        navigate('/');
+        navigate('/crm');
       }
     };
     checkUser();
@@ -36,21 +35,35 @@ const Auth = () => {
 
     try {
       if (isLogin) {
-        const { error } = await supabase.auth.signInWithPassword({
+        const { data, error } = await supabase.auth.signInWithPassword({
           email,
           password,
         });
         
         if (error) throw error;
+
+        // Check if user is approved
+        if (data.user) {
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('approved, role')
+            .eq('id', data.user.id)
+            .single();
+
+          if (!profile?.approved) {
+            await supabase.auth.signOut();
+            throw new Error('Your account is pending admin approval. Please wait for approval before logging in.');
+          }
+        }
         
         toast({
           title: "Welcome back!",
           description: "You have successfully logged in.",
         });
         
-        navigate('/');
+        navigate('/crm');
       } else {
-        const { error } = await supabase.auth.signUp({
+        const { data: authData, error } = await supabase.auth.signUp({
           email,
           password,
           options: {
@@ -62,10 +75,27 @@ const Auth = () => {
         });
         
         if (error) throw error;
+
+        // Send welcome/creation notification
+        if (authData.user) {
+          try {
+            await supabase.functions.invoke('send-user-notification', {
+              body: {
+                email: email,
+                fullName: fullName,
+                role: 'user',
+                approved: false,
+                type: 'creation'
+              }
+            });
+          } catch (emailError) {
+            console.error('Failed to send welcome email:', emailError);
+          }
+        }
         
         toast({
           title: "Account created!",
-          description: "Please check your email to verify your account.",
+          description: "Your account has been created and is pending admin approval. You'll receive an email once approved.",
         });
       }
     } catch (error: any) {
