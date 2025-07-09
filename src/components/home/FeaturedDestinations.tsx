@@ -53,9 +53,9 @@ const FeaturedDestinations = () => {
     <section className="py-20 bg-gradient-to-b from-gray-50 to-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
-          <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
-            Featured <span className="text-orange-500">Destinations</span>
-          </h2>
+        <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+          Popular <span className="text-orange-500">Tour Packages</span>
+        </h2>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
             Handpicked destinations that promise extraordinary experiences and unforgettable memories
           </p>

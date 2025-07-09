@@ -32,58 +32,47 @@ const ContactForm = () => {
   };
 
   return (
-    <div>
-      <h2 className="text-3xl font-bold text-gray-900 mb-6">Send us a Message</h2>
+    <div className="bg-white rounded-2xl shadow-xl p-8">
+      <h2 className="text-3xl font-bold text-gray-900 mb-8">Send us a Message</h2>
       <form onSubmit={handleSubmit} className="space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <Label htmlFor="name">Full Name</Label>
-            <Input
-              id="name"
-              name="name"
-              value={formData.name}
-              onChange={handleChange}
-              required
-              className="mt-1"
-            />
-          </div>
-          <div>
-            <Label htmlFor="email">Email Address</Label>
-            <Input
-              id="email"
-              name="email"
-              type="email"
-              value={formData.email}
-              onChange={handleChange}
-              required
-              className="mt-1"
-            />
-          </div>
+        <div>
+          <Label htmlFor="name">Full Name</Label>
+          <Input
+            id="name"
+            name="name"
+            value={formData.name}
+            onChange={handleChange}
+            required
+            className="mt-2"
+            placeholder="Enter your full name"
+          />
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <Label htmlFor="phone">Phone Number</Label>
-            <Input
-              id="phone"
-              name="phone"
-              value={formData.phone}
-              onChange={handleChange}
-              required
-              className="mt-1"
-            />
-          </div>
-          <div>
-            <Label htmlFor="subject">Subject</Label>
-            <Input
-              id="subject"
-              name="subject"
-              value={formData.subject}
-              onChange={handleChange}
-              required
-              className="mt-1"
-            />
-          </div>
+        <div>
+          <Label htmlFor="email">Email Address</Label>
+          <Input
+            id="email"
+            name="email"
+            type="email"
+            value={formData.email}
+            onChange={handleChange}
+            required
+            className="mt-2"
+            placeholder="Enter your email address"
+          />
+        </div>
+        
+        <div>
+          <Label htmlFor="phone">Phone Number</Label>
+          <Input
+            id="phone"
+            name="phone"
+            value={formData.phone}
+            onChange={handleChange}
+            required
+            className="mt-2"
+            placeholder="Enter your phone number"
+          />
         </div>
         
         <div>
@@ -95,12 +84,12 @@ const ContactForm = () => {
             value={formData.message}
             onChange={handleChange}
             required
-            className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            placeholder="Tell us about your travel plans..."
+            className="mt-2 w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 resize-none"
+            placeholder="Tell us about your travel plans, destination preferences, budget, and any special requirements..."
           />
         </div>
         
-        <Button type="submit" size="lg" className="w-full">
+        <Button type="submit" size="lg" className="w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold py-4 rounded-lg transition-all duration-300">
           Send Message
         </Button>
       </form>
