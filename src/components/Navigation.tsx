@@ -71,10 +71,17 @@ const Navigation = () => {
                   <DropdownMenuTrigger asChild>
                     <Button variant="outline" className="ml-4">
                       <User className="w-4 h-4 mr-2" />
-                      Account
+                      {user.email?.split('@')[0] || 'Account'}
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
+                    <DropdownMenuItem asChild>
+                      <Link to="/profile" className="flex items-center">
+                        <User className="w-4 h-4 mr-2" />
+                        Profile
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
                     <DropdownMenuItem onClick={handleSignOut}>
                       <LogOut className="w-4 h-4 mr-2" />
                       Sign Out

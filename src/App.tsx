@@ -19,6 +19,7 @@ import RefundPolicy from "./pages/RefundPolicy";
 import NotFound from "./pages/NotFound";
 import Auth from "./pages/Auth";
 import CRM from "./pages/CRM";
+import Profile from "./pages/Profile";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 
 const queryClient = new QueryClient();
@@ -33,6 +34,11 @@ const App = () => (
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/auth" element={<Auth />} />
+          <Route path="/profile" element={
+            <ProtectedRoute requireAuth={true}>
+              <Profile />
+            </ProtectedRoute>
+          } />
           <Route path="/crm" element={
             <ProtectedRoute requireAuth={true}>
               <CRM />
