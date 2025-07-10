@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import { Eye, EyeOff, ArrowLeft } from 'lucide-react';
+import { Eye, EyeOff, ArrowLeft, User } from 'lucide-react';
 
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -110,109 +110,149 @@ const Auth = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
-        <div className="mb-8">
-          <Link to="/" className="inline-flex items-center text-blue-600 hover:text-blue-700 transition-colors">
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Back to Home
-          </Link>
+    <div className="min-h-screen bg-gradient-to-br from-primary/5 to-secondary/10 flex">
+      {/* Left Side - Agency Logo & Branding */}
+      <div className="hidden lg:flex lg:flex-1 lg:flex-col lg:justify-center lg:items-center bg-gradient-to-b from-primary to-primary/80 p-12">
+        <div className="text-center text-white space-y-6">
+          <img
+            src="/lovable-uploads/dc7c4d6f-9ccd-4614-abea-77d7936b921b.png"
+            alt="Ghumo Firoo Travels"
+            className="h-20 w-auto mx-auto mb-8 filter brightness-0 invert"
+          />
+          <h1 className="text-3xl font-bold">Ghumo Firoo</h1>
+          <p className="text-lg text-white/90 max-w-md">
+            "Solving problems for our travel itinerary, increasing efficiency and leading to optimization by lead management system."
+          </p>
         </div>
+      </div>
 
-        <Card className="shadow-xl">
-          <CardHeader className="space-y-1">
-            <div className="flex justify-center mb-4">
-              <img
-                src="/lovable-uploads/dc7c4d6f-9ccd-4614-abea-77d7936b921b.png"
-                alt="Ghumo Firoo Travels"
-                className="h-12 w-auto"
-              />
-            </div>
-            <CardTitle className="text-2xl text-center">
-              {isLogin ? 'Welcome Back' : 'Create Account'}
-            </CardTitle>
-            <CardDescription className="text-center">
-              {isLogin 
-                ? 'Sign in to your travel CRM dashboard' 
-                : 'Join our travel management platform'
-              }
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              {!isLogin && (
-                <div className="space-y-2">
-                  <Label htmlFor="fullName">Full Name</Label>
-                  <Input
-                    id="fullName"
-                    type="text"
-                    placeholder="Enter your full name"
-                    value={fullName}
-                    onChange={(e) => setFullName(e.target.value)}
-                    required
-                  />
-                </div>
-              )}
-              
-              <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="Enter your email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
+      {/* Right Side - Login Form */}
+      <div className="flex-1 flex items-center justify-center p-8">
+        <div className="w-full max-w-md">
+          <div className="mb-8 lg:hidden">
+            <Link to="/" className="inline-flex items-center text-primary hover:text-primary/80 transition-colors">
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Back to Home
+            </Link>
+          </div>
+
+          <Card className="shadow-xl border-0 bg-background/95 backdrop-blur">
+            <CardHeader className="space-y-6 text-center">
+              <div className="lg:hidden flex justify-center">
+                <img
+                  src="/lovable-uploads/dc7c4d6f-9ccd-4614-abea-77d7936b921b.png"
+                  alt="Ghumo Firoo Travels"
+                  className="h-12 w-auto"
                 />
               </div>
               
-              <div className="space-y-2">
-                <Label htmlFor="password">Password</Label>
-                <div className="relative">
-                  <Input
-                    id="password"
-                    type={showPassword ? "text" : "password"}
-                    placeholder="Enter your password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                    minLength={6}
-                  />
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                    onClick={() => setShowPassword(!showPassword)}
-                  >
-                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                  </Button>
+              {/* User Profile Picture Placeholder */}
+              <div className="flex justify-center">
+                <div className="w-20 h-20 bg-muted rounded-full flex items-center justify-center border-4 border-primary/10">
+                  <User className="w-8 h-8 text-muted-foreground" />
                 </div>
               </div>
+              
+              <div>
+                <CardTitle className="text-2xl font-bold">
+                  {isLogin ? 'Sign In' : 'Create Account'}
+                </CardTitle>
+                <CardDescription className="mt-2">
+                  {isLogin 
+                    ? 'Access your travel CRM dashboard' 
+                    : 'Join our travel management platform'
+                  }
+                </CardDescription>
+              </div>
+            </CardHeader>
 
-              <Button 
-                type="submit" 
-                className="w-full" 
-                disabled={loading}
-              >
-                {loading ? 'Processing...' : (isLogin ? 'Sign In' : 'Create Account')}
-              </Button>
-            </form>
+            <CardContent>
+              <form onSubmit={handleSubmit} className="space-y-4">
+                {!isLogin && (
+                  <div className="space-y-2">
+                    <Label htmlFor="fullName">Full Name</Label>
+                    <Input
+                      id="fullName"
+                      type="text"
+                      placeholder="Enter your full name"
+                      value={fullName}
+                      onChange={(e) => setFullName(e.target.value)}
+                      className="h-12"
+                      required
+                    />
+                  </div>
+                )}
+                
+                <div className="space-y-2">
+                  <Label htmlFor="email">{isLogin ? 'Username/Email' : 'Email'}</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder={isLogin ? "ghumofiroo" : "Enter your email"}
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="h-12"
+                    required
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="password">Password</Label>
+                  <div className="relative">
+                    <Input
+                      id="password"
+                      type={showPassword ? "text" : "password"}
+                      placeholder="••••••"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      className="h-12 pr-12"
+                      required
+                      minLength={6}
+                    />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="absolute right-0 top-0 h-12 px-3 hover:bg-transparent"
+                      onClick={() => setShowPassword(!showPassword)}
+                    >
+                      {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    </Button>
+                  </div>
+                </div>
 
-            <div className="mt-6 text-center">
-              <p className="text-sm text-gray-600">
-                {isLogin ? "Don't have an account?" : "Already have an account?"}
-                <Button
-                  variant="link"
-                  className="p-0 ml-1 h-auto"
-                  onClick={() => setIsLogin(!isLogin)}
+                {isLogin && (
+                  <div className="text-right">
+                    <Button variant="link" className="p-0 h-auto text-sm text-primary">
+                      Forgot Password?
+                    </Button>
+                  </div>
+                )}
+
+                <Button 
+                  type="submit" 
+                  className="w-full h-12 text-base font-semibold" 
+                  disabled={loading}
                 >
-                  {isLogin ? 'Sign up' : 'Sign in'}
+                  {loading ? 'Processing...' : (isLogin ? 'Login' : 'Create Account')}
                 </Button>
-              </p>
-            </div>
-          </CardContent>
-        </Card>
+              </form>
+
+              <div className="mt-6 text-center">
+                <p className="text-sm text-muted-foreground">
+                  {isLogin ? "Don't have an account?" : "Already have an account?"}
+                  <Button
+                    variant="link"
+                    className="p-0 ml-1 h-auto text-primary font-semibold"
+                    onClick={() => setIsLogin(!isLogin)}
+                  >
+                    {isLogin ? 'Sign up' : 'Sign in'}
+                  </Button>
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     </div>
   );

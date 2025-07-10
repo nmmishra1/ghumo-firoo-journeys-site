@@ -1,23 +1,19 @@
 import React, { useState, useEffect } from 'react';
-import Layout from '@/components/Layout';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Plus, Edit, Phone, Mail, Users, TrendingUp, MessageCircle, UserPlus, Filter, Search, Upload, AlertTriangle, User, Clock } from 'lucide-react';
+import { Plus, Edit, Phone, Mail, Users, TrendingUp, MessageCircle, UserPlus, Filter, Search, Upload, AlertTriangle, User, Clock, LayoutDashboard, UserCheck, ChevronDown, Calendar, MapPin, Menu, Home } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
-import { KanbanBoard } from '@/components/crm/KanbanBoard';
 import { CommentsDialog } from '@/components/crm/CommentsDialog';
 import { UserManagementDialog } from '@/components/crm/UserManagementDialog';
 import { LeadForm } from '@/components/crm/LeadForm';
 import { CSVImport } from '@/components/crm/CSVImport';
-import { DashboardStats } from '@/components/crm/DashboardStats';
+import { FollowUpModal } from '@/components/crm/FollowUpModal';
 
 type Lead = {
   id: string;
@@ -56,16 +52,16 @@ const CRM = () => {
   const [csvImportOpen, setCsvImportOpen] = useState(false);
   const [editingLead, setEditingLead] = useState<Lead | null>(null);
   const [loading, setLoading] = useState(true);
-  const [currentView, setCurrentView] = useState<'table' | 'kanban'>('table');
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
-  const [assignedToFilter, setAssignedToFilter] = useState<string>('all');
-  const [customerTypeFilter, setCustomerTypeFilter] = useState<string>('all');
-  const [prospectFilter, setProspectFilter] = useState<string>('all');
   const [commentsDialogOpen, setCommentsDialogOpen] = useState(false);
   const [selectedLeadForComments, setSelectedLeadForComments] = useState<{ id: string; name: string } | null>(null);
   const [userManagementOpen, setUserManagementOpen] = useState(false);
+  const [followUpModalOpen, setFollowUpModalOpen] = useState(false);
+  const [selectedLeadForFollowUp, setSelectedLeadForFollowUp] = useState<{ id: string; name: string } | null>(null);
   const [userProfile, setUserProfile] = useState<Profile | null>(null);
+  const [currentSection, setCurrentSection] = useState<'dashboard' | 'user-dashboard' | 'leads' | 'add-lead'>('dashboard');
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   const { user } = useAuth();
   const { toast } = useToast();
@@ -85,7 +81,7 @@ const CRM = () => {
 
   useEffect(() => {
     filterLeads();
-  }, [leads, searchTerm, statusFilter, assignedToFilter, customerTypeFilter, prospectFilter]);
+  }, [leads, searchTerm, statusFilter]);
 
   const fetchUserProfile = async () => {
     if (!user) return;
@@ -99,7 +95,6 @@ const CRM = () => {
         
       if (error) throw error;
       
-      // Check if user is approved
       if (!data.approved) {
         toast({
           title: "Access Denied",
@@ -151,18 +146,6 @@ const CRM = () => {
       filtered = filtered.filter(lead => lead.status === statusFilter);
     }
     
-    if (assignedToFilter !== 'all') {
-      filtered = filtered.filter(lead => lead.assigned_to === assignedToFilter);
-    }
-    
-    if (customerTypeFilter !== 'all') {
-      filtered = filtered.filter(lead => lead.customer_type === customerTypeFilter);
-    }
-    
-    if (prospectFilter !== 'all') {
-      filtered = filtered.filter(lead => lead.lead_prospect === prospectFilter);
-    }
-    
     setFilteredLeads(filtered);
   };
 
@@ -212,28 +195,12 @@ const CRM = () => {
 
         if (error) throw error;
         toast({ title: "Success", description: "Lead created successfully" });
-        
-        // Send WhatsApp welcome message if contact number exists
-        if (leadData.contact_number) {
-          const message = `Welcome to Ghumo Firoo Travels! 🌟 Thank you for your interest in our travel packages. Our team will contact you soon to help plan your perfect journey. For immediate assistance, call us at 9910987264 or 9870229792.`;
-          
-          try {
-            await supabase.functions.invoke('whatsapp-webhook', {
-              body: {
-                phone: leadData.contact_number,
-                message: message,
-                leadId: null
-              }
-            });
-          } catch (error) {
-            console.error('WhatsApp message failed:', error);
-          }
-        }
       }
 
       fetchLeads();
       setLeadFormOpen(false);
       setEditingLead(null);
+      setCurrentSection('leads');
     } catch (error) {
       console.error('Error saving lead:', error);
       toast({
@@ -249,27 +216,6 @@ const CRM = () => {
     setLeadFormOpen(true);
   };
 
-  const handleStatusChange = async (leadId: string, newStatus: Lead['status']) => {
-    try {
-      const { error } = await supabase
-        .from('leads')
-        .update({ status: newStatus })
-        .eq('id', leadId);
-
-      if (error) throw error;
-      
-      fetchLeads();
-      toast({ title: "Success", description: "Lead status updated successfully" });
-    } catch (error) {
-      console.error('Error updating lead status:', error);
-      toast({
-        title: "Error",
-        description: "Failed to update lead status",
-        variant: "destructive"
-      });
-    }
-  };
-
   const openCommentsDialog = (leadId: string) => {
     const lead = leads.find(l => l.id === leadId);
     if (lead) {
@@ -278,15 +224,11 @@ const CRM = () => {
     }
   };
 
-  const getStatusColor = (status: Lead['status']) => {
-    switch (status) {
-      case 'New': return 'bg-blue-500';
-      case 'Contacted': return 'bg-yellow-500';
-      case 'Quote Sent': return 'bg-purple-500';
-      case 'Quote Approved': return 'bg-indigo-500';
-      case 'Converted': return 'bg-green-500';
-      case 'Dropped': return 'bg-red-500';
-      default: return 'bg-gray-500';
+  const openFollowUpModal = (leadId: string) => {
+    const lead = leads.find(l => l.id === leadId);
+    if (lead) {
+      setSelectedLeadForFollowUp({ id: lead.id, name: lead.customer_name });
+      setFollowUpModalOpen(true);
     }
   };
 
@@ -296,307 +238,398 @@ const CRM = () => {
     return profile?.full_name || 'Unknown';
   };
 
-  // Calculate user-specific stats
-  const userLeads = userProfile?.role === 'admin' ? leads : leads.filter(l => l.assigned_to === user?.id);
-  const nextCallsCount = userLeads.filter(l => l.next_call_time && new Date(l.next_call_time) > new Date()).length;
-  
-  const stats = {
-    total: leads.length,
-    new: leads.filter(l => l.status === 'New').length,
-    contacted: leads.filter(l => l.status === 'Contacted').length,
-    quoteSent: leads.filter(l => l.status === 'Quote Sent').length,
-    quoteApproved: leads.filter(l => l.status === 'Quote Approved').length,
-    converted: leads.filter(l => l.status === 'Converted').length,
-    dropped: leads.filter(l => l.status === 'Dropped').length,
-    hot: leads.filter(l => l.lead_prospect === 'Hot').length,
-    cold: leads.filter(l => l.lead_prospect === 'Cold').length,
-    assigned: userLeads.length,
-    nextCalls: nextCallsCount
-  };
-
   // Check if user is approved
   if (!user) {
     return (
-      <Layout>
-        <div className="min-h-screen flex items-center justify-center">
-          <Card className="w-96">
-            <CardContent className="p-6 text-center">
-              <h2 className="text-xl font-semibold mb-4">Access Denied</h2>
-              <p className="text-gray-600 mb-4">Please log in to access the Travel CRM dashboard.</p>
-              <Button onClick={() => window.location.href = '/auth'}>Login</Button>
-            </CardContent>
-          </Card>
-        </div>
-      </Layout>
+      <div className="min-h-screen flex items-center justify-center">
+        <Card className="w-96">
+          <CardContent className="p-6 text-center">
+            <h2 className="text-xl font-semibold mb-4">Access Denied</h2>
+            <p className="text-gray-600 mb-4">Please log in to access the Travel CRM dashboard.</p>
+            <Button onClick={() => window.location.href = '/auth'}>Login</Button>
+          </CardContent>
+        </Card>
+      </div>
     );
   }
 
   if (userProfile && !userProfile.approved && userProfile.role !== 'admin') {
     return (
-      <Layout>
-        <div className="min-h-screen flex items-center justify-center">
-          <Card className="w-96">
-            <CardContent className="p-6 text-center">
-              <AlertTriangle className="h-12 w-12 text-yellow-500 mx-auto mb-4" />
-              <h2 className="text-xl font-semibold mb-4">Account Pending Approval</h2>
-              <p className="text-gray-600 mb-4">Your account is awaiting admin approval. Please contact your administrator to gain access to the CRM system.</p>
-            </CardContent>
-          </Card>
-        </div>
-      </Layout>
+      <div className="min-h-screen flex items-center justify-center">
+        <Card className="w-96">
+          <CardContent className="p-6 text-center">
+            <AlertTriangle className="h-12 w-12 text-yellow-500 mx-auto mb-4" />
+            <h2 className="text-xl font-semibold mb-4">Account Pending Approval</h2>
+            <p className="text-gray-600 mb-4">Your account is awaiting admin approval. Please contact your administrator to gain access to the CRM system.</p>
+          </CardContent>
+        </Card>
+      </div>
     );
   }
 
   return (
-    <Layout>
-      <div className="min-h-screen bg-gray-50 p-6">
-        <div className="max-w-7xl mx-auto">
-          {/* Header */}
-          <div className="flex justify-between items-center mb-8">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900">Travel CRM Dashboard</h1>
-              <p className="text-gray-600">Manage your travel leads and customer relationships</p>
+    <div className="min-h-screen bg-background flex">
+      {/* Left Sidebar */}
+      <div className={`${sidebarCollapsed ? 'w-16' : 'w-64'} bg-primary text-primary-foreground flex flex-col transition-all duration-300`}>
+        {/* Logo Section */}
+        <div className="p-6 border-b border-primary-foreground/20">
+          <div className="flex items-center space-x-3">
+            <img
+              src="/lovable-uploads/dc7c4d6f-9ccd-4614-abea-77d7936b921b.png"
+              alt="Ghumo Firoo"
+              className={`${sidebarCollapsed ? 'h-8' : 'h-10'} w-auto filter brightness-0 invert transition-all`}
+            />
+            {!sidebarCollapsed && (
+              <div>
+                <h1 className="text-xl font-bold">Ghumo Firoo</h1>
+                <p className="text-xs text-primary-foreground/80">Travel CRM</p>
+              </div>
+            )}
+          </div>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+            className="mt-4 text-primary-foreground hover:bg-primary-foreground/10"
+          >
+            <Menu className="h-4 w-4" />
+          </Button>
+        </div>
+
+        {/* Branding Tagline */}
+        {!sidebarCollapsed && (
+          <div className="p-4 text-center border-b border-primary-foreground/20">
+            <p className="text-xs text-primary-foreground/90 leading-relaxed">
+              "Solving problems for our travel itinerary, increasing efficiency and leading to optimization by lead management system."
+            </p>
+          </div>
+        )}
+
+        {/* Navigation Menu */}
+        <nav className="flex-1 p-4">
+          <div className="space-y-2">
+            <Button
+              variant={currentSection === 'dashboard' ? 'secondary' : 'ghost'}
+              className="w-full justify-start text-primary-foreground hover:bg-primary-foreground/10"
+              onClick={() => setCurrentSection('dashboard')}
+            >
+              <LayoutDashboard className="h-4 w-4 mr-3" />
+              {!sidebarCollapsed && 'Dashboard'}
+            </Button>
+            
+            <Button
+              variant={currentSection === 'user-dashboard' ? 'secondary' : 'ghost'}
+              className="w-full justify-start text-primary-foreground hover:bg-primary-foreground/10"
+              onClick={() => setCurrentSection('user-dashboard')}
+            >
+              <UserCheck className="h-4 w-4 mr-3" />
+              {!sidebarCollapsed && 'User Dashboard'}
+            </Button>
+            
+            <div className="space-y-1">
+              <Button
+                variant={currentSection === 'leads' ? 'secondary' : 'ghost'}
+                className="w-full justify-start text-primary-foreground hover:bg-primary-foreground/10"
+                onClick={() => setCurrentSection('leads')}
+              >
+                <Users className="h-4 w-4 mr-3" />
+                {!sidebarCollapsed && 'Leads'}
+              </Button>
+              
+              {currentSection === 'leads' && !sidebarCollapsed && (
+                <div className="ml-6 space-y-1">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="w-full justify-start text-primary-foreground/80 hover:bg-primary-foreground/10"
+                    onClick={() => setCurrentSection('leads')}
+                  >
+                    All Leads
+                  </Button>
+                </div>
+              )}
             </div>
-            <div className="flex gap-2">
+          </div>
+        </nav>
+
+        {/* User Profile Section */}
+        <div className="p-4 border-t border-primary-foreground/20">
+          <div className="flex items-center space-x-3">
+            <div className="w-8 h-8 bg-primary-foreground/20 rounded-full flex items-center justify-center">
+              <User className="h-4 w-4" />
+            </div>
+            {!sidebarCollapsed && (
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium truncate">{userProfile?.full_name}</p>
+                <p className="text-xs text-primary-foreground/80 capitalize">{userProfile?.role}</p>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Main Content */}
+      <div className="flex-1 flex flex-col">
+        {/* Top Header */}
+        <header className="bg-background border-b border-border p-4">
+          <div className="flex justify-between items-center">
+            <div>
+              <h1 className="text-2xl font-bold">
+                {currentSection === 'dashboard' && 'Dashboard'}
+                {currentSection === 'user-dashboard' && 'User Dashboard'}
+                {currentSection === 'leads' && 'All Leads'}
+                {currentSection === 'add-lead' && 'Add New Lead'}
+              </h1>
+              <p className="text-muted-foreground">
+                {currentSection === 'dashboard' && 'Overview of your travel CRM'}
+                {currentSection === 'user-dashboard' && 'Your personal dashboard'}
+                {currentSection === 'leads' && 'Manage all your travel leads'}
+                {currentSection === 'add-lead' && 'Create a new travel lead'}
+              </p>
+            </div>
+            <div className="flex items-center space-x-2">
+              {currentSection === 'leads' && (
+                <Button onClick={() => setCurrentSection('add-lead')}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add Lead
+                </Button>
+              )}
               {userProfile?.role === 'admin' && (
                 <>
                   <Button variant="outline" onClick={() => setCsvImportOpen(true)}>
-                    <Upload className="w-4 h-4 mr-2" />
+                    <Upload className="h-4 w-4 mr-2" />
                     Import CSV
                   </Button>
                   <Button variant="outline" onClick={() => setUserManagementOpen(true)}>
-                    <UserPlus className="w-4 h-4 mr-2" />
+                    <UserPlus className="h-4 w-4 mr-2" />
                     Manage Users
                   </Button>
                 </>
               )}
-              <Button onClick={() => openLeadForm()}>
-                <Plus className="w-4 h-4 mr-2" />
-                Add New Lead
-              </Button>
             </div>
           </div>
+        </header>
 
-          {/* Dashboard Stats */}
-          <DashboardStats userRole={userProfile?.role || 'user'} stats={stats} />
-
-          {/* Filters and View Toggle */}
-          <div className="flex flex-col sm:flex-row gap-4 mb-6">
-            <div className="flex-1">
-              <div className="relative">
-                <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="Search leads by name, email, phone, or enquiry number..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-9"
-                />
-              </div>
-            </div>
-            <div className="flex gap-2 flex-wrap">
-              <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="w-40">
-                  <Filter className="w-4 h-4 mr-2" />
-                  <SelectValue placeholder="All Status" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Status</SelectItem>
-                  <SelectItem value="New">New</SelectItem>
-                  <SelectItem value="Contacted">Contacted</SelectItem>
-                  <SelectItem value="Quote Sent">Quote Sent</SelectItem>
-                  <SelectItem value="Quote Approved">Quote Approved</SelectItem>
-                  <SelectItem value="Converted">Converted</SelectItem>
-                  <SelectItem value="Dropped">Dropped</SelectItem>
-                </SelectContent>
-              </Select>
-              
-              {userProfile?.role === 'admin' && (
-                <Select value={assignedToFilter} onValueChange={setAssignedToFilter}>
-                  <SelectTrigger className="w-40">
-                    <User className="w-4 h-4 mr-2" />
-                    <SelectValue placeholder="Assigned To" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Users</SelectItem>
-                    <SelectItem value="">Unassigned</SelectItem>
-                    {profiles.filter(p => p.approved).map(profile => (
-                      <SelectItem key={profile.id} value={profile.id}>
-                        {profile.full_name || 'Unnamed User'}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              )}
-              
-              <Select value={customerTypeFilter} onValueChange={setCustomerTypeFilter}>
-                <SelectTrigger className="w-40">
-                  <SelectValue placeholder="Customer Type" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Types</SelectItem>
-                  <SelectItem value="Direct Customer">Direct Customer</SelectItem>
-                  <SelectItem value="Phone">Phone</SelectItem>
-                  <SelectItem value="Facebook">Facebook</SelectItem>
-                  <SelectItem value="Insta">Instagram</SelectItem>
-                </SelectContent>
-              </Select>
-              
-              <Select value={prospectFilter} onValueChange={setProspectFilter}>
-                <SelectTrigger className="w-40">
-                  <SelectValue placeholder="Prospect" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Prospects</SelectItem>
-                  <SelectItem value="Hot">Hot</SelectItem>
-                  <SelectItem value="Cold">Cold</SelectItem>
-                </SelectContent>
-              </Select>
-              
-              <Tabs value={currentView} onValueChange={(value: string) => setCurrentView(value as 'table' | 'kanban')}>
-                <TabsList>
-                  <TabsTrigger value="table">Table</TabsTrigger>
-                  <TabsTrigger value="kanban">Pipeline</TabsTrigger>
-                </TabsList>
-              </Tabs>
-            </div>
-          </div>
-
-          {/* Main Content */}
-          {currentView === 'table' ? (
-            <Card>
-              <CardHeader>
-                <CardTitle>Leads ({filteredLeads.length})</CardTitle>
-              </CardHeader>
-              <CardContent>
-                {loading ? (
-                  <div className="text-center py-8">Loading leads...</div>
-                ) : filteredLeads.length === 0 ? (
-                  <div className="text-center py-8">
-                    <p className="text-gray-600">
-                      {searchTerm || statusFilter !== 'all' 
-                        ? 'No leads match your filters' 
-                        : 'No leads found. Add your first lead to get started!'
-                      }
-                    </p>
+        {/* Content Area */}
+        <main className="flex-1 p-6 overflow-auto">
+          {currentSection === 'dashboard' && (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              <Card>
+                <CardContent className="p-6">
+                  <div className="flex items-center">
+                    <Users className="h-8 w-8 text-blue-600" />
+                    <div className="ml-4">
+                      <p className="text-sm font-medium text-muted-foreground">Total Leads</p>
+                      <p className="text-2xl font-bold">{leads.length}</p>
+                    </div>
                   </div>
-                ) : (
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Enquiry #</TableHead>
-                        <TableHead>Customer</TableHead>
-                        <TableHead>Contact</TableHead>
-                        <TableHead>Type</TableHead>
-                        <TableHead>Assigned To</TableHead>
-                        <TableHead>Status</TableHead>
-                        <TableHead>Prospect</TableHead>
-                        <TableHead>Next Call</TableHead>
-                        <TableHead>Actions</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {filteredLeads.map((lead) => (
-                        <TableRow key={lead.id}>
-                          <TableCell className="font-medium">
-                            {lead.enquiry_number || '-'}
-                          </TableCell>
-                          <TableCell>
-                            <div>
-                              <div className="font-medium">{lead.customer_name}</div>
-                              {lead.travel_interest && (
-                                <div className="text-sm text-muted-foreground truncate max-w-32">
-                                  {lead.travel_interest}
-                                </div>
-                              )}
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <div className="space-y-1">
-                              {lead.contact_number && (
-                                <div className="flex items-center text-sm">
-                                  <Phone className="w-3 h-3 mr-1" />
-                                  <span>{lead.contact_number}</span>
-                                </div>
-                              )}
-                              {lead.email && (
-                                <div className="flex items-center text-sm">
-                                  <Mail className="w-3 h-3 mr-1" />
-                                  <span className="truncate max-w-32">{lead.email}</span>
-                                </div>
-                              )}
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <span className="text-sm">{lead.customer_type || '-'}</span>
-                          </TableCell>
-                          <TableCell>
-                            <div className="flex items-center">
-                              <User className="w-3 h-3 mr-1" />
-                              <span className="text-sm">{getAssignedUserName(lead.assigned_to)}</span>
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <Badge className={`${getStatusColor(lead.status)} text-white text-xs`}>
-                              {lead.status}
-                            </Badge>
-                          </TableCell>
-                          <TableCell>
-                            {lead.lead_prospect && (
-                              <Badge variant={lead.lead_prospect === 'Hot' ? 'destructive' : 'secondary'}>
-                                {lead.lead_prospect}
-                              </Badge>
-                            )}
-                          </TableCell>
-                          <TableCell>
-                            {lead.next_call_time && (
-                              <div className="flex items-center text-sm">
-                                <Clock className="w-3 h-3 mr-1" />
-                                <span>{new Date(lead.next_call_time).toLocaleString()}</span>
-                              </div>
-                            )}
-                          </TableCell>
-                          <TableCell>
-                            <div className="flex gap-1">
-                              <Button 
-                                variant="ghost" 
-                                size="sm"
-                                onClick={() => openCommentsDialog(lead.id)}
-                              >
-                                <MessageCircle className="w-3 h-3" />
-                              </Button>
-                              <Button 
-                                variant="ghost" 
-                                size="sm" 
-                                onClick={() => openLeadForm(lead)}
-                              >
-                                <Edit className="w-3 h-3" />
-                              </Button>
-                            </div>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                )}
-              </CardContent>
-            </Card>
-          ) : (
-            <div className="h-[600px]">
-              {loading ? (
-                <div className="text-center py-8">Loading leads...</div>
-              ) : (
-                <KanbanBoard 
-                  leads={filteredLeads}
-                  onEditLead={openLeadForm}
-                  onStatusChange={handleStatusChange}
-                  onAddComment={openCommentsDialog}
-                />
-              )}
+                </CardContent>
+              </Card>
+              
+              <Card>
+                <CardContent className="p-6">
+                  <div className="flex items-center">
+                    <TrendingUp className="h-8 w-8 text-green-600" />
+                    <div className="ml-4">
+                      <p className="text-sm font-medium text-muted-foreground">Converted</p>
+                      <p className="text-2xl font-bold">{leads.filter(l => l.status === 'Converted').length}</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+              
+              <Card>
+                <CardContent className="p-6">
+                  <div className="flex items-center">
+                    <Calendar className="h-8 w-8 text-orange-600" />
+                    <div className="ml-4">
+                      <p className="text-sm font-medium text-muted-foreground">Follow-ups Today</p>
+                      <p className="text-2xl font-bold">5</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+              
+              <Card>
+                <CardContent className="p-6">
+                  <div className="flex items-center">
+                    <div className="h-8 w-8 bg-red-500 rounded-full" />
+                    <div className="ml-4">
+                      <p className="text-sm font-medium text-muted-foreground">Hot Leads</p>
+                      <p className="text-2xl font-bold">{leads.filter(l => l.lead_prospect === 'Hot').length}</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
             </div>
           )}
-        </div>
 
-        {/* Lead Form */}
+          {currentSection === 'user-dashboard' && (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <Card>
+                <CardContent className="p-6">
+                  <div className="flex items-center">
+                    <Users className="h-8 w-8 text-blue-600" />
+                    <div className="ml-4">
+                      <p className="text-sm font-medium text-muted-foreground">My Leads</p>
+                      <p className="text-2xl font-bold">{leads.filter(l => l.assigned_to === user?.id).length}</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+              
+              <Card>
+                <CardContent className="p-6">
+                  <div className="flex items-center">
+                    <Calendar className="h-8 w-8 text-orange-600" />
+                    <div className="ml-4">
+                      <p className="text-sm font-medium text-muted-foreground">Next Calls</p>
+                      <p className="text-2xl font-bold">3</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+              
+              <Card>
+                <CardContent className="p-6">
+                  <div className="flex items-center">
+                    <TrendingUp className="h-8 w-8 text-green-600" />
+                    <div className="ml-4">
+                      <p className="text-sm font-medium text-muted-foreground">This Month</p>
+                      <p className="text-2xl font-bold">12</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          )}
+
+          {currentSection === 'leads' && (
+            <div className="space-y-6">
+              {/* Search and Filters */}
+              <div className="flex flex-col sm:flex-row gap-4">
+                <div className="flex-1">
+                  <div className="relative">
+                    <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      placeholder="Search leads..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="pl-9"
+                    />
+                  </div>
+                </div>
+                <Select value={statusFilter} onValueChange={setStatusFilter}>
+                  <SelectTrigger className="w-48">
+                    <Filter className="w-4 h-4 mr-2" />
+                    <SelectValue placeholder="All Status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Status</SelectItem>
+                    <SelectItem value="New">New</SelectItem>
+                    <SelectItem value="Contacted">Contacted</SelectItem>
+                    <SelectItem value="Quote Sent">Quote Sent</SelectItem>
+                    <SelectItem value="Quote Approved">Quote Approved</SelectItem>
+                    <SelectItem value="Converted">Converted</SelectItem>
+                    <SelectItem value="Dropped">Dropped</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Leads Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {loading ? (
+                  <div className="col-span-full text-center py-8">Loading leads...</div>
+                ) : filteredLeads.length === 0 ? (
+                  <div className="col-span-full text-center py-8">
+                    <p className="text-muted-foreground">No leads found.</p>
+                  </div>
+                ) : (
+                  filteredLeads.map((lead) => (
+                    <Card key={lead.id} className="hover:shadow-lg transition-shadow">
+                      <CardHeader className="pb-3">
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <CardTitle className="text-lg">{lead.customer_name} #{lead.enquiry_number || '---'}</CardTitle>
+                            <p className="text-sm text-muted-foreground">Lead Source: {lead.customer_type || 'Unknown'}</p>
+                          </div>
+                          <Badge variant={lead.status === 'New' ? 'secondary' : 'outline'} className="text-xs">
+                            {lead.status === 'New' ? 'Not Processed' : lead.status}
+                          </Badge>
+                        </div>
+                      </CardHeader>
+                      <CardContent className="space-y-3">
+                        <div className="grid grid-cols-2 gap-3 text-sm">
+                          <div>
+                            <p className="text-muted-foreground">Phone:</p>
+                            <p className="font-medium">{lead.contact_number || 'Not provided'}</p>
+                          </div>
+                          <div>
+                            <p className="text-muted-foreground">Email:</p>
+                            <p className="font-medium truncate">{lead.email ? `${lead.email.substring(0, 8)}...` : 'Not provided'}</p>
+                          </div>
+                          <div>
+                            <p className="text-muted-foreground">Stage:</p>
+                            <p className="font-medium">{lead.status}</p>
+                          </div>
+                          <div>
+                            <p className="text-muted-foreground">Assigned to:</p>
+                            <p className="font-medium">{getAssignedUserName(lead.assigned_to)}</p>
+                          </div>
+                          <div>
+                            <p className="text-muted-foreground">Created on:</p>
+                            <p className="font-medium">{new Date(lead.created_at).toLocaleDateString()}</p>
+                          </div>
+                          <div>
+                            <p className="text-muted-foreground">Last Call:</p>
+                            <p className="font-medium">{lead.next_call_time ? new Date(lead.next_call_time).toLocaleDateString() : 'Not Scheduled'}</p>
+                          </div>
+                        </div>
+                        
+                        <div className="flex gap-2 pt-3 border-t">
+                          <Button size="sm" variant="outline" onClick={() => openFollowUpModal(lead.id)}>
+                            Follow-Up
+                          </Button>
+                          <Button size="sm" variant="outline" onClick={() => openLeadForm(lead)}>
+                            <Edit className="h-3 w-3 mr-1" />
+                            Edit
+                          </Button>
+                          <Button size="sm" variant="outline" onClick={() => openCommentsDialog(lead.id)}>
+                            <MessageCircle className="h-3 w-3 mr-1" />
+                            Comments
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))
+                )}
+              </div>
+            </div>
+          )}
+
+          {currentSection === 'add-lead' && (
+            <Card className="max-w-4xl mx-auto">
+              <CardHeader>
+                <CardTitle>Add New Lead</CardTitle>
+                <p className="text-muted-foreground">Enter the details for the new travel lead.</p>
+              </CardHeader>
+              <CardContent>
+                <LeadForm
+                  isOpen={true}
+                  onClose={() => setCurrentSection('leads')}
+                  editingLead={null}
+                  onSubmit={handleLeadSubmit}
+                  profiles={profiles}
+                  userRole={userProfile?.role || null}
+                />
+              </CardContent>
+            </Card>
+          )}
+        </main>
+      </div>
+
+      {/* Modals */}
+      {leadFormOpen && (
         <LeadForm
           isOpen={leadFormOpen}
           onClose={() => {
@@ -608,34 +641,47 @@ const CRM = () => {
           profiles={profiles}
           userRole={userProfile?.role || null}
         />
+      )}
 
-        {/* CSV Import */}
-        <CSVImport
-          isOpen={csvImportOpen}
-          onClose={() => setCsvImportOpen(false)}
-          onImportComplete={fetchLeads}
+      <CSVImport
+        isOpen={csvImportOpen}
+        onClose={() => setCsvImportOpen(false)}
+        onImportComplete={fetchLeads}
+      />
+
+      {selectedLeadForComments && (
+        <CommentsDialog 
+          isOpen={commentsDialogOpen}
+          onClose={() => {
+            setCommentsDialogOpen(false);
+            setSelectedLeadForComments(null);
+          }}
+          leadId={selectedLeadForComments.id}
+          leadName={selectedLeadForComments.name}
         />
+      )}
 
-        {/* Comments Dialog */}
-        {selectedLeadForComments && (
-          <CommentsDialog 
-            isOpen={commentsDialogOpen}
-            onClose={() => {
-              setCommentsDialogOpen(false);
-              setSelectedLeadForComments(null);
-            }}
-            leadId={selectedLeadForComments.id}
-            leadName={selectedLeadForComments.name}
-          />
-        )}
-
-        {/* User Management Dialog */}
-        <UserManagementDialog 
-          isOpen={userManagementOpen}
-          onClose={() => setUserManagementOpen(false)}
+      {selectedLeadForFollowUp && (
+        <FollowUpModal
+          isOpen={followUpModalOpen}
+          onClose={() => {
+            setFollowUpModalOpen(false);
+            setSelectedLeadForFollowUp(null);
+          }}
+          onSubmit={(data) => {
+            // Handle follow-up submission here
+            console.log('Follow-up data:', data);
+            toast({ title: "Success", description: "Follow-up saved successfully" });
+          }}
+          leadName={selectedLeadForFollowUp.name}
         />
-      </div>
-    </Layout>
+      )}
+
+      <UserManagementDialog 
+        isOpen={userManagementOpen}
+        onClose={() => setUserManagementOpen(false)}
+      />
+    </div>
   );
 };
 
