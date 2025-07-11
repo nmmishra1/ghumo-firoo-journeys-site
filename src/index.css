@@ -118,6 +118,42 @@
   .glass-effect {
     @apply bg-white/10 backdrop-blur-md border border-white/20;
   }
+
+  .line-clamp-1 {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 1;
+  }
+
+  .line-clamp-2 {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+  }
+
+  .line-clamp-3 {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+  }
+
+  /* Responsive design improvements */
+  @media (max-width: 768px) {
+    .container {
+      padding-left: 1rem;
+      padding-right: 1rem;
+    }
+  }
+
+  /* Desktop optimizations */
+  @media (min-width: 1024px) {
+    .grid-responsive {
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    }
+  }
 }
 
 @keyframes fadeIn {

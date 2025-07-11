@@ -115,6 +115,13 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "fk_leads_user"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "leads_assigned_to_fkey"
             columns: ["assigned_to"]
             isOneToOne: false
@@ -162,6 +169,22 @@ export type Database = {
       get_current_user_role: {
         Args: Record<PropertyKey, never>
         Returns: string
+      }
+      is_admin: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
+      is_approved_user: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
+      is_profile_viewable: {
+        Args: { profile_id: string }
+        Returns: boolean
+      }
+      is_user_approved: {
+        Args: { user_id: string }
+        Returns: boolean
       }
     }
     Enums: {
