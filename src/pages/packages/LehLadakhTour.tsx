@@ -181,6 +181,37 @@ const LehLadakhTour = () => {
                 </CardContent>
               </Card>
             </div>
+
+            {/* Map Section */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Tour Route Map</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="h-96 rounded-lg overflow-hidden">
+                  <iframe
+                    src="https://www.google.com/maps/embed?pb=!1m40!1m12!1m3!1d3238775.2676966786!2d75.46707356641684!3d33.85749244799251!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!4m25!3e0!4m5!1s0x390cfd5b347eb62d%3A0x37205b715389640!2sDelhi!3m2!1d28.7040592!2d77.10249019999999!4m5!1s0x39877e8b0b0b0b0b%3A0xb0b0b0b0b0b0b0b0!2sManali%2C%20Himachal%20Pradesh!3m2!1d32.2396!2d77.1887!4m5!1s0x38fdf9d4d4d4d4d4%3A0xd4d4d4d4d4d4d4d4!2sLeh%2C%20Ladakh!3m2!1d34.1526!2d77.5771!4m5!1s0x38fe1e1e1e1e1e1e%3A0x1e1e1e1e1e1e1e1e!2sPangong%20Lake%2C%20Ladakh!3m2!1d33.7692!2d78.9419!5e0!3m2!1sen!2sin!4v1710000000000!5m2!1sen!2sin"
+                    width="100%"
+                    height="100%"
+                    style={{ border: 0 }}
+                    allowFullScreen
+                    loading="lazy"
+                    referrerPolicy="no-referrer-when-downgrade"
+                    title="Leh Ladakh Tour Route Map"
+                  />
+                </div>
+                <div className="mt-4 space-y-2">
+                  <div className="flex items-center justify-between p-3 bg-muted rounded-lg">
+                    <span className="font-medium">Total Distance</span>
+                    <span className="text-orange-600">~1,200 KM</span>
+                  </div>
+                  <div className="flex items-center justify-between p-3 bg-muted rounded-lg">
+                    <span className="font-medium">Route Highlights</span>
+                    <span className="text-sm">Delhi → Manali → Leh → Pangong → Back</span>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
           </div>
 
           {/* Sidebar */}

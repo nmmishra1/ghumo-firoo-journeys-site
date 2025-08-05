@@ -2,7 +2,7 @@ import React from 'react';
 import Layout from '@/components/Layout';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { MapPin, Clock, Calendar, Star, CheckCircle, XCircle, Users, Plane } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
@@ -153,6 +153,37 @@ const RajasthanRoyal = () => {
                 </CardContent>
               </Card>
             </div>
+
+            {/* Map Section */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Tour Route Map</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="h-96 rounded-lg overflow-hidden">
+                  <iframe
+                    src="https://www.google.com/maps/embed?pb=!1m52!1m12!1m3!1d1813394.1580658383!2d73.94707373437496!3d26.789472439062458!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!4m37!3e0!4m5!1s0x390cfd5b347eb62d%3A0x37205b715389640!2sDelhi!3m2!1d28.7040592!2d77.10249019999999!4m5!1s0x396db2dce5b4d1e5%3A0x6adb0cc26025f8da!2sJaipur%2C%20Rajasthan!3m2!1d26.9124336!2d75.7872709!4m5!1s0x396a59c0ce3a3cb5%3A0x57b85c5ea6aa7b5!2sJodhpur%2C%20Rajasthan!3m2!1d26.2389!2d73.0243!4m5!1s0x396c1b9b7c7c7c7c%3A0x7c7c7c7c7c7c7c7c!2sUdaipur%2C%20Rajasthan!3m2!1d24.5854!2d73.7125!4m5!1s0x396db2dce5b4d1e5%3A0x6adb0cc26025f8da!2sJaipur%2C%20Rajasthan!3m2!1d26.9124336!2d75.7872709!4m5!1s0x390cfd5b347eb62d%3A0x37205b715389640!2sDelhi!3m2!1d28.7040592!2d77.10249019999999!5e0!3m2!1sen!2sin!4v1710000000000!5m2!1sen!2sin"
+                    width="100%"
+                    height="100%"
+                    style={{ border: 0 }}
+                    allowFullScreen
+                    loading="lazy"
+                    referrerPolicy="no-referrer-when-downgrade"
+                    title="Rajasthan Royal Tour Route Map"
+                  />
+                </div>
+                <div className="mt-4 space-y-2">
+                  <div className="flex items-center justify-between p-3 bg-muted rounded-lg">
+                    <span className="font-medium">Total Distance</span>
+                    <span className="text-orange-600">~1,400 KM</span>
+                  </div>
+                  <div className="flex items-center justify-between p-3 bg-muted rounded-lg">
+                    <span className="font-medium">Route Highlights</span>
+                    <span className="text-sm">Delhi → Jaipur → Jodhpur → Udaipur → Back</span>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
           </div>
 
           {/* Sidebar */}

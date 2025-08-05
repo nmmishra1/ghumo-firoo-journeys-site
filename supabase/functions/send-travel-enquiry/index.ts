@@ -79,7 +79,7 @@ const handler = async (req: Request): Promise<Response> => {
     // Send notification email to agency
     const agencyEmailResponse = await resend.emails.send({
       from: "Ghumo Firoo CRM <booking@ghumofiroo.com>",
-      to: ["booking@ghumofiroo.com"],
+      to: ["info@ghumofiroo.com"],
       subject: `New Travel Enquiry from ${customerData.name}`,
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">

@@ -205,10 +205,26 @@ const CharDhamYatra = () => {
                 <CardTitle>Tour Route Map</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="h-64 bg-muted rounded-lg flex items-center justify-center">
-                  <div className="text-center">
-                    <MapPin className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                    <p className="text-muted-foreground">Interactive route map will be displayed here</p>
+                <div className="h-96 rounded-lg overflow-hidden">
+                  <iframe
+                    src="https://www.google.com/maps/embed?pb=!1m76!1m12!1m3!1d3632254.6891505118!2d75.72496906771118!3d30.084459462538005!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!4m61!3e0!4m5!1s0x390cfd5b347eb62d%3A0x37205b715389640!2sDelhi!3m2!1d28.7040592!2d77.10249019999999!4m5!1s0x39a07878d6c7e269%3A0x72b827a24b346e86!2sHaridwar%2C%20Uttarakhand!3m2!1d29.9456906!2d78.1642478!4m5!1s0x390b92d4dd10b2c7%3A0x87d1a71e2b73b4c1!2sBarkot%2C%20Uttarakhand!3m2!1d31.034778!2d78.2081519!4m5!1s0x390b7a2b1d69c2af%3A0xf52b9d0c1c0b2b7c!2sYamunotri%2C%20Uttarakhand!3m2!1d31.011333!2d78.441667!4m5!1s0x390b7d5b0b0b7b5b%3A0x7b5b7b5b7b5b7b5b!2sUttarkashi%2C%20Uttarakhand!3m2!1d30.7268!2d78.4480!4m5!1s0x390bb6b5b6b6b6b6%3A0x6b6b6b6b6b6b6b6b!2sGangotri%2C%20Uttarakhand!3m2!1d30.9993!2d78.9425!4m5!1s0x390b85e5e5e5e5e5%3A0xe5e5e5e5e5e5e5e5!2sGuptkashi%2C%20Uttarakhand!3m2!1d30.5393!2d79.0713!4m5!1s0x390b8c8c8c8c8c8c%3A0x8c8c8c8c8c8c8c8c!2sKedarnath%2C%20Uttarakhand!3m2!1d30.7346!2d79.0669!4m5!1s0x390b9e9e9e9e9e9e%3A0x9e9e9e9e9e9e9e9e!2sBadrinath%2C%20Uttarakhand!3m2!1d30.7433!2d79.4938!4m5!1s0x390cfd5b347eb62d%3A0x37205b715389640!2sDelhi!3m2!1d28.7040592!2d77.10249019999999!5e0!3m2!1sen!2sin!4v1710000000000!5m2!1sen!2sin"
+                    width="100%"
+                    height="100%"
+                    style={{ border: 0 }}
+                    allowFullScreen
+                    loading="lazy"
+                    referrerPolicy="no-referrer-when-downgrade"
+                    title="Char Dham Yatra Route Map"
+                  />
+                </div>
+                <div className="mt-4 space-y-2">
+                  <div className="flex items-center justify-between p-3 bg-muted rounded-lg">
+                    <span className="font-medium">Total Distance</span>
+                    <span className="text-orange-600">~1,800 KM</span>
+                  </div>
+                  <div className="flex items-center justify-between p-3 bg-muted rounded-lg">
+                    <span className="font-medium">Route Highlights</span>
+                    <span className="text-sm">Delhi → Haridwar → Char Dhams → Delhi</span>
                   </div>
                 </div>
               </CardContent>
