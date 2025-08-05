@@ -151,11 +151,17 @@ const CRM = () => {
 
   const fetchLeads = async () => {
     try {
-      const { data, error } = await supabase
+      let query = supabase
         .from('leads')
         .select('*')
         .order('created_at', { ascending: false });
 
+      // Apply role-based filtering
+      if (userProfile?.role !== 'admin') {
+        query = query.eq('assigned_to', user?.id);
+      }
+
+      const { data, error } = await query;
       if (error) throw error;
       setLeads((data || []) as Lead[]);
     } catch (error) {
@@ -229,6 +235,39 @@ const CRM = () => {
     if (lead) {
       setSelectedLeadForFollowUp({ id: lead.id, name: lead.customer_name });
       setFollowUpModalOpen(true);
+    }
+  };
+
+  const handleFollowUpSubmit = async (leadId: string, followUpData: any) => {
+    try {
+      // Update lead with follow-up info directly
+      const { error: leadError } = await supabase
+        .from('leads')
+        .update({
+          call_follow_up: followUpData.callType,
+          lead_prospect: followUpData.leadProspect,
+          call_summary: followUpData.callSummary,
+          next_call_time: followUpData.nextCallTime
+        })
+        .eq('id', leadId);
+
+      if (leadError) throw leadError;
+
+      toast({
+        title: "Success",
+        description: "Follow-up saved successfully"
+      });
+      
+      fetchLeads();
+      setFollowUpModalOpen(false);
+      setSelectedLeadForFollowUp(null);
+    } catch (error) {
+      console.error('Error saving follow-up:', error);
+      toast({
+        title: "Error",
+        description: "Failed to save follow-up",
+        variant: "destructive"
+      });
     }
   };
 
@@ -668,10 +707,8 @@ const CRM = () => {
             setFollowUpModalOpen(false);
             setSelectedLeadForFollowUp(null);
           }}
-          onSubmit={(data) => {
-            // Handle follow-up submission here
-            console.log('Follow-up data:', data);
-            toast({ title: "Success", description: "Follow-up saved successfully" });
+          onSubmit={async (data) => {
+            await handleFollowUpSubmit(selectedLeadForFollowUp.id, data);
           }}
           leadName={selectedLeadForFollowUp.name}
         />

@@ -22,6 +22,8 @@ import CRM from "./pages/CRM";
 import Profile from "./pages/Profile";
 import CharDhamYatra from "./pages/packages/CharDhamYatra";
 import LehLadakhTour from "./pages/packages/LehLadakhTour";
+import GoldenTriangle from "./pages/packages/GoldenTriangle";
+import RajasthanRoyal from "./pages/packages/RajasthanRoyal";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 
 const queryClient = new QueryClient();
@@ -54,6 +56,8 @@ const App = () => (
           <Route path="/char-dham-yatra-2025" element={<CharDhamYatra />} />
           <Route path="/packages/leh-ladakh-tour" element={<LehLadakhTour />} />
           <Route path="/leh-ladakh-tour" element={<LehLadakhTour />} />
+          <Route path="/packages/golden-triangle" element={<GoldenTriangle />} />
+          <Route path="/packages/rajasthan-royal" element={<RajasthanRoyal />} />
           <Route path="/enquire-now" element={<EnquireNow />} />
           <Route path="/share-your-travel-dreams" element={<Index />} />
           <Route path="/career" element={<Career />} />

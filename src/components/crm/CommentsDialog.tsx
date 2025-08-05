@@ -142,7 +142,7 @@ export const CommentsDialog: React.FC<CommentsDialogProps> = ({
                   <div className="flex justify-between items-start mb-2">
                     <div>
                       <span className="font-medium text-sm">
-                        User
+                        {comment.created_by === user?.id ? 'You' : 'User'}
                       </span>
                       <span className="text-xs text-muted-foreground ml-2">
                         {new Date(comment.created_at).toLocaleString()}

@@ -96,23 +96,6 @@ const ContactInfo = () => {
         </div>
       </div>
 
-      {/* Google Map */}
-      <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
-        <div className="p-6">
-          <h3 className="text-xl font-bold text-gray-900 mb-4">Find Us Here</h3>
-        </div>
-        <div className="w-full h-64">
-          <iframe
-            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3504.4000000000005!2d77.1877!3d28.5562!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x390d1d6e7e7e7e7e%3A0x0!2sMunirka%2C%20New%20Delhi%2C%20Delhi%20110067%2C%20India!5e0!3m2!1sen!2sus!4v1234567890123!5m2!1sen!2sus"
-            width="100%"
-            height="100%"
-            style={{ border: 0 }}
-            allowFullScreen
-            loading="lazy"
-            referrerPolicy="no-referrer-when-downgrade"
-          />
-        </div>
-      </div>
     </div>
   );
 };
