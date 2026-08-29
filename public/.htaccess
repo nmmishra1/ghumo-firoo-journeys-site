@@ -153,9 +153,18 @@ ErrorDocument 500 /index.html
   RewriteCond %{REQUEST_URI} ^/packages/.+/$ [NC]
   RewriteRule ^packages/(.+)/$ https://ghumofiroo.com/packages/$1 [L,R=301]
 
-  # React SPA Client-Side Routing
-  RewriteCond %{REQUEST_URI} ^/$ [OR]
-  RewriteCond %{REQUEST_URI} ^/(about|contact|packages|privacy-policy|terms-conditions|terms-of-service|refund-policy|blog|career|enquire-now|enquire-success|products|booking|pictramapdemo|custom-tour-packages|thank-you|guides|guide|landing|profile|faq|crm|signup|forgot-password|reset-password|auth|review|destinations|payment|pay)(/.*)?$ [NC]
+  # Serve Pre-rendered Static Route HTML if folder/index.html exists
+  RewriteCond %{DOCUMENT_ROOT}%{REQUEST_URI}/index.html -f
+  RewriteRule ^(.*)/?$ $1/index.html [L]
+
+  # Serve Pre-rendered Static HTML if .html exists
+  RewriteCond %{DOCUMENT_ROOT}%{REQUEST_URI}.html -f
+  RewriteRule ^(.*)$ $1.html [L]
+
+  # React SPA Client-Side Routing Fallback (for dynamic or ungenerated routes)
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteCond %{DOCUMENT_ROOT}%{REQUEST_URI}/index.html !-f
   RewriteRule ^ /index.html [L]
 </IfModule>
 

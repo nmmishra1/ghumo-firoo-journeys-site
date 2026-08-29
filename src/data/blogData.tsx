@@ -347,6 +347,20 @@ export const blogPosts: BlogPost[] = [
     category: 'Pilgrimage',
     readTime: '10 min read',
   },
+  {
+    id: 37,
+    slug: 'evoke-tent-city-dhordo-booking-guide-2026-2027',
+    title: 'Evoke Tent City Dhordo Booking Guide 2026-2027 | Rann Utsav Packages',
+    excerpt: 'Complete booking guide for Evoke Tent City Dhordo at Rann Utsav 2026-2027. Official tariff, premium Swiss cottage categories, White Desert permits, and itinerary tips.',
+    metaDescription: 'Official booking guide for Evoke Tent City Dhordo Rann Utsav 2026-2027. Swiss cottage prices, festival dates, White Desert permits, and luxury stay packages.',
+    author: 'Gujarat Tourism Specialist',
+    date: '2026-08-20',
+    image: '/Rann-Utsav-Gujarat.png',
+    imageAlt: 'Evoke Tent City Dhordo during Rann Utsav with luxury Swiss cottages and desert sunset',
+    imageTitle: 'Evoke Tent City Dhordo Rann Utsav',
+    category: 'Rann Utsav',
+    readTime: '11 min read',
+  },
 ];
 
 export const blogContents: Record<number, React.ReactNode> = {
@@ -1117,6 +1131,34 @@ export const blogContents: Record<number, React.ReactNode> = {
       <div className="bg-orange-50 dark:bg-orange-900/20 p-6 rounded-2xl border-l-4 border-orange-600 mt-8">
         <p className="font-semibold text-orange-900 dark:text-orange-400 mb-2">Ghumo Firoo Service:</p>
         <p>When you book a Char Dham package with Ghumo Firoo Travels, our team handles the entire registration and slot booking process for you, ensuring a completely hassle-free experience.</p>
+      </div>
+    </div>
+  ),
+  37: (
+    <div className="space-y-8 text-gray-700 dark:text-slate-300 leading-relaxed">
+      <h2 className="text-3xl font-bold text-gray-900 dark:text-white bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+        Evoke Tent City Dhordo Booking Guide 2026-2027
+      </h2>
+      <p>
+        Planning a magical journey to the White Rann of Kutch? As an official partner of <strong>Evoke Experiences</strong>, Ghumo Firoo Travels provides verified bookings, official Swiss cottage accommodation, and all-inclusive Rann Utsav holiday packages for the 2026-2027 season.
+      </p>
+      <h3 className="text-2xl font-bold text-gray-900 dark:text-white">Accommodation Categories at Tent City Dhordo</h3>
+      <ul className="list-disc pl-6 space-y-2">
+        <li><strong>Premium AC Tents:</strong> Spacious luxury Swiss tents with air conditioning, attached modern bathrooms, and artisan Kutchi interiors.</li>
+        <li><strong>Deluxe Non-AC / AC Swiss Cottages:</strong> Comfortable family cottages with traditional decor and complimentary hospitality amenities.</li>
+        <li><strong>Super Premium Darbari Tents:</strong> Exclusive royal suites featuring private sitting lounges and dedicated butler service.</li>
+      </ul>
+      <h3 className="text-2xl font-bold text-gray-900 dark:text-white">Inclusions in Official Evoke Packages</h3>
+      <ul className="list-disc pl-6 space-y-2">
+        <li>Official White Desert Entry Permit & Checkpost assistance</li>
+        <li>All gourmet meals (Breakfast, Lunch, High Tea & Traditional Kutchi Dinner)</li>
+        <li>Nightly folk music, Garba, and cultural performances at the central amphitheater</li>
+        <li>Complimentary electric cart transfers within Tent City</li>
+        <li>Excursions to Kalo Dungar (Black Hill) and Gandhi Nu Gaam craft village</li>
+      </ul>
+      <div className="bg-amber-50 dark:bg-amber-900/20 p-6 rounded-2xl border-l-4 border-amber-600 mt-8">
+        <p className="font-semibold text-amber-900 dark:text-amber-400 mb-2">Book with Ghumo Firoo Travels:</p>
+        <p>Get guaranteed Swiss cottage bookings for Full Moon and weekend dates with transparent pricing and 24x7 on-trip concierge assistance. Call / WhatsApp us at +91 9910987264.</p>
       </div>
     </div>
   )
