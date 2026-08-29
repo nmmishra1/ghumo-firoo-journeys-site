@@ -49,6 +49,9 @@ ErrorDocument 500 /index.html
   RewriteEngine On
   RewriteBase /
 
+  # Pass Authorization header to PHP in CGI/FastCGI environments (cPanel)
+  SetEnvIf Authorization "(.*)" HTTP_AUTHORIZATION=$1
+
   # 1. Physical Files & Directories Served Directly
   RewriteCond %{REQUEST_FILENAME} -f [OR]
   RewriteCond %{REQUEST_FILENAME} -d
