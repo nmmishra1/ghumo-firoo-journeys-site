@@ -4,20 +4,23 @@ ini_set('display_errors', 1);
 
 header('Content-Type: text/plain');
 
-$dir = __DIR__ . '/php-backend';
-echo "Target dir: $dir\n";
+$htaccessFile = __DIR__ . '/php-backend/.htaccess';
+$content = "# php -- BEGIN cPanel-generated handler, do not edit\n"
+         . "<IfModule mime_module>\n"
+         . "  AddHandler application/x-httpd-ea-php83___lsphp .php .php8 .phtml\n"
+         . "</IfModule>\n"
+         . "# php -- END cPanel-generated handler, do not edit\n\n"
+         . "<IfModule mod_authz_core.c>\n"
+         . "    Require all granted\n"
+         . "</IfModule>\n"
+         . "<IfModule !mod_authz_core.c>\n"
+         . "    Order Allow,Deny\n"
+         . "    Allow from all\n"
+         . "</IfModule>\n";
 
-if (!is_dir($dir)) {
-    @mkdir($dir, 0755, true);
-}
+$res = file_put_contents($htaccessFile, $content);
+echo "Updating php-backend/.htaccess status: " . ($res !== false ? "SUCCESS ($res bytes)" : "FAILED") . "\n";
 
-// Create a test file
-$testFile = $dir . '/test.php';
-$written = file_put_contents($testFile, "<?php echo 'PHP_BACKEND_WORKING_OK'; ?>");
-
-echo "Test file write status: " . ($written !== false ? "SUCCESS ($written bytes)" : "FAILED") . "\n";
-
-// List files in $dir
-$files = is_dir($dir) ? scandir($dir) : [];
-echo "Total files in php-backend: " . count($files) . "\n";
-echo "Files list: " . implode(', ', array_slice($files, 0, 30)) . "\n";
+$testFile = __DIR__ . '/php-backend/test.php';
+file_put_contents($testFile, "<?php header('Content-Type: application/json'); echo json_encode(['status' => 'OK', 'message' => 'PHP backend is running successfully!']); ?>");
+echo "Updated test.php in php-backend.\n";
