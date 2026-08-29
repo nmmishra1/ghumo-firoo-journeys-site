@@ -40,5 +40,4 @@ jobs:
           dangerous-clean-slate: true
           log-level: verbose
           exclude: |
-            **/php-backend/.env
             **/php-backend/uploads/**

@@ -137,8 +137,7 @@ function authenticate(): array
         respondUnauthorized('Missing bearer token');
     }
 
-    $jwt = $matches[1];
-    $publicKey = getenv('SUPABASE_PUBLIC_KEY');
+    $publicKey = getenv('SUPABASE_PUBLIC_KEY') ?: getenv('VITE_SUPABASE_ANON_KEY') ?: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJmZHVtbG5rbWZ1YWNzem5vZ3p6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA3NzYxMDUsImV4cCI6MjA5NjM1MjEwNX0.5VtSJ46jEgI8tlqXMWOXz8jvc68C__Suo1WgGJw_KIM';
 
     if (!$publicKey) {
         http_response_code(500);
