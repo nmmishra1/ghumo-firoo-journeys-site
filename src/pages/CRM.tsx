@@ -895,10 +895,10 @@ const CRM = () => {
   }, [user, userProfile]);
 
   useEffect(() => {
-    if (user && (currentSection === 'users' || currentSection === 'agent-roles') && profiles.length === 0) {
+    if (user && profiles.length === 0) {
       loadUserDataAndProfiles();
     }
-  }, [user, currentSection, profiles.length]);
+  }, [user, profiles.length]);
 
   useEffect(() => {
     const needsLeads = ['leads', 'quotes', 'opportunities', 'reports', 'payments'].some(s => currentSection.includes(s));
