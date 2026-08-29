@@ -4875,7 +4875,14 @@ const CRM = () => {
                                 <div className="space-y-1">
                                   <div className="flex justify-between items-center text-[10px] text-slate-400 font-semibold">
                                     <span>{actDate}</span>
-                                    <span>By: {entry.agent || entry.author || 'System'}</span>
+                                    <span>By: {(() => {
+                                      const rawAuthor = entry.agent || entry.author;
+                                      if (!rawAuthor || rawAuthor.toLowerCase() === 'agent' || rawAuthor === 'profile-001' || rawAuthor === '1') {
+                                        return userProfile?.full_name || 'Agent';
+                                      }
+                                      const matched = profiles.find(p => p.id === rawAuthor || p.email?.toLowerCase() === rawAuthor.toLowerCase() || p.full_name?.toLowerCase() === rawAuthor.toLowerCase());
+                                      return matched?.full_name || rawAuthor;
+                                    })()}</span>
                                   </div>
                                   <h5 className="text-[12px] font-semibold text-slate-800 capitalize flex items-center gap-1">
                                     {entry.type === 'call' && <i className="ti ti-phone text-slate-500"></i>}
