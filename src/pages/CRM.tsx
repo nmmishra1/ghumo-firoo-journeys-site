@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useLocation, useParams } from 'react-router-dom';
+import { useNavigate, useLocation, useParams, Navigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -68,7 +68,7 @@ const CRM = () => {
   const [currentSection, setCurrentSection] = useState<'dashboard' | 'user-dashboard' | 'leads' | 'add-lead' | 'edit-lead'>('dashboard');
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const { toast } = useToast();
 
   // Sync currentSection with current URL location
@@ -313,19 +313,17 @@ const CRM = () => {
     return profile?.full_name || 'Unknown';
   };
 
-  // Check if user is approved
-  if (!user) {
+  // Check if user is authenticated
+  if (authLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Card className="w-96">
-          <CardContent className="p-6 text-center">
-            <h2 className="text-xl font-semibold mb-4">Access Denied</h2>
-            <p className="text-gray-600 mb-4">Please log in to access the Travel CRM dashboard.</p>
-            <Button onClick={() => window.location.href = '/auth'}>Login</Button>
-          </CardContent>
-        </Card>
+      <div className="min-h-screen flex items-center justify-center bg-slate-900 text-white">
+        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-500"></div>
       </div>
     );
+  }
+
+  if (!user) {
+    return <Navigate to="/auth" replace />;
   }
 
   if (userProfile && !userProfile.approved && userProfile.role !== 'admin') {
