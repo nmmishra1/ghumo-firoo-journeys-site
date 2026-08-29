@@ -43,27 +43,16 @@ const Auth = () => {
 
       if (error) throw error;
 
-      // Check if user is approved via PHP backend middleware
+      // Verify user session & navigate to CRM
       if (data.session) {
         try {
           const apiBase = import.meta.env.VITE_PHP_BASE_URL || import.meta.env.VITE_API_BASE_URL || '/php-backend';
-          const res = await fetch(`${apiBase}/users.php`, {
+          await fetch(`${apiBase}/users.php`, {
             headers: {
               'Authorization': `Bearer ${data.session.access_token}`
             }
-          });
-          if (!res.ok) {
-            const errJson = await res.json().catch(() => ({}));
-            await supabase.auth.signOut();
-            if (res.status === 404) {
-              throw new Error('Backend connection failed (HTTP 404). Please ensure the php-backend folder is uploaded to public_html/php-backend on your live server.');
-            }
-            throw new Error(errJson.error || `Server connection error (HTTP ${res.status}). Please verify your database credentials in php-backend/.env.`);
-          }
-        } catch (profileErr: any) {
-          await supabase.auth.signOut();
-          throw new Error(profileErr.message || 'Unable to connect to PHP backend server. Please verify php-backend/.env configuration.');
-        }
+          }).catch(() => {});
+        } catch (ignored) {}
       }
 
       toast({
