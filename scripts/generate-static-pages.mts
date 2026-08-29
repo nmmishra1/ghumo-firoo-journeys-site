@@ -29,9 +29,9 @@ const staticRoutesMeta: Record<string, { title: string; description: string; h1:
   },
   '/about': {
     title: 'About Us | Ghumo Firoo Travels - Trusted Delhi Travel Agency',
-    description: 'Learn about Ghumo Firoo Travels, our journey, mission, and experienced travel specialists providing customized holiday packages and 24x7 support.',
+    description: 'Learn about Ghumo Firoo Travels, founded by Sangita Kumari with 10+ years travel industry experience across MakeMyTrip, Goibibo, ixigo, and Amadeus.',
     h1: 'About Ghumo Firoo Travels',
-    bodySnippet: 'Ghumo Firoo Travels is a premier Indian travel agency based in South Delhi specializing in tailored holiday packages, spiritual yatras, and luxury vacations.'
+    bodySnippet: 'Ghumo Firoo Travels is a premier Indian travel agency founded by Sangita Kumari, featuring destination specialists with 10+ years experience across MakeMyTrip, Goibibo, ixigo, and Amadeus.'
   },
   '/contact': {
     title: 'Contact Us | Ghumo Firoo Travels - 24x7 Holiday Support Desk',

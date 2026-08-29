@@ -32,7 +32,7 @@ const About: React.FC = () => {
     },
     founder: {
       '@type': 'Person',
-      name: 'Navin Kumar Mishra',
+      name: 'Sangita Kumari',
       jobTitle: 'Founder & Managing Director',
     },
     aggregateRating: {
@@ -52,7 +52,7 @@ const About: React.FC = () => {
     <Layout>
       <SEO
         title="About Us | Ghumo Firoo Travels - Trusted Delhi Travel Agency"
-        description="Learn about Ghumo Firoo Travels, our journey, mission, and experienced travel specialists providing customized holiday packages and 24x7 support."
+        description="Learn about Ghumo Firoo Travels, founded by Sangita Kumari with 10+ years industry experience across MakeMyTrip, Goibibo, ixigo, and Amadeus."
         canonicalUrl="https://ghumofiroo.com/about"
         url="https://ghumofiroo.com/about"
         structuredData={travelAgencySchema}
@@ -114,10 +114,10 @@ const About: React.FC = () => {
                 Crafting Meaningful Journeys With Care & Precision
               </h2>
               <p className="text-base sm:text-lg text-slate-600 leading-relaxed">
-                Ghumo Firoo Travels was founded with a clear, singular vision: to make holiday planning transparent, hassle-free, and truly personalized. Operating from New Delhi, our journey began with curated Himalayan pilgrimages and has expanded into a full-service travel company managing domestic and international holidays worldwide.
+                Ghumo Firoo Travels was founded with a clear, singular vision: to make holiday planning transparent, hassle-free, and truly personalized. Operating from New Delhi, our leadership brings over 10 years of rich industry experience working with India's top travel platforms, translating institutional know-how into personalized, customer-first holiday planning.
               </p>
               <p className="text-base sm:text-lg text-slate-600 leading-relaxed">
-                Whether orchestrating a sacred Char Dham Yatra by helicopter, securing luxury Swiss cottages at Tent City Dhordo for Rann Utsav, or designing a bespoke Grand Europe holiday, our dedicated destination experts tailor every detail around your comfort, schedule, and preferences.
+                Whether orchestrating a sacred Char Dham Yatra by helicopter, securing luxury Swiss cottages at Tent City Dhordo for Rann Utsav, or designing a bespoke Grand Europe holiday, our dedicated team of place specialists and destination experts tailors every detail around your comfort, schedule, and preferences.
               </p>
 
               <div className="grid grid-cols-2 gap-4 pt-4 border-t border-slate-100">
@@ -213,31 +213,40 @@ const About: React.FC = () => {
               Meet the People Behind Your Journey
             </h2>
             <p className="text-base text-slate-600 mt-3">
-              Hands-on travel curators dedicated to making every booking effortless and dependable
+              Industry veterans with over a decade of expertise across India's leading travel technology and holiday enterprises
             </p>
           </div>
 
-          <div className="max-w-4xl mx-auto bg-gradient-to-br from-slate-50 to-blue-50/40 rounded-2xl p-8 sm:p-10 border border-slate-200/80 shadow-sm">
+          <div className="max-w-4xl mx-auto bg-gradient-to-br from-slate-50 to-blue-50/40 rounded-2xl p-8 sm:p-10 border border-slate-200/80 shadow-sm space-y-8">
             <div className="flex flex-col sm:flex-row items-center sm:items-start gap-8">
-              <div className="w-32 h-32 rounded-full overflow-hidden bg-slate-200 border-4 border-white shadow-md shrink-0">
-                <img 
-                  src="/avatars/admin.png" 
-                  alt="Navin Kumar Mishra - Founder Ghumo Firoo Travels"
-                  className="w-full h-full object-cover"
-                  onError={(e) => {
-                    (e.target as HTMLElement).style.display = 'none';
-                  }}
-                />
+              <div className="w-32 h-32 rounded-2xl overflow-hidden bg-gradient-to-br from-blue-600 to-indigo-700 text-white flex items-center justify-center font-bold text-3xl shadow-md shrink-0 border-4 border-white">
+                SK
               </div>
 
               <div className="space-y-4 text-center sm:text-left">
                 <div>
-                  <h3 className="text-2xl font-bold text-slate-900">Navin Kumar Mishra</h3>
-                  <p className="text-sm font-semibold text-blue-600">Founder & Principal Travel Director</p>
+                  <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2 mb-1">
+                    <h3 className="text-2xl font-bold text-slate-900">Sangita Kumari</h3>
+                    <span className="text-[11px] font-bold bg-blue-100 text-blue-700 px-2.5 py-0.5 rounded-full">
+                      10+ Years Travel Industry Experience
+                    </span>
+                  </div>
+                  <p className="text-sm font-semibold text-blue-600">Founder & Managing Director</p>
                 </div>
+                
                 <p className="text-slate-600 text-sm sm:text-base leading-relaxed">
-                  "At Ghumo Firoo Travels, our philosophy is simple: we treat every guest's holiday as if it were our own family vacation. From personally auditing hotel properties and verifying cab drivers to offering direct 24x7 WhatsApp support during trips, our team ensures complete peace of mind from departure to return."
+                  "With over 10 years of deep domain experience in the travel industry working with leading organizations like <strong>MakeMyTrip (MMT)</strong>, <strong>Goibibo</strong>, <strong>ixigo</strong>, and <strong>Amadeus</strong>, our foundation is built on deep destination knowledge, tech-driven reliability, and customer-first curation."
                 </p>
+
+                <div className="bg-white/80 border border-slate-200/80 rounded-xl p-4 text-xs text-slate-700 space-y-1.5">
+                  <div className="font-bold text-slate-900 flex items-center gap-1.5">
+                    <Users className="w-4 h-4 text-blue-600" /> Dedicated Team of Destination & Place Specialists:
+                  </div>
+                  <p className="text-slate-600">
+                    We have a strong team of experienced travel professionals with extensive exposure across domestic and international tour circuits. Our specialists deeply understand each customer's specific needs to curate customized, high-satisfaction travel itineraries.
+                  </p>
+                </div>
+
                 <div className="flex flex-wrap items-center justify-center sm:justify-start gap-4 pt-2 text-xs text-slate-500">
                   <span className="flex items-center gap-1.5">
                     <MapPin className="w-3.5 h-3.5 text-blue-600" /> Munirka, New Delhi
