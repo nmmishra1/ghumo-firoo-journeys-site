@@ -36,6 +36,9 @@ function loadEnvFile()
     }
 }
 
+// Automatically load .env on require
+loadEnvFile();
+
 function getDb(): PDO
 {
     static $pdo = null;

@@ -11,8 +11,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 
 require_once __DIR__ . '/db.php';
 
-$payuKey = getenv('PAYU_KEY');
-$payuSalt = getenv('PAYU_SALT');
+$payuKey = getenv('PAYU_KEY') ?: 'uid921';
+$payuSalt = getenv('PAYU_SALT') ?: '9yq8nzPvIDgzqQBuuWa6udI4aBIS5c8t';
 
 if (!$payuKey || !$payuSalt) {
     http_response_code(500);

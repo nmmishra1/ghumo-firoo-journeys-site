@@ -93,7 +93,11 @@ async function generate() {
   await fs.mkdir(outputDir, { recursive: true });
   await fs.writeFile(sitemapPath, sitemap, 'utf8');
 
-  console.log(`Generated sitemap with ${routes.length} URLs at ${sitemapPath}`);
+  const publicDir = path.resolve(process.cwd(), 'public');
+  await fs.mkdir(publicDir, { recursive: true });
+  await fs.writeFile(path.join(publicDir, 'sitemap.xml'), sitemap, 'utf8');
+
+  console.log(`Generated sitemap with ${routes.length} URLs at ${sitemapPath} and public/sitemap.xml`);
 }
 
 generate().catch((error) => {
