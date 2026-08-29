@@ -11,7 +11,7 @@
     "build:dev": "vite build --mode development",
     "build:server": "npx esbuild server/razorpay-server.ts --bundle --platform=node --outfile=dist-server/app.js",
     "generate:sitemap": "tsx scripts/generate-sitemap.mts",
-    "postbuild": "npm run generate:sitemap && (react-snap || true)",
+    "postbuild": "npm run generate:sitemap && node scripts/run-snap.js",
     "lint": "eslint .",
     "preview": "vite preview",
     "seo:validate": "node scripts/seo-validate.mjs"
