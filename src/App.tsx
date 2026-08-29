@@ -37,6 +37,15 @@ class LazyErrorBoundary extends React.Component<
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
     console.error('Lazy loading error:', error, errorInfo);
+    const msg = error?.message || '';
+    const isChunkError = msg.includes('dynamically imported module') ||
+                         msg.includes('Importing a module script failed') ||
+                         msg.includes('Loading chunk') ||
+                         error?.name === 'ChunkLoadError';
+    if (isChunkError && !sessionStorage.getItem('chunk_reload_done')) {
+      sessionStorage.setItem('chunk_reload_done', 'true');
+      window.location.reload();
+    }
   }
 
   render() {
