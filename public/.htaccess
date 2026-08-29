@@ -159,7 +159,8 @@ ErrorDocument 500 /index.html
   RewriteCond %{DOCUMENT_ROOT}%{REQUEST_URI}.html -f
   RewriteRule ^ %{REQUEST_URI}.html [L]
 
-  # 3. SPA Fallback for dynamic client-side routes without pre-rendered files
+  # 3. SPA Fallback for dynamic client-side routes without pre-rendered files (exclude PHP backend)
+  RewriteCond %{REQUEST_URI} !^/php-backend/
   RewriteCond %{REQUEST_FILENAME} !-f
   RewriteCond %{REQUEST_FILENAME} !-d
   RewriteRule ^ /index.html [L]
