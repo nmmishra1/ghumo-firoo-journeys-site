@@ -147,67 +147,111 @@ export interface EmailTemplate {
 }
 
 // Mapper functions to convert between frontend camelCase Lead and DB snake_case tables
-function mapLeadToDb(lead: Partial<Lead>): any {
+function mapLeadToDb(lead: Partial<Lead> | any): any {
   const db: any = {};
   if (lead.id !== undefined) db.id = lead.id;
-  if (lead.packageName !== undefined) db.package_name = lead.packageName;
-  if (lead.packagePrice !== undefined) db.package_price = lead.packagePrice;
+  if (lead.packageName !== undefined || lead.package_name !== undefined) db.package_name = lead.packageName ?? lead.package_name;
+  if (lead.packagePrice !== undefined || lead.package_price !== undefined || lead.budget !== undefined) {
+    db.package_price = lead.packagePrice ?? lead.package_price ?? (lead.budget ? parseFloat(lead.budget) : 0);
+  }
   if (lead.duration !== undefined) db.duration = lead.duration;
   if (lead.destinations !== undefined) db.destinations = lead.destinations;
-  if (lead.customerName !== undefined) db.customer_name = lead.customerName;
-  if (lead.customerEmail !== undefined) db.customer_email = lead.customerEmail;
-  if (lead.customerPhone !== undefined) db.customer_phone = lead.customerPhone;
+  if (lead.customerName !== undefined || lead.customer_name !== undefined) db.customer_name = lead.customerName ?? lead.customer_name;
+  if (lead.customerEmail !== undefined || lead.customer_email !== undefined || lead.email !== undefined) {
+    db.customer_email = lead.customerEmail ?? lead.customer_email ?? lead.email;
+  }
+  if (lead.customerPhone !== undefined || lead.customer_phone !== undefined || lead.contact_number !== undefined) {
+    db.customer_phone = lead.customerPhone ?? lead.customer_phone ?? lead.contact_number;
+  }
   if (lead.source !== undefined) db.source = lead.source;
   if (lead.status !== undefined) db.status = lead.status;
-  if (lead.createdAt !== undefined) db.created_at = lead.createdAt;
-  if (lead.updatedAt !== undefined) db.updated_at = lead.updatedAt;
+  if (lead.createdAt !== undefined || lead.created_at !== undefined) db.created_at = lead.createdAt ?? lead.created_at;
+  if (lead.updatedAt !== undefined || lead.updated_at !== undefined) db.updated_at = lead.updatedAt ?? lead.updated_at;
   if (lead.notes !== undefined) db.notes = lead.notes;
-  if (lead.followUpDate !== undefined) db.follow_up_date = lead.followUpDate ? new Date(lead.followUpDate).toISOString() : null;
-  if (lead.leadId !== undefined) db.external_lead_ref = lead.leadId;
-  if (lead.leadCreatedDate !== undefined) db.lead_created_date = lead.leadCreatedDate ? new Date(lead.leadCreatedDate).toISOString() : null;
-  if (lead.leadPurchasedDate !== undefined) db.lead_purchased_date = lead.leadPurchasedDate ? new Date(lead.leadPurchasedDate).toISOString() : null;
-  if (lead.customerCategory !== undefined) db.customer_category = lead.customerCategory;
-  if (lead.packageCost !== undefined) db.package_cost = lead.packageCost;
-  if (lead.tripStartDate !== undefined) db.trip_start_date = lead.tripStartDate;
-  if (lead.tripEndDate !== undefined) db.trip_end_date = lead.tripEndDate;
-  if (lead.numberOfNights !== undefined) db.number_of_nights = lead.numberOfNights;
-  if (lead.adultCount !== undefined) db.adult_count = lead.adultCount;
-  if (lead.childCount !== undefined) db.child_count = lead.childCount;
-  if (lead.infantCount !== undefined) db.infant_count = lead.infantCount;
-  if (lead.lastContactDate !== undefined) db.last_contact_date = lead.lastContactDate ? new Date(lead.lastContactDate).toISOString() : null;
-  if (lead.lostReason !== undefined) db.lost_reason = lead.lostReason;
-  if (lead.agentName !== undefined) db.agent_name = lead.agentName;
-  if (lead.emailStatus !== undefined) db.email_status = lead.emailStatus;
-  if (lead.emailSentDate !== undefined) db.email_sent_date = lead.emailSentDate ? new Date(lead.emailSentDate).toISOString() : null;
-  if (lead.lastEmailSentDate !== undefined) db.last_email_sent_date = lead.lastEmailSentDate ? new Date(lead.lastEmailSentDate).toISOString() : null;
-  if (lead.emailSentCount !== undefined) db.email_sent_count = lead.emailSentCount;
-  if (lead.emailHistory !== undefined) db.email_history = lead.emailHistory;
+  if (lead.remarks !== undefined || lead.discussion_notes !== undefined) db.remarks = lead.remarks ?? lead.discussion_notes;
+  if (lead.followUpDate !== undefined || lead.follow_up_date !== undefined) {
+    const fDate = lead.followUpDate ?? lead.follow_up_date;
+    db.follow_up_date = fDate ? new Date(fDate).toISOString() : null;
+  }
+  if (lead.leadId !== undefined || lead.external_lead_ref !== undefined) db.external_lead_ref = lead.leadId ?? lead.external_lead_ref;
+  if (lead.leadCreatedDate !== undefined || lead.lead_created_date !== undefined) {
+    const cDate = lead.leadCreatedDate ?? lead.lead_created_date;
+    db.lead_created_date = cDate ? new Date(cDate).toISOString() : null;
+  }
+  if (lead.leadPurchasedDate !== undefined || lead.lead_purchased_date !== undefined) {
+    const pDate = lead.leadPurchasedDate ?? lead.lead_purchased_date;
+    db.lead_purchased_date = pDate ? new Date(pDate).toISOString() : null;
+  }
+  if (lead.customerCategory !== undefined || lead.customer_category !== undefined) db.customer_category = lead.customerCategory ?? lead.customer_category;
+  if (lead.packageCost !== undefined || lead.package_cost !== undefined) db.package_cost = lead.packageCost ?? lead.package_cost;
+  if (lead.tripStartDate !== undefined || lead.trip_start_date !== undefined) db.trip_start_date = lead.tripStartDate ?? lead.trip_start_date;
+  if (lead.tripEndDate !== undefined || lead.trip_end_date !== undefined) db.trip_end_date = lead.tripEndDate ?? lead.trip_end_date;
+  if (lead.numberOfNights !== undefined || lead.number_of_nights !== undefined) db.number_of_nights = lead.numberOfNights ?? lead.number_of_nights;
   
-  if (lead.brochureRequested !== undefined) {
-    db.brochure_requested = (lead.brochureRequested === 'Yes' || lead.brochureRequested === true);
+  if (lead.adultCount !== undefined || lead.adult_count !== undefined || lead.adults !== undefined) {
+    db.adult_count = Number(lead.adultCount ?? lead.adult_count ?? lead.adults);
   }
-  if (lead.brochureSent !== undefined) {
-    db.brochure_sent = (lead.brochureSent === 'Yes' || lead.brochureSent === true);
+  if (lead.childCount !== undefined || lead.child_count !== undefined || lead.children !== undefined) {
+    db.child_count = Number(lead.childCount ?? lead.child_count ?? lead.children);
   }
-  if (lead.brochureSentDate !== undefined) db.brochure_sent_date = lead.brochureSentDate ? new Date(lead.brochureSentDate).toISOString() : null;
-  if (lead.brochureEmailStatus !== undefined) db.brochure_email_status = lead.brochureEmailStatus;
-  if (lead.city !== undefined) db.customer_home_city = lead.city;
-  if (lead.travelMonth !== undefined) db.travel_month = lead.travelMonth;
-  if (lead.pdfFileName !== undefined) db.pdf_file_name = lead.pdfFileName;
-  if (lead.nextPaymentDueDate !== undefined) db.next_payment_due_date = lead.nextPaymentDueDate ? new Date(lead.nextPaymentDueDate).toISOString() : null;
-  if (lead.attachedPackages !== undefined) db.attached_packages = lead.attachedPackages;
+  if (lead.infantCount !== undefined || lead.infant_count !== undefined || lead.infants !== undefined) {
+    db.infant_count = Number(lead.infantCount ?? lead.infant_count ?? lead.infants);
+  }
+  
+  if (lead.lastContactDate !== undefined || lead.last_contact_date !== undefined) {
+    const lcDate = lead.lastContactDate ?? lead.last_contact_date;
+    db.last_contact_date = lcDate ? new Date(lcDate).toISOString() : null;
+  }
+  if (lead.lostReason !== undefined || lead.lost_reason !== undefined) db.lost_reason = lead.lostReason ?? lead.lost_reason;
+  if (lead.agentName !== undefined || lead.agent_name !== undefined) db.agent_name = lead.agentName ?? lead.agent_name;
+  if (lead.emailStatus !== undefined || lead.email_status !== undefined) db.email_status = lead.emailStatus ?? lead.email_status;
+  if (lead.emailSentDate !== undefined || lead.email_sent_date !== undefined) {
+    const esDate = lead.emailSentDate ?? lead.email_sent_date;
+    db.email_sent_date = esDate ? new Date(esDate).toISOString() : null;
+  }
+  if (lead.lastEmailSentDate !== undefined || lead.last_email_sent_date !== undefined) {
+    const lesDate = lead.lastEmailSentDate ?? lead.last_email_sent_date;
+    db.last_email_sent_date = lesDate ? new Date(lesDate).toISOString() : null;
+  }
+  if (lead.emailSentCount !== undefined || lead.email_sent_count !== undefined) db.email_sent_count = lead.emailSentCount ?? lead.email_sent_count;
+  if (lead.emailHistory !== undefined || lead.email_history !== undefined) db.email_history = lead.emailHistory ?? lead.email_history;
+  
+  if (lead.brochureRequested !== undefined || lead.brochure_requested !== undefined) {
+    const bReq = lead.brochureRequested ?? lead.brochure_requested;
+    db.brochure_requested = (bReq === 'Yes' || bReq === true || bReq === 1);
+  }
+  if (lead.brochureSent !== undefined || lead.brochure_sent !== undefined) {
+    const bSent = lead.brochureSent ?? lead.brochure_sent;
+    db.brochure_sent = (bSent === 'Yes' || bSent === true || bSent === 1);
+  }
+  if (lead.brochureSentDate !== undefined || lead.brochure_sent_date !== undefined) {
+    const bsDate = lead.brochureSentDate ?? lead.brochure_sent_date;
+    db.brochure_sent_date = bsDate ? new Date(bsDate).toISOString() : null;
+  }
+  if (lead.brochureEmailStatus !== undefined || lead.brochure_email_status !== undefined) db.brochure_email_status = lead.brochureEmailStatus ?? lead.brochure_email_status;
+  if (lead.city !== undefined || lead.customer_home_city !== undefined) db.customer_home_city = lead.city ?? lead.customer_home_city;
+  if (lead.travelMonth !== undefined || lead.travel_month !== undefined) db.travel_month = lead.travelMonth ?? lead.travel_month;
+  if (lead.pdfFileName !== undefined || lead.pdf_file_name !== undefined) db.pdf_file_name = lead.pdfFileName ?? lead.pdf_file_name;
+  if (lead.nextPaymentDueDate !== undefined || lead.next_payment_due_date !== undefined) {
+    const npDate = lead.nextPaymentDueDate ?? lead.next_payment_due_date;
+    db.next_payment_due_date = npDate ? new Date(npDate).toISOString() : null;
+  }
+  if (lead.attachedPackages !== undefined || lead.attached_packages !== undefined) db.attached_packages = lead.attachedPackages ?? lead.attached_packages;
   if (lead.budget !== undefined) db.budget = lead.budget;
-  if (lead.hotelCategory !== undefined) db.hotel_category = lead.hotelCategory;
-  if (lead.whatsappNumber !== undefined) db.whatsapp_number = lead.whatsappNumber;
-  if (lead.companyName !== undefined) db.company_name = lead.companyName;
+  if (lead.hotelCategory !== undefined || lead.hotel_category !== undefined) db.hotel_category = lead.hotelCategory ?? lead.hotel_category;
+  if (lead.whatsappNumber !== undefined || lead.whatsapp_number !== undefined) db.whatsapp_number = lead.whatsappNumber ?? lead.whatsapp_number;
+  if (lead.companyName !== undefined || lead.company_name !== undefined) db.company_name = lead.companyName ?? lead.company_name;
   if (lead.country !== undefined) db.country = lead.country;
   if (lead.state !== undefined) db.state = lead.state;
-  if (lead.packageType !== undefined) db.package_type = lead.packageType;
-  if (lead.interests !== undefined) db.interests = lead.interests;
-  if (lead.transportPreference !== undefined) db.transport_preference = lead.transportPreference;
-  if (lead.expectedBookingValue !== undefined) db.expected_booking_value = lead.expectedBookingValue;
-  if (lead.communicationMethod !== undefined) db.communication_method = lead.communicationMethod;
-  if (lead.nextAction !== undefined) db.next_action = lead.nextAction;
+  if (lead.packageType !== undefined || lead.package_type !== undefined) db.package_type = lead.packageType ?? lead.package_type;
+  if (lead.interests !== undefined || lead.travel_theme !== undefined) db.interests = lead.interests ?? lead.travel_theme;
+  if (lead.transportPreference !== undefined || lead.transport_preference !== undefined) db.transport_preference = lead.transportPreference ?? lead.transport_preference;
+  if (lead.expectedBookingValue !== undefined || lead.expected_booking_value !== undefined || lead.budget !== undefined) {
+    db.expected_booking_value = lead.expectedBookingValue ?? lead.expected_booking_value ?? (lead.budget ? parseFloat(lead.budget) : 0);
+  }
+  if (lead.assigned_to !== undefined || lead.assignedTo !== undefined) db.assigned_to = lead.assigned_to ?? lead.assignedTo;
+  if (lead.communicationMethod !== undefined || lead.communication_method !== undefined) db.communication_method = lead.communicationMethod ?? lead.communication_method;
+  if (lead.nextAction !== undefined || lead.next_action !== undefined) db.next_action = lead.nextAction ?? lead.next_action;
   
   return db;
 }

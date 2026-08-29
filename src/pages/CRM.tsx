@@ -4639,7 +4639,7 @@ Ghumo Firoo Travels`
                       {` · ${activeLead.number_of_nights || activeLead.total_nights || 5}N`}
                     </div>
                     <div className="text-slate-600 font-semibold text-[11px]">
-                      {activeLead.adult_count || 1} adults · {activeLead.child_count || 0} children
+                      {Number(activeLead.adult_count ?? activeLead.adultCount ?? activeLead.adults ?? 2)} adults · {Number(activeLead.child_count ?? activeLead.childCount ?? activeLead.children ?? 0)} children
                     </div>
                   </div>
                 </div>
@@ -4647,7 +4647,7 @@ Ghumo Firoo Travels`
                 {/* Section: Financial Accounts & Balance Due */}
                 <div className="space-y-2 border-t border-slate-200/80 pt-3">
                   {(() => {
-                    const leadPkgPrice = Number(activeLead.packagePrice || activeLead.expected_booking_value || 0);
+                    const leadPkgPrice = Number(activeLead.budget || activeLead.package_price || activeLead.packagePrice || activeLead.expected_booking_value || activeLead.expectedBookingValue || 0);
                     const leadPaymentsList = allPayments.filter(p => String(p.lead_id) === String(activeLead.id));
                     const leadTotalPaid = leadPaymentsList.reduce((sum, p) => sum + Number(p.amount_received || 0), 0);
                     const leadBalanceDue = Math.max(0, leadPkgPrice - leadTotalPaid);
