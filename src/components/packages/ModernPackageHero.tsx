@@ -137,6 +137,11 @@ const ModernPackageHero: React.FC<PackageHeroProps> = ({
               src={image}
               alt={`${title} - Slide ${index + 1}`}
               className="w-full h-full object-cover"
+              loading={index === 0 ? "eager" : "lazy"}
+              // @ts-ignore
+              fetchpriority={index === 0 ? "high" : "low"}
+              fetchPriority={index === 0 ? "high" : "low"}
+              decoding="async"
               onError={(e) => {
                 (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1589308078059-be1415eab4c3?q=80&w=1200';
               }}

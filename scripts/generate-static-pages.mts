@@ -255,6 +255,27 @@ const packageRoutesMeta: Record<string, { title: string; description: string; h1
     h1: 'Georgia Adventure Holiday Packages',
     bodySnippet: 'Explore breathtaking mountain landscapes, historic cave towns, ancient vineyards, and charming European cobblestone streets in Georgia.',
     image: '/Europe Image New.png'
+  },
+  '/packages/rann-utsav-2d1n': {
+    title: 'Rann Utsav 2D/1N Express Overnight Tent City Package | Ghumo Firoo',
+    description: 'Book 2D/1N Rann Utsav Express package with Evoke Tent City Dhordo AC Swiss Tent stay, White Desert sunset walk, meals & Bhuj transfers.',
+    h1: 'Rann Utsav 2D/1N Express Overnight Tent City Package',
+    bodySnippet: 'Quick weekend escape to the White Rann of Kutch featuring 1 night at Tent City Dhordo with all meals, cultural shows & Bhuj AC transfers.',
+    image: '/Rann-Utsav-Gujarat.png'
+  },
+  '/packages/rann-utsav-3d2n': {
+    title: 'Rann Utsav 3D/2N Complete White Desert Package | Ghumo Firoo',
+    description: 'Experience 3D/2N Rann Utsav with 2 nights in Tent City Dhordo, Kalo Dungar excursion, artisan village visits, all meals & transfers.',
+    h1: 'Rann Utsav 3D/2N Complete White Desert Package',
+    bodySnippet: 'Comprehensive 3 Days / 2 Nights Rann Utsav package with luxury AC Swiss cottages, Gandhi Nu Gam handicrafts, and Kalo Dungar panoramic views.',
+    image: '/Rann-Utsav-Gujarat.png'
+  },
+  '/packages/rann-utsav-4d3n': {
+    title: 'Rann Utsav 4D/3N Extended Kutch Heritage Package | Ghumo Firoo',
+    description: 'Book 4D/3N Rann Utsav package covering Tent City Dhordo, Dholavira Harappan site, Mandvi beach & Bhuj palace sightseeing.',
+    h1: 'Rann Utsav 4D/3N Extended Kutch Heritage Package',
+    bodySnippet: '4 Days / 3 Nights grand Kutch holiday including White Rann full moon walks, UNESCO World Heritage site Dholavira, and Mandvi Vijay Vilas Palace.',
+    image: '/Rann-Utsav-Gujarat.png'
   }
 };
 
@@ -395,9 +416,10 @@ async function main() {
     // Replace OG Image & Twitter Image if custom
     if (item.ogImage) {
       const fullImg = item.ogImage.startsWith('http') ? item.ogImage : `${siteUrl}${item.ogImage.startsWith('/') ? '' : '/'}${item.ogImage}`;
+      const imgPath = item.ogImage.startsWith('http') ? item.ogImage : (item.ogImage.startsWith('/') ? item.ogImage : `/${item.ogImage}`);
       pageHtml = pageHtml.replace(
         /<meta\s+property=["']og:image["']\s+content=["'].*?["']\s*\/?>|<meta\s+content=["'].*?["']\s+property=["']og:image["']\s*\/?>/is,
-        `<meta property="og:image" content="${fullImg}" />`
+        `<meta property="og:image" content="${fullImg}" />\n    <link rel="preload" as="image" href="${imgPath}" fetchpriority="high" />`
       );
       pageHtml = pageHtml.replace(
         /<meta\s+name=["']twitter:image["']\s+content=["'].*?["']\s*\/?>|<meta\s+content=["'].*?["']\s+name=["']twitter:image["']\s*\/?>/is,

@@ -138,6 +138,9 @@ const PackageSEO: React.FC<PackageSEOProps> = ({
         <meta name="author" content={brandName} />
         {finalCanonical && <link rel="canonical" href={finalCanonical} />}
         {finalCanonical && <link rel="alternate" hreflang="en" href={finalCanonical} />}
+        {finalImages && finalImages[0] && (
+          <link rel="preload" as="image" href={finalImages[0]} fetchPriority="high" />
+        )}
 
         {/* Open Graph */}
         <meta property="og:locale" content="en_IN" />
