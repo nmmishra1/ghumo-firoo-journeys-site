@@ -4,7 +4,7 @@
 ErrorDocument 400 /index.html
 ErrorDocument 401 /index.html
 ErrorDocument 403 /index.html
-ErrorDocument 404 /index.html
+ErrorDocument 404 /404.html
 ErrorDocument 500 /index.html
 
 <IfModule mod_headers.c>
@@ -54,11 +54,14 @@ ErrorDocument 500 /index.html
   RewriteCond %{REQUEST_FILENAME} -d
   RewriteRule ^ - [L]
 
-  # 2. Force HTTP to HTTPS Redirection
-  RewriteCond %{HTTPS} off
-  RewriteCond %{HTTP:X-Forwarded-Proto} !https [OR]
+  # 2a. Force www to non-www canonical redirect (HTTP 301)
   RewriteCond %{HTTP_HOST} ^www\.ghumofiroo\.com$ [NC]
-  RewriteRule ^(.*)$ https://ghumofiroo.com/$1 [L,R=301]
+  RewriteRule ^(.*)$ https://ghumofiroo.com/$1 [R=301,L]
+
+  # 2b. Force HTTP to HTTPS Redirection (HTTP 301)
+  RewriteCond %{HTTPS} off
+  RewriteCond %{HTTP:X-Forwarded-Proto} !https
+  RewriteRule ^(.*)$ https://ghumofiroo.com/$1 [R=301,L]
 
   # Skip rewrites for root static assets
   RewriteRule ^favicon\.ico$ - [L]

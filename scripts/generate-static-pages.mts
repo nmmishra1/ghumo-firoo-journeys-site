@@ -22,9 +22,9 @@ interface RouteMeta {
 
 const staticRoutesMeta: Record<string, { title: string; description: string; h1: string; bodySnippet: string }> = {
   '/': {
-    title: 'Ghumofiroo Travels – Custom Tour Packages for Char Dham, Kashmir & Europe',
-    description: "Plan your trip with Ghumofiroo, Delhi's trusted agency & Evoke Rann Utsav partner. Custom Char Dham Yatra, Kashmir & Europe packages. Enquire today!",
-    h1: 'Ghumofiroo Travels – Custom Tour Packages for Char Dham, Kashmir & Europe',
+    title: 'Bespoke Luxury Travel & Tour Packages | Ghumo Firoo Journeys',
+    description: 'Discover bespoke luxury holidays, private tour packages, and sacred spiritual escapes with Ghumo Firoo. Book curated Char Dham Yatra, Rann Utsav tents, Kashmir, and Europe tours today.',
+    h1: 'Bespoke Luxury Travel & Handcrafted Tour Packages',
     bodySnippet: 'Discover premium custom holiday packages, Char Dham Yatra tours, Europe grand vacations, and Rann Utsav Kutch desert stays.'
   },
   '/about': {
@@ -297,7 +297,7 @@ async function main() {
       route,
       title: data.title,
       description: data.description,
-      canonical: `${siteUrl}${route === '/' ? '' : route}`,
+      canonical: `${siteUrl}${route === '/' ? '/' : route}`,
       h1: data.h1,
       bodySnippet: data.bodySnippet,
       ogType: 'website'

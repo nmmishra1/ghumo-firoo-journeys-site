@@ -244,9 +244,9 @@ const Index: React.FC = () => {
       </Helmet>
       
       <SEO 
-        title="Bespoke Luxury Holidays & Sacred Escapes | GhumoFiroo Travels"
-        description="Repositioning premium travel. Book curated Rann Utsav tents, luxury Char Dham helicopter yatras, elite Singapore skyline retreats, and grand Europe escapes."
-        canonicalUrl={config.baseUrl + "/"}
+        title="Bespoke Luxury Travel & Tour Packages | Ghumo Firoo Journeys"
+        description="Discover bespoke luxury holidays, private tour packages, and sacred spiritual escapes with Ghumo Firoo. Book curated Char Dham Yatra, Rann Utsav tents, Kashmir, and Europe tours today."
+        canonicalUrl="https://ghumofiroo.com/"
         keywords="luxury travel agency, bespoke tour packages, Rann Utsav premium tents, Char Dham yatra helicopter, Singapore luxury tour, Europe grand tour, luxury travel planner Delhi"
         structuredData={structuredData}
       />
@@ -267,7 +267,12 @@ const Index: React.FC = () => {
             >
               <img
                 src={slide.image}
-                alt={slide.title}
+                alt={slide.title || 'Ghumo Firoo Luxury Travel Experience'}
+                width="1920"
+                height="1080"
+                loading={idx === 0 ? 'eager' : 'lazy'}
+                fetchPriority={idx === 0 ? 'high' : 'auto'}
+                decoding="async"
                 className="w-full h-full object-cover scale-105 transition-transform ease-out"
                 style={{
                   transitionDuration: '8000ms',
