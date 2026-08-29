@@ -1,0 +1,72 @@
+{
+  "type": "destination",
+  "slug": "europe-travel-guide",
+  "title": "Europe Travel Guide",
+  "region": "Europe",
+  "country": "Europe",
+  "summary": "A practical guide to Europe for modern travellers, covering iconic cities, seasonal highlights, visa basics, and top experiences across Western and Eastern Europe.",
+  "heroImage": "/Europe Image.png",
+  "bestTime": "April–June and September–October for mild weather and smaller crowds; December for festive markets.",
+  "quickFacts": {
+    "Currency": "EUR (most countries)",
+    "Language": "Multiple: English widely spoken in tourism, local languages vary.",
+    "Visa": "Schengen visa for many travellers; separate visas for the UK, Ireland, and eastern Europe.",
+    "Transport": "Trains, low-cost airlines, and regional metros are easiest for most routes."
+  },
+  "attractions": [
+    { "name": "Paris", "summary": "The romantic heart of Europe with museums, iconic landmarks, and world-class dining." },
+    { "name": "Rome", "summary": "Ancient history, cathedral squares, and irresistible Italian cuisine." },
+    { "name": "Barcelona", "summary": "Gaudí architecture, bustling markets, and Mediterranean beach culture." },
+    { "name": "Prague", "summary": "Fairytale old town charm, Gothic cathedrals, and affordable city travel." },
+    { "name": "Swiss Alps", "summary": "Dramatic mountain scenery, winter sports, and scenic train journeys." }
+  ],
+  "cultureEtiquette": [
+    "Learn a few local phrases; politeness is appreciated across Europe.",
+    "Respect museum rules and quiet hours in residential areas.",
+    "Carry a reusable bag; many countries now charge for plastic bags."
+  ],
+  "gettingAround": [
+    "Use the Eurail pass or point-to-point trains for efficient multi-city travel.",
+    "Book budget flights in advance for longer routes, but compare total door-to-door time.",
+    "Use public transport cards in major cities like London, Paris, and Amsterdam."
+  ],
+  "whereToStay": [
+    { "area": "Central Paris", "bestFor": ["Museums", "Luxury stays"] },
+    { "area": "Rome Historic Centre", "bestFor": ["Landmarks", "Dining"] },
+    { "area": "Barcelona Gothic Quarter", "bestFor": ["Nightlife", "Architecture"] },
+    { "area": "Swiss Alps", "bestFor": ["Skiing", "Scenic stays"] }
+  ],
+  "costsPerDay": {
+    "budget": "₹7,000–₹10,000",
+    "midrange": "₹12,000–₹18,000",
+    "luxury": "₹25,000+"
+  },
+  "itineraries": [
+    {
+      "day": 1,
+      "title": "Classic Paris",
+      "activities": ["Visit the Louvre", "See the Eiffel Tower", "Walk along the Seine"]
+    },
+    {
+      "day": 2,
+      "title": "Rome Highlights",
+      "activities": ["Tour the Colosseum", "Explore Vatican City", "Enjoy Roman gelato"]
+    },
+    {
+      "day": 3,
+      "title": "Barcelona Art & Beach",
+      "activities": ["Tour Sagrada Família", "Stroll La Rambla", "Relax on Barceloneta Beach"]
+    }
+  ],
+  "sustainability": [
+    "Choose trains over short flights when possible.",
+    "Use refill stations for water in cities with public tap water.",
+    "Respect local recycling rules and avoid single-use plastics."
+  ],
+  "faqs": [
+    { "q": "Do I need a visa for Europe?", "a": "Most travellers to Europe need a Schengen visa; check country-specific rules for the UK and Eastern Europe." },
+    { "q": "What is the best time to visit Europe?", "a": "Spring and autumn are best for comfortable weather, fewer crowds, and easier booking." },
+    { "q": "How can I save on transport?", "a": "Book trains and budget flights early, and use city transport passes for multiple attractions." }
+  ],
+  "updatedAt": "2026-05-12"
+}

@@ -1,0 +1,1632 @@
+[
+  {
+    "Destination Code": "IND0001",
+    "State": "Uttarakhand",
+    "Destination Name": "Mussoorie",
+    "Parent Destination": "Uttarakhand",
+    "Destination Type": "Pilgrimage",
+    "Nearest Airport": "Nearest Airport",
+    "Nearest Railway Station": "Nearest Railway Station",
+    "Status": "Active"
+  },
+  {
+    "Destination Code": "IND0002",
+    "State": "Uttarakhand",
+    "Destination Name": "Nainital",
+    "Parent Destination": "Uttarakhand",
+    "Destination Type": "Wildlife",
+    "Nearest Airport": "Nearest Airport",
+    "Nearest Railway Station": "Nearest Railway Station",
+    "Status": "Active"
+  },
+  {
+    "Destination Code": "IND0003",
+    "State": "Uttarakhand",
+    "Destination Name": "Rishikesh",
+    "Parent Destination": "Uttarakhand",
+    "Destination Type": "Beach",
+    "Nearest Airport": "Nearest Airport",
+    "Nearest Railway Station": "Nearest Railway Station",
+    "Status": "Active"
+  },
+  {
+    "Destination Code": "IND0004",
+    "State": "Uttarakhand",
+    "Destination Name": "Haridwar",
+    "Parent Destination": "Uttarakhand",
+    "Destination Type": "Adventure",
+    "Nearest Airport": "Nearest Airport",
+    "Nearest Railway Station": "Nearest Railway Station",
+    "Status": "Active"
+  },
+  {
+    "Destination Code": "IND0005",
+    "State": "Uttarakhand",
+    "Destination Name": "Auli",
+    "Parent Destination": "Uttarakhand",
+    "Destination Type": "Heritage",
+    "Nearest Airport": "Nearest Airport",
+    "Nearest Railway Station": "Nearest Railway Station",
+    "Status": "Active"
+  },
+  {
+    "Destination Code": "IND0006",
+    "State": "Uttarakhand",
+    "Destination Name": "Kedarnath",
+    "Parent Destination": "Uttarakhand",
+    "Destination Type": "Nature",
+    "Nearest Airport": "Nearest Airport",
+    "Nearest Railway Station": "Nearest Railway Station",
+    "Status": "Active"
+  },
+  {
+    "Destination Code": "IND0007",
+    "State": "Uttarakhand",
+    "Destination Name": "Badrinath",
+    "Parent Destination": "Uttarakhand",
+    "Destination Type": "City",
+    "Nearest Airport": "Nearest Airport",
+    "Nearest Railway Station": "Nearest Railway Station",
+    "Status": "Active"
+  },
+  {
+    "Destination Code": "IND0008",
+    "State": "Uttarakhand",
+    "Destination Name": "Chopta",
+    "Parent Destination": "Uttarakhand",
+    "Destination Type": "Hill Station",
+    "Nearest Airport": "Nearest Airport",
+    "Nearest Railway Station": "Nearest Railway Station",
+    "Status": "Active"
+  },
+  {
+    "Destination Code": "IND0009",
+    "State": "Uttarakhand",
+    "Destination Name": "Lansdowne",
+    "Parent Destination": "Uttarakhand",
+    "Destination Type": "Pilgrimage",
+    "Nearest Airport": "Nearest Airport",
+    "Nearest Railway Station": "Nearest Railway Station",
+    "Status": "Active"
+  },
+  {
+    "Destination Code": "IND0010",
+    "State": "Uttarakhand",
+    "Destination Name": "Kausani",
+    "Parent Destination": "Uttarakhand",
+    "Destination Type": "Wildlife",
+    "Nearest Airport": "Nearest Airport",
+    "Nearest Railway Station": "Nearest Railway Station",
+    "Status": "Active"
+  },
+  {
+    "Destination Code": "IND0011",
+    "State": "Uttarakhand",
+    "Destination Name": "Ranikhet",
+    "Parent Destination": "Uttarakhand",
+    "Destination Type": "Beach",
+    "Nearest Airport": "Nearest Airport",
+    "Nearest Railway Station": "Nearest Railway Station",
+    "Status": "Active"
+  },
+  {
+    "Destination Code": "IND0012",
+    "State": "Uttarakhand",
+    "Destination Name": "Munsiyari",
+    "Parent Destination": "Uttarakhand",
+    "Destination Type": "Adventure",
+    "Nearest Airport": "Nearest Airport",
+    "Nearest Railway Station": "Nearest Railway Station",
+    "Status": "Active"
+  },
+  {
+    "Destination Code": "IND0013",
+    "State": "Uttarakhand",
+    "Destination Name": "Mukteshwar",
+    "Parent Destination": "Uttarakhand",
+    "Destination Type": "Heritage",
+    "Nearest Airport": "Nearest Airport",
+    "Nearest Railway Station": "Nearest Railway Station",
+    "Status": "Active"
+  },
+  {
+    "Destination Code": "IND0014",
+    "State": "Uttarakhand",
+    "Destination Name": "Corbett",
+    "Parent Destination": "Uttarakhand",
+    "Destination Type": "Nature",
+    "Nearest Airport": "Nearest Airport",
+    "Nearest Railway Station": "Nearest Railway Station",
+    "Status": "Active"
+  },
+  {
+    "Destination Code": "IND0015",
+    "State": "Uttarakhand",
+    "Destination Name": "Gangotri",
+    "Parent Destination": "Uttarakhand",
+    "Destination Type": "City",
+    "Nearest Airport": "Nearest Airport",
+    "Nearest Railway Station": "Nearest Railway Station",
+    "Status": "Active"
+  },
+  {
+    "Destination Code": "IND0016",
+    "State": "Uttarakhand",
+    "Destination Name": "Yamunotri",
+    "Parent Destination": "Uttarakhand",
+    "Destination Type": "Hill Station",
+    "Nearest Airport": "Nearest Airport",
+    "Nearest Railway Station": "Nearest Railway Station",
+    "Status": "Active"
+  },
+  {
+    "Destination Code": "IND0017",
+    "State": "Uttarakhand",
+    "Destination Name": "Joshimath",
+    "Parent Destination": "Uttarakhand",
+    "Destination Type": "Pilgrimage",
+    "Nearest Airport": "Nearest Airport",
+    "Nearest Railway Station": "Nearest Railway Station",
+    "Status": "Active"
+  },
+  {
+    "Destination Code": "IND0018",
+    "State": "Uttarakhand",
+    "Destination Name": "Valley of Flowers",
+    "Parent Destination": "Uttarakhand",
+    "Destination Type": "Wildlife",
+    "Nearest Airport": "Nearest Airport",
+    "Nearest Railway Station": "Nearest Railway Station",
+    "Status": "Active"
+  },
+  {
+    "Destination Code": "IND0019",
+    "State": "Uttarakhand",
+    "Destination Name": "Tehri",
+    "Parent Destination": "Uttarakhand",
+    "Destination Type": "Beach",
+    "Nearest Airport": "Nearest Airport",
+    "Nearest Railway Station": "Nearest Railway Station",
+    "Status": "Active"
+  },
+  {
+    "Destination Code": "IND0020",
+    "State": "Uttarakhand",
+    "Destination Name": "Dhanaulti",
+    "Parent Destination": "Uttarakhand",
+    "Destination Type": "Adventure",
+    "Nearest Airport": "Nearest Airport",
+    "Nearest Railway Station": "Nearest Railway Station",
+    "Status": "Active"
+  },
+  {
+    "Destination Code": "IND0021",
+    "State": "Himachal Pradesh",
+    "Destination Name": "Shimla",
+    "Parent Destination": "Himachal Pradesh",
+    "Destination Type": "Heritage",
+    "Nearest Airport": "Nearest Airport",
+    "Nearest Railway Station": "Nearest Railway Station",
+    "Status": "Active"
+  },
+  {
+    "Destination Code": "IND0022",
+    "State": "Himachal Pradesh",
+    "Destination Name": "Manali",
+    "Parent Destination": "Himachal Pradesh",
+    "Destination Type": "Nature",
+    "Nearest Airport": "Nearest Airport",
+    "Nearest Railway Station": "Nearest Railway Station",
+    "Status": "Active"
+  },
+  {
+    "Destination Code": "IND0023",
+    "State": "Himachal Pradesh",
+    "Destination Name": "Kasol",
+    "Parent Destination": "Himachal Pradesh",
+    "Destination Type": "City",
+    "Nearest Airport": "Nearest Airport",
+    "Nearest Railway Station": "Nearest Railway Station",
+    "Status": "Active"
+  },
+  {
+    "Destination Code": "IND0024",
+    "State": "Himachal Pradesh",
+    "Destination Name": "Kullu",
+    "Parent Destination": "Himachal Pradesh",
+    "Destination Type": "Hill Station",
+    "Nearest Airport": "Nearest Airport",
+    "Nearest Railway Station": "Nearest Railway Station",
+    "Status": "Active"
+  },
+  {
+    "Destination Code": "IND0025",
+    "State": "Himachal Pradesh",
+    "Destination Name": "Dharamshala",
+    "Parent Destination": "Himachal Pradesh",
+    "Destination Type": "Pilgrimage",
+    "Nearest Airport": "Nearest Airport",
+    "Nearest Railway Station": "Nearest Railway Station",
+    "Status": "Active"
+  },
+  {
+    "Destination Code": "IND0026",
+    "State": "Himachal Pradesh",
+    "Destination Name": "McLeodganj",
+    "Parent Destination": "Himachal Pradesh",
+    "Destination Type": "Wildlife",
+    "Nearest Airport": "Nearest Airport",
+    "Nearest Railway Station": "Nearest Railway Station",
+    "Status": "Active"
+  },
+  {
+    "Destination Code": "IND0027",
+    "State": "Himachal Pradesh",
+    "Destination Name": "Dalhousie",
+    "Parent Destination": "Himachal Pradesh",
+    "Destination Type": "Beach",
+    "Nearest Airport": "Nearest Airport",
+    "Nearest Railway Station": "Nearest Railway Station",
+    "Status": "Active"
+  },
+  {
+    "Destination Code": "IND0028",
+    "State": "Himachal Pradesh",
+    "Destination Name": "Khajjiar",
+    "Parent Destination": "Himachal Pradesh",
+    "Destination Type": "Adventure",
+    "Nearest Airport": "Nearest Airport",
+    "Nearest Railway Station": "Nearest Railway Station",
+    "Status": "Active"
+  },
+  {
+    "Destination Code": "IND0029",
+    "State": "Himachal Pradesh",
+    "Destination Name": "Spiti",
+    "Parent Destination": "Himachal Pradesh",
+    "Destination Type": "Heritage",
+    "Nearest Airport": "Nearest Airport",
+    "Nearest Railway Station": "Nearest Railway Station",
+    "Status": "Active"
+  },
+  {
+    "Destination Code": "IND0030",
+    "State": "Himachal Pradesh",
+    "Destination Name": "Kaza",
+    "Parent Destination": "Himachal Pradesh",
+    "Destination Type": "Nature",
+    "Nearest Airport": "Nearest Airport",
+    "Nearest Railway Station": "Nearest Railway Station",
+    "Status": "Active"
+  },
+  {
+    "Destination Code": "IND0031",
+    "State": "Himachal Pradesh",
+    "Destination Name": "Kalpa",
+    "Parent Destination": "Himachal Pradesh",
+    "Destination Type": "City",
+    "Nearest Airport": "Nearest Airport",
+    "Nearest Railway Station": "Nearest Railway Station",
+    "Status": "Active"
+  },
+  {
+    "Destination Code": "IND0032",
+    "State": "Himachal Pradesh",
+    "Destination Name": "Sangla",
+    "Parent Destination": "Himachal Pradesh",
+    "Destination Type": "Hill Station",
+    "Nearest Airport": "Nearest Airport",
+    "Nearest Railway Station": "Nearest Railway Station",
+    "Status": "Active"
+  },
+  {
+    "Destination Code": "IND0033",
+    "State": "Himachal Pradesh",
+    "Destination Name": "Chail",
+    "Parent Destination": "Himachal Pradesh",
+    "Destination Type": "Pilgrimage",
+    "Nearest Airport": "Nearest Airport",
+    "Nearest Railway Station": "Nearest Railway Station",
+    "Status": "Active"
+  },
+  {
+    "Destination Code": "IND0034",
+    "State": "Himachal Pradesh",
+    "Destination Name": "Kufri",
+    "Parent Destination": "Himachal Pradesh",
+    "Destination Type": "Wildlife",
+    "Nearest Airport": "Nearest Airport",
+    "Nearest Railway Station": "Nearest Railway Station",
+    "Status": "Active"
+  },
+  {
+    "Destination Code": "IND0035",
+    "State": "Himachal Pradesh",
+    "Destination Name": "Narkanda",
+    "Parent Destination": "Himachal Pradesh",
+    "Destination Type": "Beach",
+    "Nearest Airport": "Nearest Airport",
+    "Nearest Railway Station": "Nearest Railway Station",
+    "Status": "Active"
+  },
+  {
+    "Destination Code": "IND0036",
+    "State": "Himachal Pradesh",
+    "Destination Name": "Tirthan Valley",
+    "Parent Destination": "Himachal Pradesh",
+    "Destination Type": "Adventure",
+    "Nearest Airport": "Nearest Airport",
+    "Nearest Railway Station": "Nearest Railway Station",
+    "Status": "Active"
+  },
+  {
+    "Destination Code": "IND0037",
+    "State": "Himachal Pradesh",
+    "Destination Name": "Bir",
+    "Parent Destination": "Himachal Pradesh",
+    "Destination Type": "Heritage",
+    "Nearest Airport": "Nearest Airport",
+    "Nearest Railway Station": "Nearest Railway Station",
+    "Status": "Active"
+  },
+  {
+    "Destination Code": "IND0038",
+    "State": "Himachal Pradesh",
+    "Destination Name": "Palampur",
+    "Parent Destination": "Himachal Pradesh",
+    "Destination Type": "Nature",
+    "Nearest Airport": "Nearest Airport",
+    "Nearest Railway Station": "Nearest Railway Station",
+    "Status": "Active"
+  },
+  {
+    "Destination Code": "IND0039",
+    "State": "Himachal Pradesh",
+    "Destination Name": "Solan",
+    "Parent Destination": "Himachal Pradesh",
+    "Destination Type": "City",
+    "Nearest Airport": "Nearest Airport",
+    "Nearest Railway Station": "Nearest Railway Station",
+    "Status": "Active"
+  },
+  {
+    "Destination Code": "IND0040",
+    "State": "Himachal Pradesh",
+    "Destination Name": "Kinnaur",
+    "Parent Destination": "Himachal Pradesh",
+    "Destination Type": "Hill Station",
+    "Nearest Airport": "Nearest Airport",
+    "Nearest Railway Station": "Nearest Railway Station",
+    "Status": "Active"
+  },
+  {
+    "Destination Code": "IND0041",
+    "State": "Jammu & Kashmir",
+    "Destination Name": "Srinagar",
+    "Parent Destination": "Jammu & Kashmir",
+    "Destination Type": "Pilgrimage",
+    "Nearest Airport": "Nearest Airport",
+    "Nearest Railway Station": "Nearest Railway Station",
+    "Status": "Active"
+  },
+  {
+    "Destination Code": "IND0042",
+    "State": "Jammu & Kashmir",
+    "Destination Name": "Gulmarg",
+    "Parent Destination": "Jammu & Kashmir",
+    "Destination Type": "Wildlife",
+    "Nearest Airport": "Nearest Airport",
+    "Nearest Railway Station": "Nearest Railway Station",
+    "Status": "Active"
+  },
+  {
+    "Destination Code": "IND0043",
+    "State": "Jammu & Kashmir",
+    "Destination Name": "Pahalgam",
+    "Parent Destination": "Jammu & Kashmir",
+    "Destination Type": "Beach",
+    "Nearest Airport": "Nearest Airport",
+    "Nearest Railway Station": "Nearest Railway Station",
+    "Status": "Active"
+  },
+  {
+    "Destination Code": "IND0044",
+    "State": "Jammu & Kashmir",
+    "Destination Name": "Sonamarg",
+    "Parent Destination": "Jammu & Kashmir",
+    "Destination Type": "Adventure",
+    "Nearest Airport": "Nearest Airport",
+    "Nearest Railway Station": "Nearest Railway Station",
+    "Status": "Active"
+  },
+  {
+    "Destination Code": "IND0045",
+    "State": "Jammu & Kashmir",
+    "Destination Name": "Yusmarg",
+    "Parent Destination": "Jammu & Kashmir",
+    "Destination Type": "Heritage",
+    "Nearest Airport": "Nearest Airport",
+    "Nearest Railway Station": "Nearest Railway Station",
+    "Status": "Active"
+  },
+  {
+    "Destination Code": "IND0046",
+    "State": "Jammu & Kashmir",
+    "Destination Name": "Doodhpathri",
+    "Parent Destination": "Jammu & Kashmir",
+    "Destination Type": "Nature",
+    "Nearest Airport": "Nearest Airport",
+    "Nearest Railway Station": "Nearest Railway Station",
+    "Status": "Active"
+  },
+  {
+    "Destination Code": "IND0047",
+    "State": "Jammu & Kashmir",
+    "Destination Name": "Patnitop",
+    "Parent Destination": "Jammu & Kashmir",
+    "Destination Type": "City",
+    "Nearest Airport": "Nearest Airport",
+    "Nearest Railway Station": "Nearest Railway Station",
+    "Status": "Active"
+  },
+  {
+    "Destination Code": "IND0048",
+    "State": "Jammu & Kashmir",
+    "Destination Name": "Aru Valley",
+    "Parent Destination": "Jammu & Kashmir",
+    "Destination Type": "Hill Station",
+    "Nearest Airport": "Nearest Airport",
+    "Nearest Railway Station": "Nearest Railway Station",
+    "Status": "Active"
+  },
+  {
+    "Destination Code": "IND0049",
+    "State": "Jammu & Kashmir",
+    "Destination Name": "Betaab Valley",
+    "Parent Destination": "Jammu & Kashmir",
+    "Destination Type": "Pilgrimage",
+    "Nearest Airport": "Nearest Airport",
+    "Nearest Railway Station": "Nearest Railway Station",
+    "Status": "Active"
+  },
+  {
+    "Destination Code": "IND0050",
+    "State": "Jammu & Kashmir",
+    "Destination Name": "Aharbal",
+    "Parent Destination": "Jammu & Kashmir",
+    "Destination Type": "Wildlife",
+    "Nearest Airport": "Nearest Airport",
+    "Nearest Railway Station": "Nearest Railway Station",
+    "Status": "Active"
+  },
+  {
+    "Destination Code": "IND0051",
+    "State": "Ladakh",
+    "Destination Name": "Leh",
+    "Parent Destination": "Ladakh",
+    "Destination Type": "Beach",
+    "Nearest Airport": "Nearest Airport",
+    "Nearest Railway Station": "Nearest Railway Station",
+    "Status": "Active"
+  },
+  {
+    "Destination Code": "IND0052",
+    "State": "Ladakh",
+    "Destination Name": "Nubra Valley",
+    "Parent Destination": "Ladakh",
+    "Destination Type": "Adventure",
+    "Nearest Airport": "Nearest Airport",
+    "Nearest Railway Station": "Nearest Railway Station",
+    "Status": "Active"
+  },
+  {
+    "Destination Code": "IND0053",
+    "State": "Ladakh",
+    "Destination Name": "Pangong",
+    "Parent Destination": "Ladakh",
+    "Destination Type": "Heritage",
+    "Nearest Airport": "Nearest Airport",
+    "Nearest Railway Station": "Nearest Railway Station",
+    "Status": "Active"
+  },
+  {
+    "Destination Code": "IND0054",
+    "State": "Ladakh",
+    "Destination Name": "Tso Moriri",
+    "Parent Destination": "Ladakh",
+    "Destination Type": "Nature",
+    "Nearest Airport": "Nearest Airport",
+    "Nearest Railway Station": "Nearest Railway Station",
+    "Status": "Active"
+  },
+  {
+    "Destination Code": "IND0055",
+    "State": "Ladakh",
+    "Destination Name": "Kargil",
+    "Parent Destination": "Ladakh",
+    "Destination Type": "City",
+    "Nearest Airport": "Nearest Airport",
+    "Nearest Railway Station": "Nearest Railway Station",
+    "Status": "Active"
+  },
+  {
+    "Destination Code": "IND0056",
+    "State": "Ladakh",
+    "Destination Name": "Alchi",
+    "Parent Destination": "Ladakh",
+    "Destination Type": "Hill Station",
+    "Nearest Airport": "Nearest Airport",
+    "Nearest Railway Station": "Nearest Railway Station",
+    "Status": "Active"
+  },
+  {
+    "Destination Code": "IND0057",
+    "State": "Ladakh",
+    "Destination Name": "Lamayuru",
+    "Parent Destination": "Ladakh",
+    "Destination Type": "Pilgrimage",
+    "Nearest Airport": "Nearest Airport",
+    "Nearest Railway Station": "Nearest Railway Station",
+    "Status": "Active"
+  },
+  {
+    "Destination Code": "IND0058",
+    "State": "Ladakh",
+    "Destination Name": "Diskit",
+    "Parent Destination": "Ladakh",
+    "Destination Type": "Wildlife",
+    "Nearest Airport": "Nearest Airport",
+    "Nearest Railway Station": "Nearest Railway Station",
+    "Status": "Active"
+  },
+  {
+    "Destination Code": "IND0059",
+    "State": "Ladakh",
+    "Destination Name": "Hanle",
+    "Parent Destination": "Ladakh",
+    "Destination Type": "Beach",
+    "Nearest Airport": "Nearest Airport",
+    "Nearest Railway Station": "Nearest Railway Station",
+    "Status": "Active"
+  },
+  {
+    "Destination Code": "IND0060",
+    "State": "Ladakh",
+    "Destination Name": "Zanskar",
+    "Parent Destination": "Ladakh",
+    "Destination Type": "Adventure",
+    "Nearest Airport": "Nearest Airport",
+    "Nearest Railway Station": "Nearest Railway Station",
+    "Status": "Active"
+  },
+  {
+    "Destination Code": "IND0061",
+    "State": "Rajasthan",
+    "Destination Name": "Jaipur",
+    "Parent Destination": "Rajasthan",
+    "Destination Type": "Heritage",
+    "Nearest Airport": "Nearest Airport",
+    "Nearest Railway Station": "Nearest Railway Station",
+    "Status": "Active"
+  },
+  {
+    "Destination Code": "IND0062",
+    "State": "Rajasthan",
+    "Destination Name": "Udaipur",
+    "Parent Destination": "Rajasthan",
+    "Destination Type": "Nature",
+    "Nearest Airport": "Nearest Airport",
+    "Nearest Railway Station": "Nearest Railway Station",
+    "Status": "Active"
+  },
+  {
+    "Destination Code": "IND0063",
+    "State": "Rajasthan",
+    "Destination Name": "Jodhpur",
+    "Parent Destination": "Rajasthan",
+    "Destination Type": "City",
+    "Nearest Airport": "Nearest Airport",
+    "Nearest Railway Station": "Nearest Railway Station",
+    "Status": "Active"
+  },
+  {
+    "Destination Code": "IND0064",
+    "State": "Rajasthan",
+    "Destination Name": "Jaisalmer",
+    "Parent Destination": "Rajasthan",
+    "Destination Type": "Hill Station",
+    "Nearest Airport": "Nearest Airport",
+    "Nearest Railway Station": "Nearest Railway Station",
+    "Status": "Active"
+  },
+  {
+    "Destination Code": "IND0065",
+    "State": "Rajasthan",
+    "Destination Name": "Pushkar",
+    "Parent Destination": "Rajasthan",
+    "Destination Type": "Pilgrimage",
+    "Nearest Airport": "Nearest Airport",
+    "Nearest Railway Station": "Nearest Railway Station",
+    "Status": "Active"
+  },
+  {
+    "Destination Code": "IND0066",
+    "State": "Rajasthan",
+    "Destination Name": "Ajmer",
+    "Parent Destination": "Rajasthan",
+    "Destination Type": "Wildlife",
+    "Nearest Airport": "Nearest Airport",
+    "Nearest Railway Station": "Nearest Railway Station",
+    "Status": "Active"
+  },
+  {
+    "Destination Code": "IND0067",
+    "State": "Rajasthan",
+    "Destination Name": "Mount Abu",
+    "Parent Destination": "Rajasthan",
+    "Destination Type": "Beach",
+    "Nearest Airport": "Nearest Airport",
+    "Nearest Railway Station": "Nearest Railway Station",
+    "Status": "Active"
+  },
+  {
+    "Destination Code": "IND0068",
+    "State": "Rajasthan",
+    "Destination Name": "Bikaner",
+    "Parent Destination": "Rajasthan",
+    "Destination Type": "Adventure",
+    "Nearest Airport": "Nearest Airport",
+    "Nearest Railway Station": "Nearest Railway Station",
+    "Status": "Active"
+  },
+  {
+    "Destination Code": "IND0069",
+    "State": "Rajasthan",
+    "Destination Name": "Chittorgarh",
+    "Parent Destination": "Rajasthan",
+    "Destination Type": "Heritage",
+    "Nearest Airport": "Nearest Airport",
+    "Nearest Railway Station": "Nearest Railway Station",
+    "Status": "Active"
+  },
+  {
+    "Destination Code": "IND0070",
+    "State": "Rajasthan",
+    "Destination Name": "Ranthambore",
+    "Parent Destination": "Rajasthan",
+    "Destination Type": "Nature",
+    "Nearest Airport": "Nearest Airport",
+    "Nearest Railway Station": "Nearest Railway Station",
+    "Status": "Active"
+  },
+  {
+    "Destination Code": "IND0071",
+    "State": "Rajasthan",
+    "Destination Name": "Bharatpur",
+    "Parent Destination": "Rajasthan",
+    "Destination Type": "City",
+    "Nearest Airport": "Nearest Airport",
+    "Nearest Railway Station": "Nearest Railway Station",
+    "Status": "Active"
+  },
+  {
+    "Destination Code": "IND0072",
+    "State": "Rajasthan",
+    "Destination Name": "Alwar",
+    "Parent Destination": "Rajasthan",
+    "Destination Type": "Hill Station",
+    "Nearest Airport": "Nearest Airport",
+    "Nearest Railway Station": "Nearest Railway Station",
+    "Status": "Active"
+  },
+  {
+    "Destination Code": "IND0073",
+    "State": "Rajasthan",
+    "Destination Name": "Neemrana",
+    "Parent Destination": "Rajasthan",
+    "Destination Type": "Pilgrimage",
+    "Nearest Airport": "Nearest Airport",
+    "Nearest Railway Station": "Nearest Railway Station",
+    "Status": "Active"
+  },
+  {
+    "Destination Code": "IND0074",
+    "State": "Rajasthan",
+    "Destination Name": "Kumbhalgarh",
+    "Parent Destination": "Rajasthan",
+    "Destination Type": "Wildlife",
+    "Nearest Airport": "Nearest Airport",
+    "Nearest Railway Station": "Nearest Railway Station",
+    "Status": "Active"
+  },
+  {
+    "Destination Code": "IND0075",
+    "State": "Rajasthan",
+    "Destination Name": "Nathdwara",
+    "Parent Destination": "Rajasthan",
+    "Destination Type": "Beach",
+    "Nearest Airport": "Nearest Airport",
+    "Nearest Railway Station": "Nearest Railway Station",
+    "Status": "Active"
+  },
+  {
+    "Destination Code": "IND0076",
+    "State": "Goa",
+    "Destination Name": "North Goa",
+    "Parent Destination": "Goa",
+    "Destination Type": "Adventure",
+    "Nearest Airport": "Nearest Airport",
+    "Nearest Railway Station": "Nearest Railway Station",
+    "Status": "Active"
+  },
+  {
+    "Destination Code": "IND0077",
+    "State": "Goa",
+    "Destination Name": "South Goa",
+    "Parent Destination": "Goa",
+    "Destination Type": "Heritage",
+    "Nearest Airport": "Nearest Airport",
+    "Nearest Railway Station": "Nearest Railway Station",
+    "Status": "Active"
+  },
+  {
+    "Destination Code": "IND0078",
+    "State": "Goa",
+    "Destination Name": "Panaji",
+    "Parent Destination": "Goa",
+    "Destination Type": "Nature",
+    "Nearest Airport": "Nearest Airport",
+    "Nearest Railway Station": "Nearest Railway Station",
+    "Status": "Active"
+  },
+  {
+    "Destination Code": "IND0079",
+    "State": "Goa",
+    "Destination Name": "Calangute",
+    "Parent Destination": "Goa",
+    "Destination Type": "City",
+    "Nearest Airport": "Nearest Airport",
+    "Nearest Railway Station": "Nearest Railway Station",
+    "Status": "Active"
+  },
+  {
+    "Destination Code": "IND0080",
+    "State": "Goa",
+    "Destination Name": "Baga",
+    "Parent Destination": "Goa",
+    "Destination Type": "Hill Station",
+    "Nearest Airport": "Nearest Airport",
+    "Nearest Railway Station": "Nearest Railway Station",
+    "Status": "Active"
+  },
+  {
+    "Destination Code": "IND0081",
+    "State": "Goa",
+    "Destination Name": "Candolim",
+    "Parent Destination": "Goa",
+    "Destination Type": "Pilgrimage",
+    "Nearest Airport": "Nearest Airport",
+    "Nearest Railway Station": "Nearest Railway Station",
+    "Status": "Active"
+  },
+  {
+    "Destination Code": "IND0082",
+    "State": "Goa",
+    "Destination Name": "Anjuna",
+    "Parent Destination": "Goa",
+    "Destination Type": "Wildlife",
+    "Nearest Airport": "Nearest Airport",
+    "Nearest Railway Station": "Nearest Railway Station",
+    "Status": "Active"
+  },
+  {
+    "Destination Code": "IND0083",
+    "State": "Goa",
+    "Destination Name": "Vagator",
+    "Parent Destination": "Goa",
+    "Destination Type": "Beach",
+    "Nearest Airport": "Nearest Airport",
+    "Nearest Railway Station": "Nearest Railway Station",
+    "Status": "Active"
+  },
+  {
+    "Destination Code": "IND0084",
+    "State": "Goa",
+    "Destination Name": "Colva",
+    "Parent Destination": "Goa",
+    "Destination Type": "Adventure",
+    "Nearest Airport": "Nearest Airport",
+    "Nearest Railway Station": "Nearest Railway Station",
+    "Status": "Active"
+  },
+  {
+    "Destination Code": "IND0085",
+    "State": "Goa",
+    "Destination Name": "Palolem",
+    "Parent Destination": "Goa",
+    "Destination Type": "Heritage",
+    "Nearest Airport": "Nearest Airport",
+    "Nearest Railway Station": "Nearest Railway Station",
+    "Status": "Active"
+  },
+  {
+    "Destination Code": "IND0086",
+    "State": "Kerala",
+    "Destination Name": "Munnar",
+    "Parent Destination": "Kerala",
+    "Destination Type": "Nature",
+    "Nearest Airport": "Nearest Airport",
+    "Nearest Railway Station": "Nearest Railway Station",
+    "Status": "Active"
+  },
+  {
+    "Destination Code": "IND0087",
+    "State": "Kerala",
+    "Destination Name": "Alleppey",
+    "Parent Destination": "Kerala",
+    "Destination Type": "City",
+    "Nearest Airport": "Nearest Airport",
+    "Nearest Railway Station": "Nearest Railway Station",
+    "Status": "Active"
+  },
+  {
+    "Destination Code": "IND0088",
+    "State": "Kerala",
+    "Destination Name": "Kochi",
+    "Parent Destination": "Kerala",
+    "Destination Type": "Hill Station",
+    "Nearest Airport": "Nearest Airport",
+    "Nearest Railway Station": "Nearest Railway Station",
+    "Status": "Active"
+  },
+  {
+    "Destination Code": "IND0089",
+    "State": "Kerala",
+    "Destination Name": "Thekkady",
+    "Parent Destination": "Kerala",
+    "Destination Type": "Pilgrimage",
+    "Nearest Airport": "Nearest Airport",
+    "Nearest Railway Station": "Nearest Railway Station",
+    "Status": "Active"
+  },
+  {
+    "Destination Code": "IND0090",
+    "State": "Kerala",
+    "Destination Name": "Wayanad",
+    "Parent Destination": "Kerala",
+    "Destination Type": "Wildlife",
+    "Nearest Airport": "Nearest Airport",
+    "Nearest Railway Station": "Nearest Railway Station",
+    "Status": "Active"
+  },
+  {
+    "Destination Code": "IND0091",
+    "State": "Kerala",
+    "Destination Name": "Kovalam",
+    "Parent Destination": "Kerala",
+    "Destination Type": "Beach",
+    "Nearest Airport": "Nearest Airport",
+    "Nearest Railway Station": "Nearest Railway Station",
+    "Status": "Active"
+  },
+  {
+    "Destination Code": "IND0092",
+    "State": "Kerala",
+    "Destination Name": "Varkala",
+    "Parent Destination": "Kerala",
+    "Destination Type": "Adventure",
+    "Nearest Airport": "Nearest Airport",
+    "Nearest Railway Station": "Nearest Railway Station",
+    "Status": "Active"
+  },
+  {
+    "Destination Code": "IND0093",
+    "State": "Kerala",
+    "Destination Name": "Kumarakom",
+    "Parent Destination": "Kerala",
+    "Destination Type": "Heritage",
+    "Nearest Airport": "Nearest Airport",
+    "Nearest Railway Station": "Nearest Railway Station",
+    "Status": "Active"
+  },
+  {
+    "Destination Code": "IND0094",
+    "State": "Kerala",
+    "Destination Name": "Athirapally",
+    "Parent Destination": "Kerala",
+    "Destination Type": "Nature",
+    "Nearest Airport": "Nearest Airport",
+    "Nearest Railway Station": "Nearest Railway Station",
+    "Status": "Active"
+  },
+  {
+    "Destination Code": "IND0095",
+    "State": "Kerala",
+    "Destination Name": "Bekal",
+    "Parent Destination": "Kerala",
+    "Destination Type": "City",
+    "Nearest Airport": "Nearest Airport",
+    "Nearest Railway Station": "Nearest Railway Station",
+    "Status": "Active"
+  },
+  {
+    "Destination Code": "IND0096",
+    "State": "Andaman & Nicobar",
+    "Destination Name": "Port Blair",
+    "Parent Destination": "Andaman & Nicobar",
+    "Destination Type": "Hill Station",
+    "Nearest Airport": "Nearest Airport",
+    "Nearest Railway Station": "Nearest Railway Station",
+    "Status": "Active"
+  },
+  {
+    "Destination Code": "IND0097",
+    "State": "Andaman & Nicobar",
+    "Destination Name": "Havelock Island",
+    "Parent Destination": "Andaman & Nicobar",
+    "Destination Type": "Pilgrimage",
+    "Nearest Airport": "Nearest Airport",
+    "Nearest Railway Station": "Nearest Railway Station",
+    "Status": "Active"
+  },
+  {
+    "Destination Code": "IND0098",
+    "State": "Andaman & Nicobar",
+    "Destination Name": "Neil Island",
+    "Parent Destination": "Andaman & Nicobar",
+    "Destination Type": "Wildlife",
+    "Nearest Airport": "Nearest Airport",
+    "Nearest Railway Station": "Nearest Railway Station",
+    "Status": "Active"
+  },
+  {
+    "Destination Code": "IND0099",
+    "State": "Andaman & Nicobar",
+    "Destination Name": "Ross Island",
+    "Parent Destination": "Andaman & Nicobar",
+    "Destination Type": "Beach",
+    "Nearest Airport": "Nearest Airport",
+    "Nearest Railway Station": "Nearest Railway Station",
+    "Status": "Active"
+  },
+  {
+    "Destination Code": "IND0100",
+    "State": "Andaman & Nicobar",
+    "Destination Name": "Baratang",
+    "Parent Destination": "Andaman & Nicobar",
+    "Destination Type": "Adventure",
+    "Nearest Airport": "Nearest Airport",
+    "Nearest Railway Station": "Nearest Railway Station",
+    "Status": "Active"
+  },
+  {
+    "Destination Code": "IND0101",
+    "State": "Andaman & Nicobar",
+    "Destination Name": "Diglipur",
+    "Parent Destination": "Andaman & Nicobar",
+    "Destination Type": "Heritage",
+    "Nearest Airport": "Nearest Airport",
+    "Nearest Railway Station": "Nearest Railway Station",
+    "Status": "Active"
+  },
+  {
+    "Destination Code": "IND0102",
+    "State": "Andaman & Nicobar",
+    "Destination Name": "Rangat",
+    "Parent Destination": "Andaman & Nicobar",
+    "Destination Type": "Nature",
+    "Nearest Airport": "Nearest Airport",
+    "Nearest Railway Station": "Nearest Railway Station",
+    "Status": "Active"
+  },
+  {
+    "Destination Code": "IND0103",
+    "State": "Andaman & Nicobar",
+    "Destination Name": "Long Island",
+    "Parent Destination": "Andaman & Nicobar",
+    "Destination Type": "City",
+    "Nearest Airport": "Nearest Airport",
+    "Nearest Railway Station": "Nearest Railway Station",
+    "Status": "Active"
+  },
+  {
+    "Destination Code": "IND0104",
+    "State": "Sikkim",
+    "Destination Name": "Gangtok",
+    "Parent Destination": "Sikkim",
+    "Destination Type": "Hill Station",
+    "Nearest Airport": "Nearest Airport",
+    "Nearest Railway Station": "Nearest Railway Station",
+    "Status": "Active"
+  },
+  {
+    "Destination Code": "IND0105",
+    "State": "Sikkim",
+    "Destination Name": "Lachung",
+    "Parent Destination": "Sikkim",
+    "Destination Type": "Pilgrimage",
+    "Nearest Airport": "Nearest Airport",
+    "Nearest Railway Station": "Nearest Railway Station",
+    "Status": "Active"
+  },
+  {
+    "Destination Code": "IND0106",
+    "State": "Sikkim",
+    "Destination Name": "Lachen",
+    "Parent Destination": "Sikkim",
+    "Destination Type": "Wildlife",
+    "Nearest Airport": "Nearest Airport",
+    "Nearest Railway Station": "Nearest Railway Station",
+    "Status": "Active"
+  },
+  {
+    "Destination Code": "IND0107",
+    "State": "Sikkim",
+    "Destination Name": "Pelling",
+    "Parent Destination": "Sikkim",
+    "Destination Type": "Beach",
+    "Nearest Airport": "Nearest Airport",
+    "Nearest Railway Station": "Nearest Railway Station",
+    "Status": "Active"
+  },
+  {
+    "Destination Code": "IND0108",
+    "State": "Sikkim",
+    "Destination Name": "Namchi",
+    "Parent Destination": "Sikkim",
+    "Destination Type": "Adventure",
+    "Nearest Airport": "Nearest Airport",
+    "Nearest Railway Station": "Nearest Railway Station",
+    "Status": "Active"
+  },
+  {
+    "Destination Code": "IND0109",
+    "State": "Sikkim",
+    "Destination Name": "Ravangla",
+    "Parent Destination": "Sikkim",
+    "Destination Type": "Heritage",
+    "Nearest Airport": "Nearest Airport",
+    "Nearest Railway Station": "Nearest Railway Station",
+    "Status": "Active"
+  },
+  {
+    "Destination Code": "IND0110",
+    "State": "Sikkim",
+    "Destination Name": "Yuksom",
+    "Parent Destination": "Sikkim",
+    "Destination Type": "Nature",
+    "Nearest Airport": "Nearest Airport",
+    "Nearest Railway Station": "Nearest Railway Station",
+    "Status": "Active"
+  },
+  {
+    "Destination Code": "IND0111",
+    "State": "Sikkim",
+    "Destination Name": "Zuluk",
+    "Parent Destination": "Sikkim",
+    "Destination Type": "City",
+    "Nearest Airport": "Nearest Airport",
+    "Nearest Railway Station": "Nearest Railway Station",
+    "Status": "Active"
+  },
+  {
+    "Destination Code": "IND0112",
+    "State": "Meghalaya",
+    "Destination Name": "Shillong",
+    "Parent Destination": "Meghalaya",
+    "Destination Type": "Hill Station",
+    "Nearest Airport": "Nearest Airport",
+    "Nearest Railway Station": "Nearest Railway Station",
+    "Status": "Active"
+  },
+  {
+    "Destination Code": "IND0113",
+    "State": "Meghalaya",
+    "Destination Name": "Cherrapunji",
+    "Parent Destination": "Meghalaya",
+    "Destination Type": "Pilgrimage",
+    "Nearest Airport": "Nearest Airport",
+    "Nearest Railway Station": "Nearest Railway Station",
+    "Status": "Active"
+  },
+  {
+    "Destination Code": "IND0114",
+    "State": "Meghalaya",
+    "Destination Name": "Dawki",
+    "Parent Destination": "Meghalaya",
+    "Destination Type": "Wildlife",
+    "Nearest Airport": "Nearest Airport",
+    "Nearest Railway Station": "Nearest Railway Station",
+    "Status": "Active"
+  },
+  {
+    "Destination Code": "IND0115",
+    "State": "Meghalaya",
+    "Destination Name": "Mawlynnong",
+    "Parent Destination": "Meghalaya",
+    "Destination Type": "Beach",
+    "Nearest Airport": "Nearest Airport",
+    "Nearest Railway Station": "Nearest Railway Station",
+    "Status": "Active"
+  },
+  {
+    "Destination Code": "IND0116",
+    "State": "Meghalaya",
+    "Destination Name": "Jowai",
+    "Parent Destination": "Meghalaya",
+    "Destination Type": "Adventure",
+    "Nearest Airport": "Nearest Airport",
+    "Nearest Railway Station": "Nearest Railway Station",
+    "Status": "Active"
+  },
+  {
+    "Destination Code": "IND0117",
+    "State": "Meghalaya",
+    "Destination Name": "Nongriat",
+    "Parent Destination": "Meghalaya",
+    "Destination Type": "Heritage",
+    "Nearest Airport": "Nearest Airport",
+    "Nearest Railway Station": "Nearest Railway Station",
+    "Status": "Active"
+  },
+  {
+    "Destination Code": "IND0118",
+    "State": "Meghalaya",
+    "Destination Name": "Williamnagar",
+    "Parent Destination": "Meghalaya",
+    "Destination Type": "Nature",
+    "Nearest Airport": "Nearest Airport",
+    "Nearest Railway Station": "Nearest Railway Station",
+    "Status": "Active"
+  },
+  {
+    "Destination Code": "IND0119",
+    "State": "Assam",
+    "Destination Name": "Guwahati",
+    "Parent Destination": "Assam",
+    "Destination Type": "City",
+    "Nearest Airport": "Nearest Airport",
+    "Nearest Railway Station": "Nearest Railway Station",
+    "Status": "Active"
+  },
+  {
+    "Destination Code": "IND0120",
+    "State": "Assam",
+    "Destination Name": "Kaziranga",
+    "Parent Destination": "Assam",
+    "Destination Type": "Hill Station",
+    "Nearest Airport": "Nearest Airport",
+    "Nearest Railway Station": "Nearest Railway Station",
+    "Status": "Active"
+  },
+  {
+    "Destination Code": "IND0121",
+    "State": "Assam",
+    "Destination Name": "Majuli",
+    "Parent Destination": "Assam",
+    "Destination Type": "Pilgrimage",
+    "Nearest Airport": "Nearest Airport",
+    "Nearest Railway Station": "Nearest Railway Station",
+    "Status": "Active"
+  },
+  {
+    "Destination Code": "IND0122",
+    "State": "Assam",
+    "Destination Name": "Tezpur",
+    "Parent Destination": "Assam",
+    "Destination Type": "Wildlife",
+    "Nearest Airport": "Nearest Airport",
+    "Nearest Railway Station": "Nearest Railway Station",
+    "Status": "Active"
+  },
+  {
+    "Destination Code": "IND0123",
+    "State": "Assam",
+    "Destination Name": "Sivasagar",
+    "Parent Destination": "Assam",
+    "Destination Type": "Beach",
+    "Nearest Airport": "Nearest Airport",
+    "Nearest Railway Station": "Nearest Railway Station",
+    "Status": "Active"
+  },
+  {
+    "Destination Code": "IND0124",
+    "State": "Assam",
+    "Destination Name": "Jorhat",
+    "Parent Destination": "Assam",
+    "Destination Type": "Adventure",
+    "Nearest Airport": "Nearest Airport",
+    "Nearest Railway Station": "Nearest Railway Station",
+    "Status": "Active"
+  },
+  {
+    "Destination Code": "IND0125",
+    "State": "Assam",
+    "Destination Name": "Dibrugarh",
+    "Parent Destination": "Assam",
+    "Destination Type": "Heritage",
+    "Nearest Airport": "Nearest Airport",
+    "Nearest Railway Station": "Nearest Railway Station",
+    "Status": "Active"
+  },
+  {
+    "Destination Code": "IND0126",
+    "State": "West Bengal",
+    "Destination Name": "Darjeeling",
+    "Parent Destination": "West Bengal",
+    "Destination Type": "Nature",
+    "Nearest Airport": "Nearest Airport",
+    "Nearest Railway Station": "Nearest Railway Station",
+    "Status": "Active"
+  },
+  {
+    "Destination Code": "IND0127",
+    "State": "West Bengal",
+    "Destination Name": "Kalimpong",
+    "Parent Destination": "West Bengal",
+    "Destination Type": "City",
+    "Nearest Airport": "Nearest Airport",
+    "Nearest Railway Station": "Nearest Railway Station",
+    "Status": "Active"
+  },
+  {
+    "Destination Code": "IND0128",
+    "State": "West Bengal",
+    "Destination Name": "Siliguri",
+    "Parent Destination": "West Bengal",
+    "Destination Type": "Hill Station",
+    "Nearest Airport": "Nearest Airport",
+    "Nearest Railway Station": "Nearest Railway Station",
+    "Status": "Active"
+  },
+  {
+    "Destination Code": "IND0129",
+    "State": "West Bengal",
+    "Destination Name": "Dooars",
+    "Parent Destination": "West Bengal",
+    "Destination Type": "Pilgrimage",
+    "Nearest Airport": "Nearest Airport",
+    "Nearest Railway Station": "Nearest Railway Station",
+    "Status": "Active"
+  },
+  {
+    "Destination Code": "IND0130",
+    "State": "West Bengal",
+    "Destination Name": "Mirik",
+    "Parent Destination": "West Bengal",
+    "Destination Type": "Wildlife",
+    "Nearest Airport": "Nearest Airport",
+    "Nearest Railway Station": "Nearest Railway Station",
+    "Status": "Active"
+  },
+  {
+    "Destination Code": "IND0131",
+    "State": "West Bengal",
+    "Destination Name": "Kurseong",
+    "Parent Destination": "West Bengal",
+    "Destination Type": "Beach",
+    "Nearest Airport": "Nearest Airport",
+    "Nearest Railway Station": "Nearest Railway Station",
+    "Status": "Active"
+  },
+  {
+    "Destination Code": "IND0132",
+    "State": "Tamil Nadu",
+    "Destination Name": "Ooty",
+    "Parent Destination": "Tamil Nadu",
+    "Destination Type": "Adventure",
+    "Nearest Airport": "Nearest Airport",
+    "Nearest Railway Station": "Nearest Railway Station",
+    "Status": "Active"
+  },
+  {
+    "Destination Code": "IND0133",
+    "State": "Tamil Nadu",
+    "Destination Name": "Kodaikanal",
+    "Parent Destination": "Tamil Nadu",
+    "Destination Type": "Heritage",
+    "Nearest Airport": "Nearest Airport",
+    "Nearest Railway Station": "Nearest Railway Station",
+    "Status": "Active"
+  },
+  {
+    "Destination Code": "IND0134",
+    "State": "Tamil Nadu",
+    "Destination Name": "Chennai",
+    "Parent Destination": "Tamil Nadu",
+    "Destination Type": "Nature",
+    "Nearest Airport": "Nearest Airport",
+    "Nearest Railway Station": "Nearest Railway Station",
+    "Status": "Active"
+  },
+  {
+    "Destination Code": "IND0135",
+    "State": "Tamil Nadu",
+    "Destination Name": "Madurai",
+    "Parent Destination": "Tamil Nadu",
+    "Destination Type": "City",
+    "Nearest Airport": "Nearest Airport",
+    "Nearest Railway Station": "Nearest Railway Station",
+    "Status": "Active"
+  },
+  {
+    "Destination Code": "IND0136",
+    "State": "Tamil Nadu",
+    "Destination Name": "Rameswaram",
+    "Parent Destination": "Tamil Nadu",
+    "Destination Type": "Hill Station",
+    "Nearest Airport": "Nearest Airport",
+    "Nearest Railway Station": "Nearest Railway Station",
+    "Status": "Active"
+  },
+  {
+    "Destination Code": "IND0137",
+    "State": "Tamil Nadu",
+    "Destination Name": "Yercaud",
+    "Parent Destination": "Tamil Nadu",
+    "Destination Type": "Pilgrimage",
+    "Nearest Airport": "Nearest Airport",
+    "Nearest Railway Station": "Nearest Railway Station",
+    "Status": "Active"
+  },
+  {
+    "Destination Code": "IND0138",
+    "State": "Tamil Nadu",
+    "Destination Name": "Coonoor",
+    "Parent Destination": "Tamil Nadu",
+    "Destination Type": "Wildlife",
+    "Nearest Airport": "Nearest Airport",
+    "Nearest Railway Station": "Nearest Railway Station",
+    "Status": "Active"
+  },
+  {
+    "Destination Code": "IND0139",
+    "State": "Tamil Nadu",
+    "Destination Name": "Mahabalipuram",
+    "Parent Destination": "Tamil Nadu",
+    "Destination Type": "Beach",
+    "Nearest Airport": "Nearest Airport",
+    "Nearest Railway Station": "Nearest Railway Station",
+    "Status": "Active"
+  },
+  {
+    "Destination Code": "IND0140",
+    "State": "Karnataka",
+    "Destination Name": "Coorg",
+    "Parent Destination": "Karnataka",
+    "Destination Type": "Adventure",
+    "Nearest Airport": "Nearest Airport",
+    "Nearest Railway Station": "Nearest Railway Station",
+    "Status": "Active"
+  },
+  {
+    "Destination Code": "IND0141",
+    "State": "Karnataka",
+    "Destination Name": "Mysore",
+    "Parent Destination": "Karnataka",
+    "Destination Type": "Heritage",
+    "Nearest Airport": "Nearest Airport",
+    "Nearest Railway Station": "Nearest Railway Station",
+    "Status": "Active"
+  },
+  {
+    "Destination Code": "IND0142",
+    "State": "Karnataka",
+    "Destination Name": "Bengaluru",
+    "Parent Destination": "Karnataka",
+    "Destination Type": "Nature",
+    "Nearest Airport": "Nearest Airport",
+    "Nearest Railway Station": "Nearest Railway Station",
+    "Status": "Active"
+  },
+  {
+    "Destination Code": "IND0143",
+    "State": "Karnataka",
+    "Destination Name": "Hampi",
+    "Parent Destination": "Karnataka",
+    "Destination Type": "City",
+    "Nearest Airport": "Nearest Airport",
+    "Nearest Railway Station": "Nearest Railway Station",
+    "Status": "Active"
+  },
+  {
+    "Destination Code": "IND0144",
+    "State": "Karnataka",
+    "Destination Name": "Chikmagalur",
+    "Parent Destination": "Karnataka",
+    "Destination Type": "Hill Station",
+    "Nearest Airport": "Nearest Airport",
+    "Nearest Railway Station": "Nearest Railway Station",
+    "Status": "Active"
+  },
+  {
+    "Destination Code": "IND0145",
+    "State": "Karnataka",
+    "Destination Name": "Gokarna",
+    "Parent Destination": "Karnataka",
+    "Destination Type": "Pilgrimage",
+    "Nearest Airport": "Nearest Airport",
+    "Nearest Railway Station": "Nearest Railway Station",
+    "Status": "Active"
+  },
+  {
+    "Destination Code": "IND0146",
+    "State": "Karnataka",
+    "Destination Name": "Badami",
+    "Parent Destination": "Karnataka",
+    "Destination Type": "Wildlife",
+    "Nearest Airport": "Nearest Airport",
+    "Nearest Railway Station": "Nearest Railway Station",
+    "Status": "Active"
+  },
+  {
+    "Destination Code": "IND0147",
+    "State": "Karnataka",
+    "Destination Name": "Kabini",
+    "Parent Destination": "Karnataka",
+    "Destination Type": "Beach",
+    "Nearest Airport": "Nearest Airport",
+    "Nearest Railway Station": "Nearest Railway Station",
+    "Status": "Active"
+  },
+  {
+    "Destination Code": "IND0148",
+    "State": "Maharashtra",
+    "Destination Name": "Mumbai",
+    "Parent Destination": "Maharashtra",
+    "Destination Type": "Adventure",
+    "Nearest Airport": "Nearest Airport",
+    "Nearest Railway Station": "Nearest Railway Station",
+    "Status": "Active"
+  },
+  {
+    "Destination Code": "IND0149",
+    "State": "Maharashtra",
+    "Destination Name": "Pune",
+    "Parent Destination": "Maharashtra",
+    "Destination Type": "Heritage",
+    "Nearest Airport": "Nearest Airport",
+    "Nearest Railway Station": "Nearest Railway Station",
+    "Status": "Active"
+  },
+  {
+    "Destination Code": "IND0150",
+    "State": "Maharashtra",
+    "Destination Name": "Mahabaleshwar",
+    "Parent Destination": "Maharashtra",
+    "Destination Type": "Nature",
+    "Nearest Airport": "Nearest Airport",
+    "Nearest Railway Station": "Nearest Railway Station",
+    "Status": "Active"
+  },
+  {
+    "Destination Code": "IND0151",
+    "State": "Maharashtra",
+    "Destination Name": "Lonavala",
+    "Parent Destination": "Maharashtra",
+    "Destination Type": "City",
+    "Nearest Airport": "Nearest Airport",
+    "Nearest Railway Station": "Nearest Railway Station",
+    "Status": "Active"
+  },
+  {
+    "Destination Code": "IND0152",
+    "State": "Maharashtra",
+    "Destination Name": "Alibaug",
+    "Parent Destination": "Maharashtra",
+    "Destination Type": "Hill Station",
+    "Nearest Airport": "Nearest Airport",
+    "Nearest Railway Station": "Nearest Railway Station",
+    "Status": "Active"
+  },
+  {
+    "Destination Code": "IND0153",
+    "State": "Maharashtra",
+    "Destination Name": "Nashik",
+    "Parent Destination": "Maharashtra",
+    "Destination Type": "Pilgrimage",
+    "Nearest Airport": "Nearest Airport",
+    "Nearest Railway Station": "Nearest Railway Station",
+    "Status": "Active"
+  },
+  {
+    "Destination Code": "IND0154",
+    "State": "Maharashtra",
+    "Destination Name": "Shirdi",
+    "Parent Destination": "Maharashtra",
+    "Destination Type": "Wildlife",
+    "Nearest Airport": "Nearest Airport",
+    "Nearest Railway Station": "Nearest Railway Station",
+    "Status": "Active"
+  },
+  {
+    "Destination Code": "IND0155",
+    "State": "Maharashtra",
+    "Destination Name": "Aurangabad",
+    "Parent Destination": "Maharashtra",
+    "Destination Type": "Beach",
+    "Nearest Airport": "Nearest Airport",
+    "Nearest Railway Station": "Nearest Railway Station",
+    "Status": "Active"
+  },
+  {
+    "Destination Code": "IND0156",
+    "State": "Gujarat",
+    "Destination Name": "Ahmedabad",
+    "Parent Destination": "Gujarat",
+    "Destination Type": "Adventure",
+    "Nearest Airport": "Nearest Airport",
+    "Nearest Railway Station": "Nearest Railway Station",
+    "Status": "Active"
+  },
+  {
+    "Destination Code": "IND0157",
+    "State": "Gujarat",
+    "Destination Name": "Dwarka",
+    "Parent Destination": "Gujarat",
+    "Destination Type": "Heritage",
+    "Nearest Airport": "Nearest Airport",
+    "Nearest Railway Station": "Nearest Railway Station",
+    "Status": "Active"
+  },
+  {
+    "Destination Code": "IND0158",
+    "State": "Gujarat",
+    "Destination Name": "Somnath",
+    "Parent Destination": "Gujarat",
+    "Destination Type": "Nature",
+    "Nearest Airport": "Nearest Airport",
+    "Nearest Railway Station": "Nearest Railway Station",
+    "Status": "Active"
+  },
+  {
+    "Destination Code": "IND0159",
+    "State": "Gujarat",
+    "Destination Name": "Gir",
+    "Parent Destination": "Gujarat",
+    "Destination Type": "City",
+    "Nearest Airport": "Nearest Airport",
+    "Nearest Railway Station": "Nearest Railway Station",
+    "Status": "Active"
+  },
+  {
+    "Destination Code": "IND0160",
+    "State": "Gujarat",
+    "Destination Name": "Kutch",
+    "Parent Destination": "Gujarat",
+    "Destination Type": "Hill Station",
+    "Nearest Airport": "Nearest Airport",
+    "Nearest Railway Station": "Nearest Railway Station",
+    "Status": "Active"
+  },
+  {
+    "Destination Code": "IND0161",
+    "State": "Gujarat",
+    "Destination Name": "Statue of Unity",
+    "Parent Destination": "Gujarat",
+    "Destination Type": "Pilgrimage",
+    "Nearest Airport": "Nearest Airport",
+    "Nearest Railway Station": "Nearest Railway Station",
+    "Status": "Active"
+  },
+  {
+    "Destination Code": "IND0162",
+    "State": "Gujarat",
+    "Destination Name": "Vadodara",
+    "Parent Destination": "Gujarat",
+    "Destination Type": "Wildlife",
+    "Nearest Airport": "Nearest Airport",
+    "Nearest Railway Station": "Nearest Railway Station",
+    "Status": "Active"
+  },
+  {
+    "Destination Code": "IND0163",
+    "State": "Gujarat",
+    "Destination Name": "Saputara",
+    "Parent Destination": "Gujarat",
+    "Destination Type": "Beach",
+    "Nearest Airport": "Nearest Airport",
+    "Nearest Railway Station": "Nearest Railway Station",
+    "Status": "Active"
+  }
+]

@@ -1,0 +1,9 @@
+{
+    "name": "ghumofiroo/php-backend",
+    "description": "PHP API layer: Supabase Auth verification + MySQL business data",
+    "require": {
+        "php": ">=8.0",
+        "firebase/php-jwt": "7.0",
+        "phpmailer/phpmailer": "^6.9"
+    }
+}

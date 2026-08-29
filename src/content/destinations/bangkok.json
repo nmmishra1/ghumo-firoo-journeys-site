@@ -1,0 +1,51 @@
+{
+  "type": "destination",
+  "slug": "bangkok",
+  "title": "Bangkok",
+  "region": "Asia",
+  "country": "Thailand",
+  "summary": "Bangkok mixes gilded temples, canals, mega-malls, and phenomenal street food. It’s a gateway city with culture, nightlife, and markets that run late into the night.",
+  "heroImage": "/Badrinath.png",
+  "bestTime": "Nov–Feb is coolest and driest; hot season Mar–May; rains Jun–Oct with bursts of sunshine.",
+  "quickFacts": {
+    "Currency": "THB",
+    "Language": "Thai (English in tourism)",
+    "Power": "Type A/B/C, 220V",
+    "Emergency": "191 police, 1669 medical"
+  },
+  "attractions": [
+    { "name": "Grand Palace & Wat Phra Kaew", "summary": "Thailand’s spiritual heart; dress code enforced; arrive early." },
+    { "name": "Wat Pho", "summary": "Reclining Buddha; massage school; combine with river ferry ride." },
+    { "name": "Chatuchak Weekend Market", "summary": "15,000+ stalls; go early; hydrate often." }
+  ],
+  "cultureEtiquette": [
+    "Dress modestly in temples; remove shoes.",
+    "Respect the monarchy and images of Buddha."
+  ],
+  "gettingAround": [
+    "Use BTS/MRT for core areas; river ferries for old town.",
+    "Grab and metered taxis for late nights; beware rush-hour traffic.",
+    "Avoid unmetered tuk-tuks unless price agreed upfront."
+  ],
+  "whereToStay": [
+    { "area": "Sukhumvit", "bestFor": ["Nightlife", "Dining"] },
+    { "area": "Riverside", "bestFor": ["Views", "Luxury"] },
+    { "area": "Old City", "bestFor": ["Temples", "Backpackers"] }
+  ],
+  "costsPerDay": { "budget": "฿1200–฿1800", "midrange": "฿2500–฿4000", "luxury": "฿6000+" },
+  "itineraries": [
+    { "day": 1, "title": "Old City Temples", "activities": ["Grand Palace", "Wat Pho", "River ferry ride"] },
+    { "day": 2, "title": "Modern Bangkok", "activities": ["BTS skywalk", "Malls (Siam/ICONSIAM)", "Rooftop sunset"] },
+    { "day": 3, "title": "Markets & Food", "activities": ["Chatuchak or Or Tor Kor", "Street food tour"] }
+  ],
+  "sustainability": [
+    "Carry a refillable bottle; filtered water widely available.",
+    "Use public transport or river boats to cut emissions.",
+    "Support ethical elephant and wildlife experiences only."
+  ],
+  "faqs": [
+    { "q": "Is street food safe?", "a": "Choose busy stalls with high turnover; watch food cooked fresh." },
+    { "q": "Is there a dress code?", "a": "Yes for royal temples: covered shoulders and knees." }
+  ],
+  "updatedAt": "2025-11-04"
+}

@@ -1,0 +1,72 @@
+{
+  "type": "destination",
+  "slug": "australia-travel-guide",
+  "title": "Australia Travel Guide",
+  "region": "Oceania",
+  "country": "Australia",
+  "summary": "A concise Australia travel guide for nature lovers, coastal explorers, and city travellers who want the best of down under.",
+  "heroImage": "/Europe Image New.png",
+  "bestTime": "September–November and March–May for mild weather, fewer crowds, and ideal outdoor conditions.",
+  "quickFacts": {
+    "Currency": "AUD",
+    "Language": "English",
+    "Visa": "eVisitor/ETA required for most travellers; apply before departure.",
+    "Power": "Type I, 230V"
+  },
+  "attractions": [
+    { "name": "Sydney", "summary": "Opera House, Harbour Bridge, coastal walks, and vibrant dining." },
+    { "name": "Great Barrier Reef", "summary": "World’s largest coral reef system with snorkeling and diving experiences." },
+    { "name": "Melbourne", "summary": "Cultural capital with laneways, cafés, and art festivals." },
+    { "name": "Uluru", "summary": "Red centre icon with sunsets, indigenous culture, and desert walks." },
+    { "name": "Great Ocean Road", "summary": "Scenic coastal drive with dramatic cliffs, beaches, and wildlife." }
+  ],
+  "cultureEtiquette": [
+    "Be punctual for tours and guided activities.",
+    "Respect indigenous cultural sites and follow park guidelines.",
+    "Tip when service is exceptional, but it is not always expected."
+  ],
+  "gettingAround": [
+    "Use domestic flights for long distances between major regions.",
+    "Rent a car for the Great Ocean Road and rural national parks.",
+    "Take trams and trains in Melbourne, and ferries in Sydney." 
+  ],
+  "whereToStay": [
+    { "area": "Sydney CBD", "bestFor": ["Harbour views", "City attractions"] },
+    { "area": "Cairns", "bestFor": ["Reef access", "Rainforest tours"] },
+    { "area": "Melbourne", "bestFor": ["Culture", "Foodie experiences"] },
+    { "area": "Uluru", "bestFor": ["Desert stays", "Star gazing"] }
+  ],
+  "costsPerDay": {
+    "budget": "₹10,000–₹15,000",
+    "midrange": "₹18,000–₹25,000",
+    "luxury": "₹30,000+"
+  },
+  "itineraries": [
+    {
+      "day": 1,
+      "title": "Sydney Essentials",
+      "activities": ["Explore the Opera House precinct", "Walk the Harbour Bridge", "Visit Bondi Beach"]
+    },
+    {
+      "day": 2,
+      "title": "Reef Adventure",
+      "activities": ["Fly to Cairns", "Take a Great Barrier Reef day trip", "Enjoy tropical dining"]
+    },
+    {
+      "day": 3,
+      "title": "Melbourne Culture",
+      "activities": ["Tour laneways", "Visit the National Gallery", "Try a café brunch"]
+    }
+  ],
+  "sustainability": [
+    "Respect reef and marine life guidelines while snorkeling.",
+    "Use public transit in cities and reduce single-use plastic.",
+    "Support eco-friendly wildlife sanctuaries and tours." 
+  ],
+  "faqs": [
+    { "q": "Do I need a visa for Australia?", "a": "Yes, most international visitors must obtain an ETA or visitor visa before travel." },
+    { "q": "What is the best time to visit Australia?", "a": "Spring and autumn offer the best weather for outdoor travel without peak-season crowds." },
+    { "q": "Is Australia expensive?", "a": "Australia is generally high-cost, so book accommodation and activities early to lock in savings." }
+  ],
+  "updatedAt": "2026-05-12"
+}

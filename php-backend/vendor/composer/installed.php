@@ -1,0 +1,41 @@
+<?php return array(
+    'root' => array(
+        'name' => 'ghumofiroo/php-backend',
+        'pretty_version' => 'dev-main',
+        'version' => 'dev-main',
+        'reference' => 'cc750fbc9241c80a55a8dd6ba0e0cd5ac0b0d34f',
+        'type' => 'library',
+        'install_path' => __DIR__ . '/../../',
+        'aliases' => array(),
+        'dev' => true,
+    ),
+    'versions' => array(
+        'firebase/php-jwt' => array(
+            'pretty_version' => 'v7.0.0',
+            'version' => '7.0.0.0',
+            'reference' => 'c03036fd5dbd530a95406ca3b5f6d7b24eaa3910',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../firebase/php-jwt',
+            'aliases' => array(),
+            'dev_requirement' => false,
+        ),
+        'ghumofiroo/php-backend' => array(
+            'pretty_version' => 'dev-main',
+            'version' => 'dev-main',
+            'reference' => 'cc750fbc9241c80a55a8dd6ba0e0cd5ac0b0d34f',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../../',
+            'aliases' => array(),
+            'dev_requirement' => false,
+        ),
+        'phpmailer/phpmailer' => array(
+            'pretty_version' => 'v6.12.0',
+            'version' => '6.12.0.0',
+            'reference' => 'd1ac35d784bf9f5e61b424901d5a014967f15b12',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../phpmailer/phpmailer',
+            'aliases' => array(),
+            'dev_requirement' => false,
+        ),
+    ),
+);

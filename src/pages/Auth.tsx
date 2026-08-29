@@ -1,22 +1,24 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import { Eye, EyeOff, ArrowLeft, User } from 'lucide-react';
+import { Eye, EyeOff, ArrowLeft, Lock, Mail, Sparkles } from 'lucide-react';
 
 const Auth = () => {
-  const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [fullName, setFullName] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
+  const [searchParams] = useSearchParams();
+  const isIdle = searchParams.get('reason') === 'idle';
+  const isRevoked = searchParams.get('reason') === 'revoked';
+  const revokedMessage = searchParams.get('message');
 
   useEffect(() => {
     // Check if user is already logged in
@@ -31,73 +33,45 @@ const Auth = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
+    loading_start();
 
     try {
-      if (isLogin) {
-        const { data, error } = await supabase.auth.signInWithPassword({
-          email,
-          password,
-        });
-        
-        if (error) throw error;
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
 
-        // Check if user is approved
-        if (data.user) {
-          const { data: profile } = await supabase
-            .from('profiles')
-            .select('approved, role')
-            .eq('id', data.user.id)
-            .single();
+      if (error) throw error;
 
-          if (!profile?.approved) {
-            await supabase.auth.signOut();
-            throw new Error('Your account is pending admin approval. Please wait for approval before logging in.');
-          }
-        }
-        
-        toast({
-          title: "Welcome back!",
-          description: "You have successfully logged in.",
-        });
-        
-        navigate('/crm');
-      } else {
-        const { data: authData, error } = await supabase.auth.signUp({
-          email,
-          password,
-          options: {
-            emailRedirectTo: `${window.location.origin}/`,
-            data: {
-              full_name: fullName,
+      // Check if user is approved via PHP backend middleware
+      if (data.session) {
+        try {
+          const apiBase = import.meta.env.VITE_PHP_BASE_URL || import.meta.env.VITE_API_BASE_URL || '/php-backend';
+          const res = await fetch(`${apiBase}/users.php`, {
+            headers: {
+              'Authorization': `Bearer ${data.session.access_token}`
             }
+          });
+          if (!res.ok) {
+            const errJson = await res.json().catch(() => ({}));
+            await supabase.auth.signOut();
+            if (res.status === 404) {
+              throw new Error('Backend connection failed (HTTP 404). Please ensure the php-backend folder is uploaded to public_html/php-backend on your live server.');
+            }
+            throw new Error(errJson.error || `Server connection error (HTTP ${res.status}). Please verify your database credentials in php-backend/.env.`);
           }
-        });
-        
-        if (error) throw error;
-
-        // Send welcome/creation notification
-        if (authData.user) {
-          try {
-            await supabase.functions.invoke('send-user-notification', {
-              body: {
-                email: email,
-                fullName: fullName,
-                role: 'user',
-                approved: false,
-                type: 'creation'
-              }
-            });
-          } catch (emailError) {
-            console.error('Failed to send welcome email:', emailError);
-          }
+        } catch (profileErr: any) {
+          await supabase.auth.signOut();
+          throw new Error(profileErr.message || 'Unable to connect to PHP backend server. Please verify php-backend/.env configuration.');
         }
-        
-        toast({
-          title: "Account created!",
-          description: "Your account has been created and is pending admin approval. You'll receive an email once approved.",
-        });
       }
+
+      toast({
+        title: "Welcome back!",
+        description: "You have successfully logged in to the agent portal.",
+      });
+
+      navigate('/crm');
     } catch (error: any) {
       toast({
         title: "Error",
@@ -105,115 +79,149 @@ const Auth = () => {
         variant: "destructive",
       });
     } finally {
-      setLoading(false);
+      loading_stop();
     }
   };
 
+  const loading_start = () => setLoading(true);
+  const loading_stop = () => setLoading(false);
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary/5 to-secondary/10 flex">
-      {/* Left Side - Agency Logo & Branding */}
-      <div className="hidden lg:flex lg:flex-1 lg:flex-col lg:justify-center lg:items-center bg-gradient-to-b from-primary to-primary/80 p-12">
-        <div className="text-center text-white space-y-6">
+    <div className="min-h-screen bg-[#0B1026] flex overflow-hidden font-poppins">
+      {/* Left Side - Agency Logo & Branding Cover Image */}
+      <div 
+        className="hidden lg:flex lg:w-1/2 lg:flex-col lg:justify-between bg-cover bg-center relative p-12 overflow-hidden border-r border-white/5"
+        style={{ backgroundImage: "url('https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?q=80&w=1600')" }}
+      >
+        <div className="absolute inset-0 bg-gradient-to-tr from-[#0B1026] via-[#0B1026]/80 to-transparent z-0" />
+        
+        {/* Modern glowing ambient blurs */}
+        <div className="absolute -top-40 -left-40 w-96 h-96 bg-accent/10 rounded-full blur-[100px] z-0 pointer-events-none" />
+        <div className="absolute -bottom-40 -right-40 w-96 h-96 bg-[#D8B97A]/5 rounded-full blur-[100px] z-0 pointer-events-none" />
+        
+        <div className="relative z-10 flex items-center gap-2">
+          <div className="p-2.5 bg-accent/10 rounded-xl border border-accent/20 text-accent">
+            <Sparkles className="w-5 h-5 text-accent" />
+          </div>
           <img
-            src="/lovable-uploads/dc7c4d6f-9ccd-4614-abea-77d7936b921b.png"
+            src="/ghumo-firoo-logo.png"
             alt="Ghumo Firoo Travels"
-            className="h-20 w-auto mx-auto mb-8 filter brightness-0 invert"
+            className="h-9 w-auto brightness-0 invert"
           />
-          <h1 className="text-3xl font-bold">Ghumo Firoo</h1>
-          <p className="text-lg text-white/90 max-w-md">
-            "Solving problems for our travel itinerary, increasing efficiency and leading to optimization by lead management system."
+        </div>
+
+        <div className="relative z-10 max-w-lg space-y-6">
+          <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-accent/10 border border-accent/20 text-accent text-xs font-bold uppercase tracking-wider">
+            <Sparkles className="w-3.5 h-3.5" />
+            CRM Portal
+          </div>
+          <h1 className="text-4xl font-extrabold tracking-tight text-white leading-tight font-montserrat">
+            Smart Lead Management & Automated Itinerary Workflows
+          </h1>
+          <p className="text-base text-slate-300 font-medium">
+            Streamline your travel consultancy, automate customer proposals, and optimize bookings with the premium Ghumo Firoo enterprise ecosystem.
           </p>
+        </div>
+
+        <div className="relative z-10 text-xs text-slate-400 font-semibold">
+          © {new Date().getFullYear()} GhumoFiroo Travels. All rights reserved.
         </div>
       </div>
 
-      {/* Right Side - Login Form */}
-      <div className="flex-1 flex items-center justify-center p-8">
-        <div className="w-full max-w-md">
-          <div className="mb-8 lg:hidden">
-            <Link to="/" className="inline-flex items-center text-primary hover:text-primary/80 transition-colors">
-              <ArrowLeft className="w-4 h-4 mr-2" />
+      {/* Right Side - Login Form (Glassmorphic) */}
+      <div className="w-full lg:w-1/2 flex items-center justify-center p-8 bg-[#0B1026] relative overflow-hidden">
+        {/* Background ambient light */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-accent/[0.03] rounded-full blur-[120px] pointer-events-none" />
+        
+        <div className="w-full max-w-md relative z-10">
+          <div className="mb-8 lg:hidden flex justify-between items-center">
+            <Link to="/" className="inline-flex items-center text-sm font-semibold text-white/60 hover:text-white transition-colors">
+              <ArrowLeft className="w-4 h-4 mr-2 text-accent" />
               Back to Home
             </Link>
+            <img
+              src="/ghumo-firoo-logo.png"
+              alt="Ghumo Firoo Travels"
+              className="h-7 w-auto brightness-0 invert"
+            />
           </div>
 
-          <Card className="shadow-xl border-0 bg-background/95 backdrop-blur">
-            <CardHeader className="space-y-6 text-center">
-              <div className="lg:hidden flex justify-center">
-                <img
-                  src="/lovable-uploads/dc7c4d6f-9ccd-4614-abea-77d7936b921b.png"
-                  alt="Ghumo Firoo Travels"
-                  className="h-12 w-auto"
-                />
-              </div>
-              
-              {/* User Profile Picture Placeholder */}
+          <Card className="shadow-glass-lg border border-white/10 bg-[#1A2342]/60 backdrop-blur-2xl rounded-3xl text-white">
+            <CardHeader className="space-y-4 text-center pb-4">
+              {/* Brand Insignia Icon */}
               <div className="flex justify-center">
-                <div className="w-20 h-20 bg-muted rounded-full flex items-center justify-center border-4 border-primary/10">
-                  <User className="w-8 h-8 text-muted-foreground" />
+                <div className="w-16 h-16 bg-gradient-warm rounded-2xl flex items-center justify-center shadow-lg shadow-accent/20 rotate-3 hover:rotate-0 transition-all duration-300">
+                  <Sparkles className="w-7 h-7 text-[#0B1026] animate-pulse" />
                 </div>
               </div>
               
-              <div>
-                <CardTitle className="text-2xl font-bold">
-                  {isLogin ? 'Sign In' : 'Create Account'}
+              <div className="space-y-1.5">
+                <CardTitle className="text-2xl font-extrabold tracking-tight font-montserrat text-white">
+                  Agent Sign In
                 </CardTitle>
-                <CardDescription className="mt-2">
-                  {isLogin 
-                    ? 'Access your travel CRM dashboard' 
-                    : 'Join our travel management platform'
-                  }
+                <CardDescription className="text-xs font-medium text-slate-300">
+                  Access your premium travel CRM dashboard
                 </CardDescription>
+                {isIdle && (
+                  <div className="mt-2 bg-[#C9A25A]/20 border border-[#C9A25A]/45 text-[#C9A25A] rounded-xl p-3 text-[11px] font-semibold text-center animate-pulse">
+                    🔒 You have been logged out due to inactivity. Please log in again.
+                  </div>
+                )}
+                {isRevoked && (
+                  <div className="mt-2 bg-red-500/15 border border-red-500/40 text-red-300 rounded-xl p-3 text-[11px] font-semibold text-center">
+                    🔒 {revokedMessage || 'Your account access has changed. Please contact your administrator.'}
+                  </div>
+                )}
               </div>
             </CardHeader>
 
             <CardContent>
               <form onSubmit={handleSubmit} className="space-y-4">
-                {!isLogin && (
-                  <div className="space-y-2">
-                    <Label htmlFor="fullName">Full Name</Label>
-                    <Input
-                      id="fullName"
-                      type="text"
-                      placeholder="Enter your full name"
-                      value={fullName}
-                      onChange={(e) => setFullName(e.target.value)}
-                      className="h-12"
+                <div className="space-y-1.5">
+                  <Label htmlFor="email" className="text-xs font-bold text-slate-300 uppercase tracking-wide">Username / Email</Label>
+                  <div className="relative">
+                    <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                    <Input autoComplete="email"
+                      id="email"
+                      type="email"
+                      placeholder="agent@ghumofiroo.com"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      className="h-12 pl-11 focus-visible:ring-accent border-white/10 bg-white/5 text-white placeholder-white/20 rounded-xl font-medium text-sm focus-visible:outline-none"
                       required
                     />
                   </div>
-                )}
-                
-                <div className="space-y-2">
-                  <Label htmlFor="email">{isLogin ? 'Username/Email' : 'Email'}</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    placeholder={isLogin ? "ghumofiroo" : "Enter your email"}
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="h-12"
-                    required
-                  />
                 </div>
                 
-                <div className="space-y-2">
-                  <Label htmlFor="password">Password</Label>
+                <div className="space-y-1.5">
+                  <div className="flex justify-between items-center">
+                    <Label htmlFor="password" className="text-xs font-bold text-slate-300 uppercase tracking-wide">Password</Label>
+                    <Button 
+                      variant="link" 
+                      type="button"
+                      className="p-0 h-auto text-xs font-bold text-accent hover:text-[#D8B97A] transition-colors"
+                      onClick={() => navigate('/forgot-password')}
+                    >
+                      Forgot Password?
+                    </Button>
+                  </div>
                   <div className="relative">
-                    <Input
+                    <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                    <Input autoComplete="current-password"
                       id="password"
                       type={showPassword ? "text" : "password"}
                       placeholder="••••••"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      className="h-12 pr-12"
+                      className="h-12 pl-11 pr-12 focus-visible:ring-accent border-white/10 bg-white/5 text-white placeholder-white/20 rounded-xl font-medium text-sm focus-visible:outline-none"
                       required
-                      minLength={6}
+                      minLength={8}
                     />
                     <Button
                       type="button"
                       variant="ghost"
                       size="sm"
-                      className="absolute right-0 top-0 h-12 px-3 hover:bg-transparent"
+                      className="absolute right-0 top-0 h-12 px-3 hover:bg-transparent text-slate-400"
                       onClick={() => setShowPassword(!showPassword)}
                     >
                       {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
@@ -221,33 +229,18 @@ const Auth = () => {
                   </div>
                 </div>
 
-                {isLogin && (
-                  <div className="text-right">
-                    <Button variant="link" className="p-0 h-auto text-sm text-primary">
-                      Forgot Password?
-                    </Button>
-                  </div>
-                )}
-
                 <Button 
                   type="submit" 
-                  className="w-full h-12 text-base font-semibold" 
+                  className="w-full h-12 text-sm font-bold bg-gradient-warm hover:scale-[1.02] active:scale-95 text-[#0B1026] rounded-xl shadow-lg shadow-accent/10 transition-all duration-300 mt-2 border-0 cursor-pointer" 
                   disabled={loading}
                 >
-                  {loading ? 'Processing...' : (isLogin ? 'Login' : 'Create Account')}
+                  {loading ? 'Processing...' : 'Sign In'}
                 </Button>
               </form>
 
-              <div className="mt-6 text-center">
-                <p className="text-sm text-muted-foreground">
-                  {isLogin ? "Don't have an account?" : "Already have an account?"}
-                  <Button
-                    variant="link"
-                    className="p-0 ml-1 h-auto text-primary font-semibold"
-                    onClick={() => setIsLogin(!isLogin)}
-                  >
-                    {isLogin ? 'Sign up' : 'Sign in'}
-                  </Button>
+              <div className="mt-6 text-center border-t border-white/10 pt-4">
+                <p className="text-xs font-medium text-slate-300">
+                  🔒 Account registration is <span className="text-accent font-semibold">Admin Invitation</span> only. Contact your CRM administrator for an invite.
                 </p>
               </div>
             </CardContent>

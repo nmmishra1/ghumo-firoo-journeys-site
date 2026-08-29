@@ -1,0 +1,9 @@
+# ads.txt for ghumofiroo.com
+# Purpose: Authorize ad systems and ensure proper crawlability by DSPs.
+# NOTE: Replace the placeholder line below with your real publisher ID(s).
+
+# Example AdSense entry (update pub-xxxxxxxxxxxxxxxx):
+# google.com, pub-0000000000000000, DIRECT, f08c47fec0942fa0
+
+# Until official monetization IDs are provided, we keep the file minimal
+# to satisfy validation and proper Content-Type (text/plain).

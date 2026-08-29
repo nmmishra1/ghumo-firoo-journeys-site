@@ -20,7 +20,7 @@ type Lead = {
   travel_interest: string | null;
   discussion_notes: string | null;
   follow_up_date: string | null;
-  status: 'New' | 'Contacted' | 'Quote Sent' | 'Quote Approved' | 'Converted' | 'Dropped';
+  status: 'New' | 'Assigned' | 'Follow-up Due' | 'Quote Sent' | 'Booking Confirmed' | 'Closed Lost';
   created_by: string;
   created_at: string;
   updated_at: string;
@@ -28,11 +28,11 @@ type Lead = {
 
 const STATUSES = [
   { key: 'New', label: 'New', color: 'bg-blue-100 text-blue-800' },
-  { key: 'Contacted', label: 'Contacted', color: 'bg-yellow-100 text-yellow-800' },
-  { key: 'Quote Sent', label: 'Quote Sent', color: 'bg-purple-100 text-purple-800' },
-  { key: 'Quote Approved', label: 'Quote Approved', color: 'bg-indigo-100 text-indigo-800' },
-  { key: 'Converted', label: 'Converted', color: 'bg-green-100 text-green-800' },
-  { key: 'Dropped', label: 'Dropped', color: 'bg-red-100 text-red-800' },
+  { key: 'Assigned', label: 'Assigned', color: 'bg-yellow-100 text-yellow-800' },
+  { key: 'Follow-up Due', label: 'Follow-up Due', color: 'bg-purple-100 text-purple-800' },
+  { key: 'Quote Sent', label: 'Quote Sent', color: 'bg-indigo-100 text-indigo-800' },
+  { key: 'Booking Confirmed', label: 'Booking Confirmed', color: 'bg-green-100 text-green-800' },
+  { key: 'Closed Lost', label: 'Closed Lost', color: 'bg-red-100 text-red-800' },
 ] as const;
 
 interface KanbanBoardProps {

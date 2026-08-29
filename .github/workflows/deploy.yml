@@ -1,0 +1,49 @@
+name: Auto-Deploy Ghumo Firoo to Live cPanel Server
+
+on:
+  push:
+    branches:
+      - main
+      - master
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 📥 Checkout Code
+        uses: actions/checkout@v4
+
+      - name: ⚙️ Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: 📦 Install Dependencies
+        run: npm ci --legacy-peer-deps
+
+      - name: 🚀 Build Production Bundle
+        run: npm run build
+
+      - name: 📂 Deploy Frontend Dist to cPanel
+        uses: SamKirland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          server-dir: /ghumofiroo.com/
+          local-dir: ./dist/
+          dangerous-clean-slate: false
+
+      - name: 🐘 Deploy PHP Backend to cPanel
+        uses: SamKirland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          server-dir: /ghumofiroo.com/php-backend/
+          local-dir: ./php-backend/
+          dangerous-clean-slate: false
+          exclude: |
+            **/.env
+            **/uploads/**

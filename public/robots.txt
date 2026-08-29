@@ -10,5 +10,29 @@ Allow: /
 User-agent: facebookexternalhit
 Allow: /
 
+# AI and LLM Bots - Explicitly Allow
+User-agent: GPTBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: CCBot
+Allow: /
+
 User-agent: *
 Allow: /
+
+# Low-value paths to reduce crawl waste
+Disallow: /auth
+Disallow: /enquire-success
+
+# Sitemap location for automatic discovery
+Sitemap: https://ghumofiroo.com/sitemap.xml
+
+# LLM Data Files for AI Crawlers (AEO/GEO)
+Allow: /llm.txt
+Allow: /llm-full.txt

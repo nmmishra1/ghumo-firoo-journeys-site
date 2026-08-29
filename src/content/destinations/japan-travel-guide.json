@@ -1,0 +1,72 @@
+{
+  "type": "destination",
+  "slug": "japan-travel-guide",
+  "title": "Japan Travel Guide",
+  "region": "Asia",
+  "country": "Japan",
+  "summary": "A smart Japan travel guide that covers seasonal highlights, culture, transport, and must-see modern and traditional destinations.",
+  "heroImage": "/Europe image1.jpg",
+  "bestTime": "March–May for cherry blossoms and September–November for autumn colors and comfortable weather.",
+  "quickFacts": {
+    "Currency": "JPY",
+    "Language": "Japanese; English spoken in tourist districts.",
+    "Visa": "Visa exemption for many countries; check Japanese embassy rules before travel.",
+    "Transport": "Japan Rail Pass can be very cost-effective for multi-city travel."
+  },
+  "attractions": [
+    { "name": "Tokyo", "summary": "A high-energy metropolis of skyscrapers, temples, shopping, and cutting-edge culture." },
+    { "name": "Kyoto", "summary": "Historic shrines, traditional tea houses, and beautiful temple gardens." },
+    { "name": "Osaka", "summary": "Food capital of Japan with street food, nightlife, and friendly locals." },
+    { "name": "Mount Fuji", "summary": "Japan’s iconic peak best seen from Lake Kawaguchi or on a Fuji Five Lakes tour." },
+    { "name": "Hiroshima", "summary": "A moving reflection on peace with a modern city and historic memorials." }
+  ],
+  "cultureEtiquette": [
+    "Bow politely and remove shoes where indicated.",
+    "Queue respectfully and avoid loud phone calls on public transport.",
+    "Handle money and business cards with both hands as a sign of respect." 
+  ],
+  "gettingAround": [
+    "Use Shinkansen bullet trains for fast intercity travel.",
+    "Load an IC card like Suica for easy city transit and convenience stores.",
+    "Rent a car only for rural regions like Hokkaido or Kyushu."
+  ],
+  "whereToStay": [
+    { "area": "Shinjuku, Tokyo", "bestFor": ["City lights", "Nightlife"] },
+    { "area": "Gion, Kyoto", "bestFor": ["Tradition", "Temples"] },
+    { "area": "Namba, Osaka", "bestFor": ["Food", "Shopping"] },
+    { "area": "Kawaguchiko", "bestFor": ["Mount Fuji views", "Nature"] }
+  ],
+  "costsPerDay": {
+    "budget": "₹6,000–₹10,000",
+    "midrange": "₹12,000–₹18,000",
+    "luxury": "₹22,000+"
+  },
+  "itineraries": [
+    {
+      "day": 1,
+      "title": "Tokyo Essentials",
+      "activities": ["Explore Shibuya Crossing", "Visit Senso-ji Temple", "Dine in a ramen alley"]
+    },
+    {
+      "day": 2,
+      "title": "Kyoto Tradition",
+      "activities": ["See Fushimi Inari Shrine", "Walk through Arashiyama Bamboo Grove", "Enjoy a tea ceremony"]
+    },
+    {
+      "day": 3,
+      "title": "Day Trip to Mount Fuji",
+      "activities": ["Visit Lake Kawaguchi", "View Mount Fuji", "Relax in an onsen"]
+    }
+  ],
+  "sustainability": [
+    "Use public transport and avoid short internal flights.",
+    "Respect local recycling and waste separation rules.",
+    "Choose small local ryokans and sustainable hospitality options." 
+  ],
+  "faqs": [
+    { "q": "Do I need a rail pass in Japan?", "a": "A JR Pass is useful for long-distance travel across multiple cities and should be purchased before arrival." },
+    { "q": "What is the best season for Japan?", "a": "Cherry blossom season and autumn foliage are the two most magical times to visit." },
+    { "q": "Can I use credit cards everywhere?", "a": "Credit cards are accepted in cities, but carry cash for smaller shops and temples." }
+  ],
+  "updatedAt": "2026-05-12"
+}

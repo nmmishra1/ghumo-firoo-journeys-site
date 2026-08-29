@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate, useLocation, useParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -45,6 +46,10 @@ type Profile = {
 };
 
 const CRM = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { leadId } = useParams();
+
   const [leads, setLeads] = useState<Lead[]>([]);
   const [filteredLeads, setFilteredLeads] = useState<Lead[]>([]);
   const [profiles, setProfiles] = useState<Profile[]>([]);
@@ -60,11 +65,37 @@ const CRM = () => {
   const [followUpModalOpen, setFollowUpModalOpen] = useState(false);
   const [selectedLeadForFollowUp, setSelectedLeadForFollowUp] = useState<{ id: string; name: string } | null>(null);
   const [userProfile, setUserProfile] = useState<Profile | null>(null);
-  const [currentSection, setCurrentSection] = useState<'dashboard' | 'user-dashboard' | 'leads' | 'add-lead'>('dashboard');
+  const [currentSection, setCurrentSection] = useState<'dashboard' | 'user-dashboard' | 'leads' | 'add-lead' | 'edit-lead'>('dashboard');
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   const { user } = useAuth();
   const { toast } = useToast();
+
+  // Sync currentSection with current URL location
+  useEffect(() => {
+    const path = location.pathname.toLowerCase();
+    if (path.endsWith('/edit') || path.includes('/edit')) {
+      setCurrentSection('edit-lead');
+    } else if (path.endsWith('/new')) {
+      setCurrentSection('add-lead');
+    } else if (path.includes('/crm/leads')) {
+      setCurrentSection('leads');
+    } else if (path.includes('/crm/user-dashboard')) {
+      setCurrentSection('user-dashboard');
+    } else if (path === '/crm' || path === '/crm/') {
+      setCurrentSection('dashboard');
+    }
+  }, [location.pathname]);
+
+  // Sync editingLead when leadId from URL or leads list updates
+  useEffect(() => {
+    if (leadId && leads.length > 0) {
+      const target = leads.find(l => String(l.id) === String(leadId) || String(l.enquiry_number) === String(leadId));
+      if (target) {
+        setEditingLead(target);
+      }
+    }
+  }, [leadId, leads]);
 
   useEffect(() => {
     if (user) {
@@ -218,8 +249,13 @@ const CRM = () => {
   };
 
   const openLeadForm = (lead?: Lead) => {
-    setEditingLead(lead || null);
-    setLeadFormOpen(true);
+    if (lead) {
+      setEditingLead(lead);
+      navigate(`/crm/leads/${lead.id}/edit`);
+    } else {
+      setEditingLead(null);
+      navigate('/crm/leads/new');
+    }
   };
 
   const openCommentsDialog = (leadId: string) => {
@@ -418,12 +454,14 @@ const CRM = () => {
                 {currentSection === 'user-dashboard' && 'User Dashboard'}
                 {currentSection === 'leads' && 'All Leads'}
                 {currentSection === 'add-lead' && 'Add New Lead'}
+                {currentSection === 'edit-lead' && 'Edit Travel Lead'}
               </h1>
               <p className="text-muted-foreground">
                 {currentSection === 'dashboard' && 'Overview of your travel CRM'}
                 {currentSection === 'user-dashboard' && 'Your personal dashboard'}
                 {currentSection === 'leads' && 'Manage all your travel leads'}
                 {currentSection === 'add-lead' && 'Create a new travel lead'}
+                {currentSection === 'edit-lead' && 'Update details for this travel enquiry'}
               </p>
             </div>
             <div className="flex items-center space-x-2">
@@ -655,12 +693,45 @@ const CRM = () => {
               <CardContent>
                 <LeadForm
                   isOpen={true}
-                  onClose={() => setCurrentSection('leads')}
+                  onClose={() => navigate('/crm/leads')}
                   editingLead={null}
                   onSubmit={handleLeadSubmit}
                   profiles={profiles}
                   userRole={userProfile?.role || null}
                 />
+              </CardContent>
+            </Card>
+          )}
+
+          {currentSection === 'edit-lead' && (
+            <Card className="max-w-4xl mx-auto">
+              <CardHeader>
+                <CardTitle>Edit Travel Lead</CardTitle>
+                <p className="text-muted-foreground">Modify details for this travel enquiry.</p>
+              </CardHeader>
+              <CardContent>
+                {editingLead ? (
+                  <LeadForm
+                    isOpen={true}
+                    onClose={() => {
+                      setEditingLead(null);
+                      navigate('/crm/leads');
+                    }}
+                    editingLead={editingLead}
+                    onSubmit={handleLeadSubmit}
+                    profiles={profiles}
+                    userRole={userProfile?.role || null}
+                  />
+                ) : (
+                  <div className="py-12 text-center text-muted-foreground space-y-3">
+                    <p className="text-base font-medium">{loading ? 'Loading lead details...' : `Lead details not found.`}</p>
+                    {!loading && (
+                      <Button variant="outline" onClick={() => navigate('/crm/leads')}>
+                        Back to Leads Pipeline
+                      </Button>
+                    )}
+                  </div>
+                )}
               </CardContent>
             </Card>
           )}

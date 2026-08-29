@@ -1,4 +1,10 @@
-project_id = "vblqawjhipgswvbtggwv"
+project_id = "rfdumlnkmfuacsznogzz"
 
 [functions.whatsapp-webhook]
+verify_jwt = false
+
+[functions.travel-crm-notifications]
+verify_jwt = false
+
+[functions.resend-webhook]
 verify_jwt = false

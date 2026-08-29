@@ -60,6 +60,40 @@ This project is built with:
 - shadcn-ui
 - Tailwind CSS
 
+## Brochure PDF Download (Unified Mode)
+
+- Single optimized generator balances quality and performance.
+- System font stacks (no webfont delays/CSP issues).
+- Dynamic raster scale (1.5–2) with image readiness checks.
+- Consistent final “Ready to Book?” contact page for all packages.
+- Caching: in-memory + sessionStorage + IndexedDB; analytics event `brochure_perf`.
+
+Backward compatibility:
+- Older Fast/Rich options were removed from the UI.
+- Legacy caches (v1/v2) are auto-migrated; new cache schema is `v3`.
+
+Developer notes:
+- Implementation: `src/components/packages/EnhancedBrochureDownload.tsx`
+- To clear caches, clear sessionStorage and the IndexedDB database `BrochureCache`.
+
+## Configuration
+
+### Base URL
+
+The application uses a centralized configuration for the base URL. This is defined in `src/config.ts`.
+
+To update the base URL (e.g., when deploying to a new domain or environment), modify the `baseUrl` property in `src/config.ts`:
+
+```typescript
+// src/config.ts
+export const config = {
+  baseUrl: "https://ghumofiroo.com", // Update this value
+  // ...
+};
+```
+
+This value is used across the application for SEO (canonical URLs), Open Graph tags, and structured data (JSON-LD).
+
 ## How can I deploy this project?
 
 Simply open [Lovable](https://lovable.dev/projects/ba7a3dac-d19b-4e66-9178-030bb79a709c) and click on Share -> Publish.

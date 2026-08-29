@@ -1,0 +1,350 @@
+
+<h2 class="sr-only">Lead form redesign mockup for GhumoFiroo CRM</h2>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;font-family:var(--font-sans)}
+body{background:var(--surface-0)}
+.wrap{max-width:860px;margin:0 auto;padding:16px}
+.form-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.form-title{font-size:15px;font-weight:700;color:var(--text-primary)}
+.form-sub{font-size:11px;color:var(--text-secondary);margin-top:2px}
+.header-actions{display:flex;gap:6px}
+.btn{padding:6px 14px;border-radius:7px;font-size:12px;font-weight:600;cursor:pointer;border:1px solid}
+.btn-primary{background:#C9A25A;color:#0B1026;border-color:#C9A25A}
+.btn-outline{background:transparent;color:var(--text-primary);border-color:var(--border)}
+.btn-ghost{background:transparent;color:var(--text-secondary);border-color:transparent}
+.btn-sm{padding:4px 10px;font-size:11px}
+
+/* TEMPLATES BAR */
+.templates-bar{background:var(--surface-1);border:0.5px solid var(--border);border-radius:10px;padding:10px 14px;margin-bottom:14px}
+.templates-label{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-muted);margin-bottom:8px;display:flex;align-items:center;gap:5px}
+.templates-scroll{display:flex;gap:5px;overflow-x:auto;padding-bottom:2px}
+.template-chip{display:flex;align-items:center;gap:4px;padding:4px 10px;border-radius:6px;border:0.5px solid var(--border);background:var(--surface-0);font-size:10px;font-weight:600;color:var(--text-secondary);cursor:pointer;white-space:nowrap;transition:all 0.15s}
+.template-chip:hover{border-color:#C9A25A;color:#C9A25A;background:rgba(201,162,90,0.06)}
+.template-chip.pilgrimage{border-color:rgba(251,146,60,0.3);color:#ea580c;background:rgba(251,146,60,0.05)}
+.template-chip.international{border-color:rgba(96,165,250,0.3);color:#2563eb;background:rgba(96,165,250,0.05)}
+.template-chip.domestic{border-color:rgba(52,211,153,0.3);color:#059669;background:rgba(52,211,153,0.05)}
+
+/* TWO COLUMN LAYOUT */
+.form-grid{display:grid;grid-template-columns:1fr 340px;gap:12px;align-items:start}
+
+/* LEFT: QUICK CAPTURE */
+.quick-section{background:var(--surface-0);border:0.5px solid var(--border);border-radius:10px;padding:14px}
+.section-label{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-muted);margin-bottom:10px;display:flex;align-items:center;gap:5px}
+.field-row{display:grid;gap:8px;margin-bottom:10px}
+.field-row.two{grid-template-columns:1fr 1fr}
+.field-row.three{grid-template-columns:1fr 1fr 1fr}
+.field-label{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-muted);margin-bottom:3px;display:flex;gap:3px}
+.req{color:#ef4444}
+.input-wrap{position:relative}
+.input-icon{position:absolute;left:8px;top:50%;transform:translateY(-50%);font-size:12px;color:var(--text-muted)}
+.form-input{width:100%;height:34px;background:var(--surface-1);border:0.5px solid var(--border);border-radius:7px;padding:0 8px 0 28px;font-size:12px;color:var(--text-primary);outline:none}
+.form-input:focus{border-color:#C9A25A;box-shadow:0 0 0 2px rgba(201,162,90,0.1)}
+.form-input.no-icon{padding-left:10px}
+.dup-warn{background:rgba(201,162,90,0.08);border:0.5px solid rgba(201,162,90,0.25);border-radius:5px;padding:5px 8px;font-size:10px;color:#C9A25A;margin-top:3px;display:flex;align-items:center;gap:4px}
+
+/* DESTINATION CARDS */
+.dest-section{margin-bottom:10px}
+.stays-list{display:flex;flex-direction:column;gap:4px;margin-bottom:6px}
+.stay-card{display:flex;align-items:center;gap:8px;background:var(--surface-1);border:0.5px solid var(--border);border-radius:8px;padding:7px 10px}
+.stay-num{width:20px;height:20px;border-radius:50%;background:#C9A25A;color:#0B1026;font-size:9px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.stay-arrow{color:var(--text-muted);font-size:10px}
+.stay-city{font-size:12px;font-weight:600;color:var(--text-primary);flex:1}
+.stay-region{font-size:10px;color:var(--text-muted)}
+.nights-input{width:50px;height:26px;border:0.5px solid var(--border);border-radius:5px;text-align:center;font-size:12px;font-weight:700;color:var(--text-primary);background:var(--surface-0)}
+.nights-label{font-size:9px;color:var(--text-muted)}
+.stay-remove{width:18px;height:18px;border-radius:4px;border:none;background:rgba(239,68,68,0.1);color:#ef4444;cursor:pointer;font-size:11px;display:flex;align-items:center;justify-content:center}
+.add-stop-btn{width:100%;height:30px;border:0.5px dashed var(--border);border-radius:7px;background:transparent;color:var(--text-muted);font-size:11px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:4px}
+.add-stop-btn:hover{border-color:#C9A25A;color:#C9A25A;background:rgba(201,162,90,0.04)}
+.total-strip{background:rgba(201,162,90,0.08);border:0.5px solid rgba(201,162,90,0.2);border-radius:7px;padding:6px 10px;display:flex;justify-content:space-between;align-items:center;margin-top:6px}
+.total-text{font-size:11px;font-weight:700;color:#C9A25A}
+.total-pax{font-size:10px;color:var(--text-secondary)}
+
+/* PAX COUNTER */
+.pax-row{display:flex;gap:8px}
+.pax-item{flex:1;background:var(--surface-1);border:0.5px solid var(--border);border-radius:7px;padding:6px 8px;display:flex;align-items:center;justify-content:space-between}
+.pax-label{font-size:9px;font-weight:700;color:var(--text-muted);text-transform:uppercase}
+.pax-count{font-size:15px;font-weight:800;color:var(--text-primary)}
+.pax-btns{display:flex;flex-direction:column;gap:1px}
+.pax-btn{width:16px;height:12px;border:0.5px solid var(--border);border-radius:3px;background:var(--surface-2);color:var(--text-muted);font-size:9px;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1}
+
+/* RIGHT: FULL BRIEF */
+.brief-section{background:var(--surface-0);border:0.5px solid var(--border);border-radius:10px;padding:14px}
+.form-select{width:100%;height:34px;background:var(--surface-1);border:0.5px solid var(--border);border-radius:7px;padding:0 8px;font-size:12px;color:var(--text-primary);outline:none}
+.form-select:focus{border-color:#C9A25A}
+.form-textarea{width:100%;background:var(--surface-1);border:0.5px solid var(--border);border-radius:7px;padding:7px 10px;font-size:12px;color:var(--text-primary);outline:none;resize:none;min-height:60px}
+.form-textarea:focus{border-color:#C9A25A}
+.brief-row{margin-bottom:10px}
+.priority-pills{display:flex;gap:4px}
+.priority-pill{padding:4px 10px;border-radius:5px;border:0.5px solid var(--border);font-size:10px;font-weight:700;cursor:pointer;transition:all 0.15s}
+.priority-pill.high{border-color:rgba(239,68,68,0.3);color:#dc2626;background:rgba(239,68,68,0.05)}
+.priority-pill.medium{border-color:rgba(234,179,8,0.3);color:#ca8a04;background:rgba(234,179,8,0.05)}
+.priority-pill.low{border-color:rgba(148,163,184,0.3);color:var(--text-muted);background:transparent}
+.priority-pill.active{border-width:1.5px}
+.priority-pill.medium.active{border-color:#C9A25A;background:rgba(201,162,90,0.1);color:#C9A25A}
+.divider{height:0.5px;background:var(--border);margin:10px 0}
+.lead-title-preview{background:rgba(201,162,90,0.06);border:0.5px solid rgba(201,162,90,0.2);border-radius:6px;padding:7px 10px;font-size:11px;color:#C9A25A;font-weight:600;margin-bottom:10px}
+.lead-title-label{font-size:9px;color:rgba(201,162,90,0.7);font-weight:700;text-transform:uppercase;margin-bottom:2px}
+.submit-row{display:flex;gap:6px;margin-top:14px}
+.btn-save{flex:1;height:38px;background:#C9A25A;color:#0B1026;border:none;border-radius:8px;font-size:13px;font-weight:800;cursor:pointer}
+.btn-draft{height:38px;padding:0 14px;background:var(--surface-1);color:var(--text-secondary);border:0.5px solid var(--border);border-radius:8px;font-size:12px;font-weight:600;cursor:pointer}
+</style>
+
+<div class="wrap">
+  <div class="form-header">
+    <div>
+      <div class="form-title">✚ New Lead</div>
+      <div class="form-sub">Capture customer details and trip requirements</div>
+    </div>
+    <div class="header-actions">
+      <button class="btn btn-ghost btn-sm">← Cancel</button>
+    </div>
+  </div>
+
+  <!-- TEMPLATES BAR -->
+  <div class="templates-bar">
+    <div class="templates-label">⚡ Quick circuit templates — click to auto-fill destinations</div>
+    <div class="templates-scroll">
+      <span class="template-chip pilgrimage">🕌 Char Dham Road</span>
+      <span class="template-chip pilgrimage">🚁 Char Dham Heli</span>
+      <span class="template-chip pilgrimage">⛰ Do Dham K+B</span>
+      <span class="template-chip pilgrimage">🏔 Kedarnath</span>
+      <span class="template-chip domestic">🌿 Kerala</span>
+      <span class="template-chip domestic">❄ Kashmir</span>
+      <span class="template-chip domestic">🏔 Leh Ladakh</span>
+      <span class="template-chip domestic">🏖 Goa</span>
+      <span class="template-chip domestic">🏰 Rajasthan</span>
+      <span class="template-chip international">✈ Japan</span>
+      <span class="template-chip international">🇸🇬 Singapore</span>
+      <span class="template-chip international">🇸🇬🇲🇾 SG+MY</span>
+      <span class="template-chip international">🌍 Europe</span>
+      <span class="template-chip international">🇦🇪 Dubai</span>
+      <span class="template-chip international">🌴 Bali</span>
+      <span class="template-chip international">🇹🇷 Turkey</span>
+    </div>
+  </div>
+
+  <div class="form-grid">
+    <!-- LEFT: QUICK CAPTURE -->
+    <div>
+      <div class="quick-section">
+        <div class="section-label">👤 Customer Details</div>
+        <div class="field-row two">
+          <div>
+            <div class="field-label">Name <span class="req">*</span></div>
+            <div class="input-wrap">
+              <span class="input-icon">👤</span>
+              <input class="form-input" placeholder="Customer full name" value="Rohan Mehta">
+            </div>
+          </div>
+          <div>
+            <div class="field-label">Mobile <span class="req">*</span></div>
+            <div class="input-wrap">
+              <span class="input-icon">📱</span>
+              <input class="form-input" placeholder="+91 XXXXX XXXXX" value="+91 9910987264">
+            </div>
+          </div>
+        </div>
+        <div class="field-row two">
+          <div>
+            <div class="field-label">Email</div>
+            <div class="input-wrap">
+              <span class="input-icon">✉</span>
+              <input class="form-input" type="email" placeholder="email@example.com">
+            </div>
+          </div>
+          <div>
+            <div class="field-label">WhatsApp (if different)</div>
+            <div class="input-wrap">
+              <span class="input-icon">💬</span>
+              <input class="form-input" placeholder="WhatsApp number">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="quick-section" style="margin-top:10px">
+        <div class="section-label">🗺 Destinations & Stay Plan <span style="color:var(--text-muted);font-size:9px;font-weight:400;text-transform:none;letter-spacing:0">— or use a template above</span></div>
+        
+        <div class="stays-list">
+          <div class="stay-card">
+            <div class="stay-num">1</div>
+            <div style="flex:1">
+              <div class="stay-city">Kuala Lumpur</div>
+              <div class="stay-region">Malaysia</div>
+            </div>
+            <div style="text-align:center">
+              <input class="nights-input" value="3">
+              <div class="nights-label">nights</div>
+            </div>
+            <button class="stay-remove">×</button>
+          </div>
+          <div class="stay-card" style="border-color:rgba(201,162,90,0.3)">
+            <div class="stay-num">2</div>
+            <div style="flex:1">
+              <div class="stay-city">Langkawi</div>
+              <div class="stay-region">Malaysia</div>
+            </div>
+            <div style="text-align:center">
+              <input class="nights-input" value="3">
+              <div class="nights-label">nights</div>
+            </div>
+            <button class="stay-remove">×</button>
+          </div>
+          <div class="stay-card">
+            <div class="stay-num">3</div>
+            <div style="flex:1">
+              <div class="stay-city">Penang</div>
+              <div class="stay-region">Malaysia</div>
+            </div>
+            <div style="text-align:center">
+              <input class="nights-input" value="2">
+              <div class="nights-label">nights</div>
+            </div>
+            <button class="stay-remove">×</button>
+          </div>
+        </div>
+
+        <button class="add-stop-btn">+ Add another stop</button>
+        
+        <div class="total-strip">
+          <div class="total-text">📅 Total: 8 Nights / 9 Days</div>
+          <div class="total-pax">Malaysia · Multi-City</div>
+        </div>
+      </div>
+
+      <div class="quick-section" style="margin-top:10px">
+        <div class="section-label">👥 Travellers</div>
+        <div class="pax-row">
+          <div class="pax-item">
+            <div><div class="pax-label">Adults</div><div class="pax-count">2</div></div>
+            <div class="pax-btns">
+              <button class="pax-btn">▲</button>
+              <button class="pax-btn">▼</button>
+            </div>
+          </div>
+          <div class="pax-item">
+            <div><div class="pax-label">Children</div><div class="pax-count">1</div></div>
+            <div class="pax-btns">
+              <button class="pax-btn">▲</button>
+              <button class="pax-btn">▼</button>
+            </div>
+          </div>
+          <div class="pax-item">
+            <div><div class="pax-label">Infants</div><div class="pax-count">0</div></div>
+            <div class="pax-btns">
+              <button class="pax-btn">▲</button>
+              <button class="pax-btn">▼</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT: FULL BRIEF -->
+    <div>
+      <div class="brief-section">
+        <div class="section-label">📋 Trip Brief</div>
+
+        <!-- Auto-generated title preview -->
+        <div class="lead-title-preview">
+          <div class="lead-title-label">Auto-generated lead title</div>
+          Malaysia · KL 3N + Langkawi 3N + Penang 2N · 8N/9D · Family
+        </div>
+
+        <div class="brief-row">
+          <div class="field-label">Departure Date</div>
+          <input class="form-input no-icon" type="date" style="height:34px;width:100%;padding:0 10px">
+        </div>
+
+        <div class="brief-row">
+          <div class="field-label">Budget per person</div>
+          <div class="input-wrap">
+            <span class="input-icon">₹</span>
+            <input class="form-input" placeholder="e.g. 80000">
+          </div>
+        </div>
+
+        <div class="field-row two" style="margin-bottom:10px">
+          <div>
+            <div class="field-label">Hotel category</div>
+            <select class="form-select">
+              <option>3 Star Comfort</option>
+              <option>4 Star</option>
+              <option selected>5 Star Luxury</option>
+              <option>Heritage / Boutique</option>
+            </select>
+          </div>
+          <div>
+            <div class="field-label">Transport</div>
+            <select class="form-select">
+              <option>Private SUV</option>
+              <option>Private Sedan</option>
+              <option selected>Flight + Transfer</option>
+              <option>Coach</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="brief-row">
+          <div class="field-label">Travel theme</div>
+          <select class="form-select">
+            <option>Honeymoon / Romantic</option>
+            <option selected>Family Holiday</option>
+            <option>Adventure</option>
+            <option>Pilgrimage</option>
+            <option>Beach & Leisure</option>
+            <option>Business + Leisure</option>
+          </select>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="brief-row">
+          <div class="field-label">Priority</div>
+          <div class="priority-pills">
+            <span class="priority-pill high">🔴 Hot</span>
+            <span class="priority-pill medium active">🟡 Warm</span>
+            <span class="priority-pill low">⚪ Cold</span>
+          </div>
+        </div>
+
+        <div class="brief-row">
+          <div class="field-label">Lead source <span class="req">*</span></div>
+          <select class="form-select">
+            <option>Website</option>
+            <option selected>WhatsApp</option>
+            <option>Phone Call</option>
+            <option>Google Ad</option>
+            <option>Meta Ad</option>
+            <option>Walk-in</option>
+            <option>Agent Referral</option>
+          </select>
+        </div>
+
+        <div class="brief-row">
+          <div class="field-label">Assigned to</div>
+          <select class="form-select">
+            <option>Unassigned</option>
+            <option selected>Rahul K. (Sales)</option>
+            <option>Priya M. (International)</option>
+          </select>
+        </div>
+
+        <div class="brief-row">
+          <div class="field-label">Follow-up date</div>
+          <input class="form-input no-icon" type="date" style="height:34px;width:100%;padding:0 10px">
+        </div>
+
+        <div class="brief-row">
+          <div class="field-label">Initial remarks / notes</div>
+          <textarea class="form-textarea" placeholder="Customer wants marina bay view hotel. Flexible on dates. Budget ₹80k/pax...">Wants Batu Caves + Genting. Budget flexible. 2 rooms needed.</textarea>
+        </div>
+
+        <div class="submit-row">
+          <button class="btn-save">💾 Save Lead</button>
+          <button class="btn-draft">Draft</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Page Not Found – Ghumo Firoo Travels</title>
+    <link rel="icon" href="/favicon.ico" type="image/x-icon" />
+    <meta name="robots" content="noindex, nofollow" />
+    <link rel="canonical" href="https://ghumofiroo.com/404.html" />
+
+    <style>
+      :root {
+        --primary: #2563eb;
+        --secondary: #7c3aed;
+        --text: #0f172a;
+        --muted: #475569;
+        --bg: #f8fafc;
+        --white: #ffffff;
+      }
+      * { box-sizing: border-box; }
+      html, body { height: 100%; }
+      body {
+        margin: 0;
+        font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue", Arial, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+        color: var(--text);
+        background: linear-gradient(135deg, #eef2ff 0%, #fafafa 50%, #f5f3ff 100%);
+      }
+      .container { max-width: 960px; margin: 0 auto; padding: 24px; }
+      .card {
+        background: rgba(255,255,255,0.9);
+        backdrop-filter: blur(6px);
+        border: 1px solid #e5e7eb;
+        border-radius: 16px;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.06);
+        padding: 24px;
+      }
+      .hero {
+        display: flex; align-items: center; gap: 16px; margin-bottom: 12px;
+      }
+      .badge { width: 56px; height: 56px; border-radius: 16px; display: inline-flex; align-items: center; justify-content: center; background: linear-gradient(135deg, var(--primary), var(--secondary)); color: white; box-shadow: 0 8px 18px rgba(124, 58, 237, 0.25); }
+      h1 { font-size: 28px; margin: 0; }
+      p.lead { color: var(--muted); margin: 8px 0 16px; }
+      .actions { display: grid; grid-template-columns: 1fr; gap: 12px; margin: 16px 0; }
+      .row { display: grid; grid-template-columns: 1fr; gap: 12px; }
+      .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 12px 16px; border: 1px solid #e5e7eb; border-radius: 12px; background: var(--white); color: var(--text); text-decoration: none; font-weight: 600; box-shadow: 0 2px 6px rgba(0,0,0,0.06); }
+      .btn.primary { background: var(--primary); color: white; border-color: transparent; }
+      .btn:hover { box-shadow: 0 6px 14px rgba(0,0,0,0.08); transform: translateY(-1px); }
+      .input { width: 100%; padding: 12px 14px; border: 1px solid #e5e7eb; border-radius: 12px; }
+      .footer { margin-top: 24px; color: #64748b; font-size: 13px; }
+      .grid { display: grid; grid-template-columns: 1fr; gap: 12px; }
+      .nav { display: flex; flex-wrap: wrap; gap: 8px; margin: 8px 0 16px; }
+      .nav a { display: inline-flex; align-items: center; padding: 8px 12px; border: 1px solid #e5e7eb; border-radius: 999px; background: var(--white); text-decoration: none; color: var(--text); font-weight: 600; }
+      @media (min-width: 640px) { .actions { grid-template-columns: 1fr 1fr; } .row { grid-template-columns: 2fr 1fr; } .grid { grid-template-columns: repeat(2, 1fr); } }
+      @media (min-width: 960px) { .grid { grid-template-columns: repeat(4, 1fr); } }
+    </style>
+
+    <!-- Analytics for 404 page (GA4) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-R3ZB8V8DXC"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){ dataLayer.push(arguments); }
+      gtag('js', new Date());
+      gtag('config', 'G-R3ZB8V8DXC');
+      // Explicit 404 event
+      gtag('event', '404_page_view', { page_location: location.href, page_path: location.pathname, page_title: '404 — Page Not Found' });
+    </script>
+  </head>
+  <body>
+    <div class="container">
+      <div class="card" role="main">
+        <div class="hero">
+          <div class="badge" aria-hidden="true">🧭</div>
+          <div>
+            <h1>Page Not Found</h1>
+            <p class="lead">The page you requested isn’t available, but the rest of the site is. Try search, explore popular packages, or go back home.</p>
+          </div>
+        </div>
+
+        <form class="row" role="search" aria-label="Search packages" action="/packages" method="GET">
+          <input class="input" type="search" name="q" placeholder="Search destinations (e.g., Char Dham, Europe)" aria-label="Search query" />
+          <button class="btn primary" type="submit">Search</button>
+        </form>
+
+        <div class="actions">
+          <a class="btn" href="/">🏠 Go to Home</a>
+          <a class="btn" href="/packages">🧳 Browse Packages</a>
+        </div>
+
+        <div class="nav" role="navigation" aria-label="Main categories">
+          <a href="/products?category=domestic">Domestic</a>
+          <a href="/products?category=international">International</a>
+          <a href="/products?category=premium">Premium</a>
+          <a href="/products?category=adventure">Adventure</a>
+          <a href="/products?category=honeymoon">Honeymoon</a>
+        </div>
+
+        <div class="grid">
+          <a class="btn" href="mailto:info@ghumofiroo.com">✉️ Report a broken link</a>
+          <a class="btn" href="/contact">📞 Contact us</a>
+          <a class="btn" href="tel:+919910987264">📱 Call +91-9910987264</a>
+          <a class="btn" href="https://wa.me/919910987264?text=Found%20a%20broken%20link%20on%20the%20site">💬 WhatsApp us</a>
+        </div>
+
+        <div class="footer">© Ghumo Firoo Travels • Delhi, India</div>
+      </div>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,51 @@
+{
+  "type": "destination",
+  "slug": "paris",
+  "title": "Paris",
+  "region": "Europe",
+  "country": "France",
+  "summary": "Paris blends monumental art and architecture with neighborhood warmth. Masterpieces, café culture, and walkable quartiers make it ideal for both first-timers and repeat visitors.",
+  "heroImage": "/Europe Image New.png",
+  "bestTime": "Mar–Jun and Sep–Oct for mild weather; Jan–Feb for museum time and deals; Aug quieter but some closures.",
+  "quickFacts": {
+    "Currency": "EUR",
+    "Language": "French (English widely understood in tourism)",
+    "Power": "Type C/E, 230V",
+    "Emergency": "112"
+  },
+  "attractions": [
+    { "name": "Louvre Museum", "summary": "The world’s largest art museum; reserve timed entry and focus on one wing." },
+    { "name": "Eiffel Tower", "summary": "Book sunset slots; great views from Trocadéro and Seine cruise." },
+    { "name": "Montmartre & Sacré-Cœur", "summary": "Village-like streets, artists’ square, basilica views." }
+  ],
+  "cultureEtiquette": [
+    "Greet with bonjour/bonsoir before asking questions.",
+    "Tipping modest (round up); service usually included."
+  ],
+  "gettingAround": [
+    "Buy a Navigo Easy card and load tickets; Metro covers most sights.",
+    "RER for airports/Versailles; buses offer scenic routes.",
+    "Walkable city—group sights by arrondissement."
+  ],
+  "whereToStay": [
+    { "area": "1st/2nd", "bestFor": ["First-timers", "Walkability"] },
+    { "area": "Le Marais (3rd/4th)", "bestFor": ["Nightlife", "Boutiques"] },
+    { "area": "7th", "bestFor": ["Eiffel views", "Families"] }
+  ],
+  "costsPerDay": { "budget": "€70–€110", "midrange": "€140–€220", "luxury": "€300+" },
+  "itineraries": [
+    { "day": 1, "title": "Right Bank Icons", "activities": ["Louvre or Orsay", "Tuileries", "Seine walk", "Eiffel Tower"] },
+    { "day": 2, "title": "Left Bank", "activities": ["Latin Quarter", "Luxembourg Gardens", "Saint-Germain cafés"] },
+    { "day": 3, "title": "Montmartre + Canal", "activities": ["Sacré-Cœur", "Artists’ square", "Canal Saint‑Martin sunset"] }
+  ],
+  "sustainability": [
+    "Arrive by rail when possible.",
+    "Use Vélib’ shared bikes and tap water fountains.",
+    "Choose eco-certified hotels (Green Key)."
+  ],
+  "faqs": [
+    { "q": "Is tap water safe?", "a": "Yes, safe across the city." },
+    { "q": "Best passes?", "a": "Navigo Easy for transport; Museum Pass if doing many museums." }
+  ],
+  "updatedAt": "2025-11-04"
+}

@@ -1,0 +1,76 @@
+{
+  "type": "destination",
+  "slug": "india-travel-highlights",
+  "title": "India Travel Highlights",
+  "region": "South Asia",
+  "country": "India",
+  "summary": "From Rann Utsav to Shimla, Char Dham, and Kerala, this guide covers India’s most beloved travel experiences for modern explorers.",
+  "heroImage": "/Rann-Utsav-Gujarat.png",
+  "bestTime": "Oct–Feb for Rann Utsav and Himalayan escapes; Sep–Mar for Kerala backwaters and south coast travel.",
+  "quickFacts": {
+    "Currency": "INR",
+    "Language": "Hindi & regional languages; English widely spoken in tourism.",
+    "Top Routes": "Delhi–Ahmedabad–Kutch, Delhi–Shimla, Delhi–Rishikesh, Kochi–Alleppey.",
+    "Travel Tip": "Book festival and pilgrimage stays early, especially for Rann Utsav and Char Dham season."
+  },
+  "attractions": [
+    { "name": "Rann Utsav", "summary": "A cultural festival in the white salt desert of Kutch with crafts, food, and desert camping." },
+    { "name": "Shimla Hill Station", "summary": "Colonial charm, cool weather, scenic walks, and easy access to nearby Himalayan valleys." },
+    { "name": "Char Dham Pilgrimage", "summary": "Spiritual journey to Yamunotri, Gangotri, Kedarnath and Badrinath with sacred mountain shrines." },
+    { "name": "Kerala Backwaters", "summary": "Houseboat cruises, tea hill stations, and Ayurvedic wellness in God’s Own Country." }
+  ],
+  "cultureEtiquette": [
+    "Dress modestly when visiting temples and pilgrimage sites.",
+    "Remove shoes before entering religious buildings and private homes.",
+    "Respect local customs around food, photography, and elders."
+  ],
+  "gettingAround": [
+    "Use trains for scenic north-south travel and book early for festival season.",
+    "Hire a private car with driver for Char Dham circuits and Himachal hill station transfers.",
+    "Book local ferries and houseboats in Kerala for the best backwater experience."
+  ],
+  "whereToStay": [
+    { "area": "Dhordo (Kutch)", "bestFor": ["Festival camping", "Cultural shows"] },
+    { "area": "Shimla", "bestFor": ["Hill station charm", "Cool weather"] },
+    { "area": "Rishikesh/Badrinath", "bestFor": ["Pilgrimage", "Spiritual stays"] },
+    { "area": "Alleppey", "bestFor": ["Backwaters", "Luxury houseboats"] }
+  ],
+  "costsPerDay": {
+    "budget": "₹3,000–₹4,500",
+    "midrange": "₹5,000–₹9,000",
+    "luxury": "₹10,000+"
+  },
+  "itineraries": [
+    {
+      "day": 1,
+      "title": "Rann Utsav Adventure",
+      "activities": ["Arrive in Dhordo", "Explore desert tents", "Attend cultural performances"]
+    },
+    {
+      "day": 2,
+      "title": "Shimla Hill Station", 
+      "activities": ["Walk the Mall Road", "Visit Christ Church", "Enjoy local apple treats"]
+    },
+    {
+      "day": 3,
+      "title": "Char Dham Planning", 
+      "activities": ["Reach Rishikesh", "Prepare for pilgrimage permits", "Visit Triveni Ghat"]
+    },
+    {
+      "day": 4,
+      "title": "Kerala Backwaters", 
+      "activities": ["Board an Alleppey houseboat", "Cruise the canals", "Enjoy fresh seafood and coconut rice"]
+    }
+  ],
+  "sustainability": [
+    "Support local artisans and handicraft sellers at Rann Utsav.",
+    "Respect temple rules and local pilgrims during Char Dham travel.",
+    "Choose eco-friendly backwater stays and avoid plastic waste in Kerala."
+  ],
+  "faqs": [
+    { "q": "When is the best time to visit Rann Utsav?", "a": "October to February is the ideal period when the desert festival is in full swing and the weather is pleasant." },
+    { "q": "How do I book Char Dham travel?", "a": "Book with an experienced operator who handles permits, transport, and accommodations for a safe pilgrimage." },
+    { "q": "What is special about Kerala backwaters?", "a": "A houseboat cruise through palm-lined canals and quiet villages is the signature Kerala travel experience." }
+  ],
+  "updatedAt": "2026-05-12"
+}

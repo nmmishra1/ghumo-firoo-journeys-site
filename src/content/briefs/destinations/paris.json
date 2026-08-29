@@ -1,0 +1,20 @@
+{
+  "slug": "paris",
+  "title": "Paris Destination Guide Brief",
+  "targetKeywords": ["things to do in paris", "best time to visit paris", "paris itinerary 3 days", "where to stay in paris"],
+  "outline": [
+    "Overview & why go",
+    "Best time to visit (seasons/festivals)",
+    "Top attractions (8–12)",
+    "Culture & etiquette",
+    "Getting around (Navigo, RER, airports)",
+    "Where to stay (by arrondissement)",
+    "Costs by budget band",
+    "3/5/7‑day itineraries",
+    "Sustainable options",
+    "FAQs"
+  ],
+  "faqs": ["Is tap water safe?", "Do I need cash?", "How to skip the lines?"],
+  "sources": ["parisinfo.com", "ratp.fr", "culture.gouv.fr"],
+  "notes": "Emphasize museum reservation systems and Seine riverbank walks."
+}

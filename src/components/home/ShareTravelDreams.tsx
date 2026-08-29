@@ -6,7 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Heart, Send, Phone, Mail } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { supabase } from '@/integrations/supabase/client';
+import { submitToGoogleSheets } from '@/lib/googleSheets';
 
 const ShareTravelDreams = () => {
   const [formData, setFormData] = useState({
@@ -31,34 +31,56 @@ const ShareTravelDreams = () => {
     setIsSubmitting(true);
 
     try {
-      // Create lead in database
-      const { error: leadError } = await supabase
-        .from('leads')
-        .insert([{
-          customer_name: formData.name,
-          email: formData.email,
-          contact_number: formData.phone,
-          tour_description: `Destination: ${formData.destination}\nBudget: ${formData.budget}\nTravel Dates: ${formData.travelDates}\nGroup Size: ${formData.groupSize}\nMessage: ${formData.message}`,
-          customer_type: 'Website Enquiry',
-          travel_interest: formData.destination,
-          user_id: '00000000-0000-0000-0000-000000000000', // Default user for website enquiries
-          created_by: '00000000-0000-0000-0000-000000000000'
-        }]);
-
-      if (leadError) throw leadError;
-
-      // Send notification email
-      const { error: emailError } = await supabase.functions.invoke('send-travel-enquiry', {
-        body: {
-          customerData: formData,
-          type: 'travel_dreams'
-        }
+      // Submit to Google Sheets
+      await submitToGoogleSheets({
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone,
+        destination: formData.destination,
+        budget: formData.budget,
+        travel_date: formData.travelDates,
+        numberOfTravelers: formData.groupSize,
+        notes: formData.message,
+        source: 'share_travel_dreams_home',
+        type: 'enquiry'
       });
 
-      if (emailError) {
-        console.error('Email error:', emailError);
-        // Don't throw here, as the lead was created successfully
-      }
+      // Track Lead via Meta Pixel & CAPI
+      trackLead('Share Travel Dreams', {
+        em: formData.email,
+        ph: formData.phone,
+        fn: formData.name.split(' ')[0],
+        ln: formData.name.split(' ').slice(1).join(' ') || undefined
+      }, {
+        source: 'share_travel_dreams_home',
+        destination: formData.destination
+      });
+
+      // Create lead in local storage (Legacy/Backup)
+      const newLead = {
+        id: Date.now().toString(),
+        customer_name: formData.name,
+        email: formData.email,
+        contact_number: formData.phone,
+        tour_description: `Destination: ${formData.destination}\nBudget: ${formData.budget}\nTravel Dates: ${formData.travelDates}\nGroup Size: ${formData.groupSize}\nMessage: ${formData.message}`,
+        customer_type: 'Website Enquiry',
+        travel_interest: formData.destination,
+        user_id: '00000000-0000-0000-0000-000000000000',
+        created_by: '00000000-0000-0000-0000-000000000000',
+        created_at: new Date().toISOString(),
+        status: 'new'
+      };
+
+      // Store in localStorage
+      const existingLeads = JSON.parse(localStorage.getItem('leads') || '[]');
+      existingLeads.push(newLead);
+      localStorage.setItem('leads', JSON.stringify(existingLeads));
+
+      // Mock email notification (in real app, this would be handled by backend)
+      console.log('Travel enquiry submitted:', {
+        customerData: formData,
+        type: 'travel_dreams'
+      });
 
       toast({
         title: "Thank you for your enquiry!",
@@ -265,30 +287,30 @@ const ShareTravelDreams = () => {
 
           {/* Why Choose Us */}
           <div className="space-y-8">
-            <Card className="border-2 border-orange-200 bg-orange-50">
+            <Card className="border-2 border-accent/30 bg-accent/5">
               <CardContent className="p-6">
                 <h3 className="text-xl font-semibold text-gray-900 mb-4">
                   Why Share Your Dreams With Us?
                 </h3>
                 <ul className="space-y-3">
                   <li className="flex items-start">
-                    <div className="w-2 h-2 bg-orange-500 rounded-full mt-2 mr-3"></div>
+                    <div className="w-2 h-2 bg-accent rounded-full mt-2 mr-3"></div>
                     <span className="text-gray-700">Personalized itineraries crafted by travel experts</span>
                   </li>
                   <li className="flex items-start">
-                    <div className="w-2 h-2 bg-orange-500 rounded-full mt-2 mr-3"></div>
+                    <div className="w-2 h-2 bg-accent rounded-full mt-2 mr-3"></div>
                     <span className="text-gray-700">Best prices guaranteed with no hidden costs</span>
                   </li>
                   <li className="flex items-start">
-                    <div className="w-2 h-2 bg-orange-500 rounded-full mt-2 mr-3"></div>
+                    <div className="w-2 h-2 bg-accent rounded-full mt-2 mr-3"></div>
                     <span className="text-gray-700">24/7 support throughout your journey</span>
                   </li>
                   <li className="flex items-start">
-                    <div className="w-2 h-2 bg-orange-500 rounded-full mt-2 mr-3"></div>
+                    <div className="w-2 h-2 bg-accent rounded-full mt-2 mr-3"></div>
                     <span className="text-gray-700">Free consultation and trip planning</span>
                   </li>
                   <li className="flex items-start">
-                    <div className="w-2 h-2 bg-orange-500 rounded-full mt-2 mr-3"></div>
+                    <div className="w-2 h-2 bg-accent rounded-full mt-2 mr-3"></div>
                     <span className="text-gray-700">Trusted by 1000+ happy travelers</span>
                   </li>
                 </ul>

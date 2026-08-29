@@ -1,0 +1,18 @@
+{
+  "slug": "london",
+  "title": "London Destination Guide Brief",
+  "targetKeywords": ["things to do in london", "london itinerary 4 days", "best area to stay in london", "oyster card vs contactless"],
+  "outline": [
+    "Overview",
+    "Seasons & events",
+    "Top attractions",
+    "Neighborhoods & stays",
+    "Transport (Oyster vs contactless)",
+    "Costs",
+    "Itineraries",
+    "Sustainability",
+    "FAQs"
+  ],
+  "faqs": ["Is the Tube safe at night?", "Do I need cash?"],
+  "sources": ["visitlondon.com", "tfl.gov.uk"]
+}

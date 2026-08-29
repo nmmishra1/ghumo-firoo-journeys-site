@@ -3,6 +3,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import Layout from '@/components/Layout';
+import SEO from '@/components/SEO';
 
 const Career = () => {
   const openings = [
@@ -47,6 +48,10 @@ const Career = () => {
 
   return (
     <Layout>
+      <SEO 
+        title="Careers at Ghumo Firoo Travels | Join Our Team"
+        description="Join Ghumo Firoo Travels and build a career in the travel industry. Explore current openings for travel consultants, operations, and marketing roles."
+      />
       {/* Hero Section */}
       <section 
         className="relative h-[50vh] bg-cover bg-center bg-no-repeat flex items-center justify-center"
@@ -150,7 +155,7 @@ const Career = () => {
             Even if you don't see a perfect match above, we're always interested in meeting 
             talented individuals who share our passion for travel.
           </p>
-          <Button asChild size="lg" className="bg-orange-500 hover:bg-orange-600">
+          <Button asChild size="lg" className="bg-accent hover:bg-accent">
             <Link to="/contact">Send Your Resume</Link>
           </Button>
         </div>

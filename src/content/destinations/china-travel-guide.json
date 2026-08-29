@@ -1,0 +1,72 @@
+{
+  "type": "destination",
+  "slug": "china-travel-guide",
+  "title": "China Travel Guide",
+  "region": "Asia",
+  "country": "China",
+  "summary": "A practical guide to China for first-time travellers, covering top cities, visa planning, seasonal highlights, and cultural dos and don'ts.",
+  "heroImage": "/Europe Image.png",
+  "bestTime": "April–May and September–October for mild weather and comfortable sightseeing.",
+  "quickFacts": {
+    "Currency": "CNY",
+    "Language": "Mandarin Chinese; English is common in major cities.",
+    "Visa": "China Tourist visa required; e-visa available for some nationalities through official channels.",
+    "Transport": "High-speed rail is efficient between major cities; domestic flights cover longer distances."
+  },
+  "attractions": [
+    { "name": "Great Wall", "summary": "A world-famous wonder stretching across northern China with scenic and historic sections to explore." },
+    { "name": "Beijing", "summary": "China’s capital blends imperial history, modern architecture, and world-class museums." },
+    { "name": "Shanghai", "summary": "A futuristic skyline, vibrant food scene, and historic riverside Bund district." },
+    { "name": "Xi'an", "summary": "Home of the Terracotta Army and a rich gateway to ancient Silk Road history." },
+    { "name": "Guilin & Yangshuo", "summary": "Limestone karst landscapes, river cruises, and peaceful countryside scenery." }
+  ],
+  "cultureEtiquette": [
+    "Learn basic greetings and avoid loud behaviour in public spaces.",
+    "Respect queues, especially at train stations and tourist sites.",
+    "Use both hands for giving and receiving items to show courtesy."
+  ],
+  "gettingAround": [
+    "Use China’s high-speed train network for fast intercity travel.",
+    "Book taxis via apps like DiDi in major cities for convenience.",
+    "Download offline maps and translation apps before travel."  
+  ],
+  "whereToStay": [
+    { "area": "Beijing Dongcheng", "bestFor": ["History", "Temples"] },
+    { "area": "Shanghai Bund", "bestFor": ["City skyline", "Shopping"] },
+    { "area": "Xi'an City Wall", "bestFor": ["Ancient sites", "Local food"] },
+    { "area": "Guilin", "bestFor": ["River views", "Nature"] }
+  ],
+  "costsPerDay": {
+    "budget": "₹4,500–₹7,000",
+    "midrange": "₹8,000–₹12,000",
+    "luxury": "₹14,000+"
+  },
+  "itineraries": [
+    {
+      "day": 1,
+      "title": "Historic Beijing",
+      "activities": ["Visit the Forbidden City", "Walk Tiananmen Square", "See the Temple of Heaven"]
+    },
+    {
+      "day": 2,
+      "title": "Great Wall & Local Life",
+      "activities": ["Hike a restored Wall section", "Explore a hutong neighbourhood", "Try Peking duck"]
+    },
+    {
+      "day": 3,
+      "title": "Shanghai Modernity",
+      "activities": ["Walk the Bund", "Tour a skyscraper observation deck", "Experience local street food"]
+    }
+  ],
+  "sustainability": [
+    "Choose trains instead of flights where possible.",
+    "Carry a reusable water bottle and use drink stations.",
+    "Follow local recycling guidance and minimise plastic waste."  
+  ],
+  "faqs": [
+    { "q": "Do I need a visa for China?", "a": "Yes, most travellers require a tourist visa; apply through the official Chinese visa service before departure." },
+    { "q": "What is the best route for first-time visitors?", "a": "A Beijing-Shanghai-Xi'an route offers a strong mix of history, culture, and modern China." },
+    { "q": "Can I use my phone data easily?", "a": "Buy a local SIM or global roaming plan and use offline maps and translation apps for backup." }
+  ],
+  "updatedAt": "2026-05-12"
+}

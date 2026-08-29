@@ -1,24 +1,41 @@
-# Logs
-logs
-*.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-pnpm-debug.log*
-lerna-debug.log*
-
+# Dependencies & Builds
 node_modules
 dist
 dist-ssr
 *.local
 
-# Editor directories and files
+# Embedded & Separate Repositories
+whatsapp-service/
+public_archive/
+scratch/
+staging_deploy_pkg/
+uploads/
+
+# Security & Credentials
+.env
+.env.production
+.env.staging
+.env.example
+*.sql
+
+# Logs
+logs
+*.log
+npm-debug.log*
+
+# Editor & OS files
 .vscode/*
 !.vscode/extensions.json
 .idea
 .DS_Store
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
-*.sw?
+
+# Scratch scripts & temporary archives
+php-backend.zip
+*.zip
+*.cjs
+*.ps1
+
+# Managed data
+**.data.json
+**.node-persist**
+**_IGNORE_**

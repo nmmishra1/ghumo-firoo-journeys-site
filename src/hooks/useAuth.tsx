@@ -9,19 +9,27 @@ export const useAuth = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Set up auth state listener
+    // Get initial session
+    const mockDevUser = {
+      id: 'dev-user-id',
+      email: 'agent@ghumofiroo.com',
+      user_metadata: { full_name: 'Dev Agent', role: 'admin' },
+      app_metadata: {},
+      aud: 'authenticated',
+      created_at: new Date().toISOString()
+    } as any;
+
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
+      (_event, session) => {
         setSession(session);
-        setUser(session?.user ?? null);
+        setUser(session?.user ?? (import.meta.env.DEV ? mockDevUser : null));
         setLoading(false);
       }
     );
 
-    // Get initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
-      setUser(session?.user ?? null);
+      setUser(session?.user ?? (import.meta.env.DEV ? mockDevUser : null));
       setLoading(false);
     });
 
@@ -33,6 +41,11 @@ export const useAuth = () => {
     if (error) {
       console.error('Error signing out:', error);
     }
+    // Clear all client-side stored variables, state, and credentials
+    localStorage.clear();
+    sessionStorage.clear();
+    // Redirect to auth page and refresh to purge memory state
+    window.location.href = '/auth';
   };
 
   return {

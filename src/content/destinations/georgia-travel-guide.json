@@ -1,0 +1,78 @@
+{
+  "type": "destination",
+  "slug": "georgia-travel-guide",
+  "title": "Georgia Travel Guide",
+  "region": "Caucasus",
+  "country": "Georgia",
+  "summary": "A complete Georgia travel guide for Indian visitors, with visa tips, summer and winter highlights, Batumi coastal escapes, wine country, and mountain adventures.",
+  "heroImage": "/blog/georgia-tbilisi-warmth.png",
+  "bestTime": "May–September for beach, wine and hiking; December–March for snow, skiing and festive city escapes.",
+  "quickFacts": {
+    "Currency": "GEL",
+    "Language": "Georgian (Russian & English widely spoken)",
+    "Visa": "Visa-free for many Indians for short stays; confirm latest e-visa rules.",
+    "Airport": "Tbilisi International Airport (TBS)",
+    "Plug Type": "Type C/F, 220V"
+  },
+  "attractions": [
+    { "name": "Batumi Boulevard", "summary": "A lively sea promenade with modern sculptures, beach clubs, and café culture on the Black Sea coast." },
+    { "name": "Tbilisi Old Town", "summary": "Historic alleyways, sulfur baths, and vibrant street life in Georgia’s capital city." },
+    { "name": "Kakheti Wine Road", "summary": "Ancient vineyards, qvevri wine tastings, and charming wineries around Telavi." },
+    { "name": "Svaneti & Ushguli", "summary": "A mountain region of tower villages, dramatic alpine views, and high-altitude hiking." },
+    { "name": "Mtskheta", "summary": "Georgia’s spiritual heart with Svetitskhoveli Cathedral and hilltop Jvari Monastery." }
+  ],
+  "cultureEtiquette": [
+    "Show respect in churches and monasteries with modest clothing.",
+    "Use both hands when offering or receiving items to show politeness.",
+    "Accept invitations to taste local cuisine and join a Georgian supra when offered."
+  ],
+  "gettingAround": [
+    "Take local minibuses (marshrutkas) between cities for an authentic budget experience.",
+    "Book taxis through apps like Bolt and Yandex for reliable short trips.",
+    "Rent a car for Kakheti wine tours or day trips to mountain regions like Svaneti."  
+  ],
+  "whereToStay": [
+    { "area": "Batumi", "bestFor": ["Beach stays", "Coastal nightlife"] },
+    { "area": "Tbilisi", "bestFor": ["Historic hotels", "City exploration"] },
+    { "area": "Kakheti", "bestFor": ["Wine village retreats", "Luxury guesthouses"] },
+    { "area": "Svaneti", "bestFor": ["Mountain lodges", "Adventure travel"] }
+  ],
+  "costsPerDay": {
+    "budget": "₹4,000–₹5,500",
+    "midrange": "₹7,000–₹12,000",
+    "luxury": "₹15,000+"
+  },
+  "itineraries": [
+    {
+      "day": 1,
+      "title": "Explore Tbilisi",
+      "activities": ["Walk through Old Town", "Visit Narikala Fortress", "Relax in Abanotubani sulfur baths"]
+    },
+    {
+      "day": 2,
+      "title": "Batumi Coast & Culture",
+      "activities": ["Stroll Batumi Boulevard", "See Ali & Nino sculpture", "Enjoy the beach and local seafood"]
+    },
+    {
+      "day": 3,
+      "title": "Kakheti Wine Road",
+      "activities": ["Visit Telavi", "Taste qvevri wines", "Tour historic Gremi Fortress"]
+    },
+    {
+      "day": 4,
+      "title": "Mountain Highlights",
+      "activities": ["Drive to Mtskheta for heritage sites", "Visit the Tbilisi Flea Market", "Sample khachapuri in a local café"]
+    }
+  ],
+  "sustainability": [
+    "Choose locally owned guesthouses to support the community.",
+    "Carry a reusable bottle and avoid single-use plastics around tourist sites.",
+    "Respect natural areas in Svaneti and Batumi beaches by staying on marked trails."
+  ],
+  "faqs": [
+    { "q": "Do Indian travelers need a visa for Georgia?", "a": "Many Indian passports qualify for short-term visa-free travel to Georgia, but check the latest embassy guidelines before departure." },
+    { "q": "What is the best time to visit Batumi?", "a": "June to September is ideal for the seaside, while October is great for wine country and cooler weather." },
+    { "q": "Can I use Indian rupees in Georgia?", "a": "No, Georgia uses the Georgian lari (GEL); exchange currency at airports or local banks." }
+  ],
+  "updatedAt": "2026-05-12"
+}

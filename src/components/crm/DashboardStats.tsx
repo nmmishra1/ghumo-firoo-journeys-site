@@ -1,6 +1,6 @@
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
-import { Users, TrendingUp, Phone, Calendar, DollarSign, UserCheck, Building, BarChart3 } from 'lucide-react';
+import { Users, TrendingUp, Phone, Calendar, IndianRupee, UserCheck, Building, BarChart3 } from 'lucide-react';
 
 interface DashboardStatsProps {
   userRole: string;
@@ -27,7 +27,7 @@ export const DashboardStats: React.FC<DashboardStatsProps> = ({ userRole, stats 
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center">
-              <DollarSign className="h-6 w-6 text-green-600" />
+              <IndianRupee className="h-6 w-6 text-green-600" />
               <div className="ml-3">
                 <p className="text-xs font-medium text-gray-600">Amount Receivable</p>
                 <p className="text-xl font-bold text-gray-900">₹2,45,000</p>
@@ -39,7 +39,7 @@ export const DashboardStats: React.FC<DashboardStatsProps> = ({ userRole, stats 
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center">
-              <DollarSign className="h-6 w-6 text-red-600" />
+              <IndianRupee className="h-6 w-6 text-red-600" />
               <div className="ml-3">
                 <p className="text-xs font-medium text-gray-600">Amount Payable</p>
                 <p className="text-xl font-bold text-gray-900">₹85,000</p>
@@ -142,7 +142,7 @@ export const DashboardStats: React.FC<DashboardStatsProps> = ({ userRole, stats 
       <Card>
         <CardContent className="p-4">
           <div className="flex items-center">
-            <Calendar className="h-6 w-6 text-orange-600" />
+            <Calendar className="h-6 w-6 text-accent" />
             <div className="ml-3">
               <p className="text-xs font-medium text-gray-600">Next Calls</p>
               <p className="text-xl font-bold text-gray-900">{stats.nextCalls || 0}</p>
@@ -166,7 +166,7 @@ export const DashboardStats: React.FC<DashboardStatsProps> = ({ userRole, stats 
       <Card>
         <CardContent className="p-4">
           <div className="flex items-center">
-            <div className="h-6 w-6 bg-orange-500 rounded-full" />
+            <div className="h-6 w-6 bg-accent rounded-full" />
             <div className="ml-3">
               <p className="text-xs font-medium text-gray-600">Hot Prospects</p>
               <p className="text-xl font-bold text-gray-900">{stats.hot}</p>

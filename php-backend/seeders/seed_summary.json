@@ -1,0 +1,286 @@
+{
+    "rann_existed": true,
+    "rann_variants_seeded": 5,
+    "summary": [
+        {
+            "name": "Rann Utsav Kutch Package",
+            "slug": "rann-utsav",
+            "variants": 5
+        },
+        {
+            "name": "Kutch Rann Utsav Package by Ghumo Firoo Travels",
+            "slug": "kutch-rann-utsav",
+            "variants": 4
+        },
+        {
+            "name": "Kashmir Paradise Tour",
+            "slug": "kashmir-paradise",
+            "variants": 2
+        },
+        {
+            "name": "Badrinath Yatra",
+            "slug": "badrinath-ek-dham-yatra",
+            "variants": 0
+        },
+        {
+            "name": "Bali Paradise Escape",
+            "slug": "bali-paradise",
+            "variants": 0
+        },
+        {
+            "name": "Char Dham by Helicopter",
+            "slug": "char-dham-yatra-helicopter",
+            "variants": 0
+        },
+        {
+            "name": "Char Dham Family Package",
+            "slug": "char-dham-yatra-family",
+            "variants": 0
+        },
+        {
+            "name": "Char Dham Senior Citizen Package",
+            "slug": "char-dham-senior-citizen",
+            "variants": 0
+        },
+        {
+            "name": "Char Dham Yatra Budget Package",
+            "slug": "char-dham-yatra-budget",
+            "variants": 0
+        },
+        {
+            "name": "Char Dham Yatra Luxury Package",
+            "slug": "char-dham-yatra-luxury",
+            "variants": 0
+        },
+        {
+            "name": "Char Dham Yatra Standard Package",
+            "slug": "char-dham-yatra-standard",
+            "variants": 0
+        },
+        {
+            "name": "Char Dham Yatra Uttarakhand",
+            "slug": "char-dham-yatra",
+            "variants": 0
+        },
+        {
+            "name": "Do Dham Gangotri + Yamunotri",
+            "slug": "gangotri-yamunotri-do-dham",
+            "variants": 0
+        },
+        {
+            "name": "Do Dham Kedarnath + Badrinath",
+            "slug": "kedarnath-badrinath-do-dham",
+            "variants": 0
+        },
+        {
+            "name": "Dubai Luxury & Desert Safari",
+            "slug": "dubai-delights",
+            "variants": 0
+        },
+        {
+            "name": "Europe Highlights 12 Days",
+            "slug": "europe-highlights-12-days",
+            "variants": 0
+        },
+        {
+            "name": "France Highlights",
+            "slug": "europe-france-highlights",
+            "variants": 0
+        },
+        {
+            "name": "Georgia Mountains & Wine Tour",
+            "slug": "georgia-adventure",
+            "variants": 0
+        },
+        {
+            "name": "Goa Beach Holiday",
+            "slug": "goa-beach-holiday",
+            "variants": 0
+        },
+        {
+            "name": "Golden Triangle India Tour",
+            "slug": "golden-triangle",
+            "variants": 0
+        },
+        {
+            "name": "Grand Europe Tour",
+            "slug": "grand-europe-tour-15days",
+            "variants": 0
+        },
+        {
+            "name": "Himachal Hill Stations Tour",
+            "slug": "himachal-hill-stations",
+            "variants": 0
+        },
+        {
+            "name": "Italy Cultural Immersion",
+            "slug": "europe-italy-cultural",
+            "variants": 0
+        },
+        {
+            "name": "Jaisalmer Desert Safari Special",
+            "slug": "jaisalmer-tour",
+            "variants": 0
+        },
+        {
+            "name": "Japan Cherry Blossom Special",
+            "slug": "japan-cherry-blossom",
+            "variants": 0
+        },
+        {
+            "name": "Kedarnath Yatra",
+            "slug": "kedarnath-ek-dham-yatra",
+            "variants": 0
+        },
+        {
+            "name": "Kerala Backwaters & Houseboat",
+            "slug": "kerala-backwaters",
+            "variants": 0
+        },
+        {
+            "name": "Leh Ladakh High Passes Adventure",
+            "slug": "leh-ladakh-tour",
+            "variants": 0
+        },
+        {
+            "name": "Mauritius Island Bliss",
+            "slug": "mauritius-bliss",
+            "variants": 0
+        },
+        {
+            "name": "Rajasthan Royal Palaces",
+            "slug": "rajasthan-royal",
+            "variants": 0
+        },
+        {
+            "name": "Rann Utsav & White Desert Flagship (3D\/2N)",
+            "slug": "rann-utsav-3d2n",
+            "variants": 0
+        },
+        {
+            "name": "Rann Utsav Darbari Suite",
+            "slug": "rann-utsav-darbari-suite",
+            "variants": 0
+        },
+        {
+            "name": "Rann Utsav Day Trip",
+            "slug": "rann-utsav-day-trip",
+            "variants": 0
+        },
+        {
+            "name": "Rann Utsav Deluxe Tent",
+            "slug": "rann-utsav-deluxe-tent",
+            "variants": 0
+        },
+        {
+            "name": "Rann Utsav Family Package",
+            "slug": "rann-utsav-family-package",
+            "variants": 0
+        },
+        {
+            "name": "Rann Utsav Honeymoon Package",
+            "slug": "rann-utsav-honeymoon",
+            "variants": 0
+        },
+        {
+            "name": "Rann Utsav Premium Luxury Experience",
+            "slug": "rann-utsav-premium-luxury",
+            "variants": 0
+        },
+        {
+            "name": "Rann Utsav Premium Tent",
+            "slug": "rann-utsav-premium-tent",
+            "variants": 0
+        },
+        {
+            "name": "Rann Utsav Rajwadi Suite",
+            "slug": "rann-utsav-rajwadi-suite",
+            "variants": 0
+        },
+        {
+            "name": "Road to Heaven & Dholavira (4D\/3N)",
+            "slug": "rann-utsav-4d3n",
+            "variants": 0
+        },
+        {
+            "name": "Seychelles Tropical Paradise",
+            "slug": "seychelles-escape",
+            "variants": 0
+        },
+        {
+            "name": "Singapore + Cruise Experience",
+            "slug": "singapore-cruise-experience",
+            "variants": 0
+        },
+        {
+            "name": "Singapore + Malaysia Combo",
+            "slug": "singapore-malaysia-combo-tour",
+            "variants": 0
+        },
+        {
+            "name": "Singapore + Sentosa Beach Escape",
+            "slug": "singapore-sentosa-beach",
+            "variants": 0
+        },
+        {
+            "name": "Singapore City Delight 4D\/3N",
+            "slug": "singapore-4d-3n-city-delight",
+            "variants": 0
+        },
+        {
+            "name": "Singapore Delights & Sentosa",
+            "slug": "singapore-5d-4n",
+            "variants": 0
+        },
+        {
+            "name": "Singapore Discovery 5D\/4N",
+            "slug": "singapore-5d-4n-discovery",
+            "variants": 0
+        },
+        {
+            "name": "Singapore Family Fun Package",
+            "slug": "singapore-family-fun",
+            "variants": 0
+        },
+        {
+            "name": "Singapore Honeymoon Escape",
+            "slug": "singapore-honeymoon-escape",
+            "variants": 0
+        },
+        {
+            "name": "Singapore Luxury Collection",
+            "slug": "singapore-luxury-collection",
+            "variants": 0
+        },
+        {
+            "name": "Switzerland + Italy + France",
+            "slug": "europe-swiss-italy-france-tour",
+            "variants": 0
+        },
+        {
+            "name": "Switzerland + Italy Tour",
+            "slug": "europe-switzerland-italy-tour",
+            "variants": 0
+        },
+        {
+            "name": "Switzerland + Paris Tour",
+            "slug": "europe-switzerland-paris-tour",
+            "variants": 0
+        },
+        {
+            "name": "Switzerland Highlights",
+            "slug": "europe-switzerland-highlights",
+            "variants": 0
+        },
+        {
+            "name": "Thailand Tropical Getaway",
+            "slug": "thailand-tropical",
+            "variants": 0
+        },
+        {
+            "name": "Turkey Hot Air Balloon Adventure",
+            "slug": "turkey-adventure",
+            "variants": 0
+        }
+    ]
+}

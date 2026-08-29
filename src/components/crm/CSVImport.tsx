@@ -87,14 +87,59 @@ export const CSVImport: React.FC<CSVImportProps> = ({ isOpen, onClose, onImportC
         throw new Error('User not authenticated');
       }
       
+      // Get existing lead ids to avoid conflicts and generate consecutive sequence numbers
+      const date = new Date();
+      const year = date.getFullYear();
+      const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+      const monthAbbr = monthNames[date.getMonth()];
+      const monthNum = String(date.getMonth() + 1).padStart(2, '0');
+      const prefix1 = `LD${year}-${monthAbbr}-`;
+      const prefix2 = `LD${year}-${monthNum}-`;
+
+      const { data: existingDbLeads } = await supabase
+        .from('leads')
+        .select('lead_id')
+        .like('lead_id', `LD${year}-%`);
+
+      let maxSeq = 0;
+      (existingDbLeads || []).forEach(l => {
+        const lId = l.lead_id;
+        if (lId) {
+          if (lId.startsWith(prefix1)) {
+            const seqStr = lId.substring(prefix1.length);
+            const seq = parseInt(seqStr, 10);
+            if (!isNaN(seq) && seq > maxSeq) {
+              maxSeq = seq;
+            }
+          } else if (lId.startsWith(prefix2)) {
+            const seqStr = lId.substring(prefix2.length);
+            const seq = parseInt(seqStr, 10);
+            if (!isNaN(seq) && seq > maxSeq) {
+              maxSeq = seq;
+            }
+          }
+        }
+      });
+      
       // Prepare records for insertion
-      const leadsToInsert = records.map(record => ({
-        ...record,
-        user_id: user.id,
-        created_by: user.id,
-        status: 'New',
-        next_call_time: new Date().toISOString() // Default to current time
-      }));
+      const baseTime = Date.now();
+      const leadsToInsert = records.map((record, index) => {
+        const nextSeq = String(maxSeq + 1 + index).padStart(5, '0');
+        const generatedLeadId = `${prefix1}${nextSeq}`;
+        const newId = `lead_${baseTime}_${index}_${Math.random().toString(36).substring(2, 9)}`;
+
+        return {
+          ...record,
+          id: newId,
+          lead_id: generatedLeadId,
+          lead_created_date: new Date().toISOString(),
+          lead_purchased_date: new Date().toISOString().split('T')[0],
+          user_id: user.id,
+          created_by: user.id,
+          status: 'New',
+          next_call_time: new Date().toISOString() // Default to current time
+        };
+      });
       
       // Insert leads
       const { error } = await supabase

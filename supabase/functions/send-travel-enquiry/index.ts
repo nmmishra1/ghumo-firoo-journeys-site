@@ -9,7 +9,7 @@ const corsHeaders = {
 };
 
 interface TravelEnquiryRequest {
-  customerData: {
+  customerData?: {
     name: string;
     email: string;
     phone: string;
@@ -18,8 +18,19 @@ interface TravelEnquiryRequest {
     travelDates?: string;
     groupSize?: string;
     message?: string;
+    subject?: string;
   };
-  type: 'travel_dreams' | 'contact' | 'enquiry';
+  type?: 'travel_dreams' | 'contact' | 'enquiry';
+  // anti-spam additions
+  honeypot?: string;
+  formStart?: number;
+  captchaToken?: string;
+  // allow flat payloads
+  name?: string;
+  email?: string;
+  phone?: string;
+  message?: string;
+  subject?: string;
 }
 
 const handler = async (req: Request): Promise<Response> => {
@@ -29,7 +40,56 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
-    const { customerData, type }: TravelEnquiryRequest = await req.json();
+    const body: TravelEnquiryRequest = await req.json();
+
+    // Basic anti-spam: honeypot
+    if (body.honeypot && body.honeypot.trim().length > 0) {
+      return new Response(JSON.stringify({ success: false, message: 'Spam detected' }), {
+        status: 400,
+        headers: { "Content-Type": "application/json", ...corsHeaders },
+      });
+    }
+
+    // Basic anti-spam: minimal time threshold (bots submit instantly)
+    if (typeof body.formStart === 'number') {
+      const elapsed = Date.now() - body.formStart;
+      if (elapsed < 1500) {
+        return new Response(JSON.stringify({ success: false, message: 'Submission too fast' }), {
+          status: 400,
+          headers: { "Content-Type": "application/json", ...corsHeaders },
+        });
+      }
+    }
+
+    // Optional reCAPTCHA v3 verification
+    const recaptchaSecret = Deno.env.get('RECAPTCHA_SECRET_KEY');
+    if (recaptchaSecret && body.captchaToken) {
+      const verifyResp = await fetch('https://www.google.com/recaptcha/api/siteverify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams({
+          secret: recaptchaSecret,
+          response: body.captchaToken,
+        }),
+      });
+      const verifyData = await verifyResp.json();
+      if (!verifyData.success || (verifyData.score !== undefined && verifyData.score < 0.5)) {
+        return new Response(JSON.stringify({ success: false, message: 'CAPTCHA verification failed' }), {
+          status: 400,
+          headers: { "Content-Type": "application/json", ...corsHeaders },
+        });
+      }
+    }
+
+    // Normalize payload: prefer customerData, else use flat fields
+    const customerData = body.customerData ?? {
+      name: body.name || '',
+      email: body.email || '',
+      phone: body.phone || '',
+      message: body.message,
+      subject: body.subject,
+    };
+    const type = body.type ?? 'contact';
 
     // Send confirmation email to customer
     const customerEmailResponse = await resend.emails.send({

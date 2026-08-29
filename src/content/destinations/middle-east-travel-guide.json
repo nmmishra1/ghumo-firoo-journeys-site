@@ -1,0 +1,72 @@
+{
+  "type": "destination",
+  "slug": "middle-east-travel-guide",
+  "title": "Middle East Travel Guide",
+  "region": "Middle East",
+  "country": "Middle East",
+  "summary": "A balanced Middle East travel guide highlighting modern cities, desert adventures, cultural etiquette, and practical planning for first-time visitors.",
+  "heroImage": "/Turkey_Image.jpg",
+  "bestTime": "October–April for cooler days in the Gulf and pleasant desert weather across the region.",
+  "quickFacts": {
+    "Currency": "AED, SAR, ILS, JOD, etc.",
+    "Language": "Arabic is primary; English is widely used in tourism.",
+    "Visa": "E-visas available for many countries; some require advance approval.",
+    "Dress Code": "Modest clothing recommended in public and around religious sites."
+  },
+  "attractions": [
+    { "name": "Dubai", "summary": "Futuristic skyscrapers, luxury malls, desert safaris, and vibrant nightlife." },
+    { "name": "Abu Dhabi", "summary": "Cultural landmarks like Sheikh Zayed Mosque and luxury cultural districts." },
+    { "name": "Petra", "summary": "Ancient rock-cut city in Jordan and one of the world’s most iconic archaeological wonders." },
+    { "name": "Muscat", "summary": "A quieter Gulf experience with old souks, forts, and scenic coastal landscapes." },
+    { "name": "Dead Sea", "summary": "The lowest point on Earth, famous for buoyant salt water and healing mud." }
+  ],
+  "cultureEtiquette": [
+    "Dress respectfully in public, especially near mosques and cultural sites.",
+    "Avoid public displays of affection in conservative areas.",
+    "Accept hospitality politely and avoid criticizing local religion or politics."  
+  ],
+  "gettingAround": [
+    "Use ride-hailing apps in major cities for safe and convenient travel.",
+    "Take domestic airlines for longer Gulf journeys between the UAE, Oman, and Jordan.",
+    "Book guided tours for desert safaris and heritage site visits."
+  ],
+  "whereToStay": [
+    { "area": "Downtown Dubai", "bestFor": ["Luxury", "City attractions"] },
+    { "area": "Old Muscat", "bestFor": ["Culture", "Local markets"] },
+    { "area": "Amman", "bestFor": ["History", "Food"] },
+    { "area": "Wadi Rum", "bestFor": ["Desert camping", "Adventure"] }
+  ],
+  "costsPerDay": {
+    "budget": "₹8,000–₹12,000",
+    "midrange": "₹15,000–₹25,000",
+    "luxury": "₹30,000+"
+  },
+  "itineraries": [
+    {
+      "day": 1,
+      "title": "Dubai Highlights",
+      "activities": ["Visit Burj Khalifa", "Explore Dubai Mall", "Desert safari at sunset"]
+    },
+    {
+      "day": 2,
+      "title": "Cultural Abu Dhabi",
+      "activities": ["Tour Sheikh Zayed Mosque", "Visit Louvre Abu Dhabi", "Stroll the Corniche"]
+    },
+    {
+      "day": 3,
+      "title": "Jordan’s Petra",
+      "activities": ["Walk through the Siq", "See the Treasury", "Explore the ancient city ruins"]
+    }
+  ],
+  "sustainability": [
+    "Choose eco-friendly tours and avoid plastic bottles in the desert.",
+    "Respect dune preservation rules during desert safaris.",
+    "Support local businesses and cultural artisans when shopping."  
+  ],
+  "faqs": [
+    { "q": "Is the Middle East safe for tourists?", "a": "Major tourist destinations are generally safe, but always follow local travel advisories and respect local customs." },
+    { "q": "Do I need a visa for the UAE?", "a": "Many nationalities can obtain an e-visa or visa on arrival; check the latest UAE rules before travel." },
+    { "q": "What should I wear?", "a": "Pack modest clothing for cultural sites and lightweight layers for desert days." }
+  ],
+  "updatedAt": "2026-05-12"
+}

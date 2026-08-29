@@ -52,7 +52,7 @@ export const FollowUpModal: React.FC<FollowUpModalProps> = ({
             <div>
               <Label htmlFor="callType">Call Type *</Label>
               <Select value={formData.callType} onValueChange={(value) => setFormData({ ...formData, callType: value })} required>
-                <SelectTrigger>
+                <SelectTrigger id="callType">
                   <SelectValue placeholder="Select call type" />
                 </SelectTrigger>
                 <SelectContent>
@@ -68,7 +68,7 @@ export const FollowUpModal: React.FC<FollowUpModalProps> = ({
             <div>
               <Label htmlFor="leadProspect">Lead Prospect *</Label>
               <Select value={formData.leadProspect} onValueChange={(value) => setFormData({ ...formData, leadProspect: value })} required>
-                <SelectTrigger>
+                <SelectTrigger id="leadProspect">
                   <SelectValue placeholder="Select prospect level" />
                 </SelectTrigger>
                 <SelectContent>

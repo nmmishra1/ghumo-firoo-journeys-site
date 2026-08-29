@@ -1,0 +1,1916 @@
+[
+  {
+    "city": "Janki Chatti",
+    "name": "Gaurav Hotel",
+    "cat_or_room": "Budget",
+    "b2b_cost": 3500,
+    "rates": []
+  },
+  {
+    "city": "Janki Chatti",
+    "name": "Buransh Homestay",
+    "cat_or_room": "Budget",
+    "b2b_cost": 3500,
+    "rates": []
+  },
+  {
+    "city": "Janki Chatti",
+    "name": "AP Residency",
+    "cat_or_room": "Standard",
+    "b2b_cost": 2500,
+    "rates": [
+      2500,
+      2700,
+      3200,
+      3200,
+      3400,
+      3900,
+      4100,
+      4300,
+      4800
+    ]
+  },
+  {
+    "city": "Janki Chatti",
+    "name": "Blessings Resort Family Cottages (Mountain view with private balcony)",
+    "cat_or_room": "Premium",
+    "b2b_cost": 5000,
+    "rates": [
+      5000,
+      6200,
+      7000,
+      6800,
+      8300,
+      9500,
+      8600,
+      10400,
+      12000
+    ]
+  },
+  {
+    "city": "Janki Chatti",
+    "name": "Blessings Resort Deluxe Cottages (Mountain\nview with private balcony)",
+    "cat_or_room": "Premium",
+    "b2b_cost": 5500,
+    "rates": [
+      5500,
+      6200,
+      7000,
+      7300,
+      8300,
+      9500,
+      9100,
+      10400,
+      12000
+    ]
+  },
+  {
+    "city": "Janki Chatti",
+    "name": "Blessings Resort Luxury Cottages\n(Mountain & River view\nwith private balcony)",
+    "cat_or_room": "Premium",
+    "b2b_cost": 8000,
+    "rates": [
+      8000,
+      9500,
+      12000,
+      9800,
+      11600,
+      14500,
+      11600,
+      13700,
+      17000
+    ]
+  },
+  {
+    "city": "Janki Chatti",
+    "name": "Yamunotri Cottages (Classic)",
+    "cat_or_room": "Premium",
+    "b2b_cost": 3480,
+    "rates": [
+      3480,
+      4740,
+      6000
+    ]
+  },
+  {
+    "city": "Janki Chatti",
+    "name": "Yamunotri Cottages (Luxury Pine)",
+    "cat_or_room": "Premium",
+    "b2b_cost": 5265,
+    "rates": [
+      5265,
+      6525,
+      7785
+    ]
+  },
+  {
+    "city": "Kedarnath",
+    "name": "Rudra Camp Kedarnath",
+    "cat_or_room": "Premium",
+    "b2b_cost": 6500,
+    "rates": [
+      6500,
+      7500,
+      8000
+    ]
+  },
+  {
+    "city": "Kedarnath",
+    "name": "Rudra Hotel",
+    "cat_or_room": "Budget",
+    "b2b_cost": 7500,
+    "rates": [
+      7500,
+      15000
+    ]
+  },
+  {
+    "city": "Kedarnath",
+    "name": "Parmeshwari Kedarnath (Only 20mts Kedarnath Temple)",
+    "cat_or_room": "Premium",
+    "b2b_cost": 7000,
+    "rates": [
+      7000,
+      10500,
+      12500
+    ]
+  },
+  {
+    "city": "Janki Chatti",
+    "name": "Blessings Resort Dormitory",
+    "cat_or_room": "Budget",
+    "b2b_cost": 1200,
+    "rates": [
+      1200,
+      1600,
+      2400,
+      1800,
+      2400,
+      3600,
+      2400,
+      3200,
+      4800
+    ]
+  },
+  {
+    "city": "Uttarkashi",
+    "name": "Shivlinga Resort Deluxe Non AC",
+    "cat_or_room": "Premium",
+    "b2b_cost": 5800,
+    "rates": [
+      5800,
+      6400,
+      7700,
+      3700,
+      4000,
+      5200,
+      4000,
+      4400,
+      6000
+    ]
+  },
+  {
+    "city": "Uttarkashi",
+    "name": "Maa Saraswati Hotel",
+    "cat_or_room": "Standard",
+    "b2b_cost": 2400,
+    "rates": [
+      2400,
+      2800,
+      3200,
+      3000,
+      3600,
+      4200,
+      3600,
+      4400,
+      5200
+    ]
+  },
+  {
+    "city": "Uttarkashi",
+    "name": "Osho Zenganga Commune",
+    "cat_or_room": "Budget",
+    "b2b_cost": 1400,
+    "rates": [
+      1400,
+      2000,
+      2500,
+      3000,
+      3500,
+      4000
+    ]
+  },
+  {
+    "city": "Sonprayag",
+    "name": "Shri Narayan Touris Lodge & Chandica Hotel",
+    "cat_or_room": "Budget",
+    "b2b_cost": 600,
+    "rates": [
+      600,
+      850
+    ]
+  },
+  {
+    "city": "Sonprayag",
+    "name": "Kailashpati Resort",
+    "cat_or_room": "Standard",
+    "b2b_cost": 2800,
+    "rates": [
+      2800,
+      3400,
+      3300,
+      4200
+    ]
+  },
+  {
+    "city": "Sitapur",
+    "name": "Phulwari Resort Swiss Cottage",
+    "cat_or_room": "Premium",
+    "b2b_cost": 3500,
+    "rates": [
+      3500,
+      4000,
+      4800,
+      4500,
+      5250,
+      5700
+    ]
+  },
+  {
+    "city": "Sitapur",
+    "name": "Namami Gange",
+    "cat_or_room": "Standard",
+    "b2b_cost": 2500,
+    "rates": [
+      2500,
+      2900,
+      3200,
+      3000,
+      3600,
+      3900,
+      3600,
+      4400,
+      4800
+    ]
+  },
+  {
+    "city": "Sitapur",
+    "name": "Abhishek Hotel",
+    "cat_or_room": "Standard",
+    "b2b_cost": 3100,
+    "rates": [
+      3100,
+      3300,
+      3500,
+      3500,
+      3700,
+      3900,
+      4300,
+      4500,
+      4700
+    ]
+  },
+  {
+    "city": "Sitapur",
+    "name": "Shiv Manohar",
+    "cat_or_room": "Budget",
+    "b2b_cost": 2000,
+    "rates": [
+      2000,
+      2500,
+      2500,
+      3200,
+      3000,
+      4000
+    ]
+  },
+  {
+    "city": "Pipalkoti",
+    "name": "Ajay Palace Pipalkoti",
+    "cat_or_room": "Standard",
+    "b2b_cost": 2500,
+    "rates": [
+      2500,
+      3200,
+      3000,
+      4200,
+      4000,
+      5600
+    ]
+  },
+  {
+    "city": "Badrinath Dham",
+    "name": "Badri Palace",
+    "cat_or_room": "Premium",
+    "b2b_cost": 4000,
+    "rates": [
+      4000,
+      4400,
+      4600,
+      3600,
+      4500,
+      4800,
+      4800,
+      6000,
+      6400
+    ]
+  },
+  {
+    "city": "Sitapur",
+    "name": "New Basera",
+    "cat_or_room": "Premium",
+    "b2b_cost": 2940,
+    "rates": [
+      2940,
+      3360,
+      4043,
+      3675,
+      4200,
+      5330,
+      4725,
+      5460,
+      6930
+    ]
+  },
+  {
+    "city": "Janki Chatti",
+    "name": "Shiv Shakti Eco Resort",
+    "cat_or_room": "Budget",
+    "b2b_cost": 2200,
+    "rates": [
+      2200,
+      2500,
+      3000,
+      4200,
+      4000,
+      5600
+    ]
+  },
+  {
+    "city": "Janki Chatti",
+    "name": "Gaurav Hotel",
+    "cat_or_room": "Budget",
+    "b2b_cost": 3500,
+    "rates": []
+  },
+  {
+    "city": "Barkot",
+    "name": "Madhuvan Guest House",
+    "cat_or_room": "Budget",
+    "b2b_cost": 1000,
+    "rates": [
+      1000,
+      2000,
+      1500,
+      3500,
+      2500,
+      4500
+    ]
+  },
+  {
+    "city": "Badrinath Dham",
+    "name": "Badri Palace by Namami Gange",
+    "cat_or_room": "Premium",
+    "b2b_cost": 4000,
+    "rates": [
+      4000,
+      4400,
+      4600,
+      3600,
+      4500,
+      4800,
+      4800,
+      6000,
+      6400
+    ]
+  },
+  {
+    "city": "Kedarnath",
+    "name": "Raatri Hotels",
+    "cat_or_room": "Premium",
+    "b2b_cost": 5000,
+    "rates": [
+      5000,
+      6000,
+      7500,
+      9000,
+      10000,
+      12000
+    ]
+  },
+  {
+    "city": "Rudraprayag",
+    "name": "Raatri Hotel Bhanu Palace",
+    "cat_or_room": "Premium",
+    "b2b_cost": 3500,
+    "rates": [
+      3500,
+      4000,
+      4800
+    ]
+  },
+  {
+    "city": "Uttarkashi",
+    "name": "Anand Ganga Ganga View Rooms",
+    "cat_or_room": "Premium",
+    "b2b_cost": 7500,
+    "rates": [
+      7500,
+      8500,
+      9000,
+      10500,
+      10500,
+      13000
+    ]
+  },
+  {
+    "city": "Uttarkashi",
+    "name": "Anand Ganga",
+    "cat_or_room": "Standard",
+    "b2b_cost": 2850,
+    "rates": [
+      2850,
+      3650,
+      4050,
+      5250
+    ]
+  },
+  {
+    "city": "Sonprayag",
+    "name": "Kedar Hill Resort",
+    "cat_or_room": "Premium",
+    "b2b_cost": 2500,
+    "rates": [
+      2500,
+      3600,
+      4500,
+      2800,
+      4000,
+      5000,
+      3200,
+      4600,
+      5800
+    ]
+  },
+  {
+    "city": "Sitapur",
+    "name": "Shivalik Valley Resorts",
+    "cat_or_room": "Premium",
+    "b2b_cost": 5200,
+    "rates": [
+      5200,
+      5800,
+      6600,
+      6500,
+      7400,
+      8600,
+      7800,
+      9000,
+      10600
+    ]
+  },
+  {
+    "city": "Sonprayag",
+    "name": "Narayan Valley Resort",
+    "cat_or_room": "Standard",
+    "b2b_cost": 2500,
+    "rates": [
+      2500,
+      3000,
+      4500
+    ]
+  },
+  {
+    "city": "Sonprayag",
+    "name": "Neelansh Resort",
+    "cat_or_room": "Standard",
+    "b2b_cost": 3200,
+    "rates": [
+      3200,
+      4000,
+      4800
+    ]
+  },
+  {
+    "city": "Sitapur",
+    "name": "Shri Narayan Resort",
+    "cat_or_room": "Standard",
+    "b2b_cost": 2000,
+    "rates": [
+      2000,
+      2800,
+      2700,
+      3600,
+      3200,
+      4000
+    ]
+  },
+  {
+    "city": "Barkot",
+    "name": "RJ Anandam Resort",
+    "cat_or_room": "Standard",
+    "b2b_cost": 3000,
+    "rates": [
+      3000,
+      4000,
+      5000
+    ]
+  },
+  {
+    "city": "Kedarnath",
+    "name": "Marwar House Hotel",
+    "cat_or_room": "Premium",
+    "b2b_cost": 5400,
+    "rates": [
+      5400,
+      6000,
+      8100,
+      9000,
+      10800,
+      12000
+    ]
+  },
+  {
+    "city": "Barkot",
+    "name": "Yamunotri Darshan Resort",
+    "cat_or_room": "Standard",
+    "b2b_cost": 2800,
+    "rates": [
+      2800,
+      3300
+    ]
+  },
+  {
+    "city": "Kedarnath",
+    "name": "BIKANER HOUSE",
+    "cat_or_room": "Budget",
+    "b2b_cost": 3500,
+    "rates": []
+  },
+  {
+    "city": "Chopta",
+    "name": "Alpine Adventure Camp",
+    "cat_or_room": "Standard",
+    "b2b_cost": 3200,
+    "rates": [
+      3200,
+      4800,
+      6400
+    ]
+  },
+  {
+    "city": "Joshimath",
+    "name": "The Tattva Resort",
+    "cat_or_room": "Premium",
+    "b2b_cost": 6510,
+    "rates": [
+      6510,
+      7245,
+      10266
+    ]
+  },
+  {
+    "city": "Rishikesh",
+    "name": "DLS The Classio",
+    "cat_or_room": "Premium",
+    "b2b_cost": 4500,
+    "rates": [
+      4500,
+      5000,
+      5500
+    ]
+  },
+  {
+    "city": "Chopta",
+    "name": "paradise Adventure camp",
+    "cat_or_room": "Standard",
+    "b2b_cost": 2400,
+    "rates": [
+      2400,
+      2800,
+      3000,
+      3600,
+      4000,
+      4800
+    ]
+  },
+  {
+    "city": "Harsil",
+    "name": "Nelangana Resort Pemium Room",
+    "cat_or_room": "Premium",
+    "b2b_cost": 5900,
+    "rates": [
+      5900,
+      6500,
+      7300,
+      6500,
+      7500,
+      8800
+    ]
+  },
+  {
+    "city": "Harsil",
+    "name": "Prakriti Retreat Premium Room",
+    "cat_or_room": "Premium",
+    "b2b_cost": 7000,
+    "rates": [
+      7000,
+      8200,
+      9600,
+      8800,
+      10600,
+      12700
+    ]
+  },
+  {
+    "city": "Harsil",
+    "name": "Prakriti Retreat Standard",
+    "cat_or_room": "Premium",
+    "b2b_cost": 5000,
+    "rates": [
+      5000,
+      6200,
+      7600,
+      6800,
+      8600,
+      10700,
+      11000,
+      13400,
+      16200
+    ]
+  },
+  {
+    "city": "Harsil",
+    "name": "Nelangana Resort Deluxe Room",
+    "cat_or_room": "Premium",
+    "b2b_cost": 4800,
+    "rates": [
+      4800,
+      5400,
+      6200,
+      5400,
+      6400,
+      7700
+    ]
+  },
+  {
+    "city": "Sitapur",
+    "name": "Phulwari Resort Deluxe Room",
+    "cat_or_room": "Premium",
+    "b2b_cost": 6600,
+    "rates": [
+      6600,
+      6500,
+      8500,
+      7600,
+      7750,
+      10150
+    ]
+  },
+  {
+    "city": "Sitapur",
+    "name": "Phulwari Resort Premium Room",
+    "cat_or_room": "Premium",
+    "b2b_cost": 7500,
+    "rates": [
+      7500,
+      8000,
+      8800,
+      8500,
+      9250,
+      10450
+    ]
+  },
+  {
+    "city": "Sitapur",
+    "name": "Phulwari Resort Suite Room 4 Person",
+    "cat_or_room": "Premium",
+    "b2b_cost": 9200,
+    "rates": [
+      9200,
+      10200,
+      11800,
+      9200,
+      10200,
+      11800
+    ]
+  },
+  {
+    "city": "Sitapur",
+    "name": "Phulwari Resort Presidential Suite Room",
+    "cat_or_room": "Premium",
+    "b2b_cost": 16000,
+    "rates": [
+      16000,
+      16500,
+      17500,
+      17000,
+      17750,
+      19150
+    ]
+  },
+  {
+    "city": "Badrinath Dham",
+    "name": "Badriville Resort",
+    "cat_or_room": "Premium",
+    "b2b_cost": 4500,
+    "rates": [
+      4500,
+      5600,
+      6800
+    ]
+  },
+  {
+    "city": "Badrinath Dham",
+    "name": "Shree Kuber Regency",
+    "cat_or_room": "Premium",
+    "b2b_cost": 5500,
+    "rates": [
+      5500,
+      7300
+    ]
+  },
+  {
+    "city": "Badrinath Dham",
+    "name": "Badrinath Anant Hotel",
+    "cat_or_room": "Premium",
+    "b2b_cost": 4500,
+    "rates": [
+      4500,
+      6000
+    ]
+  },
+  {
+    "city": "Badrinath Dham",
+    "name": "VijayLord's palace Badrinath",
+    "cat_or_room": "Premium",
+    "b2b_cost": 7500,
+    "rates": [
+      7500,
+      9500
+    ]
+  },
+  {
+    "city": "Haridwar",
+    "name": "Ganga Bliss",
+    "cat_or_room": "Premium",
+    "b2b_cost": 4000,
+    "rates": [
+      4000,
+      4500,
+      5000,
+      4750,
+      5400,
+      6200
+    ]
+  },
+  {
+    "city": "Rishikesh",
+    "name": "DLS Hotels on the Ganges",
+    "cat_or_room": "Premium",
+    "b2b_cost": 5500,
+    "rates": [
+      5500
+    ]
+  },
+  {
+    "city": "Rudraprayag",
+    "name": "Sukoon DK",
+    "cat_or_room": "Premium",
+    "b2b_cost": 5000,
+    "rates": [
+      5000,
+      6200
+    ]
+  },
+  {
+    "city": "Kedarnath",
+    "name": "Kedarnath Deluxe by K3yaStays",
+    "cat_or_room": "Premium",
+    "b2b_cost": 4000,
+    "rates": [
+      4000,
+      5000
+    ]
+  },
+  {
+    "city": "Sitapur",
+    "name": "Rumkh Kedar Resort",
+    "cat_or_room": "Standard",
+    "b2b_cost": 3600,
+    "rates": [
+      3600,
+      4300,
+      4800
+    ]
+  },
+  {
+    "city": "Badrinath Dham",
+    "name": "Suryoday: The Vaikunth Premium King room",
+    "cat_or_room": "Premium",
+    "b2b_cost": 8400,
+    "rates": [
+      8400,
+      9000,
+      9850,
+      10400,
+      11300,
+      12550,
+      13850,
+      14400,
+      15250
+    ]
+  },
+  {
+    "city": "Badrinath Dham",
+    "name": "Suryoday: The Vaikunth Mini Cozy Suite",
+    "cat_or_room": "Premium",
+    "b2b_cost": 10400,
+    "rates": [
+      10400,
+      11000,
+      11900,
+      12400,
+      13300,
+      14600,
+      15000,
+      15700,
+      16500
+    ]
+  },
+  {
+    "city": "Kedarnath",
+    "name": "Bagwari House",
+    "cat_or_room": "Budget",
+    "b2b_cost": 7200,
+    "rates": [
+      7200
+    ]
+  },
+  {
+    "city": "Dholavira",
+    "name": "Rann Resort",
+    "cat_or_room": "Standard AC Room",
+    "b2b_cost": 7670,
+    "rates": [
+      7670
+    ]
+  },
+  {
+    "city": "Dholavira",
+    "name": "Rann Resort",
+    "cat_or_room": "AC Deluxe Bhunga",
+    "b2b_cost": 8260,
+    "rates": [
+      8260
+    ]
+  },
+  {
+    "city": "Dholavira",
+    "name": "Rann Resort",
+    "cat_or_room": "Rajwadi Cottage",
+    "b2b_cost": 9440,
+    "rates": [
+      9440
+    ]
+  },
+  {
+    "city": "Dholavira",
+    "name": "Rann Resort",
+    "cat_or_room": "Extra Adult passenger",
+    "b2b_cost": 2124,
+    "rates": [
+      2124
+    ]
+  },
+  {
+    "city": "Dholavira",
+    "name": "Praveg Resort",
+    "cat_or_room": "Premium AC Tents",
+    "b2b_cost": 17700,
+    "rates": [
+      17700
+    ]
+  },
+  {
+    "city": "Dholavira",
+    "name": "Praveg Resort",
+    "cat_or_room": "Rajwadi AC Bhunga",
+    "b2b_cost": 21830,
+    "rates": [
+      21830
+    ]
+  },
+  {
+    "city": "Dholavira",
+    "name": "Praveg Resort",
+    "cat_or_room": "Extra Adult passenger",
+    "b2b_cost": 4720,
+    "rates": [
+      4720
+    ]
+  },
+  {
+    "city": "Dholavira",
+    "name": "Ram Rann Resort",
+    "cat_or_room": "Kuchhi Bhuga",
+    "b2b_cost": 5500,
+    "rates": [
+      5500
+    ]
+  },
+  {
+    "city": "Dholavira",
+    "name": "Ram Rann Resort",
+    "cat_or_room": "Rajwadi Rooms",
+    "b2b_cost": 6500,
+    "rates": [
+      6500
+    ]
+  },
+  {
+    "city": "Dholavira",
+    "name": "Ram Rann Resort",
+    "cat_or_room": "Extra Adult passenger",
+    "b2b_cost": 1000,
+    "rates": [
+      1000
+    ]
+  },
+  {
+    "city": "Dhordo",
+    "name": "Kutch Resort",
+    "cat_or_room": "Kutchi Bhungas",
+    "b2b_cost": 4999,
+    "rates": [
+      4999
+    ]
+  },
+  {
+    "city": "Dhordo",
+    "name": "Kutch Resort",
+    "cat_or_room": "Premium Tents",
+    "b2b_cost": 5999,
+    "rates": [
+      5999
+    ]
+  },
+  {
+    "city": "Dhordo",
+    "name": "Kutch Resort",
+    "cat_or_room": "Extra Adult passenger",
+    "b2b_cost": 1500,
+    "rates": [
+      1500
+    ]
+  },
+  {
+    "city": "Dhordo",
+    "name": "Kutch Yatra Resort",
+    "cat_or_room": "Couple non AC",
+    "b2b_cost": 10000,
+    "rates": [
+      10000,
+      12500
+    ]
+  },
+  {
+    "city": "Dhordo",
+    "name": "Kutch Yatra Resort",
+    "cat_or_room": "Couple ac",
+    "b2b_cost": 12000,
+    "rates": [
+      12000,
+      14500
+    ]
+  },
+  {
+    "city": "Dhordo",
+    "name": "Great Rann Resort (Close to Rann Utsav - White Desert)",
+    "cat_or_room": "AC Deluxe Tent",
+    "b2b_cost": 8000,
+    "rates": [
+      8000
+    ]
+  },
+  {
+    "city": "Dhordo",
+    "name": "Great Rann Resort (Close to Rann Utsav - White Desert)",
+    "cat_or_room": "Non Ac Tent",
+    "b2b_cost": 6000,
+    "rates": [
+      6000
+    ]
+  },
+  {
+    "city": "Dhordo",
+    "name": "Desert King Resort",
+    "cat_or_room": "Kutchi Bhunga  A/c",
+    "b2b_cost": 4500,
+    "rates": [
+      4500
+    ]
+  },
+  {
+    "city": "Dhordo",
+    "name": "Desert King Resort",
+    "cat_or_room": "Rajwadi Bhunga  A/C",
+    "b2b_cost": 5000,
+    "rates": [
+      5000
+    ]
+  },
+  {
+    "city": "Dhordo",
+    "name": "Desert King Resort",
+    "cat_or_room": "Extra Adult passenger",
+    "b2b_cost": 1500,
+    "rates": [
+      1500
+    ]
+  },
+  {
+    "city": "Dholavira",
+    "name": "White Rann Resort Dholavira",
+    "cat_or_room": "Ac bhunga",
+    "b2b_cost": 4500,
+    "rates": [
+      4500
+    ]
+  },
+  {
+    "city": "Dholavira",
+    "name": "White Rann Resort Dholavira",
+    "cat_or_room": "Non ac cottages",
+    "b2b_cost": 3000,
+    "rates": [
+      3000
+    ]
+  },
+  {
+    "city": "Dholavira",
+    "name": "The Dholavira Resort",
+    "cat_or_room": "Deluxe Kutchi Bhunga Hut",
+    "b2b_cost": 5500,
+    "rates": [
+      5500
+    ]
+  },
+  {
+    "city": "Dholavira",
+    "name": "The Dholavira Resort",
+    "cat_or_room": "Desi Kutchi Bhunga Hut",
+    "b2b_cost": 5500,
+    "rates": [
+      5500
+    ]
+  },
+  {
+    "city": "Dholavira",
+    "name": "The Dholavira Resort",
+    "cat_or_room": "Extra Adult passenger",
+    "b2b_cost": 1000,
+    "rates": [
+      1000
+    ]
+  },
+  {
+    "city": "Bhuj",
+    "name": "Dream Resort",
+    "cat_or_room": "Super Delux Rooms",
+    "b2b_cost": 2800,
+    "rates": [
+      2800,
+      3300,
+      4100,
+      4900,
+      3200,
+      3800,
+      5000,
+      6000
+    ]
+  },
+  {
+    "city": "Bhuj",
+    "name": "Dream Resort",
+    "cat_or_room": "Suite Rooms",
+    "b2b_cost": 3200,
+    "rates": [
+      3200,
+      3700,
+      4600,
+      5400,
+      3700,
+      4400,
+      5400,
+      6200
+    ]
+  },
+  {
+    "city": "Bhuj",
+    "name": "Dream Resort",
+    "cat_or_room": "Executive Super Delux Room",
+    "b2b_cost": 3000,
+    "rates": [
+      3000,
+      3600,
+      4400,
+      5400,
+      3500,
+      4400,
+      5400,
+      6500
+    ]
+  },
+  {
+    "city": "Bhuj",
+    "name": "Dream Resort",
+    "cat_or_room": "Executive Suite Room",
+    "b2b_cost": 3600,
+    "rates": [
+      3600,
+      4200,
+      5000,
+      6000,
+      4200,
+      5000,
+      6200,
+      7400
+    ]
+  },
+  {
+    "city": "Dholavira",
+    "name": "Dholavira Village Resort",
+    "cat_or_room": "Couple room",
+    "b2b_cost": 5000,
+    "rates": [
+      5000
+    ]
+  },
+  {
+    "city": "Dholavira",
+    "name": "Dholavira Village Resort",
+    "cat_or_room": "Extra Adult passenger",
+    "b2b_cost": 1000,
+    "rates": [
+      1000
+    ]
+  },
+  {
+    "city": "Dhordo",
+    "name": "Toran Rann Resort",
+    "cat_or_room": "AC Bhunga",
+    "b2b_cost": 4725,
+    "rates": [
+      4725
+    ]
+  },
+  {
+    "city": "Dhordo",
+    "name": "Toran Rann Resort",
+    "cat_or_room": "Non AC Bhunga",
+    "b2b_cost": 3675,
+    "rates": [
+      3675
+    ]
+  },
+  {
+    "city": "Dhordo",
+    "name": "Toran Rann Resort",
+    "cat_or_room": "Extra Adult passenger",
+    "b2b_cost": 1050,
+    "rates": [
+      1050
+    ]
+  },
+  {
+    "city": "Bhuj",
+    "name": "The Fern Residency",
+    "cat_or_room": "Winter Green Room",
+    "b2b_cost": 7000,
+    "rates": [
+      7000,
+      8000,
+      8000
+    ]
+  },
+  {
+    "city": "Bhuj",
+    "name": "The Fern Residency",
+    "cat_or_room": "Fern Club Room",
+    "b2b_cost": 7000,
+    "rates": [
+      7000,
+      8000
+    ]
+  },
+  {
+    "city": "Bhuj",
+    "name": "The Fern Residency",
+    "cat_or_room": "Extra Adult passenger",
+    "b2b_cost": 1180,
+    "rates": [
+      1180
+    ]
+  },
+  {
+    "city": "Dhordo",
+    "name": "Gateway to Rann Resort",
+    "cat_or_room": "AC Bhunga",
+    "b2b_cost": 4500,
+    "rates": [
+      4500
+    ]
+  },
+  {
+    "city": "Dhordo",
+    "name": "Gateway to Rann Resort",
+    "cat_or_room": "Darbari Bhunga Type A",
+    "b2b_cost": 6500,
+    "rates": [
+      6500
+    ]
+  },
+  {
+    "city": "Dhordo",
+    "name": "Gateway to Rann Resort",
+    "cat_or_room": "Darbari Bhunga Type B",
+    "b2b_cost": 6500,
+    "rates": [
+      6500
+    ]
+  },
+  {
+    "city": "Dhordo",
+    "name": "Gateway to Rann Resort",
+    "cat_or_room": "Extra Adult passenger",
+    "b2b_cost": 1000,
+    "rates": [
+      1000
+    ]
+  },
+  {
+    "city": "Dhordo",
+    "name": "Rann Kutch Resort",
+    "cat_or_room": "Traditional Cottage",
+    "b2b_cost": 4500,
+    "rates": [
+      4500
+    ]
+  },
+  {
+    "city": "Dhordo",
+    "name": "Rann Kutch Resort",
+    "cat_or_room": "Bhunga Hut",
+    "b2b_cost": 5000,
+    "rates": [
+      5000
+    ]
+  },
+  {
+    "city": "Dhordo",
+    "name": "Rann Kutch Resort",
+    "cat_or_room": "Family Bhunga",
+    "b2b_cost": 7500,
+    "rates": [
+      7500
+    ]
+  },
+  {
+    "city": "Dhordo",
+    "name": "Rann Kutch Resort",
+    "cat_or_room": "Family Cottage",
+    "b2b_cost": 7000,
+    "rates": [
+      7000
+    ]
+  },
+  {
+    "city": "Dhordo",
+    "name": "Rann Kutch Resort",
+    "cat_or_room": "Extra Adult passenger",
+    "b2b_cost": 1500,
+    "rates": [
+      1500
+    ]
+  },
+  {
+    "city": "Dhordo",
+    "name": "Rann Kutch Resort",
+    "cat_or_room": "Child with bed",
+    "b2b_cost": 1200,
+    "rates": [
+      1200
+    ]
+  },
+  {
+    "city": "Dhordo",
+    "name": "Rann Resort D",
+    "cat_or_room": "Kutchi Bhungas",
+    "b2b_cost": 3380,
+    "rates": [
+      3380,
+      3500,
+      4000
+    ]
+  },
+  {
+    "city": "Dhordo",
+    "name": "The Tent City",
+    "cat_or_room": "Non Ac Swiss Cottages",
+    "b2b_cost": 18644,
+    "rates": [
+      18644
+    ]
+  },
+  {
+    "city": "Dhordo",
+    "name": "The Tent City",
+    "cat_or_room": "Extra Adult passenger",
+    "b2b_cost": 5605,
+    "rates": [
+      5605
+    ]
+  },
+  {
+    "city": "Mandvi Beach",
+    "name": "H&V Beach Hotel",
+    "cat_or_room": "Villa (Bhunga)",
+    "b2b_cost": 11000,
+    "rates": [
+      11000,
+      11500,
+      12100,
+      12700
+    ]
+  },
+  {
+    "city": "Mandvi Beach",
+    "name": "H&V Beach Hotel",
+    "cat_or_room": "Suite Room",
+    "b2b_cost": 9000,
+    "rates": [
+      9000,
+      9500,
+      10100,
+      10700
+    ]
+  },
+  {
+    "city": "Mandvi Beach",
+    "name": "H&V Beach Hotel",
+    "cat_or_room": "Family Room",
+    "b2b_cost": 8000,
+    "rates": [
+      8000,
+      8500,
+      9100,
+      9700
+    ]
+  },
+  {
+    "city": "Mandvi Beach",
+    "name": "H&V Beach Hotel",
+    "cat_or_room": "Standard Room",
+    "b2b_cost": 6000,
+    "rates": [
+      6000,
+      6500,
+      7100,
+      7700
+    ]
+  },
+  {
+    "city": "Mandvi Beach",
+    "name": "H&V Beach Hotel",
+    "cat_or_room": "Extra Adult passenger",
+    "b2b_cost": 1000,
+    "rates": [
+      1000,
+      1250,
+      1550,
+      1850
+    ]
+  },
+  {
+    "city": "Mandvi Beach",
+    "name": "Vijay Vilas Heritage Resort",
+    "cat_or_room": "Heritage Room",
+    "b2b_cost": 10030,
+    "rates": [
+      10030
+    ]
+  },
+  {
+    "city": "Mandvi Beach",
+    "name": "Vijay Vilas Heritage Resort",
+    "cat_or_room": "Garden Villa",
+    "b2b_cost": 10030,
+    "rates": [
+      10030
+    ]
+  },
+  {
+    "city": "Mandvi Beach",
+    "name": "Serena Beach Resort",
+    "cat_or_room": "Deluxe Hut King-Size Bed",
+    "b2b_cost": 9300,
+    "rates": [
+      9300,
+      10700
+    ]
+  },
+  {
+    "city": "Mandvi Beach",
+    "name": "Serena Beach Resort",
+    "cat_or_room": "Pool Villa",
+    "b2b_cost": 21450,
+    "rates": [
+      21450,
+      22450
+    ]
+  },
+  {
+    "city": "Mandvi Beach",
+    "name": "Serena Beach Resort",
+    "cat_or_room": "Garden Villa",
+    "b2b_cost": 15850,
+    "rates": [
+      15850,
+      18650
+    ]
+  },
+  {
+    "city": "Mandvi Beach",
+    "name": "Palace Beach Camp Resort",
+    "cat_or_room": "Beach View Villas",
+    "b2b_cost": 12000,
+    "rates": [
+      12000,
+      14747
+    ]
+  },
+  {
+    "city": "Mandvi Beach",
+    "name": "Palace Beach Camp Resort",
+    "cat_or_room": "Swiss Luxury Tent",
+    "b2b_cost": 7000,
+    "rates": [
+      7000,
+      9000
+    ]
+  },
+  {
+    "city": "Mandvi Beach",
+    "name": "Serena Beach Resort",
+    "cat_or_room": "Extra Adult passenger",
+    "b2b_cost": 3300,
+    "rates": [
+      3300,
+      4200
+    ]
+  },
+  {
+    "city": "Dhordo",
+    "name": "Royal Rann Camp",
+    "cat_or_room": "Non AC Tent",
+    "b2b_cost": 5250,
+    "rates": [
+      5250
+    ]
+  },
+  {
+    "city": "Dhordo",
+    "name": "Royal Rann Camp",
+    "cat_or_room": "AC Tent",
+    "b2b_cost": 6250,
+    "rates": [
+      6250
+    ]
+  },
+  {
+    "city": "Dhordo",
+    "name": "Royal Rann Camp",
+    "cat_or_room": "Extra Adult passenger",
+    "b2b_cost": 1200,
+    "rates": [
+      1200
+    ]
+  },
+  {
+    "city": "Dhordo",
+    "name": "Kutch Yatra Resort",
+    "cat_or_room": "Extra Adult passenger",
+    "b2b_cost": 2500,
+    "rates": [
+      2500
+    ]
+  },
+  {
+    "city": "Mandvi Beach",
+    "name": "Vijay Vilas Heritage Resort",
+    "cat_or_room": "Extra Adult passenger",
+    "b2b_cost": 1900,
+    "rates": [
+      1900
+    ]
+  },
+  {
+    "city": "Bhuj",
+    "name": "Dream Resort",
+    "cat_or_room": "Extra Adult passenger",
+    "b2b_cost": 400,
+    "rates": [
+      400,
+      500,
+      900
+    ]
+  },
+  {
+    "city": "Dhordo",
+    "name": "White Rann Resort",
+    "cat_or_room": "Premium Ac Tent",
+    "b2b_cost": 15500,
+    "rates": [
+      15500
+    ]
+  },
+  {
+    "city": "Dholavira",
+    "name": "StayGuru Heritage Resort",
+    "cat_or_room": "Kutchi Bhuga",
+    "b2b_cost": 7499,
+    "rates": [
+      7499
+    ]
+  },
+  {
+    "city": "Dholavira",
+    "name": "StayGuru Heritage Resort",
+    "cat_or_room": "Kutchi Bhuga Twin Beds",
+    "b2b_cost": 7499,
+    "rates": [
+      7499
+    ]
+  },
+  {
+    "city": "Dholavira",
+    "name": "StayGuru Heritage Resort",
+    "cat_or_room": "Kutchi Bhuga with Garden",
+    "b2b_cost": 8499,
+    "rates": [
+      8499
+    ]
+  },
+  {
+    "city": "Dholavira",
+    "name": "StayGuru Heritage Resort",
+    "cat_or_room": "Kutchi Bhuga Private Pool",
+    "b2b_cost": 11999,
+    "rates": [
+      11999
+    ]
+  },
+  {
+    "city": "Dholavira",
+    "name": "StayGuru Heritage Resort",
+    "cat_or_room": "Extra Adult passenger",
+    "b2b_cost": 1800,
+    "rates": [
+      1800
+    ]
+  },
+  {
+    "city": "Dholavira",
+    "name": "StayGuru Heaven Resort Dholavira",
+    "cat_or_room": "Non AC Rajwadi Cottage",
+    "b2b_cost": 6500,
+    "rates": [
+      6500
+    ]
+  },
+  {
+    "city": "Dholavira",
+    "name": "StayGuru Heaven Resort Dholavira",
+    "cat_or_room": "AC Rajwadi Cottages",
+    "b2b_cost": 7000,
+    "rates": [
+      7000
+    ]
+  },
+  {
+    "city": "Dholavira",
+    "name": "StayGuru Heaven Resort Dholavira",
+    "cat_or_room": "Non AC Rajwadi Bhunga",
+    "b2b_cost": 7000,
+    "rates": [
+      7000
+    ]
+  },
+  {
+    "city": "Dholavira",
+    "name": "StayGuru Heaven Resort Dholavira",
+    "cat_or_room": "AC Rajwadi Bhunga",
+    "b2b_cost": 7500,
+    "rates": [
+      7500
+    ]
+  },
+  {
+    "city": "Dholavira",
+    "name": "StayGuru Heaven Resort Dholavira",
+    "cat_or_room": "Extra Adult passenger",
+    "b2b_cost": 2000,
+    "rates": [
+      2000
+    ]
+  },
+  {
+    "city": "Bhuj",
+    "name": "StayGuru Hotel Kutch Elegance",
+    "cat_or_room": "Super Deluxe",
+    "b2b_cost": 3000,
+    "rates": [
+      3000,
+      3900
+    ]
+  },
+  {
+    "city": "Bhuj",
+    "name": "StayGuru Hotel Kutch Elegance",
+    "cat_or_room": "Deluxe",
+    "b2b_cost": 3500,
+    "rates": [
+      3500,
+      4400
+    ]
+  },
+  {
+    "city": "Bhuj",
+    "name": "StayGuru Hotel Kutch Elegance",
+    "cat_or_room": "Extra Adult passenger",
+    "b2b_cost": 700,
+    "rates": [
+      700,
+      1600
+    ]
+  },
+  {
+    "city": "Bhuj",
+    "name": "StayGuru Hotel Kutch Elegance",
+    "cat_or_room": "Suite Room",
+    "b2b_cost": 4500,
+    "rates": [
+      4500,
+      5400
+    ]
+  },
+  {
+    "city": "Dholavira",
+    "name": "StayGuru Road to Heaven Resort",
+    "cat_or_room": "Grand Deluxe Tent",
+    "b2b_cost": 7499,
+    "rates": [
+      7499
+    ]
+  },
+  {
+    "city": "Dholavira",
+    "name": "StayGuru Road to Heaven Resort",
+    "cat_or_room": "Grand Deluxe Twin Bed Tent",
+    "b2b_cost": 7499,
+    "rates": [
+      7499
+    ]
+  },
+  {
+    "city": "Dholavira",
+    "name": "StayGuru Road to Heaven Resort",
+    "cat_or_room": "Executive Tent",
+    "b2b_cost": 8499,
+    "rates": [
+      8499
+    ]
+  },
+  {
+    "city": "Dholavira",
+    "name": "StayGuru Road to Heaven Resort",
+    "cat_or_room": "PremiumTent",
+    "b2b_cost": 9999,
+    "rates": [
+      9999
+    ]
+  },
+  {
+    "city": "Dholavira",
+    "name": "StayGuru Road to Heaven Resort",
+    "cat_or_room": "Extra Adult passenger",
+    "b2b_cost": 2000,
+    "rates": [
+      2000
+    ]
+  },
+  {
+    "city": "Dhordo",
+    "name": "StayGuru Patgar Tent",
+    "cat_or_room": "Deluxe Tent",
+    "b2b_cost": 6000,
+    "rates": [
+      6000
+    ]
+  },
+  {
+    "city": "Dhordo",
+    "name": "StayGuru Patgar Tent",
+    "cat_or_room": "Extra Adult passenger",
+    "b2b_cost": 1200,
+    "rates": [
+      1200
+    ]
+  },
+  {
+    "city": "Bhuj",
+    "name": "Usha Residency",
+    "cat_or_room": "Deluxe Room",
+    "b2b_cost": 1500,
+    "rates": [
+      1500
+    ]
+  },
+  {
+    "city": "Bhuj",
+    "name": "Usha Residency",
+    "cat_or_room": "Family Room",
+    "b2b_cost": 3000,
+    "rates": [
+      3000
+    ]
+  },
+  {
+    "city": "Bhuj",
+    "name": "Usha Residency",
+    "cat_or_room": "Rajwadi Rooms",
+    "b2b_cost": 3000,
+    "rates": [
+      3000
+    ]
+  },
+  {
+    "city": "Bhuj",
+    "name": "Usha Residency",
+    "cat_or_room": "Extra Adult passenger",
+    "b2b_cost": 500,
+    "rates": [
+      500
+    ]
+  },
+  {
+    "city": "Bhuj",
+    "name": "Hariom Residency & Hotel",
+    "cat_or_room": "Double Deluxe",
+    "b2b_cost": 1500,
+    "rates": [
+      1500
+    ]
+  },
+  {
+    "city": "Bhuj",
+    "name": "Hariom Residency & Hotel",
+    "cat_or_room": "Superior Deluxe",
+    "b2b_cost": 1700,
+    "rates": [
+      1700
+    ]
+  },
+  {
+    "city": "Bhuj",
+    "name": "Hariom Residency & Hotel",
+    "cat_or_room": "Executive Room",
+    "b2b_cost": 2000,
+    "rates": [
+      2000
+    ]
+  },
+  {
+    "city": "Bhuj",
+    "name": "Hariom Residency & Hotel",
+    "cat_or_room": "Extra Adult passenger",
+    "b2b_cost": 500,
+    "rates": [
+      500
+    ]
+  },
+  {
+    "city": "Bhuj",
+    "name": "Ranjan Wadi",
+    "cat_or_room": "Deluxe Room",
+    "b2b_cost": 1500,
+    "rates": [
+      1500
+    ]
+  },
+  {
+    "city": "Bhuj",
+    "name": "Ranjan Wadi",
+    "cat_or_room": "Extra Adult passenger",
+    "b2b_cost": 500,
+    "rates": [
+      500
+    ]
+  },
+  {
+    "city": "Bhuj",
+    "name": "Park View Residency",
+    "cat_or_room": "Double Deluxe",
+    "b2b_cost": 17000,
+    "rates": [
+      17000
+    ]
+  },
+  {
+    "city": "Bhuj",
+    "name": "Park View Residency",
+    "cat_or_room": "Triple Deluxe",
+    "b2b_cost": 2000,
+    "rates": [
+      2000
+    ]
+  },
+  {
+    "city": "Bhuj",
+    "name": "Park View Residency",
+    "cat_or_room": "Super Deluxe",
+    "b2b_cost": 3000,
+    "rates": [
+      3000
+    ]
+  },
+  {
+    "city": "Bhuj",
+    "name": "Park View Residency",
+    "cat_or_room": "Suite Room",
+    "b2b_cost": 4000,
+    "rates": [
+      4000
+    ]
+  },
+  {
+    "city": "Bhuj",
+    "name": "Park View Residency",
+    "cat_or_room": "Extra Adult passenger",
+    "b2b_cost": 500,
+    "rates": [
+      500
+    ]
+  },
+  {
+    "city": "Bhuj",
+    "name": "Resort Farm Villa",
+    "cat_or_room": "Semi Deluxe",
+    "b2b_cost": 3000,
+    "rates": [
+      3000,
+      3900
+    ]
+  },
+  {
+    "city": "Bhuj",
+    "name": "Resort Farm Villa",
+    "cat_or_room": "Deluxe Room",
+    "b2b_cost": 3500,
+    "rates": [
+      3500,
+      4400
+    ]
+  },
+  {
+    "city": "Bhuj",
+    "name": "Resort Farm Villa",
+    "cat_or_room": "Haveli Cottage",
+    "b2b_cost": 4000,
+    "rates": [
+      4000,
+      4900
+    ]
+  },
+  {
+    "city": "Bhuj",
+    "name": "Resort Farm Villa",
+    "cat_or_room": "Family Room",
+    "b2b_cost": 5500,
+    "rates": [
+      5500,
+      6400
+    ]
+  },
+  {
+    "city": "Bhuj",
+    "name": "Resort Farm Villa",
+    "cat_or_room": "Extra Adult passenger",
+    "b2b_cost": 700,
+    "rates": [
+      700,
+      1600
+    ]
+  }
+]

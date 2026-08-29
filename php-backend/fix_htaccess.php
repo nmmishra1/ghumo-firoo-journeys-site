@@ -1,0 +1,219 @@
+<?php
+// One-shot script: writes the correct root .htaccess to the docroot.
+// Run from cPanel Terminal: php /home3/a17511nd/ghumofiroo.com/php-backend/fix_htaccess.php
+// Delete this file immediately after running.
+
+$target = '/home3/a17511nd/ghumofiroo.com/.htaccess';
+$backup = '/home3/a17511nd/ghumofiroo.com/.htaccess.backup-' . date('Ymd_His');
+
+// Back up whatever is currently there
+if (file_exists($target)) {
+    copy($target, $backup);
+    echo "Backed up existing .htaccess to: $backup\n";
+}
+
+$content = '<IfModule mod_headers.c>
+  # Strict-Transport-Security: 1 year, no subdomains until audit completes
+  Header always set Strict-Transport-Security "max-age=31536000"
+
+  # Content Security Policy: harmonized with app needs and GA4
+  # Enhanced with upgrade-insecure-requests to block mixed content
+  Header always set Content-Security-Policy "upgrade-insecure-requests; default-src \'self\'; script-src \'self\' https://checkout.razorpay.com https://*.razorpay.com https://www.googletagmanager.com https://connect.facebook.net https://www.google.com https://www.gstatic.com \'unsafe-inline\' \'unsafe-eval\' \'wasm-unsafe-eval\' \'report-sample\'; style-src \'self\' \'unsafe-inline\' https://fonts.googleapis.com https://cdn.jsdelivr.net; img-src \'self\' data: blob: https: https://images.unsplash.com https://*.gstatic.com https://*.googleusercontent.com https://www.facebook.com https://*.google.com https://*.google.co.in https://*.openstreetmap.org https://*.payu.in https://payu.in https://razorpay.com; font-src \'self\' data: https://fonts.gstatic.com https://cdn.jsdelivr.net; connect-src \'self\' https://cdn.jsdelivr.net https://api.razorpay.com https://*.razorpay.com https://ghumofiroo.com https://www.google-analytics.com https://analytics.google.com https://stats.g.doubleclick.net https://*.google.com https://*.google.co.in https://*.supabase.co wss://*.supabase.co https://www.facebook.com https://*.openstreetmap.org https://script.google.com https://script.googleusercontent.com https://api.ipify.org https://*.ipify.org https://*.ecs.us-east-2.on.aws https://*.ecs.us-west-1.on.aws https://*.run.app; frame-src \'self\' https://api.razorpay.com https://*.razorpay.com https://www.google.com https://maps.google.com https://www.openstreetmap.org https://www.facebook.com https://www.youtube.com https://*.youtube.com https://*.youtube-nocookie.com; frame-ancestors \'self\'; object-src \'none\'; base-uri \'self\'; form-action \'self\' https://www.facebook.com https://secure.payu.in https://secure.payu.in/_payment https://test.payu.in https://test.payu.in/_payment https://*.payu.in https://*.payu.com"
+
+  # Clickjacking protection (aligned with CSP\'s frame-ancestors)
+  Header always set X-Frame-Options "SAMEORIGIN"
+
+  # MIME type sniffing protection
+  Header always set X-Content-Type-Options "nosniff"
+
+  # Referrer policy for privacy
+  Header always set Referrer-Policy "strict-origin-when-cross-origin"
+
+  # Permissions Policy (formerly Feature-Policy)
+  Header always set Permissions-Policy "geolocation=(), microphone=(), camera=()"
+
+  # Custom 404 page
+  ErrorDocument 404 /404.html
+
+  # Ensure .txt served as text/plain (for ads.txt) even if default MIME misconfigured
+  AddType text/plain .txt
+
+  # Ensure favicon is properly served with cache headers
+  <FilesMatch "^favicon\.ico$">
+    Header set Cache-Control "max-age=604800, public"
+    Header set Content-Type "image/x-icon"
+  </FilesMatch>
+
+  # Cache static assets for 1 month
+  <FilesMatch "\.(jpg|jpeg|png|gif|ico|css|js|svg|woff|woff2|ttf|eot)$">
+    Header set Cache-Control "max-age=2592000, public"
+  </FilesMatch>
+
+  # Prevent caching of index.html (SPA entry) to ensure immediate updates and user session privacy
+  <FilesMatch "^index\.html$">
+    Header set Cache-Control "no-cache, no-store, must-revalidate"
+    Header set Pragma "no-cache"
+    Header set Expires "0"
+  </FilesMatch>
+
+  # Prevent caching of all API endpoints and JSON transactions containing client details
+  SetEnvIf Request_URI "^/api/" NO_CACHE=true
+  Header set Cache-Control "no-store, no-cache, must-revalidate, proxy-revalidate" env=NO_CACHE
+  Header set Pragma "no-cache" env=NO_CACHE
+  Header set Expires "0" env=NO_CACHE
+</IfModule>
+
+# When security review is completed, enable HSTS preload and includeSubDomains:
+# <IfModule mod_headers.c>
+#   Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+# </IfModule>
+
+# Reverse proxy: forward /api/* to Node.js server on port 8081
+# Requires mod_proxy and mod_rewrite to be enabled on the server
+# ProxyPass cannot always be used from .htaccess, so use a rewrite proxy rule instead.
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+
+  # 1. If the request is for an existing physical file, serve it directly
+  RewriteCond %{REQUEST_FILENAME} -f
+  RewriteRule ^ - [L]
+
+  # 2. Redirect HTTP to HTTPS and www to non-www in a single step
+  RewriteCond %{HTTPS} off
+  RewriteCond %{HTTP:X-Forwarded-Proto} !https [OR]
+  RewriteCond %{HTTP_HOST} ^www\.ghumofiroo\.com$ [NC]
+  RewriteRule ^(.*)$ https://ghumofiroo.com/$1 [L,R=301]
+
+  # Skip rewrites for static assets at root level
+  RewriteRule ^favicon\.ico$ - [L]
+  RewriteRule ^robots\.txt$ - [L]
+  RewriteRule ^sitemap\.xml$ - [L]
+  RewriteRule ^ads\.txt$ - [L]
+  RewriteRule ^404\.html$ - [L]
+
+  # Map /api/blog-categories to blog-categories.php
+  RewriteRule ^api/blog-categories$ /api/blog-categories.php [L,QSA]
+
+  # Map /api/blogs to blogs.php
+  RewriteRule ^api/blogs$ /api/blogs.php [L,QSA]
+
+  # Map /api/blogs/:slug to blogs.php?slug=:slug
+  RewriteRule ^api/blogs/([a-zA-Z0-9\-]+)$ /api/blogs.php?slug=$1 [L,QSA]
+
+  # Map Razorpay API calls
+  RewriteRule ^api/razorpay/create-order$ /api/razorpay/create-order.php [L,QSA]
+  RewriteRule ^api/razorpay/verify$ /api/razorpay/verify.php [L,QSA]
+
+  # Map PayU API calls
+  RewriteRule ^api/payu/generate-hash$ /api/payu/generate-hash.php [L,QSA]
+  RewriteRule ^api/payu/success$ /api/payu/success.php [L,QSA]
+  RewriteRule ^api/payu/failure$ /api/payu/failure.php [L,QSA]
+
+  # Map UPI Notification API calls
+  RewriteRule ^api/upi/notify$ /api/upi/notify.php [L,QSA]
+
+  # Map Packages API calls
+  RewriteRule ^api/packages$ /api/packages.php [L,QSA]
+  RewriteRule ^api/packages/([a-zA-Z0-9\-]+)$ /api/packages.php?id=$1 [L,QSA]
+
+  # Map Hotels API calls — secured, routes to php-backend
+  RewriteRule ^api/hotels$ /php-backend/hotels.php [L,QSA]
+  RewriteRule ^api/hotels/([a-zA-Z0-9\-]+)$ /php-backend/hotels.php?id=$1 [L,QSA]
+
+  # Map Hotel Rates API calls — secured, routes to php-backend
+  RewriteRule ^api/hotel-rates$ /php-backend/hotel-rates.php [L,QSA]
+  RewriteRule ^api/hotel-rates/([0-9]+)$ /php-backend/hotel-rates.php?id=$1 [L,QSA]
+
+  # Map Image Upload API — secured, routes to php-backend
+  RewriteRule ^api/upload$ /php-backend/upload.php [L,QSA]
+
+  # Map Hotel Images API calls — secured, routes to php-backend
+  RewriteRule ^api/hotel-images$ /php-backend/hotel-images.php [L,QSA]
+  RewriteRule ^api/hotel-images/([a-zA-Z0-9\-]+)$ /php-backend/hotel-images.php?id=$1 [L,QSA]
+
+  # Map Activities API calls — secured, routes to php-backend
+  RewriteRule ^api/activities$ /php-backend/activities.php [L,QSA]
+  RewriteRule ^api/activities/([a-zA-Z0-9\-]+)$ /php-backend/activities.php?id=$1 [L,QSA]
+
+  # Map secondary MySQL tables to secured mysql-crud.php in php-backend
+  RewriteRule ^api/destinations$ /php-backend/mysql-crud.php?table=destinations [L,QSA]
+  RewriteRule ^api/destinations/([a-zA-Z0-9\-]+)$ /php-backend/mysql-crud.php?table=destinations&id=$1 [L,QSA]
+
+  RewriteRule ^api/sightseeings$ /php-backend/mysql-crud.php?table=sightseeings [L,QSA]
+  RewriteRule ^api/sightseeings/([a-zA-Z0-9\-]+)$ /php-backend/mysql-crud.php?table=sightseeings&id=$1 [L,QSA]
+
+  RewriteRule ^api/visas$ /php-backend/mysql-crud.php?table=visas [L,QSA]
+  RewriteRule ^api/visas/([a-zA-Z0-9\-]+)$ /php-backend/mysql-crud.php?table=visas&id=$1 [L,QSA]
+
+  RewriteRule ^api/hotel-suppliers$ /php-backend/mysql-crud.php?table=hotel_suppliers [L,QSA]
+  RewriteRule ^api/hotel-suppliers/([a-zA-Z0-9\-]+)$ /php-backend/mysql-crud.php?table=hotel_suppliers&id=$1 [L,QSA]
+
+  RewriteRule ^api/cab-suppliers$ /php-backend/mysql-crud.php?table=cab_suppliers [L,QSA]
+  RewriteRule ^api/cab-suppliers/([a-zA-Z0-9\-]+)$ /php-backend/mysql-crud.php?table=cab_suppliers&id=$1 [L,QSA]
+
+  RewriteRule ^api/cab-vehicles$ /php-backend/mysql-crud.php?table=cab_vehicles [L,QSA]
+  RewriteRule ^api/cab-vehicles/([a-zA-Z0-9\-]+)$ /php-backend/mysql-crud.php?table=cab_vehicles&id=$1 [L,QSA]
+
+  RewriteRule ^api/cab-routes$ /php-backend/mysql-crud.php?table=cab_routes [L,QSA]
+  RewriteRule ^api/cab-routes/([a-zA-Z0-9\-]+)$ /php-backend/mysql-crud.php?table=cab_routes&id=$1 [L,QSA]
+
+  RewriteRule ^api/cab-contracts$ /php-backend/mysql-crud.php?table=cab_contracts [L,QSA]
+  RewriteRule ^api/cab-contracts/([a-zA-Z0-9\-]+)$ /php-backend/mysql-crud.php?table=cab_contracts&id=$1 [L,QSA]
+
+  RewriteRule ^api/cab-contract-rates$ /php-backend/mysql-crud.php?table=cab_contract_rates [L,QSA]
+  RewriteRule ^api/cab-contract-rates/([a-zA-Z0-9\-]+)$ /php-backend/mysql-crud.php?table=cab_contract_rates&id=$1 [L,QSA]
+
+  RewriteRule ^api/room-categories$ /php-backend/mysql-crud.php?table=room_categories [L,QSA]
+  RewriteRule ^api/room-categories/([a-zA-Z0-9\-]+)$ /php-backend/mysql-crud.php?table=room_categories&id=$1 [L,QSA]
+
+  RewriteRule ^api/payments$ /php-backend/mysql-crud.php?table=payments [L,QSA]
+  RewriteRule ^api/payments/([a-zA-Z0-9\-]+)$ /php-backend/mysql-crud.php?table=payments&id=$1 [L,QSA]
+
+  RewriteRule ^api/documents$ /php-backend/mysql-crud.php?table=documents [L,QSA]
+  RewriteRule ^api/documents/([a-zA-Z0-9\-]+)$ /php-backend/mysql-crud.php?table=documents&id=$1 [L,QSA]
+
+
+  # Canonicalize package URLs: remove trailing slash
+  RewriteCond %{REQUEST_URI} ^/packages/.+/$ [NC]
+  RewriteRule ^packages/(.+)/$ https://ghumofiroo.com/packages/$1 [L,R=301]
+
+  # Canonicalize accidental index.html under packages
+  RewriteCond %{REQUEST_URI} ^/packages/.+/index\.html$ [NC]
+  RewriteRule ^packages/(.+)/index\.html$ https://ghumofiroo.com/packages/$1 [L,R=301]
+
+  # Rewrite legacy CRM assets requested from root to /crm/ subdirectory
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_URI} ^/(static-assets|argon|media-storage|imgs|img)(/.*)?$ [NC]
+  RewriteRule ^(.*)$ /crm/$1 [L]
+
+  # Rewrite legacy CRM dist assets to /crm/dist/ subdirectory
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_URI} ^/dist/(css|js|fonts|images|img)(/.*)?$ [NC]
+  RewriteRule ^dist/(.*)$ /crm/dist/$1 [L]
+
+  # SPA Routing: serve index.html for all matching SPA client-side routes
+  # (directories like /blog or /crm are rewritten here because they are not physical files)
+  RewriteCond %{REQUEST_URI} ^/$ [OR]
+  RewriteCond %{REQUEST_URI} ^/(about|contact|packages|privacy-policy|terms-conditions|terms-of-service|refund-policy|blog|career|enquire-now|enquire-success|products|booking|pictramapdemo|custom-tour-packages|thank-you|guides|guide|landing|profile|faq|crm|signup|forgot-password|reset-password|auth|review|destinations|payment|pay)(/.*)?$ [NC]
+  RewriteRule ^ /index.html [L]
+
+  # Any other non-file path returns a real 404 served via /404.html
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteCond %{REQUEST_URI} !^/404\.html$ [NC]
+  RewriteCond %{REQUEST_URI} !^/api(/.*)?$ [NC]
+  RewriteRule .? - [R=404]
+</IfModule>
+';
+
+if (file_put_contents($target, $content) === false) {
+    echo "ERROR: Could not write to $target\n";
+    exit(1);
+}
+
+echo "SUCCESS: .htaccess written (" . strlen($content) . " bytes)\n";
+echo "Backup saved at: $backup\n";
+echo "MD5 of new file: " . md5_file($target) . "\n";
+echo "First line: " . strtok(file_get_contents($target), "\n") . "\n";
+echo "\nDelete this script now:\n";
+echo "  rm /home3/a17511nd/ghumofiroo.com/php-backend/fix_htaccess.php\n";

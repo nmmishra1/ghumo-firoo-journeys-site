@@ -1,0 +1,247 @@
+{
+  "home": {
+    "url": "/",
+    "primary_keywords": ["travel agency Delhi", "Char Dham Yatra packages", "Europe tours from India", "honeymoon tour packages India", "summer vacation packages India"],
+    "secondary_keywords": ["Rajasthan heritage tours", "best travel agency India", "customized tours", "summer vacation deals", "honeymoon travel India"],
+    "notes": "Hero and meta emphasize agency authority, Char Dham, Europe, Rajasthan, honeymoon and summer travel."
+  },
+  "packages": {
+    "url": "/packages",
+    "primary_keywords": ["best travel packages India", "custom tour packages", "travel deals", "summer vacation packages India", "honeymoon tour packages India"],
+    "secondary_keywords": ["compare prices", "custom itineraries", "trusted support", "summer holiday tours", "honeymoon holiday packages"],
+    "notes": "H1 aligned to 'Best Travel Packages in India' and CTR-driven subhead."
+  },
+  "char_dham_yatra": {
+    "url": "/packages/char-dham-yatra",
+    "primary_keywords": [
+      "char dham yatra",
+      "char dham yatra 2026",
+      "char dham yatra package",
+      "char dham yatra packages",
+      "char dham yatra helicopter package",
+      "char dham yatra registration 2026"
+    ],
+    "secondary_keywords": [
+      "char dham yatra package price",
+      "char dham yatra cost per person",
+      "char dham yatra itinerary 10 days",
+      "char dham yatra itinerary 12 days",
+      "char dham yatra route map",
+      "best time for char dham yatra",
+      "char dham yatra opening date 2026",
+      "char dham yatra from delhi",
+      "char dham yatra from haridwar",
+      "char dham yatra from dehradun",
+      "senior citizen char dham yatra",
+      "do dham yatra package",
+      "kedarnath helicopter booking",
+      "helicopter price 2026 char dham",
+      "Char Dham helicopter tour",
+      "Yamunotri temple",
+      "Gangotri glacier",
+      "Kedarnath temple",
+      "Badrinath temple"
+    ],
+    "notes": "Covers core head terms, itineraries, pricing, registration, helicopter, and city-based intents for 2026."
+  },
+  "spiti_valley_summer": {
+    "url": "/packages/spiti-valley-summer",
+    "primary_keywords": [
+      "Spiti Valley summer vacation",
+      "Spiti Valley summer tour package",
+      "Spiti Valley honeymoon package",
+      "Lahaul Spiti summer trip",
+      "Spiti Valley road trip 2026"
+    ],
+    "secondary_keywords": [
+      "Spiti Valley camping",
+      "Pin Valley trip",
+      "Kaza to Chandratal",
+      "Spiti Valley bike tour",
+      "Spiti Valley family package",
+      "best time to visit Spiti",
+      "high altitude summer travel"
+    ],
+    "notes": "Target summer travelers, honeymoon couples, and adventure seekers for the Spiti Valley summer season."
+  },
+  "do_dham_yatra": {
+    "url": "/packages/do-dham-yatra",
+    "primary_keywords": ["do dham yatra", "kedarnath badrinath package", "do dham yatra 2026"],
+    "secondary_keywords": ["do dham yatra from haridwar", "do dham yatra from delhi", "do dham helicopter package", "do dham itinerary 5 days", "do dham price 2026"],
+    "notes": "Complementary cluster targeting Kedarnath–Badrinath combinations and helicopter options."
+  },
+  "char_dham_yatra_delhi": {
+    "url": "/packages/char-dham-yatra-from-delhi",
+    "primary_keywords": ["char dham yatra from delhi", "char dham yatra package from delhi"],
+    "secondary_keywords": ["10 days itinerary delhi", "price per person delhi", "with hotels and transfers", "vip darshan assistance", "helicopter ex dehradun"],
+    "notes": "Primary metro origin; emphasize 10–12 day road trips and transfer inclusions."
+  },
+  "char_dham_yatra_haridwar": {
+    "url": "/packages/char-dham-yatra-from-haridwar",
+    "primary_keywords": ["char dham yatra from haridwar", "char dham yatra package from haridwar"],
+    "secondary_keywords": ["10 days itinerary haridwar", "budget package haridwar", "tempo traveller option", "group departures"],
+    "notes": "High search volume for pilgrimage starting at Haridwar."
+  },
+  "char_dham_yatra_dehradun": {
+    "url": "/packages/char-dham-yatra-from-dehradun",
+    "primary_keywords": ["char dham yatra from dehradun", "char dham helicopter package dehradun"],
+    "secondary_keywords": ["heli charter price 2026", "vip darshan package", "senior citizen friendly"],
+    "notes": "Helicopter-centric variant via Dehradun/Phata/Sersi routes."
+  },
+  "char_dham_yatra_mumbai": {
+    "url": "/packages/char-dham-yatra-from-mumbai",
+    "primary_keywords": ["char dham yatra from mumbai", "char dham package from mumbai"],
+    "secondary_keywords": ["flight + land package", "cost from mumbai", "12 days itinerary"],
+    "notes": "Flight add-ons + packaged transfers messaging."
+  },
+  "char_dham_yatra_bangalore": {
+    "url": "/packages/char-dham-yatra-from-bangalore",
+    "primary_keywords": ["char dham yatra from bangalore", "char dham package from bangalore"],
+    "secondary_keywords": ["with flights", "senior citizen package", "helicopter upgrade"],
+    "notes": "South metro origin with emphasis on flights and seniors."
+  },
+  "char_dham_yatra_hyderabad": {
+    "url": "/packages/char-dham-yatra-from-hyderabad",
+    "primary_keywords": ["char dham yatra from hyderabad", "char dham package from hyderabad"],
+    "secondary_keywords": ["cost with flights", "itinerary 10 days", "helicopter option"],
+    "notes": "Metro origin + option to bundle flights."
+  },
+  "char_dham_yatra_chennai": {
+    "url": "/packages/char-dham-yatra-from-chennai",
+    "primary_keywords": ["char dham yatra from chennai", "char dham package from chennai"],
+    "secondary_keywords": ["flight inclusive", "price 2026", "senior-friendly package"],
+    "notes": "Address southern market interest with flight inclusion."
+  },
+  "char_dham_yatra_pune": {
+    "url": "/packages/char-dham-yatra-from-pune",
+    "primary_keywords": ["char dham yatra from pune", "char dham package from pune"],
+    "secondary_keywords": ["flight + hotel + transfer", "10 nights itinerary", "helicopter upgrade"],
+    "notes": "Pune as a feeder city to Mumbai routes."
+  },
+  "char_dham_yatra_kolkata": {
+    "url": "/packages/char-dham-yatra-from-kolkata",
+    "primary_keywords": ["char dham yatra from kolkata", "char dham package from kolkata"],
+    "secondary_keywords": ["cost from kolkata", "flight inclusive package", "12 days itinerary"],
+    "notes": "Long-haul origin with flight-inclusive focus."
+  },
+  "char_dham_yatra_ahmedabad": {
+    "url": "/packages/char-dham-yatra-from-ahmedabad",
+    "primary_keywords": ["char dham yatra from ahmedabad", "char dham package from ahmedabad"],
+    "secondary_keywords": ["tempo traveller group", "budget options", "itinerary 10 days"],
+    "notes": "Gujarat origin; group and budget focus."
+  },
+  "char_dham_yatra_jaipur": {
+    "url": "/packages/char-dham-yatra-from-jaipur",
+    "primary_keywords": ["char dham yatra from jaipur", "char dham package from jaipur"],
+    "secondary_keywords": ["train + road package", "cost per person", "12 days plan"],
+    "notes": "North-west origin with train connectivity."
+  },
+  "char_dham_yatra_lucknow": {
+    "url": "/packages/char-dham-yatra-from-lucknow",
+    "primary_keywords": ["char dham yatra from lucknow", "char dham package from lucknow"],
+    "secondary_keywords": ["group departures", "budget packages", "road trip itinerary"],
+    "notes": "UP origin with emphasis on group/budget."
+  },
+  "europe_grand_tour": {
+    "url": "/packages/europe-grand-tour",
+    "primary_keywords": ["Europe tour package from India", "Schengen visa assistance"],
+    "secondary_keywords": ["Paris Switzerland London itinerary", "luxury Europe tour"],
+    "notes": "Visa FAQs included; highlight seasonality and custom stays."
+  },
+  "kerala_backwaters": {
+    "url": "/packages/kerala-backwaters",
+    "primary_keywords": ["Kerala backwaters package", "houseboat Alleppey tour"],
+    "secondary_keywords": ["Munnar Thekkady Kovalam", "Ayurvedic spa"],
+    "notes": "Emphasize luxury houseboat and wellness options."
+  },
+  "himachal_hill_stations": {
+    "url": "/packages/himachal-hill-stations",
+    "primary_keywords": ["Himachal tour package", "Shimla Manali package"],
+    "secondary_keywords": ["Dharamshala Dalhousie", "snow season"],
+    "notes": "Include Rohtang permits, senior-friendly pacing, adventure add-ons."
+  },
+  "goa_beach_holiday": {
+    "url": "/packages/goa-beach-holiday",
+    "primary_keywords": ["Goa beach holiday package", "Goa tour for couples"],
+    "secondary_keywords": ["water sports Goa", "sunset cruise"],
+    "notes": "Call out optional water sports and custom hotel categories."
+  },
+  "dubai_delights": {
+    "url": "/packages/dubai-delights",
+    "primary_keywords": ["Dubai tour package", "UAE visa assistance"],
+    "secondary_keywords": ["Desert safari", "Burj Khalifa tickets"],
+    "notes": "Include visa assistance and prime hour upgrades for Burj Khalifa."
+  },
+  "rann_utsav": {
+    "url": "/packages/rann-utsav",
+    "primary_keywords": ["Rann Utsav 2026-27", "Tent City Dhordo booking", "Rann Utsav package", "Evoke Experiences partner"],
+    "secondary_keywords": ["White Desert festival Kutch", "Road to Heaven Dholavira", "Full Moon Rann Utsav dates", "Kutch tour package from Bhuj", "Rann Utsav 3 Days 2 Nights price", "Dhordo village camping", "AC Deluxe Swiss Tent"],
+    "notes": "Emphasize official Evoke booking partner status, full moon dates, Dholavira Road to Heaven, and Bhuj transfers."
+  },
+  "singapore_malaysia": {
+    "url": "/packages/singapore-malaysia",
+    "primary_keywords": ["Singapore Malaysia tour package", "Singapore Malaysia tour from India", "Singapore Malaysia twin delight"],
+    "secondary_keywords": ["Sentosa Island tour", "Genting Highlands tour", "Kuala Lumpur city tour", "Singapore Malaysia itinerary 7 days", "Singapore Gardens by the Bay", "Malaysia Penang tour", "Singapore city tour", "Marina Bay Sands"],
+    "notes": "Highlight twin country experience and visa ease."
+  },
+  "seychelles_escape": {
+    "url": "/packages/seychelles-escape",
+    "primary_keywords": ["Seychelles tour package", "Seychelles honeymoon package", "Mahe Praslin La Digue tour"],
+    "secondary_keywords": ["luxury resorts Seychelles", "island hopping Seychelles", "Seychelles beaches"],
+    "notes": "Focus on luxury, honeymoon, and island hopping."
+  },
+  "turkey_adventure": {
+    "url": "/packages/turkey-adventure",
+    "primary_keywords": ["Turkey tour package", "Turkey holiday package", "Cappadocia hot air balloon"],
+    "secondary_keywords": ["Istanbul tour", "Pamukkale thermal pools", "Turkey historical sites"],
+    "notes": "Highlight balloon ride, history, and diverse landscapes."
+  },
+  "bali_paradise": {
+    "url": "/packages/bali-paradise",
+    "primary_keywords": ["Bali tour package", "Bali honeymoon package", "Bali tour from India"],
+    "secondary_keywords": ["Ubud tour", "Kuta beach", "Nusa Penida island tour", "Bali temple tour"],
+    "notes": "Emphasize culture, beaches, and affordability."
+  },
+  "leh_ladakh_tour": {
+    "url": "/packages/leh-ladakh-tour",
+    "primary_keywords": ["Leh Ladakh tour package", "Ladakh road trip", "Leh Ladakh bike trip"],
+    "secondary_keywords": ["Pangong Lake tour", "Nubra Valley tour", "Ladakh monasteries"],
+    "notes": "Focus on adventure, landscapes, and permits."
+  },
+  "jaisalmer_tour": {
+    "url": "/packages/jaisalmer-tour",
+    "primary_keywords": ["Jaisalmer tour package", "Jaisalmer desert safari", "Golden City tour"],
+    "secondary_keywords": ["Sam Sand Dunes camping", "Jaisalmer Fort tour", "Rajasthan desert tour"],
+    "notes": "Highlight desert experience, fort, and culture."
+  },
+  "thailand_tropical": {
+    "url": "/packages/thailand-tropical",
+    "primary_keywords": ["Thailand tour package", "Thailand holiday package", "Phuket Krabi tour"],
+    "secondary_keywords": ["Bangkok city tour", "Phi Phi island tour", "Thailand beaches"],
+    "notes": "Focus on beaches, nightlife, and affordability."
+  },
+  "georgia_adventure": {
+    "url": "/packages/georgia-adventure",
+    "primary_keywords": ["Georgia tour package", "Georgia tour packages from India 2026", "Tbilisi Batumi tour itinerary", "Georgia adventure tour"],
+    "secondary_keywords": ["Georgia tour from India", "Caucasus mountains tour", "Georgia wine tour", "Batumi beach holiday", "Georgia e-visa for Indians", "Ghumo Firoo Georgia", "Georgia travel guide", "Batumi nightlife", "Kakheti vineyards", "Tbilisi old town", "Svaneti hiking", "Georgia Caucasus adventure"],
+    "notes": "Focus on 9-day Tbilisi-Batumi itinerary, mountain views, Black Sea coast, and wine culture."
+  },
+  "batumi_beauty_blog": {
+    "url": "/blog/beauty-of-batumi-black-sea-pearl-guide",
+    "primary_keywords": ["Batumi tourism 2026", "Black Sea vacation", "Batumi boulevard", "things to do in Batumi"],
+    "secondary_keywords": ["Ali and Nino sculpture", "Batumi botanical garden", "Georgia seaside holiday"],
+    "notes": "Blog post highlighting the coastal charm of Batumi."
+  },
+  "hotel_21_tbilisi_blog": {
+    "url": "/blog/hotel-21-tbilisi-luxury-stay-guide",
+    "primary_keywords": ["Best hotels in Tbilisi", "Hotel 21 Tbilisi reviews", "luxury stay Georgia"],
+    "secondary_keywords": ["Tbilisi old town hotels", "where to stay in Tbilisi", "premium hotels Georgia"],
+    "notes": "Hotel spotlight blog for Tbilisi."
+  },
+  "le_port_hotel_batumi_blog": {
+    "url": "/blog/le-port-hotel-batumi-coastal-luxury",
+    "primary_keywords": ["Hotels in Batumi near beach", "Le Port Hotel Batumi booking", "luxury apartments Batumi"],
+    "secondary_keywords": ["Batumi seaside stay", "best places to stay in Batumi", "premium Batumi hotels"],
+    "notes": "Hotel spotlight blog for Batumi."
+  }
+}

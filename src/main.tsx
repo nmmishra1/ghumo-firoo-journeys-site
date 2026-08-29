@@ -1,6 +1,7 @@
 
 import React from 'react';
-import { createRoot } from 'react-dom/client'
+import { createRoot, hydrateRoot } from 'react-dom/client';
+import { HelmetProvider } from 'react-helmet-async';
 import App from './App.tsx'
 import './index.css'
 
@@ -65,39 +66,82 @@ class ErrorBoundary extends React.Component<{children: React.ReactNode}, {hasErr
 
 // Enhanced global error handlers with better isolation
 window.addEventListener('error', function(event) {
-  console.error('Global error intercepted:', {
-    message: event.message,
-    filename: event.filename,
-    lineno: event.lineno,
-    colno: event.colno,
-    error: event.error
-  });
-  
-  // Prevent external script errors from breaking React app
-  if (event.filename && (
-    event.filename.includes('b2bta-production') || 
-    event.filename.includes('s3.ap-south-1.amazonaws.com')
-  )) {
-    console.warn('External script error detected - preventing app crash');
+  const message = event.message || 'Unknown runtime error';
+  const filename = event.filename || '';
+  const lineno = event.lineno || 0;
+  const colno = event.colno || 0;
+  const errorObj = event.error;
+
+  // Mask details for standard cross-origin script / postMessage targetOrigin errors
+  if ((message === 'Script error.' && !filename) || message.includes('postMessage') || message.includes('target origin')) {
+    console.warn('Cross-origin/iframe postMessage error intercepted (suppressed details)');
     event.preventDefault();
     event.stopPropagation();
     return true;
   }
+
+  // Check if it's from a known external script, extension, or third-party tracking script
+  const isExtension = filename.startsWith('chrome-extension://') || filename.startsWith('moz-extension://');
+  const isExternal = filename.includes('googletagmanager.com') || 
+                     filename.includes('facebook.net') || 
+                     filename.includes('google-analytics.com') ||
+                     filename.includes('b2bta-production') || 
+                     filename.includes('s3.ap-south-1.amazonaws.com');
+
+  if (isExtension || isExternal) {
+    console.warn('External script/extension error intercepted (prevented app crash):', {
+      message,
+      filename,
+      lineno,
+      colno
+    });
+    event.preventDefault();
+    event.stopPropagation();
+    return true;
+  }
+
+  // Otherwise, log it in detail so it's debuggable in development
+  console.error('Global error intercepted:', {
+    message,
+    filename,
+    lineno,
+    colno,
+    error: errorObj ? (errorObj.stack || errorObj.message || errorObj) : null
+  });
 });
 
 window.addEventListener('unhandledrejection', function(event) {
-  console.error('Unhandled promise rejection intercepted:', event.reason);
+  const reason = event.reason;
+  const reasonString = reason?.toString?.() || String(reason);
   
-  // Check if rejection is from external script
-  if (event.reason && event.reason.toString && event.reason.toString().includes('b2bta')) {
-    console.warn('External script promise rejection - preventing app crash');
+  // Suppress extensions, adblockers, and analytics errors
+  if (
+    reasonString.includes('b2bta') ||
+    reasonString.includes('message channel closed') ||
+    reasonString.includes('listener indicated') ||
+    reasonString.includes('async response') ||
+    reasonString.includes('chrome-extension') ||
+    reasonString.includes('Google') ||
+    reasonString.includes('Analytics')
+  ) {
+    console.warn('External script or extension unhandled promise rejection intercepted:', reasonString);
     event.preventDefault();
     return;
   }
+  
+  console.error('Unhandled promise rejection intercepted:', reason);
 });
 
-console.log('🚀 Initializing React application...');
+// Handle runtime errors from extensions/content scripts
+window.addEventListener('message', (event) => {
+  // Allow safe cross-origin communication
+  if (event.origin !== window.location.origin) {
+    return;
+  }
+  // Just log, don't crash
+}, { passive: true });
 
+// Initialize React application
 try {
   const rootElement = document.getElementById("root");
   
@@ -105,19 +149,19 @@ try {
     throw new Error('Root element not found');
   }
   
-  console.log('✅ Creating React root...');
-  const root = createRoot(rootElement);
-  
-  console.log('✅ Rendering application...');
-  root.render(
+  const app = (
     <React.StrictMode>
-      <ErrorBoundary>
-        <App />
-      </ErrorBoundary>
+      <HelmetProvider>
+        <ErrorBoundary>
+          <App />
+        </ErrorBoundary>
+      </HelmetProvider>
     </React.StrictMode>
   );
-  
-  console.log('✅ React application rendered successfully');
+
+  // Initialize React root using createRoot
+  const root = createRoot(rootElement);
+  root.render(app);
   
 } catch (error) {
   console.error('❌ Critical error during React initialization:', error);
