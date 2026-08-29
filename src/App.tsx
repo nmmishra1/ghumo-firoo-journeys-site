@@ -24,15 +24,15 @@ PageLoader.displayName = 'PageLoader';
 // Error boundary component for lazy loaded routes
 class LazyErrorBoundary extends React.Component<
   { children: React.ReactNode },
-  { hasError: boolean }
+  { hasError: boolean; error: Error | null }
 > {
   constructor(props: { children: React.ReactNode }) {
     super(props);
-    this.state = { hasError: false };
+    this.state = { hasError: false, error: null };
   }
 
-  static getDerivedStateFromError() {
-    return { hasError: true };
+  static getDerivedStateFromError(error: Error) {
+    return { hasError: true, error };
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
@@ -51,16 +51,26 @@ class LazyErrorBoundary extends React.Component<
   render() {
     if (this.state.hasError) {
       return (
-        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-red-50 via-white to-orange-50">
-          <div className="glass-card p-8 rounded-2xl shadow-glass-lg text-center">
+        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-red-50 via-white to-orange-50 p-4">
+          <div className="glass-card p-8 rounded-2xl shadow-glass-lg text-center max-w-lg w-full">
             <h2 className="text-xl font-semibold text-red-600 mb-4">Something went wrong</h2>
             <p className="text-gray-600 mb-4">Failed to load the page. Please try refreshing.</p>
             <button 
-              onClick={() => { this.setState({ hasError: false }); window.location.reload(); }} 
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              onClick={() => {
+                sessionStorage.removeItem('chunk_reload_done');
+                this.setState({ hasError: false, error: null });
+                window.location.reload();
+              }} 
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium mb-4"
             >
               Refresh Page & Retry
             </button>
+            {this.state.error && (
+              <details className="text-left mt-4 text-xs text-gray-500 bg-gray-50 p-3 rounded border border-gray-200 overflow-auto max-h-40">
+                <summary className="cursor-pointer font-semibold text-gray-700">View Technical Details</summary>
+                <p className="mt-2 font-mono text-red-600">{this.state.error.toString()}</p>
+              </details>
+            )}
           </div>
         </div>
       );
