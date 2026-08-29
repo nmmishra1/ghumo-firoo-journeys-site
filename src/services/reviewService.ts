@@ -123,10 +123,7 @@ const computeStats = (reviews: GoogleReview[]): ReviewStats => {
   return { total, averageRating, ratingDistribution, recentCount, responseRate };
 };
 
-const API_BASE = import.meta.env.VITE_API_BASE_URL;
-if (!API_BASE) {
-  throw new Error('VITE_API_BASE_URL is not configured! Verify your env files.');
-}
+const API_BASE = (import.meta as any).env?.VITE_PHP_BASE_URL || (import.meta as any).env?.VITE_API_BASE_URL || '/php-backend';
 
 async function getAuthHeader(): Promise<Record<string, string>> {
   const { data: { session } } = await supabase.auth.getSession();
