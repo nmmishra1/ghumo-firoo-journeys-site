@@ -19,6 +19,19 @@ import { HotelContracting } from '@/pages/crm/HotelContracting';
 import { CabContracting } from '@/pages/crm/CabContracting';
 import { PackageMaster } from '@/pages/crm/PackageMaster';
 import { ReviewModeration } from '@/components/crm/ReviewModeration';
+import { OpportunityKanban } from '@/pages/crm/OpportunityKanban';
+import { ItineraryBuilder } from '@/pages/crm/ItineraryBuilder';
+import { QuoteWorkspace } from '@/pages/crm/QuoteWorkspace';
+import { DestinationManagement } from '@/pages/crm/DestinationManagement';
+import { SightseeingMaster } from '@/pages/crm/SightseeingMaster';
+import { ActivityMaster } from '@/pages/crm/ActivityMaster';
+import { VisaMaster } from '@/pages/crm/VisaMaster';
+import { BlogMaster } from '@/pages/crm/BlogMaster';
+import { BulkUploadHub } from '@/pages/crm/BulkUploadHub';
+import { AgentRoleManagement } from '@/pages/crm/AgentRoleManagement';
+import { AuditLogsViewer } from '@/pages/crm/AuditLogsViewer';
+import { EmailMarketingHub } from '@/components/crm/EmailMarketingHub';
+import { Compass, FileText, Map, ShieldCheck, Send, Layers, Globe, Sparkles, Award } from 'lucide-react';
 
 type Lead = {
   id: string;
@@ -420,86 +433,168 @@ const CRM = () => {
         )}
 
         {/* Navigation Menu */}
-        <nav className="flex-1 p-4">
-          <div className="space-y-2">
-            <Button
-              variant={currentSection === 'dashboard' ? 'secondary' : 'ghost'}
-              className="w-full justify-start text-primary-foreground hover:bg-primary-foreground/10"
-              onClick={() => setCurrentSection('dashboard')}
-            >
-              <LayoutDashboard className="h-4 w-4 mr-3" />
-              {!sidebarCollapsed && 'Dashboard'}
-            </Button>
-            
-            <Button
-              variant={currentSection === 'user-dashboard' ? 'secondary' : 'ghost'}
-              className="w-full justify-start text-primary-foreground hover:bg-primary-foreground/10"
-              onClick={() => setCurrentSection('user-dashboard')}
-            >
-              <UserCheck className="h-4 w-4 mr-3" />
-              {!sidebarCollapsed && 'User Dashboard'}
-            </Button>
-            
-            <div className="space-y-1">
-              <Button
-                variant={currentSection === 'leads' ? 'secondary' : 'ghost'}
-                className="w-full justify-start text-primary-foreground hover:bg-primary-foreground/10"
-                onClick={() => setCurrentSection('leads')}
-              >
-                <Users className="h-4 w-4 mr-3" />
-                {!sidebarCollapsed && 'Leads'}
-              </Button>
-              
-              {currentSection === 'leads' && !sidebarCollapsed && (
-                <div className="ml-6 space-y-1">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="w-full justify-start text-primary-foreground/80 hover:bg-primary-foreground/10"
-                    onClick={() => setCurrentSection('leads')}
-                  >
-                    All Leads
-                  </Button>
-                </div>
-              )}
-            </div>
+        <nav className="flex-1 p-3 overflow-y-auto max-h-[calc(100vh-220px)] space-y-1 scrollbar-thin">
+          <Button
+            variant={currentSection === 'dashboard' ? 'secondary' : 'ghost'}
+            className="w-full justify-start text-primary-foreground hover:bg-primary-foreground/10"
+            onClick={() => setCurrentSection('dashboard')}
+          >
+            <LayoutDashboard className="h-4 w-4 mr-3 text-amber-400" />
+            {!sidebarCollapsed && 'Executive Dashboard'}
+          </Button>
 
-            <Button
-              variant={currentSection === 'hotels' ? 'secondary' : 'ghost'}
-              className="w-full justify-start text-primary-foreground hover:bg-primary-foreground/10"
-              onClick={() => setCurrentSection('hotels')}
-            >
-              <Building2 className="h-4 w-4 mr-3" />
-              {!sidebarCollapsed && 'Hotel Contracting'}
-            </Button>
+          <Button
+            variant={currentSection === 'kanban' ? 'secondary' : 'ghost'}
+            className="w-full justify-start text-primary-foreground hover:bg-primary-foreground/10"
+            onClick={() => setCurrentSection('kanban')}
+          >
+            <TrendingUp className="h-4 w-4 mr-3 text-cyan-400" />
+            {!sidebarCollapsed && 'Opportunity Pipeline'}
+          </Button>
+          
+          <Button
+            variant={currentSection === 'leads' ? 'secondary' : 'ghost'}
+            className="w-full justify-start text-primary-foreground hover:bg-primary-foreground/10"
+            onClick={() => setCurrentSection('leads')}
+          >
+            <Users className="h-4 w-4 mr-3 text-blue-400" />
+            {!sidebarCollapsed && 'Lead Management'}
+          </Button>
 
-            <Button
-              variant={currentSection === 'cabs' ? 'secondary' : 'ghost'}
-              className="w-full justify-start text-primary-foreground hover:bg-primary-foreground/10"
-              onClick={() => setCurrentSection('cabs')}
-            >
-              <Car className="h-4 w-4 mr-3" />
-              {!sidebarCollapsed && 'Cab Contracting'}
-            </Button>
+          <Button
+            variant={currentSection === 'itinerary' ? 'secondary' : 'ghost'}
+            className="w-full justify-start text-primary-foreground hover:bg-primary-foreground/10"
+            onClick={() => setCurrentSection('itinerary')}
+          >
+            <Map className="h-4 w-4 mr-3 text-emerald-400" />
+            {!sidebarCollapsed && 'Itinerary Builder'}
+          </Button>
 
-            <Button
-              variant={currentSection === 'packages' ? 'secondary' : 'ghost'}
-              className="w-full justify-start text-primary-foreground hover:bg-primary-foreground/10"
-              onClick={() => setCurrentSection('packages')}
-            >
-              <Package className="h-4 w-4 mr-3" />
-              {!sidebarCollapsed && 'Package Master'}
-            </Button>
+          <Button
+            variant={currentSection === 'quotes' ? 'secondary' : 'ghost'}
+            className="w-full justify-start text-primary-foreground hover:bg-primary-foreground/10"
+            onClick={() => setCurrentSection('quotes')}
+          >
+            <FileText className="h-4 w-4 mr-3 text-indigo-400" />
+            {!sidebarCollapsed && 'Proposal & Quotes'}
+          </Button>
 
-            <Button
-              variant={currentSection === 'reviews' ? 'secondary' : 'ghost'}
-              className="w-full justify-start text-primary-foreground hover:bg-primary-foreground/10"
-              onClick={() => setCurrentSection('reviews')}
-            >
-              <Star className="h-4 w-4 mr-3" />
-              {!sidebarCollapsed && 'Review Moderation'}
-            </Button>
-          </div>
+          <Button
+            variant={currentSection === 'hotels' ? 'secondary' : 'ghost'}
+            className="w-full justify-start text-primary-foreground hover:bg-primary-foreground/10"
+            onClick={() => setCurrentSection('hotels')}
+          >
+            <Building2 className="h-4 w-4 mr-3 text-purple-400" />
+            {!sidebarCollapsed && 'Hotel Contracting'}
+          </Button>
+
+          <Button
+            variant={currentSection === 'cabs' ? 'secondary' : 'ghost'}
+            className="w-full justify-start text-primary-foreground hover:bg-primary-foreground/10"
+            onClick={() => setCurrentSection('cabs')}
+          >
+            <Car className="h-4 w-4 mr-3 text-amber-400" />
+            {!sidebarCollapsed && 'Cab Contracting & Fares'}
+          </Button>
+
+          <Button
+            variant={currentSection === 'packages' ? 'secondary' : 'ghost'}
+            className="w-full justify-start text-primary-foreground hover:bg-primary-foreground/10"
+            onClick={() => setCurrentSection('packages')}
+          >
+            <Package className="h-4 w-4 mr-3 text-pink-400" />
+            {!sidebarCollapsed && 'Package Master'}
+          </Button>
+
+          <Button
+            variant={currentSection === 'destinations' ? 'secondary' : 'ghost'}
+            className="w-full justify-start text-primary-foreground hover:bg-primary-foreground/10"
+            onClick={() => setCurrentSection('destinations')}
+          >
+            <Globe className="h-4 w-4 mr-3 text-teal-400" />
+            {!sidebarCollapsed && 'Destinations'}
+          </Button>
+
+          <Button
+            variant={currentSection === 'sightseeing' ? 'secondary' : 'ghost'}
+            className="w-full justify-start text-primary-foreground hover:bg-primary-foreground/10"
+            onClick={() => setCurrentSection('sightseeing')}
+          >
+            <Compass className="h-4 w-4 mr-3 text-orange-400" />
+            {!sidebarCollapsed && 'Sightseeing Master'}
+          </Button>
+
+          <Button
+            variant={currentSection === 'activities' ? 'secondary' : 'ghost'}
+            className="w-full justify-start text-primary-foreground hover:bg-primary-foreground/10"
+            onClick={() => setCurrentSection('activities')}
+          >
+            <Sparkles className="h-4 w-4 mr-3 text-yellow-400" />
+            {!sidebarCollapsed && 'Activity Master'}
+          </Button>
+
+          <Button
+            variant={currentSection === 'visas' ? 'secondary' : 'ghost'}
+            className="w-full justify-start text-primary-foreground hover:bg-primary-foreground/10"
+            onClick={() => setCurrentSection('visas')}
+          >
+            <Award className="h-4 w-4 mr-3 text-lime-400" />
+            {!sidebarCollapsed && 'Visa Master'}
+          </Button>
+
+          <Button
+            variant={currentSection === 'blogs' ? 'secondary' : 'ghost'}
+            className="w-full justify-start text-primary-foreground hover:bg-primary-foreground/10"
+            onClick={() => setCurrentSection('blogs')}
+          >
+            <Layers className="h-4 w-4 mr-3 text-sky-400" />
+            {!sidebarCollapsed && 'Blog Master'}
+          </Button>
+
+          <Button
+            variant={currentSection === 'email-marketing' ? 'secondary' : 'ghost'}
+            className="w-full justify-start text-primary-foreground hover:bg-primary-foreground/10"
+            onClick={() => setCurrentSection('email-marketing')}
+          >
+            <Send className="h-4 w-4 mr-3 text-rose-400" />
+            {!sidebarCollapsed && 'Email Marketing'}
+          </Button>
+
+          <Button
+            variant={currentSection === 'bulk-upload' ? 'secondary' : 'ghost'}
+            className="w-full justify-start text-primary-foreground hover:bg-primary-foreground/10"
+            onClick={() => setCurrentSection('bulk-upload')}
+          >
+            <Upload className="h-4 w-4 mr-3 text-fuchsia-400" />
+            {!sidebarCollapsed && 'Bulk Upload Hub'}
+          </Button>
+
+          <Button
+            variant={currentSection === 'agent-roles' ? 'secondary' : 'ghost'}
+            className="w-full justify-start text-primary-foreground hover:bg-primary-foreground/10"
+            onClick={() => setCurrentSection('agent-roles')}
+          >
+            <UserCheck className="h-4 w-4 mr-3 text-emerald-400" />
+            {!sidebarCollapsed && 'Agent Roles & Perms'}
+          </Button>
+
+          <Button
+            variant={currentSection === 'audit-logs' ? 'secondary' : 'ghost'}
+            className="w-full justify-start text-primary-foreground hover:bg-primary-foreground/10"
+            onClick={() => setCurrentSection('audit-logs')}
+          >
+            <ShieldCheck className="h-4 w-4 mr-3 text-zinc-400" />
+            {!sidebarCollapsed && 'System Audit Logs'}
+          </Button>
+
+          <Button
+            variant={currentSection === 'reviews' ? 'secondary' : 'ghost'}
+            className="w-full justify-start text-primary-foreground hover:bg-primary-foreground/10"
+            onClick={() => setCurrentSection('reviews')}
+          >
+            <Star className="h-4 w-4 mr-3 text-amber-400" />
+            {!sidebarCollapsed && 'Review Moderation'}
+          </Button>
         </nav>
 
         {/* User Profile Section */}
@@ -815,10 +910,21 @@ const CRM = () => {
                     )}
                   </div>
                 )}
-              </CardContent>
+          {currentSection === 'kanban' && <OpportunityKanban />}
+          {currentSection === 'itinerary' && <ItineraryBuilder />}
+          {currentSection === 'quotes' && <QuoteWorkspace />}
           {currentSection === 'hotels' && <HotelContracting />}
           {currentSection === 'cabs' && <CabContracting />}
           {currentSection === 'packages' && <PackageMaster />}
+          {currentSection === 'destinations' && <DestinationManagement />}
+          {currentSection === 'sightseeing' && <SightseeingMaster />}
+          {currentSection === 'activities' && <ActivityMaster />}
+          {currentSection === 'visas' && <VisaMaster />}
+          {currentSection === 'blogs' && <BlogMaster />}
+          {currentSection === 'email-marketing' && <EmailMarketingHub />}
+          {currentSection === 'bulk-upload' && <BulkUploadHub />}
+          {currentSection === 'agent-roles' && <AgentRoleManagement />}
+          {currentSection === 'audit-logs' && <AuditLogsViewer />}
           {currentSection === 'reviews' && <ReviewModeration />}
         </main>
       </div>
