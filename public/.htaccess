@@ -66,8 +66,8 @@ ErrorDocument 500 /index.html
   RewriteRule ^sitemap\.xml$ - [L]
   RewriteRule ^ads\.txt$ - [L]
 
-  # Allow direct access to php-backend
-  RewriteRule ^php-backend/(.*)$ php-backend/$1 [L]
+  # Allow direct access to php-backend (no rewrite loop)
+  RewriteRule ^php-backend/ - [L]
 
   # Map Leads API calls — secured, routes to php-backend
   RewriteRule ^api/leads/create-public$ /php-backend/leads_create_public.php [L,QSA]
