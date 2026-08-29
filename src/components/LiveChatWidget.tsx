@@ -300,8 +300,14 @@ export const LiveChatWidget: React.FC = () => {
     </div>
   );
 
-  // Hide live chat widget on internal CRM pages
-  if (location.pathname.startsWith('/crm')) {
+  // Hide live chat widget on internal CRM and Auth pages
+  if (
+    location.pathname.startsWith('/crm') ||
+    location.pathname.startsWith('/auth') ||
+    location.pathname.startsWith('/signup') ||
+    location.pathname.startsWith('/forgot-password') ||
+    location.pathname.startsWith('/reset-password')
+  ) {
     return null;
   }
 

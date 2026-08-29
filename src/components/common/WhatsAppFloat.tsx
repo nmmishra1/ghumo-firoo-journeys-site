@@ -4,8 +4,16 @@ import { useLocation } from 'react-router-dom';
 const WhatsAppFloat = () => {
   const location = useLocation();
 
-  // Hide on CRM routes
-  if (location.pathname.startsWith('/crm')) return null;
+  // Hide on CRM and Auth portal routes
+  if (
+    location.pathname.startsWith('/crm') ||
+    location.pathname.startsWith('/auth') ||
+    location.pathname.startsWith('/signup') ||
+    location.pathname.startsWith('/forgot-password') ||
+    location.pathname.startsWith('/reset-password')
+  ) {
+    return null;
+  }
 
   // Build context-aware pre-filled message
   const getMessage = () => {
