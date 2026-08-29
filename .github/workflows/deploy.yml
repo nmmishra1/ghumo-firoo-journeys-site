@@ -27,7 +27,7 @@ jobs:
         run: npm run build
 
       - name: 📂 Deploy Frontend Dist to cPanel
-        uses: SamKirland/ftp-deploy-action@v4.3.5
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
           server: ${{ secrets.FTP_SERVER }}
           username: ${{ secrets.FTP_USERNAME }}
@@ -37,7 +37,7 @@ jobs:
           dangerous-clean-slate: false
 
       - name: 🐘 Deploy PHP Backend to cPanel
-        uses: SamKirland/ftp-deploy-action@v4.3.5
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
           server: ${{ secrets.FTP_SERVER }}
           username: ${{ secrets.FTP_USERNAME }}
