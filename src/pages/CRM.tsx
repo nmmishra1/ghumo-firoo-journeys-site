@@ -18,7 +18,7 @@ import { FollowUpModal } from '@/components/crm/FollowUpModal';
 import { HotelContracting } from '@/pages/crm/HotelContracting';
 import CabContracting from '@/pages/crm/CabContracting';
 import PackageMaster from '@/pages/crm/PackageMaster';
-import { ReviewModeration } from '@/components/crm/ReviewModeration';
+import ReviewModeration from '@/components/crm/ReviewModeration';
 import OpportunityKanban from '@/pages/crm/OpportunityKanban';
 import ItineraryBuilder from '@/pages/crm/ItineraryBuilder';
 import QuoteWorkspace from '@/pages/crm/QuoteWorkspace';
@@ -910,6 +910,10 @@ const CRM = () => {
                     )}
                   </div>
                 )}
+              </CardContent>
+            </Card>
+          )}
+
           {currentSection === 'kanban' && <OpportunityKanban />}
           {currentSection === 'itinerary' && <ItineraryBuilder />}
           {currentSection === 'quotes' && <QuoteWorkspace />}
