@@ -18,7 +18,7 @@ if (function_exists('loadEnvFile')) {
  * Dispatches a PDF document (Quote, Itinerary, Voucher) to WhatsApp
  */
 function sendWhatsAppPdf(string $phone, string $pdfUrl, string $fileName = 'GhumoFiroo_Quote.pdf', string $caption = ''): array {
-    $baseUrl   = getenv('OPENWA_BASE_URL') ?: getenv('OPENWA_SERVICE_URL') ?: 'http://localhost:2785';
+    $baseUrl   = getenv('OPENWA_BASE_URL') ?: getenv('OPENWA_SERVICE_URL') ?: 'https://ghumofiroo-whatsapp-service.onrender.com';
     $apiKey    = getenv('OPENWA_API_KEY') ?: getenv('OPENWA_API_SECRET') ?: 'ghumo_firoo_secret_wa_key_2026';
     $sessionId = getenv('OPENWA_SESSION_ID') ?: 'main';
 
@@ -54,7 +54,7 @@ function sendWhatsAppPdf(string $phone, string $pdfUrl, string $fileName = 'Ghum
  * Dispatches a Banner / Photo to WhatsApp
  */
 function sendWhatsAppImage(string $phone, string $imageUrl, string $caption = ''): array {
-    $baseUrl   = getenv('OPENWA_BASE_URL') ?: getenv('OPENWA_SERVICE_URL') ?: 'http://localhost:2785';
+    $baseUrl   = getenv('OPENWA_BASE_URL') ?: getenv('OPENWA_SERVICE_URL') ?: 'https://ghumofiroo-whatsapp-service.onrender.com';
     $apiKey    = getenv('OPENWA_API_KEY') ?: getenv('OPENWA_API_SECRET') ?: 'ghumo_firoo_secret_wa_key_2026';
     $sessionId = getenv('OPENWA_SESSION_ID') ?: 'main';
 
@@ -88,7 +88,7 @@ function sendWhatsAppImage(string $phone, string $imageUrl, string $caption = ''
  * Dispatches a text message to WhatsApp
  */
 function sendWhatsAppText(string $phone, string $text): array {
-    $baseUrl   = getenv('OPENWA_BASE_URL') ?: getenv('OPENWA_SERVICE_URL') ?: 'http://localhost:2785';
+    $baseUrl   = getenv('OPENWA_BASE_URL') ?: getenv('OPENWA_SERVICE_URL') ?: 'https://ghumofiroo-whatsapp-service.onrender.com';
     $apiKey    = getenv('OPENWA_API_KEY') ?: getenv('OPENWA_API_SECRET') ?: 'ghumo_firoo_secret_wa_key_2026';
     $sessionId = getenv('OPENWA_SESSION_ID') ?: 'main';
 
