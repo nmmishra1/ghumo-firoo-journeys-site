@@ -72,6 +72,12 @@ ErrorDocument 500 /index.html
   # Allow direct access to php-backend (no rewrite loop)
   RewriteRule ^php-backend/ - [L]
 
+  # Map root api.php and direct PHP APIs to php-backend
+  RewriteRule ^api\.php$ /php-backend/api.php [L,QSA]
+  RewriteRule ^destinations_api\.php$ /php-backend/destinations_api.php [L,QSA]
+  RewriteRule ^hotels\.php$ /php-backend/hotels.php [L,QSA]
+  RewriteRule ^hotel-rates\.php$ /php-backend/hotel-rates.php [L,QSA]
+
   # Map Leads API calls — secured, routes to php-backend
   RewriteRule ^api/leads/create-public$ /php-backend/leads_create_public.php [L,QSA]
   RewriteRule ^api/leads/create$ /php-backend/leads_create.php [L,QSA]
