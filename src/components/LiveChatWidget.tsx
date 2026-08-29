@@ -160,8 +160,16 @@ export const LiveChatWidget: React.FC = () => {
   const handleQuickReply = async (action: string) => {
     const reply = quickReplies.find(r => r.action === action);
     if (reply) {
-      const userText = reply.text.replace(/[🚩🏔️🌴🗼🏖️👤]/g, '').trim();
+      const userText = reply.text.replace(/[🚩🏔️🌴🗼🏖️👤🎪]/g, '').trim();
       addMessage(userText, 'user');
+
+      if (action === 'agent') {
+        setTimeout(() => {
+          addMessage("Hi! 👋 I'm Sarah, Senior Travel Specialist at Ghumo Firoo. How can I assist you with your holiday plans today?\n\nYou can reach our human experts directly at **+91-9910987264** or fill in your details below so we can call you back with custom quotes!", 'agent');
+          setShowLeadForm(true);
+        }, 500);
+        return;
+      }
 
       const updatedHistory: Array<{ role: 'user' | 'assistant'; content: string }> = [
         ...conversationHistory,
@@ -180,12 +188,6 @@ export const LiveChatWidget: React.FC = () => {
           ...updatedHistory,
           { role: 'assistant', content: quickResponse }
         ] as Array<{ role: 'user' | 'assistant'; content: string }>);
-
-        if (action === 'agent') {
-          setTimeout(() => {
-            addMessage("Hi! I'm Sarah from Ghumo Firoo Travels. What destination would you like to explore today?", 'agent');
-          }, 1000);
-        }
       } catch (err) {
         console.error('Quick reply error:', err);
       } finally {
