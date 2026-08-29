@@ -11,7 +11,7 @@
     "build:dev": "vite build --mode development",
     "build:server": "npx esbuild server/razorpay-server.ts --bundle --platform=node --outfile=dist-server/app.js",
     "generate:sitemap": "tsx scripts/generate-sitemap.mts",
-    "postbuild": "npm run generate:sitemap && react-snap",
+    "postbuild": "npm run generate:sitemap && (react-snap || true)",
     "lint": "eslint .",
     "preview": "vite preview",
     "seo:validate": "node scripts/seo-validate.mjs"
@@ -19,6 +19,8 @@
   "reactSnap": {
     "source": "dist",
     "destination": "dist",
+    "concurrency": 1,
+    "fixWebpackChunksIssue": false,
     "puppeteerArgs": [
       "--no-sandbox",
       "--disable-setuid-sandbox"
