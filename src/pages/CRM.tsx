@@ -4652,8 +4652,9 @@ Ghumo Firoo Travels`
                     const leadTotalPaid = leadPaymentsList.reduce((sum, p) => sum + Number(p.amount_received || 0), 0);
                     const leadBalanceDue = Math.max(0, leadPkgPrice - leadTotalPaid);
                     
-                    const isConfirmed = activeLead.status === 'Booking Confirmed' || activeLead.status === 'Confirmed' || leadTotalPaid > 0;
-                    const isQuoted = activeLead.status === 'Quote Sent';
+                    const rawStatus = (activeLead.status || 'New').toLowerCase().trim();
+                    const isConfirmed = (rawStatus === 'booking confirmed' || rawStatus === 'confirmed' || rawStatus === 'converted') || (leadTotalPaid > 0 && rawStatus !== 'new');
+                    const isQuoted = rawStatus === 'quote sent' || rawStatus === 'proposal sent';
 
                     const dueDateStr = activeLead.trip_start_date 
                       ? new Date(new Date(activeLead.trip_start_date).getTime() - 7 * 24 * 60 * 60 * 1000).toLocaleDateString([], { month: 'short', day: 'numeric', year: 'numeric' })
