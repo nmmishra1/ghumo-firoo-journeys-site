@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Plus, Edit, Phone, Mail, Users, TrendingUp, MessageCircle, UserPlus, Filter, Search, Upload, AlertTriangle, User, Clock, LayoutDashboard, UserCheck, ChevronDown, Calendar, MapPin, Menu, Home } from 'lucide-react';
+import { Plus, Edit, Phone, Mail, Users, TrendingUp, MessageCircle, UserPlus, Filter, Search, Upload, AlertTriangle, User, Clock, LayoutDashboard, UserCheck, ChevronDown, Calendar, MapPin, Menu, Home, Building2, Car, Package, Star } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
@@ -15,6 +15,10 @@ import { UserManagementDialog } from '@/components/crm/UserManagementDialog';
 import { LeadForm } from '@/components/crm/LeadForm';
 import { CSVImport } from '@/components/crm/CSVImport';
 import { FollowUpModal } from '@/components/crm/FollowUpModal';
+import { HotelContracting } from '@/pages/crm/HotelContracting';
+import { CabContracting } from '@/pages/crm/CabContracting';
+import { PackageMaster } from '@/pages/crm/PackageMaster';
+import { ReviewModeration } from '@/components/crm/ReviewModeration';
 
 type Lead = {
   id: string;
@@ -459,6 +463,42 @@ const CRM = () => {
                 </div>
               )}
             </div>
+
+            <Button
+              variant={currentSection === 'hotels' ? 'secondary' : 'ghost'}
+              className="w-full justify-start text-primary-foreground hover:bg-primary-foreground/10"
+              onClick={() => setCurrentSection('hotels')}
+            >
+              <Building2 className="h-4 w-4 mr-3" />
+              {!sidebarCollapsed && 'Hotel Contracting'}
+            </Button>
+
+            <Button
+              variant={currentSection === 'cabs' ? 'secondary' : 'ghost'}
+              className="w-full justify-start text-primary-foreground hover:bg-primary-foreground/10"
+              onClick={() => setCurrentSection('cabs')}
+            >
+              <Car className="h-4 w-4 mr-3" />
+              {!sidebarCollapsed && 'Cab Contracting'}
+            </Button>
+
+            <Button
+              variant={currentSection === 'packages' ? 'secondary' : 'ghost'}
+              className="w-full justify-start text-primary-foreground hover:bg-primary-foreground/10"
+              onClick={() => setCurrentSection('packages')}
+            >
+              <Package className="h-4 w-4 mr-3" />
+              {!sidebarCollapsed && 'Package Master'}
+            </Button>
+
+            <Button
+              variant={currentSection === 'reviews' ? 'secondary' : 'ghost'}
+              className="w-full justify-start text-primary-foreground hover:bg-primary-foreground/10"
+              onClick={() => setCurrentSection('reviews')}
+            >
+              <Star className="h-4 w-4 mr-3" />
+              {!sidebarCollapsed && 'Review Moderation'}
+            </Button>
           </div>
         </nav>
 
@@ -490,6 +530,10 @@ const CRM = () => {
                 {currentSection === 'leads' && 'All Leads'}
                 {currentSection === 'add-lead' && 'Add New Lead'}
                 {currentSection === 'edit-lead' && 'Edit Travel Lead'}
+                {currentSection === 'hotels' && 'Hotel Contracting'}
+                {currentSection === 'cabs' && 'Cab Contracting & Fares'}
+                {currentSection === 'packages' && 'Package Master'}
+                {currentSection === 'reviews' && 'Review Moderation'}
               </h1>
               <p className="text-muted-foreground">
                 {currentSection === 'dashboard' && 'Overview of your travel CRM'}
@@ -497,6 +541,10 @@ const CRM = () => {
                 {currentSection === 'leads' && 'Manage all your travel leads'}
                 {currentSection === 'add-lead' && 'Create a new travel lead'}
                 {currentSection === 'edit-lead' && 'Update details for this travel enquiry'}
+                {currentSection === 'hotels' && 'Manage hotel partners, contract rates, and room categories'}
+                {currentSection === 'cabs' && 'Manage cab routes, vehicle types, and fare calculations'}
+                {currentSection === 'packages' && 'Manage featured tour packages and itineraries'}
+                {currentSection === 'reviews' && 'Approve and moderate customer Google reviews'}
               </p>
             </div>
             <div className="flex items-center space-x-2">
@@ -768,8 +816,10 @@ const CRM = () => {
                   </div>
                 )}
               </CardContent>
-            </Card>
-          )}
+          {currentSection === 'hotels' && <HotelContracting />}
+          {currentSection === 'cabs' && <CabContracting />}
+          {currentSection === 'packages' && <PackageMaster />}
+          {currentSection === 'reviews' && <ReviewModeration />}
         </main>
       </div>
 
