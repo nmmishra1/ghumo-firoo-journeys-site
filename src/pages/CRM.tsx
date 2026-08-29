@@ -4287,6 +4287,8 @@ const CRM = () => {
                           <tr className="bg-slate-100 dark:bg-slate-900/80 border-b border-border/50 text-xs font-black text-slate-800 dark:text-slate-200 uppercase tracking-wider text-left">
                             <th className="py-3 px-3 text-left w-10">
                               <input 
+                                id="crm-leads-select-all"
+                                name="selectAllLeads"
                                 type="checkbox" 
                                 checked={selectedLeadIds.length === filteredLeads.length && filteredLeads.length > 0} 
                                 onChange={(e) => {
@@ -4329,6 +4331,8 @@ const CRM = () => {
                               <tr key={`lead-${l.id || idx}-${idx}`} className="hover:bg-slate-50/80 dark:hover:bg-slate-900/50 transition-all duration-150 border-b border-border/10">
                                 <td className="py-3 px-3 align-top text-left w-10">
                                   <input 
+                                    id={`crm-lead-select-${l.id || idx}`}
+                                    name={`selectLead_${l.id || idx}`}
                                     type="checkbox" 
                                     checked={selectedLeadIds.includes(l.id)} 
                                     onChange={(e) => {
