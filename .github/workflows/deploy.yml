@@ -34,9 +34,11 @@ jobs:
           server: ${{ secrets.FTP_SERVER }}
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
+          port: 21
           server-dir: ./
           local-dir: ./dist/
           dangerous-clean-slate: false
+          log-level: verbose
           exclude: |
             **/php-backend/.env
             **/php-backend/uploads/**
