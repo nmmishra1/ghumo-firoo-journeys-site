@@ -150,9 +150,18 @@ ErrorDocument 500 /index.html
   RewriteCond %{REQUEST_URI} ^/packages/.+/$ [NC]
   RewriteRule ^packages/(.+)/$ https://ghumofiroo.com/packages/$1 [L,R=301]
 
-  # React SPA Client-Side Routing
-  RewriteCond %{REQUEST_URI} ^/$ [OR]
-  RewriteCond %{REQUEST_URI} ^/(about|contact|packages|privacy-policy|terms-conditions|terms-of-service|refund-policy|blog|career|enquire-now|enquire-success|products|booking|pictramapdemo|custom-tour-packages|thank-you|guides|guide|landing|profile|faq|crm|signup|forgot-password|reset-password|auth|review|destinations|payment|pay)(/.*)?$ [NC]
+  # Pre-rendered HTML File Resolution (react-snap support)
+  # 1. Serve pre-rendered subfolder index.html if present (e.g. /about/index.html or /packages/rann-utsav/index.html)
+  RewriteCond %{DOCUMENT_ROOT}%{REQUEST_URI}/index.html -f
+  RewriteRule ^ %{REQUEST_URI}/index.html [L]
+
+  # 2. Serve pre-rendered route.html if present (e.g. /about.html)
+  RewriteCond %{DOCUMENT_ROOT}%{REQUEST_URI}.html -f
+  RewriteRule ^ %{REQUEST_URI}.html [L]
+
+  # 3. SPA Fallback for dynamic client-side routes without pre-rendered files
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
   RewriteRule ^ /index.html [L]
 </IfModule>
 
