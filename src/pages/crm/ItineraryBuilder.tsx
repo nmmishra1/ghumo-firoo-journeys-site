@@ -1946,7 +1946,15 @@ export function CostingDrawer({
   );
 }
 
-export default function ItineraryBuilder({ leadId, activeLead, onBack, userProfile, initialDocView, onOpenCsvImport, onOpenUserManagement }: ItineraryBuilderProps) {
+export default function ItineraryBuilder({
+  leadId = '',
+  activeLead = null,
+  onBack = () => {},
+  userProfile = null,
+  initialDocView,
+  onOpenCsvImport = () => {},
+  onOpenUserManagement = () => {}
+}: Partial<ItineraryBuilderProps> = {}) {
   const { toast } = useToast();
 
   // Proposal Brochure, Voucher & Invoice State

@@ -22,9 +22,9 @@ interface QuoteWorkspaceProps {
   onRefresh?: () => void;
 }
 
-export default function QuoteWorkspace({ quotes: propQuotes, onCreateRevision, onAcceptVersion, onUpdateVersion, onRefresh }: QuoteWorkspaceProps) {
+export default function QuoteWorkspace({ quotes: propQuotes = [], onCreateRevision = () => {}, onAcceptVersion = () => {}, onUpdateVersion = () => {}, onRefresh = () => {} }: Partial<QuoteWorkspaceProps>) {
   const { toast } = useToast();
-  const [quotes, setQuotes] = useState<QuoteHeader[]>(propQuotes);
+  const [quotes, setQuotes] = useState<QuoteHeader[]>(Array.isArray(propQuotes) ? propQuotes : []);
   const [selectedQuote, setSelectedQuote] = useState<QuoteHeader | null>(null);
   const [compareMode, setCompareMode] = useState(false);
   const [versionA, setVersionA] = useState<string>('');

@@ -45,11 +45,12 @@ interface OpportunityKanbanProps {
   onUpdateStage: (id: string, stage: Opportunity['stage']) => void;
 }
 
-export default function OpportunityKanban({ opportunities, onUpdateStage }: OpportunityKanbanProps) {
+export default function OpportunityKanban({ opportunities = [], onUpdateStage = () => {} }: Partial<OpportunityKanbanProps>) {
   const [searchTerm, setSearchTerm] = useState('');
   const [ownerFilter, setOwnerFilter] = useState('all');
 
-  const filteredOpps = opportunities.filter(opp => {
+  const safeOpps = Array.isArray(opportunities) ? opportunities : [];
+  const filteredOpps = safeOpps.filter(opp => {
     const matchesSearch = opp.customerName.toLowerCase().includes(searchTerm.toLowerCase()) || 
                           opp.destination.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesOwner = ownerFilter === 'all' || opp.owner === ownerFilter;
