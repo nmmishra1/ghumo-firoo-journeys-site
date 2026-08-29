@@ -4570,16 +4570,17 @@ Thank you for choosing Ghumo Firoo Travels for planning your upcoming holiday to
 Our travel specialists are actively preparing your custom travel package with tailored hotel stays, sightseeing circuits, and private cab transfers designed around your preferences.
 
 Please find our contact details below:
-📞 Call / WhatsApp: +91 8010989792
+📞 Call / WhatsApp: +91 9910987264
 ✉️ Email: info@ghumofiroo.com
 🌐 Website: https://ghumofiroo.com
 
 Warm regards,
-${userProfile?.full_name || 'Travel Specialist Team'}
-Ghumo Firoo Travels Pvt. Ltd.`
+${userProfile?.full_name || 'Superadmin'}
+Ghumo Firoo Travels`
                       );
 
-                      window.open(`mailto:${emailAddr}?subject=${subject}&body=${body}`);
+                      const recipientFormatted = clientName ? `"${clientName.replace(/"/g, '')}" <${emailAddr}>` : emailAddr;
+                      window.open(`mailto:${encodeURIComponent(recipientFormatted)}?subject=${subject}&body=${body}`);
 
                       logActivity(activeLead.id, {
                         type: 'email',
