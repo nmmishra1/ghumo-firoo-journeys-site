@@ -32,7 +32,7 @@ jobs:
           server: ${{ secrets.FTP_SERVER }}
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
-          server-dir: /ghumofiroo.com/
+          server-dir: /
           local-dir: ./dist/
           dangerous-clean-slate: false
 
@@ -42,7 +42,7 @@ jobs:
           server: ${{ secrets.FTP_SERVER }}
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
-          server-dir: /ghumofiroo.com/php-backend/
+          server-dir: /php-backend/
           local-dir: ./php-backend/
           dangerous-clean-slate: false
           exclude: |
