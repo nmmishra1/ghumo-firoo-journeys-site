@@ -32,7 +32,9 @@ jobs:
           server: ${{ secrets.FTP_SERVER }}
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
-          server-dir: /
+          port: 21
+          protocol: ftp
+          server-dir: ./
           local-dir: ./dist/
           dangerous-clean-slate: false
 
@@ -42,7 +44,9 @@ jobs:
           server: ${{ secrets.FTP_SERVER }}
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
-          server-dir: /php-backend/
+          port: 21
+          protocol: ftp
+          server-dir: ./php-backend/
           local-dir: ./php-backend/
           dangerous-clean-slate: false
           exclude: |
