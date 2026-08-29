@@ -276,6 +276,9 @@ export function NavbarShell({ logoText = "GhumoFiroo", className, ...props }: Na
         {/* Mobile Search */}
         <form onSubmit={handleNavSearch} className="relative mt-6">
           <input
+            id="mobile-nav-search"
+            name="search"
+            autoComplete="off"
             type="text"
             value={navSearch}
             onChange={(e) => setNavSearch(e.target.value)}

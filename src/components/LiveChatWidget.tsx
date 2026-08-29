@@ -447,6 +447,9 @@ export const LiveChatWidget: React.FC = () => {
                 <div className="grid grid-cols-2 gap-2 text-slate-800 text-xs">
                   <div>
                     <input
+                      id="livechat-lead-name"
+                      name="name"
+                      autoComplete="name"
                       type="text"
                       placeholder="Your Name *"
                       value={leadFormData.name}
@@ -457,6 +460,9 @@ export const LiveChatWidget: React.FC = () => {
                   </div>
                   <div>
                     <input
+                      id="livechat-lead-phone"
+                      name="phone"
+                      autoComplete="tel"
                       type="tel"
                       placeholder="WhatsApp Mobile *"
                       value={leadFormData.phone}

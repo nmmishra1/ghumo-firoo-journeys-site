@@ -37,7 +37,7 @@ const DESTINATION_META: Record<string, { image: string; bestSeason: string }> = 
   'Andaman': { image: 'https://images.unsplash.com/photo-1589308078059-be1415eab4c3?q=80&w=800', bestSeason: 'Oct-May' },
   'North East': { image: 'https://images.unsplash.com/photo-1571536802807-30451e3955d8?q=80&w=800', bestSeason: 'Oct-Apr' },
   'Himachal': { image: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?q=80&w=800', bestSeason: 'Mar-Jun' },
-  'Uttarakhand': { image: 'https://images.unsplash.com/photo-1549492423-400259a2e57f?q=80&w=800', bestSeason: 'Apr-Jun' },
+  'Uttarakhand': { image: '/Kedarnath.png', bestSeason: 'Apr-Jun' },
   'Dubai': { image: 'https://images.unsplash.com/photo-1512453979798-5ea266f8880c?q=80&w=800', bestSeason: 'Nov-Apr' },
   'Singapore': { image: 'https://images.unsplash.com/photo-1546519638-68e109498ffc?q=80&w=800', bestSeason: 'Year-round' },
   'Thailand': { image: 'https://images.unsplash.com/photo-1552465011-b4e21bf6e79a?q=80&w=800', bestSeason: 'Nov-Apr' },

@@ -969,6 +969,9 @@ const Packages: React.FC = () => {
                 <div className="relative w-full">
                   <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#C9A25A]" />
                   <input 
+                    id="packages-filter-search"
+                    name="search"
+                    autoComplete="off"
                     type="text" 
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}

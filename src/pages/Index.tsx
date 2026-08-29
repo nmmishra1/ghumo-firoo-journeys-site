@@ -345,6 +345,9 @@ const Index: React.FC = () => {
               <div className="flex-1 w-full relative">
                 <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-[#C9A25A]" />
                 <input 
+                  id="home-destination-search"
+                  name="destination"
+                  autoComplete="off"
                   type="text"
                   placeholder="Where would you like to escape next? (e.g. Kedarnath, Rann Utsav, Singapore, Swiss Alps)"
                   value={searchQuery}
@@ -504,7 +507,7 @@ const Index: React.FC = () => {
               {[
                 { title: "Char Dham Yatra via Private Heli", duration: "6 Days / 5 Nights", price: "₹2,25,000", img: "/Kedarnath.png", tag: "Helicopter", details: "Avoid long trekking curves. Private helicopter travel from Dehradun, VIP darshan priority passes, and hotel stays." },
                 { title: "Sacred Kedarnath & Badrinath Heli", duration: "5 Days / 4 Nights", price: "₹22,500", img: "/Badrinath.png", tag: "2-Dham Tour", details: "Direct route to Kedarnath and Badrinath shrines. Deluxe lodgings, vegetarian gourmet meals, and local coordinator support." },
-                { title: "Char Dham Yatra Luxury Road Safari", duration: "12 Days / 11 Nights", price: "₹35,000", img: "https://images.unsplash.com/photo-1549492423-400259a2e57f?q=80&w=800", tag: "Premium SUV", details: "Comfortable drive in premium SUVs with highly experienced mountain drivers. Premium ashram/hotel accommodation." }
+                { title: "Char Dham Yatra Luxury Road Safari", duration: "12 Days / 11 Nights", price: "₹35,000", img: "/Kedarnath.png", tag: "Premium SUV", details: "Comfortable drive in premium SUVs with highly experienced mountain drivers. Premium ashram/hotel accommodation." }
               ].map((pkg, idx) => (
                 <ScrollReveal key={idx} variant="fade-in-up" delay={idx * 100}>
                   <div className="bg-[#0B1226]/90 border border-[#C9A25A]/25 rounded-2xl overflow-hidden h-full flex flex-col justify-between hover:border-[#C9A25A] hover:shadow-2xl transition-all duration-300 group">

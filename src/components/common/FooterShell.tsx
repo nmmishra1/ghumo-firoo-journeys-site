@@ -125,6 +125,9 @@ export function FooterShell({ logoText = "GhumoFiroo", className, ...props }: Fo
               <form onSubmit={handleSubscribe} className="flex flex-col sm:flex-row gap-3">
                 <div className="relative flex-1">
                   <input
+                    id="footer-newsletter-email"
+                    name="email"
+                    autoComplete="email"
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}

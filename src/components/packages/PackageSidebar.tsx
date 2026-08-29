@@ -220,6 +220,8 @@ const PackageSidebar: React.FC<PackageSidebarProps> = ({
                   <Calendar className="w-3 h-3 text-amber-400" /> Travel Date *
                 </Label>
                 <input
+                  id="sidebar-travel-date"
+                  name="travelDate"
                   type="date"
                   min={new Date().toISOString().split('T')[0]}
                   value={travelDate}
@@ -233,6 +235,8 @@ const PackageSidebar: React.FC<PackageSidebarProps> = ({
                   <Clock className="w-3 h-3 text-emerald-400" /> Return Date
                 </Label>
                 <input
+                  id="sidebar-return-date"
+                  name="returnDate"
                   type="date"
                   readOnly
                   value={returnDate}
