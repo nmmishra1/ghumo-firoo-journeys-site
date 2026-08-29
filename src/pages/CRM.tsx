@@ -15,6 +15,7 @@ import { UserManagementDialog } from '@/components/crm/UserManagementDialog';
 import { LeadForm } from '@/components/crm/LeadForm';
 import { CSVImport } from '@/components/crm/CSVImport';
 import { FollowUpModal } from '@/components/crm/FollowUpModal';
+import { DashboardStats } from '@/components/crm/DashboardStats';
 import { HotelContracting } from '@/pages/crm/HotelContracting';
 import CabContracting from '@/pages/crm/CabContracting';
 import PackageMaster from '@/pages/crm/PackageMaster';
@@ -423,15 +424,6 @@ const CRM = () => {
           </Button>
         </div>
 
-        {/* Branding Tagline */}
-        {!sidebarCollapsed && (
-          <div className="p-4 text-center border-b border-primary-foreground/20">
-            <p className="text-xs text-primary-foreground/90 leading-relaxed">
-              "Solving problems for our travel itinerary, increasing efficiency and leading to optimization by lead management system."
-            </p>
-          </div>
-        )}
-
         {/* Navigation Menu */}
         <nav className="flex-1 p-3 overflow-y-auto max-h-[calc(100vh-220px)] space-y-1 scrollbar-thin">
           <Button
@@ -668,55 +660,22 @@ const CRM = () => {
         {/* Content Area */}
         <main className="flex-1 p-6 overflow-auto">
           {currentSection === 'dashboard' && (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              <Card>
-                <CardContent className="p-6">
-                  <div className="flex items-center">
-                    <Users className="h-8 w-8 text-blue-600" />
-                    <div className="ml-4">
-                      <p className="text-sm font-medium text-muted-foreground">Total Leads</p>
-                      <p className="text-2xl font-bold">{leads.length}</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-              
-              <Card>
-                <CardContent className="p-6">
-                  <div className="flex items-center">
-                    <TrendingUp className="h-8 w-8 text-green-600" />
-                    <div className="ml-4">
-                      <p className="text-sm font-medium text-muted-foreground">Converted</p>
-                      <p className="text-2xl font-bold">{leads.filter(l => l.status === 'Converted').length}</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-              
-              <Card>
-                <CardContent className="p-6">
-                  <div className="flex items-center">
-                    <Calendar className="h-8 w-8 text-orange-600" />
-                    <div className="ml-4">
-                      <p className="text-sm font-medium text-muted-foreground">Follow-ups Today</p>
-                      <p className="text-2xl font-bold">5</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-              
-              <Card>
-                <CardContent className="p-6">
-                  <div className="flex items-center">
-                    <div className="h-8 w-8 bg-red-500 rounded-full" />
-                    <div className="ml-4">
-                      <p className="text-sm font-medium text-muted-foreground">Hot Leads</p>
-                      <p className="text-2xl font-bold">{leads.filter(l => l.lead_prospect === 'Hot').length}</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
+            <DashboardStats
+              userRole={userProfile?.role || 'admin'}
+              stats={{
+                total: leads.length,
+                new: leads.filter(l => l.status === 'New').length,
+                contacted: leads.filter(l => l.status === 'Contacted').length,
+                quoteSent: leads.filter(l => l.status === 'Quote Sent').length,
+                quoteApproved: leads.filter(l => l.status === 'Quote Approved').length,
+                converted: leads.filter(l => l.status === 'Converted').length,
+                dropped: leads.filter(l => l.status === 'Dropped').length,
+                hot: leads.filter(l => l.lead_prospect === 'Hot').length,
+                cold: leads.filter(l => l.lead_prospect === 'Cold').length,
+                assigned: leads.filter(l => l.assigned_to === user?.id).length,
+                nextCalls: 5
+              }}
+            />
           )}
 
           {currentSection === 'user-dashboard' && (
