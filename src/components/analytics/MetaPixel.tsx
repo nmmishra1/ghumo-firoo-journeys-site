@@ -45,11 +45,15 @@ const MetaPixel = () => {
           'https://connect.facebook.net/en_US/fbevents.js'
         );
         
-        window.fbq('init', PIXEL_ID);
+        if (typeof window.fbq === 'function') {
+          window.fbq('init', PIXEL_ID);
+        }
       }
 
-      // Track PageView
-      window.fbq('track', 'PageView');
+      // Track PageView safely
+      if (typeof window.fbq === 'function') {
+        window.fbq('track', 'PageView');
+      }
     }
   }, [location.pathname, location.search]);
 
