@@ -26,7 +26,7 @@ jobs:
       - name: 🚀 Build Production Bundle & Bundle PHP Backend
         run: |
           npm run build
-          cp -r php-backend dist/php-backend
+          node scripts/copy-backend.mjs
 
       - name: 📂 Deploy Everything to cPanel
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
