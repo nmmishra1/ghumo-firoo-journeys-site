@@ -137,7 +137,8 @@ function authenticate(): array
         respondUnauthorized('Missing bearer token');
     }
 
-    $publicKey = getenv('SUPABASE_PUBLIC_KEY') ?: getenv('VITE_SUPABASE_ANON_KEY') ?: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJmZHVtbG5rbWZ1YWNzem5vZ3p6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA3NzYxMDUsImV4cCI6MjA5NjM1MjEwNX0.5VtSJ46jEgI8tlqXMWOXz8jvc68C__Suo1WgGJw_KIM';
+    $jwt = $matches[1];
+    $publicKey = getenv('SUPABASE_PUBLIC_KEY');
 
     if (!$publicKey) {
         http_response_code(500);
@@ -169,33 +170,19 @@ function authenticate(): array
             $decoded = JWT::decode($jwt, new Key($secret, 'HS256'));
         } catch (Throwable $eHs) {
             // Failsafe Supabase JWT Payload Extractor
-            $jwtClean = trim(trim($jwt), '"\'');
-            $parts = explode('.', $jwtClean);
+            $parts = explode('.', $jwt);
             if (count($parts) === 3) {
                 $payloadJson = \Firebase\JWT\JWT::urlsafeB64Decode($parts[1]);
                 $decoded = json_decode($payloadJson);
-                if ($decoded && !empty($decoded->sub)) {
-                    return [
-                        'user_id' => $decoded->sub,
-                        'email'   => $decoded->email ?? 'superadmin@ghumofiroo.com',
-                        'raw'     => $decoded,
-                    ];
+                if (!$decoded || empty($decoded->sub)) {
+                    respondUnauthorized('Invalid or expired token payload');
                 }
+            } else {
+                respondUnauthorized('Invalid token format');
             }
-            
-            // Failsafe for CRM Admin Login verification
-            return [
-                'user_id' => '02f8f78e-2c0e-4a2c-a15d-a83679cded02',
-                'email'   => 'superadmin@ghumofiroo.com',
-                'raw'     => (object)['sub' => '02f8f78e-2c0e-4a2c-a15d-a83679cded02', 'email' => 'superadmin@ghumofiroo.com']
-            ];
         }
     } catch (Throwable $e) {
-        return [
-            'user_id' => '02f8f78e-2c0e-4a2c-a15d-a83679cded02',
-            'email'   => 'superadmin@ghumofiroo.com',
-            'raw'     => (object)['sub' => '02f8f78e-2c0e-4a2c-a15d-a83679cded02', 'email' => 'superadmin@ghumofiroo.com']
-        ];
+        respondUnauthorized('Invalid or expired token: ' . $e->getMessage());
     }
 
     return [

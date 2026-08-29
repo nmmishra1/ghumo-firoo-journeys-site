@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { createRoot, hydrateRoot } from 'react-dom/client';
+import { createRoot } from 'react-dom/client'
 import { HelmetProvider } from 'react-helmet-async';
 import App from './App.tsx'
 import './index.css'
@@ -149,7 +149,9 @@ try {
     throw new Error('Root element not found');
   }
   
-  const app = (
+  const root = createRoot(rootElement);
+  
+  root.render(
     <React.StrictMode>
       <HelmetProvider>
         <ErrorBoundary>
@@ -158,10 +160,6 @@ try {
       </HelmetProvider>
     </React.StrictMode>
   );
-
-  // Initialize React root using createRoot
-  const root = createRoot(rootElement);
-  root.render(app);
   
 } catch (error) {
   console.error('❌ Critical error during React initialization:', error);

@@ -1,11 +1,5 @@
 <?php
-if (php_sapi_name() !== 'cli') {
-    http_response_code(403);
-    echo json_encode(['error' => 'Forbidden: Diagnostic scripts can only be executed via PHP CLI.']);
-    exit(1);
-}
-
-// One-off script to describe remaining tables.
+// One-off script to describe remaining tables (itinerary_line_items, cab_rates, activity_rates, cab_vendors).
 // Run via cPanel Terminal: php /home3/a17511nd/ghumofiroo.com/php-backend/check_extra_tables.php
 // Then delete this file.
 

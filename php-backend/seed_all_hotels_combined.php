@@ -1,10 +1,5 @@
 <?php
-if (php_sapi_name() !== 'cli') {
-    http_response_code(403);
-    echo json_encode(['error' => 'Forbidden: Seed scripts can only be executed via PHP CLI Terminal.']);
-    exit(1);
-}
-
+// seed_all_hotels_combined.php — Seeds ALL 500+ hotels from massive lists, contractedHotels.json, and registry into MySQL DB
 header('Content-Type: application/json');
 
 require_once __DIR__ . '/db.php';

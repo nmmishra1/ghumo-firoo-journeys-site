@@ -1,12 +1,5 @@
 <?php
 // seed_hotels_india_massive.php - Seeds a massive, comprehensive database of famous hotels for ALL 96 cities across all Indian States and UTs
-
-if (php_sapi_name() !== 'cli') {
-    http_response_code(403);
-    echo json_encode(['error' => 'Forbidden: Seed scripts can only be executed via PHP CLI Terminal.']);
-    exit(1);
-}
-
 header('Content-Type: application/json');
 
 require_once __DIR__ . '/db.php';

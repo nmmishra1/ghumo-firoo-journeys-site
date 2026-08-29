@@ -177,8 +177,6 @@ function mapLeadToDb(lead: Partial<Lead>): any {
   if (lead.lastContactDate !== undefined) db.last_contact_date = lead.lastContactDate ? new Date(lead.lastContactDate).toISOString() : null;
   if (lead.lostReason !== undefined) db.lost_reason = lead.lostReason;
   if (lead.agentName !== undefined) db.agent_name = lead.agentName;
-  if ((lead as any).assignedTo !== undefined) db.assigned_to = (lead as any).assignedTo;
-  if ((lead as any).assigned_to !== undefined) db.assigned_to = (lead as any).assigned_to;
   if (lead.emailStatus !== undefined) db.email_status = lead.emailStatus;
   if (lead.emailSentDate !== undefined) db.email_sent_date = lead.emailSentDate ? new Date(lead.emailSentDate).toISOString() : null;
   if (lead.lastEmailSentDate !== undefined) db.last_email_sent_date = lead.lastEmailSentDate ? new Date(lead.lastEmailSentDate).toISOString() : null;
@@ -253,8 +251,6 @@ function mapLeadFromDb(db: any): Lead {
     daysSinceLastContact: 0, // Computed dynamically during post-fetch loop
     lostReason: db.lost_reason || '',
     agentName: db.agent_name || '',
-    assigned_to: db.assigned_to != null ? String(db.assigned_to) : null,
-    assignedTo: db.assigned_to != null ? String(db.assigned_to) : null,
     emailStatus: db.email_status || 'Not Sent',
     emailSentDate: db.email_sent_date || undefined,
     lastEmailSentDate: db.last_email_sent_date || undefined,
@@ -374,7 +370,10 @@ function mapExpenseFromDb(db: any): Expense {
   };
 }
 
-const API_BASE = (import.meta as any).env?.VITE_PHP_BASE_URL || (import.meta as any).env?.VITE_API_BASE_URL || '/php-backend';
+const API_BASE = import.meta.env.VITE_API_BASE_URL;
+if (!API_BASE) {
+  throw new Error('VITE_API_BASE_URL is not configured! Verify your env files.');
+}
 
 async function getAuthHeader(): Promise<Record<string, string>> {
   const { data: { session } } = await supabase.auth.getSession();

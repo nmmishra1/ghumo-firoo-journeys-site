@@ -49,9 +49,6 @@ ErrorDocument 500 /index.html
   RewriteEngine On
   RewriteBase /
 
-  # Pass Authorization header to PHP in CGI/FastCGI environments (cPanel)
-  SetEnvIf Authorization "(.*)" HTTP_AUTHORIZATION=$1
-
   # 1. Physical Files & Directories Served Directly
   RewriteCond %{REQUEST_FILENAME} -f [OR]
   RewriteCond %{REQUEST_FILENAME} -d
@@ -69,8 +66,8 @@ ErrorDocument 500 /index.html
   RewriteRule ^sitemap\.xml$ - [L]
   RewriteRule ^ads\.txt$ - [L]
 
-  # Allow direct access to php-backend (no rewrite loop)
-  RewriteRule ^php-backend/ - [L]
+  # Allow direct access to php-backend
+  RewriteRule ^php-backend/(.*)$ php-backend/$1 [L]
 
   # Map Leads API calls — secured, routes to php-backend
   RewriteRule ^api/leads/create-public$ /php-backend/leads_create_public.php [L,QSA]
@@ -153,19 +150,9 @@ ErrorDocument 500 /index.html
   RewriteCond %{REQUEST_URI} ^/packages/.+/$ [NC]
   RewriteRule ^packages/(.+)/$ https://ghumofiroo.com/packages/$1 [L,R=301]
 
-  # Pre-rendered HTML File Resolution (react-snap support)
-  # 1. Serve pre-rendered subfolder index.html if present (e.g. /about/index.html or /packages/rann-utsav/index.html)
-  RewriteCond %{DOCUMENT_ROOT}%{REQUEST_URI}/index.html -f
-  RewriteRule ^ %{REQUEST_URI}/index.html [L]
-
-  # 2. Serve pre-rendered route.html if present (e.g. /about.html)
-  RewriteCond %{DOCUMENT_ROOT}%{REQUEST_URI}.html -f
-  RewriteRule ^ %{REQUEST_URI}.html [L]
-
-  # 3. SPA Fallback for dynamic client-side routes without pre-rendered files (exclude PHP backend)
-  RewriteCond %{REQUEST_URI} !^/php-backend/
-  RewriteCond %{REQUEST_FILENAME} !-f
-  RewriteCond %{REQUEST_FILENAME} !-d
+  # React SPA Client-Side Routing
+  RewriteCond %{REQUEST_URI} ^/$ [OR]
+  RewriteCond %{REQUEST_URI} ^/(about|contact|packages|privacy-policy|terms-conditions|terms-of-service|refund-policy|blog|career|enquire-now|enquire-success|products|booking|pictramapdemo|custom-tour-packages|thank-you|guides|guide|landing|profile|faq|crm|signup|forgot-password|reset-password|auth|review|destinations|payment|pay)(/.*)?$ [NC]
   RewriteRule ^ /index.html [L]
 </IfModule>
 

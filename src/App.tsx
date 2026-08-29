@@ -24,53 +24,34 @@ PageLoader.displayName = 'PageLoader';
 // Error boundary component for lazy loaded routes
 class LazyErrorBoundary extends React.Component<
   { children: React.ReactNode },
-  { hasError: boolean; error: Error | null }
+  { hasError: boolean }
 > {
   constructor(props: { children: React.ReactNode }) {
     super(props);
-    this.state = { hasError: false, error: null };
+    this.state = { hasError: false };
   }
 
-  static getDerivedStateFromError(error: Error) {
-    return { hasError: true, error };
+  static getDerivedStateFromError() {
+    return { hasError: true };
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
     console.error('Lazy loading error:', error, errorInfo);
-    const msg = error?.message || '';
-    const isChunkError = msg.includes('dynamically imported module') ||
-                         msg.includes('Importing a module script failed') ||
-                         msg.includes('Loading chunk') ||
-                         error?.name === 'ChunkLoadError';
-    if (isChunkError && !sessionStorage.getItem('chunk_reload_done')) {
-      sessionStorage.setItem('chunk_reload_done', 'true');
-      window.location.reload();
-    }
   }
 
   render() {
     if (this.state.hasError) {
       return (
-        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-red-50 via-white to-orange-50 p-4">
-          <div className="glass-card p-8 rounded-2xl shadow-glass-lg text-center max-w-lg w-full">
+        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-red-50 via-white to-orange-50">
+          <div className="glass-card p-8 rounded-2xl shadow-glass-lg text-center">
             <h2 className="text-xl font-semibold text-red-600 mb-4">Something went wrong</h2>
             <p className="text-gray-600 mb-4">Failed to load the page. Please try refreshing.</p>
             <button 
-              onClick={() => {
-                sessionStorage.removeItem('chunk_reload_done');
-                this.setState({ hasError: false, error: null });
-                window.location.reload();
-              }} 
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium mb-4"
+              onClick={() => { this.setState({ hasError: false }); window.location.reload(); }} 
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
             >
               Refresh Page & Retry
             </button>
-            {this.state.error && (
-              <details className="text-left mt-4 text-xs text-gray-500 bg-gray-50 p-3 rounded border border-gray-200 overflow-auto max-h-40">
-                <summary className="cursor-pointer font-semibold text-gray-700">View Technical Details</summary>
-                <p className="mt-2 font-mono text-red-600">{this.state.error.toString()}</p>
-              </details>
-            )}
           </div>
         </div>
       );

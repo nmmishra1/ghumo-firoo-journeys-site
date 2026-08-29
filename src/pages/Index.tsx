@@ -244,10 +244,10 @@ const Index: React.FC = () => {
       </Helmet>
       
       <SEO 
-        title="Ghumofiroo Travels – Custom Tour Packages for Char Dham, Kashmir & Europe"
-        description="Plan your trip with Ghumofiroo, Delhi's trusted agency & Evoke Rann Utsav partner. Custom Char Dham Yatra, Kashmir & Europe packages. Enquire today!"
+        title="Bespoke Luxury Holidays & Sacred Escapes | GhumoFiroo Travels"
+        description="Repositioning premium travel. Book curated Rann Utsav tents, luxury Char Dham helicopter yatras, elite Singapore skyline retreats, and grand Europe escapes."
         canonicalUrl={config.baseUrl + "/"}
-        keywords="Ghumofiroo Travels, Ghumofiroo, Evoke Experiences Partner, Evoke Rann Utsav, Travel Agency Delhi, Best Travel Agency India, Char Dham Yatra Packages, Europe Tours, Kashmir Tour Packages, Rann Utsav Packages"
+        keywords="luxury travel agency, bespoke tour packages, Rann Utsav premium tents, Char Dham yatra helicopter, Singapore luxury tour, Europe grand tour, luxury travel planner Delhi"
         structuredData={structuredData}
       />
 

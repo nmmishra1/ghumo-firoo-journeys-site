@@ -975,18 +975,6 @@ export const LeadForm: React.FC<LeadFormProps> = ({
 
       setStayStops(parsedStops);
 
-      const rawAssigned = editingLead.assigned_to || (editingLead as any).assignedTo;
-      let initialAssignedTo = 'unassigned';
-      if (rawAssigned && rawAssigned !== 'unassigned' && rawAssigned !== '0') {
-        initialAssignedTo = String(rawAssigned);
-      } else {
-        const agentName = editingLead.agent_name || (editingLead as any).agentName;
-        if (agentName && agentName !== 'Unassigned' && agentName !== 'unassigned') {
-          const matched = (teamProfiles || profiles || []).find(p => p.full_name?.toLowerCase() === agentName.toLowerCase());
-          if (matched) initialAssignedTo = String(matched.id);
-        }
-      }
-
       setFormData({
         customer_name: editingLead.customer_name || '',
         contact_number: editingLead.contact_number || editingLead.customer_phone || '',
@@ -994,7 +982,7 @@ export const LeadForm: React.FC<LeadFormProps> = ({
         whatsapp_number: editingLead.whatsapp_number || '',
         company_name: editingLead.company_name || '',
         source: editingLead.source || editingLead.customer_type || 'Website',
-        assigned_to: initialAssignedTo,
+        assigned_to: editingLead.assigned_to || 'unassigned',
         priority: editingLead.priority || 'Medium',
         status: editingLead.status || 'New',
         trip_category: editingLead.country && editingLead.country !== 'India' ? 'International Holiday' : 'Destination Holiday',
@@ -1197,17 +1185,6 @@ export const LeadForm: React.FC<LeadFormProps> = ({
       package_cost: formData.budget ? parseFloat(formData.budget) || 0 : 0,
       
       assigned_to: formData.assigned_to === 'unassigned' ? null : formData.assigned_to,
-      assignedTo: formData.assigned_to === 'unassigned' ? null : formData.assigned_to,
-      agent_name: (() => {
-        if (formData.assigned_to === 'unassigned') return 'Unassigned';
-        const matched = (approvedProfiles || []).find(p => String(p.id) === String(formData.assigned_to));
-        return matched ? matched.full_name : 'Unassigned';
-      })(),
-      agentName: (() => {
-        if (formData.assigned_to === 'unassigned') return 'Unassigned';
-        const matched = (approvedProfiles || []).find(p => String(p.id) === String(formData.assigned_to));
-        return matched ? matched.full_name : 'Unassigned';
-      })(),
       status: formData.status || 'New',
       
       follow_up_date: formData.follow_up_date ? new Date(formData.follow_up_date).toISOString() : null,

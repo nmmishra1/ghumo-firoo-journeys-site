@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { reviewService } from '@/services/reviewService';
 
-const API_BASE = (import.meta as any).env?.VITE_PHP_BASE_URL || (import.meta as any).env?.VITE_API_BASE_URL || '/php-backend';
+const API_BASE = import.meta.env.VITE_API_BASE_URL;
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';

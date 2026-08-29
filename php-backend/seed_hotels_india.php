@@ -1,10 +1,4 @@
 <?php
-if (php_sapi_name() !== 'cli') {
-    http_response_code(403);
-    echo json_encode(['error' => 'Forbidden: Seed scripts can only be executed via PHP CLI Terminal.']);
-    exit(1);
-}
-
 // seed_hotels_india.php - Seeds realistic contracted hotels and room rates for famous cities in India
 header('Content-Type: application/json');
 

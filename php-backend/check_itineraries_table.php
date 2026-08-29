@@ -1,9 +1,4 @@
 <?php
-if (php_sapi_name() !== 'cli') {
-    http_response_code(403);
-    echo json_encode(['error' => 'Forbidden: Diagnostic scripts can only be executed via PHP CLI.']);
-    exit(1);
-}
 // One-off script to describe itineraries and leads tables in the database.
 // Run via cPanel Terminal: php /home3/a17511nd/ghumofiroo.com/php-backend/check_itineraries_table.php
 // Then delete this file.

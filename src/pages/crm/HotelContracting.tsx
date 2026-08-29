@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 
-const API_BASE = (import.meta as any).env?.VITE_PHP_BASE_URL || (import.meta as any).env?.VITE_API_BASE_URL || '/php-backend';
+const API_BASE = import.meta.env.VITE_API_BASE_URL;
 
 async function getAuthHeader(): Promise<Record<string, string>> {
   const { data: { session } } = await supabase.auth.getSession();

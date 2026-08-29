@@ -11,8 +11,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 
 require_once __DIR__ . '/db.php';
 
-$keyId = getenv('RAZORPAY_KEY_ID') ?: 'rzp_live_SlexboFyFLdaX8';
-$keySecret = getenv('RAZORPAY_KEY_SECRET') ?: 'uyoKOzxi5rnikfuGAB8RoJ1L';
+$keyId = getenv('RAZORPAY_KEY_ID');
+$keySecret = getenv('RAZORPAY_KEY_SECRET');
 
 if (!$keyId || !$keySecret) {
     http_response_code(500);

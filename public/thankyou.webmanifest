@@ -1,0 +1,21 @@
+{
+  "name": "Ghumo Firoo – Thank You",
+  "short_name": "GF ThankYou",
+  "start_url": "/thank-you",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#0ea5e9",
+  "description": "Quick access to your success confirmation and next steps from Ghumo Firoo Travels.",
+  "icons": [
+    {
+      "src": "/ghumo-firoo-logo.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/ghumo-firoo-logo.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

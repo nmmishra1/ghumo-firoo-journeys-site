@@ -82,12 +82,8 @@ export const trackEvent = (eventName: string, data?: object, userData?: UserData
   const eventId = generateEventId();
   
   // Client-side Pixel
-  try {
-    if (typeof window !== 'undefined' && typeof (window as any).fbq === 'function') {
-      (window as any).fbq('track', eventName, { ...data, eventID: eventId });
-    }
-  } catch (e) {
-    // Ignore fbq tracking errors
+  if (typeof window !== 'undefined' && (window as any).fbq) {
+    (window as any).fbq('track', eventName, { ...data, eventID: eventId });
   }
 
   // Server-side CAPI
@@ -98,12 +94,8 @@ export const trackEvent = (eventName: string, data?: object, userData?: UserData
 export const trackCustomEvent = (eventName: string, data?: object, userData?: UserData) => {
   const eventId = generateEventId();
 
-  try {
-    if (typeof window !== 'undefined' && typeof (window as any).fbq === 'function') {
-      (window as any).fbq('trackCustom', eventName, { ...data, eventID: eventId });
-    }
-  } catch (e) {
-    // Ignore fbq tracking errors
+  if (typeof window !== 'undefined' && (window as any).fbq) {
+    (window as any).fbq('trackCustom', eventName, { ...data, eventID: eventId });
   }
 
   sendToCAPI(eventName, eventId, data, userData);

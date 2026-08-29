@@ -16,7 +16,7 @@ import {
   ArrowRight, Landmark, Calendar, Trash2, Layers, RefreshCw, Clock, ArrowLeft, Save
 } from 'lucide-react';
 
-const API_BASE = (import.meta as any).env?.VITE_PHP_BASE_URL || (import.meta as any).env?.VITE_API_BASE_URL || '/php-backend';
+const API_BASE = import.meta.env.VITE_API_BASE_URL;
 
 interface CabContractWizardProps {
   dialogMode: 'add' | 'edit' | null;

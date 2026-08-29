@@ -530,8 +530,8 @@ const RannUtsav: React.FC = () => {
   return (
     <Layout>
       <SEO 
-        title="Rann Utsav Tent City Booking 2026-27 | Official Evoke Partner"
-        description="Official Evoke Experiences partner for Rann Utsav Tent City Dhordo. Book luxury AC Swiss Tents, White Desert full moon tours & Dholavira with Bhuj transfers."
+        title="Rann Utsav 2026-27 Packages | Tent City Dhordo | Evoke Partner"
+        description="Book official Rann Utsav 2026-27 packages at Tent City Dhordo. Enjoy AC Deluxe Swiss Tents, White Desert Full Moon & Dholavira tours with free Bhuj transfers."
         keywords="Rann Utsav 2026-27, Tent City Dhordo booking, White Rann of Kutch, Evoke Experiences partner, Rann Utsav package price, Road to Heaven Dholavira, Full Moon Rann Utsav, Kutch tour package from Bhuj"
         canonicalUrl={config.baseUrl + "/packages/rann-utsav"}
         structuredData={[breadcrumbSchema, faqSchema, eventSchema, brandSchema, tripSchema]}
