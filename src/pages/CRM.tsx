@@ -4646,66 +4646,127 @@ Ghumo Firoo Travels`
 
                 {/* Section: Financial Accounts & Balance Due */}
                 <div className="space-y-2 border-t border-slate-200/80 pt-3">
-                  <div className="flex items-center justify-between">
-                    <p className="text-[10px] font-black text-slate-500 uppercase tracking-wider flex items-center gap-1">
-                      <IndianRupee className="w-3.5 h-3.5 text-amber-500" /> Booking Ledger & Balance
-                    </p>
-                    <span className={`text-[9px] font-black uppercase px-2 py-0.5 rounded-full border ${
-                      activeLead.status === 'Booking Confirmed' ? 'bg-emerald-500/15 text-emerald-600 border-emerald-500/30' :
-                      activeLead.status === 'Quote Sent' ? 'bg-amber-500/15 text-amber-600 border-amber-500/30' :
-                      'bg-slate-500/15 text-slate-600 border-slate-500/30'
-                    }`}>
-                      {activeLead.status || 'New'}
-                    </span>
-                  </div>
-
                   {(() => {
                     const leadPkgPrice = Number(activeLead.packagePrice || activeLead.expected_booking_value || 0);
                     const leadPaymentsList = allPayments.filter(p => String(p.lead_id) === String(activeLead.id));
                     const leadTotalPaid = leadPaymentsList.reduce((sum, p) => sum + Number(p.amount_received || 0), 0);
                     const leadBalanceDue = Math.max(0, leadPkgPrice - leadTotalPaid);
                     
+                    const isConfirmed = activeLead.status === 'Booking Confirmed' || activeLead.status === 'Confirmed' || leadTotalPaid > 0;
+                    const isQuoted = activeLead.status === 'Quote Sent';
+
                     const dueDateStr = activeLead.trip_start_date 
                       ? new Date(new Date(activeLead.trip_start_date).getTime() - 7 * 24 * 60 * 60 * 1000).toLocaleDateString([], { month: 'short', day: 'numeric', year: 'numeric' })
                       : 'Before Travel';
 
                     return (
-                      <div className="bg-gradient-to-br from-slate-900 via-slate-950 to-slate-900 border border-slate-800 rounded-xl p-3.5 space-y-2.5 text-white shadow-md">
-                        <div className="flex justify-between items-center text-xs border-b border-slate-800 pb-2">
-                          <span className="text-slate-400 font-semibold">Total Package Price:</span>
-                          <span className="font-extrabold text-amber-400">₹{leadPkgPrice.toLocaleString('en-IN')}</span>
-                        </div>
-
-                        <div className="flex justify-between items-center text-xs">
-                          <span className="text-slate-400 font-semibold">Amount Paid ($X$):</span>
-                          <span className="font-extrabold text-emerald-400">₹{leadTotalPaid.toLocaleString('en-IN')}</span>
-                        </div>
-
-                        <div className="flex justify-between items-center text-xs">
-                          <span className="text-slate-400 font-semibold">Balance Due ($Y$):</span>
-                          <span className={`font-black ${leadBalanceDue > 0 ? 'text-rose-400' : 'text-emerald-400'}`}>
-                            ₹{leadBalanceDue.toLocaleString('en-IN')}
+                      <>
+                        <div className="flex items-center justify-between">
+                          <p className="text-[10px] font-black text-slate-500 uppercase tracking-wider flex items-center gap-1">
+                            <IndianRupee className="w-3.5 h-3.5 text-amber-500" /> 
+                            {isConfirmed ? 'Booking Ledger & Balance' : isQuoted ? 'Quoted Package Value' : 'Estimated Deal Budget'}
+                          </p>
+                          <span className={`text-[9px] font-black uppercase px-2 py-0.5 rounded-full border ${
+                            isConfirmed ? 'bg-emerald-500/15 text-emerald-600 border-emerald-500/30' :
+                            isQuoted ? 'bg-amber-500/15 text-amber-600 border-amber-500/30' :
+                            'bg-blue-500/15 text-blue-600 border-blue-500/30'
+                          }`}>
+                            {activeLead.status || 'New Enquiry'}
                           </span>
                         </div>
 
-                        {leadBalanceDue > 0 && (
-                          <div className="text-[10px] text-amber-300 font-semibold bg-amber-500/10 border border-amber-500/20 px-2 py-1 rounded-lg flex items-center gap-1">
-                            <Clock className="w-3 h-3 text-amber-400 shrink-0" />
-                            To be paid by {dueDateStr}
-                          </div>
-                        )}
+                        <div className="bg-gradient-to-br from-slate-900 via-slate-950 to-slate-900 border border-slate-800 rounded-xl p-3.5 space-y-2.5 text-white shadow-md">
+                          {isConfirmed ? (
+                            <>
+                              <div className="flex justify-between items-center text-xs border-b border-slate-800 pb-2">
+                                <span className="text-slate-400 font-semibold">Total Package Price:</span>
+                                <span className="font-extrabold text-amber-400">₹{leadPkgPrice.toLocaleString('en-IN')}</span>
+                              </div>
 
-                        <Button
-                          size="sm"
-                          onClick={() => {
-                            setSelectedLeadForPayment(String(activeLead.id));
-                            setRecordPaymentDialogOpen(true);
-                          }}
-                          className="w-full h-8 bg-amber-500 hover:bg-amber-600 text-slate-950 font-black text-xs rounded-lg shadow-sm border-0 flex items-center justify-center gap-1.5 cursor-pointer mt-1"
-                        >
-                          <Plus className="w-3.5 h-3.5" /> Record Payment / UPI
-                        </Button>
-                      </div>
+                              <div className="flex justify-between items-center text-xs">
+                                <span className="text-slate-400 font-semibold">Amount Paid:</span>
+                                <span className="font-extrabold text-emerald-400">₹{leadTotalPaid.toLocaleString('en-IN')}</span>
+                              </div>
+
+                              <div className="flex justify-between items-center text-xs">
+                                <span className="text-slate-400 font-semibold">Balance Due:</span>
+                                <span className={`font-black ${leadBalanceDue > 0 ? 'text-rose-400' : 'text-emerald-400'}`}>
+                                  ₹{leadBalanceDue.toLocaleString('en-IN')}
+                                </span>
+                              </div>
+
+                              {leadBalanceDue > 0 && (
+                                <div className="text-[10px] text-amber-300 font-semibold bg-amber-500/10 border border-amber-500/20 px-2 py-1 rounded-lg flex items-center gap-1">
+                                  <Clock className="w-3 h-3 text-amber-400 shrink-0" />
+                                  To be paid by {dueDateStr}
+                                </div>
+                              )}
+
+                              <Button
+                                size="sm"
+                                onClick={() => {
+                                  setSelectedLeadForPayment(String(activeLead.id));
+                                  setRecordPaymentDialogOpen(true);
+                                }}
+                                className="w-full h-8 bg-amber-500 hover:bg-amber-600 text-slate-950 font-black text-xs rounded-lg shadow-sm border-0 flex items-center justify-center gap-1.5 cursor-pointer mt-1"
+                              >
+                                <Plus className="w-3.5 h-3.5" /> Record Payment / UPI
+                              </Button>
+                            </>
+                          ) : isQuoted ? (
+                            <>
+                              <div className="flex justify-between items-center text-xs border-b border-slate-800 pb-2">
+                                <span className="text-slate-400 font-semibold">Quoted Package Price:</span>
+                                <span className="font-extrabold text-amber-400">₹{leadPkgPrice.toLocaleString('en-IN')}</span>
+                              </div>
+
+                              <div className="flex justify-between items-center text-xs">
+                                <span className="text-slate-400 font-semibold">Expected 25% Advance:</span>
+                                <span className="font-extrabold text-emerald-400">₹{Math.round(leadPkgPrice * 0.25).toLocaleString('en-IN')}</span>
+                              </div>
+
+                              <div className="text-[10px] text-amber-300/90 font-medium bg-amber-500/10 border border-amber-500/20 px-2 py-1.5 rounded-lg">
+                                Quote sent to client · Awaiting booking confirmation & advance payment.
+                              </div>
+
+                              <Button
+                                size="sm"
+                                onClick={() => {
+                                  setSelectedLeadForPayment(String(activeLead.id));
+                                  setRecordPaymentDialogOpen(true);
+                                }}
+                                className="w-full h-8 bg-amber-500 hover:bg-amber-600 text-slate-950 font-black text-xs rounded-lg shadow-sm border-0 flex items-center justify-center gap-1.5 cursor-pointer mt-1"
+                              >
+                                <Plus className="w-3.5 h-3.5" /> Record Advance Payment
+                              </Button>
+                            </>
+                          ) : (
+                            <>
+                              <div className="flex justify-between items-center text-xs border-b border-slate-800 pb-2">
+                                <span className="text-slate-400 font-semibold">Target Client Budget:</span>
+                                <span className="font-extrabold text-amber-400">
+                                  {leadPkgPrice > 0 ? `₹${leadPkgPrice.toLocaleString('en-IN')}` : 'To be estimated'}
+                                </span>
+                              </div>
+
+                              <div className="text-[10px] text-slate-300 font-medium bg-slate-800/80 border border-slate-700/60 px-2.5 py-2 rounded-lg leading-relaxed">
+                                💡 <strong className="text-amber-400 font-bold">Inquiry Stage:</strong> Finalize the custom itinerary & pricing to generate formal quotation and activate booking ledger.
+                              </div>
+
+                              <Button
+                                size="sm"
+                                onClick={() => {
+                                  setSelectedLeadForItinerary(activeLead);
+                                  setCurrentSection('itinerary-builder');
+                                }}
+                                className="w-full h-8 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-black text-xs rounded-lg shadow-sm border-0 flex items-center justify-center gap-1.5 cursor-pointer mt-1"
+                              >
+                                <Sparkles className="w-3.5 h-3.5" /> Build Itinerary & Quote
+                              </Button>
+                            </>
+                          )}
+                        </div>
+                      </>
                     );
                   })()}
                 </div>
