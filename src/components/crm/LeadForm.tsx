@@ -405,8 +405,8 @@ export const LeadForm: React.FC<LeadFormProps> = ({
       const fetchTeam = async () => {
         try {
           const { data: { session } } = await supabase.auth.getSession();
-          const token = session?.access_token;
-          const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/users.php`, {
+          const apiBase = import.meta.env.VITE_PHP_BASE_URL || import.meta.env.VITE_API_BASE_URL || '/php-backend';
+          const res = await fetch(`${apiBase}/users.php`, {
             headers: token ? { 'Authorization': `Bearer ${token}` } : {}
           });
           if (res.ok) {

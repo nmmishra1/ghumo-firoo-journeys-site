@@ -948,7 +948,7 @@ const CRM = () => {
       const token = session?.access_token;
       const authHeaders = token ? { 'Authorization': `Bearer ${token}` } : {};
 
-      const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/users.php`, {
+      const res = await fetch(`${API_BASE}/users.php`, {
         headers: authHeaders
       });
 
