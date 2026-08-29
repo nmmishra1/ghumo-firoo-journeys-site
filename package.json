@@ -25,7 +25,6 @@
       "--no-sandbox",
       "--disable-setuid-sandbox"
     ],
-    "concurrency": 2,
     "skipThirdPartyRequests": true,
     "waitFor": 1000,
     "waitUntil": "networkidle2",
