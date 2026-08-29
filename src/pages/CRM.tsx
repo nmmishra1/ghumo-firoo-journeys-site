@@ -4519,15 +4519,22 @@ const CRM = () => {
                 <div className="flex gap-2">
                   <button 
                     type="button"
-                    onClick={() => window.open(`tel:${activeLead.contact_number || activeLead.customer_phone || ''}`)}
+                    onClick={() => {
+                      setSelectedLeadForFollowUp({ id: activeLead.id, name: activeLead.customer_name });
+                      setFollowUpModalOpen(true);
+                      const telNum = (activeLead.contact_number || activeLead.customer_phone || '').trim();
+                      if (telNum) {
+                        window.open(`tel:${telNum}`);
+                      }
+                    }}
                     className="w-8 h-8 rounded-full border border-[#C9A25A]/30 cursor-pointer flex items-center justify-center bg-[#C9A25A]/15 text-[#C9A25A] hover:opacity-85 transition-opacity"
-                    title="Call Customer"
+                    title="Call & Log Follow-up"
                   >
                     <i className="ti ti-phone text-sm"></i>
                   </button>
                   <button 
                     type="button"
-                    onClick={() => window.open(`https://wa.me/${activeLead.whatsapp_number || activeLead.contact_number || activeLead.customer_phone || ''}`)}
+                    onClick={() => window.open(`https://wa.me/${(activeLead.whatsapp_number || activeLead.contact_number || activeLead.customer_phone || '').replace(/[^0-9]/g, '')}`)}
                     className="w-8 h-8 rounded-full border border-[#C8E6C9] cursor-pointer flex items-center justify-center bg-[#E8F5E9] text-[#25D366] hover:opacity-85 transition-opacity"
                     title="WhatsApp Client"
                   >
@@ -4535,9 +4542,52 @@ const CRM = () => {
                   </button>
                   <button 
                     type="button"
-                    onClick={() => window.open(`mailto:${activeLead.email || activeLead.customer_email || ''}`)}
+                    onClick={() => {
+                      const rawEmail = (activeLead.email || activeLead.customer_email || '').trim();
+                      const emailAddr = rawEmail.includes(',') ? rawEmail.split(',')[0].trim() : rawEmail;
+                      const clientName = activeLead.customer_name || 'Valued Traveler';
+                      const destLabel = (() => {
+                        if (!activeLead.destinations) return 'Holiday Package';
+                        if (typeof activeLead.destinations === 'string' && activeLead.destinations.trim().startsWith('[')) {
+                          try {
+                            const parsed = JSON.parse(activeLead.destinations);
+                            if (Array.isArray(parsed) && parsed.length > 0) {
+                              return parsed.map((s: any) => s.city || s.name || s.destination).filter(Boolean).join(' - ');
+                            }
+                          } catch(e) {}
+                        }
+                        return activeLead.destinations;
+                      })();
+
+                      const subject = encodeURIComponent(`Exclusive Travel Itinerary & Quote for ${destLabel} | Ghumo Firoo Travels`);
+                      const body = encodeURIComponent(
+`Dear ${clientName},
+
+Greetings from Ghumo Firoo Travels!
+
+Thank you for choosing Ghumo Firoo Travels for planning your upcoming holiday to ${destLabel}.
+
+Our travel specialists are actively preparing your custom travel package with tailored hotel stays, sightseeing circuits, and private cab transfers designed around your preferences.
+
+Please find our contact details below:
+📞 Call / WhatsApp: +91 8010989792
+✉️ Email: info@ghumofiroo.com
+🌐 Website: https://ghumofiroo.com
+
+Warm regards,
+${userProfile?.full_name || 'Travel Specialist Team'}
+Ghumo Firoo Travels Pvt. Ltd.`
+                      );
+
+                      window.open(`mailto:${emailAddr}?subject=${subject}&body=${body}`);
+
+                      logActivity(activeLead.id, {
+                        type: 'email',
+                        content: `Inquiry email dispatched to ${emailAddr} for ${destLabel}.`
+                      });
+                    }}
                     className="w-8 h-8 rounded-full border border-slate-200 cursor-pointer flex items-center justify-center bg-gray-50 text-gray-600 hover:bg-gray-105 transition-colors"
-                    title="Email Client"
+                    title="Send Branded Email"
                   >
                     <i className="ti ti-mail text-sm"></i>
                   </button>
@@ -4558,14 +4608,29 @@ const CRM = () => {
                 <div className="space-y-2">
                   <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Trip Details</p>
                   <div className="bg-slate-50 border border-slate-100 rounded-lg p-3 space-y-2 text-xs">
-                    <div className="flex items-center gap-1">
-                      <span className="font-semibold text-[12px] text-slate-700 truncate max-w-[90px]" title={activeLead.city || activeLead.customer_home_city || 'Delhi'}>
-                        {activeLead.city || activeLead.customer_home_city || 'Delhi'}
-                      </span>
-                      <i className="ti ti-arrow-right text-slate-400 text-xs shrink-0 mx-0.5"></i>
-                      <span className="font-semibold text-[12px] text-[#C9A25A] truncate max-w-[90px]" title={activeLead.destinations || 'Singapore'}>
-                        {activeLead.destinations || 'Singapore'}
-                      </span>
+                    <div className="flex flex-col gap-1">
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        <span className="font-bold text-[12px] text-slate-800" title={activeLead.city || activeLead.customer_home_city || 'Delhi'}>
+                          {activeLead.city || activeLead.customer_home_city || 'Delhi'}
+                        </span>
+                        <i className="ti ti-arrow-right text-slate-400 text-xs shrink-0"></i>
+                        <span className="font-bold text-[12px] text-[#C9A25A]" title={typeof activeLead.destinations === 'string' ? activeLead.destinations : ''}>
+                          {(() => {
+                            if (!activeLead.destinations) return 'Custom Itinerary';
+                            if (typeof activeLead.destinations === 'string' && activeLead.destinations.trim().startsWith('[')) {
+                              try {
+                                const parsed = JSON.parse(activeLead.destinations);
+                                if (Array.isArray(parsed) && parsed.length > 0) {
+                                  return parsed.map((s: any) => `${s.city || s.name || s.destination}${s.nights ? ` (${s.nights}N)` : ''}`).filter(Boolean).join(' → ');
+                                }
+                              } catch(e) {}
+                            } else if (Array.isArray(activeLead.destinations)) {
+                              return activeLead.destinations.map((s: any) => typeof s === 'string' ? s : `${s.city || s.name || s.destination}${s.nights ? ` (${s.nights}N)` : ''}`).filter(Boolean).join(' → ');
+                            }
+                            return activeLead.destinations;
+                          })()}
+                        </span>
+                      </div>
                     </div>
                     <div className="text-slate-500 font-medium text-[11px]">
                       {activeLead.trip_start_date ? new Date(activeLead.trip_start_date).toLocaleDateString([], {day:'numeric', month:'short'}) : 'TBD'}
