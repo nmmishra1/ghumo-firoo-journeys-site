@@ -19,7 +19,6 @@
   "reactSnap": {
     "source": "dist",
     "destination": "dist",
-    "puppeteerExecutablePath": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
     "puppeteerArgs": [
       "--no-sandbox",
       "--disable-setuid-sandbox"
