@@ -72,7 +72,7 @@ const Products = React.lazy(() => import('@/pages/Products'));
 const Profile = React.lazy(() => import('@/pages/Profile'));
 const NotFound = React.lazy(() => import('@/pages/NotFound'));
 const Booking = React.lazy(() => import('@/pages/Booking'));
-const CRM = React.lazy(() => import('@/pages/CRM'));
+import CRM from '@/pages/CRM';
 const Auth = React.lazy(() => import('@/pages/Auth'));
 const SignUp = React.lazy(() => import('@/pages/SignUp'));
 const ForgotPassword = React.lazy(() => import('@/pages/ForgotPassword'));
