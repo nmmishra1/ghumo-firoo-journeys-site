@@ -45,24 +45,24 @@ import { fetchCachedJson } from '@/utils/crmCache';
 
 const API_BASE = import.meta.env.VITE_PHP_BASE_URL || import.meta.env.VITE_API_BASE_URL || '/php-backend';
 
-const OpportunityKanban = React.lazy(() => import('@/pages/crm/OpportunityKanban'));
-const QuoteWorkspace = React.lazy(() => import('@/pages/crm/QuoteWorkspace'));
-const DestinationManagement = React.lazy(() => import('@/pages/crm/DestinationManagement').then(m => ({ default: m.DestinationManagement })));
-const HotelContracting = React.lazy(() => import('@/pages/crm/HotelContracting').then(m => ({ default: m.HotelContracting })));
-const ReviewModeration = React.lazy(() => import('@/components/crm/ReviewModeration'));
-const EmailMarketingHub = React.lazy(() => import('@/components/crm/EmailMarketingHub').then(m => ({ default: m.EmailMarketingHub })));
-const CabContracting = React.lazy(() => import('@/pages/crm/CabContracting'));
-const ItineraryBuilder = React.lazy(() => import('@/pages/crm/ItineraryBuilder'));
-const LeadProposalsWorkspace = React.lazy(() => import('@/pages/crm/LeadProposalsWorkspace'));
-const ActivityMaster = React.lazy(() => import('@/pages/crm/ActivityMaster'));
-const SightseeingMaster = React.lazy(() => import('@/pages/crm/SightseeingMaster'));
-const VisaMaster = React.lazy(() => import('@/pages/crm/VisaMaster'));
-const IndiaExplorer = React.lazy(() => import('@/pages/crm/IndiaExplorer'));
-const PackageMaster = React.lazy(() => import('@/pages/crm/PackageMaster'));
-const BlogMaster = React.lazy(() => import('@/pages/crm/BlogMaster'));
-const BulkUploadHub = React.lazy(() => import('@/pages/crm/BulkUploadHub'));
-const AuditLogsViewer = React.lazy(() => import('@/pages/crm/AuditLogsViewer'));
-const AgentRoleManagement = React.lazy(() => import('@/pages/crm/AgentRoleManagement'));
+import OpportunityKanban from '@/pages/crm/OpportunityKanban';
+import QuoteWorkspace from '@/pages/crm/QuoteWorkspace';
+import { DestinationManagement } from '@/pages/crm/DestinationManagement';
+import { HotelContracting } from '@/pages/crm/HotelContracting';
+import ReviewModeration from '@/components/crm/ReviewModeration';
+import { EmailMarketingHub } from '@/components/crm/EmailMarketingHub';
+import CabContracting from '@/pages/crm/CabContracting';
+import ItineraryBuilder from '@/pages/crm/ItineraryBuilder';
+import LeadProposalsWorkspace from '@/pages/crm/LeadProposalsWorkspace';
+import ActivityMaster from '@/pages/crm/ActivityMaster';
+import SightseeingMaster from '@/pages/crm/SightseeingMaster';
+import VisaMaster from '@/pages/crm/VisaMaster';
+import IndiaExplorer from '@/pages/crm/IndiaExplorer';
+import PackageMaster from '@/pages/crm/PackageMaster';
+import BlogMaster from '@/pages/crm/BlogMaster';
+import BulkUploadHub from '@/pages/crm/BulkUploadHub';
+import AuditLogsViewer from '@/pages/crm/AuditLogsViewer';
+import AgentRoleManagement from '@/pages/crm/AgentRoleManagement';
 
 const NavyGoldLoader = () => (
   <div className="flex items-center justify-center min-h-[400px] bg-[#0B1026] rounded-2xl p-8 border border-[#C9A25A]/20">
