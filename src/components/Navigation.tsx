@@ -1,9 +1,10 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Menu, X, ChevronDown, Phone, MessageSquare, MapPin, Compass, Sparkles } from 'lucide-react';
 import ThemeToggle from './ThemeToggle';
 import { Button } from '@/components/ui/button';
 import { preloadGuides, preloadBlog } from '@/lib/routePrefetch';
+import { prefetchRoute } from '@/utils/routePrefetch';
 
 interface NavigationItem {
   name: string;
@@ -18,12 +19,11 @@ interface MainNavigationItem {
   submenu?: NavigationItem[];
 }
 
-import { prefetchRoute } from '@/utils/routePrefetch';
-
 const Navigation = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -79,11 +79,20 @@ const Navigation = () => {
   };
 
   const handleMouseEnter = (itemName: string) => {
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+      timeoutRef.current = null;
+    }
     setActiveDropdown(itemName);
   };
 
   const handleMouseLeave = () => {
-    setActiveDropdown(null);
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+    }
+    timeoutRef.current = setTimeout(() => {
+      setActiveDropdown(null);
+    }, 220);
   };
 
   return (
@@ -122,7 +131,7 @@ const Navigation = () => {
                     <div className="relative py-4">
                       <button
                         onClick={() => navigate(item.path)}
-                        className={`px-3 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all duration-300 flex items-center gap-1.5 focus-visible:ring-2 focus-visible:ring-accent focus-visible:outline-none ${
+                        className={`px-3 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all duration-300 flex items-center gap-1.5 focus-visible:ring-2 focus-visible:ring-accent focus-visible:outline-none cursor-pointer ${
                           isActivePath(item.path) || activeDropdown === item.name
                             ? 'text-[#C9A25A] dark:text-[#E5C378] font-bold'
                             : 'text-gray-700 dark:text-gray-200 hover:text-[#C9A25A] dark:hover:text-[#E5C378]'
@@ -135,34 +144,48 @@ const Navigation = () => {
                         }`} />
                       </button>
 
-                      {/* Dropdown Menu */}
-                      <div className={`absolute top-full left-1/2 -translate-x-1/2 mt-1 w-[380px] bg-white dark:bg-[#0B1226] border border-gray-200 dark:border-[#C9A25A]/30 rounded-2xl shadow-2xl transition-all duration-300 z-50 p-3 transform ${
-                        activeDropdown === item.name
-                          ? 'opacity-100 visible translate-y-0 scale-100'
-                          : 'opacity-0 invisible -translate-y-2 scale-95 pointer-events-none'
-                      }`}>
-                        <div className="space-y-1">
-                          {item.submenu.map((subItem) => (
-                            <Link
-                              key={subItem.name}
-                              to={subItem.path}
-                              onMouseEnter={() => prefetchRoute(subItem.path)}
-                              onFocus={() => prefetchRoute(subItem.path)}
-                              className="p-2.5 rounded-xl hover:bg-gray-50 dark:hover:bg-white/10 border border-transparent hover:border-[#C9A25A]/30 transition-all flex items-center justify-between group text-left"
-                            >
-                              <div>
-                                <div className="font-bold text-gray-900 dark:text-white text-xs group-hover:text-[#C9A25A] dark:group-hover:text-[#E5C378] transition-colors flex items-center gap-1.5">
-                                  <MapPin className="w-3.5 h-3.5 text-[#C9A25A]" /> {subItem.name}
+                      {/* Dropdown Menu Container with Hover Bridge */}
+                      <div 
+                        onMouseEnter={() => {
+                          if (timeoutRef.current) {
+                            clearTimeout(timeoutRef.current);
+                            timeoutRef.current = null;
+                          }
+                        }}
+                        onMouseLeave={handleMouseLeave}
+                        className={`absolute top-full left-1/2 -translate-x-1/2 pt-2 w-[380px] z-50 transform transition-all duration-200 ${
+                          activeDropdown === item.name
+                            ? 'opacity-100 visible translate-y-0 scale-100'
+                            : 'opacity-0 invisible -translate-y-2 scale-95 pointer-events-none'
+                        }`}
+                      >
+                        {/* Invisible hover bridge connecting button to dropdown */}
+                        <div className="absolute -top-3 left-0 right-0 h-4 bg-transparent" />
+
+                        <div className="bg-white dark:bg-[#0B1226] border border-gray-200 dark:border-[#C9A25A]/30 rounded-2xl shadow-2xl p-3">
+                          <div className="space-y-1">
+                            {item.submenu.map((subItem) => (
+                              <Link
+                                key={subItem.name}
+                                to={subItem.path}
+                                onMouseEnter={() => prefetchRoute(subItem.path)}
+                                onFocus={() => prefetchRoute(subItem.path)}
+                                className="p-2.5 rounded-xl hover:bg-gray-50 dark:hover:bg-white/10 border border-transparent hover:border-[#C9A25A]/30 transition-all flex items-center justify-between group text-left"
+                              >
+                                <div>
+                                  <div className="font-bold text-gray-900 dark:text-white text-xs group-hover:text-[#C9A25A] dark:group-hover:text-[#E5C378] transition-colors flex items-center gap-1.5">
+                                    <MapPin className="w-3.5 h-3.5 text-[#C9A25A]" /> {subItem.name}
+                                  </div>
+                                  {subItem.sub && <div className="text-[10px] text-gray-500 dark:text-slate-300 font-light pl-5">{subItem.sub}</div>}
                                 </div>
-                                {subItem.sub && <div className="text-[10px] text-gray-500 dark:text-slate-300 font-light pl-5">{subItem.sub}</div>}
-                              </div>
-                              {subItem.badge && (
-                                <span className="text-[9px] px-2 py-0.5 rounded-full bg-[#C9A25A]/15 text-[#C9A25A] dark:text-[#E5C378] font-bold border border-[#C9A25A]/30">
-                                  {subItem.badge}
-                                </span>
-                              )}
-                            </Link>
-                          ))}
+                                {subItem.badge && (
+                                  <span className="text-[9px] px-2 py-0.5 rounded-full bg-[#C9A25A]/15 text-[#C9A25A] dark:text-[#E5C378] font-bold border border-[#C9A25A]/30">
+                                    {subItem.badge}
+                                  </span>
+                                )}
+                              </Link>
+                            ))}
+                          </div>
                         </div>
                       </div>
                     </div>
