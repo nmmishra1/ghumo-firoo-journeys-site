@@ -6,6 +6,7 @@ import { Star, MapPin, Clock, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import LazyImage from '@/components/ui/LazyImage';
 import { supabase } from '@/integrations/supabase/client';
+import { prefetchRoute } from '@/utils/routePrefetch';
 
 const destinations = [
   {
@@ -203,7 +204,12 @@ const FeaturedDestinations = () => {
                     <div className="text-lg font-bold text-accent">{destination.price}</div>
                   </div>
                   
-                  <Link to={destination.slug || "/enquire-now"} className="block">
+                  <Link 
+                    to={destination.slug || "/enquire-now"} 
+                    onMouseEnter={() => destination.slug && prefetchRoute(destination.slug)}
+                    onFocus={() => destination.slug && prefetchRoute(destination.slug)}
+                    className="block"
+                  >
                     <Button className="w-full bg-primary hover:bg-secondary text-white rounded-xl py-2.5 font-bold text-sm transition-all duration-300 hover:shadow-md border-0 cursor-pointer">
                       Explore Package
                     </Button>

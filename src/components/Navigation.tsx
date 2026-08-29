@@ -18,6 +18,8 @@ interface MainNavigationItem {
   submenu?: NavigationItem[];
 }
 
+import { prefetchRoute } from '@/utils/routePrefetch';
+
 const Navigation = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
@@ -144,6 +146,8 @@ const Navigation = () => {
                             <Link
                               key={subItem.name}
                               to={subItem.path}
+                              onMouseEnter={() => prefetchRoute(subItem.path)}
+                              onFocus={() => prefetchRoute(subItem.path)}
                               className="p-2.5 rounded-xl hover:bg-gray-50 dark:hover:bg-white/10 border border-transparent hover:border-[#C9A25A]/30 transition-all flex items-center justify-between group text-left"
                             >
                               <div>
@@ -165,6 +169,8 @@ const Navigation = () => {
                   ) : (
                     <Link
                       to={item.path}
+                      onMouseEnter={() => prefetchRoute(item.path)}
+                      onFocus={() => prefetchRoute(item.path)}
                       className={`px-3 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all duration-300 focus-visible:ring-2 focus-visible:ring-accent focus-visible:outline-none ${
                         isActivePath(item.path)
                           ? 'text-[#C9A25A] dark:text-[#E5C378] font-bold'
