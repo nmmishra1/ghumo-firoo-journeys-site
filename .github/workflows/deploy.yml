@@ -23,32 +23,20 @@ jobs:
       - name: 📦 Install Dependencies
         run: npm ci --legacy-peer-deps
 
-      - name: 🚀 Build Production Bundle
-        run: npm run build
+      - name: 🚀 Build Production Bundle & Bundle PHP Backend
+        run: |
+          npm run build
+          cp -r php-backend dist/php-backend
 
-      - name: 📂 Deploy Frontend Dist to cPanel
+      - name: 📂 Deploy Everything to cPanel
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
           server: ${{ secrets.FTP_SERVER }}
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
-          port: 21
-          security: loose
           server-dir: ./
           local-dir: ./dist/
           dangerous-clean-slate: false
-
-      - name: 🐘 Deploy PHP Backend to cPanel
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
-        with:
-          server: ${{ secrets.FTP_SERVER }}
-          username: ${{ secrets.FTP_USERNAME }}
-          password: ${{ secrets.FTP_PASSWORD }}
-          port: 21
-          security: loose
-          server-dir: ./php-backend/
-          local-dir: ./php-backend/
-          dangerous-clean-slate: false
           exclude: |
-            **/.env
-            **/uploads/**
+            **/php-backend/.env
+            **/php-backend/uploads/**
