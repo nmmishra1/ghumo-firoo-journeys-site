@@ -901,11 +901,10 @@ const CRM = () => {
   }, [user, profiles.length]);
 
   useEffect(() => {
-    const needsLeads = ['leads', 'quotes', 'opportunities', 'reports', 'payments'].some(s => currentSection.includes(s));
-    if (needsLeads && leads.length === 0) {
-      fetchLeads();
-    }
+    fetchLeads();
+  }, [user, showDeletedLeads]);
 
+  useEffect(() => {
     if (userProfile) {
       if (currentSection === 'dashboard') {
         fetchDashboardInventory();
