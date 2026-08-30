@@ -3353,9 +3353,6 @@ const DynamicPackageDetail: React.FC<DynamicPackageDetailProps> = ({ slug: propS
         setLoading(true);
         if (!currentSlug) return;
 
-        // Check static registry first for curated packages (e.g. Rann Utsav 2D/1N, 3D/2N)
-        const staticRegistryPkg = STATIC_PACKAGE_REGISTRY[currentSlug];
-
         // 1. Check local catalog cache for CRM package updates
         const localCatalogStr = localStorage.getItem('crm_package_catalog');
         let localPkg: any = null;
@@ -3370,19 +3367,7 @@ const DynamicPackageDetail: React.FC<DynamicPackageDetailProps> = ({ slug: propS
           }
         }
 
-        if (staticRegistryPkg) {
-          const mergedPkg = {
-            ...staticRegistryPkg,
-            ...(localPkg && Number(localPkg.price) > 3000 ? localPkg : {})
-          };
-          setPkg(mergedPkg);
-          if (mergedPkg.variants && mergedPkg.variants.length > 0) {
-            setActiveVariantId(mergedPkg.variants[0].id || mergedPkg.variants[0].variantKey || mergedPkg.variants[0].variant_key || '');
-          }
-          setLoading(false);
-          return;
-        }
-
+        // 2. Prioritize Live Database API Fetch
         const apiBase = import.meta.env.VITE_API_BASE_URL || '/php-backend';
         const endpoint = `${apiBase}/packages.php?slug=${encodeURIComponent(currentSlug)}&include_variants=1`;
         
@@ -3392,26 +3377,45 @@ const DynamicPackageDetail: React.FC<DynamicPackageDetailProps> = ({ slug: propS
             const data = await res.json();
             const apiPkg = Array.isArray(data) ? data[0] : (data.package || (data && (data.name || data.title) ? data : null));
             if (apiPkg && (apiPkg.name || apiPkg.title) && (apiPkg.is_active !== false)) {
-              const finalPkg = localPkg ? { ...apiPkg, ...localPkg } : apiPkg;
+              const staticRegistryPkg = STATIC_PACKAGE_REGISTRY[currentSlug];
+              const finalPkg = {
+                ...(staticRegistryPkg || {}),
+                ...apiPkg,
+                ...(localPkg && Number(localPkg.price) > 3000 ? localPkg : {})
+              };
               setPkg(finalPkg);
               if (finalPkg.variants && finalPkg.variants.length > 0) {
-                setActiveVariantId(finalPkg.variants[0].id || finalPkg.variants[0].variant_key || '');
+                setActiveVariantId(String(finalPkg.variants[0].id || finalPkg.variants[0].variant_key || finalPkg.variants[0].variantKey || ''));
               }
               setLoading(false);
               return;
             }
           }
         } catch (e) {
-          console.warn('API fetch bypassed, using local registry:', e);
+          console.warn('Live API fetch unavailable, falling back to static registry:', e);
+        }
+
+        // 3. Fallback to Local Static Registry if API has no record or is offline
+        const staticRegistryPkg = STATIC_PACKAGE_REGISTRY[currentSlug];
+
+        if (staticRegistryPkg) {
+          const mergedPkg = {
+            ...staticRegistryPkg,
+            ...(localPkg && Number(localPkg.price) > 3000 ? localPkg : {})
+          };
+          setPkg(mergedPkg);
+          if (mergedPkg.variants && mergedPkg.variants.length > 0) {
+            setActiveVariantId(String(mergedPkg.variants[0].id || mergedPkg.variants[0].variantKey || mergedPkg.variants[0].variant_key || ''));
+          }
+          setLoading(false);
+          return;
         }
 
         if (localPkg) {
           setPkg(localPkg);
           if (localPkg.variants && localPkg.variants.length > 0) {
-            setActiveVariantId(localPkg.variants[0].id || localPkg.variants[0].variantKey || localPkg.variants[0].variant_key || '');
+            setActiveVariantId(String(localPkg.variants[0].id || localPkg.variants[0].variantKey || localPkg.variants[0].variant_key || ''));
           }
-        } else if (STATIC_PACKAGE_REGISTRY[currentSlug]) {
-          setPkg(STATIC_PACKAGE_REGISTRY[currentSlug]);
         } else {
           // Fuzzy Slug Matcher to guarantee non-empty fallback for any slug format
           const normSlug = currentSlug.toLowerCase().replace(/[^a-z0-9]/g, '');
@@ -3435,7 +3439,7 @@ const DynamicPackageDetail: React.FC<DynamicPackageDetailProps> = ({ slug: propS
           } else if (fallbackData) {
             setPkg(fallbackData);
             if (fallbackData.variants && fallbackData.variants.length > 0) {
-              setActiveVariantId(fallbackData.variants[0].id || fallbackData.variants[0].variantKey || '');
+              setActiveVariantId(String(fallbackData.variants[0].id || fallbackData.variants[0].variantKey || ''));
             }
           }
         }
