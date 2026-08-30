@@ -12,6 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { SIGHTSEEING_SPOTS } from '@/data/sightseeingData';
+import { MASTER_DESTINATIONS } from '@/data/masterDestinations';
 import { 
   Globe, Map, MapPin, Plus, Search, Edit, Power, Download, Upload, 
   ArrowLeft, Check, X, Loader2, RefreshCw, HelpCircle, Layers, Trash2,
@@ -397,6 +398,55 @@ export const DestinationManagement: React.FC = () => {
             fetchedActivities.push(ma);
           }
         }
+      }
+
+      // Sync with master destinations & popular attractions (e.g. Pench, Indore, Ujjain, Pachmarhi, etc.)
+      const matchedMasterDest = MASTER_DESTINATIONS.find(d => 
+        targetName.includes(d.city.toLowerCase()) || d.city.toLowerCase().includes(targetName)
+      );
+
+      if (matchedMasterDest && Array.isArray(matchedMasterDest.popular_attractions)) {
+        matchedMasterDest.popular_attractions.forEach((attraction, idx) => {
+          const attractionName = attraction.trim();
+          if (!attractionName) return;
+
+          const ms: CitySightseeing = {
+            id: `master-attraction-${idx}-${matchedMasterDest.city.toLowerCase().replace(/[^a-z0-9]/g, '-')}`,
+            sightseeing_name: attractionName,
+            destination: matchedMasterDest.city,
+            duration: '2-3 Hours',
+            description: `Top tourist attraction & highlight in ${matchedMasterDest.city} (${matchedMasterDest.destination_group}).`,
+            adult_cost: 150,
+            child_cost: 100
+          };
+
+          const ma: CityActivity = {
+            id: `master-act-attraction-${idx}-${matchedMasterDest.city.toLowerCase().replace(/[^a-z0-9]/g, '-')}`,
+            name: attractionName,
+            category: matchedMasterDest.destination_group.includes('Wildlife') ? 'Wildlife Safari' : 'Sightseeing Tour',
+            sightseeing_id: ms.id,
+            contract_type: 'Direct',
+            rates: [
+              {
+                rate_id: `rate-${idx}`,
+                rate_type: 'Per Person',
+                adult_rate: 150,
+                child_rate: 100,
+                currency: 'INR'
+              }
+            ]
+          };
+
+          const existingNames = new Set(fetchedSightseeings.map(s => s.sightseeing_name.toLowerCase()));
+          if (!existingNames.has(ms.sightseeing_name.toLowerCase())) {
+            fetchedSightseeings.push(ms);
+          }
+
+          const existingActNames = new Set(fetchedActivities.map(a => a.name.toLowerCase()));
+          if (!existingActNames.has(ma.name.toLowerCase())) {
+            fetchedActivities.push(ma);
+          }
+        });
       }
 
       setCitySightseeings(fetchedSightseeings);
