@@ -508,6 +508,7 @@ export default function PublicIndiaExplorer() {
                   const cityName = city.name || city.city_name;
                   const stateName = city.state_name || city.state || '';
                   const attractions = city.popular_attractions || [];
+                  const citySlug = (cityName || '').toLowerCase().replace(/[^a-z0-9]+/g, '-');
 
                   return (
                     <Card 
@@ -517,9 +518,12 @@ export default function PublicIndiaExplorer() {
                       <CardHeader className="p-5 border-b border-slate-800/80 bg-slate-850/60">
                         <div className="flex items-start justify-between gap-2">
                           <div>
-                            <CardTitle className="text-base font-extrabold text-white group-hover:text-amber-400 transition-colors font-montserrat">
-                              {cityName}
-                            </CardTitle>
+                            <Link to={`/explore-india/${citySlug}`} className="hover:underline">
+                              <CardTitle className="text-base font-extrabold text-white group-hover:text-amber-400 transition-colors font-montserrat flex items-center gap-1.5">
+                                {cityName}
+                                <ArrowRight className="w-3.5 h-3.5 opacity-0 group-hover:opacity-100 transition-opacity" />
+                              </CardTitle>
+                            </Link>
                             <CardDescription className="text-xs text-amber-400 font-bold mt-0.5 flex items-center gap-1">
                               <MapPin className="w-3 h-3 text-amber-400 shrink-0" />
                               {stateName} · <span className="text-slate-300 font-semibold">{city.destination_group}</span>
@@ -571,13 +575,14 @@ export default function PublicIndiaExplorer() {
 
                         {/* Action Buttons */}
                         <div className="space-y-2 pt-2 border-t border-slate-800">
-                          <Button
-                            variant="secondary"
-                            onClick={() => handleOpenGuide(city)}
-                            className="w-full bg-slate-800 hover:bg-slate-750 text-white font-bold text-xs h-8 rounded-xl gap-1.5 border border-slate-700/70"
-                          >
-                            <Eye className="w-3.5 h-3.5 text-amber-400" /> View Travel Guide &amp; Itinerary
-                          </Button>
+                          <Link to={`/explore-india/${citySlug}`} className="block w-full">
+                            <Button
+                              variant="secondary"
+                              className="w-full bg-slate-800 hover:bg-slate-750 text-white font-bold text-xs h-8 rounded-xl gap-1.5 border border-slate-700/70"
+                            >
+                              <Eye className="w-3.5 h-3.5 text-amber-400" /> Explore {cityName} Guide &amp; Attractions ➔
+                            </Button>
+                          </Link>
                           <div className="grid grid-cols-2 gap-2">
                             <Button
                               onClick={() => handleOpenInquiry(city)}
