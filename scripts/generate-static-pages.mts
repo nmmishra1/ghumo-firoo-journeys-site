@@ -1029,12 +1029,27 @@ async function main() {
     });
   }
 
+  const assetFiles = await fs.readdir(path.join(distDir, 'assets'));
+  const mainJs = assetFiles.find(f => f.startsWith('index-') && f.endsWith('.js'));
+  const mainCss = assetFiles.find(f => f.startsWith('index-') && f.endsWith('.css'));
+
+  console.log(`📦 Found bundle entry assets: JS=${mainJs}, CSS=${mainCss}`);
   console.log(`📦 Rendering ${routesToGenerate.length} static SEO routes into dist/ ...`);
 
   let count = 0;
 
   for (const item of routesToGenerate) {
     let pageHtml = baseHtml;
+
+    // Ensure CSS is injected in head
+    if (mainCss && !pageHtml.includes(mainCss)) {
+      pageHtml = pageHtml.replace('</head>', `    <link rel="stylesheet" crossorigin href="/assets/${mainCss}">\n  </head>`);
+    }
+
+    // Ensure JS module script is injected in body
+    if (mainJs && !pageHtml.includes(mainJs)) {
+      pageHtml = pageHtml.replace('</body>', `    <script type="module" crossorigin src="/assets/${mainJs}"></script>\n  </body>`);
+    }
 
     // Replace Title
     pageHtml = pageHtml.replace(/<title>.*?<\/title>/is, `<title>${item.title}</title>`);
@@ -1138,8 +1153,8 @@ async function main() {
     `.trim();
 
     pageHtml = pageHtml.replace(
-      /<div id="root">.*?<\/div>/s,
-      `<div id="root">${crawlableMarkup}</div>`
+      /<div id="root">[\s\S]*?(?=\s*<!-- Private Route Pre-Hydration Shell)/,
+      `<div id="root">\n      <div style="position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border-width: 0;">\n${crawlableMarkup}\n      </div>\n    </div>\n\n    `
     );
 
     // Determine target directory and write index.html

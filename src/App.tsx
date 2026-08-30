@@ -291,10 +291,12 @@ function App() {
                <Route path="/guide/:slug" element={<GuidePage />} />
                 
                 {/* Public India Destination Explorer Search Engine & Detailed Guides */}
-                <Route path="/explore-india" element={<PublicIndiaExplorer />} />
-                <Route path="/explore-india/:slug" element={<PublicDestinationDetail />} />
-                <Route path="/india-explorer" element={<PublicIndiaExplorer />} />
-                <Route path="/india-explorer/:slug" element={<PublicDestinationDetail />} />
+                 <Route path="/explore-india" element={<PublicIndiaExplorer />} />
+                 <Route path="/explore-india/:slug" element={<PublicDestinationDetail />} />
+                 <Route path="/explore-india/:slug/*" element={<PublicDestinationDetail />} />
+                 <Route path="/india-explorer" element={<PublicIndiaExplorer />} />
+                 <Route path="/india-explorer/:slug" element={<PublicDestinationDetail />} />
+                 <Route path="/india-explorer/:slug/*" element={<PublicDestinationDetail />} />
                 
                 {/* Sightseeing & Activities */}
                 <Route path="/sightseeing" element={<SightseeingIndex />} />

@@ -176,10 +176,11 @@ export default function PublicDestinationDetail() {
   const [customerNotes, setCustomerNotes] = useState('');
   const [submittingInquiry, setSubmittingInquiry] = useState(false);
 
-  // Normalize slug into clean search term
+  // Normalize slug into clean search term (strip trailing slash)
   const destinationQuery = useMemo(() => {
     if (!slug) return '';
-    return decodeURIComponent(slug).replace(/-/g, ' ').trim().toLowerCase();
+    const clean = decodeURIComponent(slug).replace(/\/+$/, '').replace(/-/g, ' ').trim().toLowerCase();
+    return clean;
   }, [slug]);
 
   // Find matching destination from Master Catalog
@@ -429,7 +430,7 @@ export default function PublicDestinationDetail() {
       <SEO
         title={`${cityName} Tourism Guide — Top Places to Visit, Safaris, Food & Custom Tour Packages | Ghumo Firoo`}
         description={`Discover ${cityName}, ${stateName}. Comprehensive travel guide with top sightseeing places, jungle safaris, iconic food trails, best travel months, and custom private tour packages by Ghumo Firoo.`}
-        keywords={seoKeywords}
+        keywords={seoKeywords.join(', ')}
       />
 
       {/* HERO SECTION */}
