@@ -9,12 +9,17 @@ import { PerformanceProvider } from '@/contexts/PerformanceContext';
 import WhatsAppFloat from '@/components/common/WhatsAppFloat';
 import { LiveChatWidget } from '@/components/LiveChatWidget';
 
-// Enhanced loading component with better UX and delayed rendering for better INP
+// Luxury branded loading component with zero flash
 const PageLoader = memo(() => (
-  <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-purple-50 opacity-0 animate-[fadeIn_0.3s_ease-in_0.2s_forwards]">
-    <div className="glass-card p-8 rounded-2xl shadow-glass-lg">
-      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-      <p className="text-center text-gray-600 font-medium">Loading...</p>
+  <div className="min-h-screen flex flex-col items-center justify-center bg-[#050814] text-white">
+    <div className="flex flex-col items-center space-y-4">
+      <img 
+        src="/ghumo-firoo-logo.png" 
+        alt="Ghumo Firoo" 
+        className="h-10 w-auto brightness-0 invert opacity-90 mb-1" 
+      />
+      <div className="w-8 h-8 border-2 border-[#C9A25A]/20 border-t-[#C9A25A] rounded-full animate-spin"></div>
+      <p className="text-[11px] font-bold tracking-[0.15em] text-[#C9A25A] uppercase">Loading Portal...</p>
     </div>
   </div>
 ));

@@ -27,21 +27,36 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div>Loading...</div>
+      <div className="min-h-screen flex flex-col items-center justify-center bg-[#050814] text-white">
+        <div className="flex flex-col items-center space-y-4">
+          <img 
+            src="/ghumo-firoo-logo.png" 
+            alt="Ghumo Firoo" 
+            className="h-10 w-auto brightness-0 invert opacity-90 mb-1" 
+          />
+          <div className="w-8 h-8 border-2 border-[#C9A25A]/20 border-t-[#C9A25A] rounded-full animate-spin"></div>
+          <p className="text-[11px] font-bold tracking-[0.15em] text-[#C9A25A] uppercase">Verifying Session...</p>
+        </div>
       </div>
     );
   }
 
   if (requireAuth && !user) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Card className="w-96">
-          <CardContent className="p-6 text-center">
-            <User className="h-12 w-12 text-blue-500 mx-auto mb-4" />
-            <h2 className="text-xl font-semibold mb-4">Authentication Required</h2>
-            <p className="text-gray-600 mb-4">Please log in to access this page.</p>
-            <Button onClick={() => navigate('/auth')}>Login</Button>
+      <div className="min-h-screen flex items-center justify-center bg-[#050814] text-white p-4">
+        <Card className="w-96 bg-[#0B1026] border border-[#C9A25A]/30 text-white shadow-2xl">
+          <CardContent className="p-8 text-center space-y-4">
+            <div className="w-12 h-12 rounded-full bg-[#C9A25A]/10 text-[#C9A25A] flex items-center justify-center mx-auto border border-[#C9A25A]/30">
+              <User className="h-6 w-6" />
+            </div>
+            <h2 className="text-xl font-serif font-bold text-white">Authentication Required</h2>
+            <p className="text-xs text-slate-400">Please sign in to access the agent portal & CRM workspace.</p>
+            <Button 
+              onClick={() => navigate('/auth')}
+              className="w-full bg-[#C9A25A] hover:bg-[#B8924A] text-slate-950 font-bold text-xs h-10 rounded-xl"
+            >
+              Sign In to Continue
+            </Button>
           </CardContent>
         </Card>
       </div>
