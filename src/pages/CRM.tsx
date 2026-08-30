@@ -3735,7 +3735,7 @@ const CRM = () => {
                     name: l.customer_name,
                     mobile: l.contact_number || l.customer_phone || '---',
                     email: l.email || l.customer_email || '---',
-                    home_city: l.city || l.customer_home_city || 'Delhi',
+                    home_city: l.city || l.customer_home_city || l.departure_city || '---',
                     total_leads: 1,
                     total_bookings: l.status === 'Booking Confirmed' ? 1 : 0
                   };
