@@ -226,7 +226,7 @@ export const blogPosts: BlogPost[] = [
   {
     id: 28,
     slug: 'telavi-kakheti-wine-road-georgia',
-    title: "Telavi and Kakheti Wine Road: Georgia's Vineyard Heart",
+    title: "Telavi & Kakheti Wine Road Guide | Ghumo Firoo",
     excerpt: "Travel Georgia's wine country from Telavi to Kakheti, where ancient traditions, table-side feasts, and postcard vineyards create the perfect escape.",
     metaDescription: "Explore Telavi wine tours and Kakheti wine road - Georgia's premier wine tourism destination with qvevri tradition, vineyard tours, and authentic Georgian supras.",
     author: "Salome Tsimakuridze",
@@ -814,45 +814,53 @@ export const blogContents: Record<number, React.ReactNode> = {
   28: (
     <div className="space-y-8 text-gray-700 dark:text-slate-300 leading-relaxed">
       <h2 className="text-3xl font-bold text-gray-900 dark:text-white bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-        Telavi and Kakheti Wine Road: Georgia's Vineyard Heart
+        Telavi & Kakheti Wine Road: Georgia's Vineyard Heart
       </h2>
       <p>
-        Telavi and the Kakheti wine country are at the center of Georgia's food and wine renaissance. This region is ideal for travelers searching for <strong>Telavi wine tours</strong>, <strong>Kakheti wine road</strong>, and authentic Georgian wine experiences.
+        Telavi, the historic royal seat of the Kakheti region, stands at the epicentre of Georgia’s 8,000-year-old winemaking heritage. Cradled between the dramatic snow-capped peaks of the Caucasus Mountains and the fertile Alazani River Valley, this picturesque region offers travelers a sensory immersion into rolling vineyards, ancient stone monasteries, and legendary table-side feasts.
       </p>
 
-      <h3 className="text-2xl font-bold text-gray-900 dark:text-white">Why Wine Tourism in Kakheti Is Trending</h3>
+      <h3 className="text-2xl font-bold text-gray-900 dark:text-white">How to Get to Telavi from Tbilisi</h3>
       <p>
-        More people are looking for <strong>Georgia wine tourism</strong> than ever before. The region's unique qvevri winemaking tradition, family-owned vineyards, and historic wineries make it one of the most compelling day trips from Tbilisi.
+        Telavi is situated approximately 95 kilometers northeast of the Georgian capital, Tbilisi. The most scenic and recommended route is via the winding <strong>Gombori Pass</strong> (Highway S38), which takes about 1.5 to 2 hours by private car or chauffeured tour. The smooth mountain pass climbs through dense deciduous forests and opens up to sweeping panoramic viewpoints across the Alazani Valley. For a slower, picturesque loop, travelers can return via the southern highway passing the historic hilltop town of Sighnaghi.
       </p>
 
-      <h3 className="text-2xl font-bold text-gray-900 dark:text-white">The Taste of Telavi</h3>
+      <h3 className="text-2xl font-bold text-gray-900 dark:text-white">Best Time to Visit Kakheti & the Rtveli Harvest</h3>
       <p>
-        In Telavi, you can tour local wineries, taste Saperavi and Rkatsiteli wines, and learn how Georgian wine is still made in clay vessels. Combine wine tastings with visits to traditional bakeries and savory Georgian cuisine.
+        While Kakheti is a year-round destination, the ideal travel window spans from <strong>late May to October</strong>:
       </p>
+      <ul className="list-disc pl-6 space-y-2">
+        <li><strong>Autumn (September to October):</strong> The absolute best time to visit due to <em>Rtveli</em>—the ancient grape harvest festival. Travelers can participate in hand-picking grapes, pressing them in traditional wooden troughs (Satsnakheli), and celebrating with folk singing.</li>
+        <li><strong>Late Spring & Summer (May to July):</strong> Pleasant alpine weather, lush green valleys, and vibrant wildflower blooms ideal for outdoor vineyard terraces and palace gardens.</li>
+      </ul>
+
+      <h3 className="text-2xl font-bold text-gray-900 dark:text-white">What to Expect: 8,000 Years of Qvevri Winemaking</h3>
       <p>
-        Join a <strong>Kakheti wine road</strong> itinerary and discover vineyards that are as beautiful as they are historic.
+        Georgia is officially recognized by UNESCO as the birthplace of wine. In Kakheti, winemakers continue to ferment and age grape juice with its skins and stems inside large underground clay amphorae called <strong>Qvevri</strong>. This ancient technique produces amber-colored white wines (such as <em>Rkatsiteli</em> and <em>Mtsvane</em>) known for rich tannins and dried-fruit aromas, alongside bold, velvety red <em>Saperavi</em> wines.
       </p>
 
-      <h3 className="text-2xl font-bold text-gray-900 dark:text-white">A Classic Georgian Supra Experience</h3>
+      <h3 className="text-2xl font-bold text-gray-900 dark:text-white">Must-Visit Landmarks on the Kakheti Wine Road</h3>
+      <ul className="list-disc pl-6 space-y-2">
+        <li><strong>Tsinandali Estate:</strong> The 19th-century royal palace of Prince Alexander Chavchavadze, featuring magnificent English-style botanical gardens and Georgia’s oldest bottled wine cellars.</li>
+        <li><strong>Alaverdi Monastery Cellar:</strong> An 11th-century cathedral where Georgian Orthodox monks have continuously produced organic Qvevri wines for over a millennium.</li>
+        <li><strong>Gremi Fortress & Archangels Church:</strong> A dramatic 16th-century royal citadel perched above the Silk Road trading route.</li>
+        <li><strong>Boutique Family Maranis:</strong> Intimate family-run cellars where local winemakers invite guests to taste home-distilled Chacha and cellar reserves.</li>
+      </ul>
+
+      <h3 className="text-2xl font-bold text-gray-900 dark:text-white">The Classic Georgian Supra Feast</h3>
       <p>
-        The true highlight of Telavi is the supra—a Georgian feast where local wine flows freely, toasts are made, and dishes are shared in a warm, family atmosphere. This is the best way to understand Georgian hospitality and the reason why Telavi is a favorite for culinary travelers.
+        No trip along the Kakheti wine road is complete without partaking in a traditional <strong>Supra</strong>. Led by a designated toastmaster known as the <em>Tamada</em>, the feast involves eloquent philosophical toasts, three-part polyphonic folk songs, and endless platters of cheese-stuffed Khachapuri, steaming Khinkali dumplings, fire-roasted Mtsvadi skewers, and fresh tomato-cucumber salads dressed with crushed walnut paste.
       </p>
 
-      <div className="bg-blue-50 dark:bg-blue-900/20 p-6 rounded-2xl border-l-4 border-blue-600 mt-8">
-        <p className="font-semibold text-blue-900 dark:text-blue-400 mb-2">Ghumo Firoo Tip:</p>
-        <p>Book a vineyard tour that includes a visit to a local winery and a traditional supra for the most authentic Kakheti experience.</p>
+      <div className="bg-amber-50 dark:bg-amber-900/20 p-6 rounded-2xl border-l-4 border-amber-600 mt-8">
+        <p className="font-semibold text-amber-900 dark:text-amber-400 mb-2">Explore Georgia with Ghumo Firoo Travels:</p>
+        <p>
+          Dreaming of the Caucasus? Ghumo Firoo Travels curates complete, hassle-free <strong>Georgia Tour Packages</strong> from Delhi and Mumbai—including private luxury SUV road trips across Tbilisi, Kakheti Wine Valley, and the Kazbegi mountains, verified boutique vineyard stays, visa assistance, and English-speaking local guides. Contact our travel desk at <strong>+91 99109 87264</strong> to customize your personalized itinerary.
+        </p>
       </div>
 
-      <h3 className="text-2xl font-bold text-gray-900 dark:text-white">Planning Your Wine Road Trip</h3>
-      <p>
-        The best time to visit Telavi is late spring through early autumn, when the vineyards are lush and the weather is perfect for wine tasting. Make time for a day trip from Tbilisi and add nearby historic sights like <strong>Gremi Fortress</strong> and <strong>Tsinandali Estate</strong>.
-      </p>
-      <p>
-        If you're searching for the top Georgia wine destinations, Telavi and the Kakheti region should be at the top of your list.
-      </p>
-
       <p className="pt-4 text-sm border-t border-gray-300 dark:border-gray-700 italic">
-        <strong>About the Author:</strong> This article was written by Salome Tsimakuridze, Product & Growth Manager at <a href="https://georgia.to/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Georgia.to</a> — Your trusted guide to authentic Georgian experiences. For more inspiring travel content, visit <a href="https://georgia.to/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Georgia.to</a>.
+        <strong>About the Author:</strong> This article was written by Salome Tsimakuridze, Product & Growth Manager at <a href="https://georgia.to/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Georgia.to</a> — Your trusted guide to authentic Georgian experiences.
       </p>
     </div>
   ),

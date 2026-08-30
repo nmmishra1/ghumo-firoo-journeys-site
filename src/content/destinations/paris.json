@@ -1,51 +1,64 @@
 {
   "type": "destination",
   "slug": "paris",
-  "title": "Paris",
+  "title": "Paris Travel Guide",
   "region": "Europe",
   "country": "France",
-  "summary": "Paris blends monumental art and architecture with neighborhood warmth. Masterpieces, café culture, and walkable quartiers make it ideal for both first-timers and repeat visitors.",
+  "summary": "Paris blends monumental art, world-class gastronomy, and historic architecture with neighborhood warmth. From the summit of the Eiffel Tower and the treasures of the Louvre to charming sidewalk bistros along the Seine, Paris offers an unforgettable European escape.",
   "heroImage": "/Europe Image New.png",
-  "bestTime": "Mar–Jun and Sep–Oct for mild weather; Jan–Feb for museum time and deals; Aug quieter but some closures.",
+  "bestTime": "April to June (Spring) and September to October (Autumn) for pleasant 18°C–22°C temperatures and bustling sidewalk cafés. December brings magical Christmas illuminations along the Champs-Élysées.",
   "quickFacts": {
-    "Currency": "EUR",
-    "Language": "French (English widely understood in tourism)",
-    "Power": "Type C/E, 230V",
-    "Emergency": "112"
+    "Currency": "EUR (€)",
+    "Language": "French (English widely spoken across hotels and major attractions)",
+    "Power": "Type C/E, 230V, 50Hz",
+    "Emergency": "112 (European emergency number)"
   },
   "attractions": [
-    { "name": "Louvre Museum", "summary": "The world’s largest art museum; reserve timed entry and focus on one wing." },
-    { "name": "Eiffel Tower", "summary": "Book sunset slots; great views from Trocadéro and Seine cruise." },
-    { "name": "Montmartre & Sacré-Cœur", "summary": "Village-like streets, artists’ square, basilica views." }
+    { "name": "Eiffel Tower & Champ de Mars", "summary": "Ascend to the summit for sweeping 360-degree city views. Book timed sunset tickets or capture iconic photos from Trocadéro Gardens across the Seine." },
+    { "name": "Louvre Museum & Pyramide", "summary": "The world's largest art museum, home to the Mona Lisa, Winged Victory of Samothrace, and Venus de Milo. Reserve advance skip-the-line timed entry." },
+    { "name": "Musée d'Orsay", "summary": "Housed in a grand Beaux-Arts railway station, showcasing legendary Impressionist masterpieces by Monet, Van Gogh, Renoir, and Degas." },
+    { "name": "Montmartre & Sacré-Cœur Basilica", "summary": "A hilltop bohemian village featuring winding cobblestone alleys, Place du Tertre portrait artists, and panoramic city vistas from the basilica steps." },
+    { "name": "Seine River Evening Cruise", "summary": "Glide past illuminated bridges, Notre-Dame Cathedral, and the sparkling Eiffel Tower on a scenic one-hour glass-canopy boat tour." },
+    { "name": "Palace of Versailles", "summary": "An easy 40-minute RER train day excursion to King Louis XIV's opulent Hall of Mirrors and vast royal manicured gardens." }
   ],
   "cultureEtiquette": [
-    "Greet with bonjour/bonsoir before asking questions.",
-    "Tipping modest (round up); service usually included."
+    "Always greet shopkeepers and waitstaff with 'Bonjour' (or 'Bonsoir' after sunset) before speaking.",
+    "A 15% service charge (service compris) is included in restaurant bills by law; leaving an extra €1–€2 per person is customary for good service.",
+    "Keep your voice low on public transit and inside historic churches."
   ],
   "gettingAround": [
-    "Buy a Navigo Easy card and load tickets; Metro covers most sights.",
-    "RER for airports/Versailles; buses offer scenic routes.",
-    "Walkable city—group sights by arrondissement."
+    "Contactless Navigo Easy card is the most economical way to ride the Metro and bus network.",
+    "RER B train connects Charles de Gaulle Airport (CDG) directly to central Paris in 35 minutes.",
+    "High-speed TGV rail connects Paris Gare de Lyon to Switzerland (Zurich/Geneva) in just 3 hours and 15 minutes."
   ],
   "whereToStay": [
-    { "area": "1st/2nd", "bestFor": ["First-timers", "Walkability"] },
-    { "area": "Le Marais (3rd/4th)", "bestFor": ["Nightlife", "Boutiques"] },
-    { "area": "7th", "bestFor": ["Eiffel views", "Families"] }
+    { "area": "1st & 2nd Arrondissements (Louvre / Palais-Royal)", "bestFor": ["First-time visitors", "Walking distance to major sights"] },
+    { "area": "3rd & 4th Arrondissements (Le Marais)", "bestFor": ["Boutique hotels", "Art galleries", "Trendy dining"] },
+    { "area": "7th Arrondissement (Eiffel Tower)", "bestFor": ["Quiet residential charm", "Balcony Eiffel views", "Families"] },
+    { "area": "6th Arrondissement (Saint-Germain-des-Prés)", "bestFor": ["Literary cafés", "Luxury shopping", "Romantic stays"] }
   ],
-  "costsPerDay": { "budget": "€70–€110", "midrange": "€140–€220", "luxury": "€300+" },
+  "costsPerDay": { "budget": "€80–€120", "midrange": "€160–€260", "luxury": "€400+" },
   "itineraries": [
-    { "day": 1, "title": "Right Bank Icons", "activities": ["Louvre or Orsay", "Tuileries", "Seine walk", "Eiffel Tower"] },
-    { "day": 2, "title": "Left Bank", "activities": ["Latin Quarter", "Luxembourg Gardens", "Saint-Germain cafés"] },
-    { "day": 3, "title": "Montmartre + Canal", "activities": ["Sacré-Cœur", "Artists’ square", "Canal Saint‑Martin sunset"] }
+    { "day": 1, "title": "Right Bank Monuments & Eiffel Tower", "activities": ["Louvre Museum morning tour", "Stroll through Tuileries Garden and Place de la Concorde", "Walk down Champs-Élysées to Arc de Triomphe", "Sunset ascent of Eiffel Tower and evening Seine illumination cruise"] },
+    { "day": 2, "title": "Left Bank Art, Gardens & Bohemian Quarters", "activities": ["Musée d'Orsay Impressionist collection", "Explore Saint-Germain-des-Prés and historic Café de Flore", "Relax at Luxembourg Gardens", "Walk through Latin Quarter and view Notre-Dame Cathedral"] },
+    { "day": 3, "title": "Montmartre Charm & Versailles Excursion", "activities": ["Morning funicular up to Sacré-Cœur and Montmartre artist square", "Afternoon RER train excursion to the Palace of Versailles", "Farewell dinner in a traditional French bistro in Le Marais"] }
   ],
   "sustainability": [
-    "Arrive by rail when possible.",
-    "Use Vélib’ shared bikes and tap water fountains.",
-    "Choose eco-certified hotels (Green Key)."
+    "Travel between European cities by high-speed electric TGV rail instead of short-haul flights.",
+    "Explore on foot or rent Vélib' shared electric bicycles across 1,000+ km of dedicated Paris bike lanes.",
+    "Refill reusable water bottles at the 1,200+ free sparkling and still water Wallace fountains across the city."
   ],
+  "packageTieIn": {
+    "title": "Book Your Paris Holiday with Ghumo Firoo Travels",
+    "description": "Pair romantic Paris with the breathtaking Swiss Alps. Ghumo Firoo Travels provides all-inclusive customized European vacation packages with Schengen visa guidance, 4-star central hotels, TGV train passes, and private airport transfers.",
+    "packages": [
+      { "name": "Switzerland + Paris Combo Tour", "url": "/packages/europe-switzerland-paris-tour" },
+      { "name": "Grand Europe Tour (7 Countries in 15 Days)", "url": "/packages/europe-grand-tour" }
+    ]
+  },
   "faqs": [
-    { "q": "Is tap water safe?", "a": "Yes, safe across the city." },
-    { "q": "Best passes?", "a": "Navigo Easy for transport; Museum Pass if doing many museums." }
+    { "q": "How many days are needed in Paris for first-timers?", "a": "A 4 to 5-day itinerary allows you to explore major landmarks like the Eiffel Tower, Louvre, and Montmartre without rushing, plus take a day trip to Versailles." },
+    { "q": "Do Indian citizens need a Schengen visa for Paris?", "a": "Yes, Indian passport holders require a valid Schengen short-stay tourist visa. Ghumo Firoo Travels provides end-to-end appointment scheduling, document verification, and flight/hotel reservation support." }
   ],
-  "updatedAt": "2025-11-04"
+  "updatedAt": "2026-08-30"
 }

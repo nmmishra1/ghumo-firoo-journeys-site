@@ -821,9 +821,64 @@ async function main() {
 
   // 3. Blog Routes
   for (const post of blogPosts) {
+    const postTitle = post.title.includes('Ghumo Firoo') ? post.title : `${post.title} | Ghumo Firoo Travels`;
+    let blogBodyHtml = `
+      <article>
+        <header>
+          <p><strong>Published on:</strong> ${post.date} | <strong>Author:</strong> ${post.author} | <strong>Category:</strong> ${post.category}</p>
+        </header>
+        <section>
+          <p>${post.excerpt}</p>
+          ${post.content ? `<div>${post.content}</div>` : ''}
+        </section>
+      </article>
+    `;
+
+    if (post.id === 28 || post.slug === 'telavi-kakheti-wine-road-georgia') {
+      blogBodyHtml = `
+        <article>
+          <header>
+            <p><strong>Published on:</strong> ${post.date} | <strong>Author:</strong> ${post.author} | <strong>Category:</strong> ${post.category}</p>
+          </header>
+          <section>
+            <h2>Telavi & Kakheti Wine Road: Georgia's Vineyard Heart</h2>
+            <p>Telavi, the historic royal seat of the Kakheti region, stands at the epicentre of Georgia’s 8,000-year-old winemaking heritage. Cradled between the dramatic snow-capped peaks of the Caucasus Mountains and the fertile Alazani River Valley, this picturesque region offers travelers a sensory immersion into rolling vineyards, ancient stone monasteries, and legendary table-side feasts.</p>
+          </section>
+          <section>
+            <h3>How to Get to Telavi from Tbilisi</h3>
+            <p>Telavi is situated approximately 95 kilometers northeast of the Georgian capital, Tbilisi. The most scenic and recommended route is via the winding Gombori Pass (Highway S38), which takes about 1.5 to 2 hours by private car or chauffeured tour. The smooth mountain pass climbs through dense deciduous forests and opens up to sweeping panoramic viewpoints across the Alazani Valley.</p>
+          </section>
+          <section>
+            <h3>Best Time to Visit Kakheti & the Rtveli Harvest</h3>
+            <p>While Kakheti is a year-round destination, the ideal travel window spans from late May to October. Autumn (September to October) is the absolute peak season due to Rtveli—the ancient grape harvest festival where travelers participate in hand-picking grapes and wooden trough pressing. Late spring (May to June) brings pleasant alpine weather and blooming valleys.</p>
+          </section>
+          <section>
+            <h3>What to Expect: 8,000 Years of Qvevri Winemaking</h3>
+            <p>Georgia is officially recognized by UNESCO as the birthplace of wine. In Kakheti, winemakers ferment and age grape juice inside large underground clay amphorae called Qvevri. This ancient technique produces amber-colored white wines like Rkatsiteli and Mtsvane alongside bold red Saperavi.</p>
+          </section>
+          <section>
+            <h3>Must-Visit Landmarks on the Kakheti Wine Road</h3>
+            <ul>
+              <li><strong>Tsinandali Estate:</strong> The 19th-century royal palace of Prince Alexander Chavchavadze with English gardens and historic cellars.</li>
+              <li><strong>Alaverdi Monastery Cellar:</strong> 11th-century cathedral where monks have continuously produced organic Qvevri wines for over a millennium.</li>
+              <li><strong>Gremi Fortress:</strong> A 16th-century royal citadel perched above the Silk Road.</li>
+            </ul>
+          </section>
+          <section>
+            <h3>The Classic Georgian Supra Feast</h3>
+            <p>No trip along the Kakheti wine road is complete without partaking in a traditional Supra led by a Tamada toastmaster, featuring cheese-stuffed Khachapuri, Khinkali dumplings, and fire-roasted Mtsvadi skewers.</p>
+          </section>
+          <section>
+            <h3>Explore Georgia with Ghumo Firoo Travels</h3>
+            <p>Ghumo Firoo Travels curates complete Georgia Tour Packages from Delhi and Mumbai—including private luxury SUV road trips across Tbilisi, Kakheti Wine Valley, and Kazbegi, verified boutique vineyard stays, visa assistance, and English-speaking local guides. Contact our travel desk at +91 99109 87264.</p>
+          </section>
+        </article>
+      `;
+    }
+
     routesToGenerate.push({
       route: `/blog/${post.slug}`,
-      title: `${post.title} | Ghumo Firoo Travels`,
+      title: postTitle,
       description: post.metaDescription || post.excerpt,
       canonical: formatCanonical(`/blog/${post.slug}`),
       ogImage: post.image,
@@ -832,17 +887,7 @@ async function main() {
       author: post.author,
       h1: post.title,
       h2: `${post.category} · ${post.readTime} · By ${post.author}`,
-      bodyHtml: `
-        <article>
-          <header>
-            <p><strong>Published on:</strong> ${post.date} | <strong>Author:</strong> ${post.author} | <strong>Category:</strong> ${post.category}</p>
-          </header>
-          <section>
-            <p>${post.excerpt}</p>
-            ${post.content ? `<div>${post.content}</div>` : ''}
-          </section>
-        </article>
-      `
+      bodyHtml: blogBodyHtml
     });
   }
 
@@ -856,23 +901,94 @@ async function main() {
         const contentRaw = await fs.readFile(path.join(guidesDir, file), 'utf8');
         try {
           const guide = JSON.parse(contentRaw);
+          let guideBodyHtml = `
+            <article>
+              <section>
+                <h2>About ${guide.title || slug}</h2>
+                <p>${guide.summary || guide.metaDescription || 'Complete destination guidebook from Ghumo Firoo Travels.'}</p>
+                ${guide.bestTime ? `<p><strong>Best Time to Visit:</strong> ${guide.bestTime}</p>` : ''}
+              </section>
+          `;
+
+          if (Array.isArray(guide.attractions) && guide.attractions.length > 0) {
+            guideBodyHtml += `
+              <section>
+                <h2>Top Attractions & Things to Do</h2>
+                <ul>
+                  ${guide.attractions.map((a: any) => `<li><strong>${a.name}:</strong> ${a.summary}</li>`).join('')}
+                </ul>
+              </section>
+            `;
+          }
+
+          if (Array.isArray(guide.gettingAround) && guide.gettingAround.length > 0) {
+            guideBodyHtml += `
+              <section>
+                <h2>How to Get Around & Transportation</h2>
+                <ul>
+                  ${guide.gettingAround.map((g: string) => `<li>${g}</li>`).join('')}
+                </ul>
+              </section>
+            `;
+          }
+
+          if (Array.isArray(guide.whereToStay) && guide.whereToStay.length > 0) {
+            guideBodyHtml += `
+              <section>
+                <h2>Best Neighborhoods to Stay</h2>
+                <ul>
+                  ${guide.whereToStay.map((s: any) => `<li><strong>${s.area}:</strong> Best for ${Array.isArray(s.bestFor) ? s.bestFor.join(', ') : s.bestFor}</li>`).join('')}
+                </ul>
+              </section>
+            `;
+          }
+
+          if (Array.isArray(guide.itineraries) && guide.itineraries.length > 0) {
+            guideBodyHtml += `
+              <section>
+                <h2>Recommended Itinerary</h2>
+                <ol>
+                  ${guide.itineraries.map((it: any) => `<li><strong>Day ${it.day}: ${it.title}</strong> — ${Array.isArray(it.activities) ? it.activities.join('; ') : it.activities}</li>`).join('')}
+                </ol>
+              </section>
+            `;
+          }
+
+          if (guide.packageTieIn) {
+            guideBodyHtml += `
+              <section>
+                <h2>${guide.packageTieIn.title}</h2>
+                <p>${guide.packageTieIn.description}</p>
+                ${Array.isArray(guide.packageTieIn.packages) ? `<ul>${guide.packageTieIn.packages.map((pkg: any) => `<li><a href="${pkg.url}">${pkg.name}</a></li>`).join('')}</ul>` : ''}
+              </section>
+            `;
+          }
+
+          if (Array.isArray(guide.faqs) && guide.faqs.length > 0) {
+            guideBodyHtml += `
+              <section>
+                <h2>Frequently Asked Questions</h2>
+                <ul>
+                  ${guide.faqs.map((f: any) => `<li><strong>${f.q}</strong><br/>${f.a}</li>`).join('')}
+                </ul>
+              </section>
+            `;
+          }
+
+          guideBodyHtml += `</article>`;
+
+          const guideTitle = guide.title ? (guide.title.includes('Ghumo Firoo') ? guide.title : `${guide.title} | Ghumo Firoo Travels`) : `${slug} | Ghumo Firoo Travels Guide`;
+
           routesToGenerate.push({
             route: `/guides/${slug}`,
-            title: `${guide.title || slug} | Ghumo Firoo Travels Guide`,
+            title: guideTitle,
             description: guide.summary || guide.metaDescription || `Comprehensive travel guide for ${guide.title || slug} by Ghumo Firoo Travels.`,
             canonical: formatCanonical(`/guides/${slug}`),
             ogImage: guide.heroImage || guide.image || '/Rann-Utsav-Gujarat.png',
             ogType: 'article',
             h1: guide.title || slug,
             h2: guide.region ? `${guide.region} · Best Time: ${guide.bestTime || 'Winter'}` : 'Travel Guide',
-            bodyHtml: `
-              <article>
-                <section>
-                  <p>${guide.summary || guide.metaDescription || 'Complete destination guidebook from Ghumo Firoo Travels.'}</p>
-                  ${guide.details ? `<p>${guide.details}</p>` : ''}
-                </section>
-              </article>
-            `
+            bodyHtml: guideBodyHtml
           });
         } catch (e) {}
       }
