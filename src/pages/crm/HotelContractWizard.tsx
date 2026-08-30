@@ -140,40 +140,54 @@ export const HotelContractWizard: React.FC<HotelContractWizardProps> = ({
           let matchedCityId = prev.city_id;
 
           const detectedCountry = meta.country || 'India';
-          const detectedState = meta.state || 'Tamil Nadu';
-          const detectedCity = meta.city || 'Ooty';
+          const detectedState = meta.state || meta.city || 'State';
+          const detectedCity = meta.city || meta.state || 'City';
 
-          // 1. Match Country
+          // 1. Match or dynamically add Country
           if (Array.isArray(countries) && countries.length > 0) {
             const foundC = countries.find((c: any) => 
+              c.country_name?.toLowerCase() === detectedCountry.toLowerCase() ||
               c.country_name?.toLowerCase().includes(detectedCountry.toLowerCase()) || 
               detectedCountry.toLowerCase().includes(c.country_name?.toLowerCase())
             );
-            if (foundC) matchedCountryId = String(foundC.id);
-            else matchedCountryId = String(countries[0].id);
+            if (foundC) {
+              matchedCountryId = String(foundC.id);
+            } else {
+              const newCId = `c_${Date.now()}`;
+              setCountries(prevC => [...prevC, { id: newCId, country_name: detectedCountry }]);
+              matchedCountryId = newCId;
+            }
           }
 
-          // 2. Match State
-          if (Array.isArray(states) && states.length > 0) {
+          // 2. Match or dynamically add State
+          if (Array.isArray(states)) {
             const foundS = states.find((s: any) => 
+              s.state_name?.toLowerCase() === detectedState.toLowerCase() ||
               s.state_name?.toLowerCase().includes(detectedState.toLowerCase()) || 
               detectedState.toLowerCase().includes(s.state_name?.toLowerCase())
             );
-            if (foundS) matchedStateId = String(foundS.id);
-            else matchedStateId = String(states[0].id);
+            if (foundS) {
+              matchedStateId = String(foundS.id);
+            } else {
+              const newSId = `s_${Date.now()}`;
+              setStates(prevS => [...prevS, { id: newSId, state_name: detectedState, country_id: matchedCountryId }]);
+              matchedStateId = newSId;
+            }
           }
 
-          // 3. Match City
-          if (Array.isArray(cities) && cities.length > 0) {
+          // 3. Match or dynamically add City
+          if (Array.isArray(cities)) {
             const foundCity = cities.find((c: any) => 
+              c.city_name?.toLowerCase() === detectedCity.toLowerCase() ||
               c.city_name?.toLowerCase().includes(detectedCity.toLowerCase()) || 
               detectedCity.toLowerCase().includes(c.city_name?.toLowerCase())
             );
             if (foundCity) {
               matchedCityId = String(foundCity.id);
-              if (foundCity.state_id) matchedStateId = String(foundCity.state_id);
             } else {
-              matchedCityId = String(cities[0].id);
+              const newCityId = `city_${Date.now()}`;
+              setCities(prevCity => [...prevCity, { id: newCityId, city_name: detectedCity, state_id: matchedStateId }]);
+              matchedCityId = newCityId;
             }
           }
 
