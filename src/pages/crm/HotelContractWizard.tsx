@@ -95,6 +95,31 @@ const parseJsonArray = (val: any): any[] => {
   return [];
 };
 
+const DEFAULT_HOTEL_AMENITIES = [
+  { id: 'fac-wifi', facility_name: 'Free High-Speed Wi-Fi' },
+  { id: 'fac-pool', facility_name: 'Swimming Pool' },
+  { id: 'fac-restaurant', facility_name: 'Multi-Cuisine Restaurant' },
+  { id: 'fac-roomservice', facility_name: '24/7 Room Service' },
+  { id: 'fac-spa', facility_name: 'Spa & Ayurvedic Wellness' },
+  { id: 'fac-gym', facility_name: 'Fitness Centre / Gym' },
+  { id: 'fac-bar', facility_name: 'Bar & Lounge' },
+  { id: 'fac-ac', facility_name: 'Air Conditioning (Climate Control)' },
+  { id: 'fac-parking', facility_name: 'Free Valet / Self Parking' },
+  { id: 'fac-shuttle', facility_name: 'Airport / Railway Shuttle' },
+  { id: 'fac-view', facility_name: 'Mountain / Valley Scenic View' },
+  { id: 'fac-kettle', facility_name: 'Electric Kettle & Tea/Coffee Maker' },
+  { id: 'fac-banquet', facility_name: 'Banquet & Conference Hall' },
+  { id: 'fac-kids', facility_name: 'Kids Play Zone & Activity Area' },
+  { id: 'fac-pet', facility_name: 'Pet Friendly Accommodations' },
+  { id: 'fac-bonfire', facility_name: 'Bonfire & Outdoor BBQ Setup' },
+  { id: 'fac-lift', facility_name: 'Elevator / Lift Access' },
+  { id: 'fac-doctor', facility_name: 'Doctor on Call & First Aid' },
+  { id: 'fac-power', facility_name: '100% Power Backup' },
+  { id: 'fac-laundry', facility_name: 'Daily Housekeeping & Laundry' },
+  { id: 'fac-jacuzzi', facility_name: 'Jacuzzi / Hot Tub' },
+  { id: 'fac-safe', facility_name: 'In-Room Electronic Safe' }
+];
+
 export const HotelContractWizard: React.FC<HotelContractWizardProps> = ({
   dialogMode,
   selectedItemId,
@@ -114,7 +139,9 @@ export const HotelContractWizard: React.FC<HotelContractWizardProps> = ({
   const [destinations, setDestinations] = useState<any[]>([]);
   const [destinationGroups, setDestinationGroups] = useState<any[]>([]);
   const [hotelCategories, setHotelCategories] = useState<any[]>([]);
-  const [facilitiesList, setFacilitiesList] = useState<any[]>([]);
+  const [facilitiesList, setFacilitiesList] = useState<any[]>(DEFAULT_HOTEL_AMENITIES);
+  const [amenitySearchQuery, setAmenitySearchQuery] = useState('');
+  const [customAmenityInput, setCustomAmenityInput] = useState('');
   const [suppliers, setSuppliers] = useState<any[]>([]);
 
   // Cascade lists derived at runtime
@@ -353,7 +380,18 @@ export const HotelContractWizard: React.FC<HotelContractWizardProps> = ({
           catData = await catRes.json() || [];
           setHotelCategories(catData);
         }
-        if (facRes.ok) setFacilitiesList(await facRes.json() || []);
+        if (facRes.ok) {
+          const dbFacs = await facRes.json() || [];
+          if (Array.isArray(dbFacs) && dbFacs.length > 0) {
+            const merged = [...DEFAULT_HOTEL_AMENITIES];
+            dbFacs.forEach((df: any) => {
+              if (!merged.some(m => String(m.id) === String(df.id) || m.facility_name?.toLowerCase().trim() === df.facility_name?.toLowerCase().trim())) {
+                merged.push(df);
+              }
+            });
+            setFacilitiesList(merged);
+          }
+        }
 
         let destData = [];
         try {
@@ -2254,32 +2292,135 @@ export const HotelContractWizard: React.FC<HotelContractWizardProps> = ({
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   
                   {/* Facilities MultiSelect */}
-                  <div className="space-y-2 bg-slate-50 dark:bg-slate-950/40 border border-border p-4 rounded-2xl">
-                    <h3 className="text-xs font-bold text-accent dark:text-accent uppercase tracking-wider mb-2">Choose Amenities</h3>
-                    <div className="grid grid-cols-2 gap-2 max-h-[200px] overflow-y-auto pr-1">
-                      {facilitiesList.map((fac) => {
-                        const isChecked = selectedFacilities.includes(fac.id);
-                        return (
-                          <div 
-                            key={fac.id} 
-                            onClick={() => {
-                              if (isChecked) {
-                                setSelectedFacilities(selectedFacilities.filter(id => id !== fac.id));
-                              } else {
-                                setSelectedFacilities([...selectedFacilities, fac.id]);
-                              }
-                            }}
-                            className={`p-2 border rounded-xl cursor-pointer flex items-center justify-between text-[11px] font-bold transition-all ${
-                              isChecked 
-                                ? 'bg-accent/10 border-accent/50 text-accent dark:text-accent' 
-                                : 'border-border bg-background text-muted-foreground hover:border-slate-400'
-                            }`}
+                  <div className="space-y-3 bg-slate-50 dark:bg-slate-950/40 border border-border p-4 rounded-2xl flex flex-col">
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 border-b border-border pb-2">
+                      <div>
+                        <h3 className="text-xs font-bold text-accent dark:text-accent uppercase tracking-wider">
+                          Choose Amenities ({selectedFacilities.length} Selected)
+                        </h3>
+                        <p className="text-[10px] text-muted-foreground">Select hotel amenities for customer quotes & package details</p>
+                      </div>
+                      
+                      {/* Quick Action Presets */}
+                      <div className="flex items-center gap-1.5 self-end sm:self-auto">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const standardIds = ['fac-wifi', 'fac-restaurant', 'fac-roomservice', 'fac-ac', 'fac-parking'];
+                            const union = Array.from(new Set([...selectedFacilities, ...standardIds]));
+                            setSelectedFacilities(union);
+                          }}
+                          className="text-[10px] px-2 py-0.5 rounded-lg bg-accent/10 text-accent font-semibold hover:bg-accent/20 transition-colors"
+                        >
+                          + Standard 5
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setSelectedFacilities(facilitiesList.map(f => f.id))}
+                          className="text-[10px] px-2 py-0.5 rounded-lg bg-muted text-foreground font-semibold hover:bg-muted/80 transition-colors"
+                        >
+                          All
+                        </button>
+                        {selectedFacilities.length > 0 && (
+                          <button
+                            type="button"
+                            onClick={() => setSelectedFacilities([])}
+                            className="text-[10px] px-2 py-0.5 rounded-lg bg-rose-500/10 text-rose-500 font-semibold hover:bg-rose-500/20 transition-colors"
                           >
-                            <span>{fac.facility_name}</span>
-                            {isChecked && <CheckCircle2 className="w-3.5 h-3.5 text-accent" />}
-                          </div>
-                        );
-                      })}
+                            Clear
+                          </button>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Search / Filter Input */}
+                    <div className="relative">
+                      <Input
+                        placeholder="Search amenities (e.g. Wi-Fi, Pool, Spa, Bar)..."
+                        value={amenitySearchQuery}
+                        onChange={(e) => setAmenitySearchQuery(e.target.value)}
+                        className="h-8 text-xs bg-background rounded-xl pl-3 pr-8"
+                      />
+                      {amenitySearchQuery && (
+                        <button 
+                          type="button" 
+                          onClick={() => setAmenitySearchQuery('')}
+                          className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground text-xs"
+                        >
+                          ✕
+                        </button>
+                      )}
+                    </div>
+
+                    {/* Amenities Grid */}
+                    <div className="grid grid-cols-2 gap-2 max-h-[220px] overflow-y-auto pr-1">
+                      {facilitiesList
+                        .filter(fac => !amenitySearchQuery.trim() || fac.facility_name.toLowerCase().includes(amenitySearchQuery.toLowerCase().trim()))
+                        .map((fac) => {
+                          const isChecked = selectedFacilities.includes(fac.id);
+                          return (
+                            <div 
+                              key={fac.id} 
+                              onClick={() => {
+                                if (isChecked) {
+                                  setSelectedFacilities(selectedFacilities.filter(id => id !== fac.id));
+                                } else {
+                                  setSelectedFacilities([...selectedFacilities, fac.id]);
+                                }
+                              }}
+                              className={`p-2.5 border rounded-xl cursor-pointer flex items-center justify-between text-[11px] font-semibold transition-all select-none ${
+                                isChecked 
+                                  ? 'bg-accent/15 border-accent/60 text-accent font-bold shadow-sm' 
+                                  : 'border-border bg-background text-foreground hover:border-slate-400 hover:bg-slate-50 dark:hover:bg-slate-900/50'
+                              }`}
+                            >
+                              <span className="truncate pr-1">{fac.facility_name}</span>
+                              <div className={`w-4 h-4 rounded-md flex items-center justify-center border transition-all ${
+                                isChecked ? 'bg-accent border-accent text-slate-950' : 'border-slate-400 bg-background'
+                              }`}>
+                                {isChecked && <CheckCircle2 className="w-3.5 h-3.5" />}
+                              </div>
+                            </div>
+                          );
+                        })}
+                    </div>
+
+                    {/* Add Custom Amenity Row */}
+                    <div className="flex gap-1.5 pt-1 border-t border-border/60">
+                      <Input
+                        placeholder="Add custom amenity (e.g. Helipad, Jacuzzi)..."
+                        value={customAmenityInput}
+                        onChange={(e) => setCustomAmenityInput(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
+                            e.preventDefault();
+                            if (customAmenityInput.trim()) {
+                              const newId = `custom-${Date.now()}`;
+                              const newFac = { id: newId, facility_name: customAmenityInput.trim() };
+                              setFacilitiesList(prev => [...prev, newFac]);
+                              setSelectedFacilities(prev => [...prev, newId]);
+                              setCustomAmenityInput('');
+                            }
+                          }
+                        }}
+                        className="h-8 text-xs bg-background rounded-xl"
+                      />
+                      <Button
+                        type="button"
+                        size="sm"
+                        onClick={() => {
+                          if (customAmenityInput.trim()) {
+                            const newId = `custom-${Date.now()}`;
+                            const newFac = { id: newId, facility_name: customAmenityInput.trim() };
+                            setFacilitiesList(prev => [...prev, newFac]);
+                            setSelectedFacilities(prev => [...prev, newId]);
+                            setCustomAmenityInput('');
+                          }
+                        }}
+                        className="h-8 text-[11px] px-3 bg-accent hover:bg-accent/90 text-accent-foreground font-bold rounded-xl whitespace-nowrap"
+                      >
+                        + Add
+                      </Button>
                     </div>
                   </div>
 
