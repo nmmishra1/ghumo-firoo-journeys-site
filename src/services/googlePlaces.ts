@@ -22,6 +22,8 @@ export interface FetchedHotelMeta {
   cancellation_policy?: string;
   child_policy?: string;
   extra_bed_policy?: string;
+  source?: string;
+  confidence?: string;
 }
 
 export async function fetchHotelMetaFromGoogle(queryOrUrl: string): Promise<FetchedHotelMeta | null> {

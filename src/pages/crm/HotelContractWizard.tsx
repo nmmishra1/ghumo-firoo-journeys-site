@@ -139,41 +139,40 @@ export const HotelContractWizard: React.FC<HotelContractWizardProps> = ({
           let matchedStateId = prev.state_id;
           let matchedCityId = prev.city_id;
 
-          const detectedCountry = meta.country || 'India';
-          const detectedState = meta.state || 'Tamil Nadu';
-          const detectedCity = meta.city || 'Ooty';
+          const detectedCountry = meta.country || '';
+          const detectedState = meta.state || '';
+          const detectedCity = meta.city || '';
 
           // 1. Match Country
-          if (Array.isArray(countries) && countries.length > 0) {
+          if (detectedCountry && Array.isArray(countries) && countries.length > 0) {
             const foundC = countries.find((c: any) => 
+              c.country_name?.toLowerCase().trim() === detectedCountry.toLowerCase().trim() ||
               c.country_name?.toLowerCase().includes(detectedCountry.toLowerCase()) || 
               detectedCountry.toLowerCase().includes(c.country_name?.toLowerCase())
             );
             if (foundC) matchedCountryId = String(foundC.id);
-            else matchedCountryId = String(countries[0].id);
           }
 
           // 2. Match State
-          if (Array.isArray(states) && states.length > 0) {
+          if (detectedState && Array.isArray(states) && states.length > 0) {
             const foundS = states.find((s: any) => 
+              s.state_name?.toLowerCase().trim() === detectedState.toLowerCase().trim() ||
               s.state_name?.toLowerCase().includes(detectedState.toLowerCase()) || 
               detectedState.toLowerCase().includes(s.state_name?.toLowerCase())
             );
             if (foundS) matchedStateId = String(foundS.id);
-            else matchedStateId = String(states[0].id);
           }
 
           // 3. Match City
-          if (Array.isArray(cities) && cities.length > 0) {
+          if (detectedCity && Array.isArray(cities) && cities.length > 0) {
             const foundCity = cities.find((c: any) => 
+              c.city_name?.toLowerCase().trim() === detectedCity.toLowerCase().trim() ||
               c.city_name?.toLowerCase().includes(detectedCity.toLowerCase()) || 
               detectedCity.toLowerCase().includes(c.city_name?.toLowerCase())
             );
             if (foundCity) {
               matchedCityId = String(foundCity.id);
               if (foundCity.state_id) matchedStateId = String(foundCity.state_id);
-            } else {
-              matchedCityId = String(cities[0].id);
             }
           }
 
@@ -182,43 +181,52 @@ export const HotelContractWizard: React.FC<HotelContractWizardProps> = ({
           return {
             ...prev,
             hotel_name: meta.hotel_name || prev.hotel_name,
-            hotel_code: meta.hotel_code || prev.hotel_code || `HOT-${(detectedCity || 'OO').substring(0, 2).toUpperCase()}-01`,
+            hotel_code: meta.hotel_code || prev.hotel_code || '',
             address: meta.address || prev.address,
             area_locality: meta.address || prev.area_locality || detectedCity,
             destination: detectedCity || prev.destination,
-            destination_group: meta.destination_group || prev.destination_group || 'Hill Station',
+            destination_group: meta.destination_group || prev.destination_group || '',
             country_id: matchedCountryId,
-            country: detectedCountry,
+            country: detectedCountry || prev.country,
             state_id: matchedStateId,
-            state: detectedState,
+            state: detectedState || prev.state,
             city_id: matchedCityId,
-            city: detectedCity,
-            nearest_airport: meta.nearest_airport || prev.nearest_airport || 'Coimbatore International Airport (CJB) - 88 km',
-            nearest_railway: meta.nearest_railway || prev.nearest_railway || 'Udhagamandalam (Ooty) Railway Station - 1.5 km',
-            gps_coordinates: meta.gps_coordinates || prev.gps_coordinates || '11.4064° N, 76.6932° E',
+            city: detectedCity || prev.city,
+            nearest_airport: meta.nearest_airport || prev.nearest_airport || '',
+            nearest_railway: meta.nearest_railway || prev.nearest_railway || '',
+            gps_coordinates: meta.gps_coordinates || prev.gps_coordinates || '',
             google_maps_location: gMapsLink,
             google_maps_url: gMapsLink,
-            contact_number: meta.phone_number || prev.contact_number,
-            contact_person: meta.contact_person || prev.contact_person || 'Reservations & Contracting Desk',
-            website: meta.website || prev.website,
-            email: meta.email || (meta.website ? `reservations@${meta.website.replace(/^https?:\/\/(www\.)?/, '').split('/')[0]}` : prev.email),
-            check_in_time: meta.check_in_time || prev.check_in_time || '12:00',
+            contact_number: meta.phone_number || prev.contact_number || '',
+            contact_person: meta.contact_person || prev.contact_person || '',
+            website: meta.website || prev.website || '',
+            email: meta.email || prev.email || '',
+            check_in_time: meta.check_in_time || prev.check_in_time || '14:00',
             check_out_time: meta.check_out_time || prev.check_out_time || '11:00',
-            cancellation_policy: meta.cancellation_policy || prev.cancellation_policy || 'Free cancellation up to 48 hrs before check-in date. 100% cancellation penalty within 48 hrs of arrival.',
-            child_policy: meta.child_policy || prev.child_policy || 'Children below 5 years stay complimentary using existing bedding.',
-            extra_bed_policy: meta.extra_bed_policy || prev.extra_bed_policy || 'Extra adult or bed available at ₹1,200/night including breakfast.',
-            google_rating: meta.google_rating || prev.google_rating,
-            internal_rating: meta.internal_rating || prev.internal_rating || 4.5,
-            star_rating: meta.star_rating || prev.star_rating
+            // Strict Zero-Fabrication: Leave policies clean and empty unless previously entered
+            cancellation_policy: meta.cancellation_policy || prev.cancellation_policy || '',
+            child_policy: meta.child_policy || prev.child_policy || '',
+            extra_bed_policy: meta.extra_bed_policy || prev.extra_bed_policy || '',
+            google_rating: meta.google_rating || prev.google_rating || 0,
+            internal_rating: meta.internal_rating || prev.internal_rating || (meta.google_rating ? meta.google_rating : 4.0),
+            star_rating: meta.star_rating || prev.star_rating || 4
           };
         });
         if (meta.featured_image_url) {
           setMediaUrls(prev => ({ ...prev, featured_image_url: meta.featured_image_url }));
         }
-        toast({
-          title: "Fetched from Google Places! ✨",
-          description: `Successfully loaded '${meta.hotel_name}' (Google Rating: ${meta.google_rating}★).`
-        });
+
+        if (meta.source === 'google_places_verified') {
+          toast({
+            title: "Google Places Verified! ✨",
+            description: `Loaded '${meta.hotel_name}' (${meta.city ? meta.city + ', ' : ''}${meta.country}) with verified rating & contact details.`
+          });
+        } else {
+          toast({
+            title: "Location Verified (OpenStreetMap) 🌍",
+            description: `Loaded '${meta.hotel_name}' in ${meta.city ? meta.city + ', ' : ''}${meta.country}. Please fill supplier terms & contract policies manually.`
+          });
+        }
       } else {
         toast({
           title: "No Match Found",
