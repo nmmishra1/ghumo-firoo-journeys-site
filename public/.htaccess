@@ -1,5 +1,8 @@
 # Master Complete & Fully Compatible .htaccess for Ghumo Firoo Journeys
 
+Options -Indexes
+DirectoryIndex index.html
+
 # Override Hosting Provider (Webhostbox) Default Parking Ad-Injection
 ErrorDocument 400 /index.html
 ErrorDocument 401 /index.html
@@ -49,9 +52,12 @@ ErrorDocument 500 /index.html
   RewriteEngine On
   RewriteBase /
 
-  # 1. Physical Files & Directories Served Directly
-  RewriteCond %{REQUEST_FILENAME} -f [OR]
-  RewriteCond %{REQUEST_FILENAME} -d
+  # 1. Physical Files Served Directly
+  RewriteCond %{REQUEST_FILENAME} -f
+  RewriteRule ^ - [L]
+
+  # 1b. Physical Directories with index.html Served Directly
+  RewriteCond %{REQUEST_FILENAME}/index.html -f
   RewriteRule ^ - [L]
 
   # 2a. Force www to non-www canonical redirect (HTTP 301)

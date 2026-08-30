@@ -415,6 +415,60 @@ const staticRoutesMeta: Record<string, { title: string; description: string; h1:
       </section>
     `
   },
+  '/blog': {
+    title: 'Travel Blog & Holiday Guides | Ghumo Firoo Travels',
+    description: 'Read expert travel blogs, packing tips, pilgrimage advice, and destination guides for Char Dham, Rann Utsav, Kashmir, Europe, and India holidays.',
+    h1: 'Ghumo Firoo Travel Blog & Destination Guides',
+    h2: 'Inspiration, Itinerary Insights & Practical Travel Tips for Your Next Holiday',
+    bodyHtml: `
+      <section>
+        <h2>Expert Travel Guides, Pilgrimage Insights & Holiday Inspiration</h2>
+        <p>Welcome to the Ghumo Firoo Travel Blog, your trusted digital journal for comprehensive destination guides, packing checklists, pilgrimage planning tips, and insider travel recommendations crafted by our seasoned holiday curators in New Delhi.</p>
+      </section>
+
+      <section>
+        <h2>Featured Travel Articles & Destination Spotlights</h2>
+        <ul>
+          <li><strong>Complete Char Dham Yatra Guide:</strong> Essential biometric registration procedures, helicopter booking timelines, weather advisory, and packing tips for Kedarnath, Badrinath, Gangotri, and Yamunotri.</li>
+          <li><strong>Rann Utsav Tent City Survival Guide:</strong> Everything you need to know about visiting Dhordo White Desert, attending Kutchi folk festivals, exploring Kalo Dungar, and booking premium Swiss cottages.</li>
+          <li><strong>Kashmir in All Seasons:</strong> Spring tulip gardens in Srinagar, summer shikara rides on Dal Lake, autumn chinar foliage in Pahalgam, and winter snow sports at Gulmarg Gondola.</li>
+          <li><strong>Europe First-Timer Handbook:</strong> Step-by-step Schengen visa guidelines, top rail journeys in Switzerland, and must-visit landmarks across Paris, Rome, and Amsterdam.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2>Plan Your Holiday with Our Destination Experts</h2>
+        <p>Inspired by our travel stories? Reach out to our dedicated travel desk at <strong>+91 99109 87264</strong> or email <strong>info@ghumofiroo.com</strong> to begin crafting your customized holiday itinerary.</p>
+      </section>
+    `
+  },
+  '/guides': {
+    title: 'Travel Guides & Destination Insights | Ghumo Firoo',
+    description: 'Comprehensive travel guides for Char Dham Yatra, Rann Utsav Kutch, Kashmir Valley, Europe, and Kerala. Best time to visit, routes, and expert advice.',
+    h1: 'Complete Destination Travel Guides & Itinerary Tips',
+    h2: 'Everything You Need to Know Before You Embark on Your Next Journey',
+    bodyHtml: `
+      <section>
+        <h2>Comprehensive Travel Resources & Field Guides</h2>
+        <p>Explore in-depth travel guides created by Ghumo Firoo Travels to help you plan safe, memorable, and well-organized vacations across India's most iconic landscapes and top international holiday spots.</p>
+      </section>
+
+      <section>
+        <h2>Popular Destination Guides</h2>
+        <ul>
+          <li><strong>Uttarakhand Spiritual Circuit:</strong> Comprehensive trekking routes, altitude precautions, helicopter landing details, and temple timings for Kedarnath and Badrinath.</li>
+          <li><strong>Gujarat Culture & Desert Circuit:</strong> Full moon desert safari schedules, UNESCO World Heritage site Dholavira, Mandvi beach palaces, and Kutchi handicraft villages.</li>
+          <li><strong>Rajasthan Heritage Corridor:</strong> Royal fort circuits in Jaipur, Jodhpur, Udaipur, and desert dune camps in Jaisalmer.</li>
+          <li><strong>Kerala Backwaters & Hill Country:</strong> Munnar tea estate trails, Periyar wildlife sanctuaries, and Alleppey traditional luxury houseboat routes.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2>Personalized Holiday Consultation</h2>
+        <p>Have questions about permits, peak travel seasons, or luxury hotel recommendations? Our travel specialists are available 24x7 to assist you. Contact us today.</p>
+      </section>
+    `
+  },
   '/custom-tour-packages': {
     title: 'Custom Tour Packages & Tailored Itineraries | Ghumo Firoo',
     description: 'Design your own custom tour package with Ghumo Firoo Travels. Flexible dates, private cab transfers, hand-picked hotels, and tailor-made sightseeing circuits.',
