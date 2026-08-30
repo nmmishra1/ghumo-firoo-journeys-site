@@ -283,130 +283,198 @@ const QuickPayment = () => {
 
   return (
     <Layout>
-      <div className="container mx-auto px-4 py-24 flex items-center justify-center">
-        <div className="w-full max-w-2xl">
+      <div className="min-h-screen bg-[#050814] text-white py-12 sm:py-20 px-4">
+        <div className="container mx-auto max-w-3xl">
           
-          <div className="mb-6">
-            <Button variant="ghost" onClick={() => navigate(-1)} className="flex items-center gap-2 text-muted-foreground hover:text-foreground">
-              <ArrowLeft className="w-4 h-4" /> Back
+          <div className="mb-6 flex items-center justify-between">
+            <Button 
+              variant="ghost" 
+              onClick={() => navigate(-1)} 
+              className="flex items-center gap-2 text-slate-400 hover:text-white hover:bg-white/5 px-3 py-1.5 rounded-lg text-xs"
+            >
+              <ArrowLeft className="w-4 h-4" /> Back to Journeys
             </Button>
+            <div className="flex items-center gap-2 text-emerald-400 text-xs font-medium bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/20">
+              <Shield className="w-3.5 h-3.5" /> 256-Bit SSL Encrypted
+            </div>
           </div>
 
-          <Card className="shadow-2xl border-border bg-card/70 backdrop-blur-md">
-            <CardHeader className="text-center pb-4 border-b border-border/40">
-              <div className="w-12 h-12 rounded-full bg-blue-500/10 text-blue-600 flex items-center justify-center mx-auto mb-3">
-                <Shield className="w-6 h-6" />
+          <Card className="shadow-2xl border border-[#C9A25A]/30 bg-[#0B1026] rounded-2xl overflow-hidden">
+            <CardHeader className="text-center pb-6 pt-8 border-b border-white/10 bg-gradient-to-b from-[#111A38] to-[#0B1026]">
+              <div className="w-14 h-14 rounded-2xl bg-[#C9A25A]/10 border border-[#C9A25A]/30 text-[#C9A25A] flex items-center justify-center mx-auto mb-3 shadow-inner">
+                <Shield className="w-7 h-7" />
               </div>
-              <CardTitle className="text-2xl font-bold tracking-tight">GF Quick Payment Portal</CardTitle>
-              <CardDescription>Enter details and pay securely using any payment method</CardDescription>
+              <div className="text-[10px] font-bold uppercase tracking-[0.25em] text-[#C9A25A] mb-1">
+                ✦ Official Travel Desk
+              </div>
+              <CardTitle className="text-2xl sm:text-3xl font-serif font-bold text-white tracking-tight">
+                Secure Quick Payment Portal
+              </CardTitle>
+              <CardDescription className="text-slate-400 text-xs sm:text-sm mt-1 max-w-md mx-auto">
+                Complete your tour booking, package advance, or customized itinerary payment with instant verification.
+              </CardDescription>
             </CardHeader>
             
             <CardContent className="p-6 sm:p-8 space-y-8">
               
               {/* Customer Details Form */}
-              <div className="grid gap-6 sm:grid-cols-2">
-                <div className="space-y-2">
-                  <Label htmlFor="name">Full Name <span className="text-red-500">*</span></Label>
-                  <Input 
-                    id="name" 
-                    placeholder="Enter your name" 
-                    value={name}
-                    onChange={(e) => setName(e.target.value)} 
-                    required 
-                  />
+              <div>
+                <div className="flex items-center gap-2 mb-4 pb-2 border-b border-white/5">
+                  <div className="w-1.5 h-4 bg-[#C9A25A] rounded-full" />
+                  <h3 className="text-xs font-bold uppercase tracking-wider text-slate-300">
+                    1. Traveler & Payment Details
+                  </h3>
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="email">Email Address <span className="text-red-500">*</span></Label>
-                  <Input 
-                    id="email" 
-                    type="email" 
-                    placeholder="Enter your email" 
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)} 
-                    required 
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="phone">Phone Number <span className="text-red-500">*</span></Label>
-                  <Input 
-                    id="phone" 
-                    placeholder="Enter phone number" 
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)} 
-                    required 
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="purpose">Payment Purpose</Label>
-                  <Input 
-                    id="purpose" 
-                    placeholder="e.g. Booking Advance, Kashmir Tour" 
-                    value={purpose}
-                    onChange={(e) => setPurpose(e.target.value)} 
-                  />
-                </div>
-                <div className="space-y-2 sm:col-span-2">
-                  <Label htmlFor="amount">Amount to Pay (INR) <span className="text-red-500">*</span></Label>
-                  <div className="relative">
-                    <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground font-semibold">₹</span>
+
+                <div className="grid gap-5 sm:grid-cols-2">
+                  <div className="space-y-1.5">
+                    <Label htmlFor="name" className="text-xs font-medium text-slate-300">
+                      Full Name <span className="text-rose-400">*</span>
+                    </Label>
                     <Input 
-                      id="amount" 
-                      type="number"
-                      placeholder="0.00" 
-                      className="pl-8 text-lg font-bold text-blue-900 dark:text-blue-200" 
-                      value={amount}
-                      onChange={(e) => setAmount(e.target.value)} 
+                      id="name" 
+                      placeholder="e.g. Rahul Sharma" 
+                      value={name}
+                      onChange={(e) => setName(e.target.value)} 
+                      className="bg-[#060A1A] border-slate-700/80 text-white placeholder:text-slate-500 focus:border-[#C9A25A] focus:ring-[#C9A25A]/20 h-11"
                       required 
                     />
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <Label htmlFor="email" className="text-xs font-medium text-slate-300">
+                      Email Address <span className="text-rose-400">*</span>
+                    </Label>
+                    <Input 
+                      id="email" 
+                      type="email" 
+                      placeholder="e.g. rahul@example.com" 
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)} 
+                      className="bg-[#060A1A] border-slate-700/80 text-white placeholder:text-slate-500 focus:border-[#C9A25A] focus:ring-[#C9A25A]/20 h-11"
+                      required 
+                    />
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <Label htmlFor="phone" className="text-xs font-medium text-slate-300">
+                      Phone Number (WhatsApp) <span className="text-rose-400">*</span>
+                    </Label>
+                    <Input 
+                      id="phone" 
+                      placeholder="e.g. +91 98765 43210" 
+                      value={phone}
+                      onChange={(e) => setPhone(e.target.value)} 
+                      className="bg-[#060A1A] border-slate-700/80 text-white placeholder:text-slate-500 focus:border-[#C9A25A] focus:ring-[#C9A25A]/20 h-11"
+                      required 
+                    />
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <Label htmlFor="purpose" className="text-xs font-medium text-slate-300">
+                      Payment Purpose
+                    </Label>
+                    <Input 
+                      id="purpose" 
+                      placeholder="e.g. Booking Advance, Char Dham Tour" 
+                      value={purpose}
+                      onChange={(e) => setPurpose(e.target.value)} 
+                      className="bg-[#060A1A] border-slate-700/80 text-white placeholder:text-slate-500 focus:border-[#C9A25A] focus:ring-[#C9A25A]/20 h-11"
+                    />
+                  </div>
+
+                  <div className="space-y-1.5 sm:col-span-2">
+                    <Label htmlFor="amount" className="text-xs font-medium text-slate-300 flex items-center justify-between">
+                      <span>Amount to Pay (INR) <span className="text-rose-400">*</span></span>
+                      <span className="text-[10px] text-slate-400">All prices in Indian Rupees (₹)</span>
+                    </Label>
+                    <div className="relative">
+                      <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[#C9A25A] font-bold text-lg">₹</span>
+                      <Input 
+                        id="amount" 
+                        type="number"
+                        placeholder="0.00" 
+                        className="pl-9 text-xl font-bold bg-[#060A1A] border-[#C9A25A]/40 text-[#C9A25A] placeholder:text-slate-600 focus:border-[#C9A25A] h-13" 
+                        value={amount}
+                        onChange={(e) => setAmount(e.target.value)} 
+                        required 
+                      />
+                    </div>
                   </div>
                 </div>
               </div>
 
               {/* Payment Methods Section */}
-              <div className="space-y-4 pt-4 border-t border-border/40">
-                <h3 className="font-bold text-lg text-foreground flex items-center gap-2">Select Payment Method</h3>
+              <div className="pt-2">
+                <div className="flex items-center gap-2 mb-4 pb-2 border-b border-white/5">
+                  <div className="w-1.5 h-4 bg-[#C9A25A] rounded-full" />
+                  <h3 className="text-xs font-bold uppercase tracking-wider text-slate-300">
+                    2. Select Payment Method
+                  </h3>
+                </div>
                 
                 <Tabs value={selectedGateway} onValueChange={(v: any) => setSelectedGateway(v)} className="w-full">
-                  <TabsList className="grid grid-cols-2 sm:grid-cols-4 gap-2 h-auto bg-muted/50 p-1.5 rounded-xl">
-                    <TabsTrigger value="razorpay" className="py-2.5 rounded-lg flex items-center justify-center gap-2">
+                  <TabsList className="grid grid-cols-2 sm:grid-cols-4 gap-2 h-auto bg-[#060A1A] p-1.5 rounded-xl border border-white/10">
+                    <TabsTrigger 
+                      value="razorpay" 
+                      className="py-3 rounded-lg flex items-center justify-center gap-2 text-xs font-semibold text-slate-300 data-[state=active]:bg-[#C9A25A] data-[state=active]:text-[#0B1026] transition-all"
+                    >
                       <CreditCard className="w-4 h-4" /> Razorpay
                     </TabsTrigger>
-                    <TabsTrigger value="payu" className="py-2.5 rounded-lg flex items-center justify-center gap-2">
+                    <TabsTrigger 
+                      value="payu" 
+                      className="py-3 rounded-lg flex items-center justify-center gap-2 text-xs font-semibold text-slate-300 data-[state=active]:bg-[#C9A25A] data-[state=active]:text-[#0B1026] transition-all"
+                    >
                       <Shield className="w-4 h-4" /> PayU
                     </TabsTrigger>
-                    <TabsTrigger value="upi" className="py-2.5 rounded-lg flex items-center justify-center gap-2">
+                    <TabsTrigger 
+                      value="upi" 
+                      className="py-3 rounded-lg flex items-center justify-center gap-2 text-xs font-semibold text-slate-300 data-[state=active]:bg-[#C9A25A] data-[state=active]:text-[#0B1026] transition-all"
+                    >
                       <QrCode className="w-4 h-4" /> UPI QR
                     </TabsTrigger>
-                    <TabsTrigger value="neft" className="py-2.5 rounded-lg flex items-center justify-center gap-2">
+                    <TabsTrigger 
+                      value="neft" 
+                      className="py-3 rounded-lg flex items-center justify-center gap-2 text-xs font-semibold text-slate-300 data-[state=active]:bg-[#C9A25A] data-[state=active]:text-[#0B1026] transition-all"
+                    >
                       <Landmark className="w-4 h-4" /> Bank / NEFT
                     </TabsTrigger>
                   </TabsList>
 
                   {/* Razorpay Gateway */}
                   <TabsContent value="razorpay" className="pt-6 text-center space-y-4">
-                    <div className="bg-gradient-to-br from-blue-500/5 to-background p-8 rounded-2xl border border-blue-500/10 max-w-lg mx-auto">
-                      <img src="https://razorpay.com/assets/razorpay-glyph.svg" alt="Razorpay" className="h-10 mx-auto mb-4" />
-                      <h4 className="font-bold text-lg mb-1">Pay via Razorpay</h4>
-                      <p className="text-sm text-muted-foreground mb-4">Pay securely with UPI, Net Banking, Credit/Debit cards, or Wallets.</p>
+                    <div className="bg-[#080E24] p-6 sm:p-8 rounded-2xl border border-[#C9A25A]/20 max-w-lg mx-auto text-left shadow-lg">
+                      <div className="flex items-center justify-between mb-4 pb-3 border-b border-white/10">
+                        <div>
+                          <h4 className="font-serif font-bold text-lg text-white">Razorpay Checkout</h4>
+                          <p className="text-xs text-slate-400">UPI, Net Banking, Debit Cards & Wallets</p>
+                        </div>
+                        <img src="https://razorpay.com/assets/razorpay-glyph.svg" alt="Razorpay" className="h-8 filter brightness-125" />
+                      </div>
                       
-                      <div className="flex items-center space-x-2 bg-muted/40 p-3 rounded-lg border border-border/50 text-left my-4">
-                        <Checkbox id="cc-charge-razorpay" checked={isCreditCard} onCheckedChange={(checked) => setIsCreditCard(!!checked)} />
-                        <label htmlFor="cc-charge-razorpay" className="text-sm font-medium leading-none cursor-pointer select-none">
-                          Paying with Credit Card (Adds 2.36% gateway fee)
+                      <div className="flex items-center space-x-2.5 bg-white/5 p-3.5 rounded-xl border border-white/10 mb-4">
+                        <Checkbox 
+                          id="cc-charge-razorpay" 
+                          checked={isCreditCard} 
+                          onCheckedChange={(checked) => setIsCreditCard(!!checked)} 
+                          className="border-[#C9A25A] data-[state=checked]:bg-[#C9A25A] data-[state=checked]:text-[#0B1026]"
+                        />
+                        <label htmlFor="cc-charge-razorpay" className="text-xs text-slate-300 font-medium leading-none cursor-pointer select-none">
+                          Paying with Credit Card (Adds 2.36% gateway processing fee)
                         </label>
                       </div>
 
                       {isCreditCard && parseFloat(amount) > 0 && (
-                        <div className="bg-muted/30 p-3 rounded-lg text-left text-sm space-y-1.5 border border-border/40 mb-4">
-                          <div className="flex justify-between text-muted-foreground">
+                        <div className="bg-[#050814] p-3.5 rounded-xl text-xs space-y-2 border border-white/10 mb-5">
+                          <div className="flex justify-between text-slate-400">
                             <span>Base Amount:</span>
-                            <span>₹{parseFloat(amount).toFixed(2)}</span>
+                            <span className="text-white">₹{parseFloat(amount).toFixed(2)}</span>
                           </div>
-                          <div className="flex justify-between text-muted-foreground">
+                          <div className="flex justify-between text-slate-400">
                             <span>Convenience Fee (2.36%):</span>
-                            <span>₹{(parseFloat(amount) * 0.0236).toFixed(2)}</span>
+                            <span className="text-amber-400">+₹{(parseFloat(amount) * 0.0236).toFixed(2)}</span>
                           </div>
-                          <div className="flex justify-between font-bold text-foreground border-t border-border/30 pt-1.5 mt-1.5">
+                          <div className="flex justify-between font-bold text-sm text-[#C9A25A] border-t border-white/10 pt-2">
                             <span>Total Payable:</span>
                             <span>₹{(parseFloat(amount) * 1.0236).toFixed(2)}</span>
                           </div>
@@ -416,38 +484,47 @@ const QuickPayment = () => {
                       <Button 
                         disabled={isProceeding} 
                         onClick={() => handleOnlinePayment('razorpay')}
-                        className="bg-blue-600 hover:bg-blue-700 text-white w-full py-6 text-md font-semibold rounded-xl shadow-lg"
+                        className="bg-[#C9A25A] hover:bg-[#D4AF37] text-[#0B1026] w-full py-6 text-sm font-bold uppercase tracking-wider rounded-xl shadow-lg shadow-[#C9A25A]/20 transition-all"
                       >
-                        {isProceeding ? 'Connecting...' : `Pay ₹${isCreditCard ? (parseFloat(amount) * 1.0236).toFixed(2) : (amount || '0')} Now`}
+                        {isProceeding ? 'Connecting to Gateway...' : `Proceed to Pay ₹${isCreditCard ? (parseFloat(amount) * 1.0236).toFixed(2) : (amount || '0')}`}
                       </Button>
                     </div>
                   </TabsContent>
 
                   {/* PayU Gateway */}
                   <TabsContent value="payu" className="pt-6 text-center space-y-4">
-                    <div className="bg-gradient-to-br from-emerald-500/5 to-background p-8 rounded-2xl border border-emerald-500/10 max-w-lg mx-auto">
-                      <img src="https://upload.wikimedia.org/wikipedia/commons/e/e0/PayU.svg" alt="PayU" className="h-8 mx-auto mb-4" />
-                      <h4 className="font-bold text-lg mb-1">Pay via PayU</h4>
-                      <p className="text-sm text-muted-foreground mb-4">High-success checkout for cards, netbanking, and UPI.</p>
+                    <div className="bg-[#080E24] p-6 sm:p-8 rounded-2xl border border-emerald-500/20 max-w-lg mx-auto text-left shadow-lg">
+                      <div className="flex items-center justify-between mb-4 pb-3 border-b border-white/10">
+                        <div>
+                          <h4 className="font-serif font-bold text-lg text-white">PayU Gateway</h4>
+                          <p className="text-xs text-slate-400">Direct debit, corporate cards, and netbanking</p>
+                        </div>
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/e/e0/PayU.svg" alt="PayU" className="h-6 filter brightness-150" />
+                      </div>
                       
-                      <div className="flex items-center space-x-2 bg-muted/40 p-3 rounded-lg border border-border/50 text-left my-4">
-                        <Checkbox id="cc-charge-payu" checked={isCreditCard} onCheckedChange={(checked) => setIsCreditCard(!!checked)} />
-                        <label htmlFor="cc-charge-payu" className="text-sm font-medium leading-none cursor-pointer select-none">
-                          Paying with Credit Card (Adds 2.36% gateway fee)
+                      <div className="flex items-center space-x-2.5 bg-white/5 p-3.5 rounded-xl border border-white/10 mb-4">
+                        <Checkbox 
+                          id="cc-charge-payu" 
+                          checked={isCreditCard} 
+                          onCheckedChange={(checked) => setIsCreditCard(!!checked)} 
+                          className="border-emerald-500 data-[state=checked]:bg-emerald-500 data-[state=checked]:text-white"
+                        />
+                        <label htmlFor="cc-charge-payu" className="text-xs text-slate-300 font-medium leading-none cursor-pointer select-none">
+                          Paying with Credit Card (Adds 2.36% gateway processing fee)
                         </label>
                       </div>
 
                       {isCreditCard && parseFloat(amount) > 0 && (
-                        <div className="bg-muted/30 p-3 rounded-lg text-left text-sm space-y-1.5 border border-border/40 mb-4">
-                          <div className="flex justify-between text-muted-foreground">
+                        <div className="bg-[#050814] p-3.5 rounded-xl text-xs space-y-2 border border-white/10 mb-5">
+                          <div className="flex justify-between text-slate-400">
                             <span>Base Amount:</span>
-                            <span>₹{parseFloat(amount).toFixed(2)}</span>
+                            <span className="text-white">₹{parseFloat(amount).toFixed(2)}</span>
                           </div>
-                          <div className="flex justify-between text-muted-foreground">
+                          <div className="flex justify-between text-slate-400">
                             <span>Convenience Fee (2.36%):</span>
-                            <span>₹{(parseFloat(amount) * 0.0236).toFixed(2)}</span>
+                            <span className="text-emerald-400">+₹{(parseFloat(amount) * 0.0236).toFixed(2)}</span>
                           </div>
-                          <div className="flex justify-between font-bold text-foreground border-t border-border/30 pt-1.5 mt-1.5">
+                          <div className="flex justify-between font-bold text-sm text-emerald-400 border-t border-white/10 pt-2">
                             <span>Total Payable:</span>
                             <span>₹{(parseFloat(amount) * 1.0236).toFixed(2)}</span>
                           </div>
@@ -457,46 +534,49 @@ const QuickPayment = () => {
                       <Button 
                         disabled={isProceeding} 
                         onClick={() => handleOnlinePayment('payu')}
-                        className="bg-emerald-600 hover:bg-emerald-700 text-white w-full py-6 text-md font-semibold rounded-xl shadow-lg"
+                        className="bg-emerald-600 hover:bg-emerald-700 text-white w-full py-6 text-sm font-bold uppercase tracking-wider rounded-xl shadow-lg shadow-emerald-600/20 transition-all"
                       >
-                        {isProceeding ? 'Connecting...' : `Pay ₹${isCreditCard ? (parseFloat(amount) * 1.0236).toFixed(2) : (amount || '0')} Now`}
+                        {isProceeding ? 'Connecting to Gateway...' : `Proceed via PayU ₹${isCreditCard ? (parseFloat(amount) * 1.0236).toFixed(2) : (amount || '0')}`}
                       </Button>
                     </div>
                   </TabsContent>
 
                   {/* UPI QR */}
                   <TabsContent value="upi" className="pt-6 space-y-6">
-                    <div className="bg-gradient-to-br from-amber-500/5 to-background p-6 rounded-2xl border border-amber-500/10 flex flex-col items-center text-center max-w-md mx-auto">
-                      <div className="bg-white p-3 rounded-xl shadow-sm border border-border mb-4">
-                        <img src={ENV_UPI_QR} alt="UPI QR" className="w-48 h-48 object-contain" />
+                    <div className="bg-[#080E24] p-6 sm:p-8 rounded-2xl border border-[#C9A25A]/20 flex flex-col items-center text-center max-w-md mx-auto shadow-xl">
+                      <div className="bg-white p-3.5 rounded-2xl shadow-xl border border-white/20 mb-4">
+                        <img src={ENV_UPI_QR} alt="UPI QR" className="w-48 h-48 object-contain rounded-lg" />
                       </div>
-                      <h4 className="font-bold text-lg mb-1">Scan to Pay</h4>
-                      <p className="text-xs text-muted-foreground mb-4">Scan QR with Google Pay, PhonePe, Paytm, or BHIM.</p>
+                      <h4 className="font-serif font-bold text-lg text-white mb-1">Scan & Pay via any UPI App</h4>
+                      <p className="text-xs text-slate-400 mb-4">Google Pay, PhonePe, Paytm, BHIM, or Cred</p>
                       
-                      <div className="flex items-center gap-2 bg-muted/60 pl-3 pr-1 py-1.5 rounded-lg border border-border/50 w-full mb-6">
-                        <span className="font-mono text-sm font-semibold truncate flex-grow text-left">{ENV_UPI_ID}</span>
-                        <Button size="sm" variant="ghost" onClick={() => copyToClipboard(ENV_UPI_ID)} className="h-8 hover:bg-background">
-                          Copy ID
+                      <div className="flex items-center gap-2 bg-[#060A1A] pl-3.5 pr-1.5 py-2 rounded-xl border border-white/15 w-full mb-6">
+                        <span className="font-mono text-xs font-semibold text-[#C9A25A] truncate flex-grow text-left">{ENV_UPI_ID}</span>
+                        <Button size="sm" variant="ghost" onClick={() => copyToClipboard(ENV_UPI_ID)} className="h-8 text-xs text-slate-300 hover:text-white hover:bg-white/10">
+                          Copy VPA
                         </Button>
                       </div>
 
-                      <div className="w-full pt-6 border-t border-border/40 space-y-4 text-left">
-                        <h5 className="font-bold text-sm text-foreground">Paid already? Submit transaction details:</h5>
-                        <div className="space-y-2">
-                          <Label htmlFor="upi-utr" className="text-xs">UPI Transaction ID / Ref No. (12 digits) <span className="text-red-500">*</span></Label>
+                      <div className="w-full pt-6 border-t border-white/10 space-y-4 text-left">
+                        <h5 className="font-serif font-bold text-sm text-white">Paid already? Submit your 12-digit UTR Ref:</h5>
+                        <div className="space-y-1.5">
+                          <Label htmlFor="upi-utr" className="text-xs text-slate-300 font-medium">
+                            UPI Transaction Ref / UTR No. <span className="text-rose-400">*</span>
+                          </Label>
                           <Input 
                             id="upi-utr" 
-                            placeholder="e.g. 515514238285" 
+                            placeholder="e.g. 515514238285 (12 digits)" 
                             value={upiUtr}
                             onChange={(e) => setUpiUtr(e.target.value)} 
+                            className="bg-[#060A1A] border-slate-700 text-white placeholder:text-slate-500 focus:border-[#C9A25A] h-11"
                           />
                         </div>
                         <Button 
                           onClick={handleUpiSubmit} 
                           disabled={isProceeding} 
-                          className="w-full bg-amber-600 hover:bg-amber-700 text-white font-semibold py-3 text-xs rounded-lg"
+                          className="w-full bg-[#C9A25A] hover:bg-[#D4AF37] text-[#0B1026] font-bold py-6 text-xs uppercase tracking-wider rounded-xl shadow-lg shadow-[#C9A25A]/20"
                         >
-                          {isProceeding ? 'Submitting...' : 'Submit Payment Verification'}
+                          {isProceeding ? 'Submitting to CRM...' : 'Submit & Confirm Payment'}
                         </Button>
                       </div>
                     </div>
@@ -504,39 +584,55 @@ const QuickPayment = () => {
 
                   {/* Bank Transfer / NEFT */}
                   <TabsContent value="neft" className="pt-6">
-                    <div className="bg-card p-6 rounded-2xl border border-border/80 shadow-inner max-w-lg mx-auto space-y-4">
-                      <div className="flex justify-between items-center pb-3 border-b border-border/50">
-                        <span className="text-xs text-muted-foreground font-medium uppercase">Account Name</span>
-                        <span className="font-bold text-sm">Ghumo Firoo Travels</span>
+                    <div className="bg-[#080E24] p-6 sm:p-8 rounded-2xl border border-white/15 max-w-lg mx-auto space-y-4 shadow-xl text-left">
+                      <div className="flex justify-between items-center pb-3.5 border-b border-white/10">
+                        <span className="text-xs text-slate-400 font-medium uppercase tracking-wider">Account Name</span>
+                        <span className="font-bold text-xs sm:text-sm text-white">Ghumo Firoo Travels</span>
                       </div>
-                      <div className="flex justify-between items-center pb-3 border-b border-border/50">
-                        <span className="text-xs text-muted-foreground font-medium uppercase">Bank Name</span>
-                        <span className="font-bold text-sm">Slice Small Finance Bank Limited</span>
+                      <div className="flex justify-between items-center pb-3.5 border-b border-white/10">
+                        <span className="text-xs text-slate-400 font-medium uppercase tracking-wider">Bank Name</span>
+                        <span className="font-bold text-xs sm:text-sm text-white">Slice Small Finance Bank Limited</span>
                       </div>
-                      <div className="flex justify-between items-center pb-3 border-b border-border/50">
-                        <span className="text-xs text-muted-foreground font-medium uppercase">Account Number</span>
-                        <div className="flex items-center gap-2 bg-muted/60 px-2 py-1 rounded">
-                          <span className="font-mono text-xs font-bold">033311501001651</span>
-                          <button onClick={() => copyToClipboard('033311501001651')} className="text-muted-foreground hover:text-foreground">
+                      <div className="flex justify-between items-center pb-3.5 border-b border-white/10">
+                        <span className="text-xs text-slate-400 font-medium uppercase tracking-wider">Account Number</span>
+                        <div className="flex items-center gap-2 bg-[#060A1A] px-3 py-1.5 rounded-lg border border-white/10">
+                          <span className="font-mono text-xs font-bold text-[#C9A25A]">033311501001651</span>
+                          <button onClick={() => copyToClipboard('033311501001651')} className="text-slate-400 hover:text-white transition-colors" title="Copy Account Number">
                             <Copy className="w-3.5 h-3.5" />
                           </button>
                         </div>
                       </div>
                       <div className="flex justify-between items-center">
-                        <span className="text-xs text-muted-foreground font-medium uppercase">IFSC Code</span>
-                        <div className="flex items-center gap-2 bg-muted/60 px-2 py-1 rounded">
-                          <span className="font-mono text-xs font-bold">NESF0000333</span>
-                          <button onClick={() => copyToClipboard('NESF0000333')} className="text-muted-foreground hover:text-foreground">
+                        <span className="text-xs text-slate-400 font-medium uppercase tracking-wider">IFSC Code</span>
+                        <div className="flex items-center gap-2 bg-[#060A1A] px-3 py-1.5 rounded-lg border border-white/10">
+                          <span className="font-mono text-xs font-bold text-[#C9A25A]">NESF0000333</span>
+                          <button onClick={() => copyToClipboard('NESF0000333')} className="text-slate-400 hover:text-white transition-colors" title="Copy IFSC Code">
                             <Copy className="w-3.5 h-3.5" />
                           </button>
                         </div>
                       </div>
                     </div>
-                    <p className="text-center text-xs text-muted-foreground mt-4">
-                      💡 Share transaction screenshot on WhatsApp after doing Bank Transfer.
+                    <p className="text-center text-xs text-slate-400 mt-4">
+                      💡 After completing your NEFT/IMPS transfer, share your receipt on WhatsApp at <strong className="text-white">+91 99109 87264</strong> for instant booking confirmation.
                     </p>
                   </TabsContent>
                 </Tabs>
+              </div>
+
+              {/* Automatic Workflow & Trust Footer */}
+              <div className="pt-6 border-t border-white/10 grid grid-cols-1 sm:grid-cols-3 gap-4 text-center">
+                <div className="bg-white/5 p-3.5 rounded-xl border border-white/5">
+                  <div className="text-[#C9A25A] text-xs font-bold mb-0.5">1. Instant Logging</div>
+                  <div className="text-[11px] text-slate-400 leading-snug">Recorded directly to the CRM transaction ledger</div>
+                </div>
+                <div className="bg-white/5 p-3.5 rounded-xl border border-white/5">
+                  <div className="text-[#C9A25A] text-xs font-bold mb-0.5">2. Automated Receipt</div>
+                  <div className="text-[11px] text-slate-400 leading-snug">Instant digital invoice sent to your email & WhatsApp</div>
+                </div>
+                <div className="bg-white/5 p-3.5 rounded-xl border border-white/5">
+                  <div className="text-[#C9A25A] text-xs font-bold mb-0.5">3. 100% Confirmation</div>
+                  <div className="text-[11px] text-slate-400 leading-snug">Redirects to verified confirmation voucher</div>
+                </div>
               </div>
 
             </CardContent>
