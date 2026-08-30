@@ -211,9 +211,9 @@ const CharDhamRoad = () => {
 
                {/* Image Grid */}
                <div className="grid grid-cols-2 gap-4 mb-8 sticky top-24">
-                 <img src="https://images.unsplash.com/photo-1589828952858-a024255502c2?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" className="rounded-xl shadow-md w-full h-48 object-cover col-span-2" alt="Himalayan Road" />
-                 <img src="https://images.unsplash.com/photo-1626621341517-bbf3d9990a23?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" className="rounded-xl shadow-md w-full h-32 object-cover" alt="Temple" />
-                 <img src="https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" className="rounded-xl shadow-md w-full h-32 object-cover" alt="Trek" />
+                 <img src="https://images.unsplash.com/photo-1589828952858-a024255502c2?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" className="rounded-xl shadow-md w-full h-48 object-cover col-span-2" alt="Scenic Himalayan mountain highway towards Char Dham pilgrimage" />
+                 <img src="https://images.unsplash.com/photo-1626621341517-bbf3d9990a23?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" className="rounded-xl shadow-md w-full h-32 object-cover" alt="Sacred ancient Hindu temple shrine in Uttarakhand mountains" />
+                 <img src="https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" className="rounded-xl shadow-md w-full h-32 object-cover" alt="Pilgrim devotees trekking along Himalayan mountain trail" />
                  
                  <div className="col-span-2 bg-accent/5 p-6 rounded-xl border border-accent/20">
                     <h3 className="font-bold text-orange-900 mb-2">Group Departures Available</h3>

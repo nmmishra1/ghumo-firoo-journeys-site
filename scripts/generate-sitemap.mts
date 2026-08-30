@@ -79,7 +79,8 @@ const getPriority = (route: string) => {
 };
 
 const buildUrlEntry = (route: string) => {
-  return `  <url>\n    <loc>${siteUrl}${route}</loc>\n    <lastmod>${today}</lastmod>\n    <changefreq>weekly</changefreq>\n    <priority>${getPriority(route)}</priority>\n  </url>`;
+  const loc = route === '/' ? `${siteUrl}/` : `${siteUrl}${route.endsWith('/') ? route : route + '/'}`;
+  return `  <url>\n    <loc>${loc}</loc>\n    <lastmod>${today}</lastmod>\n    <changefreq>weekly</changefreq>\n    <priority>${getPriority(route)}</priority>\n  </url>`;
 };
 
 async function generate() {

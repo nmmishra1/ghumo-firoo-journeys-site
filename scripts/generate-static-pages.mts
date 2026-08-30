@@ -6,6 +6,12 @@ const siteUrl = 'https://ghumofiroo.com';
 const distDir = path.resolve(process.cwd(), 'dist');
 const templatePath = path.join(distDir, 'index.html');
 
+const formatCanonical = (route: string) => {
+  if (route === '/') return `${siteUrl}/`;
+  return `${siteUrl}${route.endsWith('/') ? route : route + '/'}`;
+};
+
+
 interface RouteMeta {
   route: string;
   title: string;
@@ -710,7 +716,7 @@ async function main() {
       route,
       title: data.title,
       description: data.description,
-      canonical: `${siteUrl}${route === '/' ? '/' : route}`,
+      canonical: formatCanonical(route),
       h1: data.h1,
       h2: data.h2,
       bodyHtml: data.bodyHtml,
@@ -724,7 +730,7 @@ async function main() {
       route,
       title: data.title,
       description: data.description,
-      canonical: `${siteUrl}${route}`,
+      canonical: formatCanonical(route),
       h1: data.h1,
       bodyHtml: data.bodyHtml,
       ogImage: data.image,
@@ -738,7 +744,7 @@ async function main() {
       route: `/blog/${post.slug}`,
       title: `${post.title} | Ghumo Firoo Travels`,
       description: post.metaDescription || post.excerpt,
-      canonical: `${siteUrl}/blog/${post.slug}`,
+      canonical: formatCanonical(`/blog/${post.slug}`),
       ogImage: post.image,
       ogType: 'article',
       publishedTime: post.date,
@@ -773,7 +779,7 @@ async function main() {
             route: `/guides/${slug}`,
             title: `${guide.title || slug} | Ghumo Firoo Travels Guide`,
             description: guide.summary || guide.metaDescription || `Comprehensive travel guide for ${guide.title || slug} by Ghumo Firoo Travels.`,
-            canonical: `${siteUrl}/guides/${slug}`,
+            canonical: formatCanonical(`/guides/${slug}`),
             ogImage: guide.heroImage || guide.image || '/Rann-Utsav-Gujarat.png',
             ogType: 'article',
             h1: guide.title || slug,
@@ -808,11 +814,16 @@ async function main() {
       `<meta name="description" content="${item.description.replace(/"/g, '&quot;')}" />`
     );
 
-    // Replace Canonical (any attribute order)
-    pageHtml = pageHtml.replace(
-      /<link\s+rel=["']canonical["']\s+href=["'].*?["']\s*\/?>|<link\s+href=["'].*?["']\s+rel=["']canonical["']\s*\/?>/is,
-      `<link rel="canonical" href="${item.canonical}" />`
-    );
+    // Ensure Canonical tag is ALWAYS present in <head>
+    const canonicalTag = `<link rel="canonical" href="${item.canonical}" />`;
+    if (pageHtml.includes('rel="canonical"')) {
+      pageHtml = pageHtml.replace(
+        /<link\s+rel=["']canonical["']\s+href=["'].*?["']\s*\/?>|<link\s+href=["'].*?["']\s+rel=["']canonical["']\s*\/?>/is,
+        canonicalTag
+      );
+    } else {
+      pageHtml = pageHtml.replace('</head>', `    ${canonicalTag}\n  </head>`);
+    }
 
     // Replace OG Title
     pageHtml = pageHtml.replace(
@@ -861,11 +872,13 @@ async function main() {
     // Build rich, crawlable, semantic markup inside <div id="root">
     const crawlableMarkup = `
       <header>
+        <img src="/ghumo-firoo-logo.png" alt="Ghumo Firoo Travels Logo" width="180" height="60" />
         <h1>${item.h1 || item.title}</h1>
         ${item.h2 ? `<h2>${item.h2}</h2>` : ''}
         <p>${item.description}</p>
       </header>
       <main>
+        ${item.ogImage ? `<img src="${item.ogImage}" alt="${item.h1 || item.title} - Ghumo Firoo Travels" width="800" height="500" />` : ''}
         ${item.bodyHtml || `<article><p>${item.description}</p></article>`}
       </main>
       <footer>

@@ -490,7 +490,7 @@ const Booking: React.FC = () => {
                              <img
                                src={upiQrSrc}
                                onError={() => setUpiQrSrc('/placeholder.svg')}
-                               alt="UPI QR Code"
+                               alt="Ghumo Firoo UPI Payment QR Code"
                                className="w-full h-full object-contain"
                              />
                            </div>
