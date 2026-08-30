@@ -189,16 +189,16 @@ const QuickPayment = () => {
     if (!name || !email || !phone || !amount) {
       toast({
         title: "Validation Error",
-        description: "Please fill in your name, email, and phone number first.",
+        description: "Please fill in your name, email, phone number, and amount.",
         variant: "destructive"
       });
       return;
     }
     const utrClean = upiUtr.trim();
-    if (utrClean.length < 10) {
+    if (utrClean.length < 6) {
       toast({
         title: "Validation Error",
-        description: "Please enter a valid 12-digit UPI UTR / Transaction Ref No.",
+        description: "Please enter a valid UPI UTR / Transaction Ref No. (e.g. 12-digit number)",
         variant: "destructive"
       });
       return;
@@ -206,69 +206,34 @@ const QuickPayment = () => {
 
     setIsProceeding(true);
     try {
-      // Find matching lead in Supabase via RPC function
-      let matchedLeadId = leadUuid || null;
-      if (!matchedLeadId) {
-        const { data: leadData, error: rpcErr } = await supabase.rpc('find_lead_by_contact', {
-          email_param: email.trim(),
-          phone_param: phone.trim()
-        });
-        if (!rpcErr && leadData && leadData.length > 0) {
-          matchedLeadId = leadData[0].id;
-        }
-      }
-
-      // Insert payment record into MySQL via local API
       const amountVal = parseFloat(amount);
-      const res = await fetch('/php-backend/api.php?table=payments', {
+      const res = await fetch('/php-backend/payments/record_upi.php', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          id: 'pay-' + Date.now() + '-' + Math.round(Math.random() * 1000),
-          lead_id: matchedLeadId,
-          amount_received: amountVal,
-          payment_date: new Date().toISOString().split('T')[0],
-          payment_mode: 'UPI',
+          lead_id: leadUuid || queryLeadId || '',
+          name: name.trim(),
+          email: email.trim(),
+          phone: phone.trim(),
+          amount: amountVal,
           reference_number: utrClean,
-          remarks: purpose ? `${purpose} (UPI Offline)` : 'Quick Payment Link (UPI Offline)',
-          received_by: 'Online Payment',
-          status: 'Success',
-          gateway_charges: 0
+          remarks: purpose ? `${purpose} (UPI Offline)` : 'Quick Payment Link (UPI Offline)'
         })
       });
 
-      if (!res.ok) {
-        const errData = await res.json();
-        throw new Error(errData.error || 'Failed to record payment in MySQL');
-      }
-
-      // Send email notifications via UPI notifier endpoint
-      try {
-        await fetch('/php-backend/upi_notify.php', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            lead_id: matchedLeadId || '',
-            amount: amountVal,
-            remarks: purpose ? `${purpose} (UPI Offline)` : 'Quick Payment Link (UPI Offline)',
-            reference_number: utrClean,
-            email: email,
-            phone: phone,
-            name: name
-          })
-        });
-      } catch (e) {
-        console.error('Trigger UPI email notify error:', e);
+      const data = await res.json();
+      if (!res.ok || data.error) {
+        throw new Error(data.error || 'Failed to record payment in CRM');
       }
 
       toast({
-        title: "Payment Submitted",
-        description: "Your UPI payment details were recorded. The CRM has updated automatically.",
+        title: "Payment Recorded Successfully",
+        description: "Your UPI payment details were verified and logged into our CRM.",
       });
       setUpiUtr('');
-      navigate('/thank-you');
+      navigate('/thank-you' + (data.payment_id ? `?payment_id=${data.payment_id}` : ''));
     } catch (err: any) {
       console.error(err);
       toast({
