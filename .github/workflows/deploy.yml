@@ -7,9 +7,14 @@ on:
       - master
   workflow_dispatch:
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - name: 📥 Checkout Code
         uses: actions/checkout@v4
@@ -38,6 +43,8 @@ jobs:
           server-dir: ./
           local-dir: ./dist/
           dangerous-clean-slate: false
-          log-level: verbose
+          log-level: standard
+          timeout: 600000
           exclude: |
             **/php-backend/uploads/**
+
