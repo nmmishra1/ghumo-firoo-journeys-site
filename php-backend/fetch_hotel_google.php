@@ -152,10 +152,36 @@ if (!$response) {
 $searchData = json_decode($response, true);
 
 if (empty($searchData['results'])) {
-    if (!empty($searchData['status']) && $searchData['status'] === 'REQUEST_DENIED') {
-        $cleanName = ucwords(str_replace(['+', '%20', '-'], ' ', $query));
-        if (preg_match('/^[a-zA-Z0-9]{10,30}$/', trim($query))) {
-            $cleanName = "Google Travel Hotel / Resort";
+    $cleanName = ucwords(str_replace(['+', '%20', '-'], ' ', $query));
+    if (preg_match('/^[a-zA-Z0-9]{10,30}$/', trim($query))) {
+        $cleanName = "Hotel / Resort";
+    }
+
+    $genericTaglines = [
+            'discover hotels for your next trip',
+            'find cheap hotels',
+            'google travel',
+            'google hotels',
+            'google search',
+            'google maps',
+            'travel/search',
+            'hotels in'
+        ];
+
+        $isGeneric = false;
+        foreach ($genericTaglines as $tagline) {
+            if (stripos($cleanName, $tagline) !== false) {
+                $isGeneric = true;
+                break;
+            }
+        }
+
+        if ($isGeneric) {
+            echo json_encode([
+                'success' => false,
+                'error' => 'Could not extract hotel name from this Google Travel URL. Please enter the Hotel Name & City directly (e.g. "Sayaji Hotel, Indore" or "Taj Lake Palace, Udaipur").'
+            ]);
+            exit;
         }
 
         $fbCity = '';
