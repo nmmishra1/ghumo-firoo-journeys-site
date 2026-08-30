@@ -8,7 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { 
   Map, FileText, Send, CheckCircle2, AlertTriangle, Plus, Search, 
   Eye, Edit, Copy, ExternalLink, Calendar, Users, IndianRupee, ShieldAlert,
-  Loader2, RefreshCw, X
+  Loader2, RefreshCw, X, Sparkles, ArrowRight, Trash2
 } from 'lucide-react';
 
 const API_BASE = import.meta.env.VITE_PHP_BASE_URL || import.meta.env.VITE_API_BASE_URL || '/php-backend';
@@ -31,6 +31,16 @@ export const ItineraryWorkspace: React.FC<ItineraryWorkspaceProps> = ({ leads, o
   const [activeTab, setActiveTab] = useState<'saved' | 'leads'>('saved');
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
+
+  // Draft generated from India Explorer
+  const [draftItinerary, setDraftItinerary] = useState<any | null>(() => {
+    try {
+      const d = localStorage.getItem('crm_draft_itinerary');
+      return d ? JSON.parse(d) : null;
+    } catch {
+      return null;
+    }
+  });
 
   useEffect(() => {
     fetchSavedItineraries();
@@ -118,6 +128,47 @@ export const ItineraryWorkspace: React.FC<ItineraryWorkspaceProps> = ({ leads, o
           </Button>
         </div>
       </div>
+
+      {/* INDIA EXPLORER ACTIVE DRAFT BANNER */}
+      {draftItinerary && (
+        <div className="p-4 rounded-2xl bg-gradient-to-r from-amber-500/20 via-amber-500/10 to-transparent border border-amber-500/40 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-left animate-in slide-in-from-top-2 duration-150">
+          <div className="flex items-center gap-3">
+            <div className="p-2.5 rounded-xl bg-amber-500 text-slate-950 font-black shrink-0 shadow-md">
+              <Sparkles className="w-5 h-5" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2 flex-wrap">
+                <Badge className="bg-amber-500 text-slate-950 font-extrabold text-[10px]">India Explorer Generated Draft</Badge>
+                <span className="text-xs font-black text-foreground">{draftItinerary.title}</span>
+              </div>
+              <p className="text-xs text-muted-foreground mt-0.5 font-medium">
+                Destinations: <strong>{draftItinerary.destinations}</strong> ({draftItinerary.days} Days / {draftItinerary.nights} Nights) · {draftItinerary.spots?.length || 0} attractions mapped.
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => { localStorage.removeItem('crm_draft_itinerary'); setDraftItinerary(null); }}
+              className="text-xs text-muted-foreground hover:text-red-500 h-8"
+            >
+              Dismiss
+            </Button>
+            <Button
+              size="sm"
+              onClick={() => {
+                if (leads.length > 0) {
+                  onNavigateLead(leads[0].id);
+                }
+              }}
+              className="bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs h-8 px-3 rounded-xl shadow-md gap-1"
+            >
+              Attach to Lead Proposal <ArrowRight className="w-3.5 h-3.5" />
+            </Button>
+          </div>
+        </div>
+      )}
 
       {/* KPI STATS CARDS STRIP */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">

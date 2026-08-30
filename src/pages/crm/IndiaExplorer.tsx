@@ -11,9 +11,15 @@ import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Label } from '@/components/ui/label';
+import { useNavigate } from 'react-router-dom';
+import { useToast } from '@/hooks/use-toast';
 import { MASTER_DESTINATIONS } from '@/data/masterDestinations';
 
 export default function IndiaExplorer() {
+  const navigate = useNavigate();
+  const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [states, setStates] = useState<any[]>([]);
   const [cities, setCities] = useState<any[]>([]);
@@ -25,6 +31,181 @@ export default function IndiaExplorer() {
   const [filterStateId, setFilterStateId] = useState<string>('all');
   const [filterCityId, setFilterCityId] = useState<string>('all');
   const [viewMode, setViewMode] = useState<'grid' | 'table'>('grid');
+
+  // Quick Itinerary Generator Modal State
+  const [quickItineraryModalOpen, setQuickItineraryModalOpen] = useState(false);
+  const [itineraryDurationNights, setItineraryDurationNights] = useState<number>(2);
+  const [itineraryTheme, setItineraryTheme] = useState<string>('Leisure & Sightseeing');
+
+  // Multi-City / Custom Trip Planner Tray
+  const [tripPlannerTray, setTripPlannerTray] = useState<any[]>(() => {
+    try {
+      const saved = localStorage.getItem('crm_trip_planner_tray');
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
+  });
+
+  const savePlannerTray = (items: any[]) => {
+    setTripPlannerTray(items);
+    localStorage.setItem('crm_trip_planner_tray', JSON.stringify(items));
+  };
+
+  const handleAddToTripPlanner = (item: any, type: 'sightseeing' | 'activity') => {
+    const cityName = selectedCity?.name || selectedCity?.city_name || item.destination || 'India';
+    const stateName = selectedState?.name || selectedState?.state_name || '';
+    const exists = tripPlannerTray.some(t => t.id === item.id || t.name === (item.name || item.sightseeing_name));
+    
+    if (exists) {
+      toast({
+        title: "Already in Trip Planner",
+        description: `${item.name || item.sightseeing_name} is already added to your planner tray.`
+      });
+      return;
+    }
+
+    const newItem = {
+      id: item.id || `spot-${Date.now()}`,
+      name: item.name || item.sightseeing_name || item.activity_name,
+      city: cityName,
+      state: stateName,
+      type,
+      category: item.category || 'Sightseeing',
+      duration: item.recommended_duration_hours ? `${item.recommended_duration_hours} Hours` : (item.duration || '2 Hours'),
+      description: item.description || ''
+    };
+
+    const updated = [...tripPlannerTray, newItem];
+    savePlannerTray(updated);
+    toast({
+      title: "Added to Trip Planner 🗺️",
+      description: `${newItem.name} (${cityName}) added to your itinerary draft!`
+    });
+  };
+
+  const handleRemoveFromTray = (id: string) => {
+    const updated = tripPlannerTray.filter(t => t.id !== id);
+    savePlannerTray(updated);
+  };
+
+  const handleClearTray = () => {
+    savePlannerTray([]);
+  };
+
+  const handleLaunchItineraryFromTray = () => {
+    if (tripPlannerTray.length === 0) return;
+
+    const uniqueCities = Array.from(new Set(tripPlannerTray.map(t => t.city)));
+    const totalDays = Math.max(3, Math.ceil(tripPlannerTray.length / 2) + 1);
+    const totalNights = totalDays - 1;
+
+    // Distribute spots across days
+    const daySchedules: any[] = [];
+    for (let i = 1; i <= totalDays; i++) {
+      if (i === 1) {
+        daySchedules.push({
+          day: 1,
+          title: `Arrival in ${uniqueCities[0]} & Welcome Orientation`,
+          description: `Arrive at the airport / railway station. Private transfer to hotel for check-in. Evening orientation and relaxing local walk.`,
+          activities: tripPlannerTray.slice(0, 2).map(t => t.name)
+        });
+      } else if (i === totalDays) {
+        daySchedules.push({
+          day: totalDays,
+          title: `Farewell & Departure Transfer`,
+          description: `Enjoy breakfast at hotel. Complete check-out formalities. Assisted transfer to airport / railway station for onward journey.`,
+          activities: []
+        });
+      } else {
+        const startIdx = (i - 2) * 2 + 2;
+        const daySpots = tripPlannerTray.slice(startIdx, startIdx + 2);
+        const cityForDay = daySpots[0]?.city || uniqueCities[Math.min(i - 2, uniqueCities.length - 1)];
+        daySchedules.push({
+          day: i,
+          title: `${cityForDay} Exploration & Highlights`,
+          description: `Full day guided sightseeing and experiential highlights in ${cityForDay}.`,
+          activities: daySpots.map(t => t.name)
+        });
+      }
+    }
+
+    const draft = {
+      id: `itinerary-custom-${Date.now()}`,
+      title: `${totalNights}N/${totalDays}D Customized ${uniqueCities.join(' + ')} Tour`,
+      destinations: uniqueCities.join(', '),
+      nights: totalNights,
+      days: totalDays,
+      spots: tripPlannerTray,
+      daySchedules,
+      created_at: new Date().toISOString()
+    };
+
+    localStorage.setItem('crm_draft_itinerary', JSON.stringify(draft));
+    toast({
+      title: "Itinerary Draft Generated! 🚀",
+      description: `Opening Itinerary Builder with ${uniqueCities.join(' + ')} (${totalNights}N/${totalDays}D)...`
+    });
+    navigate('/crm/itineraries');
+  };
+
+  const handleGenerateCityItinerary = (cityName: string, sights: any[], acts: any[]) => {
+    const totalDays = itineraryDurationNights + 1;
+    const allSpots = [...(sights || []), ...(acts || [])];
+
+    const daySchedules: any[] = [];
+    for (let i = 1; i <= totalDays; i++) {
+      if (i === 1) {
+        daySchedules.push({
+          day: 1,
+          title: `Arrival in ${cityName} & Welcome`,
+          description: `Arrive in ${cityName}. Transfer to booked hotel. Relax and enjoy evening local highlights.`,
+          activities: allSpots.slice(0, 2).map(s => s.name || s.sightseeing_name)
+        });
+      } else if (i === totalDays) {
+        daySchedules.push({
+          day: totalDays,
+          title: `${cityName} Departure`,
+          description: `Breakfast at hotel. Assisted transfer to airport / railway station for departure with fond memories.`,
+          activities: []
+        });
+      } else {
+        const startIdx = (i - 2) * 2 + 2;
+        const daySpots = allSpots.slice(startIdx, startIdx + 2);
+        daySchedules.push({
+          day: i,
+          title: `${cityName} Sightseeing & Experience`,
+          description: `Discover top monuments, scenic viewpoints, and cultural experiences in ${cityName}.`,
+          activities: daySpots.map(s => s.name || s.sightseeing_name)
+        });
+      }
+    }
+
+    const draft = {
+      id: `itinerary-${cityName.toLowerCase().replace(/[^a-z0-9]/g, '-')}-${Date.now()}`,
+      title: `${itineraryDurationNights}N/${totalDays}D Highlights of ${cityName}`,
+      destinations: cityName,
+      nights: itineraryDurationNights,
+      days: totalDays,
+      spots: allSpots.slice(0, 6).map(s => ({
+        id: s.id,
+        name: s.name || s.sightseeing_name,
+        city: cityName,
+        duration: s.recommended_duration_hours ? `${s.recommended_duration_hours} Hours` : '2 Hours',
+        description: s.description || ''
+      })),
+      daySchedules,
+      created_at: new Date().toISOString()
+    };
+
+    localStorage.setItem('crm_draft_itinerary', JSON.stringify(draft));
+    setQuickItineraryModalOpen(false);
+    toast({
+      title: "Itinerary Draft Created! ✈️",
+      description: `Generated ${itineraryDurationNights}N/${totalDays}D itinerary for ${cityName}. Loading into builder...`
+    });
+    navigate('/crm/itineraries');
+  };
 
   const [cityDetails, setCityDetails] = useState<{
     city: any;
@@ -565,8 +746,8 @@ export default function IndiaExplorer() {
           ) : selectedCity && cityDetails ? (
             // CITY DETAILS VIEW (SIGHTSEEING, ACTIVITIES & HOTELS TABS)
             <div className="space-y-6">
-              {/* Back navigation */}
-              <div className="flex items-center justify-between bg-card p-4 rounded-2xl border border-border/60 shadow-md">
+              {/* Back navigation & Itinerary CTA Header */}
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 bg-card p-4 rounded-2xl border border-border/60 shadow-md">
                 <div className="flex items-center gap-3">
                   <Button variant="ghost" size="icon" className="text-slate-500 hover:text-slate-900 dark:hover:text-white" onClick={goBack}>
                     <ArrowLeft className="h-5 w-5" />
@@ -586,6 +767,17 @@ export default function IndiaExplorer() {
                       )}
                     </div>
                   </div>
+                </div>
+
+                {/* Instant Create Itinerary Button */}
+                <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
+                  <Button 
+                    onClick={() => setQuickItineraryModalOpen(true)}
+                    className="bg-amber-500 hover:bg-amber-600 text-slate-950 font-extrabold text-xs h-9 px-4 rounded-xl shadow-md gap-1.5 shrink-0"
+                  >
+                    <Sparkles className="w-4 h-4 text-slate-950" />
+                    ⚡ Create Itinerary for {selectedCity.name || selectedCity.city_name}
+                  </Button>
                 </div>
               </div>
 
@@ -610,7 +802,7 @@ export default function IndiaExplorer() {
                 <TabsContent value="sightseeing" className="mt-4">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {cityDetails.sightseeing.map((item) => (
-                      <Card key={item.id} className="border-border/60 bg-card shadow-md text-left hover:scale-[1.01] transition-transform">
+                      <Card key={item.id} className="border-border/60 bg-card shadow-md text-left hover:scale-[1.01] transition-transform flex flex-col justify-between">
                         <CardHeader className="bg-slate-100 dark:bg-slate-900/80 p-4 border-b border-border/40 flex flex-row justify-between items-center">
                           <div>
                             <CardTitle className="text-xs font-extrabold text-slate-950 dark:text-white uppercase">{item.name}</CardTitle>
@@ -625,9 +817,19 @@ export default function IndiaExplorer() {
                         </CardHeader>
                         <CardContent className="p-4 space-y-3">
                           <p className="text-xs text-slate-700 dark:text-slate-300 leading-relaxed font-semibold">{item.description}</p>
-                          <div className="flex items-center gap-1.5 text-[10px] text-slate-500 border-t border-border/40 pt-2 font-bold">
-                            <Clock className="h-3.5 w-3.5 text-amber-500" />
-                            <span>Recommended duration: <strong>{item.recommended_duration_hours} hours</strong></span>
+                          <div className="flex items-center justify-between border-t border-border/40 pt-2 text-[10px] text-slate-500 font-bold">
+                            <div className="flex items-center gap-1.5">
+                              <Clock className="h-3.5 w-3.5 text-amber-500" />
+                              <span>Recommended: <strong>{item.recommended_duration_hours} hours</strong></span>
+                            </div>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => handleAddToTripPlanner(item, 'sightseeing')}
+                              className="h-7 text-[10px] font-bold border-amber-500/40 text-amber-600 dark:text-amber-400 hover:bg-amber-500/10 gap-1 rounded-lg"
+                            >
+                              <Plus className="w-3 h-3" /> Add to Planner
+                            </Button>
                           </div>
                         </CardContent>
                       </Card>
@@ -638,7 +840,7 @@ export default function IndiaExplorer() {
                 <TabsContent value="activities" className="mt-4">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {cityDetails.activities.map((item) => (
-                      <Card key={item.id} className="border-border/60 bg-card shadow-md text-left hover:scale-[1.01] transition-transform">
+                      <Card key={item.id} className="border-border/60 bg-card shadow-md text-left hover:scale-[1.01] transition-transform flex flex-col justify-between">
                         <CardHeader className="bg-slate-100 dark:bg-slate-900/80 p-4 border-b border-border/40 flex flex-row justify-between items-center">
                           <div>
                             <CardTitle className="text-xs font-extrabold text-slate-950 dark:text-white uppercase">{item.name}</CardTitle>
@@ -653,9 +855,19 @@ export default function IndiaExplorer() {
                         </CardHeader>
                         <CardContent className="p-4 space-y-3">
                           <p className="text-xs text-slate-700 dark:text-slate-300 leading-relaxed font-semibold">{item.description}</p>
-                          <div className="flex items-center gap-1.5 text-[10px] text-slate-500 border-t border-border/40 pt-2 font-bold">
-                            <Clock className="h-3.5 w-3.5 text-amber-500" />
-                            <span>Duration: <strong>{item.duration_hours} hours</strong></span>
+                          <div className="flex items-center justify-between border-t border-border/40 pt-2 text-[10px] text-slate-500 font-bold">
+                            <div className="flex items-center gap-1.5">
+                              <Clock className="h-3.5 w-3.5 text-amber-500" />
+                              <span>Duration: <strong>{item.duration_hours} hours</strong></span>
+                            </div>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => handleAddToTripPlanner(item, 'activity')}
+                              className="h-7 text-[10px] font-bold border-blue-500/40 text-blue-600 dark:text-blue-400 hover:bg-blue-500/10 gap-1 rounded-lg"
+                            >
+                              <Plus className="w-3 h-3" /> Add to Planner
+                            </Button>
                           </div>
                         </CardContent>
                       </Card>
@@ -881,6 +1093,136 @@ export default function IndiaExplorer() {
           )}
         </>
       )}
+
+      {/* QUICK ITINERARY GENERATOR MODAL */}
+      {selectedCity && cityDetails && (
+        <Dialog open={quickItineraryModalOpen} onOpenChange={setQuickItineraryModalOpen}>
+          <DialogContent className="sm:max-w-lg bg-card border-amber-500/30 text-foreground">
+            <DialogHeader>
+              <DialogTitle className="text-base font-extrabold flex items-center gap-2">
+                <Sparkles className="w-5 h-5 text-amber-500" />
+                Generate Tour Itinerary for {selectedCity.name || selectedCity.city_name}
+              </DialogTitle>
+              <DialogDescription className="text-xs text-muted-foreground">
+                Select your package duration to auto-distribute {selectedCity.name || selectedCity.city_name}'s sightseeing places &amp; activities into a day-by-day itinerary proposal.
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="space-y-4 py-2">
+              <div className="space-y-1.5">
+                <Label className="text-xs font-bold">Package Duration</Label>
+                <div className="grid grid-cols-3 gap-2">
+                  {[
+                    { nights: 2, days: 3, label: '2N / 3D (Weekend Tour)' },
+                    { nights: 3, days: 4, label: '3N / 4D (Standard Tour)' },
+                    { nights: 4, days: 5, label: '4N / 5D (Grand Tour)' }
+                  ].map(option => (
+                    <button
+                      key={option.nights}
+                      type="button"
+                      onClick={() => setItineraryDurationNights(option.nights)}
+                      className={`p-2.5 rounded-xl border text-xs font-bold text-left transition-all ${
+                        itineraryDurationNights === option.nights
+                          ? 'border-amber-500 bg-amber-500/10 text-amber-600 dark:text-amber-400 ring-1 ring-amber-500/50'
+                          : 'border-border/60 hover:border-border text-foreground'
+                      }`}
+                    >
+                      <div className="font-extrabold">{option.nights}N / {option.days}D</div>
+                      <div className="text-[10px] text-muted-foreground font-normal mt-0.5">{option.label}</div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Day-by-day preview */}
+              <div className="space-y-1.5">
+                <Label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
+                  Auto-Generated Day-by-Day Preview ({itineraryDurationNights + 1} Days)
+                </Label>
+                <div className="max-h-48 overflow-y-auto space-y-2 p-2.5 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-border/50 text-xs">
+                  <div className="p-2 rounded-lg bg-background border border-border/40 space-y-1">
+                    <span className="font-extrabold text-amber-500">Day 1: Arrival &amp; Check-in</span>
+                    <p className="text-[11px] text-muted-foreground">
+                      Arrival in {selectedCity.name || selectedCity.city_name} ➔ Hotel Check-in ➔ Evening local walk &amp; dining.
+                    </p>
+                  </div>
+                  {Array.from({ length: itineraryDurationNights - 1 }).map((_, idx) => {
+                    const dayNum = idx + 2;
+                    const spot = (cityDetails.sightseeing || [])[idx] || (cityDetails.activities || [])[0];
+                    return (
+                      <div key={dayNum} className="p-2 rounded-lg bg-background border border-border/40 space-y-1">
+                        <span className="font-extrabold text-blue-500">Day {dayNum}: Local Sightseeing &amp; Highlights</span>
+                        <p className="text-[11px] text-muted-foreground">
+                          Visit {spot ? (spot.name || spot.sightseeing_name) : `${selectedCity.name || selectedCity.city_name} Highlights`} &amp; experiential tours.
+                        </p>
+                      </div>
+                    );
+                  })}
+                  <div className="p-2 rounded-lg bg-background border border-border/40 space-y-1">
+                    <span className="font-extrabold text-emerald-500">Day {itineraryDurationNights + 1}: Farewell &amp; Departure</span>
+                    <p className="text-[11px] text-muted-foreground">
+                      Breakfast at hotel ➔ Check-out ➔ Transfer to airport / station with fond memories.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <DialogFooter className="gap-2">
+              <Button type="button" variant="ghost" size="sm" onClick={() => setQuickItineraryModalOpen(false)}>
+                Cancel
+              </Button>
+              <Button 
+                type="button" 
+                size="sm"
+                onClick={() => handleGenerateCityItinerary(selectedCity.name || selectedCity.city_name, cityDetails.sightseeing, cityDetails.activities)}
+                className="bg-amber-500 hover:bg-amber-600 text-slate-950 font-extrabold shadow-md"
+              >
+                Launch in Itinerary Builder ➔
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      )}
+
+      {/* FLOATING TRIP PLANNER TRAY */}
+      {tripPlannerTray.length > 0 && (
+        <div className="fixed bottom-6 right-6 z-50 animate-in slide-in-from-bottom-5 duration-200">
+          <div className="p-4 rounded-2xl bg-slate-950 text-white border border-amber-500/50 shadow-2xl flex items-center gap-4 max-w-md backdrop-blur-xl">
+            <div className="p-2.5 bg-amber-500/20 text-amber-400 rounded-xl border border-amber-500/30">
+              <MapPin className="w-5 h-5" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="text-xs font-black text-white flex items-center gap-1.5">
+                <span>Trip Planner Tray</span>
+                <Badge className="bg-amber-500 text-slate-950 font-black text-[10px] py-0 px-1.5">
+                  {tripPlannerTray.length} spots
+                </Badge>
+              </div>
+              <p className="text-[11px] text-slate-300 truncate mt-0.5">
+                {tripPlannerTray.map(t => t.name).join(', ')}
+              </p>
+            </div>
+            <div className="flex items-center gap-1.5 shrink-0">
+              <button
+                onClick={handleClearTray}
+                className="text-[11px] text-slate-400 hover:text-red-400 font-bold px-2 py-1"
+                title="Clear tray"
+              >
+                Clear
+              </button>
+              <Button
+                onClick={handleLaunchItineraryFromTray}
+                size="sm"
+                className="bg-amber-500 hover:bg-amber-600 text-slate-950 font-black text-xs h-8 px-3 rounded-xl shadow-md"
+              >
+                Build Itinerary ➔
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
+

@@ -98,6 +98,7 @@ const EnquireSuccess = React.lazy(() => import('@/pages/EnquireSuccess'));
 const ThankYou = React.lazy(() => import('@/pages/ThankYou'));
 const QuickPayment = React.lazy(() => import('@/pages/QuickPayment'));
 const QuoteView = React.lazy(() => import('@/pages/QuoteView'));
+const PublicIndiaExplorer = React.lazy(() => import('@/pages/public/PublicIndiaExplorer'));
 
 // Lazy load package pages with route-based code splitting
 const CharDham = React.lazy(() => import('@/pages/packages/CharDham'));
@@ -287,6 +288,10 @@ function App() {
                <Route path="/guides" element={<GuidesIndex />} />
                <Route path="/guides/:slug" element={<GuidePage />} />
                <Route path="/guide/:slug" element={<GuidePage />} />
+                
+                {/* Public India Destination Explorer Search Engine */}
+                <Route path="/explore-india" element={<PublicIndiaExplorer />} />
+                <Route path="/india-explorer" element={<PublicIndiaExplorer />} />
                 
                 {/* Sightseeing & Activities */}
                 <Route path="/sightseeing" element={<SightseeingIndex />} />

@@ -68,6 +68,7 @@ const Navigation = () => {
         { name: 'Custom Bespoke Packages', sub: 'Craft your tailored trip', path: '/custom-tour-packages' }
       ]
     },
+    { name: 'Explore India', path: '/explore-india' },
     { name: 'The Experience', path: '/custom-tour-packages' },
     { name: 'Concierge', path: '/enquire-now' },
     { name: 'Blogs', path: '/blog' }
