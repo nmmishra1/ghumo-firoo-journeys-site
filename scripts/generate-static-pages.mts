@@ -416,7 +416,7 @@ const staticRoutesMeta: Record<string, { title: string; description: string; h1:
     `
   },
   '/blog': {
-    title: 'Travel Blog & Holiday Guides | Ghumo Firoo Travels',
+    title: 'Travel Blog – Tips, Guides & Itineraries | Ghumo Firoo',
     description: 'Read expert travel blogs, packing tips, pilgrimage advice, and destination guides for Char Dham, Rann Utsav, Kashmir, Europe, and India holidays.',
     h1: 'Ghumo Firoo Travel Blog & Destination Guides',
     h2: 'Inspiration, Itinerary Insights & Practical Travel Tips for Your Next Holiday',

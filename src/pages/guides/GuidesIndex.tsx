@@ -37,7 +37,12 @@ const GuidesIndex: React.FC = () => {
 
   return (
     <Layout>
-      <SEO title="Travel Guides" description="Authoritative destination guides and travel briefs" />
+      <SEO 
+        title="Destination Travel Guides | Ghumo Firoo Travels" 
+        description="Comprehensive travel guides for Char Dham Yatra, Rann Utsav Kutch, Kashmir Valley, Europe, and Kerala. Best time to visit, routes, and expert advice." 
+        canonicalUrl="https://ghumofiroo.com/guides/"
+        url="https://ghumofiroo.com/guides/"
+      />
       <div className="min-h-screen bg-[#0B1026] text-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-12">
           

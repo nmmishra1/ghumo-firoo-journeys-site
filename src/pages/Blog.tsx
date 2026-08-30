@@ -257,8 +257,10 @@ const Blog = () => {
   return (
     <Layout>
       <SEO 
-        title="Travel Blog 2026 | Expert Guides & Offbeat Destinations"
-        description="Explore India's hidden gems with our 2026 travel guides. Tips for Char Dham, Europe visas, and budget weekend getaways from Delhi."
+        title="Travel Blog – Tips, Guides & Itineraries | Ghumo Firoo"
+        description="Read expert travel blogs, packing tips, pilgrimage advice, and destination guides for Char Dham, Rann Utsav, Kashmir, Europe, and India holidays."
+        canonicalUrl="https://ghumofiroo.com/blog/"
+        url="https://ghumofiroo.com/blog/"
       />
       
       <div className="bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 min-h-screen pt-32 pb-20 transition-colors duration-500">
