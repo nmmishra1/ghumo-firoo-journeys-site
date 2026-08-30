@@ -398,7 +398,71 @@ if (empty($searchData['results'])) {
         $fbPhone = trim($phoneMatch[0]);
     }
 
-    $fbAddr = $cleanName . ", " . $fbCity . ", " . $fbState . ", " . $fbCountry;
+    // Star rating detection
+    $starRating = 4;
+    $categoryName = 'Deluxe';
+    if (preg_match('/\b5\s*[- ]?star\b|luxury|palace|heritage|5-star|marriott|taj|oberoi|hyatt|leela/i', $cleanName . ' ' . $allText)) {
+        $starRating = 5;
+        $categoryName = (strpos(strtolower($cleanName), 'heritage') !== false) ? 'Heritage' : 'Luxury';
+    } elseif (preg_match('/\b3\s*[- ]?star\b|budget|inn|express|lodge|guest house|3-star/i', $cleanName . ' ' . $allText)) {
+        $starRating = 3;
+        $categoryName = 'Standard';
+    }
+
+    // Google rating extraction
+    $googleRating = 4.3;
+    if (preg_match('/(?:rated\s*|rating[:\s]*|score[:\s]*|★\s*)([3-5]\.[0-9])/i', $allText, $rm)) {
+        $googleRating = (float)$rm[1];
+    } elseif (preg_match('/\b([3-5]\.[0-9])\s*\/\s*5/i', $allText, $rm2)) {
+        $googleRating = (float)$rm2[1];
+    } else {
+        $googleRating = $starRating === 5 ? 4.7 : ($starRating === 4 ? 4.3 : 3.8);
+    }
+    if ($googleRating > 5.0) $googleRating = 4.5;
+
+    // Detect Amenities
+    $commonAmenitiesMap = [
+        'Free WiFi' => '/\b(wifi|wi-fi|internet)\b/i',
+        'Swimming Pool' => '/\b(pool|swimming)\b/i',
+        'Free Breakfast' => '/\b(breakfast|buffet)\b/i',
+        'Restaurant' => '/\b(restaurant|dining|cafe)\b/i',
+        'Air Conditioning' => '/\b(ac|air conditioning|air-conditioned)\b/i',
+        'Room Service' => '/\b(room service)\b/i',
+        'Spa / Wellness' => '/\b(spa|massage|wellness)\b/i',
+        'Free Parking' => '/\b(parking|valet)\b/i',
+        'Airport Shuttle' => '/\b(airport shuttle|transfer|cab)\b/i',
+        'Bar / Lounge' => '/\b(bar|lounge|pub)\b/i',
+        'Gym / Fitness' => '/\b(gym|fitness)\b/i',
+        'Beach Access' => '/\b(beach|beachfront|sea view)\b/i'
+    ];
+
+    $detectedAmenities = [];
+    foreach ($commonAmenitiesMap as $name => $pattern) {
+        if (preg_match($pattern, $allText)) {
+            $detectedAmenities[] = $name;
+        }
+    }
+    if (count($detectedAmenities) < 3) {
+        $detectedAmenities = array_unique(array_merge($detectedAmenities, ['Free WiFi', 'Restaurant', 'Air Conditioning', 'Room Service']));
+    }
+
+    // Clean address deduplication (prevents "Goa, Goa, Goa")
+    $rawParts = array_filter([$cleanName, $fbCity, $fbState, $fbCountry]);
+    $uniqueParts = [];
+    $seenParts = [];
+    foreach ($rawParts as $part) {
+        $subParts = explode(',', $part);
+        foreach ($subParts as $sp) {
+            $spTrim = trim($sp);
+            $spLow = strtolower($spTrim);
+            if (!empty($spTrim) && !isset($seenParts[$spLow])) {
+                $seenParts[$spLow] = true;
+                $uniqueParts[] = $spTrim;
+            }
+        }
+    }
+    $fbAddr = implode(', ', $uniqueParts);
+
     $slugName = strtolower(preg_replace('/[^a-zA-Z0-9]/', '', $cleanName));
     if (empty($slugName)) $slugName = 'hotel';
     
@@ -415,9 +479,11 @@ if (empty($searchData['results'])) {
         'phone_number' => $fbPhone,
         'website' => $fbWebsite,
         'email' => $fbEmail,
-        'google_rating' => 4.6,
+        'google_rating' => $googleRating,
         'featured_image_url' => $fbImage,
-        'star_rating' => (strpos(strtolower($cleanName), 'heritage') !== false || strpos(strtolower($cleanName), 'taj') !== false || strpos(strtolower($cleanName), 'resort') !== false) ? 5 : 4
+        'star_rating' => $starRating,
+        'category_name' => $categoryName,
+        'amenities' => array_values($detectedAmenities)
     ];
 
     $fbEnriched = enrichHotelCRMData($cleanName, $fbCity, $fbState, $fbCountry, $fbRaw);

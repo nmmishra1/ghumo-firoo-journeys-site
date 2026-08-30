@@ -177,12 +177,25 @@ export const HotelContractWizard: React.FC<HotelContractWizardProps> = ({
             }
           }
 
+          // 4. Match Hotel Category / Type
+          let matchedCategoryId = prev.category_id;
+          if (Array.isArray(hotelCategories) && hotelCategories.length > 0) {
+            const targetCategory = meta.category_name || (meta.star_rating === 5 ? 'Luxury' : (meta.star_rating === 4 ? 'Deluxe' : 'Standard'));
+            const foundCat = hotelCategories.find((c: any) => 
+              c.category_name?.toLowerCase().includes(targetCategory.toLowerCase()) || 
+              targetCategory.toLowerCase().includes(c.category_name?.toLowerCase())
+            );
+            if (foundCat) matchedCategoryId = String(foundCat.id);
+            else if (!matchedCategoryId) matchedCategoryId = String(hotelCategories[0].id);
+          }
+
           const gMapsLink = googleSearchInput.startsWith('http') ? googleSearchInput : `https://maps.google.com/?q=${encodeURIComponent(meta.hotel_name || googleSearchInput)}`;
 
           return {
             ...prev,
             hotel_name: meta.hotel_name || prev.hotel_name,
             hotel_code: meta.hotel_code || prev.hotel_code || `HOT-${(detectedCity || 'OO').substring(0, 2).toUpperCase()}-01`,
+            category_id: matchedCategoryId,
             address: meta.address || prev.address,
             area_locality: meta.address || prev.area_locality || detectedCity,
             destination: detectedCity || prev.destination,
@@ -207,11 +220,24 @@ export const HotelContractWizard: React.FC<HotelContractWizardProps> = ({
             cancellation_policy: meta.cancellation_policy || prev.cancellation_policy || 'Free cancellation up to 48 hrs before check-in date. 100% cancellation penalty within 48 hrs of arrival.',
             child_policy: meta.child_policy || prev.child_policy || 'Children below 5 years stay complimentary using existing bedding.',
             extra_bed_policy: meta.extra_bed_policy || prev.extra_bed_policy || 'Extra adult or bed available at ₹1,200/night including breakfast.',
-            google_rating: meta.google_rating || prev.google_rating,
+            google_rating: meta.google_rating !== undefined ? meta.google_rating : prev.google_rating,
             internal_rating: meta.internal_rating || prev.internal_rating || 4.5,
             star_rating: meta.star_rating || prev.star_rating
           };
         });
+
+        // Auto-select Facilities / Amenities
+        if (Array.isArray(meta.amenities) && meta.amenities.length > 0 && Array.isArray(facilitiesList) && facilitiesList.length > 0) {
+          const matchedFacilityIds = facilitiesList.filter((fac: any) => {
+            const fName = (fac.facility_name || '').toLowerCase();
+            return meta.amenities?.some(a => fName.includes(a.toLowerCase()) || a.toLowerCase().includes(fName));
+          }).map((fac: any) => fac.id);
+
+          if (matchedFacilityIds.length > 0) {
+            setSelectedFacilities(prev => Array.from(new Set([...prev, ...matchedFacilityIds])));
+          }
+        }
+
         if (meta.featured_image_url) {
           setMediaUrls(prev => ({ ...prev, featured_image_url: meta.featured_image_url }));
         }
