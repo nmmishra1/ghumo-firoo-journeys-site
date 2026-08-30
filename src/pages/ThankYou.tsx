@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
-import { Home, ArrowRight, Share2, Mail, ClipboardCheck, Download, Phone, MessageCircle, CheckCircle2, Sparkles, MapPin } from 'lucide-react';
+import { Home, ArrowRight, Share2, Mail, ClipboardCheck, Download, Phone, MessageCircle, CheckCircle2, Sparkles, MapPin, Printer, ShieldCheck, AlertTriangle, FileText, Check, Lock, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Layout from '@/components/Layout';
 import { Helmet } from 'react-helmet-async';
@@ -163,7 +163,8 @@ const AnimatedCheck = () => (
 
 const ThankYou = () => {
   const [search] = useSearchParams();
-  const type = (search.get('type') || 'enquiry').toLowerCase();
+  const paymentId = search.get('payment_id') || search.get('paymentId') || '';
+  const type = (search.get('type') || (paymentId ? 'purchase' : 'enquiry')).toLowerCase();
   const name = search.get('name') || '';
   const email = search.get('email') || '';
   const orderId = search.get('orderId') || search.get('ref') || '';
@@ -175,6 +176,35 @@ const ThankYou = () => {
   const belowFoldRef = useRef<HTMLDivElement>(null);
   const [activeStep, setActiveStep] = useState(0);
   const [copied, setCopied] = useState(false);
+
+  // Payment Verification Receipt States
+  const [loadingReceipt, setLoadingReceipt] = useState<boolean>(!!paymentId);
+  const [receiptData, setReceiptData] = useState<any>(null);
+  const [receiptError, setReceiptError] = useState<string>('');
+
+  useEffect(() => {
+    if (paymentId) {
+      const fetchReceipt = async () => {
+        try {
+          setLoadingReceipt(true);
+          setReceiptError('');
+          const res = await fetch(`/php-backend/payments/get_receipt.php?payment_id=${encodeURIComponent(paymentId)}`);
+          const data = await res.json();
+          if (res.ok && data.found) {
+            setReceiptData(data);
+          } else {
+            setReceiptError(data.error || 'Transaction record not found in Ghumo Firoo ledger');
+          }
+        } catch (err: any) {
+          console.error('Receipt verification error:', err);
+          setReceiptError('Unable to connect to verification server');
+        } finally {
+          setLoadingReceipt(false);
+        }
+      };
+      fetchReceipt();
+    }
+  }, [paymentId]);
 
   // Step animation
   useEffect(() => {
@@ -198,6 +228,212 @@ const ThankYou = () => {
     return () => io.disconnect();
   }, []);
 
+  // 1. RENDER VERIFIED PAYMENT RECEIPT VOUCHER (When payment_id is provided)
+  if (paymentId) {
+    return (
+      <Layout>
+        <Helmet>
+          <title>Payment Receipt & Verification Voucher | Ghumo Firoo Travels</title>
+          <meta name="robots" content="noindex, nofollow" />
+        </Helmet>
+
+        <div className="min-h-screen bg-[#050814] text-white py-12 sm:py-20 px-4">
+          <div className="container mx-auto max-w-3xl">
+
+            {loadingReceipt ? (
+              <div className="bg-[#0B1026] border border-[#C9A25A]/30 rounded-3xl p-12 text-center space-y-4 shadow-2xl">
+                <div className="w-12 h-12 border-2 border-[#C9A25A]/20 border-t-[#C9A25A] rounded-full animate-spin mx-auto" />
+                <h2 className="text-xl font-serif font-bold text-white">Verifying Transaction with Ledger...</h2>
+                <p className="text-xs text-slate-400">Authenticating record ID <span className="font-mono text-[#C9A25A]">{paymentId}</span></p>
+              </div>
+            ) : receiptError || !receiptData ? (
+              <div className="bg-[#0B1026] border border-rose-500/40 rounded-3xl p-8 sm:p-12 text-center space-y-6 shadow-2xl">
+                <div className="w-16 h-16 rounded-full bg-rose-500/10 text-rose-400 flex items-center justify-center mx-auto border border-rose-500/30">
+                  <AlertTriangle className="w-8 h-8" />
+                </div>
+                <div className="space-y-2">
+                  <span className="text-[10px] font-bold uppercase tracking-[0.25em] text-rose-400">
+                    ⚠️ Transaction Verification Failed
+                  </span>
+                  <h1 className="text-2xl sm:text-3xl font-serif font-bold text-white">
+                    Unverified Payment Record
+                  </h1>
+                  <p className="text-sm text-slate-300 max-w-lg mx-auto">
+                    The transaction ID <span className="font-mono text-rose-300 font-bold bg-rose-950/50 px-2 py-0.5 rounded border border-rose-500/30">{paymentId}</span> does not match any confirmed record in the Ghumo Firoo ledger.
+                  </p>
+                </div>
+
+                <div className="bg-white/5 border border-white/10 rounded-2xl p-5 text-left text-xs text-slate-400 space-y-2 max-w-md mx-auto">
+                  <p className="font-semibold text-slate-200">🛡️ Anti-Fraud & Security Notice:</p>
+                  <p>Screenshots or URLs without active verification hashes cannot be accepted as proof of payment. If you made a direct transfer, please share your official bank debit statement with our team.</p>
+                </div>
+
+                <div className="flex flex-col sm:flex-row gap-3 justify-center pt-2">
+                  <a 
+                    href="https://wa.me/919910987264?text=Hi!+I+need+help+verifying+my+payment+ref:+${paymentId}"
+                    target="_blank" 
+                    rel="noreferrer"
+                    className="inline-block"
+                  >
+                    <Button className="bg-[#25D366] hover:bg-[#1EBE5D] text-slate-950 font-bold text-xs h-11 px-6 rounded-xl flex items-center gap-2">
+                      <MessageCircle className="w-4 h-4" /> WhatsApp Support (+91 99109 87264)
+                    </Button>
+                  </a>
+                  <Link to="/payment">
+                    <Button variant="outline" className="border-white/20 text-white hover:bg-white/10 text-xs h-11 px-6 rounded-xl">
+                      Go to Payment Desk
+                    </Button>
+                  </Link>
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-6">
+                {/* Top Action Bar */}
+                <div className="flex items-center justify-between no-print">
+                  <Link to="/" className="text-xs text-slate-400 hover:text-white flex items-center gap-1.5">
+                    <Home className="w-3.5 h-3.5" /> Back to Home
+                  </Link>
+                  <div className="flex gap-2">
+                    <Button 
+                      onClick={() => window.print()} 
+                      variant="outline" 
+                      className="border-[#C9A25A]/40 text-[#C9A25A] hover:bg-[#C9A25A]/10 text-xs h-9 px-4 rounded-xl flex items-center gap-1.5"
+                    >
+                      <Printer className="w-3.5 h-3.5" /> Print / Save PDF Receipt
+                    </Button>
+                  </div>
+                </div>
+
+                {/* Printable Official Digital Voucher Card */}
+                <div className="bg-[#0B1026] border border-[#C9A25A]/40 rounded-3xl overflow-hidden shadow-2xl print:bg-white print:text-black print:border-black">
+                  
+                  {/* Header */}
+                  <div className="bg-gradient-to-b from-[#111A38] to-[#0B1026] p-6 sm:p-8 text-center border-b border-white/10 relative">
+                    <div className="flex items-center justify-between text-[11px] text-slate-400 mb-4 pb-3 border-b border-white/10">
+                      <div className="flex items-center gap-1.5 text-[#C9A25A] font-bold uppercase tracking-wider">
+                        <ShieldCheck className="w-4 h-4" /> Official Payment Voucher
+                      </div>
+                      <div className="font-mono text-slate-400">
+                        {receiptData.payment_date}
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <div className="text-xs font-bold uppercase tracking-[0.25em] text-[#C9A25A]">
+                        Ghumo Firoo Travels Private Limited
+                      </div>
+                      <h1 className="text-2xl sm:text-3xl font-serif font-bold text-white">
+                        Digital Payment Receipt
+                      </h1>
+                      <p className="text-xs text-slate-400">
+                        🌐 Ministry of Tourism (MoT) NIDHI Partner • Registered Travel Desk
+                      </p>
+                    </div>
+
+                    {/* Status Pill */}
+                    <div className="mt-5 inline-flex items-center gap-2 px-4 py-1.5 rounded-full border text-xs font-bold uppercase tracking-wider shadow-inner"
+                      style={{
+                        backgroundColor: receiptData.verification_type === 'ONLINE_REALIZED' ? 'rgba(16, 185, 129, 0.15)' : 'rgba(245, 158, 11, 0.15)',
+                        borderColor: receiptData.verification_type === 'ONLINE_REALIZED' ? 'rgba(16, 185, 129, 0.4)' : 'rgba(245, 158, 11, 0.4)',
+                        color: receiptData.verification_type === 'ONLINE_REALIZED' ? '#34D399' : '#FBBF24'
+                      }}
+                    >
+                      <CheckCircle2 className="w-4 h-4" /> {receiptData.verification_badge}
+                    </div>
+                  </div>
+
+                  {/* Voucher Body Details */}
+                  <div className="p-6 sm:p-8 space-y-6">
+                    
+                    {/* Amount Banner */}
+                    <div className="bg-[#060A1A] border border-[#C9A25A]/30 p-5 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-left">
+                      <div>
+                        <div className="text-[11px] uppercase tracking-wider text-slate-400 font-semibold">Total Amount Recorded</div>
+                        <div className="text-3xl sm:text-4xl font-bold text-[#C9A25A] font-serif mt-0.5">
+                          ₹{receiptData.amount.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        </div>
+                      </div>
+                      <div className="text-xs text-slate-400 text-right">
+                        <span className="inline-block bg-white/5 border border-white/10 px-3 py-1 rounded-lg">
+                          Mode: <strong className="text-white">{receiptData.payment_mode}</strong>
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Meta Grid */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+                      <div className="bg-white/5 p-4 rounded-xl border border-white/5 space-y-1">
+                        <span className="text-slate-400 font-medium">Receipt / Transaction ID:</span>
+                        <div className="font-mono text-sm font-bold text-white select-all">{receiptData.id}</div>
+                      </div>
+
+                      <div className="bg-white/5 p-4 rounded-xl border border-white/5 space-y-1">
+                        <span className="text-slate-400 font-medium">Bank Reference / UTR No:</span>
+                        <div className="font-mono text-sm font-bold text-[#C9A25A] select-all">{receiptData.reference_number}</div>
+                      </div>
+
+                      <div className="bg-white/5 p-4 rounded-xl border border-white/5 space-y-1">
+                        <span className="text-slate-400 font-medium">Primary Traveler:</span>
+                        <div className="font-bold text-white text-sm">{receiptData.payer_name}</div>
+                      </div>
+
+                      <div className="bg-white/5 p-4 rounded-xl border border-white/5 space-y-1">
+                        <span className="text-slate-400 font-medium">Contact / WhatsApp:</span>
+                        <div className="font-bold text-white text-sm">{receiptData.payer_phone || 'Verified on booking'}</div>
+                      </div>
+
+                      <div className="bg-white/5 p-4 rounded-xl border border-white/5 space-y-1 sm:col-span-2">
+                        <span className="text-slate-400 font-medium">Payment Purpose / Tour:</span>
+                        <div className="text-slate-200 text-xs font-medium">{receiptData.remarks || receiptData.destination}</div>
+                      </div>
+                    </div>
+
+                    {/* Anti-Fraud Security Footer */}
+                    <div className="bg-[#060A1A] border border-white/10 rounded-2xl p-4 text-[11px] text-slate-400 space-y-2">
+                      <div className="flex items-center justify-between text-slate-300 font-semibold">
+                        <span className="flex items-center gap-1.5">
+                          <Lock className="w-3.5 h-3.5 text-[#C9A25A]" /> Cryptographic Security Verification
+                        </span>
+                        <span className="font-mono text-[10px] text-[#C9A25A]">HASH: {receiptData.security_hash}</span>
+                      </div>
+                      <p className="leading-relaxed">
+                        {receiptData.verification_type === 'ONLINE_REALIZED' 
+                          ? 'This digital payment is completed and verified via authorized banking gateways. Your official travel itinerary vouchers will be shared by your travel coordinator.' 
+                          : 'This payment submission is registered in the Ghumo Firoo ledger. Final booking confirmation voucher is issued post bank statement credit reconciliation.'}
+                      </p>
+                    </div>
+
+                    {/* Next Steps Buttons */}
+                    <div className="flex flex-col sm:flex-row gap-3 pt-2 no-print">
+                      <a 
+                        href={`https://wa.me/919910987264?text=${encodeURIComponent(`Hi Ghumo Firoo! I have completed payment of ₹${receiptData.amount} (Ref: ${receiptData.id}, UTR: ${receiptData.reference_number}). Please share my tour confirmation.`)}`}
+                        target="_blank" 
+                        rel="noreferrer"
+                        className="flex-1"
+                      >
+                        <Button className="w-full bg-[#25D366] hover:bg-[#1EBE5D] text-slate-950 font-bold text-xs h-12 rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/10">
+                          <MessageCircle className="w-4 h-4" /> Share with Concierge on WhatsApp
+                        </Button>
+                      </a>
+                      <Link to="/packages" className="flex-1">
+                        <Button variant="outline" className="w-full border-white/20 text-white hover:bg-white/10 text-xs h-12 rounded-xl">
+                          Browse More Journeys
+                        </Button>
+                      </Link>
+                    </div>
+
+                  </div>
+                </div>
+              </div>
+            )}
+
+          </div>
+        </div>
+      </Layout>
+    );
+  }
+
+  // 2. RENDER BROCHURE THANK YOU PAGE
   if (type === 'brochure') {
     return (
       <Layout>
