@@ -270,17 +270,17 @@ const ThankYou = () => {
 
                 <div className="flex flex-col sm:flex-row gap-3 justify-center pt-2">
                   <a 
-                    href="https://wa.me/919910987264?text=Hi!+I+need+help+verifying+my+payment+ref:+${paymentId}"
+                    href={`https://wa.me/919910987264?text=${encodeURIComponent(`Hi! I need help verifying my payment ref: ${paymentId}`)}`}
                     target="_blank" 
                     rel="noreferrer"
                     className="inline-block"
                   >
-                    <Button className="bg-[#25D366] hover:bg-[#1EBE5D] text-slate-950 font-bold text-xs h-11 px-6 rounded-xl flex items-center gap-2">
+                    <Button className="bg-[#25D366] hover:bg-[#1EBE5D] text-slate-950 font-bold text-xs h-11 px-6 rounded-xl flex items-center gap-2 shadow-lg shadow-emerald-500/10">
                       <MessageCircle className="w-4 h-4" /> WhatsApp Support (+91 99109 87264)
                     </Button>
                   </a>
-                  <Link to="/payment">
-                    <Button variant="outline" className="border-white/20 text-white hover:bg-white/10 text-xs h-11 px-6 rounded-xl">
+                  <Link to="/payment" className="inline-block">
+                    <Button className="bg-[#111A38] hover:bg-[#1A264F] text-white font-bold text-xs h-11 px-6 rounded-xl border border-[#C9A25A]/40 shadow-lg">
                       Go to Payment Desk
                     </Button>
                   </Link>

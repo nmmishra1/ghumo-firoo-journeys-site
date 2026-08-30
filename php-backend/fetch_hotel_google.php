@@ -72,13 +72,40 @@ if (strpos($query, 'http://') === 0 || strpos($query, 'https://') === 0) {
         }
     }
     
-    // If still a raw URL, clean place string
+    // If still a raw URL, clean place string or extract title from Google Travel/Maps
     if (strpos($query, 'http') === 0) {
         if (preg_match('/place\/([^\/@]+)/', $query, $matches)) {
-            $query = urldecode(str_replace('+', ' ', $matches[1]));
-        } else {
-            // Strip domain and search params
-            $query = preg_replace('/https?:\/\/[^\/]+\//', '', $query);
+            $query = urldecode(str_replace(['+', '%20'], ' ', $matches[1]));
+        } elseif (preg_match('/(google\.[a-z.]+\/travel|maps\.google|google\.[a-z.]+\/maps)/i', $query)) {
+            // Fetch title from Google Travel / Search
+            $chTitle = curl_init();
+            curl_setopt($chTitle, CURLOPT_URL, $query);
+            curl_setopt($chTitle, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($chTitle, CURLOPT_FOLLOWLOCATION, true);
+            curl_setopt($chTitle, CURLOPT_SSL_VERIFYPEER, false);
+            curl_setopt($chTitle, CURLOPT_TIMEOUT, 6);
+            curl_setopt($chTitle, CURLOPT_USERAGENT, 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36');
+            $htmlTitle = curl_exec($chTitle);
+            curl_close($chTitle);
+
+            if (!empty($htmlTitle) && preg_match('/<title[^>]*>(.*?)<\/title>/is', $htmlTitle, $titleMatches)) {
+                $extractedTitle = html_entity_decode(trim($titleMatches[1]));
+                $cleanTitle = preg_replace('/(\s*-\s*Google\s*(Hotels|Travel|Search|Maps).*$)/i', '', $extractedTitle);
+                $cleanTitle = trim(preg_replace('/^(Hotels\s*in\s*|Google\s*Hotels\s*:\s*)/i', '', $cleanTitle));
+                if (!empty($cleanTitle) && !preg_match('/^Google\s*(Hotels|Travel|Search)?$/i', $cleanTitle)) {
+                    $query = $cleanTitle;
+                }
+            }
+        }
+        
+        // If still a raw URL after attempting title fetch, strip parameters
+        if (strpos($query, 'http') === 0) {
+            $cleanUrl = preg_replace('/\?.*$/', '', $query);
+            $segments = array_filter(explode('/', $cleanUrl));
+            $lastSeg = end($segments);
+            if (!empty($lastSeg) && !in_array($lastSeg, ['search', 'travel', 'hotels', 'maps'])) {
+                $query = urldecode(str_replace(['-', '_', '+'], ' ', $lastSeg));
+            }
         }
     }
 }

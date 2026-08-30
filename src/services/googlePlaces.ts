@@ -29,7 +29,13 @@ export async function fetchHotelMetaFromGoogle(queryOrUrl: string): Promise<Fetc
   if (!searchQuery) return null;
 
   try {
-    const res = await fetch(`/php-backend/fetch_hotel_google.php?query=${encodeURIComponent(searchQuery)}`);
+    const res = await fetch(`/php-backend/fetch_hotel_google.php`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ query: searchQuery })
+    });
     if (!res.ok) {
       throw new Error(`Proxy error: ${res.status} ${res.statusText}`);
     }
