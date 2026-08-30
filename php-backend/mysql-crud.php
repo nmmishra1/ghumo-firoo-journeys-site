@@ -107,63 +107,6 @@ function parseRow($row, $table) {
     return $row;
 }
 
-try {
-    // Retrieve list of actual table columns to filter inserts/updates safely
-    $q = $pdo->query("DESCRIBE `$table`");
-    $columns = $q->fetchAll(PDO::FETCH_COLUMN);
-
-    if ($method === 'GET') {
-        if (!empty($id)) {
-            $stmt = $pdo->prepare("SELECT * FROM `$table` WHERE id = ?");
-            $stmt->execute([$id]);
-            $row = $stmt->fetch(PDO::FETCH_ASSOC);
-            if ($row) {
-                echo json_encode(parseRow($row, $table));
-            } else {
-                header('HTTP/1.1 404 Not Found');
-                echo json_encode(['error' => 'Record not found']);
-            }
-        } else {
-            // Dynamic query filtering matching provided URL parameters
-            $whereClause = '';
-            $params = [];
-            $filterParts = [];
-            foreach ($_GET as $key => $val) {
-                if ($key !== 'table' && $key !== 'id' && in_array($key, $columns)) {
-                    $filterParts[] = "`$key` = ?";
-                    $params[] = $val;
-                }
-            }
-            if (!empty($filterParts)) {
-                $whereClause = "WHERE " . implode(" AND ", $filterParts);
-            }
-
-            // Dynamic sorting column based on table type
-            $orderBy = 'id';
-            $direction = 'ASC';
-            if (in_array('name', $columns)) $orderBy = 'name';
-            elseif (in_array('sightseeing_name', $columns)) $orderBy = 'sightseeing_name';
-            elseif (in_array('visa_name', $columns)) $orderBy = 'visa_name';
-            elseif (in_array('supplier_name', $columns)) $orderBy = 'supplier_name';
-            elseif (in_array('vehicle_type', $columns)) $orderBy = 'vehicle_type';
-            elseif (in_array('payment_date', $columns)) {
-                $orderBy = 'payment_date';
-                $direction = 'DESC';
-            } elseif (in_array('uploaded_at', $columns)) {
-                $orderBy = 'uploaded_at';
-                $direction = 'DESC';
-            }
-
-            $sql = "SELECT * FROM `$table` $whereClause ORDER BY $orderBy $direction";
-            $stmt = $pdo->prepare($sql);
-            $stmt->execute($params);
-            $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
-            
-            $parsed = array_map(function($r) use ($table) {
-                return parseRow($r, $table);
-            }, $rows);
-            echo json_encode($parsed);
-        }
 function checkDuplicateMasterRecord($pdo, $table, $input, $excludeId = null) {
     if ($table === 'sightseeings') {
         $name = trim($input['sightseeing_name'] ?? ($input['name'] ?? ''));
@@ -248,7 +191,64 @@ function checkDuplicateMasterRecord($pdo, $table, $input, $excludeId = null) {
     return null;
 }
 
-    if ($method === 'POST') {
+try {
+    // Retrieve list of actual table columns to filter inserts/updates safely
+    $q = $pdo->query("DESCRIBE `$table`");
+    $columns = $q->fetchAll(PDO::FETCH_COLUMN);
+
+    if ($method === 'GET') {
+        if (!empty($id)) {
+            $stmt = $pdo->prepare("SELECT * FROM `$table` WHERE id = ?");
+            $stmt->execute([$id]);
+            $row = $stmt->fetch(PDO::FETCH_ASSOC);
+            if ($row) {
+                echo json_encode(parseRow($row, $table));
+            } else {
+                header('HTTP/1.1 404 Not Found');
+                echo json_encode(['error' => 'Record not found']);
+            }
+        } else {
+            // Dynamic query filtering matching provided URL parameters
+            $whereClause = '';
+            $params = [];
+            $filterParts = [];
+            foreach ($_GET as $key => $val) {
+                if ($key !== 'table' && $key !== 'id' && in_array($key, $columns)) {
+                    $filterParts[] = "`$key` = ?";
+                    $params[] = $val;
+                }
+            }
+            if (!empty($filterParts)) {
+                $whereClause = "WHERE " . implode(" AND ", $filterParts);
+            }
+
+            // Dynamic sorting column based on table type
+            $orderBy = 'id';
+            $direction = 'ASC';
+            if (in_array('name', $columns)) $orderBy = 'name';
+            elseif (in_array('sightseeing_name', $columns)) $orderBy = 'sightseeing_name';
+            elseif (in_array('visa_name', $columns)) $orderBy = 'visa_name';
+            elseif (in_array('supplier_name', $columns)) $orderBy = 'supplier_name';
+            elseif (in_array('vehicle_type', $columns)) $orderBy = 'vehicle_type';
+            elseif (in_array('payment_date', $columns)) {
+                $orderBy = 'payment_date';
+                $direction = 'DESC';
+            } elseif (in_array('uploaded_at', $columns)) {
+                $orderBy = 'uploaded_at';
+                $direction = 'DESC';
+            }
+
+            $sql = "SELECT * FROM `$table` $whereClause ORDER BY $orderBy $direction";
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute($params);
+            $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            
+            $parsed = array_map(function($r) use ($table) {
+                return parseRow($r, $table);
+            }, $rows);
+            echo json_encode($parsed);
+        }
+    } elseif ($method === 'POST') {
         $input = json_decode(file_get_contents('php://input'), true);
         
         // Universal Master Duplicate Protection
