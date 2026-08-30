@@ -2,7 +2,7 @@
 error_reporting(0);
 ini_set('display_errors', 0);
 
-header('Access-Control-Allow-Origin: *');
+header('Access-Control-Allow-Origin: https://ghumofiroo.com');
 header('Access-Control-Allow-Methods: GET, POST, PUT, OPTIONS');
 header('Access-Control-Allow-Headers: Content-Type, Authorization');
 header('Content-Type: application/json');
@@ -13,35 +13,26 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'OPTIONS') {
 }
 
 require_once __DIR__ . '/db.php';
+require_once __DIR__ . '/auth_middleware.php';
 
 try {
     $pdo = getDb();
 } catch (Throwable $dbErr) {
-    $pdo = null;
+    http_response_code(500);
+    echo json_encode(['error' => 'Database connection error']);
+    exit;
 }
 
-$role = 'admin';
-$userId = 1;
-$userEmail = 'superadmin@ghumofiroo.com';
-
-if (file_exists(__DIR__ . '/auth_middleware.php')) {
-    require_once __DIR__ . '/auth_middleware.php';
-    $headers = getallheaders();
-    $authHeader = $headers['Authorization'] ?? $headers['authorization'] ?? $_SERVER['HTTP_AUTHORIZATION'] ?? $_SERVER['REDIRECT_HTTP_AUTHORIZATION'] ?? '';
-    
-    if (!empty($authHeader) && strpos($authHeader, 'Bearer') !== false) {
-        try {
-            $user = authenticate();
-            if (isset($pdo)) {
-                $profile = requireRole($user, $pdo, ['admin', 'manager', 'agent', 'user']);
-                $role = $profile['role'] ?? 'admin';
-                $userId = $profile['id'] ?? 1;
-                $userEmail = $profile['email'] ?? $user['email'] ?? 'superadmin@ghumofiroo.com';
-            }
-        } catch (Throwable $t) {
-            $role = 'admin';
-        }
-    }
+try {
+    $user = authenticate();
+    $profile = requireRole($user, $pdo, ['admin', 'manager', 'agent', 'user']);
+    $role = $profile['role'] ?? 'agent';
+    $userId = $profile['id'] ?? 1;
+    $userEmail = $profile['email'] ?? $user['email'] ?? '';
+} catch (Throwable $t) {
+    http_response_code(401);
+    echo json_encode(['error' => 'Unauthorized: ' . $t->getMessage(), 'code' => 401]);
+    exit;
 }
 
 $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';

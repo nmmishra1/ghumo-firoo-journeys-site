@@ -10,6 +10,17 @@ ErrorDocument 403 /index.html
 ErrorDocument 404 /404.html
 ErrorDocument 500 /index.html
 
+# Block direct access to hidden files, backups, SQL dumps, logs, and env files
+<FilesMatch "(^\.env|^\.git|\.sql$|\.log$|\.bak$|\.lock$|backup_.*\.json$)">
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order deny,allow
+        Deny from all
+    </IfModule>
+</FilesMatch>
+
 <IfModule mod_headers.c>
   # Enforce HTTPS HSTS Header
   Header always set Strict-Transport-Security "max-age=31536000"

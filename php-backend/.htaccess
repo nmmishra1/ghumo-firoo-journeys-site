@@ -4,6 +4,30 @@
 </IfModule>
 # php -- END cPanel-generated handler, do not edit
 
+Options -Indexes
+
+# Block sensitive environment, backup, log, and database dump files
+<FilesMatch "(^\.env|\.json$|\.sql$|\.log$|\.bak$|\.lock$|\.md$|composer\.)">
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order deny,allow
+        Deny from all
+    </IfModule>
+</FilesMatch>
+
+# Block direct access to CLI test runners & diagnostic dumps
+<FilesMatch "^(test_runner\.php|test_cli_runner\.php|view_db\.php|debug_.*\.php|dump_.*\.php|run_sql\.php|direct_run_sql\.php|backup_packages\.php)$">
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order deny,allow
+        Deny from all
+    </IfModule>
+</FilesMatch>
+
 <IfModule mod_authz_core.c>
     Require all granted
 </IfModule>

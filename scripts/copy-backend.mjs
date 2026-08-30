@@ -14,9 +14,17 @@ console.log(`📦 Copying PHP backend to dist/php-backend and dist/public_html/p
   }
 });
 
-// Copy recursively to both locations
-fs.cpSync(srcDir, destDir1, { recursive: true });
-fs.cpSync(srcDir, destDir2, { recursive: true });
+// Copy recursively to both locations, filtering out sensitive files
+const copyFilter = (src) => {
+  const base = path.basename(src);
+  if (base.startsWith('backup_') && base.endsWith('.json')) return false;
+  if (base.endsWith('.sql') || base.endsWith('.bak') || base.endsWith('.log')) return false;
+  if (base === '.env' || base === '.env.local') return false;
+  return true;
+};
+
+fs.cpSync(srcDir, destDir1, { recursive: true, filter: copyFilter });
+fs.cpSync(srcDir, destDir2, { recursive: true, filter: copyFilter });
 
 function touchRecursive(dir) {
   if (!fs.existsSync(dir)) return;
