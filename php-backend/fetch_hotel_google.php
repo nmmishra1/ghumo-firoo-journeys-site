@@ -152,12 +152,13 @@ if (!$response) {
 $searchData = json_decode($response, true);
 
 if (empty($searchData['results'])) {
-    $cleanName = ucwords(str_replace(['+', '%20', '-'], ' ', $query));
-    if (preg_match('/^[a-zA-Z0-9]{10,30}$/', trim($query))) {
-        $cleanName = "Hotel / Resort";
-    }
+    if (!empty($searchData['status']) && $searchData['status'] === 'REQUEST_DENIED') {
+        $cleanName = ucwords(str_replace(['+', '%20', '-'], ' ', $query));
+        if (preg_match('/^[a-zA-Z0-9]{10,30}$/', trim($query))) {
+            $cleanName = "Hotel / Resort";
+        }
 
-    $genericTaglines = [
+        $genericTaglines = [
             'discover hotels for your next trip',
             'find cheap hotels',
             'google travel',
@@ -204,7 +205,10 @@ if (empty($searchData['results'])) {
             'goa' => ['city' => 'Goa', 'state' => 'Goa'],
             'jaipur' => ['city' => 'Jaipur', 'state' => 'Rajasthan'],
             'udaipur' => ['city' => 'Udaipur', 'state' => 'Rajasthan'],
-            'agra' => ['city' => 'Agra', 'state' => 'Uttar Pradesh']
+            'agra' => ['city' => 'Agra', 'state' => 'Uttar Pradesh'],
+            'bhopal' => ['city' => 'Bhopal', 'state' => 'Madhya Pradesh'],
+            'indore' => ['city' => 'Indore', 'state' => 'Madhya Pradesh'],
+            'ujjain' => ['city' => 'Ujjain', 'state' => 'Madhya Pradesh']
         ];
 
         foreach ($knownCitiesMap as $k => $info) {
