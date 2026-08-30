@@ -244,7 +244,7 @@ const Index: React.FC = () => {
       </Helmet>
       
       <SEO 
-        title="Bespoke Luxury Travel & Tour Packages | Ghumo Firoo Journeys"
+        title="Char Dham, Kashmir & Europe Tours | Ghumo Firoo"
         description="Discover bespoke luxury holidays, private tour packages, and sacred spiritual escapes with Ghumo Firoo. Book curated Char Dham Yatra, Rann Utsav tents, Kashmir, and Europe tours today."
         canonicalUrl="https://ghumofiroo.com/"
         keywords="luxury travel agency, bespoke tour packages, Rann Utsav premium tents, Char Dham yatra helicopter, Singapore luxury tour, Europe grand tour, luxury travel planner Delhi"

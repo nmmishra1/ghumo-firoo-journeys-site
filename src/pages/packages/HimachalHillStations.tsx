@@ -630,7 +630,7 @@ const HimachalHillStations: React.FC = () => {
                     <div className="relative aspect-[16/10] overflow-hidden bg-slate-900">
                       <img 
                         src={item.image} 
-                        alt="" 
+                        alt={item.title || item.name || "Sightseeing Highlight"} 
                         onError={(e) => {
                           (e.target as HTMLImageElement).src = FALLBACK_HIMACHAL_IMG
                         }}

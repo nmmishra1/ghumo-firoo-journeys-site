@@ -310,7 +310,7 @@ const DubaiDelights: React.FC = () => {
                   <Link to={pkg.link} className="relative aspect-[16/10] overflow-hidden bg-slate-900 block">
                     <img 
                       src={pkg.image} 
-                      alt="" 
+                      alt={pkg.name || pkg.title || "Tour Package Details"} 
                       onError={(e) => { (e.target as HTMLImageElement).src = FALLBACK_DUBAI_IMG }}
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
                     />
@@ -422,7 +422,7 @@ const DubaiDelights: React.FC = () => {
                     <div className="relative aspect-[16/10] overflow-hidden bg-slate-900">
                       <img 
                         src={item.image} 
-                        alt="" 
+                        alt={item.title || item.name || "Sightseeing Highlight"} 
                         onError={(e) => { (e.target as HTMLImageElement).src = FALLBACK_DUBAI_IMG }}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
                       />
@@ -482,7 +482,7 @@ const DubaiDelights: React.FC = () => {
                 <div className="relative aspect-[21/9] overflow-hidden">
                   <img 
                     src={selectedAttraction.image} 
-                    alt="" 
+                    alt={selectedAttraction.title || selectedAttraction.name || "Destination Attraction View"} 
                     onError={(e) => { (e.target as HTMLImageElement).src = FALLBACK_DUBAI_IMG }}
                     className="w-full h-full object-cover" 
                   />
