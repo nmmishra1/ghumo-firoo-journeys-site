@@ -1,6 +1,7 @@
 import fs from 'fs/promises';
 import path from 'path';
 import { blogPosts } from '../src/data/blogData.tsx';
+import { MASTER_DESTINATIONS } from '../src/data/masterDestinations.ts';
 
 const siteUrl = 'https://ghumofiroo.com';
 const outputDir = path.resolve(process.cwd(), 'dist');
@@ -23,6 +24,7 @@ const staticRoutes = [
   '/refund-policy',
   '/custom-tour-packages',
   '/packages',
+  '/explore-india',
   '/enquire-now',
   '/enquire-success',
   '/thank-you',
@@ -85,8 +87,9 @@ const buildUrlEntry = (route: string) => {
 
 async function generate() {
   const guideRoutes = await getGuideRoutes();
+  const destinationRoutes = MASTER_DESTINATIONS.map(d => `/explore-india/${d.city.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`);
   const routes = Array.from(
-    new Set([...staticRoutes, ...packageRoutes, ...blogRoutes, ...guideRoutes])
+    new Set([...staticRoutes, ...packageRoutes, ...blogRoutes, ...guideRoutes, ...destinationRoutes])
   ).sort();
 
   const sitemap = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${routes.map(buildUrlEntry).join('\n')}\n</urlset>\n`;

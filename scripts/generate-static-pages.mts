@@ -1,6 +1,7 @@
 import fs from 'fs/promises';
 import path from 'path';
 import { blogPosts } from '../src/data/blogData.tsx';
+import { MASTER_DESTINATIONS } from '../src/data/masterDestinations.ts';
 
 const siteUrl = 'https://ghumofiroo.com';
 const distDir = path.resolve(process.cwd(), 'dist');
@@ -994,6 +995,39 @@ async function main() {
       }
     }
   } catch (e) {}
+
+  // 4. Explore India Destination Pages (All 200+ Indian Destinations)
+  routesToGenerate.push({
+    route: '/explore-india',
+    title: 'Explore India Tourism Destinations — 178+ Cities, UNESCO Monuments & Custom Tours | Ghumo Firoo',
+    description: 'Comprehensive directory of 178+ Indian tourist destinations, monuments, tiger safaris, spiritual circuits, and personalized holiday packages.',
+    canonical: formatCanonical('/explore-india'),
+    h1: 'Explore India Tourism Destinations & Travel Directory',
+    h2: 'Discover 178+ Verified Tourist Cities & Circuits Across 28 States',
+    bodyHtml: `<article>
+      <h2>Explore India’s Top Tourism Destinations & Holiday Circuits</h2>
+      <p>Discover customized tour packages across Rajasthan, Kerala, Goa, Himachal Pradesh, Uttarakhand, Kashmir, Gujarat, Madhya Pradesh, Karnataka, Tamil Nadu, and North East India.</p>
+    </article>`
+  });
+
+  for (const dest of MASTER_DESTINATIONS) {
+    const slug = dest.city.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+    const attractions = dest.popular_attractions ? dest.popular_attractions.join(', ') : 'historic monuments, cultural landmarks, and scenic viewpoints';
+    routesToGenerate.push({
+      route: `/explore-india/${slug}`,
+      title: `${dest.city} Tourism Guide — Top Places to Visit, Safaris, Food & Custom Tour Packages | Ghumo Firoo`,
+      description: `Discover ${dest.city} in ${dest.state}. Top sightseeing spots including ${attractions}, best travel season, cuisine, and private tour packages with Ghumo Firoo.`,
+      canonical: formatCanonical(`/explore-india/${slug}`),
+      h1: `${dest.city} Tourism & Travel Guide`,
+      h2: `${dest.state}, India · ${dest.destination_group}`,
+      bodyHtml: `<article>
+        <h2>Top Places to Visit & Attractions in ${dest.city}, ${dest.state}</h2>
+        <p>Explore iconic tourist landmarks in ${dest.city} including ${attractions}.</p>
+        <h3>Best Time to Visit ${dest.city}</h3>
+        <p>Plan your holiday to ${dest.city} with verified chauffeur cabs, boutique hotels, and customized day-wise itineraries by Ghumo Firoo Travels.</p>
+      </article>`
+    });
+  }
 
   console.log(`📦 Rendering ${routesToGenerate.length} static SEO routes into dist/ ...`);
 
