@@ -16,6 +16,7 @@ import {
   ArrowRight, Landmark, Calendar, Trash2, Layers, RefreshCw, Clock, ArrowLeft, Copy, Save
 } from 'lucide-react';
 import { fetchHotelMetaFromGoogle } from '@/services/googlePlaces';
+import { MASTER_DESTINATIONS, MasterDestination } from '@/data/masterDestinations';
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || '';
 
@@ -143,10 +144,63 @@ export const HotelContractWizard: React.FC<HotelContractWizardProps> = ({
   const [amenitySearchQuery, setAmenitySearchQuery] = useState('');
   const [customAmenityInput, setCustomAmenityInput] = useState('');
   const [suppliers, setSuppliers] = useState<any[]>([]);
+  const [allHotelsList, setAllHotelsList] = useState<any[]>([]);
+  const [destinationSearchQuery, setDestinationSearchQuery] = useState('');
+  const [showDestinationOverlay, setShowDestinationOverlay] = useState(false);
 
   // Cascade lists derived at runtime
   const [filteredStates, setFilteredStates] = useState<any[]>([]);
   const [filteredCities, setFilteredCities] = useState<any[]>([]);
+
+  // ---------------- MASTER DESTINATION SELECTOR ----------------
+  const handleSelectMasterDestination = (item: MasterDestination) => {
+    setHotelForm(prev => {
+      let matchedCountryId = prev.country_id;
+      let matchedStateId = prev.state_id;
+      let matchedCityId = prev.city_id;
+
+      if (Array.isArray(countries) && countries.length > 0) {
+        const foundC = countries.find((c: any) => 
+          (c.country_name || c.name)?.toLowerCase().trim() === item.country.toLowerCase().trim()
+        );
+        if (foundC) matchedCountryId = String(foundC.id);
+      }
+
+      if (Array.isArray(states) && states.length > 0) {
+        const foundS = states.find((s: any) => 
+          (s.state_name || s.name)?.toLowerCase().trim() === item.state.toLowerCase().trim()
+        );
+        if (foundS) matchedStateId = String(foundS.id);
+      }
+
+      if (Array.isArray(cities) && cities.length > 0) {
+        const foundCity = cities.find((c: any) => 
+          (c.city_name || c.name)?.toLowerCase().trim() === item.city.toLowerCase().trim()
+        );
+        if (foundCity) matchedCityId = String(foundCity.id);
+      }
+
+      return {
+        ...prev,
+        country: item.country,
+        country_id: matchedCountryId || prev.country_id,
+        state: item.state,
+        state_id: matchedStateId || prev.state_id,
+        city: item.city,
+        city_id: matchedCityId || prev.city_id,
+        destination_group: item.destination_group || prev.destination_group,
+        nearest_airport: item.nearest_airport || prev.nearest_airport,
+        nearest_railway: item.nearest_railway || prev.nearest_railway,
+        gps_coordinates: item.gps_coordinates || prev.gps_coordinates
+      };
+    });
+    setDestinationSearchQuery(`${item.city}, ${item.state}`);
+    setShowDestinationOverlay(false);
+    toast({
+      title: "📍 Destination Auto-Filled",
+      description: `${item.city} (${item.state}, ${item.country}) mapped to ${item.destination_group} circuit.`,
+    });
+  };
 
   // ---------------- WIZARD STATE ----------------
   const [googleSearchInput, setGoogleSearchInput] = useState('');
@@ -414,6 +468,14 @@ export const HotelContractWizard: React.FC<HotelContractWizardProps> = ({
         }
         if (supData) setSuppliers(supData);
 
+        try {
+          const hRes = await fetch(`${API_BASE}/api.php?table=hotels`);
+          if (hRes.ok) {
+            const hData = await hRes.json();
+            if (Array.isArray(hData)) setAllHotelsList(hData);
+          }
+        } catch (e) {}
+
         // Auto-initialize category
         if (catData && catData.length > 0 && !hotelForm.category_id) {
           setHotelForm(prev => ({ ...prev, category_id: catData[0].id }));
@@ -430,6 +492,22 @@ export const HotelContractWizard: React.FC<HotelContractWizardProps> = ({
     };
     fetchMasters();
   }, []);
+
+  const duplicateHotelMatch = React.useMemo(() => {
+    if (!hotelForm.hotel_name.trim()) return null;
+    const nameNorm = hotelForm.hotel_name.toLowerCase().trim();
+    const cityNorm = (hotelForm.city || '').toLowerCase().trim();
+    return allHotelsList.find((h: any) => {
+      if (dialogMode === 'edit' && String(h.id) === String(selectedItemId)) return false;
+      const hNameNorm = (h.hotel_name || h.name || '').toLowerCase().trim();
+      const hCityNorm = (h.city || h.city_name || '').toLowerCase().trim();
+      if (hNameNorm === nameNorm) {
+        if (!cityNorm || !hCityNorm) return true;
+        return cityNorm === hCityNorm;
+      }
+      return false;
+    });
+  }, [hotelForm.hotel_name, hotelForm.city, allHotelsList, dialogMode, selectedItemId]);
 
   // Load editing details if mode is edit
   useEffect(() => {
@@ -913,7 +991,17 @@ export const HotelContractWizard: React.FC<HotelContractWizardProps> = ({
 
       let hotelId = selectedItemId;
 
-      // 1. Insert/Update Hotel
+      // Duplicate Check Protection
+      if (duplicateHotelMatch) {
+        toast({
+          title: "Duplicate Hotel Error",
+          description: `A hotel named "${duplicateHotelMatch.hotel_name}" already exists in ${hotelForm.city || 'this location'} (Code: ${duplicateHotelMatch.hotel_code || 'N/A'}). Duplicate records cannot be saved.`,
+          variant: "destructive"
+        });
+        setLoading(false);
+        return;
+      }
+
       // 1. Insert/Update Hotel
       if (dialogMode === 'add') {
         const res = await fetch('/php-backend/hotels.php', {
@@ -1384,99 +1472,172 @@ export const HotelContractWizard: React.FC<HotelContractWizardProps> = ({
                     <MapPin className="w-4 h-4 text-accent" />
                     Step 1: Location & Geography
                   </h2>
-                  <p className="text-[10px] text-muted-foreground">Map the hotel coordinates to destination lists for Lead/Itinerary routing.</p>
+                  <p className="text-[10px] text-muted-foreground">Type a destination to auto-populate Country, State, City, Circuit Group, and Transit Hubs.</p>
+                </div>
+
+                {/* 🌟 Master Destination Predictive Search / Typeahead */}
+                <div className="relative bg-slate-50 dark:bg-slate-950/60 p-3.5 rounded-2xl border border-accent/30 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <Label className="text-xs font-extrabold text-accent uppercase tracking-wider flex items-center gap-1.5">
+                      <Sparkles className="w-3.5 h-3.5" /> Instant Destination Auto-Fill
+                    </Label>
+                    <span className="text-[10px] text-muted-foreground font-semibold">200+ Master Tourist Hubs Indexed</span>
+                  </div>
+                  
+                  <div className="relative">
+                    <div className="relative">
+                      <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
+                      <Input
+                        value={destinationSearchQuery}
+                        onChange={e => {
+                          setDestinationSearchQuery(e.target.value);
+                          setShowDestinationOverlay(true);
+                        }}
+                        onFocus={() => setShowDestinationOverlay(true)}
+                        placeholder="Start typing city/destination (e.g. Manali, Haridwar, Jaipur, Ooty, Munnar, Tbilisi, Dubai, Paris)..."
+                        className="pl-9 h-10 text-xs bg-background border-accent/40 rounded-xl font-medium focus:ring-accent"
+                      />
+                      {destinationSearchQuery && (
+                        <button 
+                          type="button" 
+                          onClick={() => {
+                            setDestinationSearchQuery('');
+                            setShowDestinationOverlay(false);
+                          }}
+                          className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground text-xs"
+                        >
+                          ✕
+                        </button>
+                      )}
+                    </div>
+
+                    {/* Autocomplete Suggestions Overlay */}
+                    {showDestinationOverlay && destinationSearchQuery.trim().length >= 1 && (
+                      <div className="absolute z-50 left-0 right-0 top-full mt-1.5 bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl overflow-hidden max-h-[280px] overflow-y-auto divide-y divide-slate-800">
+                        {MASTER_DESTINATIONS
+                          .filter(dest => 
+                            dest.city.toLowerCase().includes(destinationSearchQuery.toLowerCase().trim()) ||
+                            dest.state.toLowerCase().includes(destinationSearchQuery.toLowerCase().trim()) ||
+                            dest.country.toLowerCase().includes(destinationSearchQuery.toLowerCase().trim()) ||
+                            dest.destination_group.toLowerCase().includes(destinationSearchQuery.toLowerCase().trim())
+                          )
+                          .slice(0, 15)
+                          .map((item, idx) => (
+                            <div
+                              key={`${item.city}-${idx}`}
+                              onClick={() => handleSelectMasterDestination(item)}
+                              className="p-2.5 px-3 hover:bg-slate-800/80 cursor-pointer transition-colors flex items-center justify-between group"
+                            >
+                              <div className="space-y-0.5">
+                                <div className="text-xs font-bold text-slate-100 flex items-center gap-1.5 group-hover:text-accent">
+                                  <MapPin className="w-3.5 h-3.5 text-accent shrink-0" />
+                                  <span>{item.city}</span>
+                                  <span className="text-[11px] font-normal text-slate-400">— {item.state}, {item.country}</span>
+                                </div>
+                                <div className="text-[10px] text-slate-400 flex items-center gap-2 pl-5">
+                                  <span className="text-amber-400/90 font-medium">Circuit: {item.destination_group}</span>
+                                  {item.nearest_airport && <span>• ✈️ {item.nearest_airport.split('-')[0]}</span>}
+                                </div>
+                              </div>
+                              <Badge variant="outline" className="text-[9px] border-slate-700 text-slate-300 group-hover:border-accent group-hover:text-accent shrink-0 ml-2">
+                                Auto-Fill ➔
+                              </Badge>
+                            </div>
+                          ))}
+                        {MASTER_DESTINATIONS.filter(dest => 
+                          dest.city.toLowerCase().includes(destinationSearchQuery.toLowerCase().trim()) ||
+                          dest.state.toLowerCase().includes(destinationSearchQuery.toLowerCase().trim()) ||
+                          dest.country.toLowerCase().includes(destinationSearchQuery.toLowerCase().trim())
+                        ).length === 0 && (
+                          <div className="p-4 text-center text-xs text-slate-400">
+                            No predefined master destination found. You can enter custom details below.
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* Flexible Country Input */}
                   <div className="space-y-1.5">
-                    <Label className="text-xs font-bold text-slate-600 dark:text-slate-400">Country *</Label>
-                    <Select 
-                      value={hotelForm.country_id ? String(hotelForm.country_id) : ''} 
-                      onValueChange={val => {
-                        const countryObj = countries.find(c => String(c.id) === String(val));
-                        setHotelForm(prev => ({ ...prev, country_id: val, country: countryObj?.country_name || '', state_id: '', city_id: '' }));
+                    <Label className="text-xs font-bold text-slate-600 dark:text-slate-400 flex justify-between">
+                      <span>Country *</span>
+                      <span className="text-[10px] text-muted-foreground font-normal">Editable</span>
+                    </Label>
+                    <Input
+                      value={hotelForm.country || ''}
+                      onChange={e => {
+                        const val = e.target.value;
+                        const matchC = countries.find((c: any) => (c.country_name || c.name)?.toLowerCase() === val.toLowerCase());
+                        setHotelForm(prev => ({
+                          ...prev,
+                          country: val,
+                          country_id: matchC ? String(matchC.id) : prev.country_id
+                        }));
                       }}
+                      placeholder="e.g. India, Georgia, United Arab Emirates, France"
+                      className="bg-background border-border text-xs font-semibold"
                       required
-                    >
-                      <SelectTrigger className="bg-background border-border text-xs"><SelectValue placeholder="Select Country" /></SelectTrigger>
-                      <SelectContent className="bg-slate-900 border border-slate-700 text-slate-100 text-xs shadow-xl">
-                        {countries
-                          .filter((c: any) => Boolean((c.country_name || c.name || '').trim()))
-                          .map((c: any) => (
-                            <SelectItem key={c.id} value={String(c.id)}>
-                              {c.country_name || c.name}
-                            </SelectItem>
-                          ))}
-                      </SelectContent>
-                    </Select>
+                    />
                   </div>
 
+                  {/* Flexible State / Region Input */}
                   <div className="space-y-1.5">
-                    <Label className="text-xs font-bold text-slate-600 dark:text-slate-400">State / Region *</Label>
-                    <Select 
-                      value={hotelForm.state_id ? String(hotelForm.state_id) : ''} 
-                      onValueChange={val => {
-                        const stateObj = states.find(s => String(s.id) === String(val));
-                        setHotelForm(prev => ({ ...prev, state_id: val, state: stateObj?.state_name || '', city_id: '' }));
+                    <Label className="text-xs font-bold text-slate-600 dark:text-slate-400 flex justify-between">
+                      <span>State / Region *</span>
+                      <span className="text-[10px] text-muted-foreground font-normal">Editable</span>
+                    </Label>
+                    <Input
+                      value={hotelForm.state || ''}
+                      onChange={e => {
+                        const val = e.target.value;
+                        const matchS = states.find((s: any) => (s.state_name || s.name)?.toLowerCase() === val.toLowerCase());
+                        setHotelForm(prev => ({
+                          ...prev,
+                          state: val,
+                          state_id: matchS ? String(matchS.id) : prev.state_id
+                        }));
                       }}
-                      disabled={!hotelForm.country_id}
+                      placeholder="e.g. Himachal Pradesh, Uttarakhand, Rajasthan, Goa"
+                      className="bg-background border-border text-xs font-semibold"
                       required
-                    >
-                      <SelectTrigger className="bg-background border-border text-xs"><SelectValue placeholder="Select State" /></SelectTrigger>
-                      <SelectContent className="bg-slate-900 border border-slate-700 text-slate-100 text-xs shadow-xl">
-                        {filteredStates
-                          .filter((s: any) => Boolean((s.state_name || s.name || '').trim()))
-                          .map((s: any) => (
-                            <SelectItem key={s.id} value={String(s.id)}>
-                              {s.state_name || s.name}
-                            </SelectItem>
-                          ))}
-                      </SelectContent>
-                    </Select>
+                    />
                   </div>
 
+                  {/* Destination Group (Circuit) */}
                   <div className="space-y-1.5">
                     <Label className="text-xs font-bold text-slate-600 dark:text-slate-400">Destination (Circuit / Group) *</Label>
-                    <Select 
-                      value={hotelForm.destination_group} 
-                      onValueChange={val => setHotelForm(prev => ({ ...prev, destination_group: val }))}
-                    >
-                      <SelectTrigger className="bg-background border-border text-xs"><SelectValue placeholder="Circuit Group" /></SelectTrigger>
-                      <SelectContent className="bg-slate-900 border border-slate-700 text-slate-100 text-xs shadow-xl">
-                        <SelectItem value="Metro">Metro City</SelectItem>
-                        {destinationGroups
-                          .filter((dg: any) => Boolean((dg.name || '').trim()))
-                          .map((dg: any) => (
-                            <SelectItem key={dg.id} value={dg.name}>
-                              {dg.name}
-                            </SelectItem>
-                          ))}
-                      </SelectContent>
-                    </Select>
+                    <Input
+                      value={hotelForm.destination_group || ''}
+                      onChange={e => setHotelForm(prev => ({ ...prev, destination_group: e.target.value }))}
+                      placeholder="e.g. Hill Station, Spiritual / Pilgrimage, Beach Resort, Heritage & Desert, Metro"
+                      className="bg-background border-border text-xs font-semibold"
+                    />
                   </div>
 
+                  {/* Flexible City / Town Input */}
                   <div className="space-y-1.5">
-                    <Label className="text-xs font-bold text-slate-600 dark:text-slate-400">City / Town *</Label>
-                    <Select 
-                      value={hotelForm.city_id ? String(hotelForm.city_id) : ''} 
-                      onValueChange={val => {
-                        const cityObj = cities.find(c => String(c.id) === String(val));
-                        setHotelForm(prev => ({ ...prev, city_id: val, city: cityObj?.city_name || '' }));
+                    <Label className="text-xs font-bold text-slate-600 dark:text-slate-400 flex justify-between">
+                      <span>City / Town *</span>
+                      <span className="text-[10px] text-muted-foreground font-normal">Editable</span>
+                    </Label>
+                    <Input
+                      value={hotelForm.city || ''}
+                      onChange={e => {
+                        const val = e.target.value;
+                        const matchCity = cities.find((c: any) => (c.city_name || c.name)?.toLowerCase() === val.toLowerCase());
+                        setHotelForm(prev => ({
+                          ...prev,
+                          city: val,
+                          city_id: matchCity ? String(matchCity.id) : prev.city_id,
+                          destination: val
+                        }));
                       }}
-                      disabled={!hotelForm.state_id}
+                      placeholder="e.g. Manali, Haridwar, Jaipur, Munnar, Tbilisi"
+                      className="bg-background border-border text-xs font-semibold"
                       required
-                    >
-                      <SelectTrigger className="bg-background border-border text-xs"><SelectValue placeholder="Select City" /></SelectTrigger>
-                      <SelectContent className="bg-slate-900 border border-slate-700 text-slate-100 text-xs shadow-xl">
-                        {filteredCities
-                          .filter((c: any) => Boolean((c.city_name || c.name || c.city || '').trim()))
-                          .map((c: any) => (
-                            <SelectItem key={c.id || c.city_id} value={String(c.id || c.city_id)}>
-                              {c.city_name || c.name || c.city}
-                            </SelectItem>
-                          ))}
-                      </SelectContent>
-                    </Select>
+                    />
                   </div>
                 </div>
 
@@ -1519,10 +1680,29 @@ export const HotelContractWizard: React.FC<HotelContractWizardProps> = ({
                   <p className="text-[10px] text-muted-foreground">Establish basic classifications, contact information, check-in policy, and policies.</p>
                 </div>
 
+                {/* 🛡️ Duplicate Hotel Alert Banner */}
+                {duplicateHotelMatch && (
+                  <div className="p-3.5 bg-rose-500/10 border border-rose-500/40 rounded-xl flex items-start gap-2.5 text-rose-600 dark:text-rose-400">
+                    <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5 text-rose-500" />
+                    <div className="text-xs space-y-0.5">
+                      <div className="font-bold">⚠️ Duplicate Hotel Name Detected!</div>
+                      <p className="text-[11px] text-rose-500/90 font-medium">
+                        A hotel named <strong>"{duplicateHotelMatch.hotel_name}"</strong> is already registered in <strong>{hotelForm.city || 'this location'}</strong> (Code: {duplicateHotelMatch.hotel_code || 'N/A'}). Duplicates cannot be saved to the database.
+                      </p>
+                    </div>
+                  </div>
+                )}
+
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                   <div className="md:col-span-2 space-y-1.5">
                     <Label className="text-xs font-bold text-slate-600 dark:text-slate-400">Hotel Name *</Label>
-                    <Input className="bg-background border-border text-xs font-extrabold" value={hotelForm.hotel_name || ''} onChange={e => setHotelForm({...hotelForm, hotel_name: e.target.value})} placeholder="e.g. Oberoi Cecil Shimla" required />
+                    <Input 
+                      className={`bg-background border-border text-xs font-extrabold ${duplicateHotelMatch ? 'border-rose-500 focus:ring-rose-500' : ''}`} 
+                      value={hotelForm.hotel_name || ''} 
+                      onChange={e => setHotelForm({...hotelForm, hotel_name: e.target.value})} 
+                      placeholder="e.g. Oberoi Cecil Shimla" 
+                      required 
+                    />
                   </div>
                   <div className="space-y-1.5">
                     <Label className="text-xs font-bold text-slate-600 dark:text-slate-400 flex justify-between">

@@ -99,6 +99,31 @@ try {
         }
     } elseif ($method === 'POST') {
         $input = json_decode(file_get_contents('php://input'), true);
+
+        // Check for duplicate activity name in the same destination
+        $actName = trim($input['activity_name'] ?? '');
+        $dest = trim($input['destination'] ?? '');
+        if (!empty($actName)) {
+            $dupSql = "SELECT id, activity_name FROM activities WHERE LOWER(TRIM(activity_name)) = LOWER(TRIM(:name))";
+            $dupParams = [':name' => $actName];
+            if (!empty($dest)) {
+                $dupSql .= " AND LOWER(TRIM(destination)) = LOWER(TRIM(:dest))";
+                $dupParams[':dest'] = $dest;
+            }
+            $dupStmt = $pdo->prepare($dupSql);
+            $dupStmt->execute($dupParams);
+            $dup = $dupStmt->fetch(PDO::FETCH_ASSOC);
+            if ($dup) {
+                header('HTTP/1.1 409 Conflict');
+                echo json_encode([
+                    'success' => false,
+                    'error' => "Duplicate Activity: An activity named '{$dup['activity_name']}' already exists" . (!empty($dest) ? " in {$dest}." : ".") . " Duplicates cannot be saved.",
+                    'duplicate' => true
+                ]);
+                exit;
+            }
+        }
+
         $newId = $input['id'] ?? ('act-' . time() . '-' . rand(1000, 9999));
         $hasCityId = activitiesHasCityId($pdo);
 
@@ -158,6 +183,30 @@ try {
             header('HTTP/1.1 400 Bad Request');
             echo json_encode(['error' => 'Missing ID parameter']);
             exit;
+        }
+        
+        // Check for duplicate activity name in the same destination (excluding current activity)
+        $actName = trim($input['activity_name'] ?? '');
+        $dest = trim($input['destination'] ?? '');
+        if (!empty($actName)) {
+            $dupSql = "SELECT id, activity_name FROM activities WHERE LOWER(TRIM(activity_name)) = LOWER(TRIM(:name)) AND id != :current_id";
+            $dupParams = [':name' => $actName, ':current_id' => $id];
+            if (!empty($dest)) {
+                $dupSql .= " AND LOWER(TRIM(destination)) = LOWER(TRIM(:dest))";
+                $dupParams[':dest'] = $dest;
+            }
+            $dupStmt = $pdo->prepare($dupSql);
+            $dupStmt->execute($dupParams);
+            $dup = $dupStmt->fetch(PDO::FETCH_ASSOC);
+            if ($dup) {
+                header('HTTP/1.1 409 Conflict');
+                echo json_encode([
+                    'success' => false,
+                    'error' => "Duplicate Activity: Another activity named '{$dup['activity_name']}' already exists" . (!empty($dest) ? " in {$dest}." : "."),
+                    'duplicate' => true
+                ]);
+                exit;
+            }
         }
         
         $hasCityId = activitiesHasCityId($pdo);

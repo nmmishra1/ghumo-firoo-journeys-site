@@ -164,9 +164,105 @@ try {
             }, $rows);
             echo json_encode($parsed);
         }
-    } elseif ($method === 'POST') {
+function checkDuplicateMasterRecord($pdo, $table, $input, $excludeId = null) {
+    if ($table === 'sightseeings') {
+        $name = trim($input['sightseeing_name'] ?? ($input['name'] ?? ''));
+        $dest = trim($input['destination'] ?? ($input['city'] ?? ''));
+        if (!empty($name)) {
+            $sql = "SELECT id, sightseeing_name FROM `sightseeings` WHERE LOWER(TRIM(sightseeing_name)) = LOWER(TRIM(:name))";
+            $params = [':name' => $name];
+            if (!empty($dest)) {
+                $sql .= " AND LOWER(TRIM(destination)) = LOWER(TRIM(:dest))";
+                $params[':dest'] = $dest;
+            }
+            if ($excludeId) {
+                $sql .= " AND id != :exclude_id";
+                $params[':exclude_id'] = $excludeId;
+            }
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute($params);
+            $dup = $stmt->fetch(PDO::FETCH_ASSOC);
+            if ($dup) {
+                return "Duplicate Sightseeing: A sightseeing spot named '{$dup['sightseeing_name']}' already exists" . (!empty($dest) ? " in {$dest}." : ".");
+            }
+        }
+    } elseif ($table === 'activities') {
+        $name = trim($input['activity_name'] ?? ($input['name'] ?? ''));
+        $dest = trim($input['destination'] ?? ($input['city'] ?? ''));
+        if (!empty($name)) {
+            $sql = "SELECT id, activity_name FROM `activities` WHERE LOWER(TRIM(activity_name)) = LOWER(TRIM(:name))";
+            $params = [':name' => $name];
+            if (!empty($dest)) {
+                $sql .= " AND LOWER(TRIM(destination)) = LOWER(TRIM(:dest))";
+                $params[':dest'] = $dest;
+            }
+            if ($excludeId) {
+                $sql .= " AND id != :exclude_id";
+                $params[':exclude_id'] = $excludeId;
+            }
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute($params);
+            $dup = $stmt->fetch(PDO::FETCH_ASSOC);
+            if ($dup) {
+                return "Duplicate Activity: An activity named '{$dup['activity_name']}' already exists" . (!empty($dest) ? " in {$dest}." : ".");
+            }
+        }
+    } elseif ($table === 'destinations') {
+        $name = trim($input['destination_name'] ?? ($input['name'] ?? ''));
+        if (!empty($name)) {
+            $sql = "SELECT id, destination_name FROM `destinations` WHERE LOWER(TRIM(destination_name)) = LOWER(TRIM(:name))";
+            $params = [':name' => $name];
+            if ($excludeId) {
+                $sql .= " AND id != :exclude_id";
+                $params[':exclude_id'] = $excludeId;
+            }
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute($params);
+            $dup = $stmt->fetch(PDO::FETCH_ASSOC);
+            if ($dup) {
+                return "Duplicate Destination: Destination '{$dup['destination_name']}' is already registered in the master directory.";
+            }
+        }
+    } elseif ($table === 'cities') {
+        $name = trim($input['city_name'] ?? ($input['name'] ?? ''));
+        $stateId = $input['state_id'] ?? null;
+        if (!empty($name)) {
+            $sql = "SELECT id, city_name FROM `cities` WHERE LOWER(TRIM(city_name)) = LOWER(TRIM(:name))";
+            $params = [':name' => $name];
+            if ($stateId) {
+                $sql .= " AND state_id = :state_id";
+                $params[':state_id'] = $stateId;
+            }
+            if ($excludeId) {
+                $sql .= " AND id != :exclude_id";
+                $params[':exclude_id'] = $excludeId;
+            }
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute($params);
+            $dup = $stmt->fetch(PDO::FETCH_ASSOC);
+            if ($dup) {
+                return "Duplicate City: City '{$dup['city_name']}' is already registered in database.";
+            }
+        }
+    }
+    return null;
+}
+
+    if ($method === 'POST') {
         $input = json_decode(file_get_contents('php://input'), true);
         
+        // Universal Master Duplicate Protection
+        $dupError = checkDuplicateMasterRecord($pdo, $table, $input);
+        if ($dupError) {
+            http_response_code(409);
+            echo json_encode([
+                'success' => false,
+                'error' => $dupError,
+                'duplicate' => true
+            ]);
+            exit;
+        }
+
         $autoIncrementTables = [
             'countries', 'states', 'destination_groups', 'hotel_categories', 
             'hotel_facilities', 'meal_plans', 'hotel_contracts', 
@@ -230,6 +326,18 @@ try {
             exit;
         }
         
+        // Universal Master Duplicate Protection on Update
+        $dupError = checkDuplicateMasterRecord($pdo, $table, $input, $id);
+        if ($dupError) {
+            http_response_code(409);
+            echo json_encode([
+                'success' => false,
+                'error' => $dupError,
+                'duplicate' => true
+            ]);
+            exit;
+        }
+
         $data = [];
         foreach ($input as $key => $val) {
             if (in_array($key, $columns) && $key !== 'id') {

@@ -313,6 +313,31 @@ try {
                 $input['city_id'] = $resolvedId;
             }
         }
+
+        // Check for duplicate hotel name in the same city
+        $hotelName = trim($input['hotel_name'] ?? '');
+        $cityId = $input['city_id'] ?? null;
+        if (!empty($hotelName)) {
+            $dupSql = "SELECT id, hotel_name, hotel_code FROM hotels WHERE LOWER(TRIM(hotel_name)) = LOWER(TRIM(:hname))";
+            $dupParams = [':hname' => $hotelName];
+            if ($cityId) {
+                $dupSql .= " AND city_id = :city_id";
+                $dupParams[':city_id'] = $cityId;
+            }
+            $dupStmt = $pdo->prepare($dupSql);
+            $dupStmt->execute($dupParams);
+            $dup = $dupStmt->fetch(PDO::FETCH_ASSOC);
+            if ($dup) {
+                http_response_code(409);
+                echo json_encode([
+                    'success' => false,
+                    'error' => "Duplicate Record: A hotel named '{$dup['hotel_name']}' is already registered in this destination (Code: {$dup['hotel_code']}). Duplicate records cannot be saved.",
+                    'duplicate' => true
+                ]);
+                exit;
+            }
+        }
+
         $newId = $input['id'] ?? ('hotel-' . uniqid('', true));
         $data  = buildHotelData($input, $columns);
 
@@ -349,6 +374,30 @@ try {
                     $input['city_id'] = $resolvedId;
                 }
             } catch (Throwable $e) {}
+        }
+
+        // Check for duplicate hotel name in the same city (excluding current hotel)
+        $hotelName = trim($input['hotel_name'] ?? '');
+        $cityId = $input['city_id'] ?? null;
+        if (!empty($hotelName)) {
+            $dupSql = "SELECT id, hotel_name, hotel_code FROM hotels WHERE LOWER(TRIM(hotel_name)) = LOWER(TRIM(:hname)) AND id != :current_id";
+            $dupParams = [':hname' => $hotelName, ':current_id' => $id];
+            if ($cityId) {
+                $dupSql .= " AND city_id = :city_id";
+                $dupParams[':city_id'] = $cityId;
+            }
+            $dupStmt = $pdo->prepare($dupSql);
+            $dupStmt->execute($dupParams);
+            $dup = $dupStmt->fetch(PDO::FETCH_ASSOC);
+            if ($dup) {
+                http_response_code(409);
+                echo json_encode([
+                    'success' => false,
+                    'error' => "Duplicate Record: Another hotel named '{$dup['hotel_name']}' is already registered in this destination (Code: {$dup['hotel_code']}).",
+                    'duplicate' => true
+                ]);
+                exit;
+            }
         }
         $data  = buildHotelData($input, $columns);
 
