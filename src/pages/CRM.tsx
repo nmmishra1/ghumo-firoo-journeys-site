@@ -4404,12 +4404,38 @@ const CRM = () => {
                                       <Clock className="w-3.5 h-3.5" />
                                     </button>
                                   </div>
+                                  {/* Initial remarks / notes preview */}
+                                  {(l.remarks || l.notes || l.discussion_notes) && (
+                                    <div 
+                                      className="mt-1 text-[11px] text-slate-700 dark:text-slate-300 bg-amber-500/10 dark:bg-amber-500/15 border border-amber-500/30 rounded-md px-2 py-1 flex items-start gap-1 max-w-[260px]"
+                                      title={l.remarks || l.notes || l.discussion_notes}
+                                    >
+                                      <span className="text-amber-500 font-bold shrink-0">📝</span>
+                                      <span className="line-clamp-2 leading-tight font-medium">
+                                        {l.remarks || l.notes || l.discussion_notes}
+                                      </span>
+                                    </div>
+                                  )}
                                 </td>
                                 <td className="py-3 px-3 align-top text-left space-y-1">
                                   <div className="font-extrabold text-xs text-slate-900 dark:text-slate-100 uppercase">
-                                    <span>{l.city || l.customer_home_city || 'Delhi'}</span>
-                                    <span className="mx-1 text-amber-500">→</span>
-                                    <span className="text-amber-600 dark:text-amber-400">{formatLeadRoute(l)}</span>
+                                    {(() => {
+                                      const originCity = (l.city || l.customer_home_city || l.departure_city || '').trim();
+                                      const route = formatLeadRoute(l);
+                                      const firstRouteCity = route.split('→')[0]?.trim().toLowerCase();
+                                      const hasDistinctOrigin = originCity && (!firstRouteCity || firstRouteCity !== originCity.toLowerCase());
+
+                                      if (hasDistinctOrigin) {
+                                        return (
+                                          <>
+                                            <span className="text-slate-700 dark:text-slate-300">{originCity}</span>
+                                            <span className="mx-1 text-amber-500">→</span>
+                                            <span className="text-amber-600 dark:text-amber-400">{route}</span>
+                                          </>
+                                        );
+                                      }
+                                      return <span className="text-amber-600 dark:text-amber-400">{route}</span>;
+                                    })()}
                                   </div>
                                   <div className="text-xs text-slate-600 dark:text-slate-400 font-semibold">
                                     {l.adult_count || 1} adults · {l.child_count || 0} children · Dep {l.trip_start_date ? new Date(l.trip_start_date).toLocaleDateString([], {day: 'numeric', month: 'short', year: 'numeric'}) : 'TBD'}
@@ -4615,26 +4641,42 @@ Ghumo Firoo Travels`
                   <div className="bg-slate-50 border border-slate-100 rounded-lg p-3 space-y-2 text-xs">
                     <div className="flex flex-col gap-1">
                       <div className="flex items-center gap-1.5 flex-wrap">
-                        <span className="font-bold text-[12px] text-slate-800" title={activeLead.city || activeLead.customer_home_city || 'Delhi'}>
-                          {activeLead.city || activeLead.customer_home_city || 'Delhi'}
-                        </span>
-                        <i className="ti ti-arrow-right text-slate-400 text-xs shrink-0"></i>
-                        <span className="font-bold text-[12px] text-[#C9A25A]" title={typeof activeLead.destinations === 'string' ? activeLead.destinations : ''}>
-                          {(() => {
-                            if (!activeLead.destinations) return 'Custom Itinerary';
+                        {(() => {
+                          const origin = (activeLead.city || activeLead.customer_home_city || activeLead.departure_city || '').trim();
+                          let destStr = 'Custom Itinerary';
+                          if (activeLead.destinations) {
                             if (typeof activeLead.destinations === 'string' && activeLead.destinations.trim().startsWith('[')) {
                               try {
                                 const parsed = JSON.parse(activeLead.destinations);
                                 if (Array.isArray(parsed) && parsed.length > 0) {
-                                  return parsed.map((s: any) => `${s.city || s.name || s.destination}${s.nights ? ` (${s.nights}N)` : ''}`).filter(Boolean).join(' → ');
+                                  destStr = parsed.map((s: any) => `${s.city || s.name || s.destination}${s.nights ? ` (${s.nights}N)` : ''}`).filter(Boolean).join(' → ');
                                 }
                               } catch(e) {}
                             } else if (Array.isArray(activeLead.destinations)) {
-                              return activeLead.destinations.map((s: any) => typeof s === 'string' ? s : `${s.city || s.name || s.destination}${s.nights ? ` (${s.nights}N)` : ''}`).filter(Boolean).join(' → ');
+                              destStr = activeLead.destinations.map((s: any) => typeof s === 'string' ? s : `${s.city || s.name || s.destination}${s.nights ? ` (${s.nights}N)` : ''}`).filter(Boolean).join(' → ');
+                            } else if (typeof activeLead.destinations === 'string') {
+                              destStr = activeLead.destinations;
                             }
-                            return activeLead.destinations;
-                          })()}
-                        </span>
+                          }
+                          const firstDest = destStr.split('→')[0]?.trim().toLowerCase();
+                          const hasOrigin = origin && (!firstDest || !firstDest.includes(origin.toLowerCase()));
+
+                          return (
+                            <>
+                              {hasOrigin && (
+                                <>
+                                  <span className="font-bold text-[12px] text-slate-800 dark:text-slate-200">
+                                    {origin}
+                                  </span>
+                                  <i className="ti ti-arrow-right text-slate-400 text-xs shrink-0"></i>
+                                </>
+                              )}
+                              <span className="font-bold text-[12px] text-[#C9A25A]">
+                                {destStr}
+                              </span>
+                            </>
+                          );
+                        })()}
                       </div>
                     </div>
                     <div className="text-slate-500 font-medium text-[11px]">
@@ -4776,11 +4818,11 @@ Ghumo Firoo Travels`
                   })()}
                 </div>
 
-                {/* Section: Remarks */}
+                {/* Section: Initial Remarks / Notes */}
                 <div className="space-y-2">
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Remarks</p>
-                  <div className="border-l-2 border-[#C9A25A] bg-slate-50 rounded-r p-2 text-[11px] text-slate-600 font-normal leading-relaxed whitespace-pre-line">
-                    {activeLead.remarks || activeLead.notes || activeLead.discussion_notes || activeLead.tour_description || 'No remarks recorded.'}
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Initial Remarks / Notes</p>
+                  <div className="border-l-2 border-amber-500 bg-amber-500/5 dark:bg-amber-500/10 rounded-r p-2.5 text-[11px] text-slate-700 dark:text-slate-200 font-medium leading-relaxed whitespace-pre-line border border-amber-500/20">
+                    {activeLead.remarks || activeLead.notes || activeLead.discussion_notes || activeLead.tour_description || 'No initial remarks recorded.'}
                   </div>
                 </div>
 

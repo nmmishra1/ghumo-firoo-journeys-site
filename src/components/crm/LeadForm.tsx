@@ -442,6 +442,7 @@ export const LeadForm: React.FC<LeadFormProps> = ({
     email: '',
     whatsapp_number: '',
     company_name: '',
+    customer_home_city: '',
     source: 'Website',
     assigned_to: 'unassigned',
     priority: 'Medium',
@@ -982,6 +983,7 @@ export const LeadForm: React.FC<LeadFormProps> = ({
         email: editingLead.email || editingLead.customer_email || '',
         whatsapp_number: editingLead.whatsapp_number || '',
         company_name: editingLead.company_name || '',
+        customer_home_city: (editingLead as any).customer_home_city || (editingLead as any).city || (editingLead as any).departure_city || '',
         source: editingLead.source || editingLead.customer_type || 'Website',
         assigned_to: editingLead.assigned_to || 'unassigned',
         priority: editingLead.priority || 'Medium',
@@ -997,7 +999,7 @@ export const LeadForm: React.FC<LeadFormProps> = ({
         hotel_category: editingLead.hotel_category || '5 Star Luxury',
         transport_preference: editingLead.transport_preference || 'Flight + Transfer',
         follow_up_date: editingLead.follow_up_date ? editingLead.follow_up_date.split('T')[0] : '',
-        remarks: editingLead.remarks || editingLead.discussion_notes || editingLead.notes || '',
+        remarks: editingLead.remarks || editingLead.discussion_notes || editingLead.notes || (editingLead as any).tour_description || (editingLead as any).comment || '',
         package_name: editingLead.package_name || ''
       });
     }
@@ -1162,6 +1164,9 @@ export const LeadForm: React.FC<LeadFormProps> = ({
       customer_phone: formData.contact_number.trim() || null,
       whatsapp_number: formData.whatsapp_number.trim() || null,
       company_name: formData.company_name.trim() || null,
+      customer_home_city: formData.customer_home_city.trim() || null,
+      city: formData.customer_home_city.trim() || null,
+      departure_city: formData.customer_home_city.trim() || null,
       
       country: primaryCountry,
       state: primaryState,
@@ -1374,6 +1379,37 @@ export const LeadForm: React.FC<LeadFormProps> = ({
                       className="pl-8 h-9 text-xs bg-slate-950 border-slate-800 text-slate-100 font-bold placeholder:text-slate-500 focus:border-amber-500"
                     />
                   </div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                <div className="space-y-1">
+                  <Label htmlFor="customer_home_city" className="text-xs font-bold uppercase tracking-wide text-slate-300">
+                    Departure / Home City <span className="text-slate-500 text-[10px] lowercase">(optional)</span>
+                  </Label>
+                  <div className="relative">
+                    <Building2 className="absolute left-2.5 top-2.5 h-4 w-4 text-slate-400" />
+                    <Input
+                      id="customer_home_city"
+                      placeholder="e.g. Mumbai, Delhi, Ahmedabad, Kolkata"
+                      value={formData.customer_home_city}
+                      onChange={(e) => handleFieldChange('customer_home_city', e.target.value)}
+                      className="pl-8 h-9 text-xs bg-slate-950 border-slate-800 text-slate-100 font-bold placeholder:text-slate-500 focus:border-amber-500"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-1">
+                  <Label htmlFor="company_name" className="text-xs font-bold uppercase tracking-wide text-slate-300">
+                    Company / Organization <span className="text-slate-500 text-[10px] lowercase">(optional)</span>
+                  </Label>
+                  <Input
+                    id="company_name"
+                    placeholder="Corporate / Group name"
+                    value={formData.company_name}
+                    onChange={(e) => handleFieldChange('company_name', e.target.value)}
+                    className="h-9 text-xs bg-slate-950 border-slate-800 text-slate-100 font-bold placeholder:text-slate-500 focus:border-amber-500"
+                  />
                 </div>
               </div>
             </CardContent>

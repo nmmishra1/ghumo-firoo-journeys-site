@@ -104,13 +104,15 @@ try {
         } catch (Exception $e) {}
     }
 
+    $notes = trim($input['notes'] ?? $input['remarks'] ?? $input['discussion_notes'] ?? $input['discussionNotes'] ?? '');
+
     $stmt = $pdo->prepare(
         'INSERT INTO leads
             (customer_name, customer_phone, customer_email, customer_home_city, whatsapp_number,
              source, source_detail, destination_city_id, destinations,
              trip_start_date, trip_end_date, adult_count, child_count, infant_count,
-             budget, duration, number_of_nights, hotel_category, status, assigned_to, created_by)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, "New", ?, ?)'
+             budget, duration, number_of_nights, hotel_category, notes, discussion_notes, status, assigned_to, created_by)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, "New", ?, ?)'
     );
 
     $stmt->execute([
@@ -132,11 +134,20 @@ try {
         $duration,
         $numberOfNights,
         $input['hotel_category'] ?? $input['hotelCategory'] ?? null,
+        !empty($notes) ? $notes : null,
+        !empty($notes) ? $notes : null,
         $assignedTo,
         $createdBy
     ]);
 
     $newLeadId = (int)$pdo->lastInsertId();
+
+    if (!empty($notes)) {
+        try {
+            $commStmt = $pdo->prepare('INSERT INTO lead_communications (lead_id, communication_type, communication_direction, content, summary, created_by, created_at) VALUES (?, "note", "internal", ?, ?, ?, NOW())');
+            $commStmt->execute([$newLeadId, $notes, 'Initial lead remarks / notes', $createdBy ?: 'System']);
+        } catch (Throwable $ct) {}
+    }
 
     if (!empty($phone) && file_exists(__DIR__ . '/send_lead_whatsapp.php')) {
         try {

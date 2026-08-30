@@ -167,8 +167,12 @@ function mapLeadToDb(lead: Partial<Lead> | any): any {
   if (lead.status !== undefined) db.status = lead.status;
   if (lead.createdAt !== undefined || lead.created_at !== undefined) db.created_at = lead.createdAt ?? lead.created_at;
   if (lead.updatedAt !== undefined || lead.updated_at !== undefined) db.updated_at = lead.updatedAt ?? lead.updated_at;
-  if (lead.notes !== undefined) db.notes = lead.notes;
-  if (lead.remarks !== undefined || lead.discussion_notes !== undefined) db.remarks = lead.remarks ?? lead.discussion_notes;
+  if (lead.notes !== undefined || lead.remarks !== undefined || lead.discussion_notes !== undefined || lead.discussionNotes !== undefined) {
+    const nVal = lead.notes ?? lead.remarks ?? lead.discussion_notes ?? lead.discussionNotes;
+    db.notes = nVal;
+    db.remarks = nVal;
+    db.discussion_notes = nVal;
+  }
   if (lead.followUpDate !== undefined || lead.follow_up_date !== undefined) {
     const fDate = lead.followUpDate ?? lead.follow_up_date;
     db.follow_up_date = fDate ? new Date(fDate).toISOString() : null;
@@ -274,7 +278,9 @@ function mapLeadFromDb(db: any): Lead {
     status: db.status,
     createdAt: db.created_at,
     updatedAt: db.updated_at,
-    notes: db.notes || '',
+    notes: db.notes || db.remarks || db.discussion_notes || '',
+    remarks: db.remarks || db.notes || db.discussion_notes || '',
+    discussion_notes: db.discussion_notes || db.notes || db.remarks || '',
     followUpDate: db.follow_up_date ? db.follow_up_date.split('T')[0] : undefined,
     follow_up_date: db.follow_up_date ? db.follow_up_date.split('T')[0] : undefined,
     discussions: db.lead_journey ? db.lead_journey.map(mapJourneyFromDb) : [], // Timeline array mapped from communications in PHP
