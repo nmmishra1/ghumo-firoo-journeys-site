@@ -1,52 +1,89 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 
+// Module-level persistent cache across route changes
+let cachedSession: Session | null = null;
+let cachedUser: User | null = null;
+let isInitialized = false;
+const listeners = new Set<() => void>();
+
+const notifySubscribers = () => {
+  listeners.forEach(listener => listener());
+};
+
+// Initialize Supabase Auth listener once globally
+if (typeof window !== 'undefined') {
+  supabase.auth.getSession().then(({ data: { session } }) => {
+    cachedSession = session;
+    cachedUser = session?.user ?? null;
+    isInitialized = true;
+    notifySubscribers();
+  }).catch(() => {
+    isInitialized = true;
+    notifySubscribers();
+  });
+
+  supabase.auth.onAuthStateChange((_event, session) => {
+    cachedSession = session;
+    cachedUser = session?.user ?? null;
+    isInitialized = true;
+    notifySubscribers();
+  });
+}
+
 export const useAuth = () => {
-  const [user, setUser] = useState<User | null>(null);
-  const [session, setSession] = useState<Session | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [session, setSession] = useState<Session | null>(cachedSession);
+  const [user, setUser] = useState<User | null>(cachedUser);
+  const [loading, setLoading] = useState(!isInitialized);
 
   useEffect(() => {
-    // Get initial session
-    const mockDevUser = {
-      id: 'dev-user-id',
-      email: 'agent@ghumofiroo.com',
-      user_metadata: { full_name: 'Dev Agent', role: 'admin' },
-      app_metadata: {},
-      aud: 'authenticated',
-      created_at: new Date().toISOString()
-    } as any;
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
-        setSession(session);
-        setUser(session?.user ?? (import.meta.env.DEV ? mockDevUser : null));
-        setLoading(false);
-      }
-    );
-
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? (import.meta.env.DEV ? mockDevUser : null));
+    const handleUpdate = () => {
+      setSession(cachedSession);
+      setUser(cachedUser);
       setLoading(false);
-    });
+    };
 
-    return () => subscription.unsubscribe();
+    listeners.add(handleUpdate);
+
+    // If already initialized, synchronize immediately
+    if (isInitialized) {
+      setSession(cachedSession);
+      setUser(cachedUser);
+      setLoading(false);
+    } else {
+      supabase.auth.getSession().then(({ data: { session } }) => {
+        cachedSession = session;
+        cachedUser = session?.user ?? null;
+        isInitialized = true;
+        handleUpdate();
+      });
+    }
+
+    return () => {
+      listeners.delete(handleUpdate);
+    };
   }, []);
 
-  const signOut = async () => {
-    const { error } = await supabase.auth.signOut();
-    if (error) {
+  const signOut = useCallback(async () => {
+    try {
+      await supabase.auth.signOut();
+    } catch (error) {
       console.error('Error signing out:', error);
     }
-    // Clear all client-side stored variables, state, and credentials
-    localStorage.clear();
+    cachedSession = null;
+    cachedUser = null;
+    isInitialized = true;
+    notifySubscribers();
+    
+    // Clear auth keys
+    localStorage.removeItem('sb-auth-token');
+    localStorage.removeItem('ghumofiroo-crm-auth-token');
     sessionStorage.clear();
-    // Redirect to auth page and refresh to purge memory state
+
     window.location.href = '/auth';
-  };
+  }, []);
 
   return {
     user,

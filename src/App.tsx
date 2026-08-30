@@ -166,40 +166,6 @@ const SightseeingIndex = React.lazy(() => import('@/pages/sightseeing/Sightseein
 const SightseeingDetail = React.lazy(() => import('@/pages/sightseeing/SightseeingDetail'));
 
 function App() {
-  useEffect(() => {
-    let timeoutId: any;
-    const IDLE_TIMEOUT_MS = 15 * 60 * 1000; // 15 minutes of inactivity
-
-    const handleLogout = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session) {
-        await supabase.auth.signOut();
-        localStorage.clear();
-        sessionStorage.clear();
-        window.location.href = '/auth?reason=idle';
-      }
-    };
-
-    const resetTimer = () => {
-      clearTimeout(timeoutId);
-      timeoutId = setTimeout(handleLogout, IDLE_TIMEOUT_MS);
-    };
-
-    const events = ['mousemove', 'keydown', 'mousedown', 'scroll', 'touchstart'];
-    events.forEach(event => {
-      window.addEventListener(event, resetTimer);
-    });
-
-    // Start initial timer
-    resetTimer();
-
-    return () => {
-      clearTimeout(timeoutId);
-      events.forEach(event => {
-        window.removeEventListener(event, resetTimer);
-      });
-    };
-  }, []);
 
   return (
     <PerformanceProvider>
