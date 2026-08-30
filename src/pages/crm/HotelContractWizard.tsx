@@ -493,6 +493,85 @@ export const HotelContractWizard: React.FC<HotelContractWizardProps> = ({
     fetchMasters();
   }, []);
 
+  // ---------------- UNIFIED MASTER & DATABASE DESTINATIONS ----------------
+  const allUnifiedDestinations = React.useMemo(() => {
+    const list: MasterDestination[] = [...MASTER_DESTINATIONS];
+    const seen = new Set<string>();
+
+    list.forEach(item => {
+      seen.add(`${item.city.toLowerCase().trim()}_${item.state.toLowerCase().trim()}`);
+    });
+
+    // 1. Dynamically merge all cities from MySQL (managed in /crm/settings/destinations)
+    if (Array.isArray(cities)) {
+      cities.forEach((c: any) => {
+        const cityName = (c.city_name || c.name || c.city || '').trim();
+        if (!cityName) return;
+
+        let stateName = '';
+        if (c.state_id && Array.isArray(states)) {
+          const matchedS = states.find((s: any) => String(s.id) === String(c.state_id));
+          if (matchedS) stateName = (matchedS.state_name || matchedS.name || '').trim();
+        }
+        if (!stateName && c.state) stateName = String(c.state).trim();
+
+        let countryName = 'India';
+        if (c.country_id && Array.isArray(countries)) {
+          const matchedC = countries.find((co: any) => String(co.id) === String(c.country_id));
+          if (matchedC) countryName = (matchedC.country_name || matchedC.name || '').trim();
+        }
+        if (countryName === 'India' && stateName && Array.isArray(states)) {
+          const matchedS = states.find((s: any) => (s.state_name || s.name)?.toLowerCase().trim() === stateName.toLowerCase().trim());
+          if (matchedS && matchedS.country_id && Array.isArray(countries)) {
+            const matchedC = countries.find((co: any) => String(co.id) === String(matchedS.country_id));
+            if (matchedC) countryName = (matchedC.country_name || matchedC.name || '').trim();
+          }
+        }
+
+        const key = `${cityName.toLowerCase()}_${stateName.toLowerCase()}`;
+        if (!seen.has(key)) {
+          seen.add(key);
+          list.push({
+            city: cityName,
+            state: stateName || 'Madhya Pradesh',
+            country: countryName || 'India',
+            destination_group: c.city_type || c.destination_group || 'Leisure',
+            nearest_airport: c.nearest_airport || '',
+            nearest_railway: c.nearest_railway || '',
+            gps_coordinates: c.gps_coordinates || '',
+            popular_attractions: []
+          });
+        }
+      });
+    }
+
+    // 2. Dynamically merge all destinations from MySQL
+    if (Array.isArray(destinations)) {
+      destinations.forEach((d: any) => {
+        const destName = (d.destination_name || d.name || '').trim();
+        if (!destName) return;
+        const stateName = (d.state || '').trim();
+        const countryName = (d.country || 'India').trim();
+        const key = `${destName.toLowerCase()}_${stateName.toLowerCase()}`;
+        if (!seen.has(key)) {
+          seen.add(key);
+          list.push({
+            city: destName,
+            state: stateName || 'Destination',
+            country: countryName || 'India',
+            destination_group: d.category || d.destination_group || 'Leisure',
+            nearest_airport: d.nearest_airport || '',
+            nearest_railway: d.nearest_railway || '',
+            gps_coordinates: d.gps_coordinates || '',
+            popular_attractions: []
+          });
+        }
+      });
+    }
+
+    return list;
+  }, [cities, states, countries, destinations]);
+
   const duplicateHotelMatch = React.useMemo(() => {
     if (!hotelForm.hotel_name.trim()) return null;
     const nameNorm = hotelForm.hotel_name.toLowerCase().trim();
@@ -1514,7 +1593,7 @@ export const HotelContractWizard: React.FC<HotelContractWizardProps> = ({
                     {/* Autocomplete Suggestions Overlay */}
                     {showDestinationOverlay && destinationSearchQuery.trim().length >= 1 && (
                       <div className="absolute z-50 left-0 right-0 top-full mt-1.5 bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl overflow-hidden max-h-[280px] overflow-y-auto divide-y divide-slate-800">
-                        {MASTER_DESTINATIONS
+                        {allUnifiedDestinations
                           .filter(dest => 
                             dest.city.toLowerCase().includes(destinationSearchQuery.toLowerCase().trim()) ||
                             dest.state.toLowerCase().includes(destinationSearchQuery.toLowerCase().trim()) ||
@@ -1544,7 +1623,7 @@ export const HotelContractWizard: React.FC<HotelContractWizardProps> = ({
                               </Badge>
                             </div>
                           ))}
-                        {MASTER_DESTINATIONS.filter(dest => 
+                        {allUnifiedDestinations.filter(dest => 
                           dest.city.toLowerCase().includes(destinationSearchQuery.toLowerCase().trim()) ||
                           dest.state.toLowerCase().includes(destinationSearchQuery.toLowerCase().trim()) ||
                           dest.country.toLowerCase().includes(destinationSearchQuery.toLowerCase().trim())

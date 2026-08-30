@@ -819,14 +819,44 @@ export const MASTER_DESTINATIONS: MasterDestination[] = [
 
   // ===================== MADHYA PRADESH =====================
   {
-    city: 'Khajuraho',
+    city: 'Indore',
     state: 'Madhya Pradesh',
     country: 'India',
-    destination_group: 'Heritage & UNESCO',
-    nearest_airport: 'Khajuraho Airport (HJR) - 5 km',
-    nearest_railway: 'Khajuraho Railway Station (KURJ) - 5 km',
-    gps_coordinates: '24.8318, 79.9199',
-    popular_attractions: ['Western Group of Temples (Kandariya Mahadev)', 'Eastern Group of Temples', 'Sound & Light Show', 'Raneh Waterfalls']
+    destination_group: 'Commercial & Culinary Hub',
+    nearest_airport: 'Devi Ahilyabai Holkar Airport Indore (IDR) - 8 km',
+    nearest_railway: 'Indore Junction (INDB) - 2 km',
+    gps_coordinates: '22.7196, 75.8577',
+    popular_attractions: ['Sarafa Night Food Street', 'Chappan Dukan', 'Rajwada Palace', 'Lal Bagh Palace', 'Kanch Mandir', 'Khajrana Ganesh Temple', 'Ralamandal Sanctuary']
+  },
+  {
+    city: 'Bhopal',
+    state: 'Madhya Pradesh',
+    country: 'India',
+    destination_group: 'City of Lakes & Heritage',
+    nearest_airport: 'Raja Bhoj International Airport (BHO) - 12 km',
+    nearest_railway: 'Bhopal Junction (BPL) / Rani Kamlapati (RKMP)',
+    gps_coordinates: '23.2599, 77.4126',
+    popular_attractions: ['Upper Lake (Bhojtal) & Boat Club', 'Van Vihar National Park', 'Taj-ul-Masajid', 'Tribal Museum', 'Bharat Bhavan', 'Kerwa Dam']
+  },
+  {
+    city: 'Gwalior',
+    state: 'Madhya Pradesh',
+    country: 'India',
+    destination_group: 'Heritage & Forts',
+    nearest_airport: 'Rajmata Vijaya Raje Scindia Airport Gwalior (GWL) - 10 km',
+    nearest_railway: 'Gwalior Junction (GWL) - 3 km',
+    gps_coordinates: '26.2183, 78.1828',
+    popular_attractions: ['Gwalior Fort (Pearl of Fortresses)', 'Jai Vilas Palace & Museum', 'Tomb of Tansen', 'Sas Bahu Temple', 'Gopachal Parvat Rock Sculptures', 'Sun Temple']
+  },
+  {
+    city: 'Jabalpur',
+    state: 'Madhya Pradesh',
+    country: 'India',
+    destination_group: 'Nature & Marble Rocks',
+    nearest_airport: 'Dumna Airport Jabalpur (JLR) - 15 km',
+    nearest_railway: 'Jabalpur Junction (JBP) - 3 km',
+    gps_coordinates: '23.1815, 79.9864',
+    popular_attractions: ['Bhedaghat Marble Rocks & Narmada Boating', 'Dhuandhar Waterfall', 'Chausath Yogini Temple', 'Madan Mahal Fort', 'Rani Durgavati Museum', 'Tilwara Ghat']
   },
   {
     city: 'Ujjain',
@@ -836,7 +866,57 @@ export const MASTER_DESTINATIONS: MasterDestination[] = [
     nearest_airport: 'Devi Ahilyabai Holkar Indore Airport (IDR) - 55 km',
     nearest_railway: 'Ujjain Junction (UJN) - 2 km',
     gps_coordinates: '23.1765, 75.7885',
-    popular_attractions: ['Mahakaleshwar Jyotirlinga (Mahakal Lok Corridor)', 'Bhasma Aarti', 'Kal Bhairav Temple', 'Ram Ghat Shipra River', 'Harsiddhi Temple']
+    popular_attractions: ['Mahakaleshwar Jyotirlinga (Mahakal Lok Corridor)', 'Bhasma Aarti', 'Kal Bhairav Temple', 'Ram Ghat Shipra River', 'Harsiddhi Temple', 'Mangalnath Temple']
+  },
+  {
+    city: 'Khajuraho',
+    state: 'Madhya Pradesh',
+    country: 'India',
+    destination_group: 'Heritage & UNESCO',
+    nearest_airport: 'Khajuraho Airport (HJR) - 5 km',
+    nearest_railway: 'Khajuraho Railway Station (KURJ) - 5 km',
+    gps_coordinates: '24.8318, 79.9199',
+    popular_attractions: ['Western Group of Temples (Kandariya Mahadev)', 'Eastern Group of Temples', 'Sound & Light Show', 'Raneh Waterfalls & Ken River Canyon']
+  },
+  {
+    city: 'Pachmarhi',
+    state: 'Madhya Pradesh',
+    country: 'India',
+    destination_group: 'Hill Station / Queen of Satpura',
+    nearest_airport: 'Bhopal Airport (BHO) - 195 km / Jabalpur (JLR) - 260 km',
+    nearest_railway: 'Pipariya Railway Station (PPI) - 47 km',
+    gps_coordinates: '22.4674, 78.4346',
+    popular_attractions: ['Bee Falls (Jamuna Prapat)', 'Dhoopgarh Sunset Point', 'Jata Shankar Cave', 'Pandav Caves', 'Chauragarh Peak', 'Apsara Vihar']
+  },
+  {
+    city: 'Orchha',
+    state: 'Madhya Pradesh',
+    country: 'India',
+    destination_group: 'Heritage & Palaces',
+    nearest_airport: 'Gwalior Airport (GWL) - 120 km',
+    nearest_railway: 'Jhansi Junction (VGLJ) - 18 km / Orchha (ORC) - 4 km',
+    gps_coordinates: '25.3512, 78.6416',
+    popular_attractions: ['Orchha Palace & Jahangir Mahal', 'Ram Raja Temple', 'Chaturbhuj Temple', 'Royal Chhatris Cenotaphs on Betwa River', 'Betwa River Rafting']
+  },
+  {
+    city: 'Mandu (Mandav)',
+    state: 'Madhya Pradesh',
+    country: 'India',
+    destination_group: 'Heritage & Romance of Malwa',
+    nearest_airport: 'Indore Airport (IDR) - 98 km',
+    nearest_railway: 'Indore Junction (INDB) - 100 km / Ratlam (RTM) - 120 km',
+    gps_coordinates: '22.3662, 75.3424',
+    popular_attractions: ['Jahaz Mahal (Ship Palace)', 'Rani Roopmati Pavilion & Narmada View', 'Hindola Mahal (Swinging Palace)', 'Baz Bahadur Palace', 'Hoshang Shah Tomb', 'Jami Masjid']
+  },
+  {
+    city: 'Sanchi & Vidisha',
+    state: 'Madhya Pradesh',
+    country: 'India',
+    destination_group: 'Spiritual / UNESCO Buddhist',
+    nearest_airport: 'Bhopal Airport (BHO) - 55 km',
+    nearest_railway: 'Sanchi Station (SCI) - 1 km / Vidisha (BHS) - 10 km',
+    gps_coordinates: '23.4842, 77.7397',
+    popular_attractions: ['Great Sanchi Stupa (UNESCO)', 'Ashoka Pillar & Sanchi Museum', 'Udayagiri Rock-cut Caves', 'Heliodorus Pillar Vidisha', 'Bijamandal']
   },
   {
     city: 'Bandhavgarh & Kanha',
@@ -846,7 +926,17 @@ export const MASTER_DESTINATIONS: MasterDestination[] = [
     nearest_airport: 'Jabalpur Dumna Airport (JLR) - 160 km',
     nearest_railway: 'Umaria (UMR) - 32 km / Katni (KTE) - 100 km',
     gps_coordinates: '23.7000, 81.0333',
-    popular_attractions: ['Bandhavgarh Tiger Safari', 'Tala Zone', 'Kanha Tiger Reserve', 'Bandhavgarh Fort', 'Bamera Dam']
+    popular_attractions: ['Bandhavgarh Tiger Safari', 'Tala Zone', 'Kanha Tiger Reserve Mukki & Khatia Zones', 'Bandhavgarh Fort', 'Kanha Museum']
+  },
+  {
+    city: 'Pench National Park',
+    state: 'Madhya Pradesh',
+    country: 'India',
+    destination_group: 'Wildlife & Safari / Mowgli Land',
+    nearest_airport: 'Dr. Babasaheb Ambedkar Nagpur Airport (NAG) - 95 km',
+    nearest_railway: 'Nagpur Junction (NGP) - 90 km / Seoni (SEY) - 30 km',
+    gps_coordinates: '21.7644, 79.3370',
+    popular_attractions: ['Pench Tiger Safari (Turia & Touria Zones)', 'Totladoh Dam Reservoir', 'Runi Jhuni Walking Trail', 'Pottery Village Alikatta']
   },
 
   // ===================== ANDAMAN & NICOBAR =====================
