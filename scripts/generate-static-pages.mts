@@ -388,6 +388,33 @@ const staticRoutesMeta: Record<string, { title: string; description: string; h1:
       </section>
     `
   },
+  '/profile': {
+    title: 'Traveler Profile | Ghumo Firoo Travels',
+    description: 'Access your Ghumo Firoo traveler profile, manage booked holiday packages, check itinerary vouchers, and update your personal travel preferences.',
+    h1: 'Ghumo Firoo Traveler Profile & Guest Portal',
+    h2: 'Manage Your Vacation Itineraries, Saved Trips & Booking History',
+    bodyHtml: `
+      <section>
+        <h2>Welcome to the Ghumo Firoo Guest Portal</h2>
+        <p>The Ghumo Firoo Traveler Profile portal allows our valued guests to review their past and upcoming holiday itineraries, access confirmed hotel vouchers, manage travel preferences, and connect directly with their assigned holiday concierge.</p>
+      </section>
+
+      <section>
+        <h2>Features of Your Traveler Profile</h2>
+        <ul>
+          <li><strong>Active Trip Management:</strong> View live day-by-day itineraries, flight details, pickup times, and chauffeur contact information for current bookings.</li>
+          <li><strong>Digital Vouchers & Invoices:</strong> Download official hotel check-in vouchers, payment receipts, GST tax invoices, and state permit documents.</li>
+          <li><strong>Personalized Travel Wishlist:</strong> Save custom tour packages, explore seasonal holiday deals, and request tailored quotation updates with a single click.</li>
+          <li><strong>Direct Concierge Assistance:</strong> Get in touch with your dedicated 24x7 holiday manager for special requests, dietary preferences, or room upgrades.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2>Need Help with Your Account or Bookings?</h2>
+        <p>If you need assistance accessing your booking records or updating your profile details, our customer support desk is available 24x7 via phone at <strong>+91 99109 87264</strong> or email at <strong>info@ghumofiroo.com</strong>.</p>
+      </section>
+    `
+  },
   '/custom-tour-packages': {
     title: 'Custom Tour Packages & Tailored Itineraries | Ghumo Firoo',
     description: 'Design your own custom tour package with Ghumo Firoo Travels. Flexible dates, private cab transfers, hand-picked hotels, and tailor-made sightseeing circuits.',
