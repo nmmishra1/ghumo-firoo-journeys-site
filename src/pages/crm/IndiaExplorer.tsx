@@ -11,6 +11,7 @@ import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { MASTER_DESTINATIONS } from '@/data/masterDestinations';
 
 export default function IndiaExplorer() {
   const [loading, setLoading] = useState(false);
@@ -64,16 +65,75 @@ export default function IndiaExplorer() {
     fetch(`/php-backend/get_india_tourism.php?action=details&city_id=${selectedCity.id}`)
       .then(res => res.json())
       .then(data => {
-        if (data.success) {
-          setCityDetails({
-            city: data.city,
-            sightseeing: data.sightseeing || [],
-            activities: data.activities || [],
-            hotels: data.hotels || []
+        let sights = Array.isArray(data?.sightseeing) ? [...data.sightseeing] : [];
+        let acts = Array.isArray(data?.activities) ? [...data.activities] : [];
+
+        const cName = (selectedCity.name || selectedCity.city_name || '').toLowerCase().trim();
+        const matched = MASTER_DESTINATIONS.find(d => 
+          d.city.toLowerCase().includes(cName) || cName.includes(d.city.toLowerCase())
+        );
+
+        if (matched && Array.isArray(matched.popular_attractions)) {
+          matched.popular_attractions.forEach((attraction, idx) => {
+            if (!sights.some((s: any) => (s.name || s.sightseeing_name || '').toLowerCase().trim() === attraction.toLowerCase().trim())) {
+              sights.push({
+                id: `master-s-${idx}-${matched.city.toLowerCase().replace(/[^a-z0-9]/g, '-')}`,
+                name: attraction,
+                category: matched.destination_group,
+                entry_fee_estimate: 100,
+                recommended_duration_hours: 2,
+                description: `Iconic attraction and must-visit sightseeing highlight in ${matched.city}.`
+              });
+            }
+            if (idx < 3 && !acts.some((a: any) => (a.name || a.activity_name || '').toLowerCase().trim() === attraction.toLowerCase().trim())) {
+              acts.push({
+                id: `master-a-${idx}-${matched.city.toLowerCase().replace(/[^a-z0-9]/g, '-')}`,
+                name: `${attraction} Tour & Experience`,
+                category: matched.destination_group.includes('Wildlife') ? 'Safari' : 'Guided Tour',
+                average_cost: 250,
+                duration_hours: 3,
+                description: `Guided tour and experience of ${attraction} in ${matched.city}.`
+              });
+            }
           });
         }
+
+        setCityDetails({
+          city: data?.city || selectedCity,
+          sightseeing: sights,
+          activities: acts,
+          hotels: data?.hotels || []
+        });
       })
-      .catch(err => console.error("Failed to load city details:", err))
+      .catch(err => {
+        console.error("Failed to load city details:", err);
+        const cName = (selectedCity.name || selectedCity.city_name || '').toLowerCase().trim();
+        const matched = MASTER_DESTINATIONS.find(d => 
+          d.city.toLowerCase().includes(cName) || cName.includes(d.city.toLowerCase())
+        );
+        const sights = (matched?.popular_attractions || []).map((attraction, idx) => ({
+          id: `master-s-${idx}-${matched?.city.toLowerCase().replace(/[^a-z0-9]/g, '-')}`,
+          name: attraction,
+          category: matched?.destination_group || 'Leisure',
+          entry_fee_estimate: 100,
+          recommended_duration_hours: 2,
+          description: `Iconic attraction and must-visit sightseeing highlight in ${matched?.city}.`
+        }));
+        const acts = (matched?.popular_attractions || []).slice(0, 3).map((attraction, idx) => ({
+          id: `master-a-${idx}-${matched?.city.toLowerCase().replace(/[^a-z0-9]/g, '-')}`,
+          name: `${attraction} Tour & Experience`,
+          category: matched?.destination_group?.includes('Wildlife') ? 'Safari' : 'Guided Tour',
+          average_cost: 250,
+          duration_hours: 3,
+          description: `Guided tour and experience of ${attraction} in ${matched?.city}.`
+        }));
+        setCityDetails({
+          city: selectedCity,
+          sightseeing: sights,
+          activities: acts,
+          hotels: []
+        });
+      })
       .finally(() => setLoading(false));
   }, [selectedCity]);
 
@@ -145,6 +205,29 @@ export default function IndiaExplorer() {
     }
   };
 
+  // Enriched State Cities Calculation
+  const stateCities = selectedState 
+    ? cities.filter(c => isCityInState(c, selectedState)).map(c => {
+        const cName = (c.name || c.city_name || '').toLowerCase().trim();
+        const matched = MASTER_DESTINATIONS.find(d => 
+          d.city.toLowerCase().includes(cName) || cName.includes(d.city.toLowerCase())
+        );
+        const sightsCount = (c.sightseeing_count && Number(c.sightseeing_count) > 0) 
+          ? Number(c.sightseeing_count) 
+          : (matched?.popular_attractions?.length || 0);
+        const actsCount = (c.activity_count && Number(c.activity_count) > 0) 
+          ? Number(c.activity_count) 
+          : (matched?.popular_attractions?.length ? Math.min(matched.popular_attractions.length, 3) : 0);
+        return {
+          ...c,
+          sightseeing_count: sightsCount,
+          activity_count: actsCount,
+          has_airport: c.has_airport === 1 || Boolean(matched?.nearest_airport) ? 1 : 0,
+          description: c.description || (matched ? `${matched.destination_group} destination featuring ${matched.popular_attractions.slice(0, 3).join(', ')}.` : c.description)
+        };
+      })
+    : [];
+
   // KPI Metrics Calculation
   const totalStates = states.length;
   const totalCities = cities.length;
@@ -152,7 +235,26 @@ export default function IndiaExplorer() {
   const totalActivityCount = states.reduce((sum, s) => sum + (s.activity_count || 0), 0);
 
   // Cascading Location Filtering
-  const filteredStates = states.filter(s => {
+  const filteredStates = states.map(s => {
+    const sCities = cities.filter(c => isCityInState(c, s));
+    let sightsSum = s.sightseeing_count || 0;
+    let actsSum = s.activity_count || 0;
+    if (sightsSum === 0) {
+      sCities.forEach(c => {
+        const cName = (c.name || c.city_name || '').toLowerCase().trim();
+        const matched = MASTER_DESTINATIONS.find(d => d.city.toLowerCase().includes(cName) || cName.includes(d.city.toLowerCase()));
+        if (matched) {
+          sightsSum += matched.popular_attractions?.length || 0;
+          actsSum += Math.min(matched.popular_attractions?.length || 0, 3);
+        }
+      });
+    }
+    return {
+      ...s,
+      sightseeing_count: sightsSum,
+      activity_count: actsSum
+    };
+  }).filter(s => {
     if (filterRegion !== 'all' && (s.region || '').toLowerCase() !== filterRegion.toLowerCase()) return false;
     if (filterStateId !== 'all' && String(s.id) !== filterStateId) return false;
     return true;
@@ -173,10 +275,6 @@ export default function IndiaExplorer() {
         const parentState = states.find(s => String(s.id) === String(filterStateId));
         return parentState ? isCityInState(c, parentState) : false;
       });
-
-  const stateCities = selectedState 
-    ? cities.filter(c => isCityInState(c, selectedState))
-    : [];
 
   return (
     <div className="space-y-6 text-slate-900 dark:text-slate-100 text-left">

@@ -1352,10 +1352,10 @@ export const DestinationManagement: React.FC = () => {
           )}
         </div>
 
-        {/* PANEL 3: CITIES PANEL (Flex 1 - Fills Remaining Space) */}
-        <div className="flex-1 flex flex-col bg-card">
+        {/* PANEL 3: CITIES PANEL (Vertical List - 260px width) */}
+        <div className="w-[260px] flex-shrink-0 flex flex-col bg-card">
           {/* Panel Header */}
-          <div className="px-4 py-2 border-b border-border bg-slate-50/50 dark:bg-slate-900/40 flex justify-between items-center">
+          <div className="px-3 py-2 border-b border-border bg-slate-50/50 dark:bg-slate-900/40 flex justify-between items-center">
             <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground truncate" title={selectedState ? selectedState.state_name : ''}>
               📍 Cities {selectedState ? `· ${selectedState.state_name}` : ''}
             </span>
@@ -1374,9 +1374,9 @@ export const DestinationManagement: React.FC = () => {
           {selectedState ? (
             <>
               {/* Panel Inline Search */}
-              <div className="px-3 py-1.5 border-b border-border/50">
+              <div className="px-2 py-1.5 border-b border-border/50">
                 <Input
-                  placeholder="Filter cities by name or category..."
+                  placeholder="Filter cities..."
                   value={cityFilter}
                   onChange={(e) => setCityFilter(e.target.value)}
                   className="h-7 text-xs bg-muted/40 rounded-md border-border/40 focus-visible:ring-amber-500"
@@ -1385,64 +1385,61 @@ export const DestinationManagement: React.FC = () => {
 
               {/* Inline Add City Form */}
               {showAddCity && (
-                <form onSubmit={handleCreateCity} className="p-3 border-b border-green-500/30 bg-green-500/5 space-y-2.5 animate-in slide-in-from-top-2 duration-150">
+                <form onSubmit={handleCreateCity} className="p-2 border-b border-green-500/30 bg-green-500/5 space-y-2 animate-in slide-in-from-top-2 duration-150">
                   <div className="text-[11px] font-extrabold text-green-600 dark:text-green-400 uppercase tracking-wide">
-                    Add City to {selectedState.state_name} ({selectedCountry?.country_name})
+                    Add City
                   </div>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                    <Input
-                      placeholder="City Name (e.g. Rishikesh)"
-                      value={newCityName}
-                      onChange={(e) => setNewCityName(e.target.value)}
-                      className="h-7 text-xs bg-background"
-                      required
-                      autoFocus
-                    />
-                    <Select value={newCityType} onValueChange={setNewCityType}>
-                      <SelectTrigger className="h-7 text-xs bg-background"><SelectValue /></SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="Leisure">Leisure / Sightseeing</SelectItem>
-                        <SelectItem value="Adventure">Adventure / Trekking</SelectItem>
-                        <SelectItem value="Pilgrimage">Pilgrimage / Spiritual</SelectItem>
-                        <SelectItem value="Wildlife">Wildlife / Nature</SelectItem>
-                        <SelectItem value="Beach">Beach / Coastal</SelectItem>
-                        <SelectItem value="Honeymoon">Honeymoon Romantic</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
+                  <Input
+                    placeholder="City Name (e.g. Rishikesh)"
+                    value={newCityName}
+                    onChange={(e) => setNewCityName(e.target.value)}
+                    className="h-7 text-xs bg-background"
+                    required
+                    autoFocus
+                  />
+                  <Select value={newCityType} onValueChange={setNewCityType}>
+                    <SelectTrigger className="h-7 text-xs bg-background"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Leisure">Leisure / Sightseeing</SelectItem>
+                      <SelectItem value="Adventure">Adventure / Trekking</SelectItem>
+                      <SelectItem value="Pilgrimage">Pilgrimage / Spiritual</SelectItem>
+                      <SelectItem value="Wildlife">Wildlife / Nature</SelectItem>
+                      <SelectItem value="Beach">Beach / Coastal</SelectItem>
+                      <SelectItem value="Honeymoon">Honeymoon Romantic</SelectItem>
+                    </SelectContent>
+                  </Select>
                   <div className="flex gap-1.5 justify-end pt-1">
                     <Button type="button" variant="ghost" size="sm" className="h-7 text-[11px] px-2.5" onClick={() => setShowAddCity(false)}>Cancel</Button>
-                    <Button type="submit" size="sm" className="h-7 text-[11px] px-3 bg-green-600 hover:bg-green-700 text-white font-bold">Save City</Button>
+                    <Button type="submit" size="sm" className="h-7 text-[11px] px-3 bg-green-600 hover:bg-green-700 text-white font-bold">Save</Button>
                   </div>
                 </form>
               )}
 
-              {/* Cities List */}
-              <div className="flex-1 overflow-y-auto p-3 space-y-1">
+              {/* Cities Vertical List */}
+              <div className="flex-1 overflow-y-auto p-1.5 space-y-0.5">
                 {filteredCitiesList.length === 0 ? (
-                  <div className="text-xs text-muted-foreground text-center py-12">
-                    No cities registered under {selectedState.state_name} state yet.
+                  <div className="text-[11px] text-muted-foreground text-center py-10">
+                    No cities registered under {selectedState.state_name}
                   </div>
                 ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-2">
-                    {filteredCitiesList.map((city) => {
-                      const isCitySelected = selectedCity?.id === city.id;
-                      return (
+                  filteredCitiesList.map((city) => {
+                    const isCitySelected = selectedCity?.id === city.id;
+                    return (
                       <div
                         key={city.id}
                         onClick={() => handleSelectCity(city)}
-                        className={`flex items-center justify-between p-2.5 rounded-lg border transition-all group shadow-2xs cursor-pointer ${
+                        className={`flex items-center justify-between px-2.5 py-2 cursor-pointer text-xs transition-all rounded-md mx-0.5 my-0.5 group ${
                           isCitySelected
-                            ? 'border-[#C9A25A] bg-[rgba(201,162,90,0.08)] ring-1 ring-[#C9A25A]/40'
-                            : 'border-border/40 bg-slate-50/50 dark:bg-slate-900/40 hover:border-amber-500/40'
+                            ? 'bg-[rgba(201,162,90,0.12)] border-l-2 border-[#C9A25A] text-foreground font-semibold rounded-r-md'
+                            : 'hover:bg-muted/50 text-slate-700 dark:text-slate-300'
                         }`}
                       >
-                        <div className="flex items-center gap-2 min-w-0">
+                        <div className="flex items-center gap-1.5 min-w-0">
                           <MapPin className="w-3.5 h-3.5 text-green-500 shrink-0" />
-                          <span className="font-semibold text-xs text-foreground truncate">{city.city_name}</span>
+                          <span className="font-medium text-[13px] truncate">{city.city_name}</span>
                           <Badge 
                             variant="outline" 
-                            className={`text-[9px] font-bold py-0 px-1.5 shrink-0 ${getCategoryBadgeClass(city.destination_type)}`}
+                            className={`text-[8px] font-bold py-0 px-1 shrink-0 ${getCategoryBadgeClass(city.destination_type)}`}
                           >
                             {city.destination_type || 'Leisure'}
                           </Badge>
@@ -1452,299 +1449,310 @@ export const DestinationManagement: React.FC = () => {
                           <button
                             type="button"
                             onClick={(e) => { e.stopPropagation(); handleOpenEditModal('city', city); }}
-                            className="p-1 opacity-0 group-hover:opacity-100 hover:text-amber-500 text-muted-foreground transition-opacity"
+                            className="p-0.5 opacity-0 group-hover:opacity-100 hover:text-amber-500 text-muted-foreground transition-opacity"
                             title="Edit City"
                           >
-                            <Edit className="w-3.5 h-3.5" />
+                            <Edit className="w-3 h-3" />
                           </button>
 
                           <button
                             type="button"
                             onClick={(e) => { e.stopPropagation(); handleDeleteRecord('city', city); }}
-                            className="p-1 opacity-0 group-hover:opacity-100 hover:text-red-500 text-muted-foreground transition-opacity"
+                            className="p-0.5 opacity-0 group-hover:opacity-100 hover:text-red-500 text-muted-foreground transition-opacity"
                             title="Delete City"
                           >
-                            <Trash2 className="w-3.5 h-3.5" />
+                            <Trash2 className="w-3 h-3" />
                           </button>
 
                           <button
                             type="button"
                             onClick={(e) => { e.stopPropagation(); handleToggleStatus('city', city); }}
-                            className={`p-1 transition-colors ${city.active_status ? 'text-green-500 hover:text-green-600' : 'text-red-500 hover:text-red-600'}`}
+                            className={`p-0.5 transition-colors ${city.active_status ? 'text-green-500 hover:text-green-600' : 'text-red-500 hover:text-red-600'}`}
                             title={city.active_status ? 'Active (Click to Deactivate)' : 'Inactive (Click to Activate)'}
                           >
-                            <Power className="w-3.5 h-3.5" />
+                            <Power className="w-3 h-3" />
                           </button>
                         </div>
                       </div>
-                      );
-                    })}
-                  </div>
+                    );
+                  })
                 )}
               </div>
             </>
           ) : (
-            <div className="text-muted-foreground text-xs text-center py-20 px-4 flex flex-col items-center gap-2">
-              <span className="text-3xl">←</span>
-              <span className="font-medium">Select a state to see its cities</span>
+            <div className="text-muted-foreground text-[11px] text-center py-16 px-3 flex flex-col items-center gap-1.5">
+              <span className="text-xl">←</span>
+              <span>Select a state</span>
+            </div>
+          )}
+        </div>
+
+        {/* PANEL 4: PLACES & ACTIVITIES PANEL (Beside Cities Column - Fills Remaining Width) */}
+        <div className="flex-1 flex flex-col bg-card overflow-hidden">
+          {selectedCity ? (
+            <>
+              {/* Panel Header */}
+              <div className="px-4 py-2.5 border-b border-border bg-slate-50/50 dark:bg-slate-900/40 flex items-center justify-between">
+                <div className="flex items-center gap-2 min-w-0">
+                  <Compass className="w-4 h-4 text-[#C9A25A] shrink-0" />
+                  <span className="text-xs font-extrabold uppercase tracking-wide text-foreground truncate">
+                    Places &amp; Activities · {selectedCity.city_name}
+                  </span>
+                  <Badge variant="outline" className="text-[9px] border-amber-500/30 text-amber-500 font-bold shrink-0">
+                    {selectedState?.state_name}, {selectedCountry?.country_name}
+                  </Badge>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => { setSelectedCity(null); setCitySightseeings([]); setCityActivities([]); }}
+                  className="text-muted-foreground hover:text-foreground p-1 text-xs"
+                  title="Close panel"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+
+              <Tabs value={inventoryTab} onValueChange={(v) => setInventoryTab(v as 'places' | 'activities')} className="flex-1 flex flex-col overflow-hidden">
+                <div className="px-4 pt-2.5 flex items-center justify-between gap-3 flex-wrap border-b border-border/40 pb-2">
+                  <TabsList className="h-8">
+                    <TabsTrigger value="places" className="text-xs h-7 gap-1.5">
+                      <Ticket className="w-3.5 h-3.5" /> Places ({citySightseeings.length})
+                    </TabsTrigger>
+                    <TabsTrigger value="activities" className="text-xs h-7 gap-1.5">
+                      <Compass className="w-3.5 h-3.5" /> Activities ({cityActivities.length})
+                    </TabsTrigger>
+                  </TabsList>
+
+                  <div className="flex gap-2">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="h-7 text-[11px] px-2.5"
+                      onClick={() => { setShowAddPlace(!showAddPlace); setShowAddActivity(false); }}
+                    >
+                      <Plus className="w-3.5 h-3.5 mr-1" /> Add Place
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="h-7 text-[11px] px-2.5"
+                      onClick={() => { setShowAddActivity(!showAddActivity); setShowAddPlace(false); }}
+                    >
+                      <Plus className="w-3.5 h-3.5 mr-1" /> Add Activity
+                    </Button>
+                  </div>
+                </div>
+
+                {/* Inline Add Place Form */}
+                {showAddPlace && (
+                  <form onSubmit={handleCreatePlace} className="mx-4 mt-2.5 p-3 border border-green-500/30 bg-green-500/5 rounded-md space-y-2 animate-in slide-in-from-top-2 duration-150">
+                    <div className="text-[11px] font-extrabold text-green-600 dark:text-green-400 uppercase tracking-wide">
+                      Add Place to {selectedCity.city_name}
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                      <Input
+                        placeholder="Place name (e.g. Sarafa Night Food Street)"
+                        value={newPlace.name}
+                        onChange={(e) => setNewPlace(p => ({ ...p, name: e.target.value }))}
+                        className="h-7 text-xs bg-background sm:col-span-2"
+                        required
+                        autoFocus
+                      />
+                      <Input
+                        placeholder="Duration (e.g. 2 Hours)"
+                        value={newPlace.duration}
+                        onChange={(e) => setNewPlace(p => ({ ...p, duration: e.target.value }))}
+                        className="h-7 text-xs bg-background"
+                      />
+                      <div className="flex gap-2">
+                        <Input
+                          type="number"
+                          placeholder="Adult ₹"
+                          value={newPlace.adult_cost}
+                          onChange={(e) => setNewPlace(p => ({ ...p, adult_cost: e.target.value }))}
+                          className="h-7 text-xs bg-background"
+                        />
+                        <Input
+                          type="number"
+                          placeholder="Child ₹"
+                          value={newPlace.child_cost}
+                          onChange={(e) => setNewPlace(p => ({ ...p, child_cost: e.target.value }))}
+                          className="h-7 text-xs bg-background"
+                        />
+                      </div>
+                    </div>
+                    <Input
+                      placeholder="Image URL (e.g. https://images.unsplash.com/...)"
+                      value={newPlace.image_url}
+                      onChange={(e) => setNewPlace(p => ({ ...p, image_url: e.target.value }))}
+                      className="h-7 text-xs bg-background"
+                    />
+                    <Textarea
+                      placeholder="Short description (optional)"
+                      value={newPlace.description}
+                      onChange={(e) => setNewPlace(p => ({ ...p, description: e.target.value }))}
+                      className="text-xs bg-background min-h-[45px]"
+                    />
+                    <div className="flex gap-1.5 justify-end pt-1">
+                      <Button type="button" variant="ghost" size="sm" className="h-7 text-[11px] px-2.5" onClick={() => setShowAddPlace(false)}>Cancel</Button>
+                      <Button type="submit" size="sm" disabled={savingPlace} className="h-7 text-[11px] px-3 bg-green-600 hover:bg-green-700 text-white font-bold">
+                        {savingPlace ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : 'Save Place'}
+                      </Button>
+                    </div>
+                  </form>
+                )}
+
+                {/* Inline Add Activity Form */}
+                {showAddActivity && (
+                  <form onSubmit={handleCreateActivity} className="mx-4 mt-2.5 p-3 border border-blue-500/30 bg-blue-500/5 rounded-md space-y-2 animate-in slide-in-from-top-2 duration-150">
+                    <div className="text-[11px] font-extrabold text-blue-500 uppercase tracking-wide">
+                      Add Activity to {selectedCity.city_name}
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                      <Input
+                        placeholder="Activity name (e.g. Jungle Safari & Nature Walk)"
+                        value={newActivity.name}
+                        onChange={(e) => setNewActivity(a => ({ ...a, name: e.target.value }))}
+                        className="h-7 text-xs bg-background sm:col-span-2"
+                        required
+                        autoFocus
+                      />
+                      <Select value={newActivity.category} onValueChange={(v) => setNewActivity(a => ({ ...a, category: v }))}>
+                        <SelectTrigger className="h-7 text-xs bg-background"><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Adventure">Adventure</SelectItem>
+                          <SelectItem value="Wildlife Safari">Wildlife Safari</SelectItem>
+                          <SelectItem value="Water Sports">Water Sports</SelectItem>
+                          <SelectItem value="Sightseeing">Sightseeing</SelectItem>
+                          <SelectItem value="Cultural">Cultural</SelectItem>
+                          <SelectItem value="Nature">Nature</SelectItem>
+                          <SelectItem value="Shopping">Shopping</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <Input
+                        placeholder="Duration (e.g. Half-Day)"
+                        value={newActivity.duration}
+                        onChange={(e) => setNewActivity(a => ({ ...a, duration: e.target.value }))}
+                        className="h-7 text-xs bg-background"
+                      />
+                      <div className="flex gap-2 sm:col-span-2">
+                        <Input
+                          type="number"
+                          placeholder="Adult ₹"
+                          value={newActivity.adult_cost}
+                          onChange={(e) => setNewActivity(a => ({ ...a, adult_cost: e.target.value }))}
+                          className="h-7 text-xs bg-background"
+                        />
+                        <Input
+                          type="number"
+                          placeholder="Child ₹"
+                          value={newActivity.child_cost}
+                          onChange={(e) => setNewActivity(a => ({ ...a, child_cost: e.target.value }))}
+                          className="h-7 text-xs bg-background"
+                        />
+                      </div>
+                    </div>
+                    <div className="flex gap-1.5 justify-end pt-1">
+                      <Button type="button" variant="ghost" size="sm" className="h-7 text-[11px] px-2.5" onClick={() => setShowAddActivity(false)}>Cancel</Button>
+                      <Button type="submit" size="sm" disabled={savingActivity} className="h-7 text-[11px] px-3 bg-blue-600 hover:bg-blue-700 text-white font-bold">
+                        {savingActivity ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : 'Save Activity'}
+                      </Button>
+                    </div>
+                  </form>
+                )}
+
+                {/* Inventory List Content */}
+                <div className="flex-1 overflow-y-auto p-4">
+                  {inventoryLoading ? (
+                    <div className="flex items-center justify-center py-12 text-xs text-muted-foreground gap-2">
+                      <Loader2 className="w-4 h-4 animate-spin text-amber-500" />
+                      Loading places &amp; activities for {selectedCity.city_name}...
+                    </div>
+                  ) : inventoryError ? (
+                    <div className="text-center py-10 text-xs text-red-500">{inventoryError}</div>
+                  ) : (
+                    <>
+                      <TabsContent value="places" className="mt-0 space-y-2">
+                        {citySightseeings.length === 0 ? (
+                          <div className="text-center py-12 text-xs text-muted-foreground">
+                            No places added yet for {selectedCity.city_name} — click "Add Place" to create one.
+                          </div>
+                        ) : (
+                          <div className="grid grid-cols-1 lg:grid-cols-2 gap-2.5">
+                            {citySightseeings.map((place) => (
+                              <div key={place.id} className="p-3 rounded-xl border border-border/50 bg-slate-50/60 dark:bg-slate-900/40 hover:border-amber-500/40 transition-colors">
+                                <div className="flex items-start justify-between gap-2">
+                                  <span className="font-bold text-xs text-foreground flex items-center gap-1.5">
+                                    <Ticket className="w-3.5 h-3.5 text-amber-500 shrink-0" />
+                                    {place.sightseeing_name}
+                                  </span>
+                                  {place.duration && (
+                                    <Badge variant="outline" className="text-[9px] shrink-0 font-medium">{place.duration}</Badge>
+                                  )}
+                                </div>
+                                {place.description && (
+                                  <p className="text-[11px] text-muted-foreground mt-1 line-clamp-2">{place.description}</p>
+                                )}
+                                <div className="flex items-center gap-1 mt-2 text-[11px] text-muted-foreground font-semibold border-t border-border/30 pt-1.5">
+                                  <IndianRupee className="w-3 h-3 text-emerald-500" />
+                                  <span>Adult: ₹{place.adult_cost || 0}</span>
+                                  {place.child_cost > 0 && <span>· Child: ₹{place.child_cost}</span>}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </TabsContent>
+
+                      <TabsContent value="activities" className="mt-0 space-y-2">
+                        {cityActivities.length === 0 ? (
+                          <div className="text-center py-12 text-xs text-muted-foreground">
+                            No activities added yet for {selectedCity.city_name} — click "Add Activity" to create one.
+                          </div>
+                        ) : (
+                          <div className="grid grid-cols-1 lg:grid-cols-2 gap-2.5">
+                            {cityActivities.map((activity) => {
+                              const rate = activity.rates[0];
+                              return (
+                                <div key={activity.id} className="p-3 rounded-xl border border-border/50 bg-slate-50/60 dark:bg-slate-900/40 hover:border-blue-500/40 transition-colors">
+                                  <div className="flex items-start justify-between gap-2">
+                                    <span className="font-bold text-xs text-foreground flex items-center gap-1.5">
+                                      <Compass className="w-3.5 h-3.5 text-blue-500 shrink-0" />
+                                      {activity.name}
+                                    </span>
+                                    {activity.category && (
+                                      <Badge variant="outline" className="text-[9px] shrink-0 font-medium text-blue-500 border-blue-500/30">{activity.category}</Badge>
+                                    )}
+                                  </div>
+                                  {rate && (
+                                    <div className="flex items-center gap-1 mt-2 text-[11px] text-muted-foreground font-semibold border-t border-border/30 pt-1.5">
+                                      <IndianRupee className="w-3 h-3 text-emerald-500" />
+                                      <span>Adult: ₹{rate.adult_rate || 0}</span>
+                                      {rate.child_rate > 0 && <span>· Child: ₹{rate.child_rate}</span>}
+                                    </div>
+                                  )}
+                                </div>
+                              );
+                            })}
+                          </div>
+                        )}
+                      </TabsContent>
+                    </>
+                  )}
+                </div>
+              </Tabs>
+            </>
+          ) : (
+            <div className="flex-1 flex flex-col items-center justify-center p-8 text-center text-muted-foreground">
+              <Compass className="w-10 h-10 text-muted-foreground/30 mb-2" />
+              <div className="text-xs font-bold text-foreground">No City Selected</div>
+              <p className="text-[11px] text-muted-foreground mt-0.5 max-w-[260px]">
+                Click any city in the left list to view and manage its tourist places, monuments, and activities side-by-side.
+              </p>
             </div>
           )}
         </div>
       </div>
-
-      {/* PANEL 4: PLACES & ACTIVITIES FOR SELECTED CITY */}
-      {selectedCity && (
-        <div className="border-t border-border bg-card flex flex-col max-h-[420px] shrink-0">
-          <div className="px-4 py-2.5 border-b border-border bg-slate-50/50 dark:bg-slate-900/40 flex items-center justify-between">
-            <span className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
-              <Compass className="w-3.5 h-3.5 text-[#C9A25A]" />
-              Places &amp; Activities · {selectedCity.city_name}
-            </span>
-            <button
-              type="button"
-              onClick={() => { setSelectedCity(null); setCitySightseeings([]); setCityActivities([]); }}
-              className="text-muted-foreground hover:text-foreground p-1"
-              title="Close panel"
-            >
-              <X className="w-3.5 h-3.5" />
-            </button>
-          </div>
-
-          <Tabs value={inventoryTab} onValueChange={(v) => setInventoryTab(v as 'places' | 'activities')} className="flex-1 flex flex-col overflow-hidden">
-            <div className="px-4 pt-2.5 flex items-center justify-between gap-3 flex-wrap">
-              <TabsList className="h-8">
-                <TabsTrigger value="places" className="text-xs h-7 gap-1.5">
-                  <Ticket className="w-3.5 h-3.5" /> Places ({citySightseeings.length})
-                </TabsTrigger>
-                <TabsTrigger value="activities" className="text-xs h-7 gap-1.5">
-                  <Compass className="w-3.5 h-3.5" /> Activities ({cityActivities.length})
-                </TabsTrigger>
-              </TabsList>
-
-              <div className="flex gap-2">
-                <Button
-                  size="sm"
-                  variant="outline"
-                  className="h-7 text-[11px] px-2.5"
-                  onClick={() => { setShowAddPlace(!showAddPlace); setShowAddActivity(false); }}
-                >
-                  <Plus className="w-3.5 h-3.5 mr-1" /> Add Place
-                </Button>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  className="h-7 text-[11px] px-2.5"
-                  onClick={() => { setShowAddActivity(!showAddActivity); setShowAddPlace(false); }}
-                >
-                  <Plus className="w-3.5 h-3.5 mr-1" /> Add Activity
-                </Button>
-              </div>
-            </div>
-
-            {/* Inline Add Place Form — geography pre-filled from selectedCity, no re-picking */}
-            {showAddPlace && (
-              <form onSubmit={handleCreatePlace} className="mx-4 mt-2.5 p-3 border border-green-500/30 bg-green-500/5 rounded-md space-y-2 animate-in slide-in-from-top-2 duration-150">
-                <div className="text-[11px] font-extrabold text-green-600 dark:text-green-400 uppercase tracking-wide">
-                  Add Place to {selectedCity.city_name}
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                  <Input
-                    placeholder="Place name (e.g. Tawang Monastery Viewpoint)"
-                    value={newPlace.name}
-                    onChange={(e) => setNewPlace(p => ({ ...p, name: e.target.value }))}
-                    className="h-7 text-xs bg-background sm:col-span-2"
-                    required
-                    autoFocus
-                  />
-                  <Input
-                    placeholder="Duration (e.g. 2 Hours)"
-                    value={newPlace.duration}
-                    onChange={(e) => setNewPlace(p => ({ ...p, duration: e.target.value }))}
-                    className="h-7 text-xs bg-background"
-                  />
-                  <div className="flex gap-2">
-                    <Input
-                      type="number"
-                      placeholder="Adult ₹"
-                      value={newPlace.adult_cost}
-                      onChange={(e) => setNewPlace(p => ({ ...p, adult_cost: e.target.value }))}
-                      className="h-7 text-xs bg-background"
-                    />
-                    <Input
-                      type="number"
-                      placeholder="Child ₹"
-                      value={newPlace.child_cost}
-                      onChange={(e) => setNewPlace(p => ({ ...p, child_cost: e.target.value }))}
-                      className="h-7 text-xs bg-background"
-                    />
-                  </div>
-                </div>
-                <Input
-                  placeholder="Image URL (e.g. https://images.unsplash.com/...)"
-                  value={newPlace.image_url}
-                  onChange={(e) => setNewPlace(p => ({ ...p, image_url: e.target.value }))}
-                  className="h-7 text-xs bg-background"
-                />
-                <Textarea
-                  placeholder="Short description (optional)"
-                  value={newPlace.description}
-                  onChange={(e) => setNewPlace(p => ({ ...p, description: e.target.value }))}
-                  className="text-xs bg-background min-h-[50px]"
-                />
-                <div className="flex gap-1.5 justify-end pt-1">
-                  <Button type="button" variant="ghost" size="sm" className="h-7 text-[11px] px-2.5" onClick={() => setShowAddPlace(false)}>Cancel</Button>
-                  <Button type="submit" size="sm" disabled={savingPlace} className="h-7 text-[11px] px-3 bg-green-600 hover:bg-green-700 text-white font-bold">
-                    {savingPlace ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : 'Save Place'}
-                  </Button>
-                </div>
-              </form>
-            )}
-
-            {/* Inline Add Activity Form — geography pre-filled from selectedCity, no re-picking */}
-            {showAddActivity && (
-              <form onSubmit={handleCreateActivity} className="mx-4 mt-2.5 p-3 border border-blue-500/30 bg-blue-500/5 rounded-md space-y-2 animate-in slide-in-from-top-2 duration-150">
-                <div className="text-[11px] font-extrabold text-blue-500 uppercase tracking-wide">
-                  Add Activity to {selectedCity.city_name}
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                  <Input
-                    placeholder="Activity name (e.g. Bum La Pass Cable Car & Trek)"
-                    value={newActivity.name}
-                    onChange={(e) => setNewActivity(a => ({ ...a, name: e.target.value }))}
-                    className="h-7 text-xs bg-background sm:col-span-2"
-                    required
-                    autoFocus
-                  />
-                  <Select value={newActivity.category} onValueChange={(v) => setNewActivity(a => ({ ...a, category: v }))}>
-                    <SelectTrigger className="h-7 text-xs bg-background"><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="Adventure">Adventure</SelectItem>
-                      <SelectItem value="Water Sports">Water Sports</SelectItem>
-                      <SelectItem value="Sightseeing">Sightseeing</SelectItem>
-                      <SelectItem value="Cultural">Cultural</SelectItem>
-                      <SelectItem value="Nature">Nature</SelectItem>
-                      <SelectItem value="Shopping">Shopping</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <Input
-                    placeholder="Duration (e.g. Half-Day)"
-                    value={newActivity.duration}
-                    onChange={(e) => setNewActivity(a => ({ ...a, duration: e.target.value }))}
-                    className="h-7 text-xs bg-background"
-                  />
-                  <div className="flex gap-2 sm:col-span-2">
-                    <Input
-                      type="number"
-                      placeholder="Adult ₹"
-                      value={newActivity.adult_cost}
-                      onChange={(e) => setNewActivity(a => ({ ...a, adult_cost: e.target.value }))}
-                      className="h-7 text-xs bg-background"
-                    />
-                    <Input
-                      type="number"
-                      placeholder="Child ₹"
-                      value={newActivity.child_cost}
-                      onChange={(e) => setNewActivity(a => ({ ...a, child_cost: e.target.value }))}
-                      className="h-7 text-xs bg-background"
-                    />
-                  </div>
-                </div>
-                <Input
-                  placeholder="Image URL (e.g. https://images.unsplash.com/...)"
-                  value={newActivity.image_url}
-                  onChange={(e) => setNewActivity(a => ({ ...a, image_url: e.target.value }))}
-                  className="h-7 text-xs bg-background"
-                />
-                <Textarea
-                  placeholder="Short description (optional)"
-                  value={newActivity.description}
-                  onChange={(e) => setNewActivity(a => ({ ...a, description: e.target.value }))}
-                  className="text-xs bg-background min-h-[50px]"
-                />
-                <div className="flex gap-1.5 justify-end pt-1">
-                  <Button type="button" variant="ghost" size="sm" className="h-7 text-[11px] px-2.5" onClick={() => setShowAddActivity(false)}>Cancel</Button>
-                  <Button type="submit" size="sm" disabled={savingActivity} className="h-7 text-[11px] px-3 bg-blue-600 hover:bg-blue-700 text-white font-bold">
-                    {savingActivity ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : 'Save Activity'}
-                  </Button>
-                </div>
-              </form>
-            )}
-
-            {/* Lists */}
-            <div className="flex-1 overflow-y-auto p-4">
-              {inventoryLoading ? (
-                <div className="flex items-center justify-center py-10 text-muted-foreground text-xs gap-2">
-                  <Loader2 className="w-4 h-4 animate-spin" /> Loading places & activities for {selectedCity.city_name}...
-                </div>
-              ) : inventoryError ? (
-                <div className="text-center py-10 text-xs text-red-500">{inventoryError}</div>
-              ) : (
-                <>
-                  <TabsContent value="places" className="mt-0">
-                    {citySightseeings.length === 0 ? (
-                      <div className="text-center py-10 text-xs text-muted-foreground">
-                        No places added yet for {selectedCity.city_name} — click "Add Place" to add the first one.
-                      </div>
-                    ) : (
-                      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-2">
-                        {citySightseeings.map((place) => (
-                          <div key={place.id} className="p-2.5 rounded-lg border border-border/40 bg-slate-50/50 dark:bg-slate-900/40">
-                            <div className="flex items-start justify-between gap-2">
-                              <span className="font-semibold text-xs text-foreground">{place.sightseeing_name}</span>
-                              {place.duration && (
-                                <Badge variant="outline" className="text-[9px] shrink-0">{place.duration}</Badge>
-                              )}
-                            </div>
-                            {place.description && (
-                              <p className="text-[11px] text-muted-foreground mt-1 line-clamp-2">{place.description}</p>
-                            )}
-                            <div className="flex items-center gap-1 mt-1.5 text-[11px] text-muted-foreground">
-                              <IndianRupee className="w-3 h-3" />
-                              <span>Adult: ₹{place.adult_cost || 0}</span>
-                              {place.child_cost > 0 && <span>· Child: ₹{place.child_cost}</span>}
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </TabsContent>
-
-                  <TabsContent value="activities" className="mt-0">
-                    {cityActivities.length === 0 ? (
-                      <div className="text-center py-10 text-xs text-muted-foreground">
-                        No activities added yet for {selectedCity.city_name} — click "Add Activity" to add the first one.
-                      </div>
-                    ) : (
-                      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-2">
-                        {cityActivities.map((activity) => {
-                          const rate = activity.rates[0];
-                          return (
-                            <div key={activity.id} className="p-2.5 rounded-lg border border-border/40 bg-slate-50/50 dark:bg-slate-900/40">
-                              <div className="flex items-start justify-between gap-2">
-                                <span className="font-semibold text-xs text-foreground">{activity.name}</span>
-                                {activity.category && (
-                                  <Badge variant="outline" className="text-[9px] shrink-0">{activity.category}</Badge>
-                                )}
-                              </div>
-                              {rate && (
-                                <div className="flex items-center gap-1 mt-1.5 text-[11px] text-muted-foreground">
-                                  <IndianRupee className="w-3 h-3" />
-                                  <span>Adult: ₹{rate.adult_rate || 0}</span>
-                                  {rate.child_rate > 0 && <span>· Child: ₹{rate.child_rate}</span>}
-                                </div>
-                              )}
-                            </div>
-                          );
-                        })}
-                      </div>
-                    )}
-                  </TabsContent>
-                </>
-              )}
-            </div>
-          </Tabs>
-        </div>
-      )}
 
       {/* EDIT ITEM INLINE MODAL */}
       <Dialog open={editModalOpen} onOpenChange={setEditModalOpen}>
