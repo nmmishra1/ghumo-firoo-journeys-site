@@ -140,67 +140,41 @@ export const HotelContractWizard: React.FC<HotelContractWizardProps> = ({
           let matchedCityId = prev.city_id;
 
           const detectedCountry = meta.country || 'India';
-          const detectedState = meta.state || meta.city || 'State';
-          const detectedCity = meta.city || meta.state || 'City';
+          const detectedState = meta.state || 'Tamil Nadu';
+          const detectedCity = meta.city || 'Ooty';
 
-          // 1. Match or dynamically add Country
+          // 1. Match Country
           if (Array.isArray(countries) && countries.length > 0) {
             const foundC = countries.find((c: any) => 
-              c.country_name?.toLowerCase() === detectedCountry.toLowerCase() ||
               c.country_name?.toLowerCase().includes(detectedCountry.toLowerCase()) || 
               detectedCountry.toLowerCase().includes(c.country_name?.toLowerCase())
             );
-            if (foundC) {
-              matchedCountryId = String(foundC.id);
-            } else {
-              const newCId = `c_${Date.now()}`;
-              setCountries(prevC => [...prevC, { id: newCId, country_name: detectedCountry }]);
-              matchedCountryId = newCId;
-            }
+            if (foundC) matchedCountryId = String(foundC.id);
+            else matchedCountryId = String(countries[0].id);
           }
 
-          // 2. Match or dynamically add State
-          if (Array.isArray(states)) {
+          // 2. Match State
+          if (Array.isArray(states) && states.length > 0) {
             const foundS = states.find((s: any) => 
-              s.state_name?.toLowerCase() === detectedState.toLowerCase() ||
               s.state_name?.toLowerCase().includes(detectedState.toLowerCase()) || 
               detectedState.toLowerCase().includes(s.state_name?.toLowerCase())
             );
-            if (foundS) {
-              matchedStateId = String(foundS.id);
-            } else {
-              const newSId = `s_${Date.now()}`;
-              setStates(prevS => [...prevS, { id: newSId, state_name: detectedState, country_id: matchedCountryId }]);
-              matchedStateId = newSId;
-            }
+            if (foundS) matchedStateId = String(foundS.id);
+            else matchedStateId = String(states[0].id);
           }
 
-          // 3. Match or dynamically add City
-          if (Array.isArray(cities)) {
+          // 3. Match City
+          if (Array.isArray(cities) && cities.length > 0) {
             const foundCity = cities.find((c: any) => 
-              c.city_name?.toLowerCase() === detectedCity.toLowerCase() ||
               c.city_name?.toLowerCase().includes(detectedCity.toLowerCase()) || 
               detectedCity.toLowerCase().includes(c.city_name?.toLowerCase())
             );
             if (foundCity) {
               matchedCityId = String(foundCity.id);
+              if (foundCity.state_id) matchedStateId = String(foundCity.state_id);
             } else {
-              const newCityId = `city_${Date.now()}`;
-              setCities(prevCity => [...prevCity, { id: newCityId, city_name: detectedCity, state_id: matchedStateId }]);
-              matchedCityId = newCityId;
+              matchedCityId = String(cities[0].id);
             }
-          }
-
-          // 4. Match Hotel Category / Type
-          let matchedCategoryId = prev.category_id;
-          if (Array.isArray(hotelCategories) && hotelCategories.length > 0) {
-            const targetCategory = meta.category_name || (meta.star_rating === 5 ? 'Luxury' : (meta.star_rating === 4 ? 'Deluxe' : 'Standard'));
-            const foundCat = hotelCategories.find((c: any) => 
-              c.category_name?.toLowerCase().includes(targetCategory.toLowerCase()) || 
-              targetCategory.toLowerCase().includes(c.category_name?.toLowerCase())
-            );
-            if (foundCat) matchedCategoryId = String(foundCat.id);
-            else if (!matchedCategoryId) matchedCategoryId = String(hotelCategories[0].id);
           }
 
           const gMapsLink = googleSearchInput.startsWith('http') ? googleSearchInput : `https://maps.google.com/?q=${encodeURIComponent(meta.hotel_name || googleSearchInput)}`;
@@ -209,7 +183,6 @@ export const HotelContractWizard: React.FC<HotelContractWizardProps> = ({
             ...prev,
             hotel_name: meta.hotel_name || prev.hotel_name,
             hotel_code: meta.hotel_code || prev.hotel_code || `HOT-${(detectedCity || 'OO').substring(0, 2).toUpperCase()}-01`,
-            category_id: matchedCategoryId,
             address: meta.address || prev.address,
             area_locality: meta.address || prev.area_locality || detectedCity,
             destination: detectedCity || prev.destination,
@@ -234,24 +207,11 @@ export const HotelContractWizard: React.FC<HotelContractWizardProps> = ({
             cancellation_policy: meta.cancellation_policy || prev.cancellation_policy || 'Free cancellation up to 48 hrs before check-in date. 100% cancellation penalty within 48 hrs of arrival.',
             child_policy: meta.child_policy || prev.child_policy || 'Children below 5 years stay complimentary using existing bedding.',
             extra_bed_policy: meta.extra_bed_policy || prev.extra_bed_policy || 'Extra adult or bed available at ₹1,200/night including breakfast.',
-            google_rating: meta.google_rating !== undefined ? meta.google_rating : prev.google_rating,
+            google_rating: meta.google_rating || prev.google_rating,
             internal_rating: meta.internal_rating || prev.internal_rating || 4.5,
             star_rating: meta.star_rating || prev.star_rating
           };
         });
-
-        // Auto-select Facilities / Amenities
-        if (Array.isArray(meta.amenities) && meta.amenities.length > 0 && Array.isArray(facilitiesList) && facilitiesList.length > 0) {
-          const matchedFacilityIds = facilitiesList.filter((fac: any) => {
-            const fName = (fac.facility_name || '').toLowerCase();
-            return meta.amenities?.some(a => fName.includes(a.toLowerCase()) || a.toLowerCase().includes(fName));
-          }).map((fac: any) => fac.id);
-
-          if (matchedFacilityIds.length > 0) {
-            setSelectedFacilities(prev => Array.from(new Set([...prev, ...matchedFacilityIds])));
-          }
-        }
-
         if (meta.featured_image_url) {
           setMediaUrls(prev => ({ ...prev, featured_image_url: meta.featured_image_url }));
         }
