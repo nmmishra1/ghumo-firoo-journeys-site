@@ -1,6 +1,6 @@
 <?php
 // get_india_tourism.php - Serve India Tourism Explorer database query calls dynamically synced with CRM
-header('Content-Type: application/json');
+header('Content-Type: application/json; charset=utf-8');
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Headers: Content-Type, Authorization');
 header('Access-Control-Allow-Methods: GET, OPTIONS');
@@ -17,12 +17,15 @@ try {
     $action = $_GET['action'] ?? 'baseline';
     $stateId = $_GET['state_id'] ?? '';
     $cityId = $_GET['city_id'] ?? '';
+    $slug = trim($_GET['slug'] ?? $_GET['destination'] ?? $_GET['city'] ?? '');
     $search = $_GET['search'] ?? '';
 
     // ==========================================
     // ACTION: baseline - Returns all states and cities with live counts
     // ==========================================
     if ($action === 'baseline') {
+        header('Cache-Control: public, max-age=3600, stale-while-revalidate=86400');
+        
         // Fetch states from primary `states` table (India is country_id = 1 or states under India)
         $states = [];
         try {
@@ -36,7 +39,7 @@ try {
                            WHEN s.state_name IN ('West Bengal', 'Odisha', 'Bihar', 'Jharkhand', 'Sikkim', 'Assam', 'Meghalaya', 'Arunachal Pradesh') THEN 'East'
                            ELSE 'North'
                        END as region,
-                       (SELECT COUNT(*) FROM cities c WHERE c.state_id = s.id AND (c.active_status = 1 OR c.active_status IS NULL)) as city_count,
+                       (SELECT COUNT(*) FROM cities c WHERE c.state_id = s.id AND (c.active_status = 1 OR c.active_status IS NULL) AND TRIM(COALESCE(c.city_name, c.name)) != '') as city_count,
                        (SELECT COUNT(*) FROM sightseeings sg WHERE sg.state_id = s.id) as sightseeing_count,
                        (SELECT COUNT(*) FROM activities ac WHERE ac.state_id = s.id) as activity_count
                 FROM states s
@@ -50,23 +53,30 @@ try {
             $states = $stmt->fetchAll(PDO::FETCH_ASSOC);
         }
 
-        // Fetch cities from primary `cities` table
+        // Fetch cities from primary `cities` table, strictly excluding null/empty name records
         $cities = [];
         try {
             $stmt2 = $pdo->query("
-                SELECT c.id, c.city_name as name, c.city_name, c.state_id, c.destination_type,
-                       s.state_name, s.state_name as state,
-                       (SELECT COUNT(*) FROM sightseeings sg WHERE sg.city_id = c.id OR LOWER(TRIM(sg.destination)) = LOWER(TRIM(c.city_name))) as sightseeing_count,
-                       (SELECT COUNT(*) FROM activities ac WHERE ac.city_id = c.id OR LOWER(TRIM(ac.destination)) = LOWER(TRIM(c.city_name))) as activity_count
+                SELECT c.id, 
+                       COALESCE(c.city_name, c.name) as name, 
+                       COALESCE(c.city_name, c.name) as city_name, 
+                       c.state_id, 
+                       c.destination_type,
+                       s.state_name, 
+                       s.state_name as state,
+                       (SELECT COUNT(*) FROM sightseeings sg WHERE sg.city_id = c.id OR (TRIM(COALESCE(c.city_name, c.name)) != '' AND LOWER(TRIM(sg.destination)) = LOWER(TRIM(COALESCE(c.city_name, c.name))))) as sightseeing_count,
+                       (SELECT COUNT(*) FROM activities ac WHERE ac.city_id = c.id OR (TRIM(COALESCE(c.city_name, c.name)) != '' AND LOWER(TRIM(ac.destination)) = LOWER(TRIM(COALESCE(c.city_name, c.name))))) as activity_count
                 FROM cities c
                 LEFT JOIN states s ON c.state_id = s.id
-                WHERE (c.active_status = 1 OR c.active_status IS NULL) AND (c.country_id = 1 OR c.country_id IS NULL OR c.country_id = '')
-                ORDER BY c.city_name ASC
+                WHERE (c.active_status = 1 OR c.active_status IS NULL) 
+                  AND (c.country_id = 1 OR c.country_id IS NULL OR c.country_id = '')
+                  AND (c.city_name IS NOT NULL AND TRIM(c.city_name) != '' OR c.name IS NOT NULL AND TRIM(c.name) != '')
+                ORDER BY COALESCE(c.city_name, c.name) ASC
             ");
             $cities = $stmt2->fetchAll(PDO::FETCH_ASSOC);
         } catch (Exception $e) {
             // Fallback to india_cities
-            $stmt2 = $pdo->query("SELECT c.*, s.name as state_name FROM india_cities c JOIN india_states s ON c.state_id = s.id ORDER BY c.name ASC");
+            $stmt2 = $pdo->query("SELECT c.*, s.name as state_name FROM india_cities c JOIN india_states s ON c.state_id = s.id WHERE c.name IS NOT NULL AND TRIM(c.name) != '' ORDER BY c.name ASC");
             $cities = $stmt2->fetchAll(PDO::FETCH_ASSOC);
         }
 
@@ -79,28 +89,98 @@ try {
     }
 
     // ==========================================
-    // ACTION: details - Returns detailed sightseeing and activities for a city
+    // ACTION: details / destination - Returns detailed sightseeing, activities, hotels & nearby cities
     // ==========================================
-    if ($action === 'details') {
-        if (empty($cityId)) {
+    if ($action === 'details' || $action === 'destination') {
+        if (empty($cityId) && empty($slug)) {
             http_response_code(400);
-            echo json_encode(['error' => 'city_id is required']);
+            echo json_encode(['success' => false, 'error' => 'city_id or slug is required']);
             exit;
         }
 
-        // Fetch city details
         $city = null;
+        
+        // Try finding city by ID or Slug/Name
         try {
-            $stmt = $pdo->prepare("SELECT c.*, c.city_name as name, s.state_name FROM cities c LEFT JOIN states s ON c.state_id = s.id WHERE c.id = ?");
-            $stmt->execute([$cityId]);
-            $city = $stmt->fetch(PDO::FETCH_ASSOC);
+            if (!empty($cityId) && is_numeric($cityId)) {
+                $stmt = $pdo->prepare("
+                    SELECT c.*, 
+                           COALESCE(c.city_name, c.name) as name, 
+                           COALESCE(c.city_name, c.name) as city_name, 
+                           s.state_name 
+                    FROM cities c 
+                    LEFT JOIN states s ON c.state_id = s.id 
+                    WHERE c.id = ? AND (c.city_name IS NOT NULL AND TRIM(c.city_name) != '' OR c.name IS NOT NULL AND TRIM(c.name) != '')
+                ");
+                $stmt->execute([$cityId]);
+                $city = $stmt->fetch(PDO::FETCH_ASSOC);
+            }
+            
+            if (!$city && !empty($slug)) {
+                $cleanSlug = strtolower(trim(str_replace(['/', '\\'], '', $slug)));
+                $slugAsText = str_replace('-', ' ', $cleanSlug);
+                $slugAlpha = preg_replace('/[^a-z0-9]/', '', $cleanSlug);
+
+                // Look up by exact name, slug match, or alphanumeric inclusion
+                $stmt = $pdo->prepare("
+                    SELECT c.*, 
+                           COALESCE(c.city_name, c.name) as name, 
+                           COALESCE(c.city_name, c.name) as city_name, 
+                           s.state_name 
+                    FROM cities c 
+                    LEFT JOIN states s ON c.state_id = s.id 
+                    WHERE (c.active_status = 1 OR c.active_status IS NULL)
+                      AND (c.city_name IS NOT NULL AND TRIM(c.city_name) != '' OR c.name IS NOT NULL AND TRIM(c.name) != '')
+                      AND (
+                          LOWER(TRIM(COALESCE(c.city_name, c.name))) = ?
+                          OR LOWER(REPLACE(COALESCE(c.city_name, c.name), ' ', '-')) = ?
+                          OR LOWER(TRIM(COALESCE(c.city_name, c.name))) LIKE ?
+                          OR LOWER(REPLACE(REPLACE(REPLACE(COALESCE(c.city_name, c.name), ' ', ''), '-', ''), '(', '')) = ?
+                      )
+                    ORDER BY 
+                      CASE 
+                        WHEN LOWER(TRIM(COALESCE(c.city_name, c.name))) = ? THEN 1
+                        WHEN LOWER(REPLACE(COALESCE(c.city_name, c.name), ' ', '-')) = ? THEN 2
+                        ELSE 3
+                      END ASC
+                    LIMIT 1
+                ");
+                $stmt->execute([
+                    $slugAsText,
+                    $cleanSlug,
+                    '%' . $slugAsText . '%',
+                    $slugAlpha,
+                    $slugAsText,
+                    $cleanSlug
+                ]);
+                $city = $stmt->fetch(PDO::FETCH_ASSOC);
+            }
         } catch (Exception $e) {
-            $stmt = $pdo->prepare("SELECT c.*, s.name as state_name FROM india_cities c JOIN india_states s ON c.state_id = s.id WHERE c.id = ?");
-            $stmt->execute([$cityId]);
-            $city = $stmt->fetch(PDO::FETCH_ASSOC);
+            // Fallback table lookup
+            try {
+                if (!empty($cityId) && is_numeric($cityId)) {
+                    $stmt = $pdo->prepare("SELECT c.*, s.name as state_name FROM india_cities c JOIN india_states s ON c.state_id = s.id WHERE c.id = ?");
+                    $stmt->execute([$cityId]);
+                    $city = $stmt->fetch(PDO::FETCH_ASSOC);
+                }
+            } catch (Exception $e2) {}
         }
 
-        $cityName = $city['city_name'] ?? $city['name'] ?? '';
+        if (!$city) {
+            http_response_code(404);
+            echo json_encode([
+                'success' => false, 
+                'error' => 'Destination not found in live database',
+                'slug' => $slug,
+                'city_id' => $cityId
+            ]);
+            exit;
+        }
+
+        $cityName = trim($city['city_name'] ?? $city['name'] ?? '');
+        $resolvedCityId = $city['id'];
+        $stateId = $city['state_id'] ?? null;
+        $stateName = $city['state_name'] ?? $city['state'] ?? '';
 
         // Fetch sightseeing from `sightseeings` table
         $sightseeing = [];
@@ -110,15 +190,17 @@ try {
                        adult_cost as entry_fee_estimate, adult_cost, child_cost, duration as recommended_duration_hours,
                        category
                 FROM sightseeings 
-                WHERE city_id = ? OR LOWER(TRIM(destination)) = LOWER(TRIM(?))
+                WHERE city_id = ? OR (? != '' AND LOWER(TRIM(destination)) = LOWER(TRIM(?)))
                 ORDER BY sightseeing_name ASC
             ");
-            $stmt2->execute([$cityId, $cityName]);
+            $stmt2->execute([$resolvedCityId, $cityName, $cityName]);
             $sightseeing = $stmt2->fetchAll(PDO::FETCH_ASSOC);
         } catch (Exception $e) {
-            $stmt2 = $pdo->prepare("SELECT * FROM india_sightseeing WHERE city_id = ? ORDER BY name ASC");
-            $stmt2->execute([$cityId]);
-            $sightseeing = $stmt2->fetchAll(PDO::FETCH_ASSOC);
+            try {
+                $stmt2 = $pdo->prepare("SELECT * FROM india_sightseeing WHERE city_id = ? ORDER BY name ASC");
+                $stmt2->execute([$resolvedCityId]);
+                $sightseeing = $stmt2->fetchAll(PDO::FETCH_ASSOC);
+            } catch (Exception $e2) {}
         }
 
         // Fetch activities from `activities` table
@@ -129,15 +211,17 @@ try {
                        adult_cost as average_cost, adult_cost, child_cost, duration as duration_hours,
                        activity_category as category
                 FROM activities 
-                WHERE city_id = ? OR LOWER(TRIM(destination)) = LOWER(TRIM(?))
+                WHERE city_id = ? OR (? != '' AND LOWER(TRIM(destination)) = LOWER(TRIM(?)))
                 ORDER BY activity_name ASC
             ");
-            $stmt3->execute([$cityId, $cityName]);
+            $stmt3->execute([$resolvedCityId, $cityName, $cityName]);
             $activities = $stmt3->fetchAll(PDO::FETCH_ASSOC);
         } catch (Exception $e) {
-            $stmt3 = $pdo->prepare("SELECT * FROM india_activities WHERE city_id = ? ORDER BY name ASC");
-            $stmt3->execute([$cityId]);
-            $activities = $stmt3->fetchAll(PDO::FETCH_ASSOC);
+            try {
+                $stmt3 = $pdo->prepare("SELECT * FROM india_activities WHERE city_id = ? ORDER BY name ASC");
+                $stmt3->execute([$resolvedCityId]);
+                $activities = $stmt3->fetchAll(PDO::FETCH_ASSOC);
+            } catch (Exception $e2) {}
         }
 
         // Fetch hotels
@@ -147,19 +231,46 @@ try {
                 SELECT h.id, h.hotel_name AS name, h.star_rating AS star_category, hc.room_type, hc.meal_plan, hc.contract_rate 
                 FROM hotels h
                 LEFT JOIN hotel_contracts hc ON hc.hotel_id = h.id
-                WHERE (h.city_id = ? OR LOWER(TRIM(h.city)) = LOWER(TRIM(?))) AND (h.active_status = 1 OR h.active = 1)
+                WHERE (h.city_id = ? OR (? != '' AND LOWER(TRIM(h.city)) = LOWER(TRIM(?)))) 
+                  AND (h.active_status = 1 OR h.active = 1)
                 ORDER BY h.star_rating DESC, h.hotel_name ASC
             ");
-            $stmt4->execute([$cityId, $cityName]);
+            $stmt4->execute([$resolvedCityId, $cityName, $cityName]);
             $hotels = $stmt4->fetchAll(PDO::FETCH_ASSOC);
         } catch (Exception $e) {}
 
+        // Fetch nearby cities in the same state (compact payload for related destinations)
+        $nearbyCities = [];
+        try {
+            if ($stateId || $stateName) {
+                $stmt5 = $pdo->prepare("
+                    SELECT c.id, 
+                           COALESCE(c.city_name, c.name) as name, 
+                           COALESCE(c.city_name, c.name) as city_name, 
+                           c.destination_type, 
+                           s.state_name, 
+                           s.state_name as state
+                    FROM cities c
+                    LEFT JOIN states s ON c.state_id = s.id
+                    WHERE c.id != ?
+                      AND (c.state_id = ? OR (? != '' AND s.state_name = ?))
+                      AND (c.active_status = 1 OR c.active_status IS NULL)
+                      AND (c.city_name IS NOT NULL AND TRIM(c.city_name) != '' OR c.name IS NOT NULL AND TRIM(c.name) != '')
+                    LIMIT 4
+                ");
+                $stmt5->execute([$resolvedCityId, $stateId, $stateName, $stateName]);
+                $nearbyCities = $stmt5->fetchAll(PDO::FETCH_ASSOC);
+            }
+        } catch (Exception $e) {}
+
+        header('Cache-Control: public, max-age=3600, stale-while-revalidate=86400');
         echo json_encode([
             'success' => true,
             'city' => $city,
             'sightseeing' => $sightseeing,
             'activities' => $activities,
-            'hotels' => $hotels
+            'hotels' => $hotels,
+            'nearby_cities' => $nearbyCities
         ]);
         exit;
     }
@@ -205,6 +316,7 @@ try {
             $activities = $stmt2->fetchAll(PDO::FETCH_ASSOC);
         } catch (Exception $e) {}
 
+        header('Cache-Control: public, max-age=1800, stale-while-revalidate=86400');
         echo json_encode([
             'success' => true,
             'sightseeing' => $sightseeing,

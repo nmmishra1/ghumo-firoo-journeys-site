@@ -12,13 +12,15 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { MASTER_DESTINATIONS, MasterDestination } from '@/data/masterDestinations';
+import { getCuratedGuide, CuratedDestinationGuide } from '@/data/curatedDestinationContent';
 import { 
   MapPin, Search, ArrowRight, Sparkles, Globe, Compass, 
   Clock, Plane, Calendar, Phone, MessageCircle, CheckCircle2,
   ChevronRight, Filter, Landmark, Trees, ShieldCheck, Heart,
   ArrowLeft, Share2, Eye, Star, Loader2, IndianRupee, Utensils,
   Train, Sun, CloudRain, HelpCircle, Award, Check, Navigation,
-  FileText, Shield, UserCheck, Car, Camera, Flame, Waves, Mountain
+  FileText, Shield, UserCheck, Car, Camera, Flame, Waves, Mountain,
+  Tent, ExternalLink
 } from 'lucide-react';
 
 const API_BASE = import.meta.env.VITE_PHP_BASE_URL || import.meta.env.VITE_API_BASE_URL || '/php-backend';
@@ -176,92 +178,151 @@ export default function PublicDestinationDetail() {
   const [customerNotes, setCustomerNotes] = useState('');
   const [submittingInquiry, setSubmittingInquiry] = useState(false);
 
-  // Normalize slug into clean search term (strip trailing slash)
-  const destinationQuery = useMemo(() => {
-    if (!slug) return '';
-    const clean = decodeURIComponent(slug).replace(/\/+$/, '').replace(/-/g, ' ').trim().toLowerCase();
-    return clean;
-  }, [slug]);
+  const [notFound, setNotFound] = useState(false);
+  const [matchedMasterState, setMatchedMasterState] = useState<MasterDestination | undefined>(undefined);
 
-  // Find matching destination from Master Catalog
-  const matchedMaster: MasterDestination | undefined = useMemo(() => {
-    if (!destinationQuery) return undefined;
-    return MASTER_DESTINATIONS.find(d => 
-      d.city.toLowerCase() === destinationQuery ||
-      d.city.toLowerCase().replace(/[^a-z0-9]/g, '') === destinationQuery.replace(/[^a-z0-9]/g, '') ||
-      d.city.toLowerCase().includes(destinationQuery) ||
-      destinationQuery.includes(d.city.toLowerCase())
-    );
-  }, [destinationQuery]);
+  // Helper function to strictly match master destination
+  const findMasterDestination = (querySlug: string): MasterDestination | undefined => {
+    if (!querySlug) return undefined;
+    const clean = querySlug.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+    const cleanAlpha = clean.replace(/-/g, '');
 
-  // Load live DB data from get_india_tourism.php
+    return MASTER_DESTINATIONS.find(d => {
+      const dName = d.city.toLowerCase().trim();
+      const dSlug = dName.replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+      const dAlpha = dSlug.replace(/-/g, '');
+
+      // Exact slug or alphanumeric match
+      if (dSlug === clean || dAlpha === cleanAlpha) return true;
+
+      // Match base name before parentheses (e.g., "Gir National Park" in "Gir National Park (Sasan Gir)")
+      const baseName = dName.split('(')[0].trim().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+      if (baseName === clean || baseName.replace(/-/g, '') === cleanAlpha) return true;
+
+      // Match content inside parentheses (e.g. "sasan-gir" or "ekta-nagar")
+      if (dName.includes('(')) {
+        const parenContent = dName.substring(dName.indexOf('(') + 1, dName.indexOf(')')).trim();
+        const parenSlug = parenContent.replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+        if (parenSlug === clean || parenSlug.replace(/-/g, '') === cleanAlpha) return true;
+      }
+
+      return false;
+    });
+  };
+
+  // Targeted live DB data fetch by slug from get_india_tourism.php
   useEffect(() => {
+    if (!slug) {
+      setLoading(false);
+      setNotFound(true);
+      return;
+    }
+
+    const cleanSlug = decodeURIComponent(slug).toLowerCase().trim().replace(/\/+$/, '').replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+    const matched = findMasterDestination(cleanSlug);
+    setMatchedMasterState(matched);
+
+    // Check session storage cache first
+    const cacheKey = `dest_cache_${cleanSlug}`;
+    const cached = typeof window !== 'undefined' ? sessionStorage.getItem(cacheKey) : null;
+    if (cached) {
+      try {
+        const parsed = JSON.parse(cached);
+        if (parsed && parsed.city) {
+          setCityData(parsed.city);
+          setDbSightseeing(parsed.sightseeing || []);
+          setDbActivities(parsed.activities || []);
+          setNearbyCities(parsed.nearby_cities || []);
+          setLoading(false);
+          setNotFound(false);
+          return;
+        }
+      } catch {}
+    }
+
     setLoading(true);
-    fetch(`${API_BASE}/get_india_tourism.php?action=baseline`)
+    setNotFound(false);
+
+    // Single targeted API call (< 3 KB) instead of heavy baseline dataset
+    fetch(`${API_BASE}/get_india_tourism.php?action=details&slug=${encodeURIComponent(cleanSlug)}`)
       .then(res => res.json())
-      .then(async (baselineData) => {
-        if (baselineData.success) {
-          const allCities: any[] = baselineData.cities || [];
-          
-          // Match city
-          const foundCity = allCities.find((c: any) => {
-            const cName = (c.name || c.city_name || '').toLowerCase();
-            return cName === destinationQuery ||
-                   cName.replace(/[^a-z0-9]/g, '') === destinationQuery.replace(/[^a-z0-9]/g, '') ||
-                   cName.includes(destinationQuery) ||
-                   destinationQuery.includes(cName);
+      .then((detData) => {
+        if (detData.success && detData.city) {
+          setCityData(detData.city);
+          setDbSightseeing(detData.sightseeing || []);
+          setDbActivities(detData.activities || []);
+          setNearbyCities(detData.nearby_cities || []);
+          setNotFound(false);
+
+          try {
+            sessionStorage.setItem(cacheKey, JSON.stringify(detData));
+          } catch {}
+        } else if (matched) {
+          // Master Catalog Fallback with curated destination data
+          setCityData({
+            name: matched.city,
+            city_name: matched.city,
+            state_name: matched.state,
+            destination_type: matched.destination_group,
+            description: `Discover ${matched.city}, one of India's most celebrated travel destinations in ${matched.state}. Famous for its ${matched.destination_group.toLowerCase()}, rich history, scenic landscapes, and signature hospitality.`
           });
 
-          if (foundCity) {
-            setCityData(foundCity);
-
-            // Fetch detailed sightseeing & activities for this city
-            try {
-              const detRes = await fetch(`${API_BASE}/get_india_tourism.php?action=details&city_id=${foundCity.id}`);
-              const detData = await detRes.json();
-              if (detData.success) {
-                setDbSightseeing(detData.sightseeing || []);
-                setDbActivities(detData.activities || []);
-              }
-            } catch (err) {
-              console.error("Error fetching city details:", err);
-            }
-
-            // Find nearby cities in same state
-            const sameStateCities = allCities.filter((c: any) => 
-              c.id !== foundCity.id && 
-              (c.state_id === foundCity.state_id || (c.state_name && foundCity.state_name && c.state_name === foundCity.state_name))
-            ).slice(0, 4);
-            setNearbyCities(sameStateCities);
-          } else if (matchedMaster) {
-            // Master fallback
-            setCityData({
-              name: matchedMaster.city,
-              city_name: matchedMaster.city,
-              state_name: matchedMaster.state,
-              destination_type: matchedMaster.destination_group,
-              description: `Discover ${matchedMaster.city}, one of India's most celebrated travel destinations in ${matchedMaster.state}. Famous for its ${matchedMaster.destination_group.toLowerCase()}, rich history, stunning vantage points, and cultural hospitality.`
-            });
-
-            // Find other master destinations in same state
-            const otherMasters = MASTER_DESTINATIONS.filter(d => 
-              d.city !== matchedMaster.city && d.state.toLowerCase() === matchedMaster.state.toLowerCase()
-            ).slice(0, 4);
-            setNearbyCities(otherMasters);
-          }
+          // Find other master destinations in same state for nearby cards
+          const otherMasters = MASTER_DESTINATIONS.filter(d => 
+            d.city !== matched.city && d.state.toLowerCase() === matched.state.toLowerCase()
+          ).slice(0, 4);
+          setNearbyCities(otherMasters);
+          setNotFound(false);
+        } else {
+          // Destination not found in database or catalog
+          setCityData(null);
+          setNotFound(true);
         }
       })
-      .catch((err) => console.error("Error fetching destination data:", err))
+      .catch((err) => {
+        console.error("Error fetching destination data:", err);
+        if (matched) {
+          setCityData({
+            name: matched.city,
+            city_name: matched.city,
+            state_name: matched.state,
+            destination_type: matched.destination_group,
+            description: `Discover ${matched.city}, one of India's most celebrated travel destinations in ${matched.state}.`
+          });
+          setNotFound(false);
+        } else {
+          setNotFound(true);
+        }
+      })
       .finally(() => setLoading(false));
-  }, [destinationQuery, matchedMaster]);
+  }, [slug]);
 
-  const cityName = cityData?.name || cityData?.city_name || matchedMaster?.city || 'Indian Destination';
-  const stateName = cityData?.state_name || cityData?.state || matchedMaster?.state || 'India';
+  const matchedMaster = matchedMasterState;
+  const curatedGuide = useMemo(() => getCuratedGuide(slug || ''), [slug]);
+
+  const cityName = curatedGuide?.city || cityData?.name || cityData?.city_name || matchedMaster?.city || 'Indian Destination';
+  const displayCityName = (curatedGuide?.city || cityName || '').split('(')[0].trim();
+  const stateName = curatedGuide?.state || cityData?.state_name || cityData?.state || matchedMaster?.state || 'India';
   const stateKey = stateName.toLowerCase().trim();
-  const groupName = matchedMaster?.destination_group || cityData?.destination_type || 'Heritage, Leisure & Sightseeing';
+  const groupName = curatedGuide?.heroBadge || matchedMaster?.destination_group || cityData?.destination_type || 'Heritage, Leisure & Sightseeing';
+  const pageTitle = curatedGuide?.title || `${cityName} Tourism Guide — Top Places to Visit, Safaris, Food & Custom Tour Packages | Ghumo Firoo`;
+  const pageDescription = curatedGuide?.metaDescription || `Discover ${cityName}, ${stateName}. Comprehensive travel guide with top sightseeing places, jungle safaris, iconic food trails, best travel months, and custom private tour packages by Ghumo Firoo.`;
+  const heroOverview = curatedGuide?.overview || cityData?.description || `Explore the timeless beauty, iconic landmarks, vibrant cuisine, and signature experiences of ${cityName}. Plan your customized private tour with verified chauffeur cars and hand-picked boutique stays.`;
 
-  // Compute Sightseeings (Merging live DB + Master popular attractions)
+  // Compute Sightseeings (Curated Signature / Live DB / Master popular attractions)
   const allSightseeings = useMemo(() => {
+    if (curatedGuide?.signatureExperiences && curatedGuide.signatureExperiences.length > 0) {
+      return curatedGuide.signatureExperiences.map((exp, idx) => ({
+        id: `curated-sig-${idx}`,
+        name: exp.title,
+        sightseeing_name: exp.title,
+        category: exp.category,
+        recommended_duration_hours: exp.duration,
+        entry_fee_estimate: exp.price,
+        description: exp.description
+      }));
+    }
+
     const list: any[] = [...dbSightseeing];
     const existingNames = new Set(list.map(s => (s.name || s.sightseeing_name || '').toLowerCase()));
 
@@ -289,10 +350,22 @@ export default function PublicDestinationDetail() {
       );
     }
     return list;
-  }, [dbSightseeing, matchedMaster, cityName]);
+  }, [curatedGuide, dbSightseeing, matchedMaster, cityName]);
 
-  // Compute Activities (Safaris, Walks, Boating, Experiences tailored to state & city)
+  // Compute Activities (Curated Heritage Trail / Live DB / Tailored experiences)
   const allActivities = useMemo(() => {
+    if (curatedGuide?.heritageAndCultureTrail && curatedGuide.heritageAndCultureTrail.length > 0) {
+      return curatedGuide.heritageAndCultureTrail.map((act, idx) => ({
+        id: `curated-act-${idx}`,
+        name: act.title,
+        activity_name: act.title,
+        category: act.category,
+        duration_hours: act.duration,
+        average_cost: act.price,
+        description: act.description
+      }));
+    }
+
     const list: any[] = [...dbActivities];
     if (list.length === 0) {
       // Look up in state activities dictionary
@@ -324,7 +397,7 @@ export default function PublicDestinationDetail() {
       }
     }
     return list;
-  }, [dbActivities, groupName, cityName, stateKey]);
+  }, [curatedGuide, dbActivities, groupName, cityName, stateKey]);
 
   // Compute Culinary Highlights tailored to state & city
   const foodHighlights = useMemo(() => {
@@ -342,9 +415,9 @@ export default function PublicDestinationDetail() {
     ];
   }, [cityName, stateKey]);
 
-  const nearestAirport = matchedMaster?.nearest_airport || (cityData?.has_airport === 1 ? 'Regional Airport Connected' : 'Connected via State Airport Hub');
-  const nearestRailway = matchedMaster?.nearest_railway || 'Central Railway Junction with Express Trains';
-  const bestSeason = cityData?.best_time_to_visit || 'October to March (Pleasant Autumn & Winter)';
+  const nearestAirport = curatedGuide?.howToReach.airport || matchedMaster?.nearest_airport || (cityData?.has_airport === 1 ? 'Regional Airport Connected' : 'Connected via State Airport Hub');
+  const nearestRailway = curatedGuide?.howToReach.railway || matchedMaster?.nearest_railway || 'Central Railway Junction with Express Trains';
+  const bestSeason = curatedGuide?.bestTimeToVisit.season || cityData?.best_time_to_visit || 'October to March (Pleasant Autumn & Winter)';
 
   // SEO Schema Keywords
   const seoKeywords = useMemo(() => {
@@ -425,11 +498,60 @@ export default function PublicDestinationDetail() {
     }
   };
 
+  if (loading) {
+    return (
+      <Layout>
+        <div className="min-h-[70vh] flex flex-col items-center justify-center bg-[#060913] text-white pt-24">
+          <div className="flex flex-col items-center space-y-4">
+            <div className="w-10 h-10 border-2 border-[#C9A25A]/20 border-t-[#C9A25A] rounded-full animate-spin"></div>
+            <p className="text-xs font-extrabold tracking-widest text-[#C9A25A] uppercase">Loading Destination Guide...</p>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
+
+  if (notFound || (!cityData && !matchedMaster)) {
+    return (
+      <Layout>
+        <SEO
+          title="Destination Guide Coming Soon | Ghumo Firoo"
+          description="Explore curated travel guides, sightseeing circuits, and luxury tour packages across India with Ghumo Firoo."
+        />
+        <div className="min-h-[80vh] flex flex-col items-center justify-center bg-[#060913] text-white px-4 pt-28 pb-16 text-center">
+          <div className="max-w-md space-y-5">
+            <div className="w-16 h-16 rounded-full bg-[#C9A25A]/10 border border-[#C9A25A]/30 text-[#C9A25A] flex items-center justify-center mx-auto text-2xl">
+              🗺️
+            </div>
+            <h1 className="text-2xl sm:text-3xl font-black font-montserrat text-white">
+              Destination Coming Soon
+            </h1>
+            <p className="text-xs sm:text-sm text-slate-400 leading-relaxed">
+              We are currently curating handpicked heritage stays, verified chauffeur routes, and private safari trails for <strong className="text-amber-400 font-bold capitalize">{slug ? slug.replace(/-/g, ' ') : 'this destination'}</strong>.
+            </p>
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
+              <Link to="/explore-india">
+                <Button className="bg-[#C9A25A] hover:bg-[#d6af63] text-slate-950 font-bold text-xs h-10 px-5 rounded-xl gap-2">
+                  <Compass className="w-4 h-4" /> Explore All Indian Destinations
+                </Button>
+              </Link>
+              <Link to="/packages">
+                <Button variant="outline" className="border-slate-700 hover:bg-slate-800 text-white font-bold text-xs h-10 px-5 rounded-xl">
+                  Browse Tour Packages
+                </Button>
+              </Link>
+            </div>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
+
   return (
     <Layout>
       <SEO
-        title={`${cityName} Tourism Guide — Top Places to Visit, Safaris, Food & Custom Tour Packages | Ghumo Firoo`}
-        description={`Discover ${cityName}, ${stateName}. Comprehensive travel guide with top sightseeing places, jungle safaris, iconic food trails, best travel months, and custom private tour packages by Ghumo Firoo.`}
+        title={pageTitle}
+        description={pageDescription}
         keywords={seoKeywords.join(', ')}
       />
 
@@ -462,12 +584,14 @@ export default function PublicDestinationDetail() {
               </div>
 
               <h1 className="text-3xl sm:text-4xl md:text-5xl font-black font-montserrat text-white tracking-tight leading-tight">
-                {cityName} Tourism &amp; Travel Guide
+                {displayCityName} Tourism &amp; Travel Guide
               </h1>
 
-              <p className="text-slate-300 text-sm sm:text-base leading-relaxed font-medium">
-                {cityData?.description || `Explore the timeless beauty, iconic landmarks, vibrant cuisine, and signature experiences of ${cityName}. Plan your customized private tour with verified chauffeur cars and hand-picked boutique stays.`}
-              </p>
+              <div className="text-slate-300 text-sm sm:text-base leading-relaxed font-medium space-y-3">
+                {String(heroOverview || '').split('\n\n').map((para, pIdx) => (
+                  <p key={pIdx}>{para}</p>
+                ))}
+              </div>
             </div>
 
             {/* ACTION CTAs */}
@@ -476,8 +600,17 @@ export default function PublicDestinationDetail() {
                 onClick={() => setInquiryModalOpen(true)}
                 className="bg-[#C9A25A] hover:bg-[#d6af63] text-slate-950 font-black text-xs sm:text-sm h-11 px-6 rounded-2xl shadow-xl gap-2"
               >
-                <Sparkles className="w-4 h-4" /> Plan a Custom Trip to {cityName}
+                <Sparkles className="w-4 h-4" /> Plan a Custom Trip to {displayCityName}
               </Button>
+              {curatedGuide?.officialPartnerCallout?.ctaLink && (
+                <Link to={curatedGuide.officialPartnerCallout.ctaLink}>
+                  <Button
+                    className="w-full bg-amber-500 hover:bg-amber-600 text-slate-950 font-black text-xs sm:text-sm h-11 px-6 rounded-2xl shadow-xl gap-2"
+                  >
+                    <Tent className="w-4 h-4" /> Book Rann Utsav Package
+                  </Button>
+                </Link>
+              )}
               <Button
                 variant="outline"
                 onClick={handleWhatsApp}
@@ -488,10 +621,34 @@ export default function PublicDestinationDetail() {
             </div>
           </div>
 
+          {/* OFFICIAL PARTNER CALLOUT BANNER (IF AVAILABLE) */}
+          {curatedGuide?.officialPartnerCallout && (
+            <div className="mt-8 p-5 sm:p-6 rounded-2xl bg-gradient-to-r from-amber-500/20 via-[#C9A25A]/15 to-emerald-500/15 border border-[#C9A25A]/40 flex flex-col md:flex-row items-start md:items-center justify-between gap-5 shadow-2xl text-left">
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <Badge className="bg-[#C9A25A] text-slate-950 font-black text-[10px] uppercase px-3 py-0.5 shadow">
+                    <ShieldCheck className="w-3.5 h-3.5 mr-1 inline" /> {curatedGuide.officialPartnerCallout.badgeText}
+                  </Badge>
+                </div>
+                <h3 className="text-base sm:text-lg font-black text-white font-montserrat">
+                  {curatedGuide.officialPartnerCallout.title}
+                </h3>
+                <p className="text-xs sm:text-sm text-slate-300 max-w-3xl leading-relaxed">
+                  {curatedGuide.officialPartnerCallout.description}
+                </p>
+              </div>
+              <Link to={curatedGuide.officialPartnerCallout.ctaLink} className="shrink-0 w-full sm:w-auto">
+                <Button className="w-full sm:w-auto bg-[#C9A25A] hover:bg-[#d6af63] text-slate-950 font-black text-xs sm:text-sm h-11 px-6 rounded-2xl shadow-xl gap-2">
+                  <Tent className="w-4 h-4" /> {curatedGuide.officialPartnerCallout.ctaText} ➔
+                </Button>
+              </Link>
+            </div>
+          )}
+
           {/* QUICK TRANSIT & CLIMATE STRIP */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-8 pt-6 border-t border-slate-800 text-left">
             <div className="p-3.5 rounded-xl bg-slate-900/90 border border-slate-800 flex items-center gap-3">
-              <div className="p-2.5 rounded-lg bg-amber-500/20 text-amber-400">
+              <div className="p-2.5 rounded-lg bg-amber-500/20 text-amber-400 shrink-0">
                 <Sun className="w-5 h-5" />
               </div>
               <div>
@@ -501,22 +658,22 @@ export default function PublicDestinationDetail() {
             </div>
 
             <div className="p-3.5 rounded-xl bg-slate-900/90 border border-slate-800 flex items-center gap-3">
-              <div className="p-2.5 rounded-lg bg-emerald-500/20 text-emerald-400">
+              <div className="p-2.5 rounded-lg bg-emerald-500/20 text-emerald-400 shrink-0">
                 <Plane className="w-5 h-5" />
               </div>
               <div>
                 <span className="text-[10px] text-slate-400 font-extrabold uppercase block">Nearest Airport</span>
-                <span className="text-xs font-bold text-white truncate block max-w-[200px]">{nearestAirport}</span>
+                <span className="text-xs font-bold text-white line-clamp-1">{nearestAirport}</span>
               </div>
             </div>
 
             <div className="p-3.5 rounded-xl bg-slate-900/90 border border-slate-800 flex items-center gap-3">
-              <div className="p-2.5 rounded-lg bg-blue-500/20 text-blue-400">
+              <div className="p-2.5 rounded-lg bg-blue-500/20 text-blue-400 shrink-0">
                 <Train className="w-5 h-5" />
               </div>
               <div>
                 <span className="text-[10px] text-slate-400 font-extrabold uppercase block">Railway Connectivity</span>
-                <span className="text-xs font-bold text-white truncate block max-w-[200px]">{nearestRailway}</span>
+                <span className="text-xs font-bold text-white line-clamp-1">{nearestRailway}</span>
               </div>
             </div>
           </div>
@@ -527,15 +684,15 @@ export default function PublicDestinationDetail() {
       <section className="py-12 bg-[#060913] text-slate-100 min-h-[800px]">
         <div className="container mx-auto px-4 max-w-6xl space-y-12">
 
-          {/* SECTION 1: TOP PLACES TO VISIT & SIGHTSEEING */}
+          {/* SECTION 1: SIGNATURE EXPERIENCES / MUST-VISIT ATTRACTIONS */}
           <div className="space-y-4 text-left">
             <div className="flex items-center justify-between border-b border-slate-800 pb-3 flex-wrap gap-2">
               <div>
                 <span className="text-xs font-extrabold uppercase tracking-widest text-[#C9A25A] flex items-center gap-1.5">
-                  <Landmark className="w-4 h-4" /> Must-Visit Attractions
+                  <Landmark className="w-4 h-4" /> {curatedGuide ? 'Signature Experiences' : 'Must-Visit Attractions'}
                 </span>
                 <h2 className="text-xl md:text-2xl font-black text-white font-montserrat mt-1">
-                  Top Places to Visit in {cityName} ({allSightseeings.length} Spots)
+                  {curatedGuide ? `Signature Experiences in ${displayCityName}` : `Top Places to Visit in ${displayCityName} (${allSightseeings.length} Spots)`}
                 </h2>
               </div>
               <Button 
@@ -568,7 +725,7 @@ export default function PublicDestinationDetail() {
                       </div>
                     </div>
                     <div className="text-right shrink-0">
-                      <span className="text-[9px] text-slate-500 uppercase block font-extrabold">Est. Entry</span>
+                      <span className="text-[9px] text-slate-500 uppercase block font-extrabold">Price / Entry</span>
                       <span className="text-xs font-black text-amber-400">
                         {sight.entry_fee_estimate ? (isNaN(sight.entry_fee_estimate) ? sight.entry_fee_estimate : `₹${sight.entry_fee_estimate}`) : 'Free'}
                       </span>
@@ -600,15 +757,15 @@ export default function PublicDestinationDetail() {
             </div>
           </div>
 
-          {/* SECTION 2: ADVENTURE, EXPERIENCES & SAFARIS */}
+          {/* SECTION 2: HERITAGE, SAFARIS & EXPERIENCES */}
           <div className="space-y-4 text-left">
             <div className="flex items-center justify-between border-b border-slate-800 pb-3">
               <div>
                 <span className="text-xs font-extrabold uppercase tracking-widest text-emerald-400 flex items-center gap-1.5">
-                  <Trees className="w-4 h-4" /> Experiential Activities &amp; Tours
+                  <Trees className="w-4 h-4" /> {curatedGuide ? 'Heritage & Culture Trail' : 'Experiential Activities & Tours'}
                 </span>
                 <h2 className="text-xl md:text-2xl font-black text-white font-montserrat mt-1">
-                  Top Activities &amp; Safaris in {cityName}, {stateName}
+                  {curatedGuide ? `Heritage, Palaces & Culture Trail in ${displayCityName}` : `Top Activities & Safaris in ${displayCityName}, ${stateName}`}
                 </h2>
               </div>
             </div>
@@ -643,7 +800,7 @@ export default function PublicDestinationDetail() {
                     <div className="flex items-center justify-between pt-2 border-t border-slate-800 text-[11px] text-slate-400 font-medium">
                       <div className="flex items-center gap-1.5">
                         <Clock className="w-3.5 h-3.5 text-emerald-400" />
-                        <span>Duration: <strong>{act.duration_hours || '2'} Hours</strong></span>
+                        <span>Duration: <strong>{act.duration_hours || '2'}</strong></span>
                       </div>
                       <Button
                         size="sm"
@@ -671,10 +828,10 @@ export default function PublicDestinationDetail() {
               </div>
               <div>
                 <h3 className="text-lg font-extrabold text-white font-montserrat">
-                  Famous Food &amp; Culinary Specialties in {cityName} ({stateName})
+                  Famous Food &amp; Culinary Specialties in {displayCityName} ({stateName})
                 </h3>
                 <p className="text-xs text-slate-400">
-                  Don't leave {cityName} without savoring these authentic culinary highlights:
+                  Don't leave without savoring these authentic regional flavors and sweets:
                 </p>
               </div>
             </div>
@@ -694,138 +851,251 @@ export default function PublicDestinationDetail() {
             </div>
           </div>
 
-          {/* SECTION 4: SUGGESTED 3D/2N SAMPLE TOUR ITINERARY */}
-          <div className="space-y-4 text-left">
-            <div className="border-b border-slate-800 pb-3">
-              <span className="text-xs font-extrabold uppercase tracking-widest text-[#C9A25A] flex items-center gap-1.5">
-                <Calendar className="w-4 h-4" /> Recommended Holiday Blueprint
-              </span>
-              <h2 className="text-xl md:text-2xl font-black text-white font-montserrat mt-1">
-                Suggested 2 Nights / 3 Days {cityName} Tour Plan
-              </h2>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="p-5 rounded-2xl bg-slate-900 border border-slate-800 space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-black text-amber-400 uppercase">Day 1</span>
-                  <Badge className="bg-amber-500/20 text-amber-300 text-[10px]">Arrival &amp; Heritage</Badge>
-                </div>
-                <h4 className="text-sm font-bold text-white">Welcome &amp; Local Orientation</h4>
-                <p className="text-xs text-slate-300 leading-relaxed font-medium">
-                  • Arrival at airport / station. Private transfer to verified hotel.<br />
-                  • Post lunch, visit {allSightseeings[0]?.name || 'key central landmarks'}.<br />
-                  • Evening sunset stroll &amp; signature local food experience.
-                </p>
-              </div>
-
-              <div className="p-5 rounded-2xl bg-slate-900 border border-slate-800 space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-black text-emerald-400 uppercase">Day 2</span>
-                  <Badge className="bg-emerald-500/20 text-emerald-300 text-[10px]">Full-Day Tour</Badge>
-                </div>
-                <h4 className="text-sm font-bold text-white">Monuments &amp; Safari Adventures</h4>
-                <p className="text-xs text-slate-300 leading-relaxed font-medium">
-                  • Early morning {allActivities[0]?.name || 'sightseeing exploration'}.<br />
-                  • Guided tour of {allSightseeings[1]?.name || 'monument clusters'}.<br />
-                  • Evening cultural experience and local handicraft shopping.
-                </p>
-              </div>
-
-              <div className="p-5 rounded-2xl bg-slate-900 border border-slate-800 space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-black text-blue-400 uppercase">Day 3</span>
-                  <Badge className="bg-blue-500/20 text-blue-300 text-[10px]">Departure</Badge>
-                </div>
-                <h4 className="text-sm font-bold text-white">Leisure &amp; Onward Journey</h4>
-                <p className="text-xs text-slate-300 leading-relaxed font-medium">
-                  • Buffet breakfast at hotel.<br />
-                  • Visit {allSightseeings[2]?.name || 'local scenic garden / viewpoints'}.<br />
-                  • Check-out and assisted transfer to airport / railway station.
-                </p>
-              </div>
-            </div>
-          </div>
-
-          {/* SECTION 5: NEARBY DESTINATIONS */}
-          {nearbyCities.length > 0 && (
+          {/* SECTION 4: NEARBY DESTINATIONS & REGIONAL HUBS */}
+          {((curatedGuide?.nearbyDestinations && curatedGuide.nearbyDestinations.length > 0) || nearbyCities.length > 0) && (
             <div className="space-y-4 text-left">
               <div className="border-b border-slate-800 pb-3">
-                <span className="text-xs font-extrabold uppercase tracking-widest text-[#C9A25A]">Combine &amp; Explore More in {stateName}</span>
-                <h2 className="text-xl font-black text-white font-montserrat mt-1">
-                  Popular Destinations Nearby in {stateName}
+                <span className="text-xs font-extrabold uppercase tracking-widest text-[#C9A25A]">Regional Circuit</span>
+                <h2 className="text-xl md:text-2xl font-black text-white font-montserrat mt-1">
+                  Nearby Destinations in {curatedGuide ? 'Kutch Region' : stateName}
                 </h2>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-                {nearbyCities.map((near: any, idx: number) => {
-                  const nearName = near.name || near.city_name || near.city;
-                  const nearSlug = nearName.toLowerCase().replace(/[^a-z0-9]+/g, '-');
-                  return (
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                {curatedGuide?.nearbyDestinations ? (
+                  curatedGuide.nearbyDestinations.map((near, idx) => (
                     <Link
                       key={idx}
-                      to={`/explore-india/${nearSlug}`}
-                      className="p-4 rounded-2xl bg-slate-900/80 border border-slate-800 hover:border-amber-500/50 transition-all group flex flex-col justify-between"
+                      to={near.link || `/explore-india`}
+                      className="p-5 rounded-2xl bg-slate-900/80 border border-slate-800 hover:border-amber-500/50 transition-all group flex flex-col justify-between space-y-3"
                     >
                       <div>
-                        <MapPin className="w-4 h-4 text-amber-400 mb-2" />
-                        <h4 className="font-extrabold text-sm text-white group-hover:text-amber-400 transition-colors font-montserrat">
-                          {nearName}
+                        <div className="flex items-center justify-between">
+                          <MapPin className="w-4 h-4 text-amber-400" />
+                          <span className="text-[10px] text-slate-400 font-extrabold">{near.distance}</span>
+                        </div>
+                        <h4 className="font-extrabold text-sm text-white group-hover:text-amber-400 transition-colors font-montserrat mt-2">
+                          {near.name}
                         </h4>
-                        <p className="text-[11px] text-slate-400 mt-1">
-                          {near.destination_group || near.destination_type || 'Tourism Hub'}
+                        <Badge className="bg-slate-800 text-amber-300 text-[9px] font-bold mt-1">
+                          {near.type}
+                        </Badge>
+                        <p className="text-[11px] text-slate-400 mt-2 leading-relaxed">
+                          {near.description}
                         </p>
                       </div>
-                      <div className="mt-3 text-[10px] text-amber-400 font-bold flex items-center gap-1">
-                        <span>View Travel Guide</span>
+                      <div className="pt-2 text-[10px] text-amber-400 font-bold flex items-center gap-1">
+                        <span>Explore Guide</span>
                         <ChevronRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" />
                       </div>
                     </Link>
-                  );
-                })}
+                  ))
+                ) : (
+                  nearbyCities.map((near: any, idx: number) => {
+                    const nearName = near.name || near.city_name || near.city;
+                    const nearSlug = nearName.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+                    return (
+                      <Link
+                        key={idx}
+                        to={`/explore-india/${nearSlug}`}
+                        className="p-4 rounded-2xl bg-slate-900/80 border border-slate-800 hover:border-amber-500/50 transition-all group flex flex-col justify-between"
+                      >
+                        <div>
+                          <MapPin className="w-4 h-4 text-amber-400 mb-2" />
+                          <h4 className="font-extrabold text-sm text-white group-hover:text-amber-400 transition-colors font-montserrat">
+                            {nearName}
+                          </h4>
+                          <p className="text-[11px] text-slate-400 mt-1">
+                            {near.destination_group || near.destination_type || 'Tourism Hub'}
+                          </p>
+                        </div>
+                        <div className="mt-3 text-[10px] text-amber-400 font-bold flex items-center gap-1">
+                          <span>View Travel Guide</span>
+                          <ChevronRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" />
+                        </div>
+                      </Link>
+                    );
+                  })
+                )}
               </div>
             </div>
           )}
 
-          {/* SECTION 6: FAQ SECTION WITH GOOGLE SEO SCHEMA */}
+          {/* SECTION 5: WIDER STATE HIGHLIGHTS (IF CURATED) */}
+          {curatedGuide?.widerStateHighlights && curatedGuide.widerStateHighlights.length > 0 && (
+            <div className="space-y-4 text-left">
+              <div className="border-b border-slate-800 pb-3">
+                <span className="text-xs font-extrabold uppercase tracking-widest text-emerald-400">Grand State Holiday Combination</span>
+                <h2 className="text-xl md:text-2xl font-black text-white font-montserrat mt-1">
+                  Other Gujarat Highlights (Worth Combining on a Longer Holiday)
+                </h2>
+                <p className="text-xs text-slate-400 mt-1">
+                  These aren't short day trips from Kutch, but pair exceptionally well if you are planning a comprehensive Gujarat holiday itinerary:
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+                {curatedGuide.widerStateHighlights.map((hi, idx) => (
+                  <Link
+                    key={idx}
+                    to={hi.link || `/explore-india`}
+                    className="p-4 rounded-2xl bg-slate-900/80 border border-slate-800 hover:border-emerald-500/50 transition-all group flex flex-col justify-between space-y-2"
+                  >
+                    <div>
+                      <div className="flex items-center justify-between">
+                        <Landmark className="w-4 h-4 text-emerald-400" />
+                        <span className="text-[10px] text-slate-400 font-extrabold">{hi.distance}</span>
+                      </div>
+                      <h4 className="font-extrabold text-sm text-white group-hover:text-emerald-400 transition-colors font-montserrat mt-1.5">
+                        {hi.name}
+                      </h4>
+                      <Badge className="bg-emerald-500/10 text-emerald-300 border-emerald-500/30 text-[9px] font-bold mt-1">
+                        {hi.type}
+                      </Badge>
+                      <p className="text-[11px] text-slate-400 mt-1.5 leading-relaxed">
+                        {hi.description}
+                      </p>
+                    </div>
+                    <div className="pt-2 text-[10px] text-emerald-400 font-bold flex items-center gap-1">
+                      <span>View Destination</span>
+                      <ChevronRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" />
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* SECTION 6: QUICK INTERNAL LINKS & BOOKING GUIDES */}
+          {curatedGuide?.quickLinks && (
+            <div className="p-6 rounded-2xl bg-slate-900 border border-slate-800 text-left space-y-4">
+              <div className="flex items-center gap-2">
+                <div className="p-2 rounded-xl bg-amber-500/20 text-amber-400">
+                  <FileText className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-base font-extrabold text-white font-montserrat">
+                    Helpful Links &amp; Detailed Booking Resources
+                  </h3>
+                  <p className="text-xs text-slate-400">
+                    Direct access to official booking pages and in-depth travel guides:
+                  </p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3 pt-1">
+                {curatedGuide.quickLinks.map((lk, idx) => (
+                  <Link
+                    key={idx}
+                    to={lk.path}
+                    className="p-3.5 rounded-xl bg-slate-850/80 border border-slate-750 hover:border-amber-500/50 transition-all group flex flex-col justify-between"
+                  >
+                    <div>
+                      <span className="font-extrabold text-xs text-white group-hover:text-amber-400 flex items-center justify-between font-montserrat">
+                        {lk.label}
+                        <ExternalLink className="w-3.5 h-3.5 opacity-60 group-hover:opacity-100 transition-opacity" />
+                      </span>
+                      <p className="text-[11px] text-slate-400 mt-1 leading-relaxed">
+                        {lk.description}
+                      </p>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* SECTION 7: PRIMARY CTA BANNER */}
+          {curatedGuide?.primaryCta ? (
+            <div className="p-8 sm:p-10 rounded-3xl bg-gradient-to-r from-amber-600/20 via-[#0d172a] to-emerald-600/20 border border-[#C9A25A]/40 text-center space-y-4 shadow-2xl">
+              <div className="w-12 h-12 rounded-full bg-[#C9A25A]/20 text-[#C9A25A] flex items-center justify-center mx-auto text-xl font-black">
+                ✨
+              </div>
+              <h3 className="text-xl sm:text-2xl font-black text-white font-montserrat">
+                {curatedGuide.primaryCta.title}
+              </h3>
+              <p className="text-xs sm:text-sm text-slate-300 max-w-2xl mx-auto leading-relaxed">
+                {curatedGuide.primaryCta.subtitle}
+              </p>
+              <div className="pt-2">
+                <Link to={curatedGuide.primaryCta.buttonLink}>
+                  <Button className="bg-[#C9A25A] hover:bg-[#d6af63] text-slate-950 font-black text-xs sm:text-sm h-11 px-8 rounded-2xl shadow-xl gap-2">
+                    <Tent className="w-4 h-4" /> {curatedGuide.primaryCta.buttonText}
+                  </Button>
+                </Link>
+              </div>
+            </div>
+          ) : (
+            <div className="p-8 rounded-3xl bg-gradient-to-r from-amber-600/20 via-[#0d172a] to-blue-600/20 border border-slate-800 text-center space-y-4 shadow-2xl">
+              <h3 className="text-xl sm:text-2xl font-black text-white font-montserrat">
+                Ready to Plan Your Private Holiday to {displayCityName}?
+              </h3>
+              <p className="text-xs sm:text-sm text-slate-300 max-w-xl mx-auto">
+                Get a customized day-by-day itinerary proposal with verified private chauffeur cars, curated stays, and 24x7 concierge.
+              </p>
+              <div className="pt-2">
+                <Button
+                  onClick={() => setInquiryModalOpen(true)}
+                  className="bg-[#C9A25A] hover:bg-[#d6af63] text-slate-950 font-black text-xs sm:text-sm h-11 px-8 rounded-2xl shadow-xl gap-2"
+                >
+                  <Sparkles className="w-4 h-4" /> Request Custom Itinerary &amp; Quote
+                </Button>
+              </div>
+            </div>
+          )}
+
+          {/* SECTION 8: FAQ SECTION WITH GOOGLE SEO SCHEMA */}
           <div className="space-y-4 text-left">
             <div className="border-b border-slate-800 pb-3">
               <span className="text-xs font-extrabold uppercase tracking-widest text-amber-400 flex items-center gap-1.5">
                 <HelpCircle className="w-4 h-4" /> Traveler Queries Answered
               </span>
               <h2 className="text-xl font-black text-white font-montserrat mt-1">
-                Frequently Asked Questions about {cityName} ({stateName}) Travel
+                Frequently Asked Questions about {displayCityName} ({stateName}) Travel
               </h2>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="p-4 rounded-xl bg-slate-900 border border-slate-800 space-y-1.5">
-                <h4 className="text-xs font-bold text-white">What is the best time to visit {cityName}?</h4>
-                <p className="text-[11px] text-slate-300 leading-relaxed font-medium">
-                  The ideal time to visit {cityName} is between <strong>{bestSeason}</strong> when the weather is pleasant for outdoor monument exploration, safaris, and heritage walks.
-                </p>
-              </div>
+              {curatedGuide?.faqs ? (
+                curatedGuide.faqs.map((faq, idx) => (
+                  <div key={idx} className="p-4 rounded-xl bg-slate-900 border border-slate-800 space-y-1.5">
+                    <h4 className="text-xs font-bold text-white">{faq.question}</h4>
+                    <p className="text-[11px] text-slate-300 leading-relaxed font-medium">
+                      {faq.answer}
+                    </p>
+                  </div>
+                ))
+              ) : (
+                <>
+                  <div className="p-4 rounded-xl bg-slate-900 border border-slate-800 space-y-1.5">
+                    <h4 className="text-xs font-bold text-white">What is the best time to visit {cityName}?</h4>
+                    <p className="text-[11px] text-slate-300 leading-relaxed font-medium">
+                      The ideal time to visit {cityName} is between <strong>{bestSeason}</strong> when the weather is pleasant for outdoor exploration, safaris, and heritage walks.
+                    </p>
+                  </div>
 
-              <div className="p-4 rounded-xl bg-slate-900 border border-slate-800 space-y-1.5">
-                <h4 className="text-xs font-bold text-white">How many days are recommended for a {cityName} tour?</h4>
-                <p className="text-[11px] text-slate-300 leading-relaxed font-medium">
-                  A <strong>2 Nights / 3 Days</strong> tour is ideal to cover top attractions and food walks. For combined circuits with neighboring destinations in {stateName}, 4 to 6 days is recommended.
-                </p>
-              </div>
+                  <div className="p-4 rounded-xl bg-slate-900 border border-slate-800 space-y-1.5">
+                    <h4 className="text-xs font-bold text-white">How many days are recommended for a {cityName} tour?</h4>
+                    <p className="text-[11px] text-slate-300 leading-relaxed font-medium">
+                      A <strong>2 Nights / 3 Days</strong> tour is ideal to cover top attractions and food walks. For combined circuits with neighboring destinations in {stateName}, 4 to 6 days is recommended.
+                    </p>
+                  </div>
 
-              <div className="p-4 rounded-xl bg-slate-900 border border-slate-800 space-y-1.5">
-                <h4 className="text-xs font-bold text-white">Can Ghumo Firoo arrange private transfers &amp; customized hotels in {cityName}?</h4>
-                <p className="text-[11px] text-slate-300 leading-relaxed font-medium">
-                  Yes! We provide complete end-to-end custom packages including verified AC private chauffeurs, hand-picked boutique hotels, and dedicated 24x7 on-trip concierge.
-                </p>
-              </div>
+                  <div className="p-4 rounded-xl bg-slate-900 border border-slate-800 space-y-1.5">
+                    <h4 className="text-xs font-bold text-white">Can Ghumo Firoo arrange private transfers &amp; customized hotels in {cityName}?</h4>
+                    <p className="text-[11px] text-slate-300 leading-relaxed font-medium">
+                      Yes! We provide complete end-to-end custom packages including verified AC private chauffeurs, hand-picked boutique hotels, and dedicated 24x7 on-trip concierge.
+                    </p>
+                  </div>
 
-              <div className="p-4 rounded-xl bg-slate-900 border border-slate-800 space-y-1.5">
-                <h4 className="text-xs font-bold text-white">How do I book a personalized holiday package for {cityName}?</h4>
-                <p className="text-[11px] text-slate-300 leading-relaxed font-medium">
-                  Simply click <strong>"Plan a Custom Trip"</strong> or WhatsApp our destination specialists directly to get a custom quote and day-wise itinerary proposal.
-                </p>
-              </div>
+                  <div className="p-4 rounded-xl bg-slate-900 border border-slate-800 space-y-1.5">
+                    <h4 className="text-xs font-bold text-white">How do I book a personalized holiday package for {cityName}?</h4>
+                    <p className="text-[11px] text-slate-300 leading-relaxed font-medium">
+                      Simply click <strong>"Plan a Custom Trip"</strong> or WhatsApp our destination specialists directly to get a custom quote and day-wise itinerary proposal.
+                    </p>
+                  </div>
+                </>
+              )}
             </div>
           </div>
 

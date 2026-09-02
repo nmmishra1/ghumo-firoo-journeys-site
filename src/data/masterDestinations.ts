@@ -589,14 +589,25 @@ export const MASTER_DESTINATIONS: MasterDestination[] = [
 
   // ===================== GUJARAT =====================
   {
-    city: 'Kutch (Dhordo / Rann of Kutch)',
+    city: 'Rann of Kutch (Dhordo / Kutch)',
     state: 'Gujarat',
     country: 'India',
-    destination_group: 'Heritage & Desert',
-    nearest_airport: 'Bhuj Domestic Airport (BHJ) - 80 km',
-    nearest_railway: 'Bhuj Railway Station (SOJN) - 82 km',
+    destination_group: 'White Desert & Heritage',
+    nearest_airport: 'Bhuj Airport (BHJ) - 80 km',
+    nearest_railway: 'Bhuj Railway Station (BHJ) - 80 km',
     gps_coordinates: '23.8344, 69.5100',
-    popular_attractions: ['White Desert (Great Rann of Kutch)', 'Tent City Dhordo', 'Kala Dungar (Black Hill)', 'Rann Utsav Cultural Pavilion']
+    popular_attractions: [
+      'White Desert Sunset & Full Moon Walk',
+      'Tent City Dhordo (Rann Utsav)',
+      'Kalo Dungar (Black Hill - 1,516 ft)',
+      'Aina Mahal & Prag Mahal Clock Tower',
+      'Kutch Museum (Estd. 1877)',
+      'Bhujodi Textile Craft Village & Vankar Weavers',
+      'Vijay Vilas Palace Mandvi',
+      'Lakhpat Walled Fort & Gurudwara Sahib',
+      'Mata no Madh (Ashapura Temple)',
+      'Koteshwar Mahadev Temple & Narayan Sarovar'
+    ]
   },
   {
     city: 'Bhuj',

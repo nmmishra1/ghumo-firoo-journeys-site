@@ -86,8 +86,22 @@ export default function PublicIndiaExplorer() {
   const [customerNotes, setCustomerNotes] = useState('');
   const [submittingInquiry, setSubmittingInquiry] = useState(false);
 
-  // Load baseline states & cities live from CRM Database
+  // Load baseline states & cities live from CRM Database with sessionStorage caching
   useEffect(() => {
+    const cacheKey = 'india_explorer_baseline_v2';
+    const cached = typeof window !== 'undefined' ? sessionStorage.getItem(cacheKey) : null;
+    if (cached) {
+      try {
+        const parsed = JSON.parse(cached);
+        if (parsed && parsed.states && parsed.cities) {
+          setStates(parsed.states);
+          setCities(parsed.cities);
+          setLoading(false);
+          return;
+        }
+      } catch {}
+    }
+
     setLoading(true);
     fetch(`${API_BASE}/get_india_tourism.php?action=baseline`)
       .then(res => res.json())
@@ -95,6 +109,9 @@ export default function PublicIndiaExplorer() {
         if (data.success) {
           setStates(data.states || []);
           setCities(data.cities || []);
+          try {
+            sessionStorage.setItem(cacheKey, JSON.stringify(data));
+          } catch {}
         }
       })
       .catch(err => console.error("Error loading baseline tourism data:", err))

@@ -39,3 +39,4 @@ php-backend.zip
 **.data.json
 **.node-persist**
 **_IGNORE_**
+php-backend/cache/

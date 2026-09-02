@@ -2,6 +2,7 @@ import fs from 'fs/promises';
 import path from 'path';
 import { blogPosts } from '../src/data/blogData.tsx';
 import { MASTER_DESTINATIONS } from '../src/data/masterDestinations.ts';
+import { CURATED_DESTINATION_GUIDES, getCuratedGuide } from '../src/data/curatedDestinationContent.ts';
 
 const siteUrl = 'https://ghumofiroo.com';
 const distDir = path.resolve(process.cwd(), 'dist');
@@ -1010,8 +1011,56 @@ async function main() {
     </article>`
   });
 
+  // Generate curated destination guides
+  const generatedSlugs = new Set<string>();
+
+  for (const [guideKey, guide] of Object.entries(CURATED_DESTINATION_GUIDES)) {
+    for (const slug of guide.slugs) {
+      if (generatedSlugs.has(slug)) continue;
+      generatedSlugs.add(slug);
+
+      const attractions = guide.signatureExperiences.map(e => e.title).join(', ');
+      const heritageList = guide.heritageAndCultureTrail.map(h => h.title).join(', ');
+
+      routesToGenerate.push({
+        route: `/explore-india/${slug}`,
+        title: guide.title,
+        description: guide.metaDescription,
+        canonical: formatCanonical(`/explore-india/${slug}`),
+        h1: `${guide.city.split('(')[0].trim()} Tourism & Travel Guide`,
+        h2: `${guide.state}, India · ${guide.heroBadge || 'Signature Destination'}`,
+        bodyHtml: `<article>
+          <h2>About ${guide.city.split('(')[0].trim()}, ${guide.state}</h2>
+          <p>${guide.overview.replace(/\n\n/g, '</p><p>')}</p>
+          
+          <h3>Top Signature Experiences & Activities</h3>
+          <p>${attractions}</p>
+
+          <h3>Heritage & Culture Trail</h3>
+          <p>${heritageList}</p>
+
+          <h3>Best Time to Visit</h3>
+          <p><strong>${guide.bestTimeToVisit.season}:</strong> ${guide.bestTimeToVisit.description}</p>
+
+          <h3>How to Reach</h3>
+          <ul>
+            <li><strong>Airport:</strong> ${guide.howToReach.airport}</li>
+            <li><strong>Railway:</strong> ${guide.howToReach.railway}</li>
+            <li><strong>Road:</strong> ${guide.howToReach.road}</li>
+          </ul>
+
+          <h3>Official Booking Partner</h3>
+          <p>Ghumo Firoo is an official booking partner for Evoke Tent City Dhordo, Gujarat Tourism's authorized operator for Rann Utsav. Book directly for the best rates.</p>
+        </article>`
+      });
+    }
+  }
+
   for (const dest of MASTER_DESTINATIONS) {
     const slug = dest.city.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+    if (generatedSlugs.has(slug)) continue;
+    generatedSlugs.add(slug);
+
     const attractions = dest.popular_attractions ? dest.popular_attractions.join(', ') : 'historic monuments, cultural landmarks, and scenic viewpoints';
     routesToGenerate.push({
       route: `/explore-india/${slug}`,
