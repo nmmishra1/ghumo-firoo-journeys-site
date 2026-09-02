@@ -212,7 +212,7 @@ export default function PublicIndiaExplorer() {
     const destName = destination.name || destination.city_name || destination.city;
     const stateName = destination.state_name || destination.state || '';
     const message = encodeURIComponent(`Hello Ghumo Firoo! 👋 I am exploring ${destName}${stateName ? ` in ${stateName}` : ''} on your India Explorer guide. Please share customized itinerary options, verified boutique hotels, and pricing quote.`);
-    window.open(`https://wa.me/919904455888?text=${message}`, '_blank');
+    window.open(`https://wa.me/919910987264?text=${message}`, '_blank');
   };
 
   const handleSubmitInquiry = async (e: React.FormEvent) => {

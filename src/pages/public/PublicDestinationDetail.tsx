@@ -440,7 +440,7 @@ export default function PublicDestinationDetail() {
   // Handle WhatsApp Inquiry
   const handleWhatsApp = () => {
     const message = encodeURIComponent(`Hello Ghumo Firoo! 👋 I am interested in planning a customized private holiday package to ${cityName} in ${stateName}. Please share itinerary options, boutique hotel choices, and price quote.`);
-    window.open(`https://wa.me/919904455888?text=${message}`, '_blank');
+    window.open(`https://wa.me/919910987264?text=${message}`, '_blank');
   };
 
   // Submit Inquiry into CRM Leads
