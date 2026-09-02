@@ -1156,7 +1156,7 @@ async function main() {
       const imgPath = item.ogImage.startsWith('http') ? item.ogImage : (item.ogImage.startsWith('/') ? item.ogImage : `/${item.ogImage}`);
       pageHtml = pageHtml.replace(
         /<meta\s+property=["']og:image["']\s+content=["'].*?["']\s*\/?>|<meta\s+content=["'].*?["']\s+property=["']og:image["']\s*\/?>/is,
-        `<meta property="og:image" content="${fullImg}" />\n    <link rel="preload" as="image" href="${imgPath}" fetchpriority="high" />`
+        `<meta property="og:image" content="${fullImg}" />`
       );
       pageHtml = pageHtml.replace(
         /<meta\s+name=["']twitter:image["']\s+content=["'].*?["']\s*\/?>|<meta\s+content=["'].*?["']\s+name=["']twitter:image["']\s*\/?>/is,
