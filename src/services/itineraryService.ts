@@ -1,5 +1,57 @@
 import { supabase } from '@/integrations/supabase/client';
 
+const API_BASE = import.meta.env.VITE_PHP_BASE_URL || import.meta.env.VITE_API_BASE_URL || '/php-backend';
+
+export interface GenerateAIItineraryParams {
+  destination: string;
+  duration_days?: number;
+  passenger_count?: number;
+  travel_style?: string;
+  budget_tier?: string;
+  custom_notes?: string;
+  customer_name?: string;
+}
+
+export interface GeneratedAIItineraryResult {
+  package_title: string;
+  overview: string;
+  total_days: number;
+  total_nights: number;
+  destination: string;
+  travel_style: string;
+  suggested_hotels: Array<{
+    hotel_name: string;
+    city: string;
+    star_rating: number;
+    nights: number;
+    room_type: string;
+    est_rate_per_night: number;
+    total_cost: number;
+  }>;
+  day_by_day: Array<{
+    day_number: number;
+    title: string;
+    morning_highlight?: string;
+    afternoon_highlight?: string;
+    evening_highlight?: string;
+    overnight_stay?: string;
+    drive_distance_km?: number;
+    description: string;
+    activities?: string[];
+  }>;
+  inclusions: string[];
+  exclusions: string[];
+  quote_items: Array<{
+    type: 'hotel' | 'transport' | 'activity' | 'flight' | 'custom';
+    name: string;
+    detail: string;
+    qty: number;
+    rate: number;
+    total: number;
+  }>;
+  source?: string;
+}
+
 export interface ItineraryDay {
   id?: string;
   package_slug: string;
@@ -256,5 +308,29 @@ export const itineraryService = {
         localStorage.setItem(LOCAL_STORAGE_ITINERARIES_KEY, JSON.stringify(INITIAL_PACKAGE_ITINERARIES));
       }
     } catch {}
+  },
+
+  // 1-Click Database-Prioritized Gemini Itinerary & Quote Generator
+  generateAIItinerary: async (params: GenerateAIItineraryParams): Promise<{ success: boolean; data?: GeneratedAIItineraryResult; error?: string }> => {
+    try {
+      const res = await fetch(`${API_BASE}/generate_ai_itinerary.php`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(params)
+      });
+
+      if (!res.ok) {
+        throw new Error(`HTTP error ${res.status}`);
+      }
+
+      const json = await res.json();
+      if (json.success && json.data) {
+        return { success: true, data: json.data };
+      }
+      return { success: false, error: json.error || 'Failed to generate itinerary' };
+    } catch (err: any) {
+      console.error('generateAIItinerary error:', err);
+      return { success: false, error: err.message || 'Connection error with AI service' };
+    }
   }
 };

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { 
   FileText, Plus, GitCompare, Eye, RefreshCw, Copy, CheckCircle2, 
   ArrowLeft, ArrowRight, User, Calendar, IndianRupee, Settings, Filter, Search, Edit, Trash2, Save, X, Share2, MessageCircle, Loader2,
-  TrendingUp, ShieldAlert, Star, Globe, MapPin, Compass, Sparkles, Camera, Landmark
+  TrendingUp, ShieldAlert, Star, Globe, MapPin, Compass, Sparkles, Camera, Landmark, Wand2, Bot, Hotel, Car, CheckCircle
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -12,7 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useToast } from '@/hooks/use-toast';
 import { quoteService, QuoteHeader, QuoteVersion, QuoteItem } from '@/services/quoteService';
-import { itineraryService } from '@/services/itineraryService';
+import { itineraryService, GeneratedAIItineraryResult } from '@/services/itineraryService';
 
 interface QuoteWorkspaceProps {
   quotes: QuoteHeader[];
@@ -44,6 +44,23 @@ export default function QuoteWorkspace({ quotes: propQuotes = [], onCreateRevisi
   const [shareEmail, setShareEmail] = useState('');
   const [shareMsg, setShareMsg] = useState('');
   const [generatedShareUrl, setGeneratedShareUrl] = useState('');
+
+  // AI Itinerary & Proposal Generator State
+  const [aiModalOpen, setAiModalOpen] = useState(false);
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiResult, setAiResult] = useState<GeneratedAIItineraryResult | null>(null);
+  const [aiFormData, setAiFormData] = useState({
+    destination: 'Kashmir',
+    durationDays: 5,
+    passengerCount: 2,
+    travelStyle: 'Honeymoon Romantic',
+    budgetTier: '4-Star Premium',
+    customerName: '',
+    customerEmail: '',
+    customerPhone: '',
+    customNotes: '',
+    margin: 15
+  });
 
   // New Quote Creation Modal State
   const [newQuoteModalOpen, setNewQuoteModalOpen] = useState(false);
@@ -161,6 +178,179 @@ export default function QuoteWorkspace({ quotes: propQuotes = [], onCreateRevisi
       description: `Created quote ${newQuoteNum} for ${newQuoteObj.customerName}.`,
       className: 'bg-slate-900 text-white border-emerald-500/40'
     });
+  };
+
+  // AI Proposal Generation Handler
+  const handleGenerateAIProposal = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    if (!aiFormData.destination.trim()) {
+      toast({
+        title: "Destination Required",
+        description: "Please enter a destination name (e.g., Kashmir, Rann of Kutch, Kerala).",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setAiLoading(true);
+    setAiResult(null);
+
+    try {
+      const res = await itineraryService.generateAIItinerary({
+        destination: aiFormData.destination.trim(),
+        duration_days: aiFormData.durationDays,
+        passenger_count: aiFormData.passengerCount,
+        travel_style: aiFormData.travelStyle,
+        budget_tier: aiFormData.budgetTier,
+        custom_notes: aiFormData.customNotes,
+        customer_name: aiFormData.customerName || (selectedQuote?.customerName || '')
+      });
+
+      if (res.success && res.data) {
+        setAiResult(res.data);
+        toast({
+          title: "✨ Proposal Generated with Gemini",
+          description: `Built customized ${res.data.total_days}D/${res.data.total_nights}N itinerary with database hotel inventory.`,
+          className: 'bg-slate-900 text-white border-emerald-500/40'
+        });
+      } else {
+        toast({
+          title: "Generation Failed",
+          description: res.error || "Could not generate proposal. Please try again.",
+          variant: "destructive"
+        });
+      }
+    } catch (err: any) {
+      toast({
+        title: "Error Generating Proposal",
+        description: err.message || "Something went wrong.",
+        variant: "destructive"
+      });
+    } finally {
+      setAiLoading(false);
+    }
+  };
+
+  // Apply Generated AI Itinerary to Quote
+  const handleApplyAIProposal = () => {
+    if (!aiResult) return;
+
+    const items: QuoteItem[] = (aiResult.quote_items && aiResult.quote_items.length > 0)
+      ? aiResult.quote_items.map((item, idx) => ({
+          type: (item.type || 'hotel') as any,
+          name: item.name,
+          detail: item.detail || '',
+          qty: item.qty || 1,
+          rate: item.rate || 0,
+          total: item.total || (item.qty * item.rate)
+        }))
+      : [];
+
+    // If quote_items was empty, assemble from suggested_hotels and transport
+    if (items.length === 0 && aiResult.suggested_hotels && aiResult.suggested_hotels.length > 0) {
+      aiResult.suggested_hotels.forEach(h => {
+        items.push({
+          type: 'hotel',
+          name: `${h.hotel_name} [${h.city}] (${h.star_rating || 4}★)`,
+          detail: `${h.room_type || 'Deluxe Room'} • ${h.nights} Nights Stay`,
+          qty: h.nights,
+          rate: h.est_rate_per_night || 4500,
+          total: h.total_cost || (h.nights * (h.est_rate_per_night || 4500))
+        });
+      });
+
+      items.push({
+        type: 'transfer',
+        name: `Dedicated Private AC Vehicle (${aiResult.total_days} Days)`,
+        detail: `Full-circuit transfers, airport pickup & all highway toll taxes`,
+        qty: aiResult.total_days,
+        rate: 3200,
+        total: aiResult.total_days * 3200
+      });
+    }
+
+    const totalCost = items.reduce((sum, it) => sum + it.total, 0);
+    const margin = aiFormData.margin || 15;
+    const sellingPrice = Math.round(totalCost * (1 + (margin / 100)));
+
+    if (selectedQuote && vA) {
+      // Append to Active Quote
+      const updatedVersions = selectedQuote.versions.map(ver => {
+        if (ver.id === vA.id) {
+          return {
+            ...ver,
+            items: items,
+            itineraryDays: aiResult.day_by_day as any,
+            totalCost: totalCost,
+            margin: margin,
+            sellingPrice: sellingPrice
+          };
+        }
+        return ver;
+      });
+
+      const updatedQuote = {
+        ...selectedQuote,
+        destination: aiResult.destination || selectedQuote.destination,
+        versions: updatedVersions
+      };
+
+      setSelectedQuote(updatedQuote);
+      setQuotes(prev => prev.map(q => q.id === selectedQuote.id ? updatedQuote : q));
+      setEditItems(items);
+      setEditMargin(margin);
+
+      toast({
+        title: "Proposal Updated with AI Itinerary",
+        description: `Injected ${items.length} line items and Day 1–${aiResult.total_days} schedule.`,
+        className: 'bg-slate-900 text-white border-emerald-500/40'
+      });
+    } else {
+      // Create Brand New Quote from AI Itinerary
+      const newQuoteId = `q-${Date.now()}`;
+      const newQuoteNum = `QT-${new Date().getFullYear()}-${Math.floor(100 + Math.random() * 900)}`;
+      const clientName = aiFormData.customerName.trim() || 'Valued Traveler';
+
+      const newVersion: QuoteVersion = {
+        id: `ver-${Date.now()}`,
+        versionNumber: 1,
+        createdAt: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+        createdBy: 'Gemini AI Designer',
+        status: 'Draft',
+        items: items,
+        itineraryDays: aiResult.day_by_day as any,
+        totalCost: totalCost,
+        margin: margin,
+        sellingPrice: sellingPrice
+      };
+
+      const newQuoteObj: QuoteHeader = {
+        id: newQuoteId,
+        quoteNumber: newQuoteNum,
+        customerName: clientName,
+        destination: aiResult.destination || aiFormData.destination,
+        createdAt: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+        currentVersion: 1,
+        decisionStatus: 'Draft',
+        versions: [newVersion]
+      };
+
+      setQuotes(prev => [newQuoteObj, ...prev]);
+      setSelectedQuote(newQuoteObj);
+      setVersionA(newVersion.id);
+      setVersionB('');
+      setEditItems(items);
+      setEditMargin(margin);
+
+      toast({
+        title: "✨ New AI Quote Created",
+        description: `Created proposal ${newQuoteNum} for ${clientName} (${items.length} line items).`,
+        className: 'bg-slate-900 text-white border-emerald-500/40'
+      });
+    }
+
+    setAiModalOpen(false);
+    setAiResult(null);
   };
   // Destination Intelligence Slide-Over Drawer state
   const [showDestDrawer, setShowDestDrawer] = useState(false);
@@ -781,7 +971,28 @@ export default function QuoteWorkspace({ quotes: propQuotes = [], onCreateRevisi
                   </CardDescription>
                 </div>
 
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2.5">
+                  <Button 
+                    onClick={() => {
+                      setAiFormData({
+                        destination: 'Kashmir',
+                        durationDays: 5,
+                        passengerCount: 2,
+                        travelStyle: 'Honeymoon Romantic',
+                        budgetTier: '4-Star Premium',
+                        customerName: '',
+                        customerEmail: '',
+                        customerPhone: '',
+                        customNotes: '',
+                        margin: 15
+                      });
+                      setAiResult(null);
+                      setAiModalOpen(true);
+                    }}
+                    className="bg-gradient-to-r from-purple-600 via-indigo-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-black text-xs rounded-xl h-9 px-4 shadow-md flex items-center gap-1.5 shrink-0 border border-purple-400/30"
+                  >
+                    <Sparkles className="w-4 h-4 text-amber-300 animate-pulse" /> ✨ Generate with Gemini AI
+                  </Button>
                   <Button 
                     onClick={() => setNewQuoteModalOpen(true)}
                     className="bg-amber-500 hover:bg-amber-600 text-slate-950 font-black text-xs rounded-xl h-9 px-4 shadow-md flex items-center gap-1.5 shrink-0"
@@ -937,6 +1148,27 @@ export default function QuoteWorkspace({ quotes: propQuotes = [], onCreateRevisi
               </div>
             </div>
             <div className="flex items-center gap-2">
+              <Button 
+                onClick={() => {
+                  setAiFormData({
+                    destination: selectedQuote.destination,
+                    durationDays: 5,
+                    passengerCount: 2,
+                    travelStyle: 'Honeymoon Romantic',
+                    budgetTier: '4-Star Premium',
+                    customerName: selectedQuote.customerName,
+                    customerEmail: '',
+                    customerPhone: '',
+                    customNotes: '',
+                    margin: vA?.margin || 15
+                  });
+                  setAiResult(null);
+                  setAiModalOpen(true);
+                }}
+                className="bg-gradient-to-r from-purple-600 via-indigo-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-black text-xs rounded-xl h-9 px-3.5 shadow-md flex items-center gap-1.5 shrink-0 border border-purple-400/30"
+              >
+                <Sparkles className="w-4 h-4 text-amber-300 animate-pulse" /> ✨ AI Itinerary Generator
+              </Button>
               <Button 
                 variant="outline"
                 size="sm"
@@ -1743,6 +1975,313 @@ export default function QuoteWorkspace({ quotes: propQuotes = [], onCreateRevisi
               <Button onClick={handleAddCustomHotelStay} size="sm" className="bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold text-xs rounded-xl h-9 px-4">
                 Add Hotel Stay
               </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 1-CLICK GEMINI AI ITINERARY & PROPOSAL GENERATOR MODAL */}
+      {aiModalOpen && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 z-50 animate-fadeIn overflow-y-auto">
+          <div className="bg-[#111827] border border-purple-500/40 rounded-3xl p-6 max-w-2xl w-full shadow-2xl text-slate-100 space-y-5 my-8 max-h-[90vh] flex flex-col justify-between">
+            {/* Modal Header */}
+            <div className="flex items-center justify-between border-b border-slate-800 pb-4 shrink-0">
+              <div className="flex items-center gap-3">
+                <div className="p-3 bg-gradient-to-br from-purple-500/20 to-indigo-500/20 text-purple-400 rounded-2xl border border-purple-500/30 shadow-inner">
+                  <Sparkles className="w-5 h-5 text-amber-300 animate-pulse" />
+                </div>
+                <div>
+                  <h3 className="text-base font-black text-white flex items-center gap-2">
+                    1-Click Gemini AI Itinerary &amp; Quote Builder
+                    <Badge className="bg-emerald-500/20 text-emerald-300 border-emerald-500/40 text-[10px] font-extrabold uppercase">
+                      Database Priority RAG
+                    </Badge>
+                  </h3>
+                  <p className="text-xs text-slate-400 font-medium mt-0.5">
+                    Queries MySQL database for verified hotels &amp; sightseeings, then builds a tailored proposal.
+                  </p>
+                </div>
+              </div>
+              <Button size="icon" variant="ghost" onClick={() => { setAiModalOpen(false); setAiResult(null); }} className="text-slate-400 hover:text-white rounded-xl">
+                <X className="w-5 h-5" />
+              </Button>
+            </div>
+
+            {/* Modal Body */}
+            <div className="flex-1 overflow-y-auto pr-1 space-y-4">
+              {!aiResult ? (
+                /* STEP 1: FORM INPUTS */
+                <form onSubmit={handleGenerateAIProposal} className="space-y-4">
+                  {/* Destination Input + Quick Chips */}
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-extrabold uppercase tracking-wider text-purple-300 flex items-center justify-between">
+                      <span>Destination / Circuit *</span>
+                      <span className="text-[10px] text-slate-400 lowercase">e.g. Kashmir, Rann of Kutch, Kerala</span>
+                    </label>
+                    <Input
+                      required
+                      value={aiFormData.destination}
+                      onChange={(e) => setAiFormData(prev => ({ ...prev, destination: e.target.value }))}
+                      placeholder="e.g. Kashmir / Rann of Kutch / Kerala / Rajasthan / Andaman"
+                      className="h-10 text-xs bg-slate-900 border-slate-700 text-white rounded-xl focus:border-purple-500"
+                    />
+                    {/* Quick Selection Chips */}
+                    <div className="flex items-center gap-1.5 flex-wrap pt-1">
+                      {['Kashmir', 'Rann of Kutch', 'Kerala', 'Rajasthan', 'Char Dham', 'Goa', 'Andaman', 'Himachal', 'Dubai'].map(dest => (
+                        <button
+                          key={dest}
+                          type="button"
+                          onClick={() => setAiFormData(prev => ({ ...prev, destination: dest }))}
+                          className={`text-[11px] px-2.5 py-1 rounded-lg font-bold transition-colors ${
+                            aiFormData.destination.toLowerCase() === dest.toLowerCase()
+                              ? 'bg-purple-600 text-white'
+                              : 'bg-slate-800/80 hover:bg-slate-700 text-slate-300 border border-slate-700/60'
+                          }`}
+                        >
+                          {dest}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Duration, Pax & Margin Grid */}
+                  <div className="grid grid-cols-3 gap-3">
+                    <div className="space-y-1">
+                      <label className="text-xs font-extrabold uppercase text-slate-300">Duration (Days)</label>
+                      <Input
+                        type="number"
+                        min={1}
+                        max={30}
+                        value={aiFormData.durationDays}
+                        onChange={(e) => setAiFormData(prev => ({ ...prev, durationDays: Math.max(1, Number(e.target.value)) }))}
+                        className="h-9 text-xs bg-slate-900 border-slate-700 text-white rounded-xl"
+                      />
+                      <span className="text-[10px] text-slate-400 font-medium">({aiFormData.durationDays - 1} Nights)</span>
+                    </div>
+
+                    <div className="space-y-1">
+                      <label className="text-xs font-extrabold uppercase text-slate-300">Travelers (Adults)</label>
+                      <Input
+                        type="number"
+                        min={1}
+                        max={50}
+                        value={aiFormData.passengerCount}
+                        onChange={(e) => setAiFormData(prev => ({ ...prev, passengerCount: Math.max(1, Number(e.target.value)) }))}
+                        className="h-9 text-xs bg-slate-900 border-slate-700 text-white rounded-xl"
+                      />
+                    </div>
+
+                    <div className="space-y-1">
+                      <label className="text-xs font-extrabold uppercase text-slate-300">Markup Margin %</label>
+                      <Input
+                        type="number"
+                        min={0}
+                        max={100}
+                        value={aiFormData.margin}
+                        onChange={(e) => setAiFormData(prev => ({ ...prev, margin: Math.max(0, Number(e.target.value)) }))}
+                        className="h-9 text-xs bg-slate-900 border-slate-700 text-white rounded-xl"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Travel Style & Budget Tier */}
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-1">
+                      <label className="text-xs font-extrabold uppercase text-slate-300">Travel Vibe / Style</label>
+                      <Select 
+                        value={aiFormData.travelStyle} 
+                        onValueChange={(val) => setAiFormData(prev => ({ ...prev, travelStyle: val }))}
+                      >
+                        <SelectTrigger className="h-9 text-xs bg-slate-900 border-slate-700 text-white rounded-xl">
+                          <SelectValue placeholder="Select Style" />
+                        </SelectTrigger>
+                        <SelectContent className="bg-slate-900 border-slate-700 text-white">
+                          <SelectItem value="Honeymoon Romantic">💍 Honeymoon &amp; Romantic</SelectItem>
+                          <SelectItem value="Family Leisure">👨‍👩‍👧‍👦 Family Leisure &amp; Kids</SelectItem>
+                          <SelectItem value="Luxury Heritage Palace">👑 Luxury Heritage &amp; Boutique Stays</SelectItem>
+                          <SelectItem value="Spiritual Pilgrimage">🕉️ Spiritual Pilgrimage &amp; VIP Darshan</SelectItem>
+                          <SelectItem value="Adventure & Nature Trek">⛰️ Adventure &amp; Scenic Nature</SelectItem>
+                          <SelectItem value="Corporate Executive Retreat">💼 Corporate &amp; Group Tour</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div className="space-y-1">
+                      <label className="text-xs font-extrabold uppercase text-slate-300">Hotel &amp; Budget Tier</label>
+                      <Select 
+                        value={aiFormData.budgetTier} 
+                        onValueChange={(val) => setAiFormData(prev => ({ ...prev, budgetTier: val }))}
+                      >
+                        <SelectTrigger className="h-9 text-xs bg-slate-900 border-slate-700 text-white rounded-xl">
+                          <SelectValue placeholder="Select Tier" />
+                        </SelectTrigger>
+                        <SelectContent className="bg-slate-900 border-slate-700 text-white">
+                          <SelectItem value="4-Star Premium">⭐ 4-Star Premium / Boutique Stays</SelectItem>
+                          <SelectItem value="5-Star Luxury">⭐⭐ 5-Star Luxury / 5-Star Resorts</SelectItem>
+                          <SelectItem value="3-Star Comfort">✨ 3-Star Deluxe Comfort (Value)</SelectItem>
+                          <SelectItem value="Swiss Tent & Houseboat">🏕️ Swiss Tents / Deluxe Houseboats</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+
+                  {/* Customer Name (Optional) */}
+                  {!selectedQuote && (
+                    <div className="space-y-1">
+                      <label className="text-xs font-extrabold uppercase text-slate-300">Customer Name (Optional)</label>
+                      <Input
+                        value={aiFormData.customerName}
+                        onChange={(e) => setAiFormData(prev => ({ ...prev, customerName: e.target.value }))}
+                        placeholder="e.g. Rahul Sharma"
+                        className="h-9 text-xs bg-slate-900 border-slate-700 text-white rounded-xl"
+                      />
+                    </div>
+                  )}
+
+                  {/* Special Requests & Client Preferences */}
+                  <div className="space-y-1">
+                    <label className="text-xs font-extrabold uppercase text-slate-300 flex items-center justify-between">
+                      <span>Client Notes / Special Requests</span>
+                      <span className="text-[10px] text-slate-400">Optional</span>
+                    </label>
+                    <textarea
+                      rows={2}
+                      value={aiFormData.customNotes}
+                      onChange={(e) => setAiFormData(prev => ({ ...prev, customNotes: e.target.value }))}
+                      placeholder="e.g. Prefers pure vegetarian Jain food, elderly traveler needing gentle pacing, private Dal Lake shikara included."
+                      className="w-full p-2.5 text-xs bg-slate-900 border border-slate-700 text-white rounded-xl focus:outline-none focus:border-purple-500 font-medium"
+                    />
+                  </div>
+
+                  {/* Submit Button */}
+                  <div className="pt-2">
+                    <Button
+                      type="submit"
+                      disabled={aiLoading}
+                      className="w-full bg-gradient-to-r from-purple-600 via-indigo-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-black text-xs sm:text-sm h-11 rounded-2xl shadow-xl flex items-center justify-center gap-2 border border-purple-400/40"
+                    >
+                      {aiLoading ? (
+                        <>
+                          <Loader2 className="w-4 h-4 animate-spin text-amber-300" />
+                          <span>Querying database &amp; building itinerary with Gemini...</span>
+                        </>
+                      ) : (
+                        <>
+                          <Wand2 className="w-4 h-4 text-amber-300" />
+                          <span>Generate Tailored Itinerary &amp; Quote Proposal</span>
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                </form>
+              ) : (
+                /* STEP 2: GENERATED RESULT PREVIEW */
+                <div className="space-y-4 animate-fadeIn">
+                  {/* Proposal Banner */}
+                  <div className="p-4 rounded-2xl bg-gradient-to-br from-purple-950/60 via-slate-900 to-indigo-950/60 border border-purple-500/30 space-y-2">
+                    <div className="flex items-center justify-between flex-wrap gap-2">
+                      <Badge className="bg-purple-500/20 text-purple-300 border-purple-500/40 font-extrabold text-[10px]">
+                        {aiResult.total_days} Days / {aiResult.total_nights} Nights
+                      </Badge>
+                      <Badge className="bg-amber-500/20 text-amber-400 border-amber-500/40 font-bold text-[10px]">
+                        {aiResult.travel_style}
+                      </Badge>
+                      {aiResult.source && (
+                        <span className="text-[10px] text-slate-400 font-mono">Engine: {aiResult.source}</span>
+                      )}
+                    </div>
+                    <h4 className="text-base font-black text-white">{aiResult.package_title}</h4>
+                    <p className="text-xs text-slate-300 leading-relaxed font-medium line-clamp-3">
+                      {aiResult.overview}
+                    </p>
+                  </div>
+
+                  {/* Suggested Hotel Stays (From DB) */}
+                  {aiResult.suggested_hotels && aiResult.suggested_hotels.length > 0 && (
+                    <div className="space-y-2">
+                      <h5 className="text-xs font-black text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
+                        <Hotel className="w-3.5 h-3.5 text-indigo-400" /> Contracted Hotel Stays ({aiResult.suggested_hotels.length})
+                      </h5>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        {aiResult.suggested_hotels.map((h, hIdx) => (
+                          <div key={hIdx} className="p-3 bg-slate-900/90 border border-slate-800 rounded-xl space-y-1">
+                            <div className="flex items-center justify-between">
+                              <span className="text-xs font-black text-white">{h.hotel_name}</span>
+                              <span className="text-[10px] text-amber-400 font-bold">{h.star_rating}★</span>
+                            </div>
+                            <p className="text-[11px] text-slate-400">{h.city} • {h.nights} Nights</p>
+                            <p className="text-[10px] text-emerald-400 font-semibold">₹{h.est_rate_per_night.toLocaleString('en-IN')}/night</p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Day-by-Day Schedule Accordion */}
+                  <div className="space-y-2">
+                    <h5 className="text-xs font-black text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
+                      <Calendar className="w-3.5 h-3.5 text-amber-400" /> Day-by-Day Route &amp; Sightseeing Schedule
+                    </h5>
+                    <div className="space-y-2 max-h-56 overflow-y-auto pr-1">
+                      {aiResult.day_by_day.map((d, dIdx) => (
+                        <div key={dIdx} className="p-3 bg-slate-900/80 border border-slate-800/80 rounded-xl space-y-1.5">
+                          <div className="flex items-center justify-between">
+                            <span className="text-xs font-black text-amber-400">{d.title}</span>
+                            {d.drive_distance_km ? (
+                              <span className="text-[10px] text-slate-400 flex items-center gap-1">
+                                <Car className="w-3 h-3" /> ~{d.drive_distance_km} km
+                              </span>
+                            ) : null}
+                          </div>
+                          <p className="text-[11px] text-slate-300 leading-relaxed font-medium">
+                            {d.description}
+                          </p>
+                          {d.overnight_stay && (
+                            <p className="text-[10px] text-indigo-400 font-bold">
+                              🏨 Overnight: {d.overnight_stay}
+                            </p>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Pre-Calculated Pricing Breakdown */}
+                  {aiResult.quote_items && (
+                    <div className="p-3 bg-slate-900 border border-slate-800 rounded-2xl flex items-center justify-between">
+                      <div>
+                        <span className="text-[10px] text-slate-400 uppercase font-extrabold block">Net Cost + {aiFormData.margin}% Margin</span>
+                        <span className="text-xs text-slate-300 font-bold">{aiResult.quote_items.length} Line Items Computed</span>
+                      </div>
+                      <div className="text-right">
+                        <span className="text-lg font-black text-emerald-400">
+                          ₹{Math.round(aiResult.quote_items.reduce((s, it) => s + (it.total || 0), 0) * (1 + (aiFormData.margin / 100))).toLocaleString('en-IN')}
+                        </span>
+                        <span className="text-[10px] text-slate-400 block font-medium">Estimated Client Selling Price</span>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Actions: Re-generate or Apply */}
+                  <div className="flex gap-2 justify-end pt-2 border-t border-slate-800">
+                    <Button 
+                      type="button" 
+                      variant="outline" 
+                      onClick={() => setAiResult(null)} 
+                      className="text-xs border-slate-700 text-slate-300 rounded-xl h-9"
+                    >
+                      ← Modify Details
+                    </Button>
+                    <Button 
+                      onClick={handleApplyAIProposal} 
+                      className="bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs rounded-xl h-9 px-5 shadow-lg flex items-center gap-1.5"
+                    >
+                      <CheckCircle className="w-4 h-4" /> 
+                      {selectedQuote ? 'Apply to Active Proposal' : 'Create New Quote with this Itinerary'}
+                    </Button>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>
