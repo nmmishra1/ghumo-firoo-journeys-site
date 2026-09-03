@@ -1000,16 +1000,133 @@ async function main() {
   // 4. Explore India Destination Pages (All 200+ Indian Destinations)
   routesToGenerate.push({
     route: '/explore-india',
-    title: 'Explore India Tourism Destinations — 178+ Cities, UNESCO Monuments & Custom Tours | Ghumo Firoo',
-    description: 'Comprehensive directory of 178+ Indian tourist destinations, monuments, tiger safaris, spiritual circuits, and personalized holiday packages.',
+    title: 'Explore India — 178+ Destinations | Ghumo Firoo',
+    description: 'Comprehensive directory of 178+ Indian tourist destinations, UNESCO monuments, tiger safaris, spiritual circuits, and personalized holiday packages.',
     canonical: formatCanonical('/explore-india'),
     h1: 'Explore India Tourism Destinations & Travel Directory',
     h2: 'Discover 178+ Verified Tourist Cities & Circuits Across 28 States',
     bodyHtml: `<article>
-      <h2>Explore India’s Top Tourism Destinations & Holiday Circuits</h2>
-      <p>Discover customized tour packages across Rajasthan, Kerala, Goa, Himachal Pradesh, Uttarakhand, Kashmir, Gujarat, Madhya Pradesh, Karnataka, Tamil Nadu, and North East India.</p>
+      <h2>Exploring India with Ghumo Firoo: Curated Journeys Across 178+ Destinations</h2>
+      <p>Welcome to Ghumo Firoo’s India Tourism Directory — your comprehensive portal to discovering 178+ celebrated holiday destinations, sacred pilgrimage circuits, wildlife tiger sanctuaries, and royal heritage monuments across 28 Indian states. India is a land of kaleidoscopic diversity where ancient heritage blends seamlessly with breathtaking natural landscapes. Whether you are seeking a spiritually transformative darshan at sacred Jyotirlingas, private tiger tracking drives in Madhya Pradesh, serene luxury houseboat cruises on Kerala backwaters, or walks along the shimmering white salt desert of the Rann of Kutch, Ghumo Firoo designs bespoke holiday packages tailored specifically to your pacing and preferences.</p>
+      
+      <p>Unlike off-the-shelf group tour packages, every Ghumo Firoo journey features handpicked 4-star and 5-star boutique hotels, verified private chauffeur vehicles with all interstate taxes and tolls included, curated cultural experiences, and 24/7 dedicated on-trip concierge assistance to ensure complete peace of mind.</p>
+
+      <h3>Signature Indian Travel Circuits &amp; Categories</h3>
+      
+      <h4>1. Sacred Pilgrimages &amp; Jyotirlingas</h4>
+      <p>Embark on sacred spiritual journeys across the revered Char Dham Yatra (Kedarnath, Badrinath, Gangotri, Yamunotri), holy Jyotirlinga shrines like Varanasi Kashi Vishwanath, Ujjain Mahakaleshwar, Omkareshwar, and Somnath, as well as Ayodhya Ram Mandir, Tirupati Balaji, and the Golden Temple in Amritsar.</p>
+
+      <h4>2. Royal Heritage &amp; UNESCO Palaces</h4>
+      <p>Immerse yourself in regal grandeur across Rajasthan’s Golden Triangle (Jaipur, Udaipur, Jodhpur, Jaisalmer), the iconic Agra Taj Mahal, the erotic stone sculptures of Khajuraho, and the ancient boulder ruins of Hampi.</p>
+
+      <h4>3. Himalayan Mountain Escapes &amp; Valleys</h4>
+      <p>Experience snow-capped peaks and serene valleys across Kashmir (Srinagar, Gulmarg, Pahalgam), the high-altitude moonscapes of Ladakh, and lush hill retreats in Manali, Shimla, Dharamshala, and Nainital.</p>
+
+      <h4>4. Tropical Beaches, Lagoons &amp; Backwaters</h4>
+      <p>Unwind along the palm-fringed coastlines of Goa, cruise emerald lagoons aboard luxury private houseboats in Alleppey &amp; Kumarakom, or dive into crystal-clear waters in the Andaman &amp; Nicobar Islands.</p>
+
+      <h4>5. Wilderness Safaris &amp; Tiger Reserves</h4>
+      <p>Track Bengal tigers and Asiatic lions with guaranteed jeep safari permits across Jim Corbett, Ranthambore, Gir National Park, Bandhavgarh, and Kanha with expert local naturalists.</p>
+
+      <h4>6. Desert Festivals &amp; Cultural Trails</h4>
+      <p>Walk the mesmerizing white salt desert of Dhordo during Rann Utsav with official booking partner Evoke Tent City Dhordo, explore Harappan ruins at Dholavira, and discover the royal palaces of Bhuj &amp; Mandvi.</p>
     </article>`
   });
+
+  // Helper for generating concise, destination-specific titles under 60 characters
+  function getDestinationStaticTitle(city: string, state: string, group: string, attractionsList: string[]): string {
+    const cleanCity = city.split('(')[0].trim();
+    const cLower = cleanCity.toLowerCase();
+    const gLower = (group || '').toLowerCase();
+
+    if (cLower === 'agra') {
+      return 'Agra Travel Guide: Taj Mahal & Top Places | Ghumo Firoo';
+    }
+    if (cLower === 'varanasi' || cLower === 'kashi') {
+      return 'Varanasi Travel Guide: Ghats & Temples | Ghumo Firoo';
+    }
+    if (cLower === 'jaipur') {
+      return 'Jaipur Travel Guide: Forts & Palaces | Ghumo Firoo';
+    }
+    if (cLower === 'goa') {
+      return 'Goa Travel Guide: Beaches & Top Places | Ghumo Firoo';
+    }
+    if (cLower.includes('rann of kutch') || cLower === 'kutch' || cLower === 'dhordo') {
+      return 'Rann of Kutch Guide: White Desert & Utsav | Ghumo Firoo';
+    }
+    if (cLower.includes('statue of unity')) {
+      return 'Statue of Unity Guide: Kevadia Tour | Ghumo Firoo';
+    }
+
+    // Dedicated Wildlife Reserves / National Parks
+    const isDedicatedWildlife = 
+      gLower.includes('wildlife') || 
+      gLower.includes('tiger reserve') ||
+      cLower.includes('national park') ||
+      cLower.includes('sanctuary') ||
+      cLower.includes('corbett') ||
+      cLower.includes('ranthambore') ||
+      cLower.includes('kanha') ||
+      cLower.includes('bandhavgarh') ||
+      cLower.includes('kaziranga') ||
+      cLower.includes('gir') ||
+      cLower.includes('pench') ||
+      cLower.includes('tadoba') ||
+      cLower.includes('periyar') ||
+      cLower.includes('nagarhole') ||
+      cLower.includes('bandipur');
+
+    if (isDedicatedWildlife) {
+      const t = `${cleanCity} Safari & Wildlife Guide | Ghumo Firoo`;
+      return t.length <= 60 ? t : `${cleanCity} Safari Guide | Ghumo Firoo`;
+    }
+
+    // Dedicated Pilgrimages / Temples
+    const isDedicatedPilgrimage =
+      gLower.includes('pilgrimage') ||
+      gLower.includes('jyotirlinga') ||
+      cLower.includes('dham') ||
+      cLower.includes('temple') ||
+      ['badrinath', 'kedarnath', 'gangotri', 'yamunotri', 'ujjain', 'omkareshwar', 'somnath', 'tirupati', 'haridwar', 'rishikesh', 'ayodhya', 'mathura', 'vrindavan', 'puri', 'rameshwaram', 'dwarka', 'shirdi'].includes(cLower);
+
+    if (isDedicatedPilgrimage) {
+      const t = `${cleanCity} Pilgrimage & Temple Guide | Ghumo Firoo`;
+      return t.length <= 60 ? t : `${cleanCity} Pilgrimage Guide | Ghumo Firoo`;
+    }
+
+    // Beach & Coastal
+    const isBeach =
+      gLower.includes('beach') ||
+      gLower.includes('coastal') ||
+      gLower.includes('island') ||
+      ['goa', 'andaman', 'havelock', 'neil island', 'kovalam', 'varkala', 'gokarna', 'lakshadweep', 'puducherry', 'pondicherry', 'daman', 'diu'].includes(cLower);
+
+    if (isBeach) {
+      const t = `${cleanCity} Beach & Holiday Guide | Ghumo Firoo`;
+      return t.length <= 60 ? t : `${cleanCity} Beach Guide | Ghumo Firoo`;
+    }
+
+    // Hill Stations & Valleys
+    const isHillStation =
+      gLower.includes('hill') ||
+      gLower.includes('himalayan') ||
+      gLower.includes('valley') ||
+      ['manali', 'shimla', 'dharamshala', 'dalhousie', 'nainital', 'mussoorie', 'kullu', 'kashmir', 'srinagar', 'gulmarg', 'pahalgam', 'ladakh', 'leh', 'munnar', 'ooty', 'kodaikanal', 'coorg', 'chikmagalur', 'wayanad', 'darjeeling', 'gangtok', 'shillong', 'auli', 'chopta', 'spiti', 'kasol', 'jibhi'].includes(cLower);
+
+    if (isHillStation) {
+      const t = `${cleanCity} Hill Station Travel Guide | Ghumo Firoo`;
+      return t.length <= 60 ? t : `${cleanCity} Travel Guide | Ghumo Firoo`;
+    }
+
+    // Royal Heritage & UNESCO Palaces
+    if (gLower.includes('heritage') || gLower.includes('unesco') || gLower.includes('fort') || gLower.includes('palace')) {
+      const t = `${cleanCity} Heritage & Travel Guide | Ghumo Firoo`;
+      return t.length <= 60 ? t : `${cleanCity} Travel Guide | Ghumo Firoo`;
+    }
+
+    const defaultTitle = `${cleanCity} Travel Guide: Top Places & Tour | Ghumo Firoo`;
+    return defaultTitle.length <= 60 ? defaultTitle : `${cleanCity} Travel Guide | Ghumo Firoo`;
+  }
 
   // Generate curated destination guides
   const generatedSlugs = new Set<string>();
@@ -1062,10 +1179,12 @@ async function main() {
     generatedSlugs.add(slug);
 
     const attractions = dest.popular_attractions ? dest.popular_attractions.join(', ') : 'historic monuments, cultural landmarks, and scenic viewpoints';
+    const destTitle = getDestinationStaticTitle(dest.city, dest.state, dest.destination_group, dest.popular_attractions || []);
+    
     routesToGenerate.push({
       route: `/explore-india/${slug}`,
-      title: `${dest.city} Tourism Guide — Top Places to Visit, Safaris, Food & Custom Tour Packages | Ghumo Firoo`,
-      description: `Discover ${dest.city} in ${dest.state}. Top sightseeing spots including ${attractions}, best travel season, cuisine, and private tour packages with Ghumo Firoo.`,
+      title: destTitle,
+      description: `Discover ${dest.city} in ${dest.state}. Top sightseeing spots including ${attractions}, best travel season, and private tour packages with Ghumo Firoo.`,
       canonical: formatCanonical(`/explore-india/${slug}`),
       h1: `${dest.city} Tourism & Travel Guide`,
       h2: `${dest.state}, India · ${dest.destination_group}`,

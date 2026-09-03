@@ -273,8 +273,8 @@ export default function PublicIndiaExplorer() {
   return (
     <Layout>
       <SEO
-        title="Explore India Tourism — 178+ Destinations, UNESCO Monuments, Wildlife & Custom Itineraries | Ghumo Firoo"
-        description="Comprehensive India travel directory featuring 178+ cities, top tourist spots, tiger safaris, spiritual temples, and food trails. Get personalized day-by-day tour itineraries."
+        title="Explore India — 178+ Destinations | Ghumo Firoo"
+        description="Comprehensive directory of 178+ Indian tourist destinations, UNESCO monuments, tiger safaris, spiritual circuits, and personalized holiday packages."
         keywords={['Explore India', 'India tourism guide', 'Madhya Pradesh destinations', 'Indore food trail', 'Khajuraho temples guide', 'Pench safari booking', 'custom tour packages India']}
       />
 
@@ -622,6 +622,99 @@ export default function PublicIndiaExplorer() {
                 })}
               </div>
             )}
+          </div>
+
+          {/* COMPREHENSIVE EDITORIAL DESTINATION GUIDE & REGIONAL CIRCUITS */}
+          <div className="mt-16 pt-12 border-t border-slate-800 text-left space-y-8">
+            <div className="max-w-4xl space-y-4">
+              <Badge className="bg-[#C9A25A]/20 text-[#C9A25A] border-[#C9A25A]/40 text-xs font-extrabold uppercase tracking-wider">
+                Travel Guide &amp; Regional Directory
+              </Badge>
+              <h2 className="text-2xl md:text-3xl font-black text-white font-montserrat">
+                Exploring India with Ghumo Firoo: A Curated Journey Across 178+ Destinations
+              </h2>
+              <p className="text-sm text-slate-300 leading-relaxed font-medium">
+                Welcome to Ghumo Firoo’s India Tourism Directory — your comprehensive portal to discovering 178+ celebrated holiday destinations, sacred pilgrimage circuits, wildlife tiger sanctuaries, and royal heritage monuments across 28 Indian states. India is a land of kaleidoscopic diversity where ancient heritage blends seamlessly with breathtaking natural landscapes. Whether you are seeking a spiritually transformative darshan at sacred Jyotirlingas, private tiger tracking drives in Madhya Pradesh, serene luxury houseboat cruises on Kerala backwaters, or walks along the shimmering white salt desert of the Rann of Kutch, Ghumo Firoo designs bespoke holiday packages tailored specifically to your pacing and preferences.
+              </p>
+              <p className="text-sm text-slate-300 leading-relaxed font-medium">
+                Unlike off-the-shelf group tour packages, every Ghumo Firoo journey features handpicked 4-star and 5-star boutique hotels, verified private chauffeur vehicles with all interstate taxes and tolls included, curated cultural experiences, and 24/7 dedicated on-trip concierge assistance to ensure complete peace of mind.
+              </p>
+            </div>
+
+            {/* SIX SIGNATURE THEMES & REGIONAL CIRCUITS GRID */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pt-4">
+              <div className="p-5 rounded-2xl bg-slate-900/80 border border-slate-800 space-y-2.5">
+                <div className="flex items-center gap-2 text-amber-400 font-black text-sm">
+                  <span className="text-xl">🛕</span> Sacred Pilgrimages &amp; Jyotirlingas
+                </div>
+                <p className="text-xs text-slate-400 leading-relaxed">
+                  Embark on sacred spiritual journeys across the revered <strong>Char Dham Yatra</strong> (Kedarnath, Badrinath, Gangotri, Yamunotri), holy Jyotirlinga shrines like <strong>Varanasi Kashi Vishwanath</strong>, <strong>Ujjain Mahakaleshwar</strong>, <strong>Omkareshwar</strong>, and <strong>Somnath</strong>, as well as Ayodhya Ram Mandir and Tirupati Balaji.
+                </p>
+                <Link to="/packages/char-dham-yatra" className="inline-flex items-center gap-1 text-xs font-bold text-amber-400 hover:text-amber-300 pt-1">
+                  View Char Dham Packages ➔
+                </Link>
+              </div>
+
+              <div className="p-5 rounded-2xl bg-slate-900/80 border border-slate-800 space-y-2.5">
+                <div className="flex items-center gap-2 text-amber-400 font-black text-sm">
+                  <span className="text-xl">🏰</span> Royal Heritage &amp; UNESCO Palaces
+                </div>
+                <p className="text-xs text-slate-400 leading-relaxed">
+                  Immerse yourself in regal grandeur across Rajasthan’s Golden Triangle (<strong>Jaipur</strong>, <strong>Udaipur</strong>, <strong>Jodhpur</strong>, <strong>Jaisalmer</strong>), the iconic <strong>Agra Taj Mahal</strong>, the erotic stone sculptures of <strong>Khajuraho</strong>, and the ancient boulder ruins of <strong>Hampi</strong>.
+                </p>
+                <Link to="/explore-india/agra" className="inline-flex items-center gap-1 text-xs font-bold text-amber-400 hover:text-amber-300 pt-1">
+                  Explore Agra Guide ➔
+                </Link>
+              </div>
+
+              <div className="p-5 rounded-2xl bg-slate-900/80 border border-slate-800 space-y-2.5">
+                <div className="flex items-center gap-2 text-amber-400 font-black text-sm">
+                  <span className="text-xl">🏔️</span> Himalayan Escapes &amp; Valleys
+                </div>
+                <p className="text-xs text-slate-400 leading-relaxed">
+                  Experience snow-capped peaks and serene valleys across <strong>Kashmir</strong> (Srinagar, Gulmarg, Pahalgam), the high-altitude moonscapes of <strong>Ladakh</strong>, and lush hill retreats in <strong>Manali</strong>, <strong>Shimla</strong>, <strong>Dharamshala</strong>, and <strong>Nainital</strong>.
+                </p>
+                <Link to="/packages" className="inline-flex items-center gap-1 text-xs font-bold text-amber-400 hover:text-amber-300 pt-1">
+                  Browse Mountain Packages ➔
+                </Link>
+              </div>
+
+              <div className="p-5 rounded-2xl bg-slate-900/80 border border-slate-800 space-y-2.5">
+                <div className="flex items-center gap-2 text-amber-400 font-black text-sm">
+                  <span className="text-xl">🌴</span> Beaches, Lagoons &amp; Backwaters
+                </div>
+                <p className="text-xs text-slate-400 leading-relaxed">
+                  Unwind along the palm-fringed coastlines of <strong>Goa</strong>, cruise emerald lagoons aboard luxury private houseboats in <strong>Alleppey &amp; Kumarakom</strong>, or dive into crystal-clear waters in the <strong>Andaman &amp; Nicobar Islands</strong>.
+                </p>
+                <Link to="/explore-india/goa" className="inline-flex items-center gap-1 text-xs font-bold text-amber-400 hover:text-amber-300 pt-1">
+                  Explore Goa Beach Guide ➔
+                </Link>
+              </div>
+
+              <div className="p-5 rounded-2xl bg-slate-900/80 border border-slate-800 space-y-2.5">
+                <div className="flex items-center gap-2 text-amber-400 font-black text-sm">
+                  <span className="text-xl">🐅</span> Wilderness Safaris &amp; Tiger Reserves
+                </div>
+                <p className="text-xs text-slate-400 leading-relaxed">
+                  Track Bengal tigers and Asiatic lions with guaranteed jeep safari permits across <strong>Jim Corbett</strong>, <strong>Ranthambore</strong>, <strong>Gir National Park</strong>, <strong>Bandhavgarh</strong>, and <strong>Kanha</strong> with expert local naturalists.
+                </p>
+                <Link to="/packages" className="inline-flex items-center gap-1 text-xs font-bold text-amber-400 hover:text-amber-300 pt-1">
+                  Explore Safari Holidays ➔
+                </Link>
+              </div>
+
+              <div className="p-5 rounded-2xl bg-slate-900/80 border border-slate-800 space-y-2.5">
+                <div className="flex items-center gap-2 text-amber-400 font-black text-sm">
+                  <span className="text-xl">✨</span> Desert Festivals &amp; Cultural Trails
+                </div>
+                <p className="text-xs text-slate-400 leading-relaxed">
+                  Walk the mesmerizing white salt desert of Dhordo during <strong>Rann Utsav</strong> with official booking partner Evoke Tent City Dhordo, explore Harappan ruins at <strong>Dholavira</strong>, and discover the royal palaces of <strong>Bhuj &amp; Mandvi</strong>.
+                </p>
+                <Link to="/packages/rann-utsav" className="inline-flex items-center gap-1 text-xs font-bold text-amber-400 hover:text-amber-300 pt-1">
+                  Book Rann Utsav Packages ➔
+                </Link>
+              </div>
+            </div>
           </div>
 
           {/* TRAVEL PLANNING TIPS & WHY CHOOSE US */}

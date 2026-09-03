@@ -305,9 +305,103 @@ export default function PublicDestinationDetail() {
   const stateName = curatedGuide?.state || cityData?.state_name || cityData?.state || matchedMaster?.state || 'India';
   const stateKey = stateName.toLowerCase().trim();
   const groupName = curatedGuide?.heroBadge || matchedMaster?.destination_group || cityData?.destination_type || 'Heritage, Leisure & Sightseeing';
-  const pageTitle = curatedGuide?.title || `${cityName} Tourism Guide — Top Places to Visit, Safaris, Food & Custom Tour Packages | Ghumo Firoo`;
-  const pageDescription = curatedGuide?.metaDescription || `Discover ${cityName}, ${stateName}. Comprehensive travel guide with top sightseeing places, jungle safaris, iconic food trails, best travel months, and custom private tour packages by Ghumo Firoo.`;
-  const heroOverview = curatedGuide?.overview || cityData?.description || `Explore the timeless beauty, iconic landmarks, vibrant cuisine, and signature experiences of ${cityName}. Plan your customized private tour with verified chauffeur cars and hand-picked boutique stays.`;
+  const pageTitle = useMemo(() => {
+    if (curatedGuide?.title) return curatedGuide.title;
+    const cLower = displayCityName.toLowerCase();
+    const gLower = groupName.toLowerCase();
+
+    if (cLower === 'agra') {
+      return 'Agra Travel Guide: Taj Mahal & Top Places | Ghumo Firoo';
+    }
+    if (cLower === 'varanasi' || cLower === 'kashi') {
+      return 'Varanasi Travel Guide: Ghats & Temples | Ghumo Firoo';
+    }
+    if (cLower === 'jaipur') {
+      return 'Jaipur Travel Guide: Forts & Palaces | Ghumo Firoo';
+    }
+    if (cLower === 'goa') {
+      return 'Goa Travel Guide: Beaches & Top Places | Ghumo Firoo';
+    }
+    if (cLower === 'rann of kutch' || cLower === 'kutch') {
+      return 'Rann of Kutch Guide: White Desert & Utsav | Ghumo Firoo';
+    }
+
+    if (cLower.includes('statue of unity')) {
+      return 'Statue of Unity Guide: Kevadia Tour | Ghumo Firoo';
+    }
+
+    // Dedicated Wildlife Reserves / National Parks
+    const isDedicatedWildlife = 
+      gLower.includes('wildlife') || 
+      gLower.includes('tiger reserve') ||
+      cLower.includes('national park') ||
+      cLower.includes('sanctuary') ||
+      cLower.includes('corbett') ||
+      cLower.includes('ranthambore') ||
+      cLower.includes('kanha') ||
+      cLower.includes('bandhavgarh') ||
+      cLower.includes('kaziranga') ||
+      cLower.includes('gir') ||
+      cLower.includes('pench') ||
+      cLower.includes('tadoba') ||
+      cLower.includes('periyar') ||
+      cLower.includes('nagarhole') ||
+      cLower.includes('bandipur');
+
+    if (isDedicatedWildlife) {
+      const t = `${displayCityName} Safari & Wildlife Guide | Ghumo Firoo`;
+      return t.length <= 60 ? t : `${displayCityName} Safari Guide | Ghumo Firoo`;
+    }
+
+    // Dedicated Pilgrimages / Temples
+    const isDedicatedPilgrimage =
+      gLower.includes('pilgrimage') ||
+      gLower.includes('jyotirlinga') ||
+      cLower.includes('dham') ||
+      cLower.includes('temple') ||
+      ['badrinath', 'kedarnath', 'gangotri', 'yamunotri', 'ujjain', 'omkareshwar', 'somnath', 'tirupati', 'haridwar', 'rishikesh', 'ayodhya', 'mathura', 'vrindavan', 'puri', 'rameshwaram', 'dwarka', 'shirdi'].includes(cLower);
+
+    if (isDedicatedPilgrimage) {
+      const t = `${displayCityName} Pilgrimage & Temple Guide | Ghumo Firoo`;
+      return t.length <= 60 ? t : `${displayCityName} Pilgrimage Guide | Ghumo Firoo`;
+    }
+
+    // Beach & Coastal
+    const isBeach =
+      gLower.includes('beach') ||
+      gLower.includes('coastal') ||
+      gLower.includes('island') ||
+      ['goa', 'andaman', 'havelock', 'neil island', 'kovalam', 'varkala', 'gokarna', 'lakshadweep', 'puducherry', 'pondicherry', 'daman', 'diu'].includes(cLower);
+
+    if (isBeach) {
+      const t = `${displayCityName} Beach & Holiday Guide | Ghumo Firoo`;
+      return t.length <= 60 ? t : `${displayCityName} Beach Guide | Ghumo Firoo`;
+    }
+
+    // Hill Stations & Valleys
+    const isHillStation =
+      gLower.includes('hill') ||
+      gLower.includes('himalayan') ||
+      gLower.includes('valley') ||
+      ['manali', 'shimla', 'dharamshala', 'dalhousie', 'nainital', 'mussoorie', 'kullu', 'kashmir', 'srinagar', 'gulmarg', 'pahalgam', 'ladakh', 'leh', 'munnar', 'ooty', 'kodaikanal', 'coorg', 'chikmagalur', 'wayanad', 'darjeeling', 'gangtok', 'shillong', 'auli', 'chopta', 'spiti', 'kasol', 'jibhi'].includes(cLower);
+
+    if (isHillStation) {
+      const t = `${displayCityName} Hill Station Travel Guide | Ghumo Firoo`;
+      return t.length <= 60 ? t : `${displayCityName} Travel Guide | Ghumo Firoo`;
+    }
+
+    // Royal Heritage & UNESCO Palaces
+    if (gLower.includes('heritage') || gLower.includes('unesco') || gLower.includes('fort') || gLower.includes('palace')) {
+      const t = `${displayCityName} Heritage & Travel Guide | Ghumo Firoo`;
+      return t.length <= 60 ? t : `${displayCityName} Travel Guide | Ghumo Firoo`;
+    }
+
+    const defaultTitle = `${displayCityName} Travel Guide: Top Places & Tour | Ghumo Firoo`;
+    return defaultTitle.length <= 60 ? defaultTitle : `${displayCityName} Travel Guide | Ghumo Firoo`;
+  }, [curatedGuide?.title, displayCityName, groupName]);
+
+  const pageDescription = curatedGuide?.metaDescription || `Discover ${displayCityName}, ${stateName}. Comprehensive travel guide with top sightseeing places, local culture, best travel months, and custom private tour packages by Ghumo Firoo.`;
+  const heroOverview = curatedGuide?.overview || cityData?.description || `Explore the timeless beauty, iconic landmarks, vibrant cuisine, and signature experiences of ${displayCityName}. Plan your customized private tour with verified chauffeur cars and hand-picked boutique stays.`;
 
   // Compute Sightseeings (Curated Signature / Live DB / Master popular attractions)
   const allSightseeings = useMemo(() => {

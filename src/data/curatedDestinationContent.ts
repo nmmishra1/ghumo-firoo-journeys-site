@@ -1,4 +1,4 @@
-﻿export interface CuratedDestinationGuide {
+export interface CuratedDestinationGuide {
   slugs: string[];
   city: string;
   state: string;
@@ -72,7 +72,7 @@ export const CURATED_DESTINATION_GUIDES: Record<string, CuratedDestinationGuide>
     slugs: ['rann-of-kutch', 'kutch', 'dhordo', 'white-desert', 'rann-utsav-kutch', 'kutch-dhordo-rann-of-kutch'],
     city: 'Rann of Kutch (Dhordo / Kutch)',
     state: 'Gujarat',
-    title: 'Rann of Kutch, Gujarat – White Desert & Rann Utsav Guide | Ghumo Firoo',
+    title: 'Rann of Kutch Guide: White Desert & Utsav | Ghumo Firoo',
     metaDescription: "Explore the Rann of Kutch's white salt desert, Dhordo's Tent City, and Rann Utsav 2026-2027. Best time to visit, how to reach, and things to do.",
     heroBadge: 'Official Partner · Evoke Tent City Dhordo',
     officialPartnerCallout: {
