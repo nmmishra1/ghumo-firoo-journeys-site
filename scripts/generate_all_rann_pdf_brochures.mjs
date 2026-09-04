@@ -114,7 +114,7 @@ const packages = [
         tag: 'KALO DUNGAR & ROAD TO HEAVEN',
         title: 'KALO DUNGAR, INDIA BRIDGE & ROAD TO HEAVEN',
         bullets: [
-          'Panoramic views from Kalo Dungar (Black Hill) — the highest point of Kutch overlooking the salt desert',
+          'Panoramic views from Kalo Dungar (Black Hill) — highest point of Kutch overlooking the salt desert',
           'Visit iconic Dattatreya Temple & scenic drive through India Bridge border outpost',
           'Thrilling drive across the famous Road to Heaven highway surrounded by glistening white salt flats',
           'Evening return to Dhordo / Bhuj luxury resort with traditional Kutchi dinner'
@@ -251,7 +251,7 @@ const packages = [
         title: 'ROAD TO HEAVEN & DHOLAVIRA UNESCO SITE',
         bullets: [
           'Excursion to Kalo Dungar (Black Hill) with panoramic salt views',
-          'Spectacular drive along the iconic Road to Heaven through the Great Rann waters',
+          'Spectacular drive along the iconic Road to Heaven through Great Rann waters',
           'Full-day exploration of Dholavira UNESCO World Heritage Harappan Metropolis & 5,000-year-old stepwells'
         ],
         img: imgDholavira
@@ -273,7 +273,7 @@ const packages = [
         title: 'SACRED KUTCH SHRINES & DEPARTURE',
         bullets: [
           'Darshan at Maa Ashapura Temple (Mata No Madh)',
-          'Holy Narayan Sarovar & ancient Koteshwar Mahadev Temple at the Arabian sea edge',
+          'Holy Narayan Sarovar & ancient Koteshwar Mahadev Temple at Arabian sea edge',
           'Assisted departure transfer to Bhuj Railway Station / Airport'
         ],
         img: imgSmritivan
@@ -338,21 +338,21 @@ function generateHTML(pkg) {
 
     /* Common Header (Pages 2, 3, 4) */
     .brand-header {
-      padding: 16px 32px 12px 32px;
+      padding: 14px 32px 10px 32px;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      border-bottom: 2px solid rgba(201, 162, 90, 0.35);
+      border-bottom: 2px solid rgba(201, 162, 90, 0.4);
       background: #ffffff;
       z-index: 10;
     }
     .brand-logo-wrap {
       display: flex;
       align-items: center;
-      gap: 14px;
+      gap: 16px;
     }
     .brand-logo-img {
-      height: 48px;
+      height: 56px;
       width: auto;
       object-fit: contain;
     }
@@ -362,14 +362,14 @@ function generateHTML(pkg) {
     }
     .brand-name {
       font-family: 'Cinzel', serif;
-      font-size: 21px;
+      font-size: 24px;
       font-weight: 800;
       color: #0b1d3a;
       letter-spacing: 0.5px;
       line-height: 1.1;
     }
     .brand-tagline {
-      font-size: 9px;
+      font-size: 9.5px;
       font-weight: 700;
       color: #b8860b;
       letter-spacing: 1.2px;
@@ -390,7 +390,7 @@ function generateHTML(pkg) {
 
     /* Common Footer (Pages 2, 3, 4) */
     .brand-footer {
-      padding: 10px 32px;
+      padding: 9px 32px;
       background: #081326;
       color: #ffffff;
       display: flex;
@@ -418,10 +418,6 @@ function generateHTML(pkg) {
       gap: 14px;
       color: #e2e8f0;
     }
-    .footer-highlight {
-      color: #f1c40f;
-      font-weight: 700;
-    }
 
     /* PAGE 1: FULL BLEED LUXURY COVER */
     .page-cover {
@@ -433,8 +429,8 @@ function generateHTML(pkg) {
       justify-content: space-between;
     }
     .cover-top-overlay {
-      padding: 38px 36px 20px 36px;
-      background: linear-gradient(180deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.85) 45%, rgba(255, 255, 255, 0.35) 75%, rgba(255, 255, 255, 0) 100%);
+      padding: 42px 36px 20px 36px;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.96) 0%, rgba(255, 255, 255, 0.88) 45%, rgba(255, 255, 255, 0.35) 75%, rgba(255, 255, 255, 0) 100%);
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -445,14 +441,14 @@ function generateHTML(pkg) {
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 16px;
-      margin-bottom: 22px;
+      gap: 18px;
+      margin-bottom: 24px;
     }
     .cover-logo-img {
-      height: 60px;
+      height: 72px;
       width: auto;
       object-fit: contain;
-      filter: drop-shadow(0 2px 8px rgba(0,0,0,0.1));
+      filter: drop-shadow(0 3px 10px rgba(0,0,0,0.12));
     }
     .cover-brand-text {
       display: flex;
@@ -461,50 +457,50 @@ function generateHTML(pkg) {
     }
     .cover-brand-title {
       font-family: 'Cinzel', serif;
-      font-size: 32px;
+      font-size: 34px;
       font-weight: 900;
       color: #0b1d3a;
       letter-spacing: 0.8px;
-      line-height: 1;
+      line-height: 1.05;
     }
     .cover-brand-tag {
-      font-size: 10px;
-      font-weight: 700;
+      font-size: 11px;
+      font-weight: 800;
       color: #b8860b;
       letter-spacing: 1.5px;
       text-transform: uppercase;
-      margin-top: 3px;
+      margin-top: 4px;
     }
     .cover-brand-subtag {
-      font-size: 8.5px;
-      font-weight: 600;
+      font-size: 9px;
+      font-weight: 700;
       color: #475569;
-      letter-spacing: 0.6px;
+      letter-spacing: 0.8px;
       margin-top: 2px;
     }
     .cover-tagline-pill {
       display: inline-block;
-      background: rgba(255, 255, 255, 0.92);
-      border: 1.5px solid rgba(201, 162, 90, 0.8);
+      background: rgba(255, 255, 255, 0.94);
+      border: 1.5px solid rgba(201, 162, 90, 0.85);
       color: #0b1d3a;
       font-size: 10.5px;
       font-weight: 800;
       letter-spacing: 2px;
       text-transform: uppercase;
-      padding: 8px 24px;
+      padding: 8px 26px;
       border-radius: 30px;
       box-shadow: 0 4px 15px rgba(0,0,0,0.08);
-      margin-bottom: 18px;
+      margin-bottom: 20px;
     }
     .cover-main-title {
       font-family: 'Cinzel', serif;
       font-size: 58px;
       font-weight: 900;
       color: #ffffff;
-      text-shadow: 0 4px 20px rgba(11, 29, 58, 0.7), 0 2px 4px rgba(0,0,0,0.5);
+      text-shadow: 0 4px 20px rgba(11, 29, 58, 0.75), 0 2px 5px rgba(0,0,0,0.5);
       letter-spacing: 6px;
       line-height: 1.05;
-      margin-bottom: 14px;
+      margin-bottom: 16px;
     }
     .cover-duration-badge {
       display: inline-block;
@@ -514,19 +510,19 @@ function generateHTML(pkg) {
       font-weight: 900;
       letter-spacing: 2.5px;
       text-transform: uppercase;
-      padding: 8px 30px;
+      padding: 8px 32px;
       border-radius: 25px;
-      box-shadow: 0 6px 20px rgba(170, 124, 17, 0.4);
+      box-shadow: 0 6px 20px rgba(170, 124, 17, 0.45);
     }
     .cover-bottom-bar {
-      padding: 14px 36px;
-      background: rgba(8, 19, 38, 0.88);
+      padding: 13px 36px;
+      background: rgba(8, 19, 38, 0.9);
       backdrop-filter: blur(8px);
       color: #ffffff;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      font-size: 10.5px;
+      font-size: 11px;
       font-weight: 700;
       letter-spacing: 0.8px;
       border-top: 2px solid #c9a25a;
@@ -542,11 +538,11 @@ function generateHTML(pkg) {
     }
     .section-heading {
       text-align: center;
-      margin-bottom: 12px;
+      margin-bottom: 10px;
     }
     .section-title {
       font-family: 'Cinzel', serif;
-      font-size: 23px;
+      font-size: 22px;
       font-weight: 800;
       color: #0b1d3a;
       letter-spacing: 1.5px;
@@ -562,7 +558,7 @@ function generateHTML(pkg) {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
       grid-template-rows: repeat(3, 1fr);
-      gap: 11px;
+      gap: 10px;
       flex: 1;
       margin-bottom: 4px;
     }
@@ -613,11 +609,11 @@ function generateHTML(pkg) {
 
     /* PAGE 3: ITINERARY */
     .page-itinerary-content {
-      padding: 16px 30px;
+      padding: 14px 30px;
       flex: 1;
       display: flex;
       flex-direction: column;
-      gap: 10px;
+      gap: 9px;
     }
     .itinerary-card {
       display: flex;
@@ -658,7 +654,7 @@ function generateHTML(pkg) {
     }
     .itinerary-details-col {
       flex: 1;
-      padding: 10px 16px;
+      padding: 9px 15px;
       display: flex;
       flex-direction: column;
       justify-content: center;
@@ -669,14 +665,14 @@ function generateHTML(pkg) {
       font-weight: 800;
       color: #0b1d3a;
       letter-spacing: 0.5px;
-      margin-bottom: 5px;
+      margin-bottom: 4px;
       text-transform: uppercase;
     }
     .itinerary-bullets {
       list-style: none;
       display: flex;
       flex-direction: column;
-      gap: 3px;
+      gap: 2.5px;
     }
     .itinerary-bullets li {
       font-size: 8.2px;
@@ -695,7 +691,7 @@ function generateHTML(pkg) {
       line-height: 1.35;
     }
     .itinerary-img-col {
-      width: 145px;
+      width: 140px;
       height: 100%;
     }
     .itinerary-img-col img {
@@ -705,55 +701,54 @@ function generateHTML(pkg) {
       display: block;
     }
 
-    /* PAGE 4: PRICING & INCLUSIONS */
+    /* PAGE 4: PRICING & INCLUSIONS - COMPACT VERTICAL STACK */
     .page-pricing-content {
-      padding: 14px 28px;
+      padding: 12px 28px 10px 28px;
       flex: 1;
       display: flex;
       flex-direction: column;
-      gap: 10px;
+      gap: 6px;
     }
     .rate-table {
       width: 100%;
       border-collapse: collapse;
-      font-size: 8.5px;
+      font-size: 8px;
       border-radius: 8px;
       overflow: hidden;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+      margin-bottom: 2px;
     }
     .rate-table th {
       background: #081326;
       color: #ffffff;
-      padding: 6px 5px;
+      padding: 5px 4px;
       font-weight: 800;
       text-transform: uppercase;
       letter-spacing: 0.5px;
       text-align: center;
       border: 1px solid #1e293b;
-      font-size: 8px;
+      font-size: 7.8px;
     }
     .rate-table th.th-package {
       background: #11264b;
       color: #d4af37;
     }
     .rate-table td {
-      padding: 4.5px 5px;
+      padding: 3.8px 4px;
       text-align: center;
       border: 1px solid #e2e8f0;
       font-weight: 600;
       color: #334155;
+      font-size: 7.8px;
     }
     .rate-table tr:nth-child(even) {
       background: #f8fafc;
-    }
-    .rate-table tr:hover {
-      background: #f1f5f9;
     }
     .rate-table .td-pax {
       font-weight: 700;
       color: #0b1d3a;
       text-align: left;
-      padding-left: 8px;
+      padding-left: 6px;
     }
     .rate-table .td-price {
       font-weight: 800;
@@ -764,55 +759,45 @@ function generateHTML(pkg) {
       color: #b8860b;
     }
 
-    .info-boxes-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-    }
-    .info-box {
-      border: 1.5px solid rgba(201, 162, 90, 0.4);
-      border-radius: 8px;
-      padding: 9px 12px;
+    /* VERTICAL SECTION BOXES */
+    .v-section-box {
+      border: 1.2px solid rgba(201, 162, 90, 0.45);
+      border-radius: 6px;
+      padding: 6px 10px;
       background: #fafaf9;
     }
-    .info-box-title {
+    .v-section-title {
       font-family: 'Cinzel', serif;
-      font-size: 10px;
+      font-size: 9px;
       font-weight: 800;
       color: #b8860b;
       letter-spacing: 0.8px;
-      margin-bottom: 5px;
+      margin-bottom: 3px;
       text-transform: uppercase;
       display: flex;
       align-items: center;
-      gap: 5px;
+      gap: 4px;
     }
-    .info-box-list {
+    .v-grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4px 12px;
+    }
+    .v-list {
       list-style: none;
       display: flex;
       flex-direction: column;
-      gap: 3px;
+      gap: 2px;
     }
-    .info-box-list li {
-      font-size: 7.8px;
+    .v-list li {
+      font-size: 7.4px;
       color: #334155;
-      line-height: 1.35;
+      line-height: 1.3;
       font-weight: 500;
     }
-    .info-box-list li strong {
+    .v-list li strong {
       color: #0b1d3a;
       font-weight: 700;
-    }
-    .info-box-full {
-      border: 1.5px solid rgba(201, 162, 90, 0.4);
-      border-radius: 8px;
-      padding: 8px 12px;
-      background: #fafaf9;
-    }
-    .tips-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 8px;
     }
   </style>
 </head>
@@ -825,8 +810,8 @@ function generateHTML(pkg) {
         <img src="${logoBase64}" class="cover-logo-img" alt="Ghumo Firoo Logo" />
         <div class="cover-brand-text">
           <div class="cover-brand-title">Ghumo Firoo</div>
-          <div class="cover-brand-tag">Embark on Luxury Journeys · Official Evoke Partner</div>
-          <div class="cover-brand-subtag">Ministry of Tourism Registered Partner (MoT, Govt. of India)</div>
+          <div class="cover-brand-tag">Your Journey, Our Expertise!</div>
+          <div class="cover-brand-subtag">Official Partner: Evoke Tent City Dhordo</div>
         </div>
       </div>
 
@@ -844,7 +829,7 @@ function generateHTML(pkg) {
     </div>
 
     <div class="cover-bottom-bar">
-      <div>🌐 ghumofiroo.com · Ministry of Tourism Partner</div>
+      <div>🌐 ghumofiroo.com</div>
       <div>Official Partner: Evoke Tent City Dhordo</div>
     </div>
   </div>
@@ -856,7 +841,7 @@ function generateHTML(pkg) {
         <img src="${logoBase64}" class="brand-logo-img" alt="Ghumo Firoo Logo" />
         <div class="brand-text">
           <div class="brand-name">Ghumo Firoo</div>
-          <div class="brand-tagline">Ministry of Tourism Registered Partner</div>
+          <div class="brand-tagline">Your Journey, Our Expertise!</div>
         </div>
       </div>
       <div class="brand-badge">Official Evoke Partner</div>
@@ -998,7 +983,7 @@ function generateHTML(pkg) {
         <img src="${logoBase64}" class="brand-logo-img" alt="Ghumo Firoo Logo" />
         <div class="brand-text">
           <div class="brand-name">Ghumo Firoo</div>
-          <div class="brand-tagline">Ministry of Tourism Registered Partner</div>
+          <div class="brand-tagline">Your Journey, Our Expertise!</div>
         </div>
       </div>
       <div class="brand-badge">${pkg.headerBadge}</div>
@@ -1041,14 +1026,14 @@ function generateHTML(pkg) {
     </div>
   </div>
 
-  <!-- PAGE 4: PRICING & INCLUSIONS -->
+  <!-- PAGE 4: PRICING & INCLUSIONS - VERTICAL STACK -->
   <div class="page">
     <div class="brand-header">
       <div class="brand-logo-wrap">
         <img src="${logoBase64}" class="brand-logo-img" alt="Ghumo Firoo Logo" />
         <div class="brand-text">
           <div class="brand-name">Ghumo Firoo</div>
-          <div class="brand-tagline">Ministry of Tourism Registered Partner</div>
+          <div class="brand-tagline">Your Journey, Our Expertise!</div>
         </div>
       </div>
       <div class="brand-badge">Tariff & Inclusions</div>
@@ -1087,44 +1072,68 @@ function generateHTML(pkg) {
         </tbody>
       </table>
 
-      <div class="info-boxes-grid">
-        <div class="info-box">
-          <div class="info-box-title">✦ Package Inclusions</div>
-          <ul class="info-box-list">
+      <!-- 1. PACKAGE INCLUSIONS -->
+      <div class="v-section-box">
+        <div class="v-section-title">✦ Package Inclusions</div>
+        <div class="v-grid-2">
+          <ul class="v-list">
             <li>• <strong>${pkg.staySummary}</strong></li>
             <li>• <strong>MAPAI Meal Plan</strong> (Daily Breakfast + Dinner/Lunch included)</li>
-            <li>• <strong>Dedicated AC Private Vehicle</strong> for full circuit sightseeing & transfers</li>
+            <li>• <strong>Dedicated AC Private Vehicle</strong> for complete transfers & sightseeing</li>
+          </ul>
+          <ul class="v-list">
             <li>• <strong>All toll taxes, parking fees, driver allowance (DA) & fuel charges</strong></li>
             <li>• <strong>White Rann entry permits</strong> and monument access arrangements</li>
             <li>• <strong>Pick-up & drop</strong> from Bhuj Airport / Railway Station / Bus Terminal</li>
           </ul>
         </div>
+      </div>
 
-        <div class="info-box">
-          <div class="info-box-title">✦ Notes & Policy</div>
-          <ul class="info-box-list">
+      <!-- 2. PACKAGE EXCLUSIONS -->
+      <div class="v-section-box">
+        <div class="v-section-title">✦ Package Exclusions</div>
+        <div class="v-grid-2">
+          <ul class="v-list">
+            <li>• Airfare / Train fare to and from Bhuj</li>
+            <li>• Personal expenses (laundry, room service, telephone calls, tips)</li>
+          </ul>
+          <ul class="v-list">
+            <li>• Optional adventure activities (Paramotoring, ATV quad bike, Camel safari rides)</li>
+            <li>• Monument entry tickets, camera fees & guide fees unless explicitly listed</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- 3. NOTES & POLICY -->
+      <div class="v-section-box">
+        <div class="v-section-title">✦ Booking Notes & Policy</div>
+        <div class="v-grid-2">
+          <ul class="v-list">
             <li>• Above rates are calculated on a <strong>per-person basis</strong> (Double/Triple Sharing).</li>
-            <li>• Rates are subject to dynamic room category availability at booking time.</li>
             <li>• Peak Festive Dates (Diwali, Christmas, New Year) subject to festive supplement.</li>
+          </ul>
+          <ul class="v-list">
             <li>• <strong>Extra Adult/Child with Bed:</strong> ₹1,999 per night (MAPAI basis).</li>
             <li>• <strong>24x7 Dedicated Ghumo Firoo</strong> on-trip concierge assistance throughout your tour.</li>
           </ul>
         </div>
       </div>
 
-      <div class="info-box-full">
-        <div class="info-box-title">✦ Ghumo Firoo Travel & Gourmet Tips</div>
-        <div class="tips-grid">
-          <ul class="info-box-list">
+      <!-- 4. TRAVEL & GOURMET TIPS -->
+      <div class="v-section-box">
+        <div class="v-section-title">✦ Ghumo Firoo Travel & Gourmet Tips</div>
+        <div class="v-grid-2">
+          <ul class="v-list">
             <li>• <strong>Best Season:</strong> October to March during full moon for gleaming white desert vistas.</li>
             <li>• <strong>Kutchi Delicacies:</strong> Don't miss authentic Kutchi Thali, Ringna No Olo, Bajra Rotla & Khavda Mawa.</li>
           </ul>
-          <ul class="info-box-list">
+          <ul class="v-list">
             <li>• <strong>Clothing:</strong> Light woolens recommended for brisk early morning & desert night breeze.</li>
             <li>• <strong>Official Partner:</strong> Official booking partner with Evoke Tent City Dhordo for guaranteed luxury.</li>
           </ul>
         </div>
       </div>
+
     </div>
 
     <div class="brand-footer">
