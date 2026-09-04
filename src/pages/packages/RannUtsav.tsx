@@ -433,7 +433,7 @@ const RannUtsav: React.FC = () => {
       categoryName: "Coastal & Forts",
       title: "Koteshwar Mahadev Temple & Narayan Sarovar",
       description: "Ancient Lord Shiva temple standing right on the Arabian Sea cliff at India's westernmost geographic boundary.",
-      image: "/Mandvi Beach_Kutch.png",
+      image: "/koteshwar_mahadev_temple.jpg",
       distance: "Westernmost Tip (150 km from Bhuj)",
       highlights: ["Westernmost Tip of India", "Arabian Sea Cliff Temple", "Narayan Sarovar Sacred Lake", "Sunset Over Ocean"],
       details: {
