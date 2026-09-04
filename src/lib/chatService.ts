@@ -28,17 +28,22 @@ const CANDIDATE_GEMINI_MODELS = [
   'gemini-flash-latest'
 ];
 
-const SYSTEM_PROMPT = `You are Sarah, Senior AI Travel Designer for Ghumo Firoo Journeys — India's premier luxury travel company (Ministry of Tourism Registered Partner, Official Evoke Partner).
+const SYSTEM_PROMPT = `You are Sarah, Lead Travel Designer & Concierge at Ghumo Firoo Journeys — India's premier luxury travel company (Ministry of Tourism Registered Partner, Official Evoke Partner).
 
-YOUR EXPERTISE & BEHAVIOR:
-1. Speak warmly, engagingly, and professionally like an elite human luxury travel specialist.
-2. ALWAYS maintain conversational context across multiple turns. Never forget the destination, dates, or passenger count the user previously shared.
-3. When the user asks for a destination plan (e.g. Coorg, Rann Utsav, Char Dham, Kashmir, Manali, Kerala, Rajasthan, Goa, Europe, Thailand, Singapore, Bali, Dubai):
-   - Provide a vibrant, structured day-by-day itinerary with real sightseeing, scenic drives, and local culinary tips.
-   - Provide realistic pricing estimates (e.g. ₹12,000 - ₹25,000/person for domestic; ₹35,000 - ₹1,80,000 for international) with private transfers and 4-star boutique stays.
-   - Warmly ask for their tentative travel dates and passenger count if not yet provided.
-4. When the user gives dates (e.g. "oct 31") or guests (e.g. "2 people"), acknowledge their destination AND dates warmly, confirm seasonal weather recommendations, and offer to send the day-by-day PDF brochure with custom quotation to their WhatsApp or Email.
-5. NEVER repeat generic templates like "X is a fantastic destination choice" when the user is answering date or passenger questions.`;
+YOUR CHAT PERSONALITY & RULES:
+1. Speak warmly, naturally, and concisely like a real luxury travel designer chatting on WhatsApp/LiveChat. Avoid stiff essays or robotically long lectures.
+2. Maintain sharp context across all turns. Remember destinations, dates, guest counts, and travel themes (e.g. Honeymoon, Family, Adventure, Pilgrimage, Luxury).
+3. When the user asks for a honeymoon or vacation recommendation:
+   - If they specify "domestic" or "India": Immediately suggest India's top 3 romantic destinations (e.g., Kashmir's snow peaks & Dal Lake houseboat, Kerala's private pool villas & Alleppey backwaters, or Udaipur's royal lake palaces).
+   - If they specify "international": Suggest Switzerland & Paris, Bali private pool villas, or Thailand luxury island resorts.
+   - Keep suggestions focused with 2-3 sentence highlights, realistic pricing, and an engaging question.
+4. When the user gives dates (e.g. "30 oct") or guest count (e.g. "one couple" / "2 people"):
+   - Acknowledge their exact dates and destination. Confirm seasonal highlights and weather.
+   - Present a crisp, day-wise plan with verified 4★/5★ boutique stays and private chauffeured transfers.
+   - Offer to share the complete day-by-day PDF brochure directly on WhatsApp or Email.
+5. If the user asks to talk to a human expert, call, or contact on WhatsApp:
+   - Warmly share our direct 24/7 concierge number (+91 9910987264) and offer to connect immediately on WhatsApp.
+6. Format your messages cleanly with bullet points, bold key landmarks, and emojis for a modern, sleek reading experience.`;
 
 export const classifyUserIntent = (text: string): 'pricing' | 'booking' | 'dates' | 'discounts' | 'cancellation' | 'agent' | 'general' => {
   const lower = text.toLowerCase();
@@ -47,7 +52,7 @@ export const classifyUserIntent = (text: string): 'pricing' | 'booking' | 'dates
   if (lower.includes('date') || lower.includes('month') || lower.includes('when') || lower.includes('season') || lower.includes('oct') || lower.includes('nov') || lower.includes('dec')) return 'dates';
   if (lower.includes('discount') || lower.includes('offer') || lower.includes('group') || lower.includes('deal')) return 'discounts';
   if (lower.includes('cancel') || lower.includes('refund') || lower.includes('policy')) return 'cancellation';
-  if (lower.includes('agent') || lower.includes('speak') || lower.includes('call') || lower.includes('contact') || lower.includes('human')) return 'agent';
+  if (lower.includes('agent') || lower.includes('speak') || lower.includes('call') || lower.includes('contact') || lower.includes('human') || lower.includes('expert') || lower.includes('whatsapp')) return 'agent';
   return 'general';
 };
 
@@ -61,11 +66,11 @@ export const generateChatResponse = async (
     const contents: any[] = [
       {
         role: 'user',
-        parts: [{ text: `${SYSTEM_PROMPT}\n\n[ROLE PLAY INSTRUCTION]: You are Sarah, Senior Travel Designer at Ghumo Firoo. Respond directly to the user.` }]
+        parts: [{ text: `${SYSTEM_PROMPT}\n\n[ROLE PLAY INSTRUCTION]: You are Sarah. Respond directly, warmly, and naturally to the client in live chat format.` }]
       },
       {
         role: 'model',
-        parts: [{ text: "Understood! I'm Sarah, Senior AI Travel Designer at Ghumo Firoo Journeys. I will provide personalized, accurate, luxury holiday itineraries and maintain context across all turns." }]
+        parts: [{ text: "Hello! I'm Sarah, Lead Travel Designer at Ghumo Firoo Journeys. How can I help you design your dream holiday?" }]
       }
     ];
 
@@ -105,7 +110,7 @@ export const generateChatResponse = async (
           }
         }
       } catch (e) {
-        // Try next candidate model
+        // Try next model
       }
     }
   }
@@ -130,10 +135,10 @@ export const generateChatResponse = async (
       }
     }
   } catch (e) {
-    // Fall through to smart offline conversational designer
+    // Fall through
   }
 
-  // 3. Smart Multi-Turn Conversational Fallback Designer
+  // 3. Smart Multi-Turn Local Fallback Designer
   return getRichDestinationReply(userMessage, conversationHistory, context);
 };
 
@@ -144,6 +149,9 @@ interface ExtractedEntities {
   pax: string;
   isGreeting: boolean;
   isContactInfo: boolean;
+  isHumanRequest: boolean;
+  isHoneymoon: boolean;
+  isDomestic: boolean;
 }
 
 function extractEntities(query: string, history: ChatMessage[], context?: ChatContext): ExtractedEntities {
@@ -156,6 +164,15 @@ function extractEntities(query: string, history: ChatMessage[], context?: ChatCo
   // Greetings check
   const greetings = ['hi', 'hello', 'hey', 'namaste', 'good morning', 'good afternoon', 'good evening', 'start', 'help', 'menu', 'hi there'];
   const isGreeting = greetings.includes(q.trim());
+
+  // Human request
+  const isHumanRequest = /\b(human|agent|expert|speak|talk|call|phone|consultant)\b/i.test(q);
+
+  // Honeymoon check
+  const isHoneymoon = /\b(honeymoon|wedding|marriage|couple|romantic)\b/i.test(allText);
+
+  // Domestic check
+  const isDomestic = /\b(domestic|india|in india|indian)\b/i.test(q) || /\b(domestic|india)\b/i.test(allText);
 
   // Phone / Contact check
   const isContactInfo = /(\+?\d{10,12}|[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/.test(query);
@@ -170,11 +187,11 @@ function extractEntities(query: string, history: ChatMessage[], context?: ChatCo
   // Extract Pax / Guest Count
   let pax = '';
   const paxMatch = allText.match(/(\d+)\s*(?:people|person|pax|guests|adults|travelers|members)/i) || 
-                   allText.match(/\b(couple|family of \d+|solo|honeymoon)\b/i);
+                   allText.match(/\b(couple|one couple|family of \d+|solo|2 adults)\b/i);
   if (paxMatch) {
     pax = paxMatch[0];
-  } else if (allText.includes('2 people') || allText.includes('for 2') || allText.includes('2 pax')) {
-    pax = '2 guests';
+  } else if (allText.includes('2 people') || allText.includes('for 2') || allText.includes('2 pax') || allText.includes('one couple')) {
+    pax = '2 guests (Couple)';
   }
 
   // Extract Duration
@@ -187,16 +204,16 @@ function extractEntities(query: string, history: ChatMessage[], context?: ChatCo
   // Extract Destination
   let destination = context?.destination || '';
   
-  // 1. Direct search against Master Destinations & common spellings
   const knownPlaces = [
+    { key: 'ooty', names: ['ooty', 'nilgiri', 'coonoor'] },
     { key: 'coorg', names: ['coorg', 'corrong', 'kodagu', 'madikeri', 'kushalnagar'] },
-    { key: 'rann of kutch', names: ['rann', 'kutch', 'utsav', 'dhordo', 'tent city'] },
     { key: 'kashmir', names: ['kashmir', 'srinagar', 'gulmarg', 'pahalgam', 'sonamarg'] },
+    { key: 'rann of kutch', names: ['rann', 'kutch', 'utsav', 'dhordo', 'tent city'] },
     { key: 'char dham', names: ['char dham', 'chardham', 'kedarnath', 'badrinath', 'gangotri', 'yamunotri'] },
+    { key: 'kerala', names: ['kerala', 'munnar', 'alleppey', 'kochi', 'thekkady', 'kumarakom'] },
     { key: 'goa', names: ['goa', 'calangute', 'panaji', 'baga', 'candolim'] },
     { key: 'manali', names: ['manali', 'solang', 'rohtang', 'kasol', 'kullu'] },
     { key: 'shimla', names: ['shimla', 'kufri', 'chail'] },
-    { key: 'kerala', names: ['kerala', 'munnar', 'alleppey', 'kochi', 'thekkady', 'kumarakom'] },
     { key: 'rajasthan', names: ['rajasthan', 'jaipur', 'udaipur', 'jodhpur', 'jaisalmer'] },
     { key: 'andaman', names: ['andaman', 'havelock', 'port blair', 'neil island'] },
     { key: 'thailand', names: ['thailand', 'phuket', 'krabi', 'bangkok', 'pattaya'] },
@@ -204,7 +221,6 @@ function extractEntities(query: string, history: ChatMessage[], context?: ChatCo
     { key: 'bali', names: ['bali', 'ubud', 'seminyak', 'nusa penida', 'kuta'] },
     { key: 'dubai', names: ['dubai', 'abu dhabi', 'burj khalifa'] },
     { key: 'europe', names: ['europe', 'switzerland', 'paris', 'france', 'italy', 'alps'] },
-    { key: 'ooty', names: ['ooty', 'coonoor'] },
     { key: 'wayanad', names: ['wayanad'] },
     { key: 'hampi', names: ['hampi'] },
     { key: 'mysore', names: ['mysore', 'mysuru'] },
@@ -221,7 +237,7 @@ function extractEntities(query: string, history: ChatMessage[], context?: ChatCo
     }
   }
 
-  // If not found in query, scan MASTER_DESTINATIONS in query
+  // If not found in query, scan MASTER_DESTINATIONS
   if (!destination) {
     const mdMatch = MASTER_DESTINATIONS.find(d => q.includes(d.city.toLowerCase()) || q.includes(d.state.toLowerCase()));
     if (mdMatch) {
@@ -249,168 +265,102 @@ function extractEntities(query: string, history: ChatMessage[], context?: ChatCo
     }
   }
 
-  return { destination, duration, dates, pax, isGreeting, isContactInfo };
+  return { destination, duration, dates, pax, isGreeting, isContactInfo, isHumanRequest, isHoneymoon, isDomestic };
 }
 
 function getRichDestinationReply(msg: string, history: ChatMessage[], context?: ChatContext): string {
   const query = msg.toLowerCase().trim();
   const entities = extractEntities(query, history, context);
 
-  // 1. GREETINGS
-  if (entities.isGreeting && !entities.destination) {
-    return "Hello! 👋 I'm **Sarah**, Senior AI Travel Designer at Ghumo Firoo Journeys (Official Evoke Partner).\n\nWhich dream destination are you looking to explore next (Rann Utsav Kutch, Coorg, Char Dham Yatra, Kashmir, Kerala, Rajasthan, Europe, Thailand, Bali, or Dubai)? Tell me a bit about your travel plans!";
+  // 1. TALK TO HUMAN EXPERT
+  if (entities.isHumanRequest) {
+    return "I’d love to connect you directly with one of our Senior Travel Consultants! 📞✨\n\n• **Direct Call**: +91-9910987264 (24/7 Concierge)\n• **WhatsApp Direct**: You can tap below to chat with our team on WhatsApp immediately.\n\nAlternatively, please share your preferred phone number and travel dates here, and I'll have our specialist prepare your custom itinerary and call you right back!";
   }
 
-  // 2. CONTACT INFO CAPTURED
+  // 2. GREETINGS
+  if (entities.isGreeting && !entities.destination) {
+    return "Hello! 👋 I'm **Sarah**, Senior Travel Designer at Ghumo Firoo Journeys (Official Evoke Partner).\n\nWhich dream destination are you looking to explore next (Rann Utsav Kutch, Kashmir, Kerala, Ooty, Char Dham Yatra, Europe, Thailand, Bali, or Dubai)? Tell me a bit about your travel plans!";
+  }
+
+  // 3. CONTACT INFO CAPTURED
   if (entities.isContactInfo) {
     const destName = entities.destination || 'your dream holiday';
-    return `Thank you! ✈️✨ I've noted down your contact details for **${destName}**. Our destination specialist is preparing your bespoke day-wise PDF proposal with verified 4-star boutique stays and private chauffeured transfers. We will reach out to you shortly on WhatsApp!`;
+    return `Thank you! ✈️✨ I've registered your request for **${destName}**. Our senior destination designer is preparing your bespoke day-by-day PDF proposal with handpicked boutique stays and private chauffeured transfers. We will send it directly to your WhatsApp shortly!`;
   }
 
-  // 3. DESTINATION MATCHED WITH MULTI-TURN CONTEXT
-  const destLower = (entities.destination || '').toLowerCase();
+  // 4. DOMESTIC HONEYMOON INTENT
+  if (entities.isHoneymoon && (entities.isDomestic || !entities.destination)) {
+    return "Congratulations on your upcoming honeymoon! 💍✨ India has some truly breathtaking romantic getaways:\n\n" +
+      "1. 🏔️ **Kashmir (The Fairytale Romance)**: Luxury Dal Lake private houseboat, sunset Shikara ride, and Gulmarg snow gondola. *₹45,000 – ₹75,000/couple*\n" +
+      "2. 🌴 **Kerala (Backwaters & Hills)**: Private pool villa in Munnar tea hills + luxury private houseboat cruise in Alleppey. *₹38,000 – ₹60,000/couple*\n" +
+      "3. 🏰 **Udaipur (Royal Palace Romance)**: Heritage lakeview palace stays on Lake Pichola with candlelit dinners. *₹35,000 – ₹55,000/couple*\n" +
+      "4. 🏖️ **Andaman (Exotic Beaches)**: Havelock Island Radhanagar beach & private beachside candlelit dinners. *₹42,000 – ₹70,000/couple*\n\n" +
+      "Which of these vibes appeals to you both the most—snowy mountains, serene backwaters, royal palaces, or tropical beaches?";
+  }
 
-  // If user provided dates or pax for an active destination
+  // 5. DESTINATION MATCHED WITH MULTI-TURN CONTEXT
+  const destLower = (entities.destination || '').toLowerCase();
   const hasUserGivenDatesOrPax = entities.dates || entities.pax;
 
-  // COORG / KODAGU
-  if (destLower.includes('coorg') || destLower.includes('corrong') || destLower.includes('kodagu')) {
+  // OOTY / NILGIRI HILLS
+  if (destLower.includes('ooty') || destLower.includes('nilgiri')) {
     if (hasUserGivenDatesOrPax) {
-      const paxText = entities.pax ? `for **${entities.pax}**` : '';
-      const dateText = entities.dates ? `traveling around **${entities.dates}**` : '';
-      return `Wonderful! 🌿☕ Here is your tailored **Coorg Coffee Estate & Nature Getaway** ${paxText} ${dateText}:\n\n` +
-        `• **Duration**: 3 Days / 2 Nights\n` +
-        `• **Day 1**: Private pickup from Bangalore/Mysore/Mangalore ➔ Check into Luxury Coffee Plantation Resort ➔ Sunset at Raja's Seat & Madikeri Fort\n` +
-        `• **Day 2**: Morning misty visit to Abbey Falls ➔ 4x4 Jeep Safari to Mandalpatti Peak ➔ Coffee tasting & plantation walking trail\n` +
-        `• **Day 3**: Dubare Elephant Camp (Elephant bathing & interaction) ➔ Bylakuppe Golden Temple (Tibetan Monastery) ➔ Return transfer\n` +
-        `• **Stays**: 4-Star Coffee Estate Boutique Resort with Daily Breakfast\n` +
-        `• **Estimated Investment**: ₹14,500 – ₹18,500 / person (all private transfers included)\n\n` +
-        `Would you like me to send the complete day-by-day PDF brochure with photos and resort options directly to your WhatsApp or Email?`;
+      return `Wonderful! 🌿☕ Here is your **3D/2N Ooty & Nilgiri Hills Heritage Escape** (${entities.dates || 'Upcoming Dates'} for ${entities.pax || 'Couple'}):\n\n` +
+        `• **Day 1**: Private transfer to Ooty ➔ Check-in at Colonial Heritage Bungalow / Luxury Resort ➔ Botanical Gardens walk & High Tea\n` +
+        `• **Day 2**: Panoramic views from Doddabetta Peak ➔ Private Tea Factory & Glenmorgan Estate Trail ➔ Evening fireplace & bonfire\n` +
+        `• **Day 3**: Ooty Lake boating & local homemade chocolate trails ➔ Assisted return transfer\n` +
+        `• **Stays & Inclusions**: 4-Star Heritage Stay, Daily Breakfast, AC Sedan at disposal, and Sightseeing Passes\n` +
+        `• **Investment**: ₹22,000 – ₹35,000 / couple\n\n` +
+        `Would you like me to send the complete day-by-day PDF proposal with boutique stay photos to your WhatsApp?`;
     }
-    return `Coorg (Kodagu) is pure mountain magic and coffee heaven! ☕🌿 From private coffee estate villas and Abbey Falls to thrilling 4x4 Jeep safaris up Mandalpatti peak, it's ideal for both couples and families.\n\n` +
-      `✨ **Recommended 3D/2N Plan**: Madikeri Heritage ➔ Abbey Falls & Mandalpatti ➔ Dubare Elephant Camp & Golden Temple.\n\n` +
-      `When are you planning to travel, and how many guests will be joining you?`;
+    return `Ooty (The Queen of Hill Stations) is pure tranquility with eucalyptus air and rolling tea estates! 🌿☕\n\n✨ **Recommended 3D/2N Plan**: Doddabetta Peak, private tea plantation tour, and colonial heritage bungalow stays.\n\nWhen are you planning to travel, and how many guests will be joining?`;
   }
 
-  // RANN OF KUTCH / RANN UTSAV
-  if (destLower.includes('rann') || destLower.includes('kutch') || destLower.includes('utsav')) {
+  // COORG
+  if (destLower.includes('coorg') || destLower.includes('corrong') || destLower.includes('kodagu')) {
     if (hasUserGivenDatesOrPax) {
-      return `Awesome! 🎪✨ As the Official Booking Partner for **Evoke Tent City Dhordo**, here is your **Rann Utsav White Desert Experience** (${entities.dates || 'Season 2026-27'}):\n\n` +
-        `• **Duration**: 3 Days / 2 Nights\n` +
-        `• **Day 1**: AC Chauffeur pickup from Bhuj Airport/Station ➔ Check-in at Premium AC Swiss Tent / Darbari Suite ➔ High Tea & White Rann Sunset Walk ➔ Cultural folk dance\n` +
-        `• **Day 2**: Sunrise over the White Salt Desert ➔ Excursion to UNESCO Harappan city Dholavira & Road to Heaven ➔ Evening Desert Carnival & Star Gazing\n` +
-        `• **Day 3**: Kala Dungar (Highest Point in Kutch) ➔ Gandhi Nu Gam artisan village ➔ Bhuj Aina Mahal & return transfer\n` +
-        `• **Inclusions**: Luxury AC Tent Stay, All Meals (Breakfast, Lunch, High Tea, Dinner), Sightseeing transfers, and White Rann permits\n` +
-        `• **Starting Price**: ₹12,500 – ₹18,000 / person\n\n` +
-        `Should I send the official Evoke Tent City room tariff & availability chart to your WhatsApp?`;
+      return `Wonderful! 🌿☕ Here is your tailored **3D/2N Coorg Coffee Estate & Nature Getaway** (${entities.dates || 'Upcoming Dates'} for ${entities.pax || 'Couple'}):\n\n` +
+        `• **Day 1**: Private pickup ➔ Check into 4★ Coffee Estate Resort ➔ Sunset at Raja's Seat & Madikeri Fort\n` +
+        `• **Day 2**: Misty Abbey Falls ➔ 4x4 Jeep Safari up Mandalpatti Peak ➔ Guided coffee tasting trail\n` +
+        `• **Day 3**: Dubare Elephant Camp ➔ Bylakuppe Golden Temple (Tibetan Monastery) ➔ Return transfer\n` +
+        `• **Investment**: ₹14,500 – ₹18,500 / person (Private vehicle & 4★ stay included)\n\n` +
+        `Shall I send the full PDF brochure with resort options to your WhatsApp?`;
     }
-    return `Rann Utsav 2026-27 is an extraordinary cultural spectacle on the gleaming white salt desert! 🎪✨ As the Official Booking Partner for **Evoke Tent City Dhordo**, we offer verified luxury AC Swiss Tents, all meals, and transfers.\n\nWhen are you planning to visit, and how many guests will be traveling with you?`;
+    return `Coorg (Kodagu) is coffee country heaven! ☕🌿 From private coffee estate villas and Abbey Falls to 4x4 Jeep safaris up Mandalpatti, it's a refreshing escape.\n\nWhen are you planning to travel, and how many guests will be joining?`;
   }
 
   // KASHMIR
   if (destLower.includes('kashmir') || destLower.includes('srinagar') || destLower.includes('gulmarg')) {
-    if (hasUserGivenDatesOrPax) {
-      return `Kashmir is heaven on Earth! 🏔️❄️ Here is your bespoke **Kashmir Paradise Plan** (${entities.dates || 'Upcoming Season'}):\n\n` +
-        `• **Duration**: 6 Days / 5 Nights (Srinagar 2N ➔ Gulmarg 1N ➔ Pahalgam 2N)\n` +
-        `• **Highlights**: Luxury Dal Lake Houseboat stay, Sunset Shikara ride, Gulmarg Gondola Cable Car Ride, Betaab Valley & Aru Valley excursion\n` +
-        `• **Stays**: 4-Star Premium Resorts & Deluxe Heritage Houseboat with Breakfast & Dinner included\n` +
-        `• **Estimated Rate**: ₹19,500 – ₹24,000 / person (Private Chauffeured Cab included)\n\n` +
-        `Shall I share the full itinerary PDF on your WhatsApp?`;
-    }
-    return `Kashmir is true paradise on Earth! 🏔️❄️ From waking up on a luxury Dal Lake houseboat to taking the Gulmarg Gondola high into snow-capped peaks, it's unforgettable.\n\nWhen are you planning to visit, and are you looking for a romantic honeymoon or a family holiday?`;
+    return `Kashmir is pure magic! 🏔️❄️ Here is your **Kashmir Paradise Experience (5D/4N)** (${entities.dates || 'Late October/Autumn'}):\n\n` +
+      `• **Route**: Srinagar Houseboat (2N) ➔ Gulmarg Mountain Resort (2N)\n` +
+      `• **Highlights**: Sunset Shikara on Dal Lake, Mughal Gardens, Phase 2 Gondola Fast-Track Tickets, and Wazwan Dinner\n` +
+      `• **Stays**: 4★ Luxury Resorts & Deluxe Houseboat with Breakfast & Dinner included\n` +
+      `• **Estimated Rate**: ₹55,000 – ₹85,000 per couple (Private Chauffeured Cab included)\n\n` +
+      `Would you like me to send the complete day-by-day PDF brochure to your WhatsApp?`;
   }
 
-  // CHAR DHAM
-  if (destLower.includes('char dham') || destLower.includes('chardham') || destLower.includes('kedarnath')) {
-    return `Namaste! 🙏 Char Dham Yatra (Yamunotri, Gangotri, Kedarnath, Badrinath) is a sacred journey. We offer:\n\n` +
-      `1. **Chauffeured Road Yatra (10 Days / 9 Nights)**: ₹28,500 – ₹38,000 / person (Premium hotels, AC Innova, VIP Darshan tokens)\n` +
-      `2. **VIP Helicopter Yatra (6 Days / 5 Nights)**: ₹1,85,000 / person (Dehradun to all 4 Dhams)\n\n` +
-      `When are you planning to embark, and how many pilgrims will be joining?`;
-  }
-
-  // THAILAND
-  if (destLower.includes('thailand') || destLower.includes('phuket') || destLower.includes('krabi')) {
-    if (hasUserGivenDatesOrPax) {
-      return `Thailand is pure tropical bliss! 🇹🇭🌴 Here is your **Thailand Island & City Escape (6 Days / 5 Nights)**:\n\n` +
-        `• **Route**: Phuket (3N) ➔ Krabi & Phi Phi Islands (2N)\n` +
-        `• **Highlights**: Phi Phi Islands Speedboat Day Tour, James Bond Island Sunset Cruise, 4-Star Beachfront Resort Stay\n` +
-        `• **Estimated Rate**: ₹34,999 / person (Private transfers included)\n\n` +
-        `Would you like me to send the complete day-by-day PDF brochure to your WhatsApp or Email?`;
-    }
-    return `Thailand is an incredible destination! 🇹🇭✨ From private beachfront resorts in Phuket & Krabi to island hopping speedboats, it's a dream holiday.\n\nWhen are you planning to travel, and how many guests will be joining?`;
-  }
-
-  // BALI
-  if (destLower.includes('bali') || destLower.includes('ubud')) {
-    return `Bali is absolute paradise! 🌴🌺\n\n✨ **Bali Luxury Island Escape (6 Days / 5 Nights)**:\n` +
-      `• **Route**: Ubud Private Pool Villa (3N) ➔ Seminyak Clifftop Beach Resort (2N)\n` +
-      `• **Highlights**: Nusa Penida Island Speedboat Tour, Kintamani Volcano, Uluwatu Clifftop Sunset & Beach Clubs\n` +
-      `• **Estimated Rate**: ₹39,500 / person\n\n` +
-      `When are you planning to travel, and are you planning a honeymoon or family trip?`;
-  }
-
-  // DUBAI
-  if (destLower.includes('dubai')) {
-    return `Dubai is pure luxury and futuristic adventure! 🏙️✨\n\n` +
-      `✨ **Dubai Luxury & Desert Safari (5 Days / 4 Nights)**:\n` +
-      `• **Highlights**: Burj Khalifa 124th Floor, Desert Safari with BBQ Dinner & Dune Bashing, Marina Sunset Yacht Cruise\n` +
-      `• **Estimated Rate**: ₹44,500 / person\n\n` +
-      `What travel dates do you have in mind?`;
+  // RANN OF KUTCH
+  if (destLower.includes('rann') || destLower.includes('kutch') || destLower.includes('utsav')) {
+    return `Rann Utsav 2026-27 is an extraordinary cultural spectacle on the gleaming white salt desert! 🎪✨ As Official Booking Partner for **Evoke Tent City Dhordo**, we offer verified AC Swiss Tents, all meals, and desert transfers from ₹12,500/person.\n\nWhen are you planning to visit?`;
   }
 
   // EUROPE
   if (destLower.includes('europe') || destLower.includes('switzerland') || destLower.includes('paris')) {
-    return `Europe is absolute magic! 🇪🇺✨ Whether taking the Glacier Express through the Swiss Alps or strolling along romantic Paris boulevards, we craft extraordinary journeys.\n\n` +
-      `✨ **Swiss & Paris Highlights (8 Days / 7 Nights)** starting at ₹1,85,000 / person.\n\n` +
-      `When are you thinking of traveling, and how many guests will be in your party?`;
+    return `Europe is absolute romance! 🇪🇺✨ Whether taking the Glacier Express through the Swiss Alps or strolling along romantic Paris streets, we curate unforgettable luxury journeys starting from ₹1,85,000/person.\n\nWhat travel dates do you have in mind?`;
   }
 
-  // GOA
-  if (destLower.includes('goa')) {
-    return `Goa is coastal luxury at its finest! 🏖️🍹\n\n` +
-      `✨ **Goa Beachfront Escape (4 Days / 3 Nights)**:\n` +
-      `• **Highlights**: 4-Star Beachfront Resort in South Goa, Private Mandovi Sunset Cruise & Water Sports\n` +
-      `• **Estimated Rate**: ₹14,500 / person\n\n` +
-      `When are you planning to visit?`;
-  }
-
-  // RAJASTHAN
-  if (destLower.includes('rajasthan') || destLower.includes('jaipur') || destLower.includes('udaipur')) {
-    return `Rajasthan is royal heritage at its finest! 🏰👑\n\n` +
-      `✨ **Royal Rajasthan Circuit (6 Days / 5 Nights)**:\n` +
-      `• **Route**: Jaipur (2N) ➔ Udaipur (2N) ➔ Jaisalmer Desert Glamping (1N)\n` +
-      `• **Estimated Rate**: ₹24,500 / person\n\n` +
-      `When are you planning to travel?`;
-  }
-
-  // CHECK MASTER DESTINATIONS FOR OTHER CITIES (e.g. Ooty, Wayanad, Pachmarhi, Hampi, Indore, Agra, etc.)
+  // MASTER DESTINATIONS GENERAL FALLBACK
   if (entities.destination) {
     const matchedDest = MASTER_DESTINATIONS.find(d => d.city.toLowerCase() === destLower || destLower.includes(d.city.toLowerCase()));
     const attractions = matchedDest?.popular_attractions?.slice(0, 4).join(', ') || 'cultural landmarks and scenic viewpoints';
     const bestTime = matchedDest?.best_time_to_visit || 'October to March';
-    const idealDays = matchedDest?.destination_group?.includes('Wildlife') ? '3 Days / 2 Nights' : '3-4 Days';
-
-    if (hasUserGivenDatesOrPax) {
-      return `Wonderful! ✈️✨ For your customized trip to **${entities.destination}** (${entities.pax || 'your party'} around ${entities.dates || 'your chosen dates'}):\n\n` +
-        `• **Suggested Duration**: ${idealDays}\n` +
-        `• **Must-Visit Highlights**: ${attractions}\n` +
-        `• **Best Season**: ${bestTime}\n` +
-        `• **Inclusions**: 4-Star verified boutique hotel, daily breakfast, private chauffeur vehicle, and dedicated 24/7 on-trip concierge\n` +
-        `• **Estimated Investment**: ₹12,500 – ₹18,000 / person\n\n` +
-        `Please share your WhatsApp number or Email, and I'll send the detailed day-by-day PDF proposal right over!`;
-    }
 
     return `**${entities.destination}** is a wonderful holiday choice! ✈️✨\n\n` +
-      `• **Ideal Duration**: ${idealDays}\n` +
-      `• **Key Attractions**: ${attractions}\n` +
-      `• **Best Time to Visit**: ${bestTime}\n\n` +
-      `When are you planning to travel, and how many guests will be joining you?`;
+      `• **Key Highlights**: ${attractions}\n` +
+      `• **Best Season**: ${bestTime}\n` +
+      `• **Inclusions**: 4-Star verified boutique hotel, daily breakfast, private chauffeur vehicle, and dedicated 24/7 on-trip concierge\n\n` +
+      `When are you planning to travel, and how many guests will be joining?`;
   }
 
-  // 4. SMART GENERAL INTENT HANDLING (When user talks without an explicit destination)
-  if (hasUserGivenDatesOrPax) {
-    return `Got it! I have noted your dates (${entities.dates || 'your dates'}) and party size (${entities.pax || 'your guests'}). ✈️✨\n\nWhich destination are you thinking of exploring (e.g. Rann Utsav Kutch, Coorg, Kashmir, Char Dham Yatra, Kerala, Europe, Thailand, Bali, or Dubai)?`;
-  }
-
-  return "I'd love to help craft your perfect holiday! ✈️✨ Which dream destination are you planning next (Rann Utsav Kutch, Coorg, Char Dham Yatra, Kashmir, Kerala, Rajasthan, Europe, Thailand, Bali, or Dubai)? Tell me where you'd like to go!";
+  return "I'd love to help craft your perfect holiday! ✈️✨ Which dream destination are you planning next (Rann Utsav Kutch, Kashmir, Kerala, Ooty, Rajasthan, Europe, Thailand, Bali, or Dubai)?";
 }
