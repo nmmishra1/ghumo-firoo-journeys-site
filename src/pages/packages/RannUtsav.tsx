@@ -289,7 +289,7 @@ const RannUtsav: React.FC = () => {
       categoryName: "Coastal & Forts",
       title: "Vijay Vilas Palace Mandvi",
       description: "Grand 1929 Rajput royal palace built of red sandstone featuring private beach, dome gazebos, and famous Bollywood movie filming locations.",
-      image: "/Mandvi Beach_Kutch.png",
+      image: "/vijay_vilas_palace_mandvi.jpg",
       distance: "Mandvi (60 km from Bhuj)",
       highlights: ["1929 Rajput Architecture", "Private Royal Beach", "Bollywood Movie Location", "Windmill Coast"],
       details: {
@@ -393,7 +393,7 @@ const RannUtsav: React.FC = () => {
       categoryName: "Coastal & Forts",
       title: "Lakhpat Walled Fort & Gurudwara Sahib",
       description: "Ancient 18th-century 7km stone fort wall overlooking the Great Rann, home to UNESCO-awarded Lakhpat Gurudwara Sahib.",
-      image: "/kalodungar.jpg",
+      image: "/lakhpat_fort_kutch.jpg",
       distance: "Lakhpat (135 km from Bhuj)",
       highlights: ["7km Stone Fort Wall", "UNESCO Awarded Gurudwara", "Ghost Town Ruins", "Rann Overlook"],
       details: {
@@ -413,7 +413,7 @@ const RannUtsav: React.FC = () => {
       categoryName: "Heritage & Palaces",
       title: "Mata no Madh (Ashapura Temple)",
       description: "Revered 14th-century temple dedicated to Goddess Ashapura, the kuldevi (patron deity) of the Jadeja rulers of Kutch.",
-      image: "/kutchsunriseimage.jpg",
+      image: "/mata_no_madh_ashapura_temple.jpg",
       distance: "Nakhatrana (80 km from Bhuj)",
       highlights: ["Patron Deity of Kutch", "14th-Century Temple", "Navratri Pilgrimage", "Sacred Prasad"],
       details: {
