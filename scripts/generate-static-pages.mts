@@ -1197,11 +1197,28 @@ async function main() {
     });
   }
 
-  const assetFiles = await fs.readdir(path.join(distDir, 'assets'));
-  const mainJs = assetFiles.find(f => f.startsWith('index-') && f.endsWith('.js'));
-  const mainCss = assetFiles.find(f => f.startsWith('index-') && f.endsWith('.css'));
+  // Extract Vite's actual emitted entry JS and CSS directly from dist/index.html or dist/assets
+  const jsMatch = baseHtml.match(/<script\s+type=["']module["']\s+crossorigin\s+src=["']([^"']+)["']><\/script>/i) ||
+                  baseHtml.match(/<script\s+type=["']module["']\s+src=["']([^"']+)["']><\/script>/i);
+  const cssMatch = baseHtml.match(/<link\s+rel=["']stylesheet["']\s+crossorigin\s+href=["']([^"']+)["']>/i) ||
+                   baseHtml.match(/<link\s+rel=["']stylesheet["']\s+href=["']([^"']+)["']>/i);
 
-  console.log(`📦 Found bundle entry assets: JS=${mainJs}, CSS=${mainCss}`);
+  let entryJs = jsMatch ? jsMatch[1] : null;
+  let entryCss = cssMatch ? cssMatch[1] : null;
+
+  try {
+    const assetFiles = await fs.readdir(path.join(distDir, 'assets'));
+    if (!entryJs) {
+      const foundJs = assetFiles.find(f => f.startsWith('index-') && f.endsWith('.js') && !f.endsWith('.js.gz') && f !== 'index-HDGB6jlA.js');
+      if (foundJs) entryJs = `/assets/${foundJs}`;
+    }
+    if (!entryCss) {
+      const foundCss = assetFiles.find(f => f.startsWith('index-') && f.endsWith('.css') && !f.endsWith('.css.gz'));
+      if (foundCss) entryCss = `/assets/${foundCss}`;
+    }
+  } catch (e) {}
+
+  console.log(`📦 Found bundle entry assets: JS=${entryJs}, CSS=${entryCss}`);
   console.log(`📦 Rendering ${routesToGenerate.length} static SEO routes into dist/ ...`);
 
   let count = 0;
@@ -1209,14 +1226,18 @@ async function main() {
   for (const item of routesToGenerate) {
     let pageHtml = baseHtml;
 
-    // Ensure CSS is injected in head
-    if (mainCss && !pageHtml.includes(mainCss)) {
-      pageHtml = pageHtml.replace('</head>', `    <link rel="stylesheet" crossorigin href="/assets/${mainCss}">\n  </head>`);
+    // Ensure CSS is cleanly injected in head
+    if (entryCss) {
+      pageHtml = pageHtml.replace(/<link\s+rel=["']stylesheet["']\s+crossorigin\s+href=["']\/assets\/index-.*?\.css["']>/gi, '');
+      pageHtml = pageHtml.replace(/<link\s+rel=["']stylesheet["']\s+href=["']\/assets\/index-.*?\.css["']>/gi, '');
+      pageHtml = pageHtml.replace('</head>', `    <link rel="stylesheet" crossorigin href="${entryCss}">\n  </head>`);
     }
 
-    // Ensure JS module script is injected in body
-    if (mainJs && !pageHtml.includes(mainJs)) {
-      pageHtml = pageHtml.replace('</body>', `    <script type="module" crossorigin src="/assets/${mainJs}"></script>\n  </body>`);
+    // Ensure JS module script is cleanly injected before </body>
+    if (entryJs) {
+      pageHtml = pageHtml.replace(/<script\s+type=["']module["']\s+crossorigin\s+src=["']\/assets\/index-.*?\.js["']><\/script>/gi, '');
+      pageHtml = pageHtml.replace(/<script\s+type=["']module["']\s+src=["']\/assets\/index-.*?\.js["']><\/script>/gi, '');
+      pageHtml = pageHtml.replace('</body>', `    <script type="module" crossorigin src="${entryJs}"></script>\n  </body>`);
     }
 
     // Replace Title

@@ -47,6 +47,7 @@ export default defineConfig(({ mode }) => ({
     'process.env.NODE_ENV': JSON.stringify(mode),
   },
   build: {
+    emptyOutDir: true,
     modulePreload: false,
     // Optimize build performance
     target: 'esnext',
