@@ -14,7 +14,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { 
   Clock, Star, ArrowRight, ShieldCheck, Heart, Sparkles, Compass, 
   CheckCircle2, Hotel, Check, X, Calendar, MapPin, Info, Mountain, 
-  Eye, Car, ChevronRight, Moon, Flame, Map, Bus, Footprints, Award, FileText, CheckCheck, SlidersHorizontal
+  Eye, Car, ChevronRight, Moon, Flame, Map, Bus, Footprints, Award, FileText, CheckCheck, SlidersHorizontal, Download
 } from "lucide-react"
 
 const RannUtsav: React.FC = () => {
@@ -43,7 +43,7 @@ const RannUtsav: React.FC = () => {
       title: "Rann Utsav 2D/1N Express Overnight Tent City",
       desc: "Ideal quick weekend escape featuring 1 night in AC Deluxe Swiss Tents at Tent City Dhordo, White Desert sunset & Kutchi Garba stage.",
       badge: "Express Weekend",
-      image: "/Rann-Utsav-Gujarat.png",
+      image: "/brochure-assets/camel_safari.jpg",
       price: 12500,
       duration: "2 Days / 1 Night",
       rating: 4.90,
@@ -64,7 +64,7 @@ const RannUtsav: React.FC = () => {
       title: "Rann Utsav Express Tent City Retreat (3D/2N)",
       desc: "Our most popular Rann Utsav package featuring 2 nights in AC Deluxe Swiss Tents at Tent City Dhordo, Kalo Dungar Black Hill & Gandhi Nu Gam.",
       badge: "Evoke Partner Best Seller",
-      image: "/rann-utsav.jpg",
+      image: "/brochure-assets/gala_dinner.jpg",
       price: 18500,
       duration: "3 Days / 2 Nights",
       rating: 4.95,
@@ -133,7 +133,7 @@ const RannUtsav: React.FC = () => {
       title: "Rann Utsav Full Moon (Purnima) Special Package (3D/2N)",
       desc: "Curated specifically for full moon dates when the white desert glows vibrant blue under the night sky with priority Tent City allotment.",
       badge: "Full Moon Purnima Special",
-      image: "/kutchsunriseimage.jpg",
+      image: "/brochure-assets/stargazing.jpg",
       price: 21500,
       duration: "3 Days / 2 Nights",
       rating: 4.97,
@@ -155,7 +155,7 @@ const RannUtsav: React.FC = () => {
       title: "Interactive Rann Utsav Live Rate Calculator & Customizer",
       desc: "Build your customized Tent City & cab package with real-time rate card calculation, custom dates, and tent category selections.",
       badge: "Interactive Customizer",
-      image: "/Dhordo Village Gate.png",
+      image: "/brochure-assets/palace_legacy.jpg",
       price: 15999,
       duration: "Custom Days & Tents",
       rating: 4.96,
@@ -179,7 +179,7 @@ const RannUtsav: React.FC = () => {
       categoryName: "White Desert & Salt",
       title: "Great White Rann of Kutch",
       description: "Vast 7,500 sq km white salt marsh desert that turns bright blue under full moon nights and glows warm gold during sunsets.",
-      image: "/Rann-Utsav-Gujarat.png",
+      image: "/brochure-assets/camel_safari.jpg",
       distance: "Dhordo (80 km from Bhuj)",
       highlights: ["Full Moon Blue Glow", "Camel Cart Sunset Walk", "Cultural Stage Garba", "Golf Cart Access"],
       details: {
@@ -223,7 +223,7 @@ const RannUtsav: React.FC = () => {
       categoryName: "Heritage & Palaces",
       title: "Dholavira UNESCO World Heritage Site",
       description: "Ancient 5,000-year-old Indus Valley / Harappan civilization metropolis featuring sophisticated stone water reservoirs and stepwells.",
-      image: "/rann-utsav.jpg",
+      image: "/brochure-assets/dholavira.jpg",
       distance: "Dholavira Island",
       highlights: ["5,000-Year Ancient Citadel", "World's First Water Reservoirs", "Harappan Signboard", "Wood Fossil Park"],
       details: {
@@ -245,7 +245,7 @@ const RannUtsav: React.FC = () => {
       categoryName: "Heritage & Palaces",
       title: "Tent City Dhordo & Craft Bazaar",
       description: "Luxury pop-up city spread across 500,000 sq meters offering 350+ AC Swiss Tents, adventure sports, spa, and live Kutchi folk stage.",
-      image: "/Rann-Utsav-Gujarat.png",
+      image: "/brochure-assets/gala_dinner.jpg",
       distance: "Dhordo Base",
       highlights: ["350+ AC Deluxe Swiss Tents", "Live Folk Dance Stage", "Kutchi Craft Haat", "Paramotoring & ATV Sports"],
       details: {
@@ -332,7 +332,7 @@ const RannUtsav: React.FC = () => {
       categoryName: "Heritage & Palaces",
       title: "Bhujodi Textile Craft Village & Vankar Weavers",
       description: "Famous textile artisan village known for Vankar shawl weavers, Ajrakh block printing, and Hira Laxmi Craft Park.",
-      image: "https://images.unsplash.com/photo-1599661046827-dacff0c0f09a?q=80&w=800",
+      image: "/brochure-assets/handicrafts.jpg",
       distance: "Bhuj Town (8 km)",
       highlights: ["Vankar Shawl Weaving", "Ajrakh Block Print", "Copper Bell Artisans", "Hira Laxmi Craft Park"],
       details: {
@@ -352,7 +352,7 @@ const RannUtsav: React.FC = () => {
       categoryName: "Heritage & Palaces",
       title: "Aina Mahal & Prag Mahal Clock Tower",
       description: "18th-century Venetian glass 'Palace of Mirrors' built by Ram Singh Malam paired with Prag Mahal's 45m Gothic clock tower.",
-      image: "/Kutch-Rann-Utsav-2023-2024.jpg",
+      image: "/brochure-assets/palace_legacy.jpg",
       distance: "Bhuj City Center",
       highlights: ["Venetian Glass Mirrors", "45m Clock Tower", "Hall of Mirrors Fountain", "Historical Armoury"],
       details: {
@@ -364,6 +364,27 @@ const RannUtsav: React.FC = () => {
           "Climb Prag Mahal's 45m Gothic clock tower for panoramic city views."
         ],
         travelTips: "Located next to Hamirsar Lake in central Bhuj."
+      }
+    },
+    {
+      id: "smritivan-memorial",
+      category: "heritage",
+      categoryName: "Heritage & Palaces",
+      title: "Smritivan Earthquake Memorial & Museum",
+      description: "Spectacular 170-acre architectural memorial and interactive earthquake museum atop Bhujiyo Dungar hill in Bhuj.",
+      image: "/brochure-assets/smritivan.jpg",
+      distance: "Bhujiyo Dungar (Bhuj)",
+      highlights: ["170-Acre Hilltop Memorial", "50 Check-Dam Reservoirs", "Simulator Theatre", "Panoramic Hill View"],
+      details: {
+        altitude: "150 meters",
+        bestTime: "Year-Round (Closed on Mondays)",
+        overview: "Smritivan is an internationally acclaimed memorial dedicated to the victims of the 2001 Gujarat earthquake. It features 50 check-dam reservoirs, over 300,000 trees, and a world-class experiential museum.",
+        experiences: [
+          "Walk through the state-of-the-art museum galleries detailing Kutch's seismic resilience.",
+          "Experience the 360-degree earthquake simulation theater.",
+          "Enjoy sweeping panoramic views of Bhuj city and Bhujiyo Fort from the hilltop vantage points."
+        ],
+        travelTips: "Included in all 1N, 2N, 3N and 4N Ghumo Firoo Kutch itineraries."
       }
     },
     {
@@ -434,6 +455,52 @@ const RannUtsav: React.FC = () => {
     { month: "January 2027", date: "22nd Jan - 24th Jan 2027", note: "Kite Festival (Uttrayan) + Full Moon" },
     { month: "February 2027", date: "20th Feb - 22nd Feb 2027", note: "Spring Full Moon — Ideal Weather" },
     { month: "March 2027", date: "5th Mar - 7th Mar 2027", note: "Season Closing Full Moon — Sunset Glow" }
+  ]
+
+  const adventureActivities = [
+    { title: "Royal Legacy of Kutch", image: "/brochure-assets/palace_legacy.jpg", tag: "Heritage Palaces", desc: "Italian Gothic Prag Mahal & 18th-century Aina Mahal Hall of Mirrors." },
+    { title: "Road to Heaven", image: "/rann_utsav_road_to_heaven.jpg", tag: "Ocean Salt Highway", desc: "30km uninterrupted straight highway cutting across turquoise salt waters." },
+    { title: "Smritivan Museum & Viewpoint", image: "/brochure-assets/smritivan.jpg", tag: "Memorial Architecture", desc: "170-acre world-class hilltop memorial & earthquake museum in Bhuj." },
+    { title: "Explore the Threads of Kutch", image: "/brochure-assets/handicrafts.jpg", tag: "Artisan Crafts", desc: "Master artisans hand-crafting Rogan art, Bandhani tie-dye & Ajrakh prints." },
+    { title: "Paramotoring & Gliding", image: "/brochure-assets/paramotoring.jpg", tag: "Aerial Thrill", desc: "Soar over vast gleaming white salt desert flats during sunset." },
+    { title: "Hidden Valleys of Kutch", image: "/brochure-assets/hidden_valleys.jpg", tag: "Salt Canyon Vistas", desc: "Rugged ancient rocky valleys & salt fossil viewpoints in Kutch." },
+    { title: "Luxury Spa & Wellness", image: "/brochure-assets/spa_wellness.jpg", tag: "Desert Rejuvenation", desc: "Ayurvedic spa, aroma therapy & wellness pavilions at Tent City." },
+    { title: "Rann Sky Watch & Stargazing", image: "/brochure-assets/stargazing.jpg", tag: "Milky Way Astronomy", desc: "Clear desert night sky telescope stargazing under the Milky Way." },
+    { title: "Rann Riders & ATV Safari", image: "/brochure-assets/atv_safari.jpg", tag: "Quad Bike Desert", desc: "High-octane ATV quad biking across open white salt flats." },
+    { title: "Hilltop of Kutch (Kalo Dungar)", image: "/kalodungar.jpg", tag: "1,525 ft Black Hill", desc: "Panoramic view of the Great Rann salt expanse meeting the horizon." },
+    { title: "Starlite Desert Gala Dinner", image: "/brochure-assets/gala_dinner.jpg", tag: "Live Folk & Banquet", desc: "Illuminated luxury dining with live Gujarati & Kutchi folk musicians." },
+    { title: "Golden Hour Camel Ride", image: "/brochure-assets/camel_safari.jpg", tag: "Sunset Caravan", desc: "Traditional decorated camel safari walking into vibrant sunset hues." }
+  ]
+
+  const pdfBrochures = [
+    {
+      title: "Culture Kutch 1N / 2D Express",
+      desc: "Dhordo Tent City, White Desert Sunset, Camel Safari & Smritivan Museum.",
+      file: "/Ghumo_Firoo_Culture_Kutch_1N2D_Brochure.pdf",
+      badge: "01 Night / 02 Days",
+      color: "from-blue-600/30 to-indigo-950/80"
+    },
+    {
+      title: "Culture Kutch 2N / 3D Retreat",
+      desc: "Tent City Dhordo, Kalo Dungar Black Hill, Road to Heaven & Bhuj Palaces.",
+      file: "/Ghumo_Firoo_Culture_Kutch_2N3D_Brochure.pdf",
+      badge: "02 Nights / 03 Days",
+      color: "from-amber-600/30 to-amber-950/80"
+    },
+    {
+      title: "Culture Kutch 3N / 4D Grand Circuit",
+      desc: "Complete Kutch: White Rann, Tent City, Kalo Dungar, Mandvi Beach & Shrines.",
+      file: "/Ghumo_Firoo_Culture_Kutch_3N4D_Brochure.pdf",
+      badge: "03 Nights / 04 Days",
+      color: "from-emerald-600/30 to-teal-950/80"
+    },
+    {
+      title: "Culture Kutch 4N / 5D Odyssey",
+      desc: "Grand Odyssey with Dholavira UNESCO Site, Road to Heaven & Mandvi Beach.",
+      file: "/Ghumo_Firoo_Culture_Kutch_4N5D_Brochure.pdf",
+      badge: "04 Nights / 05 Days",
+      color: "from-purple-600/30 to-purple-950/80"
+    }
   ]
 
   const filteredAttractions = activeCategory === "all" 
@@ -543,10 +610,10 @@ const RannUtsav: React.FC = () => {
         <ScrollReveal variant="fade-in-scale" duration="slow" className="relative h-[85vh] min-h-[560px] flex items-center justify-center overflow-hidden">
           <div className="absolute inset-0 bg-[#0B1026]">
             <img 
-              src="/Rann-Utsav-Gujarat.png" 
+              src="/brochure-assets/cover_kutch.jpg" 
               alt="White Desert Rann Utsav Tent City Kutch" 
               onError={(e) => { (e.target as HTMLImageElement).src = FALLBACK_RANN_IMG }}
-              className="absolute inset-0 w-full h-full object-cover opacity-45 mix-blend-luminosity" 
+              className="absolute inset-0 w-full h-full object-cover opacity-60" 
             />
             <div className="absolute inset-0 bg-gradient-to-b from-[#070C1E]/80 via-[#070C1E]/60 to-[#070C1E] z-10" />
           </div>
@@ -751,6 +818,99 @@ const RannUtsav: React.FC = () => {
                   <div className="text-[10px] text-slate-400 font-light">{item.note}</div>
                 </div>
               ))}
+            </div>
+          </div>
+        </section>
+
+        {/* 12 ADVENTURE ACTIVITIES & HERITAGE SHOWCASE */}
+        <section className="py-24 bg-[#070C1E] border-b border-[#C9A25A]/20">
+          <div className="container mx-auto px-6 max-w-7xl">
+            <SectionHeading 
+              kicker="Signature Kutch Experiences" 
+              title="Adventure Activities & Royal Heritage" 
+              subtitle="Immerse in the vibrant colors, white desert thrill, and timeless royal heritage of Kutch." 
+              align="center" 
+              className="mx-auto mb-16" 
+            />
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              {adventureActivities.map((act, i) => (
+                <ScrollReveal key={i} variant="fade-in-up" delay={i * 30}>
+                  <div className="relative aspect-[4/5] rounded-2xl overflow-hidden border border-[#C9A25A]/30 group hover:border-[#C9A25A] transition-all duration-500 shadow-xl bg-slate-900">
+                    <img 
+                      src={act.image} 
+                      alt={act.title}
+                      onError={(e) => { (e.target as HTMLImageElement).src = FALLBACK_RANN_IMG }}
+                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" 
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-[#070C1E] via-[#070C1E]/50 to-transparent" />
+                    
+                    <div className="absolute top-3 left-3">
+                      <span className="bg-black/75 backdrop-blur-md border border-[#C9A25A]/50 text-[#E5C378] text-[9.5px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full">
+                        {act.tag}
+                      </span>
+                    </div>
+
+                    <div className="absolute bottom-0 inset-x-0 p-5 flex flex-col justify-end">
+                      <h4 className="font-serif font-bold text-white text-base leading-snug group-hover:text-[#E5C378] transition-colors mb-1.5">
+                        {act.title}
+                      </h4>
+                      <div className="w-8 h-0.5 bg-[#C9A25A] mb-2 group-hover:w-16 transition-all duration-300" />
+                      <p className="text-[11px] text-slate-300 font-light leading-relaxed line-clamp-2">
+                        {act.desc}
+                      </p>
+                    </div>
+                  </div>
+                </ScrollReveal>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* OFFICIAL CLIENT PDF BROCHURES DOWNLOAD SECTION */}
+        <section className="py-20 bg-gradient-to-b from-[#050A18] to-[#0B1026] border-b border-[#C9A25A]/20">
+          <div className="container mx-auto px-6 max-w-7xl">
+            <div className="bg-[#0B1226]/90 border-2 border-[#C9A25A]/40 rounded-3xl p-8 sm:p-12 shadow-2xl relative overflow-hidden">
+              <div className="absolute -top-24 -right-24 w-80 h-80 bg-[#C9A25A]/10 rounded-full blur-3xl pointer-events-none" />
+              
+              <div className="text-center max-w-3xl mx-auto space-y-4 mb-10 relative z-10">
+                <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#C9A25A]/20 border border-[#C9A25A]/50 text-[#E5C378] text-xs font-bold uppercase tracking-wider">
+                  <FileText className="w-4 h-4 text-[#C9A25A]" /> Official Client-Ready Brochures
+                </div>
+                <h3 className="text-2xl sm:text-4xl font-serif font-bold text-white">
+                  Download Official Ghumo Firoo Kutch Brochures
+                </h3>
+                <p className="text-xs sm:text-sm text-slate-300 font-light leading-relaxed">
+                  Download our high-definition, transparently priced client brochures complete with detailed day-wise itineraries, vehicle choices, and Tent City inclusions.
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 relative z-10">
+                {pdfBrochures.map((pdf, idx) => (
+                  <div key={idx} className={`p-6 rounded-2xl border border-[#C9A25A]/35 bg-gradient-to-b ${pdf.color} flex flex-col justify-between space-y-4 hover:border-[#C9A25A] transition-all hover:scale-[1.02] shadow-xl`}>
+                    <div>
+                      <span className="text-[10px] font-extrabold uppercase px-3 py-1 rounded-full bg-black/60 text-[#E5C378] border border-[#C9A25A]/40 inline-block mb-3">
+                        {pdf.badge}
+                      </span>
+                      <h4 className="font-serif font-bold text-white text-lg mb-2">
+                        {pdf.title}
+                      </h4>
+                      <p className="text-xs text-slate-300 font-light leading-relaxed">
+                        {pdf.desc}
+                      </p>
+                    </div>
+
+                    <a 
+                      href={pdf.file} 
+                      target="_blank" 
+                      rel="noreferrer"
+                      className="w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-[#C9A25A] to-[#E5C378] text-[#070C1E] font-bold text-xs uppercase tracking-wider text-center flex items-center justify-center gap-2 hover:brightness-110 shadow-md transition-all"
+                    >
+                      <Download className="w-4 h-4" /> Download PDF
+                    </a>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         </section>
