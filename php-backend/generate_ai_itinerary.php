@@ -261,49 +261,60 @@ $aiResult = null;
 $geminiApiKey = getenv('GEMINI_API_KEY') ?: getenv('VITE_GEMINI_API_KEY') ?: '';
 $geminiApiUrl = getenv('GEMINI_WEB2API_URL') ?: getenv('VITE_GEMINI_WEB2API_URL') ?: 'https://gemini-web2api-sxti.onrender.com/v1';
 
-// Method 1: Official Google Gemini API
+// Method 1: Official Google Gemini API with multi-model fallback
 if (!empty($geminiApiKey)) {
-    try {
-        $googleUrl = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={$geminiApiKey}";
-        $fullPrompt = "{$systemPrompt}\n\n{$userPrompt}";
-        $payload = [
-            'contents' => [
-                [
-                    'role' => 'user',
-                    'parts' => [['text' => $fullPrompt]]
-                ]
-            ],
-            'generationConfig' => [
-                'temperature' => 0.4,
-                'maxOutputTokens' => 4096,
-                'responseMimeType' => 'application/json'
+    $modelsToTry = [
+        'gemini-3.1-flash-lite-preview',
+        'gemini-3-flash-preview',
+        'gemini-3.1-flash-lite',
+        'gemini-3.5-flash',
+        'gemini-3.6-flash'
+    ];
+
+    $fullPrompt = "{$systemPrompt}\n\n{$userPrompt}";
+    $payload = [
+        'contents' => [
+            [
+                'role' => 'user',
+                'parts' => [['text' => $fullPrompt]]
             ]
-        ];
+        ],
+        'generationConfig' => [
+            'temperature' => 0.4,
+            'maxOutputTokens' => 4096,
+            'responseMimeType' => 'application/json'
+        ]
+    ];
 
-        $ch = curl_init($googleUrl);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_POST, true);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
-        curl_setopt($ch, CURLOPT_TIMEOUT, 18);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+    foreach ($modelsToTry as $candidateModel) {
+        try {
+            $googleUrl = "https://generativelanguage.googleapis.com/v1beta/models/{$candidateModel}:generateContent?key={$geminiApiKey}";
+            $ch = curl_init($googleUrl);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_POST, true);
+            curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
+            curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
+            curl_setopt($ch, CURLOPT_TIMEOUT, 12);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
 
-        $res = curl_exec($ch);
-        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        curl_close($ch);
+            $res = curl_exec($ch);
+            $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            curl_close($ch);
 
-        if ($httpCode === 200 && $res) {
-            $gData = json_decode($res, true);
-            $rawText = $gData['candidates'][0]['content']['parts'][0]['text'] ?? '';
-            $rawText = trim(preg_replace('/^```json\s*|```\s*$/im', '', $rawText));
-            $parsed = json_decode($rawText, true);
-            if (!empty($parsed['day_by_day']) && is_array($parsed['day_by_day'])) {
-                $aiResult = $parsed;
-                $aiResult['source'] = 'official-gemini-2.0-flash';
+            if ($httpCode === 200 && $res) {
+                $gData = json_decode($res, true);
+                $rawText = $gData['candidates'][0]['content']['parts'][0]['text'] ?? '';
+                $rawText = trim(preg_replace('/^```json\s*|```\s*$/im', '', $rawText));
+                $parsed = json_decode($rawText, true);
+                if (!empty($parsed['day_by_day']) && is_array($parsed['day_by_day'])) {
+                    $aiResult = $parsed;
+                    $aiResult['source'] = "official-gemini-{$candidateModel}";
+                    break;
+                }
             }
+        } catch (Exception $e) {
+            // Try next model
         }
-    } catch (Exception $e) {
-        // Fall through to Render proxy
     }
 }
 
