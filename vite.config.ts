@@ -86,8 +86,9 @@ export default defineConfig(({ mode }) => ({
     exclude: ['@tanstack/react-query']
   },
   esbuild: {
-    // Remove console.log in production
-    drop: mode === 'production' ? ['console', 'debugger'] : [],
+    // Only drop debugger in production, preserve console.error and console.warn for runtime error reporting
+    drop: mode === 'production' ? ['debugger'] : [],
+    pure: mode === 'production' ? ['console.log'] : [],
     // Force production JSX runtime in Vite builds
     jsx: 'automatic',
     jsxImportSource: 'react',

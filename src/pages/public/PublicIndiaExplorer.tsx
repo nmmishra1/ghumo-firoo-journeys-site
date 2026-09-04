@@ -70,6 +70,8 @@ export default function PublicIndiaExplorer() {
   const [selectedRegion, setSelectedRegion] = useState<string>('All');
   const [activeTheme, setActiveTheme] = useState<string>('All');
   const [searchQuery, setSearchQuery] = useState('');
+  const [sortBy, setSortBy] = useState<'popular' | 'name' | 'state'>('popular');
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 
   // Detailed Destination Travel Guide Modal
   const [guideModalOpen, setGuideModalOpen] = useState(false);
