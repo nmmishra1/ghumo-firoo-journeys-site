@@ -10,11 +10,11 @@ import { SectionHeading } from "@/components/ui/SectionHeading"
 import { FAQAccordion } from "@/components/ui/FAQAccordion"
 import { StickyCTA } from "@/components/common/StickyCTA"
 import { reviewService, GoogleReview } from "@/services/reviewService"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog"
 import { 
-  Clock, Star, ArrowRight, ShieldCheck, Heart, Sparkles, Compass, 
-  CheckCircle2, Hotel, Check, X, Calendar, MapPin, Info, Mountain, 
-  Eye, Car, ChevronRight
+  Clock, Star, ArrowRight, ShieldCheck, Sparkles, Compass, 
+  CheckCircle2, Hotel, Calendar, MapPin, Mountain, 
+  Eye, Car, ChevronRight, Tag
 } from "lucide-react"
 
 const Singapore: React.FC = () => {
@@ -23,7 +23,7 @@ const Singapore: React.FC = () => {
   const [selectedAttraction, setSelectedAttraction] = useState<any | null>(null)
   const [activeCategory, setActiveCategory] = useState<string>("all")
 
-  const FALLBACK_SINGAPORE_IMG = "https://images.unsplash.com/photo-1525625293386-3f8f99389edd?q=80&w=800"
+  const FALLBACK_SINGAPORE_IMG = "/singapore/gardens_by_the_bay.jpg"
 
   useEffect(() => {
     const loadReviews = async () => {
@@ -41,9 +41,9 @@ const Singapore: React.FC = () => {
     { 
       id: "singapore-4d-3n",
       title: "Singapore City & Sentosa Island Express (4D/3N)", 
-      desc: "Ideal Singapore starter package covering Gardens by the Bay, Night Safari tram & Universal Studios Sentosa all-day theme park.", 
+      desc: "Ideal starter package covering Gardens by the Bay, Mandai Night Safari guided tram tour & Universal Studios Sentosa all-day theme park.", 
       badge: "Express Choice", 
-      image: "https://images.unsplash.com/photo-1525625293386-3f8f99389edd?q=80&w=800",
+      image: "/singapore/universal_studios.jpg",
       link: "/packages/singapore-4d-3n", 
       price: 48000,
       duration: "4 Days / 3 Nights",
@@ -69,9 +69,9 @@ const Singapore: React.FC = () => {
     { 
       id: "singapore-5d-4n",
       title: "Singapore Grand Delight & Cable Car Sky Dining (5D/4N)", 
-      desc: "Our best-selling Singapore tour featuring S.E.A. Aquarium, Cable Car Mount Faber line, Wings of Time & Jewel Canopy Park.", 
+      desc: "Our best-selling Singapore vacation featuring S.E.A. Aquarium, Cable Car Mount Faber line, Wings of Time & Jewel Canopy Park.", 
       badge: "Best Seller", 
-      image: "https://images.unsplash.com/photo-1546519638-68e109498ffc?q=80&w=800",
+      image: "/singapore/gardens_by_the_bay.jpg",
       link: "/packages/singapore-5d-4n", 
       price: 64000,
       duration: "5 Days / 4 Nights",
@@ -94,6 +94,74 @@ const Singapore: React.FC = () => {
         "Private AC Transfers Throughout"
       ],
       exclusions: ["Flight tickets"]
+    },
+    { 
+      id: "singapore-city-delight",
+      title: "Singapore City Delight & Night Safari (4D/3N)", 
+      desc: "Fast-paced Singapore holiday combining panoramic city sights, Merlion Park, Singapore Flyer and nocturnal Mandai safari.", 
+      badge: "Family Favorite", 
+      image: "/singapore/singapore_flyer.jpg",
+      link: "/packages/singapore-city-delight", 
+      price: 52000,
+      duration: "4 Days / 3 Nights",
+      rating: 4.89,
+      reviewsCount: 320,
+      stay: "4-Star Central City Hotel (3N)",
+      vehicle: "Private AC Vehicle",
+      highlights: ["Singapore Flyer Giant Wheel", "Mandai Night Safari", "Merlion Park & River Cruise", "Little India & Chinatown"],
+      inclusions: ["3N 4-Star Hotel", "E-Visa Assistance", "Singapore Flyer + Night Safari Passes", "All Transfers"],
+      exclusions: ["International Flights"]
+    },
+    { 
+      id: "singapore-luxury",
+      title: "Singapore Luxury Skyline & Marina Bay Sands (5D/4N)", 
+      desc: "Ultra-luxury experience featuring 5-star hotel stay, iconic Marina Bay Sands SkyPark, celebrity dining and VIP private yacht.", 
+      badge: "Ultra Luxury", 
+      image: "/singapore/marina_bay_sands.jpg",
+      link: "/packages/singapore-luxury", 
+      price: 95000,
+      duration: "5 Days / 4 Nights",
+      rating: 4.98,
+      reviewsCount: 260,
+      stay: "5-Star Marina Bay Sands / Pan Pacific (4N)",
+      vehicle: "Chauffeured Luxury Mercedes/Alphard",
+      highlights: ["MBS SkyPark Infinity Experience", "Private Sunset Yacht Charter", "Universal Studios VIP Pass", "Fine Dining Credits"],
+      inclusions: ["4N 5-Star Luxury Accommodations", "VIP Express Fast-Track Tickets", "Private Limousine Transfers", "E-Visa Support"],
+      exclusions: ["Flight Tickets"]
+    },
+    { 
+      id: "singapore-cruise",
+      title: "Singapore & Resorts World Genting Dream Cruise (6D/5N)", 
+      desc: "The ultimate land and ocean combo featuring 3 nights in Singapore and 2 nights aboard the luxury Genting Dream ocean cruise.", 
+      badge: "Land & Cruise Combo", 
+      image: "/singapore/wings_of_time_sentosa.jpg",
+      link: "/packages/singapore-cruise", 
+      price: 88000,
+      duration: "6 Days / 5 Nights",
+      rating: 4.96,
+      reviewsCount: 640,
+      stay: "3N Singapore Hotel + 2N Genting Dream Balcony Cabin",
+      vehicle: "Private Transfers + Luxury Cruise Ship",
+      highlights: ["Genting Dream Ocean Cruise", "Universal Studios Sentosa", "Gardens by the Bay", "Full Board Cruise Dining"],
+      inclusions: ["3N Hotel + 2N Cruise Balcony Cabin", "All Cruise Meals & Theatrical Shows", "Universal Studios Tickets", "E-Visa Processing"],
+      exclusions: ["Airfare", "Cruise Gratuities"]
+    },
+    { 
+      id: "singapore-malaysia",
+      title: "Singapore & Malaysia Twin Country Delight (7D/6N)", 
+      desc: "Comprehensive Southeast Asia vacation combining Singapore's futuristic skyline with Kuala Lumpur Petronas Towers and Genting Highlands.", 
+      badge: "Twin Country Tour", 
+      image: "/singapore/merlion_park.jpg",
+      link: "/packages/singapore-malaysia", 
+      price: 79000,
+      duration: "7 Days / 6 Nights",
+      rating: 4.92,
+      reviewsCount: 780,
+      stay: "3N Singapore (4-Star) + 3N Kuala Lumpur (4-Star)",
+      vehicle: "Private AC Vehicle & Cross-Border Coach",
+      highlights: ["Universal Studios Singapore", "Petronas Twin Towers KL", "Batu Caves & Genting Highlands", "Gardens by the Bay"],
+      inclusions: ["6N 4-Star Accommodations", "Singapore & Malaysia Dual E-Visas", "Cross-Border Executive Coach", "All Sightseeing Passes"],
+      exclusions: ["International Flights"]
     }
   ]
 
@@ -101,45 +169,277 @@ const Singapore: React.FC = () => {
     {
       id: "gardens-by-the-bay",
       category: "landmarks",
-      categoryName: "Iconic Landmarks",
-      title: "Gardens by the Bay & Supertrees",
+      categoryName: "Iconic Landmarks & Skyviews",
+      title: "Gardens by the Bay & Supertree Grove",
+      trendingKeywords: ["Gardens by the Bay Supertrees", "Cloud Forest Dome Waterfall", "Supertree Grove Light Show", "OCBC Skyway Aerial Walk", "Flower Dome"],
       description: "Futuristic 101-hectare botanical park featuring 50-meter high Supertree structures, climate-controlled Cloud Forest dome with indoor waterfall & Flower Dome.",
-      image: "https://images.unsplash.com/photo-1546519638-68e109498ffc?q=80&w=800",
-      distance: "Marina Bayfront",
-      highlights: ["50m Supertree Grove", "35m Cloud Forest Waterfall", "Flower Dome", "Garden Rhapsody Light Show"],
+      image: "/singapore/gardens_by_the_bay.jpg",
+      distance: "Marina Bayfront (Downtown Singapore)",
+      highlights: ["50m Supertree Grove", "35m Cloud Forest Waterfall", "Flower Dome Conservatory", "Garden Rhapsody Light Show"],
       details: {
         altitude: "Sea Level (0 m)",
         bestTime: "Year-Round | Evening Light Show 7:45 PM & 8:45 PM",
-        overview: "Gardens by the Bay is Singapore's crown horticultural jewel. The park blends futuristic architecture with lush biodiversity, anchored by the iconic 18 Supertrees wrapped in over 160,000 plants.",
+        overview: "Gardens by the Bay is Singapore's iconic futuristic horticultural wonderland. Spanning 101 hectares, it features 18 colossal Supertrees wrapped in over 160,000 living plants, two world-record cooled conservatories, and the breathtaking mist-filled Cloud Forest.",
         experiences: [
-          "Walk along the elevated OCBC Skyway suspended 22 meters above ground between Supertrees.",
-          "Step inside the misty Cloud Forest dome featuring a 35-meter indoor mountain waterfall.",
-          "Marvel at Mediterranean flora inside the world's largest glass greenhouse (Flower Dome).",
-          "Watch the nightly Garden Rhapsody sound and light show transform Supertrees into colorful beacons."
+          "Walk along the suspended OCBC Skyway bridge 22 meters above ground between majestic Supertrees.",
+          "Enter the misty Cloud Forest dome and stand beneath the world's tallest 35-meter indoor mountain waterfall.",
+          "Marvel at exotic Mediterranean flora inside the world's largest glass greenhouse (Flower Dome).",
+          "Experience the synchronized sound and illumination of the nightly Garden Rhapsody light show."
         ],
-        travelTips: "Combined dome entry tickets and OCBC Skyway passes are included in all GhumoFiroo packages."
+        travelTips: "Pre-booked entry to Cloud Forest, Flower Dome and OCBC Skyway are included in all Ghumo Firoo Singapore itineraries."
+      }
+    },
+    {
+      id: "marina-bay-sands",
+      category: "landmarks",
+      categoryName: "Iconic Landmarks & Skyviews",
+      title: "Marina Bay Sands SkyPark & Observation Deck",
+      trendingKeywords: ["Marina Bay Sands SkyPark Observation Deck", "MBS Rooftop View", "Spectra Light & Water Show", "The Shoppes at Marina Bay"],
+      description: "Iconic 57th-floor cantilevered rooftop observation deck offering 360-degree panoramic vistas of the Singapore skyline, Singapore Strait, and Marina Bay.",
+      image: "/singapore/marina_bay_sands.jpg",
+      distance: "Marina Bay (Central Boulevard)",
+      highlights: ["57th Floor SkyPark Deck", "360° Marina Bay Skyline", "Spectra Laser Water Show", "Luxury The Shoppes at MBS"],
+      details: {
+        altitude: "200 meters (57 Stories High)",
+        bestTime: "Golden Hour Sunset (6:00 PM – 8:00 PM)",
+        overview: "Perched 57 stories atop three soaring towers, Marina Bay Sands SkyPark offers Singapore's most celebrated 360-degree panoramic vantage point, looking across the Singapore Strait, Gardens by the Bay, and the glittering city skyline.",
+        experiences: [
+          "Gaze out over the Singapore skyline from the cantilevered public observation deck 200 meters high.",
+          "Watch the mesmerizing Spectra Light & Water Show from the waterfront event plaza below.",
+          "Stroll through The Shoppes at Marina Bay Sands featuring luxury boutiques and indoor canal gondola sampans.",
+          "Dine at celebrity chef rooftop lounges including CÉ LA VI, Spago, and LAVO."
+        ],
+        travelTips: "Visit at 6:30 PM to witness the transition from golden sunset to glowing neon night skyline."
       }
     },
     {
       id: "universal-studios",
-      category: "parks",
-      categoryName: "Theme Parks & Wildlife",
-      title: "Universal Studios Sentosa",
-      description: "Southeast Asia's only Universal Studios theme park featuring 24 rides, shows, and attractions across 7 themed zones like Sci-Fi City & Far Far Away.",
-      image: "https://images.unsplash.com/photo-1596422846543-75c6fc197f07?q=80&w=800",
-      distance: "Sentosa Island",
-      highlights: ["Transformers 3D Ride", "Battlestar Galactica Coaster", "Revenge of the Mummy", "Far Far Away Castle"],
+      category: "themeparks",
+      categoryName: "Theme Parks & Island Adventures",
+      title: "Universal Studios Singapore (Sentosa)",
+      trendingKeywords: ["Universal Studios Singapore Tickets", "Transformers The Ride 3D", "Battlestar Galactica Roller Coaster", "Ancient Egypt Mummy", "Far Far Away Castle"],
+      description: "Southeast Asia's only Universal Studios theme park featuring 24 cutting-edge rides, blockbuster shows, and 6 themed zones across Sentosa Island.",
+      image: "/singapore/universal_studios.jpg",
+      distance: "Resorts World Sentosa",
+      highlights: ["Transformers 3D Ultimate Battle", "Battlestar Galactica Dueling Coaster", "Revenge of the Mummy", "Minion Land & Far Far Away"],
       details: {
         altitude: "Sea Level (0 m)",
-        bestTime: "Year-Round | Park Hours 10:00 AM to 7:00 PM",
-        overview: "Universal Studios Sentosa delivers Hollywood-grade thrills. Highlights include the world's tallest dueling roller coaster (Battlestar Galactica) and the immersive 3D hyper-reality Transformers ride.",
+        bestTime: "Year-Round | Park Hours 10:00 AM – 7:00 PM",
+        overview: "Universal Studios Singapore delivers Hollywood-grade thrills across 6 immersive themed zones. Highlights include the world's tallest dueling roller coaster (Battlestar Galactica) and the hyper-realistic Transformers 3D dark ride.",
         experiences: [
-          "Join Optimus Prime in a 3D battle against Decepticons on Transformers: The Ride.",
-          "Launch backward in complete darkness on the high-speed Revenge of the Mummy roller coaster.",
-          "Explore the fairy tale castle of Far Far Away and watch Shrek 4D adventure movies.",
-          "Meet Transformers, Minions, and Sesame Street characters during street parades."
+          "Join the Autobots in a hyper-realistic 3D battle on Transformers: The Ride.",
+          "Plunge into pitch-black darkness with fireballs and scarab beetles on Revenge of the Mummy coaster.",
+          "Experience high-G inversions on the world's tallest dueling roller coasters: Battlestar Galactica.",
+          "Meet Illumination's Minions, Transformers, and Sesame Street characters during colorful street parades."
         ],
-        travelTips: "Fast-Track Universal Express Passes are available through GhumoFiroo to skip normal queue lines."
+        travelTips: "Fast-Track Universal Express Passes can be added to bypass general queues during peak vacation periods."
+      }
+    },
+    {
+      id: "sea-aquarium",
+      category: "themeparks",
+      categoryName: "Theme Parks & Island Adventures",
+      title: "S.E.A. Aquarium & Open Ocean Habitat",
+      trendingKeywords: ["S.E.A. Aquarium Sentosa", "Open Ocean Habitat Shark Tunnel", "Resorts World Sentosa Marine Life", "Manta Ray Feeding Session"],
+      description: "One of the world's largest marine realms, home to over 100,000 aquatic animals from 1,000 species across 45 unique naturalistic habitats.",
+      image: "/singapore/sea_aquarium.jpg",
+      distance: "Resorts World Sentosa",
+      highlights: ["100,000+ Marine Animals", "Open Ocean Viewing Panel", "Shark Seas Underwater Tunnel", "Giant Manta Rays"],
+      details: {
+        altitude: "Sea Level (Underwater Habitat)",
+        bestTime: "10:00 AM – 5:00 PM (Daily)",
+        overview: "One of the world's premier oceanariums, S.E.A. Aquarium is home to over 100,000 marine creatures. Its centerpiece Open Ocean viewing panel creates the unforgettable sensation of standing on the ocean floor surrounded by gliding manta rays and apex sharks.",
+        experiences: [
+          "Stand in awe before the 36-meter wide Open Ocean panoramic habitat with gliding giant oceanic manta rays.",
+          "Walk through the Shark Seas tunnel with over 100 apex predators swimming directly overhead.",
+          "Observe glowing neon jellyfish exhibits and vibrant Indo-Pacific coral reef ecosystems.",
+          "Watch live marine diver feeding sessions and learn about ocean conservation programs."
+        ],
+        travelTips: "Combine S.E.A. Aquarium with Sentosa Cable Car SkyPass for a seamless full-day island adventure."
+      }
+    },
+    {
+      id: "jewel-changi",
+      category: "landmarks",
+      categoryName: "Iconic Landmarks & Skyviews",
+      title: "Jewel Changi Airport & HSBC Rain Vortex",
+      trendingKeywords: ["Jewel Changi HSBC Rain Vortex Waterfall", "Canopy Park Bouncing Nets", "Shiseido Forest Valley Changi", "World's Best Airport Experience"],
+      description: "Spectacular multi-dimensional lifestyle destination featuring the world's tallest 40m indoor waterfall surrounded by a lush 4-storey indoor forest.",
+      image: "/singapore/jewel_changi.jpg",
+      distance: "Changi Airport Terminal Complex",
+      highlights: ["40m World's Tallest Indoor Waterfall", "Shiseido Forest Valley", "Canopy Park & Glass Sky Bridge", "Night Waterfall Light Show"],
+      details: {
+        altitude: "Indoor Multi-Level Biosphere",
+        bestTime: "Year-Round | Hourly Light & Sound Show from 7:30 PM",
+        overview: "Jewel Changi Airport is Singapore's multi-award-winning architectural masterpiece that connects airport terminals. Anchored by the 40-meter HSBC Rain Vortex—the world's tallest indoor waterfall—surrounded by a 4-storey terraced forest valley.",
+        experiences: [
+          "Witness 10,000 gallons of rainwater cascade from the glass oculus dome at the HSBC Rain Vortex.",
+          "Hike the lush tropical walking trails of the 4-storey Shiseido Forest Valley with over 2,000 trees.",
+          "Cross the glass-bottomed Canopy Bridge and bounce on the suspended Manulife Sky Nets on level 5.",
+          "Catch the Skytrain glide right beside the waterfall as it connects airport terminals."
+        ],
+        travelTips: "Included as an arrival or departure transfer highlight on all Ghumo Firoo Singapore itineraries."
+      }
+    },
+    {
+      id: "singapore-flyer",
+      category: "landmarks",
+      categoryName: "Iconic Landmarks & Skyviews",
+      title: "Singapore Flyer & Time Capsule",
+      trendingKeywords: ["Singapore Flyer Giant Observation Wheel", "Time Capsule Immersive Experience", "Marina Bay Skyline View", "Singapore Giant Wheel VIP Capsule"],
+      description: "Asia's largest giant observation wheel standing 165 meters tall, offering 360-degree bird's-eye views spanning Singapore, Malaysia, and Indonesian islands.",
+      image: "/singapore/singapore_flyer.jpg",
+      distance: "Marina Promenade",
+      highlights: ["165m Giant Observation Wheel", "Multi-Sensory Time Capsule", "View of 3 Countries", "Air-Conditioned VIP Capsules"],
+      details: {
+        altitude: "165 meters High",
+        bestTime: "Sunset to Twilight (6:15 PM – 7:45 PM)",
+        overview: "Standing at 165 meters tall (the height of a 42-storey building), the Singapore Flyer is Asia's largest giant observation wheel. Each 30-minute rotation offers panoramic vistas across Marina Bay, the Singapore River, and on clear days, parts of Malaysia and Indonesia.",
+        experiences: [
+          "Embark on a gentle 30-minute scenic flight in a spacious, air-conditioned panoramic glass capsule.",
+          "Walk through the interactive 'Time Capsule' multi-sensory journey showcasing Singapore's 700-year history.",
+          "Capture breathtaking bird's-eye photos of the F1 Singapore Grand Prix circuit and Marina Bay.",
+          "Enjoy romantic Champagne or Singapore Sling flight upgrades during twilight."
+        ],
+        travelTips: "Board right before dusk to capture both daytime city clarity and night city lights in one rotation."
+      }
+    },
+    {
+      id: "night-safari",
+      category: "wildlife",
+      categoryName: "Wildlife & Nature Safaris",
+      title: "Mandai Night Safari & Tram Experience",
+      trendingKeywords: ["Mandai Night Safari Tram Tour", "Creatures of the Night Show", "World's First Nocturnal Zoo Singapore", "Night Safari Guided Walking Trails"],
+      description: "The world's first nocturnal wildlife park where you explore 35 hectares of dense secondary rainforest and observe over 900 night creatures via open tram.",
+      image: "/singapore/night_safari.jpg",
+      distance: "Mandai Wildlife Reserve (Northern Singapore)",
+      highlights: ["World's 1st Nocturnal Wildlife Park", "Guided Tram Audio Tour", "Creatures of the Night Show", "4 Themed Walking Trails"],
+      details: {
+        altitude: "Mandai Rainforest Reserve",
+        bestTime: "Evenings (7:15 PM – 11:00 PM)",
+        overview: "The world's first nocturnal wildlife park, Night Safari spans 35 hectares of dense secondary rainforest. Home to over 900 nocturnal animals from 100 species living in open, naturalistic habitats illuminated with subtle moon-lighting.",
+        experiences: [
+          "Ride the 40-minute guided open tram with informative commentary through 6 geographical zones.",
+          "Witness Asian elephants, Malayan tapirs, one-horned rhinoceroses, and lions active after dark.",
+          "Stroll along the Fishing Cat, Leopard, East Lodge, and Wallaby walking trails.",
+          "Enjoy the high-energy 'Creatures of the Night' animal presentation and Twilight Performance."
+        ],
+        travelTips: "Express tram boarding passes with reserved seating are included in Ghumo Firoo packages."
+      }
+    },
+    {
+      id: "cable-car-sentosa",
+      category: "landmarks",
+      categoryName: "Iconic Landmarks & Skyviews",
+      title: "Singapore Cable Car SkyPass & Sky Dining",
+      trendingKeywords: ["Singapore Cable Car SkyPass", "Mount Faber Line Sentosa", "Sentosa Sky Dining Cable Car", "HarbourFront Aerial Cableway"],
+      description: "Iconic aerial cable ropeway connecting Mount Faber Peak across Keppel Harbour to Sentosa Island with 360-degree coastal and skyline views.",
+      image: "/singapore/cable_car_sentosa.jpg",
+      distance: "Mount Faber Peak to Sentosa Island",
+      highlights: ["Two Interconnected Cable Lines", "360° Harbor & Island Views", "Mount Faber Hilltop Peak", "Sentosa Sky Dining Cabin"],
+      details: {
+        altitude: "100 meters above sea level",
+        bestTime: "Late Afternoon (4:30 PM – 7:00 PM)",
+        overview: "The Singapore Cable Car is an iconic aerial ropeway connecting mainland Singapore from Mount Faber Peak across Keppel Harbour to Sentosa Island. It offers unforgettable 360-degree vistas of the cruise port, skyscrapers, and Sentosa beaches.",
+        experiences: [
+          "Soar across the sea channel from Mount Faber Peak through HarbourFront to Sentosa's Imbiah Lookout.",
+          "Hop onto the Sentosa Line to fly directly over the lush jungle canopy and sandy beaches.",
+          "Ring the Bell of Happiness at Mount Faber's hilltop garden viewpoint.",
+          "Upgrade to private 4-course Sky Dining in a decorated starlit cable car cabin."
+        ],
+        travelTips: "Both Mount Faber Line and Sentosa Island Line round-trip SkyPasses are included."
+      }
+    },
+    {
+      id: "wings-of-time",
+      category: "themeparks",
+      categoryName: "Theme Parks & Island Adventures",
+      title: "Wings of Time & Siloso Beach Laser Show",
+      trendingKeywords: ["Wings of Time Laser Water Show", "Sentosa Beach Fireworks", "Siloso Beach Sentosa Nightlife", "Multi-Sensory Outdoor Night Show"],
+      description: "Spectacular multi-sensory night extravaganza on open sea featuring 3D projection mapping, state-of-the-art lasers, giant water fountains, and fireworks.",
+      image: "/singapore/wings_of_time_sentosa.jpg",
+      distance: "Siloso Beach (Sentosa Island)",
+      highlights: ["Multi-Sensory Laser & Water Show", "Open-Sea Stage Fireworks", "Siloso Beach Coastal Vibes", "Award-Winning Sound Production"],
+      details: {
+        altitude: "Sea Level (Coastal Open-Sea Stage)",
+        bestTime: "Nightly Shows at 7:40 PM & 8:40 PM",
+        overview: "Wings of Time is an award-winning multi-sensory night extravaganza staged right on the open sea at Siloso Beach. It features 3D projection mapping, state-of-the-art lasers, giant water fountains, flame bursts, and brilliant fireworks.",
+        experiences: [
+          "Watch the mythical bird Shahbaz and friends travel across the Industrial Revolution, Silk Road, and African Savanna.",
+          "Feel the warmth of synchronized flame jets and the ocean spray of giant dancing water jets.",
+          "Marvel at the grand finale fireworks lighting up the night sky over the Singapore Strait.",
+          "Relax at beachfront cafes and cocktail lounges along Siloso Beach promenade before the show."
+        ],
+        travelTips: "Premium grandstand seating tickets are pre-arranged with Ghumo Firoo for unobstructed central views."
+      }
+    },
+    {
+      id: "merlion-park",
+      category: "culture",
+      categoryName: "Cultural Heritage & Nightlife",
+      title: "Merlion Park & Singapore River Cruise",
+      trendingKeywords: ["Merlion Park Landmark Statue", "Singapore River Bumboat Cruise", "Clarke Quay Nightlife Promenade", "Boat Quay Waterfront Dining"],
+      description: "Singapore's legendary 8.6m water-spouting Merlion statue overlooking Marina Bay paired with a scenic electric bumboat heritage river cruise.",
+      image: "/singapore/merlion_park.jpg",
+      distance: "One Fullerton (Marina Bay)",
+      highlights: ["Iconic 8.6m Merlion Statue", "Electric Bumboat River Cruise", "Clarke Quay & Boat Quay", "Colonial Fullerton Heritage"],
+      details: {
+        altitude: "Sea Level (Waterfront)",
+        bestTime: "Morning for photos (8:30 AM) or Night cruise (8:00 PM)",
+        overview: "The Merlion—half lion, half fish—stands proudly at Merlion Park overlooking Marina Bay as the official national mascot of Singapore. From here, electric bumboats cruise historic waterways past colonial bridges, Boat Quay, and the vibrant dining district of Clarke Quay.",
+        experiences: [
+          "Capture the classic postcard photo with the spouting 8.6-meter Merlion statue and Marina Bay Sands backdrop.",
+          "Board a 40-minute traditional electric bumboat cruise gliding past Raffles Landing Site and Asian Civilisations Museum.",
+          "Pass beneath historic 19th-century colonial bridges including Cavenagh Bridge and Anderson Bridge.",
+          "Disembark at Clarke Quay for lively riverside dinner, live music clubs, and artisan cocktail bars."
+        ],
+        travelTips: "Take the bumboat cruise in the evening to witness the city's illuminated bridges and waterfront buildings."
+      }
+    },
+    {
+      id: "haji-lane-heritage",
+      category: "culture",
+      categoryName: "Cultural Heritage & Nightlife",
+      title: "Cultural Quarters: Little India, Chinatown & Haji Lane",
+      trendingKeywords: ["Little India Heritage Trail Singapore", "Buddha Tooth Relic Temple Chinatown", "Haji Lane Trendy Cafes & Murals", "Sultan Mosque Kampong Glam", "Mustafa Centre 24x7 Shopping"],
+      description: "Immerse in Singapore's multicultural tapestry: historic Chinatown temples, Little India's spice bazaars and 24/7 Mustafa Centre, and Haji Lane's indie murals.",
+      image: "/singapore/haji_lane_heritage.jpg",
+      distance: "Central Singapore Cultural Districts",
+      highlights: ["Sri Veeramakaliamman Temple", "Buddha Tooth Relic Temple", "Sultan Mosque & Haji Lane Murals", "Mustafa Centre 24/7 Shopping"],
+      details: {
+        altitude: "City Level",
+        bestTime: "Year-Round | Daytime Walking & Evening Cafes",
+        overview: "Singapore's multicultural heritage thrives in its three historic ethnic quarters: vibrant Little India with fragrant spice bazaars and temples, historic Chinatown with ornate shophouses and Buddhist temples, and hip Kampong Glam centered around Sultan Mosque and the colorful graffiti walls of Haji Lane.",
+        experiences: [
+          "Admire the intricate Dravidian gopuram towers of Sri Veeramakaliamman Temple in Little India.",
+          "Shop for gold, electronics, and authentic Indian spices at the legendary 24-hour Mustafa Centre.",
+          "Visit the 4-storey Tang Dynasty-style Buddha Tooth Relic Temple and Museum in Chinatown.",
+          "Snap vibrant photos in front of colorful street art murals and indie boutiques along narrow Haji Lane."
+        ],
+        travelTips: "Great spots for vegetarian and Jain Indian dining, including Komala Vilas, Saravanaa Bhavan, and Shivam."
+      }
+    },
+    {
+      id: "mandai-river-wonders",
+      category: "wildlife",
+      categoryName: "Wildlife & Nature Safaris",
+      title: "Mandai River Wonders & Singapore Zoo",
+      trendingKeywords: ["Mandai River Wonders Giant Panda Forest", "Amazon River Quest Boat Ride", "Singapore Zoo Rainforest Habitat", "Jia Jia & Kai Kai Giant Pandas"],
+      description: "Asia's only river-themed wildlife park featuring giant pandas Kai Kai & Jia Jia, the Amazon River Quest boat ride, and the world's largest freshwater aquarium.",
+      image: "/singapore/mandai_river_wonders.jpg",
+      distance: "Mandai Wildlife Reserve",
+      highlights: ["Giant Panda Forest (Jia Jia & Kai Kai)", "Amazon River Quest Boat Ride", "World's Largest Freshwater Aquarium", "Open-Concept Rainforest Zoo"],
+      details: {
+        altitude: "Mandai Rainforest Biosphere",
+        bestTime: "Morning & Afternoon (9:00 AM – 5:30 PM)",
+        overview: "River Wonders is Asia's first river-themed wildlife park, recreating iconic river ecosystems such as the Amazon, Mississippi, Nile, and Yangtze. It is famous for the Giant Panda Forest housing giant pandas Kai Kai and Jia Jia, as well as the thrilling Amazon River Quest boat ride.",
+        experiences: [
+          "Visit the climate-controlled biodome of the Giant Panda Forest and watch giant pandas munching fresh bamboo.",
+          "Embark on the Amazon River Quest boat ride through simulated rainforest riverbeds with jaguars and tapirs.",
+          "Walk inside the Amazon Flooded Forest, the world's largest freshwater aquarium exhibit housing manatees.",
+          "Upgrade to experience the award-winning open-concept Singapore Zoo and Rainforest KidzWorld."
+        ],
+        travelTips: "Book the 11:00 AM Giant Panda feeding session for the best active photos."
       }
     }
   ]
@@ -149,12 +449,12 @@ const Singapore: React.FC = () => {
     : attractions.filter(item => item.category === activeCategory)
 
   const faqItems = [
-    { id: "sg-faq-1", question: "Do Indian passport holders need a visa for Singapore, and how long does it take?", answer: "Yes, Indian passport holders require an electronic tourist visa (eVisa). GhumoFiroo handles 100% of your Singapore eVisa filing with a guaranteed 3 to 5 working day approval turnaround." },
+    { id: "sg-faq-1", question: "Do Indian passport holders need a visa for Singapore, and how long does it take?", answer: "Yes, Indian passport holders require an electronic tourist visa (eVisa). Ghumo Firoo handles 100% of your Singapore eVisa filing with a guaranteed 3 to 5 working day approval turnaround." },
     { id: "sg-faq-2", question: "What top attractions are included in the Sentosa Island & Universal Studios package?", answer: "Our Sentosa packages include Universal Studios Express passes (no waiting in lines), Singapore Cable Car skypass, S.E.A. Aquarium entry, Wings of Time laser show, and Sentosa Express beach monorail passes." },
     { id: "sg-faq-3", question: "Can we combine Singapore with Genting Dream Cruise or Malaysia?", answer: "Yes! We offer popular 6N/7D twin-country combos (Singapore + Kuala Lumpur / Genting Highlands) as well as 4-night land + 2-night Resort World Genting Dream luxury ocean cruise packages." },
     { id: "sg-faq-4", question: "What is the difference between Singapore 4D3N and 5D4N packages?", answer: "The 4D3N itinerary is ideal for a quick holiday covering Gardens by the Bay, Night Safari, and Universal Studios. The 5D4N package adds a free day for shopping at Orchard Road, Jewel Changi Rain Vortex, and Sentosa Beach Resorts." },
     { id: "sg-faq-5", question: "Is Indian vegetarian and Jain food easily available in Singapore?", answer: "Yes! Singapore features hundreds of authentic Indian restaurants in Little India (like Saravanaa Bhavan, Ananda Bhavan, and Komala Vilas) as well as vegetarian options in Marina Bay Sands and Sentosa." },
-    { id: "sg-faq-6", question: "What luxury hotel stay options are provided in GhumoFiroo Singapore packages?", answer: "We provide 4-star and 5-star hotel options including Marina Bay Sands, Swissotel The Stamford, Pan Pacific, Shangri-La Sentosa, and Village Hotel Bugis with daily breakfast buffet." },
+    { id: "sg-faq-6", question: "What luxury hotel stay options are provided in Ghumo Firoo Singapore packages?", answer: "We provide 4-star and 5-star hotel options including Marina Bay Sands, Swissotel The Stamford, Pan Pacific, Shangri-La Sentosa, and Village Hotel Bugis with daily breakfast buffet." },
     { id: "sg-faq-7", question: "Are flight-inclusive Singapore packages available from major Indian cities?", answer: "Yes, we customize flight-inclusive packages with direct non-stop flights from Delhi (DEL), Mumbai (BOM), Bengaluru (BLR), Chennai (MAA), and Kolkata (CCU)." }
   ]
 
@@ -168,9 +468,9 @@ const Singapore: React.FC = () => {
 
   const tripSchema = buildTouristTripJsonLd({
     name: "Singapore Luxury Vacation & Sentosa Packages 2026",
-    description: "Experience top-rated Singapore luxury packages with GhumoFiroo. Gardens by the Bay, Marina Bay Sands, Universal Studios Sentosa & Genting Dream cruise combos.",
+    description: "Experience top-rated Singapore luxury packages with Ghumo Firoo. Gardens by the Bay, Marina Bay Sands, Universal Studios Sentosa & Genting Dream cruise combos.",
     url: config.baseUrl + "/packages/singapore",
-    image: "https://images.unsplash.com/photo-1525625293386-3f8f99389edd?w=800&q=80",
+    image: "/singapore/gardens_by_the_bay.jpg",
     duration: "P5D",
     itinerary: [
       { position: 1, name: "Gardens by the Bay & Marina Bay Skyline", description: "Cloud Forest dome tour & rooftop Marina Bay Sands observation deck." },
@@ -191,9 +491,9 @@ const Singapore: React.FC = () => {
   return (
     <Layout>
       <SEO 
-        title="Singapore Tour Packages 2026 | Sentosa, Universal Studios & E-Visa"
-        description="Book top-rated Singapore tour packages from India. Experience Marina Bay Sands, Gardens by the Bay, Universal Studios Sentosa VIP, Genting Dream Cruise & Fast-Track E-Visa."
-        keywords="Singapore tour package 2026, Singapore E-visa assistance, Universal Studios Sentosa VIP package, Genting Dream Cruise Singapore, Singapore Malaysia twin delight 7 days, Singapore family package price"
+        title="Singapore Tour Packages 2026 | Sentosa, Universal Studios, Marina Bay & E-Visa"
+        description="Book top-rated Singapore tour packages from India. Experience Marina Bay Sands, Gardens by the Bay Supertrees, Universal Studios Sentosa VIP, Genting Dream Cruise, S.E.A. Aquarium & Fast-Track E-Visa."
+        keywords="Singapore tour package 2026, Singapore sightseeing places, Gardens by the Bay tickets, Marina Bay Sands SkyPark, Universal Studios Singapore Sentosa, S.E.A. Aquarium Sentosa, Jewel Changi Rain Vortex, Singapore Flyer tickets, Mandai Night Safari tram, Singapore Cable Car Skypass, Wings of Time Sentosa, Merlion Park Singapore, Haji Lane Little India, Singapore E-visa assistance, Genting Dream Cruise Singapore, Singapore Malaysia twin delight 7 days, Singapore family package price"
         canonicalUrl={config.baseUrl + "/packages/singapore"}
         structuredData={[breadcrumbSchema, faqSchema, tripSchema]}
       />
@@ -204,10 +504,10 @@ const Singapore: React.FC = () => {
         <ScrollReveal variant="fade-in-scale" duration="slow" className="relative h-[85vh] min-h-[560px] flex items-center justify-center overflow-hidden">
           <div className="absolute inset-0 bg-[#0B1026]">
             <img 
-              src="https://images.unsplash.com/photo-1525625293386-3f8f99389edd?q=80&w=1600" 
+              src="/singapore/gardens_by_the_bay.jpg" 
               alt="Singapore Marina Bay Sands Night Skyline" 
               onError={(e) => { (e.target as HTMLImageElement).src = FALLBACK_SINGAPORE_IMG }}
-              className="absolute inset-0 w-full h-full object-cover opacity-45 mix-blend-luminosity" 
+              className="absolute inset-0 w-full h-full object-cover opacity-50 mix-blend-luminosity" 
             />
             <div className="absolute inset-0 bg-gradient-to-b from-[#070C1E]/80 via-[#070C1E]/60 to-[#070C1E] z-10" />
           </div>
@@ -216,7 +516,7 @@ const Singapore: React.FC = () => {
             <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-black/50 border border-[#C9A25A]/50 backdrop-blur-md">
               <Sparkles className="w-3.5 h-3.5 text-[#C9A25A]" />
               <span className="text-[11px] font-semibold uppercase tracking-[0.25em] text-[#E5C378]">
-                Lion City Collection
+                Lion City Collection 2026
               </span>
             </div>
             
@@ -225,7 +525,7 @@ const Singapore: React.FC = () => {
             </h1>
             
             <p className="text-sm sm:text-lg text-slate-200 max-w-2xl font-light leading-relaxed drop-shadow-md">
-              Gardens by the Bay, Marina Bay Sands skyline, Sentosa Island theme parks, Genting Dream ocean cruise & Malaysia twin tours.
+              Gardens by the Bay Supertrees, Marina Bay Sands skyline, Universal Studios Sentosa VIP passes, Night Safari & Genting Dream ocean cruises.
             </p>
 
             <div className="flex flex-wrap items-center justify-center gap-4 pt-2">
@@ -242,7 +542,7 @@ const Singapore: React.FC = () => {
                 className="px-8 py-6 rounded-full bg-black/40 border-white/20 text-white font-bold text-xs uppercase tracking-[0.2em] hover:bg-white/10 backdrop-blur-md"
                 onClick={() => document.getElementById("highlights-section")?.scrollIntoView({ behavior: "smooth" })}
               >
-                View Sightseeing Guide <Compass className="ml-2 h-4 w-4 text-[#C9A25A]" />
+                View 12 Sightseeing Highlights <Compass className="ml-2 h-4 w-4 text-[#C9A25A]" />
               </Button>
             </div>
 
@@ -268,19 +568,19 @@ const Singapore: React.FC = () => {
           <SectionHeading 
             kicker="Curated Itineraries" 
             title="Select Your Singapore Package" 
-            subtitle="Choose from 4-day city express breaks or 5-day Sentosa & cable car sky dining specials." 
+            subtitle="Choose from 4-day city express breaks, 5-day Sentosa & cable car sky dining specials, Genting Dream cruises, or Malaysia twin country combos." 
             align="center" 
             className="mx-auto mb-16" 
           />
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-8 max-w-4xl mx-auto">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
             {singaporePackages.map((pkg, idx) => (
-              <ScrollReveal key={idx} variant="fade-in-up" delay={idx * 50}>
+              <ScrollReveal key={idx} variant="fade-in-up" delay={idx * 40}>
                 <div className="bg-[#0B1226]/90 border border-[#C9A25A]/25 rounded-2xl overflow-hidden h-full flex flex-col justify-between hover:border-[#C9A25A] hover-gold-glow transition-all duration-300 group">
                   <Link to={pkg.link} className="relative aspect-[16/10] overflow-hidden bg-slate-900 block">
                     <img 
                       src={pkg.image} 
-                      alt={pkg.name || pkg.title || "Tour Package Details"} 
+                      alt={pkg.title} 
                       onError={(e) => { (e.target as HTMLImageElement).src = FALLBACK_SINGAPORE_IMG }}
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
                     />
@@ -304,11 +604,11 @@ const Singapore: React.FC = () => {
                       </div>
                       
                       <Link to={pkg.link} className="block">
-                        <h3 className="text-lg font-serif font-bold text-white mb-1 group-hover:text-[#E5C378] transition-colors">
+                        <h3 className="text-lg font-serif font-bold text-white mb-1 group-hover:text-[#E5C378] transition-colors line-clamp-2">
                           {pkg.title}
                         </h3>
                       </Link>
-                      <p className="text-xs text-slate-300 font-light leading-relaxed mb-3">{pkg.desc}</p>
+                      <p className="text-xs text-slate-300 font-light leading-relaxed mb-3 line-clamp-2">{pkg.desc}</p>
 
                       <div className="space-y-1.5 pt-2 border-t border-white/10 text-[11px]">
                         <div className="flex items-center gap-1.5 text-slate-300">
@@ -353,9 +653,9 @@ const Singapore: React.FC = () => {
         <section id="highlights-section" className="py-24 bg-[#050A18] border-y border-[#C9A25A]/15">
           <div className="container mx-auto px-6 max-w-7xl">
             <SectionHeading 
-              kicker="In-Depth Sightseeing Guide" 
+              kicker="12 Trending Sightseeing Places" 
               title="Singapore Highlights Included" 
-              subtitle="Explore complete details of iconic attractions covered across our Singapore itineraries. Click any card to view full travel advice & altitude guides." 
+              subtitle="Explore high-definition details of top trending attractions covered across our Singapore itineraries. Click any attraction to view complete travel tips, altitudes, top experiences & trending keywords." 
               align="center" 
               className="mx-auto mb-12" 
             />
@@ -363,9 +663,11 @@ const Singapore: React.FC = () => {
             {/* CATEGORY FILTER TABS */}
             <div className="flex flex-wrap items-center justify-center gap-2 mb-12">
               {[
-                { key: "all", label: "All Highlights" },
-                { key: "landmarks", label: "Iconic Landmarks" },
-                { key: "parks", label: "Theme Parks & Wildlife" }
+                { key: "all", label: "All 12 Highlights" },
+                { key: "landmarks", label: "Iconic Landmarks & Skyviews" },
+                { key: "themeparks", label: "Theme Parks & Island Adventures" },
+                { key: "wildlife", label: "Wildlife & Nature Safaris" },
+                { key: "culture", label: "Cultural Heritage & Nightlife" }
               ].map(tab => (
                 <button
                   key={tab.key}
@@ -381,9 +683,9 @@ const Singapore: React.FC = () => {
               ))}
             </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-8 max-w-4xl mx-auto">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {filteredAttractions.map((item, idx) => (
-                <ScrollReveal key={idx} variant="fade-in-up" delay={idx * 40}>
+                <ScrollReveal key={idx} variant="fade-in-up" delay={idx * 30}>
                   <div 
                     onClick={() => setSelectedAttraction(item)}
                     className="bg-[#0B1226]/90 border border-[#C9A25A]/25 rounded-2xl overflow-hidden h-full flex flex-col justify-between hover:border-[#C9A25A] hover-gold-glow transition-all duration-300 group cursor-pointer"
@@ -391,7 +693,7 @@ const Singapore: React.FC = () => {
                     <div className="relative aspect-[16/10] overflow-hidden bg-slate-900">
                       <img 
                         src={item.image} 
-                        alt={item.title || item.name || "Sightseeing Highlight"} 
+                        alt={item.title} 
                         onError={(e) => { (e.target as HTMLImageElement).src = FALLBACK_SINGAPORE_IMG }}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
                       />
@@ -409,6 +711,9 @@ const Singapore: React.FC = () => {
 
                     <div className="p-6 flex flex-col flex-1 justify-between space-y-4">
                       <div>
+                        <div className="text-[10px] uppercase font-bold text-[#C9A25A] mb-1">
+                          {item.categoryName}
+                        </div>
                         <h3 className="text-lg font-serif font-bold text-white mb-2 group-hover:text-[#E5C378] transition-colors">
                           {item.title}
                         </h3>
@@ -451,7 +756,7 @@ const Singapore: React.FC = () => {
                 <div className="relative aspect-[21/9] overflow-hidden">
                   <img 
                     src={selectedAttraction.image} 
-                    alt={selectedAttraction.title || selectedAttraction.name || "Destination Attraction View"} 
+                    alt={selectedAttraction.title} 
                     onError={(e) => { (e.target as HTMLImageElement).src = FALLBACK_SINGAPORE_IMG }}
                     className="w-full h-full object-cover" 
                   />
@@ -466,7 +771,7 @@ const Singapore: React.FC = () => {
                 <div className="p-6 sm:p-8 space-y-6">
                   <div>
                     <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#C9A25A]/15 border border-[#C9A25A]/30 text-[#E5C378] text-xs font-bold uppercase tracking-wider mb-2">
-                      <Mountain className="w-3.5 h-3.5 text-[#C9A25A]" /> Altitude: {selectedAttraction.details.altitude}
+                      <Mountain className="w-3.5 h-3.5 text-[#C9A25A]" /> Altitude / Level: {selectedAttraction.details.altitude}
                     </div>
                     <DialogTitle className="text-2xl sm:text-3xl font-serif font-bold text-white mb-2">
                       {selectedAttraction.title}
@@ -475,6 +780,22 @@ const Singapore: React.FC = () => {
                       {selectedAttraction.details.overview}
                     </DialogDescription>
                   </div>
+
+                  {/* TRENDING SEARCH KEYWORDS BADGES */}
+                  {selectedAttraction.trendingKeywords && (
+                    <div className="bg-[#070C1E] p-4 rounded-xl border border-[#C9A25A]/25 space-y-2">
+                      <h4 className="text-xs font-serif font-bold text-[#E5C378] uppercase tracking-wider flex items-center gap-1.5">
+                        <Tag className="w-3.5 h-3.5 text-[#C9A25A]" /> Trending Search Keywords & Highlights
+                      </h4>
+                      <div className="flex flex-wrap gap-1.5">
+                        {selectedAttraction.trendingKeywords.map((kw: string, i: number) => (
+                          <span key={i} className="text-[10px] px-2.5 py-1 rounded-md bg-[#C9A25A]/10 text-[#E5C378] border border-[#C9A25A]/20 font-medium">
+                            #{kw}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
 
                   {/* KEY EXPERIENCES */}
                   <div className="space-y-3 bg-white/5 p-5 rounded-xl border border-white/10">
