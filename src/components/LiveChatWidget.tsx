@@ -112,27 +112,32 @@ export const LiveChatWidget: React.FC = () => {
     ];
     setConversationHistory(updatedHistory);
 
-    // Extract intents from user message
+    // Extract intents & entities from full user message history
     const intents = classifyUserIntent(userMessage);
-    const extractedLead = extractLeadFromChat([{ text: userMessage, sender: 'user' }]);
+    const allChatHistory = [...messages, { text: userMessage, sender: 'user' as const }];
+    const extractedLead = extractLeadFromChat(allChatHistory);
 
     let nextChatContext = chatContext;
 
-    if (extractedLead.destination) {
+    if (extractedLead.destination || extractedLead.travelDate || extractedLead.passengers) {
       nextChatContext = {
         ...chatContext,
-        destination: extractedLead.destination,
+        destination: extractedLead.destination || chatContext.destination,
+        travelDate: extractedLead.travelDate || chatContext.travelDate,
+        passengers: extractedLead.passengers || chatContext.passengers,
         interests: Array.from(new Set([...(chatContext.interests || []), ...(extractedLead.interests || [])]))
       };
 
       setChatContext(nextChatContext);
       setLeadFormData(prev => ({
         ...prev,
-        destination: prev.destination || extractedLead.destination
+        destination: extractedLead.destination || prev.destination,
+        travelDate: extractedLead.travelDate || prev.travelDate,
+        passengers: extractedLead.passengers ? String(extractedLead.passengers) : prev.passengers
       }));
     }
 
-    if (intents.includes('destination') || userMessage.toLowerCase().includes('book')) {
+    if (intents === 'booking' || intents === 'pricing' || userMessage.toLowerCase().includes('pdf') || userMessage.toLowerCase().includes('brochure') || userMessage.toLowerCase().includes('book')) {
       setTimeout(() => setShowLeadForm(true), 2500);
     }
 
@@ -213,9 +218,9 @@ export const LiveChatWidget: React.FC = () => {
         name: leadFormData.name,
         phone: leadFormData.phone,
         email: leadFormData.email,
-        destination: leadFormData.destination || chatContext.destination || 'General Enquiry',
-        travelDate: leadFormData.travelDate || chatContext.travelDate || '',
-        passengers: parseInt(leadFormData.passengers) || 2,
+        destination: leadFormData.destination || chatContext.destination || extractLeadFromChat(messages).destination || 'Custom Luxury Holiday',
+        travelDate: leadFormData.travelDate || chatContext.travelDate || extractLeadFromChat(messages).travelDate || '',
+        passengers: parseInt(leadFormData.passengers) || chatContext.passengers || extractLeadFromChat(messages).passengers || 2,
         budget: chatContext.budget || '',
         source: 'LiveChatWidget',
         chatHistory: messages.map(m => `${m.sender}: ${m.text}`).join('\n'),

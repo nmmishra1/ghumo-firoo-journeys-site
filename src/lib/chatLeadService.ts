@@ -3,6 +3,7 @@
  */
 
 import { submitToGoogleSheets, LeadSubmission } from './googleSheets';
+import { MASTER_DESTINATIONS } from '@/data/masterDestinations';
 
 const API_BASE = import.meta.env.VITE_PHP_BASE_URL || import.meta.env.VITE_API_BASE_URL || '/php-backend';
 
@@ -102,13 +103,11 @@ export const validateChatLead = (data: Partial<ChatLeadData>): { valid: boolean;
 };
 
 /**
- * Extract lead data from conversation
+ * Extract rich lead data (Destination, Travel Date, Passengers, Interests) from conversation
  */
 export const extractLeadFromChat = (messages: Array<{ text: string; sender: 'user' | 'agent' | 'bot' }>): Partial<ChatLeadData> => {
-  const chatText = messages
-    .filter(m => m.sender === 'user')
-    .map(m => m.text.toLowerCase())
-    .join(' ');
+  const userMessages = messages.filter(m => m.sender === 'user').map(m => m.text);
+  const fullText = userMessages.join(' ').toLowerCase();
 
   const extracted: Partial<ChatLeadData> = {
     interests: [],
@@ -116,27 +115,60 @@ export const extractLeadFromChat = (messages: Array<{ text: string; sender: 'use
     createdAt: new Date().toISOString()
   };
 
-  const destinationKeywords: Record<string, string> = {
-    'char dham': 'Char Dham Yatra',
-    'char-dham': 'Char Dham Yatra',
-    yatra: 'Char Dham Yatra',
-    kashmir: 'Kashmir',
-    ladakh: 'Ladakh',
-    kerala: 'Kerala',
-    europe: 'Europe',
-    dubai: 'Dubai',
-    bali: 'Bali',
-    thailand: 'Thailand',
-    singapore: 'Singapore',
-    goa: 'Goa',
-    rajasthan: 'Rajasthan'
-  };
+  // Known destination aliases and priorities
+  const destinationMap: Array<{ key: string; name: string; aliases: string[] }> = [
+    { key: 'ooty', name: 'Ooty (Nilgiri Hills)', aliases: ['ooty', 'nilgiri', 'coonoor'] },
+    { key: 'coorg', name: 'Coorg (Kodagu)', aliases: ['coorg', 'corrong', 'kodagu', 'madikeri'] },
+    { key: 'kashmir', name: 'Kashmir (Srinagar & Gulmarg)', aliases: ['kashmir', 'srinagar', 'gulmarg', 'pahalgam', 'sonamarg'] },
+    { key: 'rann', name: 'Rann Utsav Kutch', aliases: ['rann', 'kutch', 'utsav', 'dhordo', 'tent city'] },
+    { key: 'chardham', name: 'Char Dham Yatra', aliases: ['char dham', 'chardham', 'kedarnath', 'badrinath', 'gangotri', 'yamunotri'] },
+    { key: 'kerala', name: 'Kerala Backwaters & Hills', aliases: ['kerala', 'munnar', 'alleppey', 'kochi', 'thekkady', 'kumarakom'] },
+    { key: 'goa', name: 'Goa Beachfront', aliases: ['goa', 'calangute', 'panaji', 'baga', 'candolim'] },
+    { key: 'manali', name: 'Manali & Solang Valley', aliases: ['manali', 'solang', 'rohtang', 'kasol'] },
+    { key: 'shimla', name: 'Shimla & Kufri', aliases: ['shimla', 'kufri'] },
+    { key: 'rajasthan', name: 'Rajasthan Heritage Circuit', aliases: ['rajasthan', 'jaipur', 'udaipur', 'jodhpur', 'jaisalmer'] },
+    { key: 'andaman', name: 'Andaman & Nicobar Islands', aliases: ['andaman', 'havelock', 'port blair', 'neil island'] },
+    { key: 'thailand', name: 'Thailand (Phuket & Krabi)', aliases: ['thailand', 'phuket', 'krabi', 'bangkok', 'pattaya'] },
+    { key: 'singapore', name: 'Singapore City & Sentosa', aliases: ['singapore', 'sentosa', 'universal studios'] },
+    { key: 'bali', name: 'Bali (Ubud & Seminyak)', aliases: ['bali', 'ubud', 'seminyak', 'nusa penida'] },
+    { key: 'dubai', name: 'Dubai & Desert Safari', aliases: ['dubai', 'burj khalifa', 'abu dhabi'] },
+    { key: 'europe', name: 'Europe (Swiss & Paris)', aliases: ['europe', 'switzerland', 'paris', 'france', 'italy'] }
+  ];
 
-  for (const [keyword, destination] of Object.entries(destinationKeywords)) {
-    if (chatText.includes(keyword)) {
-      extracted.destination = destination;
+  // Scan user messages in REVERSE (most recent user message takes priority for destination changes)
+  for (let i = userMessages.length - 1; i >= 0; i--) {
+    const text = userMessages[i].toLowerCase();
+
+    for (const item of destinationMap) {
+      if (item.aliases.some(alias => text.includes(alias))) {
+        extracted.destination = item.name;
+        break;
+      }
+    }
+    if (extracted.destination) break;
+
+    // Match against Master Destinations
+    const md = MASTER_DESTINATIONS.find(d => text.includes(d.city.toLowerCase()));
+    if (md) {
+      extracted.destination = `${md.city}, ${md.state}`;
       break;
     }
+  }
+
+  // Extract Travel Date
+  const dateMatch = fullText.match(/\b(\d{1,2}(?:st|nd|rd|th)?\s*(?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*|\b(?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\s*\d{1,2}|diwali|christmas|new year|next month|next week)\b/i);
+  if (dateMatch) {
+    extracted.travelDate = dateMatch[0];
+  }
+
+  // Extract Passengers / Guests
+  const paxMatch = fullText.match(/(\d+)\s*(?:people|person|pax|guests|adults|travelers|members|passenger)/i);
+  if (paxMatch) {
+    extracted.passengers = parseInt(paxMatch[1], 10);
+  } else if (fullText.includes('couple') || fullText.includes('one couple') || fullText.includes('husband and wife') || fullText.includes('2 people')) {
+    extracted.passengers = 2;
+  } else if (fullText.includes('solo')) {
+    extracted.passengers = 1;
   }
 
   return extracted;
