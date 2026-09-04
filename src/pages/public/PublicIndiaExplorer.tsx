@@ -661,7 +661,7 @@ export default function PublicIndiaExplorer() {
                           </div>
                           <div className="flex items-center gap-1.5 text-slate-400 font-medium truncate">
                             <Utensils className="w-3.5 h-3.5 text-orange-400 shrink-0" />
-                            <span className="truncate">Food: {city.food_highlights[0]}</span>
+                            <span className="truncate">Food: {city.food_highlights?.[0] || 'Local Regional Specialties'}</span>
                           </div>
                         </div>
 
