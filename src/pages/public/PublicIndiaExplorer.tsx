@@ -12,12 +12,13 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { MASTER_DESTINATIONS } from '@/data/masterDestinations';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { 
   MapPin, Search, ArrowRight, Sparkles, Globe, Compass, 
   Clock, Plane, Calendar, Phone, MessageCircle, CheckCircle2,
   ChevronRight, Filter, Landmark, Trees, ShieldCheck, Heart,
   ArrowLeft, Share2, Eye, Star, Loader2, IndianRupee, Utensils,
-  Train, Sun, CloudRain, HelpCircle, Award, Check
+  Train, Sun, CloudRain, HelpCircle, Award, Check, LayoutGrid, List, SlidersHorizontal, X
 } from 'lucide-react';
 
 const API_BASE = import.meta.env.VITE_PHP_BASE_URL || import.meta.env.VITE_API_BASE_URL || '/php-backend';
@@ -119,7 +120,14 @@ export default function PublicIndiaExplorer() {
   }, []);
 
   const regions = ['All', 'North', 'South', 'West', 'Central', 'East'];
-  const themes = ['All', 'Heritage & UNESCO', 'Wildlife & Safari', 'Spiritual & Pilgrimage', 'Hill Stations & Nature', 'Cultural & Food'];
+  const themes = [
+    { id: 'All', label: 'All Circuits', icon: '🌟' },
+    { id: 'Heritage & UNESCO', label: 'Royal Heritage & Palaces', icon: '🏛️' },
+    { id: 'Wildlife & Safari', label: 'Tiger Safaris & Wildlife', icon: '🐅' },
+    { id: 'Spiritual & Pilgrimage', label: 'Sacred Pilgrimage & Ghats', icon: '🛕' },
+    { id: 'Hill Stations & Nature', label: 'Himalayan Hills & Valleys', icon: '🏔️' },
+    { id: 'Cultural & Food', label: 'Culinary & Culture', icon: '🍲' }
+  ];
 
   // Helper matching
   const isCityInState = (city: any, state: any) => {
@@ -164,9 +172,9 @@ export default function PublicIndiaExplorer() {
     });
   }, [cities]);
 
-  // Filtered cities list
+  // Filtered cities list with sorting
   const filteredCities = useMemo(() => {
-    return enrichedCities.filter(city => {
+    const list = enrichedCities.filter(city => {
       if (selectedState && !isCityInState(city, selectedState)) return false;
 
       if (selectedRegion !== 'All') {
@@ -178,11 +186,11 @@ export default function PublicIndiaExplorer() {
       
       if (activeTheme !== 'All') {
         const group = (city.destination_group || '').toLowerCase();
-        if (activeTheme === 'Heritage & UNESCO' && !group.includes('heritage') && !group.includes('unesco')) return false;
-        if (activeTheme === 'Wildlife & Safari' && !group.includes('wildlife') && !group.includes('safari')) return false;
-        if (activeTheme === 'Spiritual & Pilgrimage' && !group.includes('spiritual') && !group.includes('pilgrimage') && !group.includes('temple')) return false;
-        if (activeTheme === 'Hill Stations & Nature' && !group.includes('hill') && !group.includes('nature') && !group.includes('mountain')) return false;
-        if (activeTheme === 'Cultural & Food' && !group.includes('cultural') && !group.includes('food')) return false;
+        if (activeTheme === 'Heritage & UNESCO' && !group.includes('heritage') && !group.includes('unesco') && !group.includes('fort') && !group.includes('palace')) return false;
+        if (activeTheme === 'Wildlife & Safari' && !group.includes('wildlife') && !group.includes('safari') && !group.includes('nature') && !group.includes('national park')) return false;
+        if (activeTheme === 'Spiritual & Pilgrimage' && !group.includes('spiritual') && !group.includes('pilgrimage') && !group.includes('temple') && !group.includes('jyotirlinga')) return false;
+        if (activeTheme === 'Hill Stations & Nature' && !group.includes('hill') && !group.includes('nature') && !group.includes('valley') && !group.includes('himalayan')) return false;
+        if (activeTheme === 'Cultural & Food' && !group.includes('cultural') && !group.includes('food') && !group.includes('culinary')) return false;
       }
 
       if (searchQuery.trim()) {
@@ -191,12 +199,30 @@ export default function PublicIndiaExplorer() {
         const stateName = (city.state_name || city.state || '').toLowerCase();
         const group = (city.destination_group || '').toLowerCase();
         const attractions = (city.popular_attractions || []).join(' ').toLowerCase();
+
         return name.includes(q) || stateName.includes(q) || group.includes(q) || attractions.includes(q);
       }
 
       return true;
     });
-  }, [enrichedCities, selectedState, selectedRegion, activeTheme, searchQuery, states]);
+
+    if (sortBy === 'name') {
+      return list.sort((a, b) => (a.name || a.city_name || '').localeCompare(b.name || b.city_name || ''));
+    }
+    if (sortBy === 'state') {
+      return list.sort((a, b) => (a.state_name || a.state || '').localeCompare(b.state_name || b.state || ''));
+    }
+    return list;
+  }, [enrichedCities, selectedState, selectedRegion, activeTheme, searchQuery, states, sortBy]);
+
+  const activeFiltersCount = (selectedRegion !== 'All' ? 1 : 0) + (activeTheme !== 'All' ? 1 : 0) + (selectedState ? 1 : 0) + (searchQuery.trim() ? 1 : 0);
+
+  const resetAllFilters = () => {
+    setSelectedRegion('All');
+    setActiveTheme('All');
+    setSelectedState(null);
+    setSearchQuery('');
+  };
 
   const handleOpenGuide = (city: any) => {
     setActiveGuideCity(city);
@@ -346,68 +372,70 @@ export default function PublicIndiaExplorer() {
         </div>
       </section>
 
-      {/* POPULAR TOURISM CIRCUITS BANNER */}
-      <section className="py-10 bg-[#080d1a] border-b border-slate-800">
+      {/* POPULAR TOURISM CIRCUITS STRIP (INTERACTIVE THEME SWITCHER) */}
+      <section className="py-8 bg-[#080d1a] border-b border-slate-800/80">
         <div className="container mx-auto px-4 max-w-7xl">
-          <div className="mb-6 text-left">
-            <span className="text-xs font-extrabold uppercase tracking-widest text-[#C9A25A] flex items-center gap-1.5">
-              <Compass className="w-4 h-4" /> Curated Indian Holiday Circuits
-            </span>
-            <h2 className="text-xl md:text-2xl font-black text-white font-montserrat mt-1">
-              Explore by Travel Interest &amp; Circuit
-            </h2>
+          <div className="flex items-center justify-between gap-4 mb-4 text-left">
+            <div>
+              <span className="text-[11px] font-black uppercase tracking-widest text-[#C9A25A] flex items-center gap-1.5">
+                <Compass className="w-3.5 h-3.5" /> Curated Indian Holiday Circuits
+              </span>
+              <h2 className="text-lg md:text-xl font-black text-white font-montserrat mt-0.5">
+                Explore by Holiday Interest &amp; Theme
+              </h2>
+            </div>
+            {activeTheme !== 'All' && (
+              <button
+                onClick={() => setActiveTheme('All')}
+                className="text-xs text-amber-400 hover:text-amber-300 font-bold flex items-center gap-1"
+              >
+                Reset Theme <X className="w-3.5 h-3.5" />
+              </button>
+            )}
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
-            {TOURISM_CIRCUITS.map((circuit) => (
-              <div
-                key={circuit.id}
-                onClick={() => {
-                  setSearchQuery(circuit.topDestinations[0]);
-                  toast({
-                    title: `Viewing ${circuit.name}`,
-                    description: `Showing top destinations like ${circuit.topDestinations.join(', ')}.`
-                  });
-                }}
-                className="p-4 rounded-2xl bg-slate-900/80 border border-slate-800 hover:border-amber-500/50 hover:bg-slate-850 transition-all cursor-pointer group shadow-lg text-left flex flex-col justify-between"
-              >
-                <div>
-                  <div className="text-2xl mb-2">{circuit.icon}</div>
-                  <h3 className="font-extrabold text-sm text-white group-hover:text-amber-400 transition-colors font-montserrat">
-                    {circuit.name}
-                  </h3>
-                  <p className="text-[11px] text-slate-400 mt-1 line-clamp-2 leading-relaxed">
-                    {circuit.description}
-                  </p>
-                </div>
-                <div className="mt-3 pt-2 border-t border-slate-800/80 flex items-center justify-between text-[10px] font-bold text-amber-400">
-                  <span>Top: {circuit.topDestinations.slice(0, 2).join(', ')}</span>
-                  <ChevronRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
-                </div>
-              </div>
-            ))}
+          {/* Luxury Category Pills */}
+          <div className="flex items-center gap-2 overflow-x-auto pb-2 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+            {themes.map((theme) => {
+              const isSelected = activeTheme === theme.id;
+              return (
+                <button
+                  key={theme.id}
+                  onClick={() => setActiveTheme(theme.id)}
+                  className={`px-4 py-2.5 rounded-2xl text-xs font-black shrink-0 transition-all duration-200 flex items-center gap-2 ${
+                    isSelected
+                      ? 'bg-gradient-to-r from-amber-500 via-amber-400 to-amber-500 text-slate-950 shadow-lg shadow-amber-500/20 scale-[1.02]'
+                      : 'bg-slate-900/90 text-slate-300 hover:text-white hover:bg-slate-800 border border-slate-800'
+                  }`}
+                >
+                  <span className="text-base">{theme.icon}</span>
+                  <span>{theme.label}</span>
+                </button>
+              );
+            })}
           </div>
         </div>
       </section>
 
       {/* MAIN DESTINATIONS EXPLORER WORKSPACE */}
-      <section className="py-12 bg-[#060913] text-slate-100 min-h-[700px]">
-        <div className="container mx-auto px-4 max-w-7xl">
+      <section className="py-10 bg-[#060913] text-slate-100 min-h-[700px]">
+        <div className="container mx-auto px-4 max-w-7xl space-y-6">
           
-          {/* REGION & THEME FILTERS TOOLBAR */}
-          <div className="bg-slate-900/90 border border-slate-800 p-4 rounded-2xl shadow-xl mb-8 space-y-4 text-left">
-            {/* Region Tabs */}
-            <div className="flex items-center justify-between flex-wrap gap-2">
-              <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
-                <span className="text-xs font-extrabold text-slate-400 uppercase tracking-wider mr-1 shrink-0">Region:</span>
+          {/* MODERN UNIFIED FILTER & DISCOVERY CONSOLE */}
+          <div className="bg-slate-900/80 backdrop-blur-xl border border-slate-800 rounded-3xl p-4 sm:p-6 shadow-2xl space-y-4 text-left">
+            {/* Top Row: Region Pills + State Dropdown + Sort */}
+            <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3.5">
+              {/* Region Selector Pills */}
+              <div className="flex items-center gap-1.5 overflow-x-auto pb-1 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+                <span className="text-xs font-black text-slate-400 uppercase tracking-wider mr-1 shrink-0">Region:</span>
                 {regions.map(reg => (
                   <button
                     key={reg}
                     onClick={() => { setSelectedRegion(reg); setSelectedState(null); }}
-                    className={`px-3 py-1 rounded-xl text-xs font-bold shrink-0 transition-all ${
+                    className={`px-3 py-1.5 rounded-xl text-xs font-extrabold shrink-0 transition-all ${
                       selectedRegion === reg
-                        ? 'bg-[#C9A25A] text-slate-950 font-black shadow-md'
-                        : 'bg-slate-800 text-slate-300 hover:bg-slate-700 border border-slate-700/50'
+                        ? 'bg-[#C9A25A] text-slate-950 shadow-md scale-[1.02]'
+                        : 'bg-slate-800/90 text-slate-300 hover:bg-slate-750 hover:text-white border border-slate-700/60'
                     }`}
                   >
                     {reg === 'All' ? 'All Regions' : `${reg} India`}
@@ -415,87 +443,134 @@ export default function PublicIndiaExplorer() {
                 ))}
               </div>
 
-              {/* Theme Filter */}
-              <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
-                <span className="text-xs font-extrabold text-slate-400 uppercase tracking-wider mr-1 shrink-0">Theme:</span>
-                {themes.map(theme => (
+              {/* State Select Dropdown + Sort By */}
+              <div className="flex items-center gap-2.5 flex-wrap sm:flex-nowrap">
+                {/* Searchable State Dropdown */}
+                <div className="w-full sm:w-60">
+                  <Select
+                    value={selectedState ? String(selectedState.id) : 'all'}
+                    onValueChange={(val) => {
+                      if (val === 'all') setSelectedState(null);
+                      else {
+                        const found = states.find(s => String(s.id) === val);
+                        setSelectedState(found || null);
+                      }
+                    }}
+                  >
+                    <SelectTrigger className="h-9 text-xs bg-slate-800/90 border-slate-700 text-white rounded-xl font-bold">
+                      <div className="flex items-center gap-2 truncate">
+                        <Globe className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                        <SelectValue placeholder="Select State / UT" />
+                      </div>
+                    </SelectTrigger>
+                    <SelectContent className="bg-slate-900 border-slate-700 text-white max-h-72">
+                      <SelectItem value="all" className="text-xs font-bold text-amber-400">
+                        ✨ All 28 States &amp; UTs
+                      </SelectItem>
+                      {states.map(s => (
+                        <SelectItem key={s.id} value={String(s.id)} className="text-xs font-medium">
+                          {s.name || s.state_name} {s.city_count > 0 && `(${s.city_count})`}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Sort Order Selector */}
+                <div className="w-full sm:w-44">
+                  <Select
+                    value={sortBy}
+                    onValueChange={(val: any) => setSortBy(val)}
+                  >
+                    <SelectTrigger className="h-9 text-xs bg-slate-800/90 border-slate-700 text-white rounded-xl font-bold">
+                      <div className="flex items-center gap-1.5 truncate">
+                        <SlidersHorizontal className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                        <SelectValue placeholder="Sort By" />
+                      </div>
+                    </SelectTrigger>
+                    <SelectContent className="bg-slate-900 border-slate-700 text-white">
+                      <SelectItem value="popular" className="text-xs font-medium">🔥 Most Popular</SelectItem>
+                      <SelectItem value="name" className="text-xs font-medium">🔤 Name (A-Z)</SelectItem>
+                      <SelectItem value="state" className="text-xs font-medium">📍 By State</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Grid / List View Mode Toggle */}
+                <div className="hidden sm:flex items-center gap-1 bg-slate-800/90 p-1 rounded-xl border border-slate-700/60 shrink-0">
                   <button
-                    key={theme}
-                    onClick={() => setActiveTheme(theme)}
-                    className={`px-3 py-1 rounded-xl text-xs font-bold shrink-0 transition-all ${
-                      activeTheme === theme
-                        ? 'bg-amber-500 text-slate-950 font-black shadow-md'
-                        : 'bg-slate-800 text-slate-300 hover:bg-slate-700 border border-slate-700/50'
+                    onClick={() => setViewMode('grid')}
+                    className={`p-1.5 rounded-lg transition-all ${
+                      viewMode === 'grid' ? 'bg-amber-500 text-slate-950 shadow-sm' : 'text-slate-400 hover:text-white'
                     }`}
+                    title="Grid View"
                   >
-                    {theme}
+                    <LayoutGrid className="w-4 h-4" />
                   </button>
-                ))}
+                  <button
+                    onClick={() => setViewMode('list')}
+                    className={`p-1.5 rounded-lg transition-all ${
+                      viewMode === 'list' ? 'bg-amber-500 text-slate-950 shadow-sm' : 'text-slate-400 hover:text-white'
+                    }`}
+                    title="List View"
+                  >
+                    <List className="w-4 h-4" />
+                  </button>
+                </div>
               </div>
             </div>
 
-            {/* State Picker Strip */}
-            <div className="border-t border-slate-800 pt-3">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-[11px] font-extrabold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
-                  <Globe className="w-3.5 h-3.5 text-amber-400" /> States in this category ({states.length}):
-                </span>
-                {selectedState && (
-                  <button 
-                    onClick={() => setSelectedState(null)} 
-                    className="text-xs text-amber-400 hover:underline font-bold"
-                  >
-                    Show All States
-                  </button>
-                )}
-              </div>
+            {/* Bottom Row: Active Filter Tags & Quick Reset */}
+            {activeFiltersCount > 0 && (
+              <div className="flex items-center justify-between flex-wrap gap-2 pt-3 border-t border-slate-800/80 text-xs">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="text-[11px] font-extrabold uppercase tracking-wider text-slate-400">Active Filters:</span>
+                  {selectedRegion !== 'All' && (
+                    <Badge className="bg-amber-500/20 text-amber-300 border-amber-500/40 text-[11px] font-bold flex items-center gap-1 py-0.5">
+                      Region: {selectedRegion}
+                      <X className="w-3 h-3 cursor-pointer hover:text-white" onClick={() => setSelectedRegion('All')} />
+                    </Badge>
+                  )}
+                  {activeTheme !== 'All' && (
+                    <Badge className="bg-amber-500/20 text-amber-300 border-amber-500/40 text-[11px] font-bold flex items-center gap-1 py-0.5">
+                      Theme: {activeTheme}
+                      <X className="w-3 h-3 cursor-pointer hover:text-white" onClick={() => setActiveTheme('All')} />
+                    </Badge>
+                  )}
+                  {selectedState && (
+                    <Badge className="bg-amber-500/20 text-amber-300 border-amber-500/40 text-[11px] font-bold flex items-center gap-1 py-0.5">
+                      State: {selectedState.name || selectedState.state_name}
+                      <X className="w-3 h-3 cursor-pointer hover:text-white" onClick={() => setSelectedState(null)} />
+                    </Badge>
+                  )}
+                  {searchQuery && (
+                    <Badge className="bg-amber-500/20 text-amber-300 border-amber-500/40 text-[11px] font-bold flex items-center gap-1 py-0.5">
+                      Search: "{searchQuery}"
+                      <X className="w-3 h-3 cursor-pointer hover:text-white" onClick={() => setSearchQuery('')} />
+                    </Badge>
+                  )}
+                </div>
 
-              <div className="flex gap-2 overflow-x-auto pb-1.5 scrollbar-thin scrollbar-thumb-amber-500/20">
                 <button
-                  onClick={() => setSelectedState(null)}
-                  className={`px-3.5 py-1.5 rounded-xl text-xs font-bold shrink-0 transition-all ${
-                    selectedState === null
-                      ? 'bg-amber-500 text-slate-950 font-extrabold shadow-sm'
-                      : 'bg-slate-800 text-slate-300 hover:bg-slate-700 border border-slate-700/50'
-                  }`}
+                  onClick={resetAllFilters}
+                  className="text-xs text-amber-400 hover:text-amber-300 font-extrabold flex items-center gap-1 underline"
                 >
-                  All States
+                  Clear All Filters
                 </button>
-                {states.map(state => {
-                  const isSelected = selectedState?.id === state.id;
-                  return (
-                    <button
-                      key={state.id}
-                      onClick={() => setSelectedState(isSelected ? null : state)}
-                      className={`px-3 py-1.5 rounded-xl text-xs font-bold shrink-0 transition-all flex items-center gap-1.5 ${
-                        isSelected
-                          ? 'bg-amber-500 text-slate-950 font-extrabold shadow-sm'
-                          : 'bg-slate-800 text-slate-300 hover:bg-slate-700 border border-slate-700/50'
-                      }`}
-                    >
-                      <span>{state.name || state.state_name}</span>
-                      {state.city_count > 0 && (
-                        <span className={`text-[10px] px-1.5 py-0.2 rounded-full ${isSelected ? 'bg-slate-950 text-amber-400 font-bold' : 'bg-slate-900 text-slate-400'}`}>
-                          {state.city_count}
-                        </span>
-                      )}
-                    </button>
-                  );
-                })}
               </div>
-            </div>
+            )}
           </div>
 
-          {/* DESTINATIONS GRID */}
+          {/* DESTINATIONS DIRECTORY HEADER */}
           <div className="space-y-4">
             <div className="flex items-center justify-between border-b border-slate-800 pb-3 text-left">
               <div>
-                <h2 className="text-lg md:text-xl font-extrabold text-white font-montserrat flex items-center gap-2">
+                <h2 className="text-lg md:text-xl font-black text-white font-montserrat flex items-center gap-2">
                   <MapPin className="w-5 h-5 text-amber-400" />
                   {selectedState ? `${selectedState.name || selectedState.state_name} Tourism Destinations` : 'All Indian Tourism Destinations'}
                 </h2>
                 <p className="text-xs text-slate-400 mt-0.5">
-                  Showing {filteredCities.length} verified tourism destinations with live attraction directories
+                  Showing <strong>{filteredCities.length}</strong> verified destinations with detailed attraction guides
                 </p>
               </div>
             </div>
@@ -506,20 +581,21 @@ export default function PublicIndiaExplorer() {
                 <p className="text-xs text-slate-400 font-bold uppercase tracking-wider">Syncing Destination Directory from Database...</p>
               </div>
             ) : filteredCities.length === 0 ? (
-              <div className="text-center py-20 bg-slate-900/40 rounded-2xl border border-slate-800">
-                <Compass className="w-12 h-12 text-slate-600 mx-auto mb-3" />
-                <h3 className="text-sm font-bold text-white">No destinations found</h3>
-                <p className="text-xs text-slate-400 mt-1 max-w-sm mx-auto">
-                  Try clearing your search query or switching to 'All' themes to explore all cities.
+              <div className="text-center py-20 bg-slate-900/40 rounded-3xl border border-slate-800 space-y-3">
+                <Compass className="w-12 h-12 text-slate-600 mx-auto" />
+                <h3 className="text-base font-bold text-white">No destinations found</h3>
+                <p className="text-xs text-slate-400 max-w-sm mx-auto">
+                  No cities matched your current search filters. Try clearing your search query or selecting 'All Circuits'.
                 </p>
                 <Button
-                  onClick={() => { setSearchQuery(''); setActiveTheme('All'); setSelectedState(null); setSelectedRegion('All'); }}
-                  className="mt-4 bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs font-bold rounded-xl"
+                  onClick={resetAllFilters}
+                  className="bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs font-bold rounded-xl"
                 >
                   Reset All Filters
                 </Button>
               </div>
-            ) : (
+            ) : viewMode === 'grid' ? (
+              /* GRID VIEW: LUXURY CARDS */
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 text-left">
                 {filteredCities.map((city) => {
                   const cityName = city.name || city.city_name;
@@ -530,9 +606,9 @@ export default function PublicIndiaExplorer() {
                   return (
                     <Card 
                       key={city.id} 
-                      className="border border-slate-800 bg-slate-900/90 hover:border-amber-500/50 transition-all duration-200 shadow-xl rounded-2xl flex flex-col justify-between overflow-hidden group"
+                      className="border border-slate-800/90 bg-gradient-to-b from-slate-900/90 to-slate-950/90 hover:border-amber-500/50 hover:shadow-2xl hover:shadow-amber-500/5 transition-all duration-300 rounded-3xl flex flex-col justify-between overflow-hidden group hover:-translate-y-1"
                     >
-                      <CardHeader className="p-5 border-b border-slate-800/80 bg-slate-850/60">
+                      <CardHeader className="p-5 border-b border-slate-800/80 bg-slate-850/40">
                         <div className="flex items-start justify-between gap-2">
                           <div>
                             <Link to={`/explore-india/${citySlug}`} className="hover:underline">
@@ -558,14 +634,14 @@ export default function PublicIndiaExplorer() {
                         {/* Attractions List */}
                         <div className="space-y-2">
                           <span className="text-[11px] font-extrabold uppercase tracking-wider text-slate-400 flex items-center gap-1">
-                            <Landmark className="w-3.5 h-3.5 text-amber-400" /> Must-Visit Attractions:
+                            <Landmark className="w-3.5 h-3.5 text-amber-400" /> Must-Visit Landmarks:
                           </span>
                           {attractions.length > 0 ? (
                             <div className="flex flex-wrap gap-1.5">
                               {attractions.slice(0, 4).map((att: string, i: number) => (
                                 <span 
                                   key={i} 
-                                  className="text-[11px] px-2.5 py-1 rounded-lg bg-slate-800/80 text-slate-200 border border-slate-700/60 font-medium"
+                                  className="text-[11px] px-2.5 py-1 rounded-xl bg-slate-800/90 text-slate-200 border border-slate-700/60 font-medium"
                                 >
                                   {att}
                                 </span>
@@ -595,9 +671,9 @@ export default function PublicIndiaExplorer() {
                           <Link to={`/explore-india/${citySlug}`} className="block w-full">
                             <Button
                               variant="secondary"
-                              className="w-full bg-slate-800 hover:bg-slate-750 text-white font-bold text-xs h-8 rounded-xl gap-1.5 border border-slate-700/70"
+                              className="w-full bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs h-9 rounded-xl gap-1.5 border border-slate-700/70"
                             >
-                              <Eye className="w-3.5 h-3.5 text-amber-400" /> Explore {cityName} Guide &amp; Attractions ➔
+                              <Eye className="w-3.5 h-3.5 text-amber-400" /> Explore {cityName} Guide &amp; Itinerary ➔
                             </Button>
                           </Link>
                           <div className="grid grid-cols-2 gap-2">
@@ -618,6 +694,62 @@ export default function PublicIndiaExplorer() {
                         </div>
                       </CardContent>
                     </Card>
+                  );
+                })}
+              </div>
+            ) : (
+              /* LIST VIEW: COMPACT SCANNING ROWS */
+              <div className="space-y-2.5 text-left">
+                {filteredCities.map((city) => {
+                  const cityName = city.name || city.city_name;
+                  const stateName = city.state_name || city.state || '';
+                  const attractions = city.popular_attractions || [];
+                  const citySlug = (cityName || '').toLowerCase().replace(/[^a-z0-9]+/g, '-');
+
+                  return (
+                    <div 
+                      key={city.id} 
+                      className="p-4 rounded-2xl bg-slate-900/90 border border-slate-800 hover:border-amber-500/50 hover:bg-slate-850 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-4 group"
+                    >
+                      <div className="space-y-1 flex-1">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <Link to={`/explore-india/${citySlug}`} className="font-extrabold text-white text-base group-hover:text-amber-400 transition-colors font-montserrat">
+                            {cityName}
+                          </Link>
+                          <Badge className="bg-slate-800 text-slate-300 border-slate-700 text-[10px] font-bold">
+                            {stateName}
+                          </Badge>
+                          <span className="text-xs text-amber-400 font-semibold">{city.destination_group}</span>
+                          {city.nearest_airport && (
+                            <Badge className="bg-emerald-500/15 text-emerald-300 border-emerald-500/30 text-[9px] font-extrabold">
+                              Airport
+                            </Badge>
+                          )}
+                        </div>
+                        <p className="text-xs text-slate-400 line-clamp-1">
+                          {attractions.length > 0 ? `Must-visit: ${attractions.slice(0, 4).join(', ')}` : (city.description || 'Cultural landmarks and scenic sightseeing')}
+                        </p>
+                      </div>
+
+                      <div className="flex items-center gap-2 shrink-0">
+                        <Link to={`/explore-india/${citySlug}`}>
+                          <Button
+                            variant="secondary"
+                            size="sm"
+                            className="bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs h-8 rounded-xl px-3 border border-slate-700"
+                          >
+                            Explore Guide ➔
+                          </Button>
+                        </Link>
+                        <Button
+                          size="sm"
+                          onClick={() => handleOpenInquiry(city)}
+                          className="bg-[#C9A25A] hover:bg-[#d6af63] text-slate-950 font-black text-xs h-8 rounded-xl px-3"
+                        >
+                          Plan Trip
+                        </Button>
+                      </div>
+                    </div>
                   );
                 })}
               </div>
