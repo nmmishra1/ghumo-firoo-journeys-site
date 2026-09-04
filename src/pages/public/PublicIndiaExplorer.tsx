@@ -12,7 +12,6 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { MASTER_DESTINATIONS } from '@/data/masterDestinations';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { 
   MapPin, Search, ArrowRight, Sparkles, Globe, Compass, 
   Clock, Plane, Calendar, Phone, MessageCircle, CheckCircle2,
@@ -207,10 +206,10 @@ export default function PublicIndiaExplorer() {
     });
 
     if (sortBy === 'name') {
-      return list.sort((a, b) => (a.name || a.city_name || '').localeCompare(b.name || b.city_name || ''));
+      return [...list].sort((a, b) => String(a.name || a.city_name || '').localeCompare(String(b.name || b.city_name || '')));
     }
     if (sortBy === 'state') {
-      return list.sort((a, b) => (a.state_name || a.state || '').localeCompare(b.state_name || b.state || ''));
+      return [...list].sort((a, b) => String(a.state_name || a.state || '').localeCompare(String(b.state_name || b.state || '')));
     }
     return list;
   }, [enrichedCities, selectedState, selectedRegion, activeTheme, searchQuery, states, sortBy]);
@@ -446,54 +445,54 @@ export default function PublicIndiaExplorer() {
               {/* State Select Dropdown + Sort By */}
               <div className="flex items-center gap-2.5 flex-wrap sm:flex-nowrap">
                 {/* Searchable State Dropdown */}
-                <div className="w-full sm:w-60">
-                  <Select
-                    value={selectedState ? String(selectedState.id) : 'all'}
-                    onValueChange={(val) => {
+                <div className="w-full sm:w-60 relative">
+                  <div className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none text-amber-400">
+                    <Globe className="w-3.5 h-3.5" />
+                  </div>
+                  <select
+                    value={selectedState ? String(selectedState.id || selectedState.name || selectedState.state_name) : 'all'}
+                    onChange={(e) => {
+                      const val = e.target.value;
                       if (val === 'all') setSelectedState(null);
                       else {
-                        const found = states.find(s => String(s.id) === val);
+                        const found = states.find(s => String(s.id || s.name || s.state_name) === val);
                         setSelectedState(found || null);
                       }
                     }}
+                    className="w-full h-9 pl-8 pr-7 text-xs bg-slate-800/90 border border-slate-700 hover:border-slate-600 text-white rounded-xl font-bold appearance-none cursor-pointer focus:outline-none focus:ring-1 focus:ring-amber-400/50"
                   >
-                    <SelectTrigger className="h-9 text-xs bg-slate-800/90 border-slate-700 text-white rounded-xl font-bold">
-                      <div className="flex items-center gap-2 truncate">
-                        <Globe className="w-3.5 h-3.5 text-amber-400 shrink-0" />
-                        <SelectValue placeholder="Select State / UT" />
-                      </div>
-                    </SelectTrigger>
-                    <SelectContent className="bg-slate-900 border-slate-700 text-white max-h-72">
-                      <SelectItem value="all" className="text-xs font-bold text-amber-400">
-                        ✨ All 28 States &amp; UTs
-                      </SelectItem>
-                      {states.map(s => (
-                        <SelectItem key={s.id} value={String(s.id)} className="text-xs font-medium">
-                          {s.name || s.state_name} {s.city_count > 0 && `(${s.city_count})`}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                    <option value="all" className="bg-slate-900 text-amber-400 font-bold">✨ All 28 States &amp; UTs</option>
+                    {states.map(s => {
+                      const keyVal = String(s.id || s.name || s.state_name);
+                      return (
+                        <option key={keyVal} value={keyVal} className="bg-slate-900 text-white font-medium">
+                          {s.name || s.state_name} {s.city_count > 0 ? `(${s.city_count})` : ''}
+                        </option>
+                      );
+                    })}
+                  </select>
+                  <div className="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
+                    <ChevronRight className="w-3.5 h-3.5 rotate-90" />
+                  </div>
                 </div>
 
                 {/* Sort Order Selector */}
-                <div className="w-full sm:w-44">
-                  <Select
+                <div className="w-full sm:w-44 relative">
+                  <div className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
+                    <SlidersHorizontal className="w-3.5 h-3.5" />
+                  </div>
+                  <select
                     value={sortBy}
-                    onValueChange={(val: any) => setSortBy(val)}
+                    onChange={(e) => setSortBy(e.target.value as any)}
+                    className="w-full h-9 pl-8 pr-7 text-xs bg-slate-800/90 border border-slate-700 hover:border-slate-600 text-white rounded-xl font-bold appearance-none cursor-pointer focus:outline-none focus:ring-1 focus:ring-amber-400/50"
                   >
-                    <SelectTrigger className="h-9 text-xs bg-slate-800/90 border-slate-700 text-white rounded-xl font-bold">
-                      <div className="flex items-center gap-1.5 truncate">
-                        <SlidersHorizontal className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                        <SelectValue placeholder="Sort By" />
-                      </div>
-                    </SelectTrigger>
-                    <SelectContent className="bg-slate-900 border-slate-700 text-white">
-                      <SelectItem value="popular" className="text-xs font-medium">🔥 Most Popular</SelectItem>
-                      <SelectItem value="name" className="text-xs font-medium">🔤 Name (A-Z)</SelectItem>
-                      <SelectItem value="state" className="text-xs font-medium">📍 By State</SelectItem>
-                    </SelectContent>
-                  </Select>
+                    <option value="popular" className="bg-slate-900 text-white">🔥 Most Popular</option>
+                    <option value="name" className="bg-slate-900 text-white">🔤 Name (A-Z)</option>
+                    <option value="state" className="bg-slate-900 text-white">📍 By State</option>
+                  </select>
+                  <div className="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
+                    <ChevronRight className="w-3.5 h-3.5 rotate-90" />
+                  </div>
                 </div>
 
                 {/* Grid / List View Mode Toggle */}
