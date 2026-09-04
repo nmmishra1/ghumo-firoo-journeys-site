@@ -18,6 +18,7 @@ function getBase64(fileRelPath) {
 }
 
 const logoBase64 = getBase64('public/ghumo-firoo-logo.png');
+const iconBase64 = getBase64('public/ghumo-firoo-icon.png') || logoBase64;
 const coverBg = getBase64('public/brochure-assets/cover_kutch.jpg') || getBase64('public/rann_utsav_white_desert.jpg');
 
 const imgPalace = getBase64('public/brochure-assets/palace_legacy.jpg') || getBase64('public/rann_utsav_tent_city.jpg');
@@ -295,7 +296,8 @@ const packages = [
   }
 ];
 
-function generateHTML(pkg) {
+function generateHTML(pkg, airplaneIcon) {
+  const coverIcon = airplaneIcon || iconBase64;
   return `
 <!DOCTYPE html>
 <html lang="en">
@@ -304,7 +306,7 @@ function generateHTML(pkg) {
   <title>Culture Kutch - ${pkg.durationTitle} | Ghumo Firoo</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800;900&family=Montserrat:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800;900&family=Montserrat:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
   <style>
     * {
       box-sizing: border-box;
@@ -349,10 +351,10 @@ function generateHTML(pkg) {
     .brand-logo-wrap {
       display: flex;
       align-items: center;
-      gap: 16px;
+      gap: 14px;
     }
     .brand-logo-img {
-      height: 56px;
+      height: 52px;
       width: auto;
       object-fit: contain;
     }
@@ -429,75 +431,86 @@ function generateHTML(pkg) {
       justify-content: space-between;
     }
     .cover-top-overlay {
-      padding: 42px 36px 20px 36px;
-      background: linear-gradient(180deg, rgba(255, 255, 255, 0.96) 0%, rgba(255, 255, 255, 0.88) 45%, rgba(255, 255, 255, 0.35) 75%, rgba(255, 255, 255, 0) 100%);
+      padding: 34px 36px 18px 36px;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(255, 255, 255, 0.92) 45%, rgba(255, 255, 255, 0.45) 75%, rgba(255, 255, 255, 0) 100%);
       display: flex;
       flex-direction: column;
       align-items: center;
       text-align: center;
       z-index: 5;
     }
-    .cover-brand-header {
+    .cover-brand-header-inline {
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 18px;
-      margin-bottom: 24px;
+      gap: 14px;
+      margin-bottom: 16px;
     }
-    .cover-logo-img {
-      height: 72px;
-      width: auto;
+    .cover-airplane-img {
+      height: 60px;
+      width: 60px;
       object-fit: contain;
-      filter: drop-shadow(0 3px 10px rgba(0,0,0,0.12));
+      filter: drop-shadow(0 3px 8px rgba(0,0,0,0.14));
     }
     .cover-brand-text {
       display: flex;
       flex-direction: column;
-      text-align: left;
+      align-items: center;
+      text-align: center;
     }
     .cover-brand-title {
       font-family: 'Cinzel', serif;
-      font-size: 34px;
+      font-size: 36px;
       font-weight: 900;
-      color: #0b1d3a;
-      letter-spacing: 0.8px;
+      color: #1877f2;
+      letter-spacing: 1.5px;
       line-height: 1.05;
+      text-transform: uppercase;
+      text-shadow: 0 1px 2px rgba(24, 119, 242, 0.15);
     }
     .cover-brand-tag {
       font-size: 11px;
       font-weight: 800;
-      color: #b8860b;
-      letter-spacing: 1.5px;
+      color: #65a30d;
+      letter-spacing: 1.8px;
       text-transform: uppercase;
-      margin-top: 4px;
-    }
-    .cover-brand-subtag {
-      font-size: 9px;
-      font-weight: 700;
-      color: #475569;
-      letter-spacing: 0.8px;
       margin-top: 2px;
+    }
+    .cover-brand-partner-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      margin-top: 4px;
+      padding: 2.5px 12px;
+      background: rgba(11, 29, 58, 0.06);
+      border: 1px solid rgba(201, 162, 90, 0.6);
+      border-radius: 15px;
+      font-size: 8.5px;
+      font-weight: 700;
+      color: #0b1d3a;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
     }
     .cover-tagline-pill {
       display: inline-block;
-      background: rgba(255, 255, 255, 0.94);
+      background: rgba(255, 255, 255, 0.96);
       border: 1.5px solid rgba(201, 162, 90, 0.85);
       color: #0b1d3a;
-      font-size: 10.5px;
+      font-size: 10px;
       font-weight: 800;
-      letter-spacing: 2px;
+      letter-spacing: 1.8px;
       text-transform: uppercase;
-      padding: 8px 26px;
+      padding: 7px 24px;
       border-radius: 30px;
       box-shadow: 0 4px 15px rgba(0,0,0,0.08);
-      margin-bottom: 20px;
+      margin-bottom: 16px;
     }
     .cover-main-title {
       font-family: 'Cinzel', serif;
-      font-size: 58px;
+      font-size: 56px;
       font-weight: 900;
       color: #ffffff;
-      text-shadow: 0 4px 20px rgba(11, 29, 58, 0.75), 0 2px 5px rgba(0,0,0,0.5);
+      text-shadow: 0 4px 20px rgba(11, 29, 58, 0.75), 0 2px 6px rgba(0,0,0,0.6);
       letter-spacing: 6px;
       line-height: 1.05;
       margin-bottom: 16px;
@@ -506,7 +519,7 @@ function generateHTML(pkg) {
       display: inline-block;
       background: linear-gradient(135deg, #d4af37 0%, #aa7c11 100%);
       color: #0b1d3a;
-      font-size: 14px;
+      font-size: 13.5px;
       font-weight: 900;
       letter-spacing: 2.5px;
       text-transform: uppercase;
@@ -516,7 +529,7 @@ function generateHTML(pkg) {
     }
     .cover-bottom-bar {
       padding: 13px 36px;
-      background: rgba(8, 19, 38, 0.9);
+      background: rgba(8, 19, 38, 0.92);
       backdrop-filter: blur(8px);
       color: #ffffff;
       display: flex;
@@ -531,18 +544,18 @@ function generateHTML(pkg) {
 
     /* PAGE 2: ADVENTURE ACTIVITIES (FULL IMAGE CARDS) */
     .page-activities-content {
-      padding: 14px 28px 10px 28px;
+      padding: 12px 28px 8px 28px;
       flex: 1;
       display: flex;
       flex-direction: column;
     }
     .section-heading {
       text-align: center;
-      margin-bottom: 10px;
+      margin-bottom: 8px;
     }
     .section-title {
       font-family: 'Cinzel', serif;
-      font-size: 22px;
+      font-size: 21px;
       font-weight: 800;
       color: #0b1d3a;
       letter-spacing: 1.5px;
@@ -550,24 +563,24 @@ function generateHTML(pkg) {
     .section-subtitle {
       font-size: 9.5px;
       font-weight: 600;
-      color: #64748b;
+      color: #475569;
       margin-top: 2px;
-      letter-spacing: 0.5px;
+      letter-spacing: 0.4px;
     }
     .activity-grid {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
       grid-template-rows: repeat(3, 1fr);
-      gap: 10px;
+      gap: 9px;
       flex: 1;
       margin-bottom: 4px;
     }
     .activity-card {
       position: relative;
-      border-radius: 12px;
+      border-radius: 10px;
       overflow: hidden;
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.16);
-      border: 1px solid rgba(201, 162, 90, 0.4);
+      border: 1px solid rgba(201, 162, 90, 0.45);
       background: #0b1d3a;
       height: 100%;
     }
@@ -577,12 +590,15 @@ function generateHTML(pkg) {
       object-fit: cover;
       display: block;
     }
+    .activity-card img.img-paramotor {
+      object-position: 22% center;
+    }
     .activity-card-overlay {
       position: absolute;
       bottom: 0;
       left: 0;
       right: 0;
-      padding: 24px 8px 8px 8px;
+      padding: 22px 6px 7px 6px;
       background: linear-gradient(to top, rgba(7, 18, 38, 0.98) 0%, rgba(7, 18, 38, 0.75) 55%, transparent 100%);
       display: flex;
       flex-direction: column;
@@ -594,9 +610,11 @@ function generateHTML(pkg) {
       font-size: 8.5px;
       font-weight: 800;
       color: #ffffff;
-      letter-spacing: 0.6px;
+      letter-spacing: 0.5px;
       text-transform: uppercase;
       line-height: 1.25;
+      text-shadow: 0 1px 3px rgba(0,0,0,0.9);
+    }
       text-shadow: 0 1px 3px rgba(0,0,0,0.8);
     }
     .activity-card-line {
@@ -701,58 +719,62 @@ function generateHTML(pkg) {
       display: block;
     }
 
-    /* PAGE 4: PRICING & INCLUSIONS - COMPACT VERTICAL STACK */
+    /* PAGE 4: PRICING & INCLUSIONS - SPACIOUS & MAXIMUM READABILITY */
     .page-pricing-content {
       padding: 12px 28px 10px 28px;
       flex: 1;
       display: flex;
       flex-direction: column;
-      gap: 6px;
+      justify-content: space-between;
+      gap: 7px;
+      font-family: 'Plus Jakarta Sans', sans-serif;
     }
     .rate-table {
       width: 100%;
       border-collapse: collapse;
-      font-size: 8px;
+      font-size: 10px;
       border-radius: 8px;
       overflow: hidden;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
-      margin-bottom: 2px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+      margin-bottom: 3px;
+      font-family: 'Plus Jakarta Sans', sans-serif;
     }
     .rate-table th {
       background: #081326;
       color: #ffffff;
-      padding: 5px 4px;
+      padding: 6px 5px;
       font-weight: 800;
       text-transform: uppercase;
       letter-spacing: 0.5px;
       text-align: center;
       border: 1px solid #1e293b;
-      font-size: 7.8px;
+      font-size: 9.6px;
     }
     .rate-table th.th-package {
       background: #11264b;
       color: #d4af37;
     }
     .rate-table td {
-      padding: 3.8px 4px;
+      padding: 4.2px 5px;
       text-align: center;
-      border: 1px solid #e2e8f0;
+      border: 1px solid #cbd5e1;
       font-weight: 600;
-      color: #334155;
-      font-size: 7.8px;
+      color: #000000;
+      font-size: 10px;
     }
     .rate-table tr:nth-child(even) {
       background: #f8fafc;
     }
     .rate-table .td-pax {
       font-weight: 700;
-      color: #0b1d3a;
+      color: #000000;
       text-align: left;
-      padding-left: 6px;
+      padding-left: 9px;
+      font-size: 10px;
     }
     .rate-table .td-price {
       font-weight: 800;
-      color: #0b1d3a;
+      color: #000000;
     }
     .rate-table .td-price-prem {
       font-weight: 800;
@@ -761,43 +783,46 @@ function generateHTML(pkg) {
 
     /* VERTICAL SECTION BOXES */
     .v-section-box {
-      border: 1.2px solid rgba(201, 162, 90, 0.45);
-      border-radius: 6px;
-      padding: 6px 10px;
-      background: #fafaf9;
+      border: 1.2px solid rgba(201, 162, 90, 0.6);
+      border-radius: 7px;
+      padding: 7.5px 16px;
+      background: #ffffff;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.03);
     }
     .v-section-title {
       font-family: 'Cinzel', serif;
-      font-size: 9px;
+      font-size: 11.5px;
       font-weight: 800;
-      color: #b8860b;
+      color: #0b1d3a;
       letter-spacing: 0.8px;
-      margin-bottom: 3px;
+      margin-bottom: 4px;
       text-transform: uppercase;
       display: flex;
       align-items: center;
-      gap: 4px;
+      gap: 6px;
+      border-bottom: 1px solid rgba(201, 162, 90, 0.25);
+      padding-bottom: 2.5px;
     }
-    .v-grid-2 {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 4px 12px;
+    .v-section-title span.gold-icon {
+      color: #b8860b;
+      font-size: 11px;
     }
-    .v-list {
+    .v-list-vertical {
       list-style: none;
       display: flex;
       flex-direction: column;
-      gap: 2px;
+      gap: 3px;
     }
-    .v-list li {
-      font-size: 7.4px;
-      color: #334155;
-      line-height: 1.3;
-      font-weight: 500;
+    .v-list-vertical li {
+      font-size: 10.5px;
+      color: #000000;
+      line-height: 1.48;
+      font-weight: 550;
+      font-family: 'Plus Jakarta Sans', sans-serif;
     }
-    .v-list li strong {
-      color: #0b1d3a;
-      font-weight: 700;
+    .v-list-vertical li strong {
+      color: #000000;
+      font-weight: 800;
     }
   </style>
 </head>
@@ -806,12 +831,12 @@ function generateHTML(pkg) {
   <!-- PAGE 1: COVER -->
   <div class="page page-cover">
     <div class="cover-top-overlay">
-      <div class="cover-brand-header">
-        <img src="${logoBase64}" class="cover-logo-img" alt="Ghumo Firoo Logo" />
+      <div class="cover-brand-header-inline">
+        <img src="${coverIcon}" class="cover-airplane-img" alt="Ghumo Firoo Airplane Emblem" />
         <div class="cover-brand-text">
-          <div class="cover-brand-title">Ghumo Firoo</div>
-          <div class="cover-brand-tag">Your Journey, Our Expertise!</div>
-          <div class="cover-brand-subtag">Official Partner: Evoke Tent City Dhordo</div>
+          <div class="cover-brand-title">GHUMO FIROO</div>
+          <div class="cover-brand-tag">YOUR JOURNEY, OUR EXPERTISE!</div>
+          <div class="cover-brand-partner-badge">Official Partner: Evoke Tent City Dhordo</div>
         </div>
       </div>
 
@@ -892,7 +917,7 @@ function generateHTML(pkg) {
 
         <!-- 5 -->
         <div class="activity-card">
-          <img src="${imgParamotoring}" alt="Paramotoring & Gliding" />
+          <img src="${imgParamotoring}" class="img-paramotor" alt="Paramotoring & Gliding" />
           <div class="activity-card-overlay">
             <div class="activity-card-title">PARAMOTORING & GLIDING</div>
             <div class="activity-card-line"></div>
@@ -1074,64 +1099,48 @@ function generateHTML(pkg) {
 
       <!-- 1. PACKAGE INCLUSIONS -->
       <div class="v-section-box">
-        <div class="v-section-title">✦ Package Inclusions</div>
-        <div class="v-grid-2">
-          <ul class="v-list">
-            <li>• <strong>${pkg.staySummary}</strong></li>
-            <li>• <strong>MAPAI Meal Plan</strong> (Daily Breakfast + Dinner/Lunch included)</li>
-            <li>• <strong>Dedicated AC Private Vehicle</strong> for complete transfers & sightseeing</li>
-          </ul>
-          <ul class="v-list">
-            <li>• <strong>All toll taxes, parking fees, driver allowance (DA) & fuel charges</strong></li>
-            <li>• <strong>White Rann entry permits</strong> and monument access arrangements</li>
-            <li>• <strong>Pick-up & drop</strong> from Bhuj Airport / Railway Station / Bus Terminal</li>
-          </ul>
-        </div>
+        <div class="v-section-title"><span class="gold-icon">✦</span> Package Inclusions</div>
+        <ul class="v-list-vertical">
+          <li>• <strong>${pkg.staySummary}</strong></li>
+          <li>• <strong>MAPAI Meal Plan:</strong> Daily delicious breakfast and sumptuous Kutchi dinner/lunch included at resort.</li>
+          <li>• <strong>Private Chauffeured Vehicle:</strong> Dedicated AC vehicle with expert chauffeur for all transfers & excursions.</li>
+          <li>• <strong>Permits & Tolls:</strong> All toll taxes, state permits, parking fees, driver allowance (DA) & fuel charges included.</li>
+          <li>• <strong>White Rann Entry Permits:</strong> Government Rann permit arrangements and monument access support included.</li>
+          <li>• <strong>Arrival & Departure Transfers:</strong> Seamless pick-up & drop from Bhuj Airport / Railway Station.</li>
+        </ul>
       </div>
 
       <!-- 2. PACKAGE EXCLUSIONS -->
       <div class="v-section-box">
-        <div class="v-section-title">✦ Package Exclusions</div>
-        <div class="v-grid-2">
-          <ul class="v-list">
-            <li>• Airfare / Train fare to and from Bhuj</li>
-            <li>• Personal expenses (laundry, room service, telephone calls, tips)</li>
-          </ul>
-          <ul class="v-list">
-            <li>• Optional adventure activities (Paramotoring, ATV quad bike, Camel safari rides)</li>
-            <li>• Monument entry tickets, camera fees & guide fees unless explicitly listed</li>
-          </ul>
-        </div>
+        <div class="v-section-title"><span class="gold-icon">✦</span> Package Exclusions</div>
+        <ul class="v-list-vertical">
+          <li>• Airfare / Train fare to and from Bhuj.</li>
+          <li>• Personal expenses (laundry, beverages, room service, telephone calls, tips & porterage).</li>
+          <li>• Optional adventure activities (Paramotoring, ATV quad bike rides, Camel safari rides).</li>
+          <li>• Monument entry tickets, camera fees & professional guide fees unless explicitly listed in inclusions.</li>
+        </ul>
       </div>
 
       <!-- 3. NOTES & POLICY -->
       <div class="v-section-box">
-        <div class="v-section-title">✦ Booking Notes & Policy</div>
-        <div class="v-grid-2">
-          <ul class="v-list">
-            <li>• Above rates are calculated on a <strong>per-person basis</strong> (Double/Triple Sharing).</li>
-            <li>• Peak Festive Dates (Diwali, Christmas, New Year) subject to festive supplement.</li>
-          </ul>
-          <ul class="v-list">
-            <li>• <strong>Extra Adult/Child with Bed:</strong> ₹1,999 per night (MAPAI basis).</li>
-            <li>• <strong>24x7 Dedicated Ghumo Firoo</strong> on-trip concierge assistance throughout your tour.</li>
-          </ul>
-        </div>
+        <div class="v-section-title"><span class="gold-icon">✦</span> Booking Notes & Policy</div>
+        <ul class="v-list-vertical">
+          <li>• Above rates are calculated on a <strong>per-person basis</strong> (Double / Triple Sharing).</li>
+          <li>• Peak Festive Dates (Diwali, Christmas, New Year) subject to festive seasonal supplement.</li>
+          <li>• <strong>Extra Adult / Child with Bed:</strong> ₹1,999 per night on MAPAI basis.</li>
+          <li>• <strong>24x7 Dedicated Ghumo Firoo Concierge:</strong> Continuous on-trip helpline & local support throughout your stay.</li>
+        </ul>
       </div>
 
       <!-- 4. TRAVEL & GOURMET TIPS -->
       <div class="v-section-box">
-        <div class="v-section-title">✦ Ghumo Firoo Travel & Gourmet Tips</div>
-        <div class="v-grid-2">
-          <ul class="v-list">
-            <li>• <strong>Best Season:</strong> October to March during full moon for gleaming white desert vistas.</li>
-            <li>• <strong>Kutchi Delicacies:</strong> Don't miss authentic Kutchi Thali, Ringna No Olo, Bajra Rotla & Khavda Mawa.</li>
-          </ul>
-          <ul class="v-list">
-            <li>• <strong>Clothing:</strong> Light woolens recommended for brisk early morning & desert night breeze.</li>
-            <li>• <strong>Official Partner:</strong> Official booking partner with Evoke Tent City Dhordo for guaranteed luxury.</li>
-          </ul>
-        </div>
+        <div class="v-section-title"><span class="gold-icon">✦</span> Ghumo Firoo Travel & Gourmet Tips</div>
+        <ul class="v-list-vertical">
+          <li>• <strong>Best Season:</strong> October to March during full moon for breathtaking gleaming white desert vistas.</li>
+          <li>• <strong>Kutchi Delicacies:</strong> Must try authentic Kutchi Thali, Ringna No Olo, Bajra Rotla, Garlic Chutney & Khavda Mawa.</li>
+          <li>• <strong>Clothing:</strong> Light woolens recommended for brisk early morning sunrise & chilly desert night breeze.</li>
+          <li>• <strong>Official Partner:</strong> Official booking partner with Evoke Tent City Dhordo for guaranteed luxury & priority check-in.</li>
+        </ul>
       </div>
 
     </div>
@@ -1162,12 +1171,14 @@ async function generateAllPDFs() {
     args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-gpu']
   });
 
+  const airplaneIconDataUri = iconBase64;
+
   for (const pkg of packages) {
     console.log(`\n⏳ Generating brochure: ${pkg.durationTitle} (${pkg.fileName})...`);
     const page = await browser.newPage();
     await page.setViewport({ width: 1200, height: 1600, deviceScaleFactor: 2 });
     
-    const html = generateHTML(pkg);
+    const html = generateHTML(pkg, airplaneIconDataUri);
     await page.setContent(html, { waitUntil: 'domcontentloaded', timeout: 60000 });
     // Wait a brief 500ms for any font / image paints
     await new Promise(r => setTimeout(r, 600));
@@ -1182,9 +1193,15 @@ async function generateAllPDFs() {
       margin: { top: 0, right: 0, bottom: 0, left: 0 }
     });
 
-    // Also copy to dist if dist exists
-    if (fs.existsSync(path.join(rootDir, 'dist'))) {
-      fs.copyFileSync(outPublic, outDist);
+    // Also take screenshot of each page for preview if 2N3D
+    if (pkg.id === '2N3D') {
+      const artifactDir = 'C:\\Users\\admin\\.gemini\\antigravity\\brain\\5976d37f-e5dd-4e36-91fc-27a532892aa4';
+      const pageElements = await page.$$('.page');
+      for (let i = 0; i < pageElements.length; i++) {
+        const previewPath = path.join(artifactDir, `preview_page_${i + 1}.png`);
+        await pageElements[i].screenshot({ path: previewPath });
+        console.log(`📸 Saved Preview: ${previewPath}`);
+      }
     }
 
     console.log(`✅ Saved: ${outPublic}`);
