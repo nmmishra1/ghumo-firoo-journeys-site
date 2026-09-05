@@ -475,6 +475,7 @@ try {
             exit;
         }
         echo json_encode(['success' => true]);
+    }
 } catch (Throwable $e) {
     if ($method === 'GET') {
         echo json_encode([]);
