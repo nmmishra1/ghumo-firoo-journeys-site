@@ -347,13 +347,6 @@
     ]
   },
   {
-    "city": "Janki Chatti",
-    "name": "Gaurav Hotel",
-    "cat_or_room": "Budget",
-    "b2b_cost": 3500,
-    "rates": []
-  },
-  {
     "city": "Barkot",
     "name": "Madhuvan Guest House",
     "cat_or_room": "Budget",
@@ -850,1067 +843,4900 @@
   {
     "city": "Dholavira",
     "name": "Rann Resort",
-    "cat_or_room": "Standard AC Room",
-    "b2b_cost": 7670,
-    "rates": [
-      7670
-    ]
-  },
-  {
-    "city": "Dholavira",
-    "name": "Rann Resort",
-    "cat_or_room": "AC Deluxe Bhunga",
-    "b2b_cost": 8260,
-    "rates": [
-      8260
-    ]
-  },
-  {
-    "city": "Dholavira",
-    "name": "Rann Resort",
-    "cat_or_room": "Rajwadi Cottage",
-    "b2b_cost": 9440,
-    "rates": [
-      9440
-    ]
-  },
-  {
-    "city": "Dholavira",
-    "name": "Rann Resort",
-    "cat_or_room": "Extra Adult passenger",
+    "state": "Gujarat",
+    "cat_or_room": "Premium",
     "b2b_cost": 2124,
     "rates": [
+      7670,
+      8260,
+      9440,
       2124
+    ],
+    "rooms_detail": [
+      {
+        "roomType": "Standard AC Room",
+        "doubleEP": null,
+        "doubleCP": null,
+        "doubleMAP": 7670,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "AC Deluxe Bhunga",
+        "doubleEP": null,
+        "doubleCP": null,
+        "doubleMAP": 8260,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Rajwadi Cottage",
+        "doubleEP": null,
+        "doubleCP": null,
+        "doubleMAP": 9440,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Extra Adult passenger",
+        "doubleEP": null,
+        "doubleCP": null,
+        "doubleMAP": 2124,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      }
     ]
   },
   {
     "city": "Dholavira",
     "name": "Praveg Resort",
-    "cat_or_room": "Premium AC Tents",
-    "b2b_cost": 17700,
-    "rates": [
-      17700
-    ]
-  },
-  {
-    "city": "Dholavira",
-    "name": "Praveg Resort",
-    "cat_or_room": "Rajwadi AC Bhunga",
-    "b2b_cost": 21830,
-    "rates": [
-      21830
-    ]
-  },
-  {
-    "city": "Dholavira",
-    "name": "Praveg Resort",
-    "cat_or_room": "Extra Adult passenger",
+    "state": "Gujarat",
+    "cat_or_room": "Luxury",
     "b2b_cost": 4720,
     "rates": [
+      17700,
+      21830,
       4720
+    ],
+    "rooms_detail": [
+      {
+        "roomType": "Premium AC Tents",
+        "doubleEP": null,
+        "doubleCP": null,
+        "doubleMAP": 17700,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Rajwadi AC Bhunga",
+        "doubleEP": null,
+        "doubleCP": null,
+        "doubleMAP": 21830,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Extra Adult passenger",
+        "doubleEP": null,
+        "doubleCP": null,
+        "doubleMAP": 4720,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      }
     ]
   },
   {
     "city": "Dholavira",
     "name": "Ram Rann Resort",
-    "cat_or_room": "Kuchhi Bhuga",
-    "b2b_cost": 5500,
-    "rates": [
-      5500
-    ]
-  },
-  {
-    "city": "Dholavira",
-    "name": "Ram Rann Resort",
-    "cat_or_room": "Rajwadi Rooms",
-    "b2b_cost": 6500,
-    "rates": [
-      6500
-    ]
-  },
-  {
-    "city": "Dholavira",
-    "name": "Ram Rann Resort",
-    "cat_or_room": "Extra Adult passenger",
+    "state": "Gujarat",
+    "cat_or_room": "Premium",
     "b2b_cost": 1000,
     "rates": [
+      5500,
+      6500,
       1000
+    ],
+    "rooms_detail": [
+      {
+        "roomType": "Kuchhi Bhuga",
+        "doubleEP": null,
+        "doubleCP": null,
+        "doubleMAP": 5500,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Rajwadi Rooms",
+        "doubleEP": null,
+        "doubleCP": null,
+        "doubleMAP": 6500,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Extra Adult passenger",
+        "doubleEP": null,
+        "doubleCP": null,
+        "doubleMAP": 1000,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      }
     ]
   },
   {
     "city": "Dhordo",
     "name": "Kutch Resort",
-    "cat_or_room": "Kutchi Bhungas",
-    "b2b_cost": 4999,
-    "rates": [
-      4999
-    ]
-  },
-  {
-    "city": "Dhordo",
-    "name": "Kutch Resort",
-    "cat_or_room": "Premium Tents",
-    "b2b_cost": 5999,
-    "rates": [
-      5999
-    ]
-  },
-  {
-    "city": "Dhordo",
-    "name": "Kutch Resort",
-    "cat_or_room": "Extra Adult passenger",
+    "state": "Gujarat",
+    "cat_or_room": "Premium",
     "b2b_cost": 1500,
     "rates": [
+      4999,
+      5999,
       1500
+    ],
+    "rooms_detail": [
+      {
+        "roomType": "Kutchi Bhungas",
+        "doubleEP": null,
+        "doubleCP": null,
+        "doubleMAP": 4999,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Premium Tents",
+        "doubleEP": null,
+        "doubleCP": null,
+        "doubleMAP": 5999,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Extra Adult passenger",
+        "doubleEP": null,
+        "doubleCP": null,
+        "doubleMAP": 1500,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      }
     ]
   },
   {
     "city": "Dhordo",
     "name": "Kutch Yatra Resort",
-    "cat_or_room": "Couple non AC",
-    "b2b_cost": 10000,
+    "state": "Gujarat",
+    "cat_or_room": "Premium",
+    "b2b_cost": 2500,
     "rates": [
       10000,
-      12500
-    ]
-  },
-  {
-    "city": "Dhordo",
-    "name": "Kutch Yatra Resort",
-    "cat_or_room": "Couple ac",
-    "b2b_cost": 12000,
-    "rates": [
       12000,
-      14500
+      2500
+    ],
+    "rooms_detail": [
+      {
+        "roomType": "Couple non AC",
+        "doubleEP": null,
+        "doubleCP": null,
+        "doubleMAP": 10000,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": 12500,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Couple ac",
+        "doubleEP": null,
+        "doubleCP": null,
+        "doubleMAP": 12000,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": 14500,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Extra Adult passenger",
+        "doubleEP": null,
+        "doubleCP": null,
+        "doubleMAP": 2500,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      }
     ]
   },
   {
     "city": "Dhordo",
     "name": "Great Rann Resort (Close to Rann Utsav - White Desert)",
-    "cat_or_room": "AC Deluxe Tent",
-    "b2b_cost": 8000,
-    "rates": [
-      8000
-    ]
-  },
-  {
-    "city": "Dhordo",
-    "name": "Great Rann Resort (Close to Rann Utsav - White Desert)",
-    "cat_or_room": "Non Ac Tent",
+    "state": "Gujarat",
+    "cat_or_room": "Premium",
     "b2b_cost": 6000,
     "rates": [
+      8000,
       6000
+    ],
+    "rooms_detail": [
+      {
+        "roomType": "AC Deluxe Tent",
+        "doubleEP": null,
+        "doubleCP": null,
+        "doubleMAP": 8000,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Non Ac Tent",
+        "doubleEP": null,
+        "doubleCP": null,
+        "doubleMAP": 6000,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      }
     ]
   },
   {
     "city": "Dhordo",
     "name": "Desert King Resort",
-    "cat_or_room": "Kutchi Bhunga  A/c",
-    "b2b_cost": 4500,
-    "rates": [
-      4500
-    ]
-  },
-  {
-    "city": "Dhordo",
-    "name": "Desert King Resort",
-    "cat_or_room": "Rajwadi Bhunga  A/C",
-    "b2b_cost": 5000,
-    "rates": [
-      5000
-    ]
-  },
-  {
-    "city": "Dhordo",
-    "name": "Desert King Resort",
-    "cat_or_room": "Extra Adult passenger",
+    "state": "Gujarat",
+    "cat_or_room": "Premium",
     "b2b_cost": 1500,
     "rates": [
+      4500,
+      5000,
       1500
+    ],
+    "rooms_detail": [
+      {
+        "roomType": "Kutchi Bhunga  A/c",
+        "doubleEP": null,
+        "doubleCP": null,
+        "doubleMAP": 4500,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Rajwadi Bhunga  A/C",
+        "doubleEP": null,
+        "doubleCP": null,
+        "doubleMAP": 5000,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Extra Adult passenger",
+        "doubleEP": null,
+        "doubleCP": null,
+        "doubleMAP": 1500,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      }
     ]
   },
   {
     "city": "Dholavira",
     "name": "White Rann Resort Dholavira",
-    "cat_or_room": "Ac bhunga",
-    "b2b_cost": 4500,
-    "rates": [
-      4500
-    ]
-  },
-  {
-    "city": "Dholavira",
-    "name": "White Rann Resort Dholavira",
-    "cat_or_room": "Non ac cottages",
+    "state": "Gujarat",
+    "cat_or_room": "Premium",
     "b2b_cost": 3000,
     "rates": [
+      4500,
       3000
+    ],
+    "rooms_detail": [
+      {
+        "roomType": "Ac bhunga",
+        "doubleEP": null,
+        "doubleCP": null,
+        "doubleMAP": 4500,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Non ac cottages",
+        "doubleEP": null,
+        "doubleCP": null,
+        "doubleMAP": 3000,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      }
     ]
   },
   {
     "city": "Dholavira",
     "name": "The Dholavira Resort",
-    "cat_or_room": "Deluxe Kutchi Bhunga Hut",
-    "b2b_cost": 5500,
-    "rates": [
-      5500
-    ]
-  },
-  {
-    "city": "Dholavira",
-    "name": "The Dholavira Resort",
-    "cat_or_room": "Desi Kutchi Bhunga Hut",
-    "b2b_cost": 5500,
-    "rates": [
-      5500
-    ]
-  },
-  {
-    "city": "Dholavira",
-    "name": "The Dholavira Resort",
-    "cat_or_room": "Extra Adult passenger",
+    "state": "Gujarat",
+    "cat_or_room": "Premium",
     "b2b_cost": 1000,
     "rates": [
+      5500,
       1000
+    ],
+    "rooms_detail": [
+      {
+        "roomType": "Deluxe Kutchi Bhunga Hut",
+        "doubleEP": null,
+        "doubleCP": null,
+        "doubleMAP": 5500,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Desi Kutchi Bhunga Hut",
+        "doubleEP": null,
+        "doubleCP": null,
+        "doubleMAP": 5500,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Extra Adult passenger",
+        "doubleEP": null,
+        "doubleCP": null,
+        "doubleMAP": 1000,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      }
     ]
   },
   {
     "city": "Bhuj",
     "name": "Dream Resort",
-    "cat_or_room": "Super Delux Rooms",
-    "b2b_cost": 2800,
+    "state": "Gujarat",
+    "cat_or_room": "Premium",
+    "b2b_cost": 400,
     "rates": [
       2800,
       3300,
       4100,
       4900,
       3200,
-      3800,
-      5000,
-      6000
-    ]
-  },
-  {
-    "city": "Bhuj",
-    "name": "Dream Resort",
-    "cat_or_room": "Suite Rooms",
-    "b2b_cost": 3200,
-    "rates": [
-      3200,
       3700,
       4600,
       5400,
-      3700,
-      4400,
-      5400,
-      6200
-    ]
-  },
-  {
-    "city": "Bhuj",
-    "name": "Dream Resort",
-    "cat_or_room": "Executive Super Delux Room",
-    "b2b_cost": 3000,
-    "rates": [
       3000,
       3600,
       4400,
-      5400,
-      3500,
-      4400,
-      5400,
-      6500
-    ]
-  },
-  {
-    "city": "Bhuj",
-    "name": "Dream Resort",
-    "cat_or_room": "Executive Suite Room",
-    "b2b_cost": 3600,
-    "rates": [
-      3600,
       4200,
       5000,
       6000,
-      4200,
-      5000,
-      6200,
-      7400
+      400,
+      500,
+      900
+    ],
+    "rooms_detail": [
+      {
+        "roomType": "Super Delux Rooms",
+        "doubleEP": 2800,
+        "doubleCP": 3300,
+        "doubleMAP": 4100,
+        "doubleAP": 4900,
+        "tripleEP": 3200,
+        "tripleCP": 3800,
+        "tripleMAP": 5000,
+        "tripleAP": 6000
+      },
+      {
+        "roomType": "Suite Rooms",
+        "doubleEP": 3200,
+        "doubleCP": 3700,
+        "doubleMAP": 4600,
+        "doubleAP": 5400,
+        "tripleEP": 3700,
+        "tripleCP": 4400,
+        "tripleMAP": 5400,
+        "tripleAP": 6200
+      },
+      {
+        "roomType": "Executive Super Delux Room",
+        "doubleEP": 3000,
+        "doubleCP": 3600,
+        "doubleMAP": 4400,
+        "doubleAP": 5400,
+        "tripleEP": 3500,
+        "tripleCP": 4400,
+        "tripleMAP": 5400,
+        "tripleAP": 6500
+      },
+      {
+        "roomType": "Executive Suite Room",
+        "doubleEP": 3600,
+        "doubleCP": 4200,
+        "doubleMAP": 5000,
+        "doubleAP": 6000,
+        "tripleEP": 4200,
+        "tripleCP": 5000,
+        "tripleMAP": 6200,
+        "tripleAP": 7400
+      },
+      {
+        "roomType": "Extra Adult passenger",
+        "doubleEP": 400,
+        "doubleCP": 500,
+        "doubleMAP": 900,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      }
     ]
   },
   {
     "city": "Dholavira",
     "name": "Dholavira Village Resort",
-    "cat_or_room": "Couple room",
-    "b2b_cost": 5000,
-    "rates": [
-      5000
-    ]
-  },
-  {
-    "city": "Dholavira",
-    "name": "Dholavira Village Resort",
-    "cat_or_room": "Extra Adult passenger",
+    "state": "Gujarat",
+    "cat_or_room": "Premium",
     "b2b_cost": 1000,
     "rates": [
+      5000,
       1000
+    ],
+    "rooms_detail": [
+      {
+        "roomType": "Couple room",
+        "doubleEP": null,
+        "doubleCP": null,
+        "doubleMAP": 5000,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Extra Adult passenger",
+        "doubleEP": null,
+        "doubleCP": null,
+        "doubleMAP": 1000,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      }
     ]
   },
   {
     "city": "Dhordo",
     "name": "Toran Rann Resort",
-    "cat_or_room": "AC Bhunga",
-    "b2b_cost": 4725,
-    "rates": [
-      4725
-    ]
-  },
-  {
-    "city": "Dhordo",
-    "name": "Toran Rann Resort",
-    "cat_or_room": "Non AC Bhunga",
-    "b2b_cost": 3675,
-    "rates": [
-      3675
-    ]
-  },
-  {
-    "city": "Dhordo",
-    "name": "Toran Rann Resort",
-    "cat_or_room": "Extra Adult passenger",
+    "state": "Gujarat",
+    "cat_or_room": "Premium",
     "b2b_cost": 1050,
     "rates": [
+      4725,
+      3675,
       1050
+    ],
+    "rooms_detail": [
+      {
+        "roomType": "AC Bhunga",
+        "doubleEP": null,
+        "doubleCP": null,
+        "doubleMAP": 4725,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Non AC Bhunga",
+        "doubleEP": null,
+        "doubleCP": null,
+        "doubleMAP": 3675,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Extra Adult passenger",
+        "doubleEP": null,
+        "doubleCP": null,
+        "doubleMAP": 1050,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      }
     ]
   },
   {
     "city": "Bhuj",
     "name": "The Fern Residency",
-    "cat_or_room": "Winter Green Room",
-    "b2b_cost": 7000,
+    "state": "Gujarat",
+    "cat_or_room": "Standard",
+    "b2b_cost": 1180,
     "rates": [
       7000,
       8000,
-      8000
-    ]
-  },
-  {
-    "city": "Bhuj",
-    "name": "The Fern Residency",
-    "cat_or_room": "Fern Club Room",
-    "b2b_cost": 7000,
-    "rates": [
-      7000,
-      8000
-    ]
-  },
-  {
-    "city": "Bhuj",
-    "name": "The Fern Residency",
-    "cat_or_room": "Extra Adult passenger",
-    "b2b_cost": 1180,
-    "rates": [
       1180
+    ],
+    "rooms_detail": [
+      {
+        "roomType": "Winter Green Room",
+        "doubleEP": null,
+        "doubleCP": 7000,
+        "doubleMAP": 8000,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": 8000,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Fern Club Room",
+        "doubleEP": null,
+        "doubleCP": 7000,
+        "doubleMAP": 8000,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Extra Adult passenger",
+        "doubleEP": null,
+        "doubleCP": null,
+        "doubleMAP": 1180,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      }
     ]
   },
   {
     "city": "Dhordo",
     "name": "Gateway to Rann Resort",
-    "cat_or_room": "AC Bhunga",
-    "b2b_cost": 4500,
-    "rates": [
-      4500
-    ]
-  },
-  {
-    "city": "Dhordo",
-    "name": "Gateway to Rann Resort",
-    "cat_or_room": "Darbari Bhunga Type A",
-    "b2b_cost": 6500,
-    "rates": [
-      6500
-    ]
-  },
-  {
-    "city": "Dhordo",
-    "name": "Gateway to Rann Resort",
-    "cat_or_room": "Darbari Bhunga Type B",
-    "b2b_cost": 6500,
-    "rates": [
-      6500
-    ]
-  },
-  {
-    "city": "Dhordo",
-    "name": "Gateway to Rann Resort",
-    "cat_or_room": "Extra Adult passenger",
+    "state": "Gujarat",
+    "cat_or_room": "Premium",
     "b2b_cost": 1000,
     "rates": [
+      4500,
+      6500,
       1000
+    ],
+    "rooms_detail": [
+      {
+        "roomType": "AC Bhunga",
+        "doubleEP": null,
+        "doubleCP": null,
+        "doubleMAP": 4500,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Darbari Bhunga Type A",
+        "doubleEP": null,
+        "doubleCP": null,
+        "doubleMAP": 6500,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Darbari Bhunga Type B",
+        "doubleEP": null,
+        "doubleCP": null,
+        "doubleMAP": 6500,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Extra Adult passenger",
+        "doubleEP": null,
+        "doubleCP": null,
+        "doubleMAP": 1000,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      }
     ]
   },
   {
     "city": "Dhordo",
     "name": "Rann Kutch Resort",
-    "cat_or_room": "Traditional Cottage",
-    "b2b_cost": 4500,
-    "rates": [
-      4500
-    ]
-  },
-  {
-    "city": "Dhordo",
-    "name": "Rann Kutch Resort",
-    "cat_or_room": "Bhunga Hut",
-    "b2b_cost": 5000,
-    "rates": [
-      5000
-    ]
-  },
-  {
-    "city": "Dhordo",
-    "name": "Rann Kutch Resort",
-    "cat_or_room": "Family Bhunga",
-    "b2b_cost": 7500,
-    "rates": [
-      7500
-    ]
-  },
-  {
-    "city": "Dhordo",
-    "name": "Rann Kutch Resort",
-    "cat_or_room": "Family Cottage",
-    "b2b_cost": 7000,
-    "rates": [
-      7000
-    ]
-  },
-  {
-    "city": "Dhordo",
-    "name": "Rann Kutch Resort",
-    "cat_or_room": "Extra Adult passenger",
-    "b2b_cost": 1500,
-    "rates": [
-      1500
-    ]
-  },
-  {
-    "city": "Dhordo",
-    "name": "Rann Kutch Resort",
-    "cat_or_room": "Child with bed",
+    "state": "Gujarat",
+    "cat_or_room": "Premium",
     "b2b_cost": 1200,
     "rates": [
+      4500,
+      5000,
+      7500,
+      7000,
+      1500,
       1200
+    ],
+    "rooms_detail": [
+      {
+        "roomType": "Traditional Cottage",
+        "doubleEP": null,
+        "doubleCP": null,
+        "doubleMAP": 4500,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Bhunga Hut",
+        "doubleEP": null,
+        "doubleCP": null,
+        "doubleMAP": 5000,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Family Bhunga",
+        "doubleEP": null,
+        "doubleCP": null,
+        "doubleMAP": 7500,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Family Cottage",
+        "doubleEP": null,
+        "doubleCP": null,
+        "doubleMAP": 7000,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Extra Adult passenger",
+        "doubleEP": null,
+        "doubleCP": null,
+        "doubleMAP": 1500,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Child with bed",
+        "doubleEP": null,
+        "doubleCP": null,
+        "doubleMAP": 1200,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      }
     ]
   },
   {
     "city": "Dhordo",
     "name": "Rann Resort D",
-    "cat_or_room": "Kutchi Bhungas",
+    "state": "Gujarat",
+    "cat_or_room": "Premium",
     "b2b_cost": 3380,
     "rates": [
       3380,
-      3500,
-      4000
+      3500
+    ],
+    "rooms_detail": [
+      {
+        "roomType": "Kutchi Bhungas",
+        "doubleEP": null,
+        "doubleCP": 3380,
+        "doubleMAP": 3500,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": 4000,
+        "tripleAP": null
+      }
     ]
   },
   {
     "city": "Dhordo",
     "name": "The Tent City",
-    "cat_or_room": "Non Ac Swiss Cottages",
-    "b2b_cost": 18644,
-    "rates": [
-      18644
-    ]
-  },
-  {
-    "city": "Dhordo",
-    "name": "The Tent City",
-    "cat_or_room": "Extra Adult passenger",
+    "state": "Gujarat",
+    "cat_or_room": "Premium",
     "b2b_cost": 5605,
     "rates": [
+      18644,
       5605
+    ],
+    "rooms_detail": [
+      {
+        "roomType": "Non Ac Swiss Cottages",
+        "doubleEP": null,
+        "doubleCP": null,
+        "doubleMAP": null,
+        "doubleAP": 18644,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Extra Adult passenger",
+        "doubleEP": null,
+        "doubleCP": null,
+        "doubleMAP": null,
+        "doubleAP": 5605,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      }
     ]
   },
   {
     "city": "Mandvi Beach",
     "name": "H&V Beach Hotel",
-    "cat_or_room": "Villa (Bhunga)",
-    "b2b_cost": 11000,
+    "state": "Gujarat",
+    "cat_or_room": "Premium",
+    "b2b_cost": 1000,
     "rates": [
       11000,
       11500,
       12100,
-      12700
-    ]
-  },
-  {
-    "city": "Mandvi Beach",
-    "name": "H&V Beach Hotel",
-    "cat_or_room": "Suite Room",
-    "b2b_cost": 9000,
-    "rates": [
+      12700,
       9000,
       9500,
       10100,
-      10700
-    ]
-  },
-  {
-    "city": "Mandvi Beach",
-    "name": "H&V Beach Hotel",
-    "cat_or_room": "Family Room",
-    "b2b_cost": 8000,
-    "rates": [
+      10700,
       8000,
       8500,
       9100,
-      9700
-    ]
-  },
-  {
-    "city": "Mandvi Beach",
-    "name": "H&V Beach Hotel",
-    "cat_or_room": "Standard Room",
-    "b2b_cost": 6000,
-    "rates": [
+      9700,
       6000,
       6500,
       7100,
-      7700
-    ]
-  },
-  {
-    "city": "Mandvi Beach",
-    "name": "H&V Beach Hotel",
-    "cat_or_room": "Extra Adult passenger",
-    "b2b_cost": 1000,
-    "rates": [
+      7700,
       1000,
       1250,
       1550,
       1850
+    ],
+    "rooms_detail": [
+      {
+        "roomType": "Villa (Bhunga)",
+        "doubleEP": 11000,
+        "doubleCP": 11500,
+        "doubleMAP": 12100,
+        "doubleAP": 12700,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Suite Room",
+        "doubleEP": 9000,
+        "doubleCP": 9500,
+        "doubleMAP": 10100,
+        "doubleAP": 10700,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Family Room",
+        "doubleEP": 8000,
+        "doubleCP": 8500,
+        "doubleMAP": 9100,
+        "doubleAP": 9700,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Standard Room",
+        "doubleEP": 6000,
+        "doubleCP": 6500,
+        "doubleMAP": 7100,
+        "doubleAP": 7700,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Extra Adult passenger",
+        "doubleEP": 1000,
+        "doubleCP": 1250,
+        "doubleMAP": 1550,
+        "doubleAP": 1850,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      }
     ]
   },
   {
     "city": "Mandvi Beach",
     "name": "Vijay Vilas Heritage Resort",
-    "cat_or_room": "Heritage Room",
-    "b2b_cost": 10030,
-    "rates": [
-      10030
-    ]
-  },
-  {
-    "city": "Mandvi Beach",
-    "name": "Vijay Vilas Heritage Resort",
-    "cat_or_room": "Garden Villa",
-    "b2b_cost": 10030,
-    "rates": [
-      10030
-    ]
-  },
-  {
-    "city": "Mandvi Beach",
-    "name": "Serena Beach Resort",
-    "cat_or_room": "Deluxe Hut King-Size Bed",
-    "b2b_cost": 9300,
-    "rates": [
-      9300,
-      10700
-    ]
-  },
-  {
-    "city": "Mandvi Beach",
-    "name": "Serena Beach Resort",
-    "cat_or_room": "Pool Villa",
-    "b2b_cost": 21450,
-    "rates": [
-      21450,
-      22450
-    ]
-  },
-  {
-    "city": "Mandvi Beach",
-    "name": "Serena Beach Resort",
-    "cat_or_room": "Garden Villa",
-    "b2b_cost": 15850,
-    "rates": [
-      15850,
-      18650
-    ]
-  },
-  {
-    "city": "Mandvi Beach",
-    "name": "Palace Beach Camp Resort",
-    "cat_or_room": "Beach View Villas",
-    "b2b_cost": 12000,
-    "rates": [
-      12000,
-      14747
-    ]
-  },
-  {
-    "city": "Mandvi Beach",
-    "name": "Palace Beach Camp Resort",
-    "cat_or_room": "Swiss Luxury Tent",
-    "b2b_cost": 7000,
-    "rates": [
-      7000,
-      9000
-    ]
-  },
-  {
-    "city": "Mandvi Beach",
-    "name": "Serena Beach Resort",
-    "cat_or_room": "Extra Adult passenger",
-    "b2b_cost": 3300,
-    "rates": [
-      3300,
-      4200
-    ]
-  },
-  {
-    "city": "Dhordo",
-    "name": "Royal Rann Camp",
-    "cat_or_room": "Non AC Tent",
-    "b2b_cost": 5250,
-    "rates": [
-      5250
-    ]
-  },
-  {
-    "city": "Dhordo",
-    "name": "Royal Rann Camp",
-    "cat_or_room": "AC Tent",
-    "b2b_cost": 6250,
-    "rates": [
-      6250
-    ]
-  },
-  {
-    "city": "Dhordo",
-    "name": "Royal Rann Camp",
-    "cat_or_room": "Extra Adult passenger",
-    "b2b_cost": 1200,
-    "rates": [
-      1200
-    ]
-  },
-  {
-    "city": "Dhordo",
-    "name": "Kutch Yatra Resort",
-    "cat_or_room": "Extra Adult passenger",
-    "b2b_cost": 2500,
-    "rates": [
-      2500
-    ]
-  },
-  {
-    "city": "Mandvi Beach",
-    "name": "Vijay Vilas Heritage Resort",
-    "cat_or_room": "Extra Adult passenger",
+    "state": "Gujarat",
+    "cat_or_room": "Premium",
     "b2b_cost": 1900,
     "rates": [
+      10030,
       1900
+    ],
+    "rooms_detail": [
+      {
+        "roomType": "Heritage Room",
+        "doubleEP": null,
+        "doubleCP": null,
+        "doubleMAP": 10030,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Garden Villa",
+        "doubleEP": null,
+        "doubleCP": null,
+        "doubleMAP": 10030,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Extra Adult passenger",
+        "doubleEP": null,
+        "doubleCP": null,
+        "doubleMAP": 1900,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      }
     ]
   },
   {
-    "city": "Bhuj",
-    "name": "Dream Resort",
-    "cat_or_room": "Extra Adult passenger",
-    "b2b_cost": 400,
+    "city": "Mandvi Beach",
+    "name": "Serena Beach Resort",
+    "state": "Gujarat",
+    "cat_or_room": "Premium",
+    "b2b_cost": 3300,
     "rates": [
-      400,
-      500,
-      900
+      9300,
+      10700,
+      21450,
+      22450,
+      15850,
+      18650,
+      3300,
+      4200
+    ],
+    "rooms_detail": [
+      {
+        "roomType": "Deluxe Hut King-Size Bed",
+        "doubleEP": null,
+        "doubleCP": 9300,
+        "doubleMAP": 10700,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Pool Villa",
+        "doubleEP": null,
+        "doubleCP": 21450,
+        "doubleMAP": 22450,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Garden Villa",
+        "doubleEP": null,
+        "doubleCP": 15850,
+        "doubleMAP": 18650,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Extra Adult passenger",
+        "doubleEP": null,
+        "doubleCP": 3300,
+        "doubleMAP": 4200,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      }
+    ]
+  },
+  {
+    "city": "Mandvi Beach",
+    "name": "Palace Beach Camp Resort",
+    "state": "Gujarat",
+    "cat_or_room": "Luxury",
+    "b2b_cost": 7000,
+    "rates": [
+      12000,
+      14747,
+      7000,
+      9000
+    ],
+    "rooms_detail": [
+      {
+        "roomType": "Beach View Villas",
+        "doubleEP": null,
+        "doubleCP": 12000,
+        "doubleMAP": 14747,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Swiss Luxury Tent",
+        "doubleEP": null,
+        "doubleCP": 7000,
+        "doubleMAP": 9000,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      }
+    ]
+  },
+  {
+    "city": "Dhordo",
+    "name": "Royal Rann Camp",
+    "state": "Gujarat",
+    "cat_or_room": "Premium",
+    "b2b_cost": 1200,
+    "rates": [
+      5250,
+      6250,
+      1200
+    ],
+    "rooms_detail": [
+      {
+        "roomType": "Non AC Tent",
+        "doubleEP": null,
+        "doubleCP": null,
+        "doubleMAP": 5250,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "AC Tent",
+        "doubleEP": null,
+        "doubleCP": null,
+        "doubleMAP": 6250,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Extra Adult passenger",
+        "doubleEP": null,
+        "doubleCP": null,
+        "doubleMAP": 1200,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      }
     ]
   },
   {
     "city": "Dhordo",
     "name": "White Rann Resort",
-    "cat_or_room": "Premium Ac Tent",
+    "state": "Gujarat",
+    "cat_or_room": "Premium",
     "b2b_cost": 15500,
     "rates": [
       15500
+    ],
+    "rooms_detail": [
+      {
+        "roomType": "Premium Ac Tent",
+        "doubleEP": null,
+        "doubleCP": null,
+        "doubleMAP": null,
+        "doubleAP": 15500,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      }
     ]
   },
   {
     "city": "Dholavira",
     "name": "StayGuru Heritage Resort",
-    "cat_or_room": "Kutchi Bhuga",
-    "b2b_cost": 7499,
-    "rates": [
-      7499
-    ]
-  },
-  {
-    "city": "Dholavira",
-    "name": "StayGuru Heritage Resort",
-    "cat_or_room": "Kutchi Bhuga Twin Beds",
-    "b2b_cost": 7499,
-    "rates": [
-      7499
-    ]
-  },
-  {
-    "city": "Dholavira",
-    "name": "StayGuru Heritage Resort",
-    "cat_or_room": "Kutchi Bhuga with Garden",
-    "b2b_cost": 8499,
-    "rates": [
-      8499
-    ]
-  },
-  {
-    "city": "Dholavira",
-    "name": "StayGuru Heritage Resort",
-    "cat_or_room": "Kutchi Bhuga Private Pool",
-    "b2b_cost": 11999,
-    "rates": [
-      11999
-    ]
-  },
-  {
-    "city": "Dholavira",
-    "name": "StayGuru Heritage Resort",
-    "cat_or_room": "Extra Adult passenger",
+    "state": "Gujarat",
+    "cat_or_room": "Premium",
     "b2b_cost": 1800,
     "rates": [
+      7499,
+      8499,
+      11999,
       1800
+    ],
+    "rooms_detail": [
+      {
+        "roomType": "Kutchi Bhuga",
+        "doubleEP": null,
+        "doubleCP": null,
+        "doubleMAP": 7499,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Kutchi Bhuga Twin Beds",
+        "doubleEP": null,
+        "doubleCP": null,
+        "doubleMAP": 7499,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Kutchi Bhuga with Garden",
+        "doubleEP": null,
+        "doubleCP": null,
+        "doubleMAP": 8499,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Kutchi Bhuga Private Pool",
+        "doubleEP": null,
+        "doubleCP": null,
+        "doubleMAP": 11999,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Extra Adult passenger",
+        "doubleEP": null,
+        "doubleCP": null,
+        "doubleMAP": 1800,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      }
     ]
   },
   {
     "city": "Dholavira",
     "name": "StayGuru Heaven Resort Dholavira",
-    "cat_or_room": "Non AC Rajwadi Cottage",
-    "b2b_cost": 6500,
-    "rates": [
-      6500
-    ]
-  },
-  {
-    "city": "Dholavira",
-    "name": "StayGuru Heaven Resort Dholavira",
-    "cat_or_room": "AC Rajwadi Cottages",
-    "b2b_cost": 7000,
-    "rates": [
-      7000
-    ]
-  },
-  {
-    "city": "Dholavira",
-    "name": "StayGuru Heaven Resort Dholavira",
-    "cat_or_room": "Non AC Rajwadi Bhunga",
-    "b2b_cost": 7000,
-    "rates": [
-      7000
-    ]
-  },
-  {
-    "city": "Dholavira",
-    "name": "StayGuru Heaven Resort Dholavira",
-    "cat_or_room": "AC Rajwadi Bhunga",
-    "b2b_cost": 7500,
-    "rates": [
-      7500
-    ]
-  },
-  {
-    "city": "Dholavira",
-    "name": "StayGuru Heaven Resort Dholavira",
-    "cat_or_room": "Extra Adult passenger",
+    "state": "Gujarat",
+    "cat_or_room": "Premium",
     "b2b_cost": 2000,
     "rates": [
+      6500,
+      7000,
+      7500,
       2000
+    ],
+    "rooms_detail": [
+      {
+        "roomType": "Non AC Rajwadi Cottage",
+        "doubleEP": null,
+        "doubleCP": null,
+        "doubleMAP": 6500,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "AC Rajwadi Cottages",
+        "doubleEP": null,
+        "doubleCP": null,
+        "doubleMAP": 7000,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Non AC Rajwadi Bhunga",
+        "doubleEP": null,
+        "doubleCP": null,
+        "doubleMAP": 7000,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "AC Rajwadi Bhunga",
+        "doubleEP": null,
+        "doubleCP": null,
+        "doubleMAP": 7500,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Extra Adult passenger",
+        "doubleEP": null,
+        "doubleCP": null,
+        "doubleMAP": 2000,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      }
     ]
   },
   {
     "city": "Bhuj",
     "name": "StayGuru Hotel Kutch Elegance",
-    "cat_or_room": "Super Deluxe",
-    "b2b_cost": 3000,
-    "rates": [
-      3000,
-      3900
-    ]
-  },
-  {
-    "city": "Bhuj",
-    "name": "StayGuru Hotel Kutch Elegance",
-    "cat_or_room": "Deluxe",
-    "b2b_cost": 3500,
-    "rates": [
-      3500,
-      4400
-    ]
-  },
-  {
-    "city": "Bhuj",
-    "name": "StayGuru Hotel Kutch Elegance",
-    "cat_or_room": "Extra Adult passenger",
+    "state": "Gujarat",
+    "cat_or_room": "Premium",
     "b2b_cost": 700,
     "rates": [
+      3000,
+      3900,
+      3500,
+      4400,
       700,
-      1600
-    ]
-  },
-  {
-    "city": "Bhuj",
-    "name": "StayGuru Hotel Kutch Elegance",
-    "cat_or_room": "Suite Room",
-    "b2b_cost": 4500,
-    "rates": [
+      1600,
       4500,
       5400
+    ],
+    "rooms_detail": [
+      {
+        "roomType": "Super Deluxe",
+        "doubleEP": null,
+        "doubleCP": 3000,
+        "doubleMAP": 3900,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Deluxe",
+        "doubleEP": null,
+        "doubleCP": 3500,
+        "doubleMAP": 4400,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Extra Adult passenger",
+        "doubleEP": null,
+        "doubleCP": 700,
+        "doubleMAP": 1600,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Suite Room",
+        "doubleEP": null,
+        "doubleCP": 4500,
+        "doubleMAP": 5400,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      }
     ]
   },
   {
     "city": "Dholavira",
     "name": "StayGuru Road to Heaven Resort",
-    "cat_or_room": "Grand Deluxe Tent",
-    "b2b_cost": 7499,
-    "rates": [
-      7499
-    ]
-  },
-  {
-    "city": "Dholavira",
-    "name": "StayGuru Road to Heaven Resort",
-    "cat_or_room": "Grand Deluxe Twin Bed Tent",
-    "b2b_cost": 7499,
-    "rates": [
-      7499
-    ]
-  },
-  {
-    "city": "Dholavira",
-    "name": "StayGuru Road to Heaven Resort",
-    "cat_or_room": "Executive Tent",
-    "b2b_cost": 8499,
-    "rates": [
-      8499
-    ]
-  },
-  {
-    "city": "Dholavira",
-    "name": "StayGuru Road to Heaven Resort",
-    "cat_or_room": "PremiumTent",
-    "b2b_cost": 9999,
-    "rates": [
-      9999
-    ]
-  },
-  {
-    "city": "Dholavira",
-    "name": "StayGuru Road to Heaven Resort",
-    "cat_or_room": "Extra Adult passenger",
+    "state": "Gujarat",
+    "cat_or_room": "Premium",
     "b2b_cost": 2000,
     "rates": [
+      7499,
+      8499,
+      9999,
       2000
+    ],
+    "rooms_detail": [
+      {
+        "roomType": "Grand Deluxe Tent",
+        "doubleEP": null,
+        "doubleCP": null,
+        "doubleMAP": 7499,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Grand Deluxe Twin Bed Tent",
+        "doubleEP": null,
+        "doubleCP": null,
+        "doubleMAP": 7499,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Executive Tent",
+        "doubleEP": null,
+        "doubleCP": null,
+        "doubleMAP": 8499,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "PremiumTent",
+        "doubleEP": null,
+        "doubleCP": null,
+        "doubleMAP": 9999,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Extra Adult passenger",
+        "doubleEP": null,
+        "doubleCP": null,
+        "doubleMAP": 2000,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      }
     ]
   },
   {
     "city": "Dhordo",
     "name": "StayGuru Patgar Tent",
-    "cat_or_room": "Deluxe Tent",
-    "b2b_cost": 6000,
-    "rates": [
-      6000
-    ]
-  },
-  {
-    "city": "Dhordo",
-    "name": "StayGuru Patgar Tent",
-    "cat_or_room": "Extra Adult passenger",
+    "state": "Gujarat",
+    "cat_or_room": "Premium",
     "b2b_cost": 1200,
     "rates": [
+      6000,
       1200
+    ],
+    "rooms_detail": [
+      {
+        "roomType": "Deluxe Tent",
+        "doubleEP": null,
+        "doubleCP": null,
+        "doubleMAP": 6000,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Extra Adult passenger",
+        "doubleEP": null,
+        "doubleCP": null,
+        "doubleMAP": 1200,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      }
     ]
   },
   {
     "city": "Bhuj",
     "name": "Usha Residency",
-    "cat_or_room": "Deluxe Room",
-    "b2b_cost": 1500,
-    "rates": [
-      1500
-    ]
-  },
-  {
-    "city": "Bhuj",
-    "name": "Usha Residency",
-    "cat_or_room": "Family Room",
-    "b2b_cost": 3000,
-    "rates": [
-      3000
-    ]
-  },
-  {
-    "city": "Bhuj",
-    "name": "Usha Residency",
-    "cat_or_room": "Rajwadi Rooms",
-    "b2b_cost": 3000,
-    "rates": [
-      3000
-    ]
-  },
-  {
-    "city": "Bhuj",
-    "name": "Usha Residency",
-    "cat_or_room": "Extra Adult passenger",
+    "state": "Gujarat",
+    "cat_or_room": "Standard",
     "b2b_cost": 500,
     "rates": [
+      1500,
+      3000,
       500
+    ],
+    "rooms_detail": [
+      {
+        "roomType": "Deluxe Room",
+        "doubleEP": null,
+        "doubleCP": 1500,
+        "doubleMAP": null,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Family Room",
+        "doubleEP": null,
+        "doubleCP": 3000,
+        "doubleMAP": null,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Rajwadi Rooms",
+        "doubleEP": null,
+        "doubleCP": 3000,
+        "doubleMAP": null,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Extra Adult passenger",
+        "doubleEP": null,
+        "doubleCP": 500,
+        "doubleMAP": null,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      }
     ]
   },
   {
     "city": "Bhuj",
     "name": "Hariom Residency & Hotel",
-    "cat_or_room": "Double Deluxe",
-    "b2b_cost": 1500,
-    "rates": [
-      1500
-    ]
-  },
-  {
-    "city": "Bhuj",
-    "name": "Hariom Residency & Hotel",
-    "cat_or_room": "Superior Deluxe",
-    "b2b_cost": 1700,
-    "rates": [
-      1700
-    ]
-  },
-  {
-    "city": "Bhuj",
-    "name": "Hariom Residency & Hotel",
-    "cat_or_room": "Executive Room",
-    "b2b_cost": 2000,
-    "rates": [
-      2000
-    ]
-  },
-  {
-    "city": "Bhuj",
-    "name": "Hariom Residency & Hotel",
-    "cat_or_room": "Extra Adult passenger",
+    "state": "Gujarat",
+    "cat_or_room": "Standard",
     "b2b_cost": 500,
     "rates": [
+      1500,
+      1700,
+      2000,
       500
+    ],
+    "rooms_detail": [
+      {
+        "roomType": "Double Deluxe",
+        "doubleEP": null,
+        "doubleCP": 1500,
+        "doubleMAP": null,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Superior Deluxe",
+        "doubleEP": null,
+        "doubleCP": 1700,
+        "doubleMAP": null,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Executive Room",
+        "doubleEP": null,
+        "doubleCP": 2000,
+        "doubleMAP": null,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Extra Adult passenger",
+        "doubleEP": null,
+        "doubleCP": 500,
+        "doubleMAP": null,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      }
     ]
   },
   {
     "city": "Bhuj",
     "name": "Ranjan Wadi",
-    "cat_or_room": "Deluxe Room",
-    "b2b_cost": 1500,
-    "rates": [
-      1500
-    ]
-  },
-  {
-    "city": "Bhuj",
-    "name": "Ranjan Wadi",
-    "cat_or_room": "Extra Adult passenger",
+    "state": "Gujarat",
+    "cat_or_room": "Premium",
     "b2b_cost": 500,
     "rates": [
+      1500,
       500
+    ],
+    "rooms_detail": [
+      {
+        "roomType": "Deluxe Room",
+        "doubleEP": null,
+        "doubleCP": 1500,
+        "doubleMAP": null,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Extra Adult passenger",
+        "doubleEP": null,
+        "doubleCP": 500,
+        "doubleMAP": null,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      }
     ]
   },
   {
     "city": "Bhuj",
     "name": "Park View Residency",
-    "cat_or_room": "Double Deluxe",
-    "b2b_cost": 17000,
-    "rates": [
-      17000
-    ]
-  },
-  {
-    "city": "Bhuj",
-    "name": "Park View Residency",
-    "cat_or_room": "Triple Deluxe",
-    "b2b_cost": 2000,
-    "rates": [
-      2000
-    ]
-  },
-  {
-    "city": "Bhuj",
-    "name": "Park View Residency",
-    "cat_or_room": "Super Deluxe",
-    "b2b_cost": 3000,
-    "rates": [
-      3000
-    ]
-  },
-  {
-    "city": "Bhuj",
-    "name": "Park View Residency",
-    "cat_or_room": "Suite Room",
-    "b2b_cost": 4000,
-    "rates": [
-      4000
-    ]
-  },
-  {
-    "city": "Bhuj",
-    "name": "Park View Residency",
-    "cat_or_room": "Extra Adult passenger",
+    "state": "Gujarat",
+    "cat_or_room": "Standard",
     "b2b_cost": 500,
     "rates": [
+      17000,
+      2000,
+      3000,
+      4000,
       500
+    ],
+    "rooms_detail": [
+      {
+        "roomType": "Double Deluxe",
+        "doubleEP": null,
+        "doubleCP": 17000,
+        "doubleMAP": null,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Triple Deluxe",
+        "doubleEP": null,
+        "doubleCP": 2000,
+        "doubleMAP": null,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Super Deluxe",
+        "doubleEP": null,
+        "doubleCP": 3000,
+        "doubleMAP": null,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Suite Room",
+        "doubleEP": null,
+        "doubleCP": 4000,
+        "doubleMAP": null,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Extra Adult passenger",
+        "doubleEP": null,
+        "doubleCP": 500,
+        "doubleMAP": null,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      }
     ]
   },
   {
     "city": "Bhuj",
     "name": "Resort Farm Villa",
-    "cat_or_room": "Semi Deluxe",
+    "state": "Gujarat",
+    "cat_or_room": "Premium",
+    "b2b_cost": 700,
+    "rates": [
+      3000,
+      3900,
+      3500,
+      4400,
+      4000,
+      4900,
+      5500,
+      6400,
+      700,
+      1600
+    ],
+    "rooms_detail": [
+      {
+        "roomType": "Semi Deluxe",
+        "doubleEP": null,
+        "doubleCP": 3000,
+        "doubleMAP": 3900,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Deluxe Room",
+        "doubleEP": null,
+        "doubleCP": 3500,
+        "doubleMAP": 4400,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Haveli Cottage",
+        "doubleEP": null,
+        "doubleCP": 4000,
+        "doubleMAP": 4900,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Family Room",
+        "doubleEP": null,
+        "doubleCP": 5500,
+        "doubleMAP": 6400,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Extra Adult passenger",
+        "doubleEP": null,
+        "doubleCP": 700,
+        "doubleMAP": 1600,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      }
+    ]
+  },
+  {
+    "city": "Alleppey",
+    "name": "Venice Iva Residency",
+    "state": "Kerala",
+    "cat_or_room": "Standard",
+    "b2b_cost": 500,
+    "rates": [
+      3900,
+      5100,
+      4900,
+      6100,
+      800,
+      1400,
+      5600,
+      6800,
+      600,
+      1000,
+      500,
+      900
+    ],
+    "rooms_detail": [
+      {
+        "roomType": "Deluxe Room",
+        "doubleEP": null,
+        "doubleCP": 3900,
+        "doubleMAP": 5100,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Quadruple Bed Room (04 pax)",
+        "doubleEP": null,
+        "doubleCP": 4900,
+        "doubleMAP": 6100,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Extra Adult passenger",
+        "doubleEP": null,
+        "doubleCP": 800,
+        "doubleMAP": 1400,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Triple Bed Room (03 pax)",
+        "doubleEP": null,
+        "doubleCP": 5600,
+        "doubleMAP": 6800,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Child with bed",
+        "doubleEP": null,
+        "doubleCP": 600,
+        "doubleMAP": 1000,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Child without bed",
+        "doubleEP": null,
+        "doubleCP": 500,
+        "doubleMAP": 900,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      }
+    ]
+  },
+  {
+    "city": "Thekkady",
+    "name": "The Elephant Court",
+    "state": "Kerala",
+    "cat_or_room": "Luxury",
+    "b2b_cost": 700,
+    "rates": [
+      7200,
+      9100,
+      13500,
+      9500,
+      11400,
+      15800,
+      12000,
+      13900,
+      18300,
+      14500,
+      16400,
+      20800,
+      2000,
+      2950,
+      3950,
+      1250,
+      1700,
+      2150,
+      700,
+      1150,
+      1600
+    ],
+    "rooms_detail": [
+      {
+        "roomType": "Patio",
+        "doubleEP": null,
+        "doubleCP": 7200,
+        "doubleMAP": 9100,
+        "doubleAP": 13500,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Honeymoon Suite",
+        "doubleEP": null,
+        "doubleCP": 9500,
+        "doubleMAP": 11400,
+        "doubleAP": 15800,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Garden Suite",
+        "doubleEP": null,
+        "doubleCP": 12000,
+        "doubleMAP": 13900,
+        "doubleAP": 18300,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Pool Studio",
+        "doubleEP": null,
+        "doubleCP": 14500,
+        "doubleMAP": 16400,
+        "doubleAP": 20800,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Extra Adult passenger",
+        "doubleEP": null,
+        "doubleCP": 2000,
+        "doubleMAP": 2950,
+        "doubleAP": 3950,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Child with bed",
+        "doubleEP": null,
+        "doubleCP": 1250,
+        "doubleMAP": 1700,
+        "doubleAP": 2150,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Child without bed",
+        "doubleEP": null,
+        "doubleCP": 700,
+        "doubleMAP": 1150,
+        "doubleAP": 1600,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      }
+    ]
+  },
+  {
+    "city": "Thekkady",
+    "name": "Peppervine",
+    "state": "Kerala",
+    "cat_or_room": "Premium",
+    "b2b_cost": 500,
+    "rates": [
+      4300,
+      5700,
+      7100,
+      5300,
+      6700,
+      8100,
+      1500,
+      2200,
+      2900,
+      950,
+      1300,
+      1650,
+      500,
+      850,
+      1200,
+      6000,
+      7400,
+      8800
+    ],
+    "rooms_detail": [
+      {
+        "roomType": "Deluxe Room",
+        "doubleEP": null,
+        "doubleCP": 4300,
+        "doubleMAP": 5700,
+        "doubleAP": 7100,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Suite Room",
+        "doubleEP": null,
+        "doubleCP": 5300,
+        "doubleMAP": 6700,
+        "doubleAP": 8100,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Extra Adult passenger",
+        "doubleEP": null,
+        "doubleCP": 1500,
+        "doubleMAP": 2200,
+        "doubleAP": 2900,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Child with bed",
+        "doubleEP": null,
+        "doubleCP": 950,
+        "doubleMAP": 1300,
+        "doubleAP": 1650,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Child without bed",
+        "doubleEP": null,
+        "doubleCP": 500,
+        "doubleMAP": 850,
+        "doubleAP": 1200,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Premium Room",
+        "doubleEP": null,
+        "doubleCP": 6000,
+        "doubleMAP": 7400,
+        "doubleAP": 8800,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      }
+    ]
+  },
+  {
+    "city": "Kovalam",
+    "name": "Uday Samudra Beach Hotel",
+    "state": "Kerala",
+    "cat_or_room": "Premium",
+    "b2b_cost": 5712,
+    "rates": [
+      5712,
+      7560,
+      11269
+    ],
+    "rooms_detail": [
+      {
+        "roomType": "Standard Room",
+        "doubleEP": null,
+        "doubleCP": 5712,
+        "doubleMAP": 7560,
+        "doubleAP": 11269,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      }
+    ]
+  },
+  {
+    "city": "Kovalam",
+    "name": "Uday Samudra Leisure Beach Hotel",
+    "state": "Kerala",
+    "cat_or_room": "Premium",
+    "b2b_cost": 850,
+    "rates": [
+      6776,
+      8568,
+      12390,
+      7784,
+      9617,
+      13452,
+      9440,
+      11446,
+      14927,
+      11505,
+      13570,
+      17051,
+      13865,
+      15930,
+      19588,
+      16225,
+      18290,
+      21063,
+      17995,
+      20060,
+      22597,
+      27435,
+      29500,
+      31565,
+      2000,
+      2500,
+      3000,
+      1000,
+      1750,
+      850
+    ],
+    "rooms_detail": [
+      {
+        "roomType": "Atrium room",
+        "doubleEP": null,
+        "doubleCP": 6776,
+        "doubleMAP": 8568,
+        "doubleAP": 12390,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Pool view Room",
+        "doubleEP": null,
+        "doubleCP": 7784,
+        "doubleMAP": 9617,
+        "doubleAP": 13452,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Coastal view room",
+        "doubleEP": null,
+        "doubleCP": 9440,
+        "doubleMAP": 11446,
+        "doubleAP": 14927,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Premium Sea view Room",
+        "doubleEP": null,
+        "doubleCP": 11505,
+        "doubleMAP": 13570,
+        "doubleAP": 17051,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Lounge Suite",
+        "doubleEP": null,
+        "doubleCP": 13865,
+        "doubleMAP": 15930,
+        "doubleAP": 19588,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Lounge Seaview Suite",
+        "doubleEP": null,
+        "doubleCP": 16225,
+        "doubleMAP": 18290,
+        "doubleAP": 21063,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Ocean Breeze Suite",
+        "doubleEP": null,
+        "doubleCP": 17995,
+        "doubleMAP": 20060,
+        "doubleAP": 22597,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Grand Family Suite",
+        "doubleEP": null,
+        "doubleCP": 27435,
+        "doubleMAP": 29500,
+        "doubleAP": 31565,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Extra Adult passenger",
+        "doubleEP": null,
+        "doubleCP": 2000,
+        "doubleMAP": 2500,
+        "doubleAP": 3000,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Child with bed",
+        "doubleEP": null,
+        "doubleCP": 1000,
+        "doubleMAP": 1750,
+        "doubleAP": 2500,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Child without bed",
+        "doubleEP": null,
+        "doubleCP": 850,
+        "doubleMAP": 1000,
+        "doubleAP": 1000,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      }
+    ]
+  },
+  {
+    "city": "Kovalam",
+    "name": "The Byke Heritage - Puja Samudra",
+    "state": "Kerala",
+    "cat_or_room": "Premium",
     "b2b_cost": 3000,
     "rates": [
       3000,
-      3900
+      3400,
+      3800,
+      3500,
+      3900,
+      4300
+    ],
+    "rooms_detail": [
+      {
+        "roomType": "Deluxe",
+        "doubleEP": null,
+        "doubleCP": 3000,
+        "doubleMAP": 3400,
+        "doubleAP": 3800,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Super Deluxe",
+        "doubleEP": null,
+        "doubleCP": 3500,
+        "doubleMAP": 3900,
+        "doubleAP": 4300,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      }
     ]
   },
   {
-    "city": "Bhuj",
-    "name": "Resort Farm Villa",
-    "cat_or_room": "Deluxe Room",
-    "b2b_cost": 3500,
+    "city": "Alleppey",
+    "name": "Uday Backwater Resort",
+    "state": "Kerala",
+    "cat_or_room": "Premium",
+    "b2b_cost": 850,
+    "rates": [
+      6440,
+      8568,
+      12567,
+      7392,
+      9617,
+      13806,
+      11387,
+      13570,
+      16166,
+      13393,
+      15576,
+      19116,
+      23541,
+      25960,
+      29500,
+      38940,
+      41300,
+      44781,
+      2000,
+      2500,
+      3000,
+      1000,
+      1750,
+      850
+    ],
+    "rooms_detail": [
+      {
+        "roomType": "Lakeview Deluxe Room",
+        "doubleEP": null,
+        "doubleCP": 6440,
+        "doubleMAP": 8568,
+        "doubleAP": 12567,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Lake View Elite Rooms",
+        "doubleEP": null,
+        "doubleCP": 7392,
+        "doubleMAP": 9617,
+        "doubleAP": 13806,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Lakeview Premium Room",
+        "doubleEP": null,
+        "doubleCP": 11387,
+        "doubleMAP": 13570,
+        "doubleAP": 16166,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Lakeview Suite Room",
+        "doubleEP": null,
+        "doubleCP": 13393,
+        "doubleMAP": 15576,
+        "doubleAP": 19116,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Pool Villa",
+        "doubleEP": null,
+        "doubleCP": 23541,
+        "doubleMAP": 25960,
+        "doubleAP": 29500,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Premium Pool Villa (2 Bed Room unit)",
+        "doubleEP": null,
+        "doubleCP": 38940,
+        "doubleMAP": 41300,
+        "doubleAP": 44781,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Extra Adult passenger",
+        "doubleEP": null,
+        "doubleCP": 2000,
+        "doubleMAP": 2500,
+        "doubleAP": 3000,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Child with bed",
+        "doubleEP": null,
+        "doubleCP": 1000,
+        "doubleMAP": 1750,
+        "doubleAP": 2500,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Child without bed",
+        "doubleEP": null,
+        "doubleCP": 850,
+        "doubleMAP": 1000,
+        "doubleAP": 1000,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      }
+    ]
+  },
+  {
+    "city": "Thiruvananthapuram",
+    "name": "Uday Suites, The Airport Hotel",
+    "state": "Kerala",
+    "cat_or_room": "Premium",
+    "b2b_cost": 750,
+    "rates": [
+      4704,
+      6160,
+      8344,
+      5712,
+      7280,
+      9440,
+      6720,
+      10620,
+      10640,
+      13570,
+      15930,
+      9464,
+      11210,
+      12390,
+      1500,
+      1700,
+      2000,
+      1000,
+      1250,
+      750
+    ],
+    "rooms_detail": [
+      {
+        "roomType": "Mystica",
+        "doubleEP": null,
+        "doubleCP": 4704,
+        "doubleMAP": 6160,
+        "doubleAP": 8344,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Ixora",
+        "doubleEP": null,
+        "doubleCP": 5712,
+        "doubleMAP": 7280,
+        "doubleAP": 9440,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Exotica",
+        "doubleEP": null,
+        "doubleCP": 6720,
+        "doubleMAP": 8344,
+        "doubleAP": 10620,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Raja Ravi Varma Suite",
+        "doubleEP": null,
+        "doubleCP": 10640,
+        "doubleMAP": 13570,
+        "doubleAP": 15930,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Heritage Suite",
+        "doubleEP": null,
+        "doubleCP": 9464,
+        "doubleMAP": 11210,
+        "doubleAP": 12390,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Extra Adult passenger",
+        "doubleEP": null,
+        "doubleCP": 1500,
+        "doubleMAP": 1700,
+        "doubleAP": 2000,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Child with bed",
+        "doubleEP": null,
+        "doubleCP": 1000,
+        "doubleMAP": 1250,
+        "doubleAP": 1250,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Child without bed",
+        "doubleEP": null,
+        "doubleCP": 750,
+        "doubleMAP": 750,
+        "doubleAP": 750,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      }
+    ]
+  },
+  {
+    "city": "Munnar",
+    "name": "Tea castle resort",
+    "state": "Kerala",
+    "cat_or_room": "Premium",
+    "b2b_cost": 400,
+    "rates": [
+      2800,
+      4000,
+      5200,
+      3100,
+      4300,
+      5500,
+      6400,
+      900,
+      1500,
+      2100,
+      400,
+      850,
+      1200,
+      700,
+      1700
+    ],
+    "rooms_detail": [
+      {
+        "roomType": "Executive Room",
+        "doubleEP": null,
+        "doubleCP": 2800,
+        "doubleMAP": 4000,
+        "doubleAP": 5200,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Deluxe Room",
+        "doubleEP": null,
+        "doubleCP": 3100,
+        "doubleMAP": 4300,
+        "doubleAP": 5500,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Club Room",
+        "doubleEP": null,
+        "doubleCP": 4000,
+        "doubleMAP": 5200,
+        "doubleAP": 6400,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Extra Adult passenger",
+        "doubleEP": null,
+        "doubleCP": 900,
+        "doubleMAP": 1500,
+        "doubleAP": 2100,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Child with bed",
+        "doubleEP": null,
+        "doubleCP": 400,
+        "doubleMAP": 850,
+        "doubleAP": 1200,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Child without bed",
+        "doubleEP": null,
+        "doubleCP": 700,
+        "doubleMAP": 1200,
+        "doubleAP": 1700,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      }
+    ]
+  },
+  {
+    "city": "Munnar",
+    "name": "The Breeze Resort",
+    "state": "Kerala",
+    "cat_or_room": "Premium",
+    "b2b_cost": 500,
     "rates": [
       3500,
-      4400
+      3400,
+      800,
+      1350,
+      3750,
+      4950,
+      600,
+      1000,
+      500,
+      900
+    ],
+    "rooms_detail": [
+      {
+        "roomType": "Deluxe Room (With Balcony)",
+        "doubleEP": null,
+        "doubleCP": 3500,
+        "doubleMAP": 3400,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Extra Adult passenger",
+        "doubleEP": null,
+        "doubleCP": 800,
+        "doubleMAP": 1350,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Valley View Room (With Balcony)",
+        "doubleEP": null,
+        "doubleCP": 3750,
+        "doubleMAP": 4950,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Child with bed",
+        "doubleEP": null,
+        "doubleCP": 600,
+        "doubleMAP": 1000,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Child without bed",
+        "doubleEP": null,
+        "doubleCP": 500,
+        "doubleMAP": 900,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      }
     ]
   },
   {
-    "city": "Bhuj",
-    "name": "Resort Farm Villa",
-    "cat_or_room": "Haveli Cottage",
-    "b2b_cost": 4000,
+    "city": "Munnar",
+    "name": "The Whispering Meadows",
+    "state": "Kerala",
+    "cat_or_room": "Premium",
+    "b2b_cost": 500,
     "rates": [
-      4000,
-      4900
+      3600,
+      4900,
+      800,
+      1450,
+      3400,
+      4700,
+      600,
+      1000,
+      500,
+      900
+    ],
+    "rooms_detail": [
+      {
+        "roomType": "Executive Room",
+        "doubleEP": null,
+        "doubleCP": 3600,
+        "doubleMAP": 4900,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Extra Adult passenger",
+        "doubleEP": null,
+        "doubleCP": 800,
+        "doubleMAP": 1450,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Superior Rooms [With Balcony]",
+        "doubleEP": null,
+        "doubleCP": 3400,
+        "doubleMAP": 4700,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Child with bed",
+        "doubleEP": null,
+        "doubleCP": 600,
+        "doubleMAP": 1000,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Child without bed",
+        "doubleEP": null,
+        "doubleCP": 500,
+        "doubleMAP": 900,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      }
     ]
   },
   {
-    "city": "Bhuj",
-    "name": "Resort Farm Villa",
-    "cat_or_room": "Family Room",
+    "city": "Munnar",
+    "name": "Blossom Hill Resort",
+    "state": "Kerala",
+    "cat_or_room": "Premium",
+    "b2b_cost": 500,
+    "rates": [
+      3400,
+      4700,
+      800,
+      1450,
+      3900,
+      5200,
+      600,
+      1250,
+      500,
+      1150
+    ],
+    "rooms_detail": [
+      {
+        "roomType": "Valley View Cottage (With Balcony)",
+        "doubleEP": null,
+        "doubleCP": 3400,
+        "doubleMAP": 4700,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Extra Adult passenger",
+        "doubleEP": null,
+        "doubleCP": 800,
+        "doubleMAP": 1450,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Premium Valley View Cottage (With Balcony)",
+        "doubleEP": null,
+        "doubleCP": 3900,
+        "doubleMAP": 5200,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Child with bed",
+        "doubleEP": null,
+        "doubleCP": 600,
+        "doubleMAP": 1250,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Child without bed",
+        "doubleEP": null,
+        "doubleCP": 500,
+        "doubleMAP": 1150,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      }
+    ]
+  },
+  {
+    "city": "Munnar",
+    "name": "Seven Springs Plantation Resort",
+    "state": "Kerala",
+    "cat_or_room": "Premium",
+    "b2b_cost": 1000,
+    "rates": [
+      3500,
+      4500,
+      5500,
+      6500,
+      8000,
+      9000,
+      1000,
+      2000
+    ],
+    "rooms_detail": [
+      {
+        "roomType": "Deluxe Room",
+        "doubleEP": null,
+        "doubleCP": 3500,
+        "doubleMAP": 4500,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Super Deluxe Room",
+        "doubleEP": null,
+        "doubleCP": 4500,
+        "doubleMAP": 5500,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Suite Rooms",
+        "doubleEP": null,
+        "doubleCP": 5500,
+        "doubleMAP": 6500,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Tree House",
+        "doubleEP": null,
+        "doubleCP": 8000,
+        "doubleMAP": 9000,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Extra Adult passenger",
+        "doubleEP": null,
+        "doubleCP": 1000,
+        "doubleMAP": 2000,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      }
+    ]
+  },
+  {
+    "city": "Alleppey",
+    "name": "Casino Houseboats",
+    "state": "Kerala",
+    "cat_or_room": "Premium",
     "b2b_cost": 5500,
     "rates": [
       5500,
-      6400
+      8500
+    ],
+    "rooms_detail": [
+      {
+        "roomType": "Standard",
+        "doubleEP": null,
+        "doubleCP": null,
+        "doubleMAP": null,
+        "doubleAP": 5500,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Preimum",
+        "doubleEP": null,
+        "doubleCP": null,
+        "doubleMAP": null,
+        "doubleAP": 8500,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      }
+    ]
+  },
+  {
+    "city": "Alleppey",
+    "name": "Haveli Backwater Resort",
+    "state": "Kerala",
+    "cat_or_room": "Premium",
+    "b2b_cost": 500,
+    "rates": [
+      3200,
+      4400,
+      5600,
+      3500,
+      4700,
+      5900,
+      4500,
+      5700,
+      6900,
+      1000,
+      1600,
+      2200,
+      800,
+      1200,
+      500,
+      1100
+    ],
+    "rooms_detail": [
+      {
+        "roomType": "Royal Deluxe",
+        "doubleEP": null,
+        "doubleCP": 3200,
+        "doubleMAP": 4400,
+        "doubleAP": 5600,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Royal Grand",
+        "doubleEP": null,
+        "doubleCP": 3500,
+        "doubleMAP": 4700,
+        "doubleAP": 5900,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Royal Suite",
+        "doubleEP": null,
+        "doubleCP": 4500,
+        "doubleMAP": 5700,
+        "doubleAP": 6900,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Extra Adult passenger",
+        "doubleEP": null,
+        "doubleCP": 1000,
+        "doubleMAP": 1600,
+        "doubleAP": 2200,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Child with bed",
+        "doubleEP": null,
+        "doubleCP": 800,
+        "doubleMAP": 1200,
+        "doubleAP": 1600,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Child without bed",
+        "doubleEP": null,
+        "doubleCP": 500,
+        "doubleMAP": 800,
+        "doubleAP": 1100,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      }
+    ]
+  },
+  {
+    "city": "Alleppey",
+    "name": "Pagoda Resorts",
+    "state": "Kerala",
+    "cat_or_room": "Premium",
+    "b2b_cost": 400,
+    "rates": [
+      2500,
+      3600,
+      4700,
+      2800,
+      3900,
+      5000,
+      3300,
+      4400,
+      5500,
+      5800,
+      800,
+      1350,
+      1900,
+      600,
+      900,
+      1200,
+      400,
+      700,
+      1000
+    ],
+    "rooms_detail": [
+      {
+        "roomType": "Deluxe",
+        "doubleEP": null,
+        "doubleCP": 2500,
+        "doubleMAP": 3600,
+        "doubleAP": 4700,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Deluxe Superior",
+        "doubleEP": null,
+        "doubleCP": 2800,
+        "doubleMAP": 3900,
+        "doubleAP": 5000,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Pagoda Cottage",
+        "doubleEP": null,
+        "doubleCP": 3300,
+        "doubleMAP": 4400,
+        "doubleAP": 5500,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Suite",
+        "doubleEP": null,
+        "doubleCP": 3600,
+        "doubleMAP": 4700,
+        "doubleAP": 5800,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Extra Adult passenger",
+        "doubleEP": null,
+        "doubleCP": 800,
+        "doubleMAP": 1350,
+        "doubleAP": 1900,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Child with bed",
+        "doubleEP": null,
+        "doubleCP": 600,
+        "doubleMAP": 900,
+        "doubleAP": 1200,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Child without bed",
+        "doubleEP": null,
+        "doubleCP": 400,
+        "doubleMAP": 700,
+        "doubleAP": 1000,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      }
+    ]
+  },
+  {
+    "city": "Thekkady",
+    "name": "Pagoda Plantation Resort",
+    "state": "Kerala",
+    "cat_or_room": "Premium",
+    "b2b_cost": 400,
+    "rates": [
+      3300,
+      4300,
+      3800,
+      4800,
+      4100,
+      5100,
+      6800,
+      5000,
+      6000,
+      5500,
+      6500,
+      900,
+      1400,
+      600,
+      400,
+      700
+    ],
+    "rooms_detail": [
+      {
+        "roomType": "Valley View Deluxe",
+        "doubleEP": null,
+        "doubleCP": 3300,
+        "doubleMAP": 4300,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Hill Top Deluxe",
+        "doubleEP": null,
+        "doubleCP": 3800,
+        "doubleMAP": 4800,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Hill Top Premium",
+        "doubleEP": null,
+        "doubleCP": 4100,
+        "doubleMAP": 5100,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Valley View Family Room (4 PAX)",
+        "doubleEP": null,
+        "doubleCP": 4800,
+        "doubleMAP": 6800,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Tea Valley Deluxe",
+        "doubleEP": null,
+        "doubleCP": 5000,
+        "doubleMAP": 6000,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Tea Valley Premium",
+        "doubleEP": null,
+        "doubleCP": 5500,
+        "doubleMAP": 6500,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Extra Adult passenger",
+        "doubleEP": null,
+        "doubleCP": 900,
+        "doubleMAP": 1400,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Child with bed",
+        "doubleEP": null,
+        "doubleCP": 600,
+        "doubleMAP": 900,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Child without bed",
+        "doubleEP": null,
+        "doubleCP": 400,
+        "doubleMAP": 700,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      }
+    ]
+  },
+  {
+    "city": "Thekkady",
+    "name": "Jungle Park Resort",
+    "state": "Kerala",
+    "cat_or_room": "Premium",
+    "b2b_cost": 500,
+    "rates": [
+      3100,
+      4400,
+      3600,
+      4900,
+      3700,
+      5000,
+      5500,
+      6800,
+      6000,
+      7300,
+      800,
+      1450,
+      600,
+      1000,
+      500,
+      900
+    ],
+    "rooms_detail": [
+      {
+        "roomType": "Jungle View Deluxe (Non A/c)",
+        "doubleEP": null,
+        "doubleCP": 3100,
+        "doubleMAP": 4400,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Jungle View Venus (A/c)",
+        "doubleEP": null,
+        "doubleCP": 3600,
+        "doubleMAP": 4900,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "DeluxeFamilyRoom-03Pax (Non A/c)",
+        "doubleEP": null,
+        "doubleCP": 3700,
+        "doubleMAP": 5000,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Jungle View Family- 4Pax (Non A/c)",
+        "doubleEP": null,
+        "doubleCP": 5500,
+        "doubleMAP": 6800,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Jungle View Family- 4Pax (A/c)",
+        "doubleEP": null,
+        "doubleCP": 6000,
+        "doubleMAP": 7300,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Extra Adult passenger",
+        "doubleEP": null,
+        "doubleCP": 800,
+        "doubleMAP": 1450,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Child with bed",
+        "doubleEP": null,
+        "doubleCP": 600,
+        "doubleMAP": 1000,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Child without bed",
+        "doubleEP": null,
+        "doubleCP": 500,
+        "doubleMAP": 900,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      }
+    ]
+  },
+  {
+    "city": "Alleppey",
+    "name": "Symphony Houseboats",
+    "state": "Kerala",
+    "cat_or_room": "Premium",
+    "b2b_cost": 3000,
+    "rates": [
+      3000
+    ],
+    "rooms_detail": [
+      {
+        "roomType": "A Day Cruise without room Checkin 1pm to Checkout 5:30pm same day ,Veg",
+        "doubleEP": null,
+        "doubleCP": 3000,
+        "doubleMAP": null,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      }
+    ]
+  },
+  {
+    "city": "Kovalam",
+    "name": "Jeevan Beach Resort",
+    "state": "Kerala",
+    "cat_or_room": "Premium",
+    "b2b_cost": 500,
+    "rates": [
+      3400,
+      4600,
+      3600,
+      4800,
+      3900,
+      5200,
+      5000,
+      6200,
+      5500,
+      7200,
+      800,
+      1200,
+      600,
+      1000,
+      500,
+      900
+    ],
+    "rooms_detail": [
+      {
+        "roomType": "Sea Shell (Partial Sea View)",
+        "doubleEP": null,
+        "doubleCP": 3400,
+        "doubleMAP": 4600,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Sea Shore (Partial Sea View over the Pool)",
+        "doubleEP": null,
+        "doubleCP": 3400,
+        "doubleMAP": 4600,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Bay Watch (Sunset Sea View)",
+        "doubleEP": null,
+        "doubleCP": 3600,
+        "doubleMAP": 4800,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Exotic Sea View (Best Sea View)",
+        "doubleEP": null,
+        "doubleCP": 3900,
+        "doubleMAP": 5200,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Wooden Suite (Partial Sea View)",
+        "doubleEP": null,
+        "doubleCP": 5000,
+        "doubleMAP": 6200,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Pearl Sea View With Terrace (Best Sea View)",
+        "doubleEP": null,
+        "doubleCP": 5500,
+        "doubleMAP": 7200,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Extra Adult passenger",
+        "doubleEP": null,
+        "doubleCP": 800,
+        "doubleMAP": 1200,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Child with bed",
+        "doubleEP": null,
+        "doubleCP": 600,
+        "doubleMAP": 1000,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Child without bed",
+        "doubleEP": null,
+        "doubleCP": 500,
+        "doubleMAP": 900,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      }
+    ]
+  },
+  {
+    "city": "Varkala",
+    "name": "Sunview Beach Resort & Spa by Citrine",
+    "state": "Kerala",
+    "cat_or_room": "Luxury",
+    "b2b_cost": 3500,
+    "rates": [
+      6500,
+      7000,
+      7500,
+      8500,
+      9000,
+      12000,
+      3500
+    ],
+    "rooms_detail": [
+      {
+        "roomType": "Garden View",
+        "doubleEP": null,
+        "doubleCP": 6500,
+        "doubleMAP": null,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Pool View",
+        "doubleEP": null,
+        "doubleCP": 7000,
+        "doubleMAP": null,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Ocean View",
+        "doubleEP": null,
+        "doubleCP": 7500,
+        "doubleMAP": null,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Heritage",
+        "doubleEP": null,
+        "doubleCP": 8500,
+        "doubleMAP": null,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Royal Seaview",
+        "doubleEP": null,
+        "doubleCP": 9000,
+        "doubleMAP": null,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Panoramic Vista",
+        "doubleEP": null,
+        "doubleCP": 12000,
+        "doubleMAP": null,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "D Series (No View)",
+        "doubleEP": null,
+        "doubleCP": 3500,
+        "doubleMAP": null,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      }
+    ]
+  },
+  {
+    "city": "Munnar",
+    "name": "Sprise Munnar Resort & Spa",
+    "state": "Kerala",
+    "cat_or_room": "Luxury",
+    "b2b_cost": 750,
+    "rates": [
+      6250,
+      7050,
+      6750,
+      7550,
+      10000,
+      10800,
+      12500,
+      13300,
+      1750,
+      2350,
+      1250,
+      1850,
+      750,
+      1350
+    ],
+    "rooms_detail": [
+      {
+        "roomType": "Marvellous Mountain View",
+        "doubleEP": null,
+        "doubleCP": 6250,
+        "doubleMAP": 7050,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Majestic Ponmudi Dam View",
+        "doubleEP": null,
+        "doubleCP": 6750,
+        "doubleMAP": 7550,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Timeless Jacuzzi Suite",
+        "doubleEP": null,
+        "doubleCP": 10000,
+        "doubleMAP": 10800,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Fabulous Interconnecting Suite (04 Pax)",
+        "doubleEP": null,
+        "doubleCP": 12500,
+        "doubleMAP": 13300,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Extra Adult passenger",
+        "doubleEP": null,
+        "doubleCP": 1750,
+        "doubleMAP": 2350,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Child with bed",
+        "doubleEP": null,
+        "doubleCP": 1250,
+        "doubleMAP": 1850,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Child without bed",
+        "doubleEP": null,
+        "doubleCP": 750,
+        "doubleMAP": 1350,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      }
+    ]
+  },
+  {
+    "city": "Kochi",
+    "name": "Broad Bean Hotel",
+    "state": "Kerala",
+    "cat_or_room": "Premium",
+    "b2b_cost": 500,
+    "rates": [
+      3100,
+      4300,
+      3400,
+      4600,
+      3500,
+      4700,
+      5900,
+      7100,
+      6900,
+      8100,
+      800,
+      1200,
+      600,
+      1000,
+      500,
+      900
+    ],
+    "rooms_detail": [
+      {
+        "roomType": "Standard Room",
+        "doubleEP": null,
+        "doubleCP": 3100,
+        "doubleMAP": 4300,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Deluxe Room",
+        "doubleEP": null,
+        "doubleCP": 3400,
+        "doubleMAP": 4600,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Executive Room",
+        "doubleEP": null,
+        "doubleCP": 3500,
+        "doubleMAP": 4700,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Deluxe Suite",
+        "doubleEP": null,
+        "doubleCP": 5900,
+        "doubleMAP": 7100,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Premium Suite",
+        "doubleEP": null,
+        "doubleCP": 6900,
+        "doubleMAP": 8100,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Extra Adult passenger",
+        "doubleEP": null,
+        "doubleCP": 800,
+        "doubleMAP": 1200,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Child with bed",
+        "doubleEP": null,
+        "doubleCP": 600,
+        "doubleMAP": 1000,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Child without bed",
+        "doubleEP": null,
+        "doubleCP": 500,
+        "doubleMAP": 900,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      }
+    ]
+  },
+  {
+    "city": "Kovalam",
+    "name": "Lagoona Beach Resort",
+    "state": "Kerala",
+    "cat_or_room": "Premium",
+    "b2b_cost": 400,
+    "rates": [
+      3800,
+      5100,
+      5800,
+      7100,
+      5300,
+      6600,
+      8300,
+      9600,
+      9300,
+      10600,
+      800,
+      1250,
+      600,
+      1050,
+      400,
+      850
+    ],
+    "rooms_detail": [
+      {
+        "roomType": "Lagoona Standard Sea View",
+        "doubleEP": null,
+        "doubleCP": 3800,
+        "doubleMAP": 5100,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Lagoona Standard Non-Sea View",
+        "doubleEP": null,
+        "doubleCP": 3800,
+        "doubleMAP": 5100,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Premium Sea View Rooms with Balcony",
+        "doubleEP": null,
+        "doubleCP": 5800,
+        "doubleMAP": 7100,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Premium Twin Room (Non Sea View)",
+        "doubleEP": null,
+        "doubleCP": 5300,
+        "doubleMAP": 6600,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Premium Sea View Suite Room with Balcony",
+        "doubleEP": null,
+        "doubleCP": 8300,
+        "doubleMAP": 9600,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Cottage Villa with Living Area",
+        "doubleEP": null,
+        "doubleCP": 9300,
+        "doubleMAP": 10600,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Extra Adult passenger",
+        "doubleEP": null,
+        "doubleCP": 800,
+        "doubleMAP": 1250,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Child with bed",
+        "doubleEP": null,
+        "doubleCP": 600,
+        "doubleMAP": 1050,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Child without bed",
+        "doubleEP": null,
+        "doubleCP": 400,
+        "doubleMAP": 850,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      }
+    ]
+  },
+  {
+    "city": "Kochi",
+    "name": "Napier Heritage Fort",
+    "state": "Kerala",
+    "cat_or_room": "Premium",
+    "b2b_cost": 750,
+    "rates": [
+      6000,
+      7300,
+      7000,
+      8300,
+      8000,
+      9300,
+      9000,
+      10300,
+      10000,
+      11300,
+      11000,
+      12300,
+      13000,
+      14300,
+      1500,
+      1950,
+      1000,
+      1450,
+      750,
+      1200
+    ],
+    "rooms_detail": [
+      {
+        "roomType": "Dutch Room",
+        "doubleEP": null,
+        "doubleCP": 6000,
+        "doubleMAP": 7300,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Executive Room",
+        "doubleEP": null,
+        "doubleCP": 7000,
+        "doubleMAP": 8300,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Premium Room",
+        "doubleEP": null,
+        "doubleCP": 8000,
+        "doubleMAP": 9300,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Club Room",
+        "doubleEP": null,
+        "doubleCP": 9000,
+        "doubleMAP": 10300,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Viceroy Room",
+        "doubleEP": null,
+        "doubleCP": 10000,
+        "doubleMAP": 11300,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Majestic Luxury [Bathtub Room]",
+        "doubleEP": null,
+        "doubleCP": 11000,
+        "doubleMAP": 12300,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Royale Luxury Jacuzzi",
+        "doubleEP": null,
+        "doubleCP": 13000,
+        "doubleMAP": 14300,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Extra Adult passenger",
+        "doubleEP": null,
+        "doubleCP": 1500,
+        "doubleMAP": 1950,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Child with bed",
+        "doubleEP": null,
+        "doubleCP": 1000,
+        "doubleMAP": 1450,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Child without bed",
+        "doubleEP": null,
+        "doubleCP": 750,
+        "doubleMAP": 1200,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      }
+    ]
+  },
+  {
+    "city": "Alleppey",
+    "name": "Trium Resort & Houseboats",
+    "state": "Kerala",
+    "cat_or_room": "Premium",
+    "b2b_cost": 650,
+    "rates": [
+      1500,
+      2900,
+      2350,
+      3750,
+      3000,
+      4400,
+      4600,
+      6000,
+      650,
+      2050
+    ],
+    "rooms_detail": [
+      {
+        "roomType": "Standard Room Non AC",
+        "doubleEP": null,
+        "doubleCP": 1500,
+        "doubleMAP": 2900,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Standard Room AC",
+        "doubleEP": null,
+        "doubleCP": 2350,
+        "doubleMAP": 3750,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Standard Twin Bed Room AC",
+        "doubleEP": null,
+        "doubleCP": 2350,
+        "doubleMAP": 3750,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Deluxe Room AC",
+        "doubleEP": null,
+        "doubleCP": 3000,
+        "doubleMAP": 4400,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Suite Room",
+        "doubleEP": null,
+        "doubleCP": 4600,
+        "doubleMAP": 6000,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Extra Adult passenger",
+        "doubleEP": null,
+        "doubleCP": 650,
+        "doubleMAP": 2050,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      }
+    ]
+  },
+  {
+    "city": "Alleppey",
+    "name": "Trium Deluxe Houseboats",
+    "state": "Kerala",
+    "cat_or_room": "Premium",
+    "b2b_cost": 7000,
+    "rates": [
+      7000,
+      8400,
+      8000,
+      9400
+    ],
+    "rooms_detail": [
+      {
+        "roomType": "Day Cruise 12 PM-5PM",
+        "doubleEP": null,
+        "doubleCP": 7000,
+        "doubleMAP": 8400,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Day Nigt Cruise 12PM-9AM",
+        "doubleEP": null,
+        "doubleCP": 8000,
+        "doubleMAP": 9400,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      }
+    ]
+  },
+  {
+    "city": "Alleppey",
+    "name": "Trium Preimum Houseboats",
+    "state": "Kerala",
+    "cat_or_room": "Premium",
+    "b2b_cost": 9500,
+    "rates": [
+      9500,
+      10900,
+      11000,
+      12400
+    ],
+    "rooms_detail": [
+      {
+        "roomType": "Day Cruise 12 PM-5PM",
+        "doubleEP": null,
+        "doubleCP": 9500,
+        "doubleMAP": 10900,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Day Nigt Cruise 12PM-9AM",
+        "doubleEP": null,
+        "doubleCP": 11000,
+        "doubleMAP": 12400,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      }
+    ]
+  },
+  {
+    "city": "Kovalam",
+    "name": "Ocean Bay Ayurvedic Beach Resort",
+    "state": "Kerala",
+    "cat_or_room": "Premium",
+    "b2b_cost": 400,
+    "rates": [
+      3000,
+      4000,
+      2800,
+      3800,
+      1000,
+      1500,
+      750,
+      1150,
+      400,
+      800
+    ],
+    "rooms_detail": [
+      {
+        "roomType": "DLX AC DBL Palm View",
+        "doubleEP": null,
+        "doubleCP": 3000,
+        "doubleMAP": 4000,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "DLX AC DBL",
+        "doubleEP": null,
+        "doubleCP": 2800,
+        "doubleMAP": 3800,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Extra Adult passenger",
+        "doubleEP": null,
+        "doubleCP": 1000,
+        "doubleMAP": 1500,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Child with bed",
+        "doubleEP": null,
+        "doubleCP": 750,
+        "doubleMAP": 1150,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Child without bed",
+        "doubleEP": null,
+        "doubleCP": 400,
+        "doubleMAP": 800,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      }
+    ]
+  },
+  {
+    "city": "Kovalam",
+    "name": "Aadisaktthi Resort",
+    "state": "Kerala",
+    "cat_or_room": "Premium",
+    "b2b_cost": 500,
+    "rates": [
+      5500,
+      7000,
+      6500,
+      8000,
+      7500,
+      9000,
+      12500,
+      15500,
+      14000,
+      1500,
+      2250,
+      1000,
+      1750,
+      500,
+      1250
+    ],
+    "rooms_detail": [
+      {
+        "roomType": "Deluxe AC",
+        "doubleEP": null,
+        "doubleCP": 5500,
+        "doubleMAP": 7000,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Club Deluxe Garden view",
+        "doubleEP": null,
+        "doubleCP": 5500,
+        "doubleMAP": 7000,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Super Deluxe AC",
+        "doubleEP": null,
+        "doubleCP": 6500,
+        "doubleMAP": 8000,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Premium AC",
+        "doubleEP": null,
+        "doubleCP": 7500,
+        "doubleMAP": 9000,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Super Deluxe Family Room (4 Pax)",
+        "doubleEP": null,
+        "doubleCP": 12500,
+        "doubleMAP": 15500,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "The Pool Club",
+        "doubleEP": null,
+        "doubleCP": 12500,
+        "doubleMAP": 14000,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Extra Adult passenger",
+        "doubleEP": null,
+        "doubleCP": 1500,
+        "doubleMAP": 2250,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Child with bed",
+        "doubleEP": null,
+        "doubleCP": 1000,
+        "doubleMAP": 1750,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Child without bed",
+        "doubleEP": null,
+        "doubleCP": 500,
+        "doubleMAP": 1250,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      }
+    ]
+  },
+  {
+    "city": "Alleppey",
+    "name": "Miraaya Sundara Island Villa",
+    "state": "Kerala",
+    "cat_or_room": "Premium",
+    "b2b_cost": 1000,
+    "rates": [
+      10500,
+      12500,
+      15500,
+      17500,
+      2000,
+      3000,
+      1500,
+      1000
+    ],
+    "rooms_detail": [
+      {
+        "roomType": "Premium Villa",
+        "doubleEP": null,
+        "doubleCP": 10500,
+        "doubleMAP": 12500,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Jacuzzi Suite Villa",
+        "doubleEP": null,
+        "doubleCP": 15500,
+        "doubleMAP": 17500,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Extra Adult passenger",
+        "doubleEP": null,
+        "doubleCP": 2000,
+        "doubleMAP": 3000,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Child with bed",
+        "doubleEP": null,
+        "doubleCP": 1500,
+        "doubleMAP": 2000,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Child without bed",
+        "doubleEP": null,
+        "doubleCP": 1000,
+        "doubleMAP": 1500,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      }
     ]
   },
   {
     "city": "Bhuj",
-    "name": "Resort Farm Villa",
-    "cat_or_room": "Extra Adult passenger",
-    "b2b_cost": 700,
+    "name": "Hotel Ilark",
+    "state": "Gujarat",
+    "cat_or_room": "Premium",
+    "b2b_cost": 1232,
     "rates": [
+      4600,
+      5600,
+      5200,
+      6000,
+      6500,
+      7500,
+      7499,
+      8200,
+      1232,
+      1900
+    ],
+    "rooms_detail": [
+      {
+        "roomType": "Deluxe",
+        "doubleEP": null,
+        "doubleCP": 4600,
+        "doubleMAP": 5600,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Super deluxe",
+        "doubleEP": null,
+        "doubleCP": 5200,
+        "doubleMAP": 6000,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Deluxe Suite",
+        "doubleEP": null,
+        "doubleCP": 6500,
+        "doubleMAP": 7500,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Presidential Suite",
+        "doubleEP": null,
+        "doubleCP": 7499,
+        "doubleMAP": 8200,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Extra Adult passenger",
+        "doubleEP": null,
+        "doubleCP": 1232,
+        "doubleMAP": 1900,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      }
+    ]
+  },
+  {
+    "city": "Bhuj",
+    "name": "Hotel Tulsi Residency",
+    "state": "Gujarat",
+    "cat_or_room": "Standard",
+    "b2b_cost": 500,
+    "rates": [
+      2500,
+      2700,
+      3000,
+      3200,
+      3500,
+      3700,
+      4000,
+      500,
       700,
-      1600
+      1000
+    ],
+    "rooms_detail": [
+      {
+        "roomType": "Deluxe",
+        "doubleEP": 2500,
+        "doubleCP": 2700,
+        "doubleMAP": 3000,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Super deluxe",
+        "doubleEP": 3000,
+        "doubleCP": 3200,
+        "doubleMAP": 3500,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Tulsi super deluxe",
+        "doubleEP": 3500,
+        "doubleCP": 3700,
+        "doubleMAP": 4000,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Extra Adult passenger",
+        "doubleEP": 500,
+        "doubleCP": 700,
+        "doubleMAP": 1000,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      }
+    ]
+  },
+  {
+    "city": "Bhuj",
+    "name": "Hotel Mangalam",
+    "state": "Gujarat",
+    "cat_or_room": "Premium",
+    "b2b_cost": 1125,
+    "rates": [
+      2100,
+      2500,
+      3000,
+      3675,
+      4675,
+      4725,
+      5725,
+      5430,
+      7010,
+      5775,
+      6775,
+      1125,
+      1252
+    ],
+    "rooms_detail": [
+      {
+        "roomType": "Standard Ac Room",
+        "doubleEP": 2100,
+        "doubleCP": 2500,
+        "doubleMAP": 3000,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Deluxe Ac Room",
+        "doubleEP": 3675,
+        "doubleCP": null,
+        "doubleMAP": 4675,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Super Deluxe Ac Room",
+        "doubleEP": 4725,
+        "doubleCP": null,
+        "doubleMAP": 5725,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Family Room",
+        "doubleEP": null,
+        "doubleCP": 5430,
+        "doubleMAP": 7010,
+        "doubleAP": null,
+        "tripleEP": 5250,
+        "tripleCP": 5750,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Suite Room Ac",
+        "doubleEP": 5775,
+        "doubleCP": null,
+        "doubleMAP": 6775,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Extra Adult passenger",
+        "doubleEP": 1125,
+        "doubleCP": null,
+        "doubleMAP": 1252,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      }
+    ]
+  },
+  {
+    "city": "Mandvi Beach",
+    "name": "Hotel Seven Beach Inn",
+    "state": "Gujarat",
+    "cat_or_room": "Standard",
+    "b2b_cost": 500,
+    "rates": [
+      2000,
+      1700,
+      500
+    ],
+    "rooms_detail": [
+      {
+        "roomType": "Super Deluxe",
+        "doubleEP": null,
+        "doubleCP": 2000,
+        "doubleMAP": null,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Deluxe",
+        "doubleEP": null,
+        "doubleCP": 1700,
+        "doubleMAP": null,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Extra Adult passenger",
+        "doubleEP": null,
+        "doubleCP": 500,
+        "doubleMAP": null,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      }
+    ]
+  },
+  {
+    "city": "Dhordo",
+    "name": "Nova Patgar Tents",
+    "state": "Gujarat",
+    "cat_or_room": "Premium",
+    "b2b_cost": 3500,
+    "rates": [
+      3500,
+      4500,
+      5500
+    ],
+    "rooms_detail": [
+      {
+        "roomType": "Standard Room",
+        "doubleEP": null,
+        "doubleCP": null,
+        "doubleMAP": null,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      }
+    ]
+  },
+  {
+    "city": "Bhuj",
+    "name": "Hotel Atithi",
+    "state": "Gujarat",
+    "cat_or_room": "Premium",
+    "b2b_cost": 500,
+    "rates": [
+      1700,
+      2000,
+      2500,
+      500
+    ],
+    "rooms_detail": [
+      {
+        "roomType": "Standard Room",
+        "doubleEP": null,
+        "doubleCP": 1700,
+        "doubleMAP": null,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Super Deluxe Room",
+        "doubleEP": null,
+        "doubleCP": 2000,
+        "doubleMAP": null,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Executive Room",
+        "doubleEP": null,
+        "doubleCP": 2500,
+        "doubleMAP": null,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      },
+      {
+        "roomType": "Extra Adult passenger",
+        "doubleEP": null,
+        "doubleCP": 500,
+        "doubleMAP": null,
+        "doubleAP": null,
+        "tripleEP": null,
+        "tripleCP": null,
+        "tripleMAP": null,
+        "tripleAP": null
+      }
     ]
   }
 ]
