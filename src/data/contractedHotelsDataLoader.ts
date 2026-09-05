@@ -48,27 +48,42 @@ const CITY_STATE_MAP: Record<string, { state: string; country: string }> = {
   'Dhordo': { state: 'Gujarat', country: 'India' },
   'Bhuj': { state: 'Gujarat', country: 'India' },
   'Mandvi Beach': { state: 'Gujarat', country: 'India' },
+  'Mandvi': { state: 'Gujarat', country: 'India' },
+  'Hodka': { state: 'Gujarat', country: 'India' },
+  'Ahmedabad': { state: 'Gujarat', country: 'India' },
+  'Kutch': { state: 'Gujarat', country: 'India' },
+  'Alleppey': { state: 'Kerala', country: 'India' },
+  'Thekkady': { state: 'Kerala', country: 'India' },
+  'Kovalam': { state: 'Kerala', country: 'India' },
+  'Thiruvananthapuram': { state: 'Kerala', country: 'India' },
+  'Trivandrum': { state: 'Kerala', country: 'India' },
+  'Munnar': { state: 'Kerala', country: 'India' },
+  'Varkala': { state: 'Kerala', country: 'India' },
+  'Kochi': { state: 'Kerala', country: 'India' },
+  'Cochin': { state: 'Kerala', country: 'India' },
+  'Wayanad': { state: 'Kerala', country: 'India' },
+  'Kumarakom': { state: 'Kerala', country: 'India' },
+  'Poovar': { state: 'Kerala', country: 'India' },
+  'Marari': { state: 'Kerala', country: 'India' },
+  'Vagamon': { state: 'Kerala', country: 'India' },
+  'Bekal': { state: 'Kerala', country: 'India' },
+  'Athirappilly': { state: 'Kerala', country: 'India' },
+  'Kozhikode': { state: 'Kerala', country: 'India' },
 };
 
 /**
  * Builds a display list from the real spreadsheet import (name, city,
- * category, b2b_cost — see contractedHotels.json). This is ONLY shown as a
- * fallback when the real hotels table has zero rows (see
- * HotelContracting.tsx's fetchHotels) — it used to be merged into the live
- * hotel list unconditionally.
- *
- * IMPORTANT: this used to also fabricate contact numbers, emails, Google/
- * internal ratings, and stock photos for these entries — none of that was
- * real data, and it was indistinguishable from genuinely-entered hotels in
- * the UI. Those fields are now left null/unset rather than invented. If you
- * want this data to show real contact info, ratings, or photos, enter these
- * hotels properly through the Hotel Contracting UI instead of relying on
- * this seed list — that's the only way the values will be real.
+ * category, b2b_cost — see contractedHotels.json).
  */
 export function getContractedHotelsMasterList(): ProcessedContractedHotel[] {
   return contractedHotelsRaw.map((h: any, idx: number) => {
     const cityName = (h.city || 'Uttarakhand').trim();
-    const mapping = CITY_STATE_MAP[cityName] || { state: 'Uttarakhand', country: 'India' };
+    const mapping = CITY_STATE_MAP[cityName] || { 
+      state: h.state || 'Uttarakhand', 
+      country: h.country || 'India' 
+    };
+    const hotelState = h.state || mapping.state;
+    const hotelCountry = h.country || mapping.country;
     
     let stars = 3;
     const cat = (h.cat_or_room || '').toLowerCase();
@@ -91,23 +106,23 @@ export function getContractedHotelsMasterList(): ProcessedContractedHotel[] {
       hotel_code: hotelCode,
       star_rating: stars,
       city: cityName,
-      state: mapping.state,
-      country: mapping.country,
+      state: hotelState,
+      country: hotelCountry,
       city_id: cityName,
-      state_id: mapping.state,
-      country_id: mapping.country,
+      state_id: hotelState,
+      country_id: hotelCountry,
       cities: { city_name: cityName },
-      states: { state_name: mapping.state },
-      countries: { country_name: mapping.country },
+      states: { state_name: hotelState },
+      countries: { country_name: hotelCountry },
       google_rating: null,
       internal_rating: null,
       contact_number: null,
       email: null,
-      meal_plan_supported: null,
+      meal_plan_supported: ['EP', 'CP', 'MAP', 'AP'],
       featured_image_url: null,
       cat_or_room: h.cat_or_room || 'Standard',
       b2b_cost: h.b2b_cost || 3000,
-      address: `${cleanName}, ${cityName}, ${mapping.state}, ${mapping.country}`
+      address: `${cleanName}, ${cityName}, ${hotelState}, ${hotelCountry}`
     };
   });
 }

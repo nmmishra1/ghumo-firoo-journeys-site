@@ -404,7 +404,10 @@ export default function PackageMaster() {
       return ['Joshimath', 'Badrinath Dham', 'Haridwar', 'Rishikesh', 'Sitapur', 'Uttarkashi', 'Sonprayag', 'Rudraprayag', 'Pipalkoti', 'Barkot', 'Janki Chatti', 'Kedarnath', 'Guptkashi', 'Chopta', 'Harsil', 'Netala', 'Pandukeshwar'].includes(city);
     }
     if (cityRegionFilter === 'Rann Kutch') {
-      return ['Tent City Dhordo', 'Dhordo', 'Bhuj', 'Dholavira', 'Mandvi Beach'].includes(city);
+      return ['Tent City Dhordo', 'Dhordo', 'Bhuj', 'Dholavira', 'Mandvi Beach', 'Mandvi', 'Hodka', 'Kutch', 'Ahmedabad'].includes(city);
+    }
+    if (cityRegionFilter === 'Kerala') {
+      return ['Munnar', 'Thekkady', 'Alleppey', 'Kovalam', 'Kochi', 'Cochin', 'Wayanad', 'Thiruvananthapuram', 'Trivandrum', 'Kumarakom', 'Varkala', 'Poovar', 'Marari', 'Bekal', 'Athirappilly', 'Kozhikode', 'Vagamon'].includes(city);
     }
     if (cityRegionFilter === 'Kashmir') {
       return ['Srinagar', 'Gulmarg', 'Pahalgam', 'Sonmarg', 'Katara'].includes(city);
@@ -1626,7 +1629,7 @@ export default function PackageMaster() {
                             {/* Quick Region Badges */}
                             <div className="flex flex-wrap gap-1 px-0.5 py-1 border-b border-slate-800">
                               <span className="text-[9px] text-slate-400 font-bold w-full uppercase">Quick Regions:</span>
-                              {['All', 'Char Dham', 'Rann Kutch', 'Kashmir'].map((region) => (
+                              {['All', 'Char Dham', 'Rann Kutch', 'Kerala', 'Kashmir'].map((region) => (
                                 <button
                                   key={region}
                                   type="button"
