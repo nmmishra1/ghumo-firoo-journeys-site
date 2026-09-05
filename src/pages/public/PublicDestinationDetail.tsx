@@ -13,6 +13,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { MASTER_DESTINATIONS, MasterDestination } from '@/data/masterDestinations';
 import { getCuratedGuide, CuratedDestinationGuide } from '@/data/curatedDestinationContent';
+import { getDestinationFaqs } from '@/data/destinationFaqs';
 import { 
   MapPin, Search, ArrowRight, Sparkles, Globe, Compass, 
   Clock, Plane, Calendar, Phone, MessageCircle, CheckCircle2,
@@ -1150,46 +1151,22 @@ export default function PublicDestinationDetail() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {curatedGuide?.faqs ? (
-                curatedGuide.faqs.map((faq, idx) => (
-                  <div key={idx} className="p-4 rounded-xl bg-slate-900 border border-slate-800 space-y-1.5">
-                    <h4 className="text-xs font-bold text-white">{faq.question}</h4>
-                    <p className="text-[11px] text-slate-300 leading-relaxed font-medium">
+              {(() => {
+                const guideFaqs = curatedGuide?.faqs || [];
+                const destFaqs = getDestinationFaqs(`${cityName} ${stateName}`);
+                const combinedFaqs = guideFaqs.length > 0 ? guideFaqs : destFaqs;
+                return combinedFaqs.map((faq, idx) => (
+                  <div key={idx} className="p-4 rounded-xl bg-slate-900 border border-slate-800 space-y-1.5 hover:border-[#C9A25A]/40 transition-colors">
+                    <h4 className="text-xs font-bold text-white flex items-start gap-2">
+                      <HelpCircle className="w-3.5 h-3.5 text-[#C9A25A] shrink-0 mt-0.5" />
+                      {faq.question}
+                    </h4>
+                    <p className="text-[11px] text-slate-300 leading-relaxed font-medium pl-5.5">
                       {faq.answer}
                     </p>
                   </div>
-                ))
-              ) : (
-                <>
-                  <div className="p-4 rounded-xl bg-slate-900 border border-slate-800 space-y-1.5">
-                    <h4 className="text-xs font-bold text-white">What is the best time to visit {cityName}?</h4>
-                    <p className="text-[11px] text-slate-300 leading-relaxed font-medium">
-                      The ideal time to visit {cityName} is between <strong>{bestSeason}</strong> when the weather is pleasant for outdoor exploration, safaris, and heritage walks.
-                    </p>
-                  </div>
-
-                  <div className="p-4 rounded-xl bg-slate-900 border border-slate-800 space-y-1.5">
-                    <h4 className="text-xs font-bold text-white">How many days are recommended for a {cityName} tour?</h4>
-                    <p className="text-[11px] text-slate-300 leading-relaxed font-medium">
-                      A <strong>2 Nights / 3 Days</strong> tour is ideal to cover top attractions and food walks. For combined circuits with neighboring destinations in {stateName}, 4 to 6 days is recommended.
-                    </p>
-                  </div>
-
-                  <div className="p-4 rounded-xl bg-slate-900 border border-slate-800 space-y-1.5">
-                    <h4 className="text-xs font-bold text-white">Can Ghumo Firoo arrange private transfers &amp; customized hotels in {cityName}?</h4>
-                    <p className="text-[11px] text-slate-300 leading-relaxed font-medium">
-                      Yes! We provide complete end-to-end custom packages including verified AC private chauffeurs, hand-picked boutique hotels, and dedicated 24x7 on-trip concierge.
-                    </p>
-                  </div>
-
-                  <div className="p-4 rounded-xl bg-slate-900 border border-slate-800 space-y-1.5">
-                    <h4 className="text-xs font-bold text-white">How do I book a personalized holiday package for {cityName}?</h4>
-                    <p className="text-[11px] text-slate-300 leading-relaxed font-medium">
-                      Simply click <strong>"Plan a Custom Trip"</strong> or WhatsApp our destination specialists directly to get a custom quote and day-wise itinerary proposal.
-                    </p>
-                  </div>
-                </>
-              )}
+                ));
+              })()}
             </div>
           </div>
 

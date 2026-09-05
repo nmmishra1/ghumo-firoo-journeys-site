@@ -19,6 +19,7 @@ import { AttractionCard } from '@/components/packages/AttractionCard';
 import PackageVariantSelector, { PackageVariant } from '@/components/packages/PackageVariantSelector';
 import VariantDetails from '@/components/packages/VariantDetails';
 import PremiumTimeline from '@/components/packages/PremiumTimeline';
+import { getDestinationFaqs } from '@/data/destinationFaqs';
 import { itineraryService } from '@/services/itineraryService';
 
 interface DynamicPackageDetailProps {
@@ -3852,7 +3853,9 @@ const DynamicPackageDetail: React.FC<DynamicPackageDetailProps> = ({ slug: propS
   };
 
   const mapLocations = getDynamicMapLocations(effectivePkg);
-  const faqs = effectivePkg.faqs || [];
+  const faqs = (effectivePkg.faqs && effectivePkg.faqs.length > 0)
+    ? effectivePkg.faqs
+    : getDestinationFaqs(effectivePkg.slug || currentSlug || effectivePkg.destination || effectivePkg.name || '');
   const flightRoutes = effectivePkg.flight_routes || effectivePkg.flightRoutes || [];
 
   const virtualTourData = effectivePkg.virtual_tour && Object.keys(effectivePkg.virtual_tour).length > 0 ? effectivePkg.virtual_tour : {

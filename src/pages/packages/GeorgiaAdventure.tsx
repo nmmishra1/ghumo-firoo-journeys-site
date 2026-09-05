@@ -9,6 +9,7 @@ import ScrollReveal from "@/components/ui/ScrollReveal"
 import { SectionHeading } from "@/components/ui/SectionHeading"
 import { FAQAccordion } from "@/components/ui/FAQAccordion"
 import { StickyCTA } from "@/components/common/StickyCTA"
+import { DESTINATION_FAQS } from "@/data/destinationFaqs"
 import { reviewService, GoogleReview } from "@/services/reviewService"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
 import { 
@@ -228,11 +229,7 @@ const GeorgiaAdventure: React.FC = () => {
     ? attractions 
     : attractions.filter(item => item.category === activeCategory)
 
-  const faqItems = [
-    { id: "ge-faq-1", question: "Do Indian passport holders need a visa for Georgia?", answer: "Indian passport holders holding valid US, UK, Schengen, or GCC residency visas qualify for Visa-Free entry to Georgia. Others require an eVisa processed online in 5 business days." },
-    { id: "ge-faq-2", question: "Is the Kazbegi 4x4 mountain jeep safari included?", answer: "Yes! All GhumoFiroo Georgia packages include 4x4 Mitsubishi Delica jeep transfers up to 2,170m Gergeti Trinity Church." },
-    { id: "ge-faq-3", question: "What currency is used in Georgia?", answer: "The currency is Georgian Lari (GEL). USD and Euros can easily be exchanged at banks and exchange booths across Tbilisi." }
-  ]
+  const faqItems = DESTINATION_FAQS.georgia;
 
   const breadcrumbSchema = buildBreadcrumbJsonLd([
     { name: "Home", item: "/" },
