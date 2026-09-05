@@ -287,7 +287,7 @@ const Packages: React.FC = () => {
       destination: 'Singapore',
       category: 'international',
       region: 'Southeast Asia',
-      image: '/singapore/gardens_by_the_bay_supertree.jpg',
+      image: '/singapore/gardens_by_the_bay.jpg',
       price: '₹42,000',
       duration: '4 Days / 3 Nights',
       rating: 4.9,
@@ -301,7 +301,7 @@ const Packages: React.FC = () => {
       destination: 'Singapore',
       category: 'international',
       region: 'Southeast Asia',
-      image: '/singapore/universal_studios_singapore.jpg',
+      image: '/singapore/universal_studios.jpg',
       price: '₹48,000',
       duration: '5 Days / 4 Nights',
       rating: 4.9,
@@ -315,7 +315,7 @@ const Packages: React.FC = () => {
       destination: 'Singapore',
       category: 'international',
       region: 'Southeast Asia',
-      image: '/singapore/singapore_cable_car_sentosa.jpg',
+      image: '/singapore/cable_car_sentosa.jpg',
       price: '₹62,500',
       duration: '6 Days / 5 Nights',
       rating: 4.95,
@@ -329,7 +329,7 @@ const Packages: React.FC = () => {
       destination: 'Singapore & Malaysia',
       category: 'international',
       region: 'Southeast Asia',
-      image: '/singapore/jewel_changi_rain_vortex.jpg',
+      image: '/singapore/jewel_changi.jpg',
       price: '₹56,000',
       duration: '7 Days / 6 Nights',
       rating: 4.92,
@@ -343,7 +343,7 @@ const Packages: React.FC = () => {
       destination: 'Singapore',
       category: 'international',
       region: 'Southeast Asia',
-      image: '/singapore/mandai_wildlife_zoo.jpg',
+      image: '/singapore/night_safari.jpg',
       price: '₹49,500',
       duration: '5 Days / 4 Nights',
       rating: 4.91,
@@ -357,7 +357,7 @@ const Packages: React.FC = () => {
       destination: 'Singapore',
       category: 'international',
       region: 'Southeast Asia',
-      image: '/singapore/marina_bay_sands_merlion.jpg',
+      image: '/singapore/marina_bay_sands.jpg',
       price: '₹54,000',
       duration: '5 Days / 4 Nights',
       rating: 4.97,
@@ -702,7 +702,7 @@ const Packages: React.FC = () => {
       id: 'singapore-tour',
       name: 'Singapore & Sentosa Island',
       subtitle: 'Universal Studios, Marina Bay Sands, Night Safari & Genting Cruise',
-      image: '/singapore/gardens_by_the_bay_supertree.jpg',
+      image: '/singapore/gardens_by_the_bay.jpg',
       price: '₹42,000 to ₹62,500',
       duration: '3 to 7 Days',
       rating: 4.9,
@@ -1064,7 +1064,6 @@ const Packages: React.FC = () => {
                           <img 
                             src={pkg.image} 
                             alt={pkg.title} 
-                            onError={(e) => { (e.target as HTMLImageElement).src = '/Badrinath.png'; }}
                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
                           />
                           <div className="absolute top-3 left-3 flex gap-2">
