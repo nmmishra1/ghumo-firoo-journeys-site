@@ -358,7 +358,11 @@ export const CabContractWizard: React.FC<CabContractWizardProps> = ({
             profit_margin: rate.profit_margin,
             is_tax_overridden: rate.is_tax_overridden,
             tax_override_reason: rate.tax_override_reason,
-            tax_audit_logs: rate.tax_audit_logs || []
+            tax_audit_logs: rate.tax_audit_logs || [],
+            block_circuit_cost: Number(rate.block_circuit_cost) || (rate.rate_model === 'Block Circuit' ? Number(rate.base_cost || rate.supplier_cost || 0) : 0),
+            block_circuit_km: Number(rate.block_circuit_km) || (rate.rate_model === 'Block Circuit' ? Number(rate.base_km_included || rt?.distance_km || 0) : 0),
+            block_circuit_nights: rate.block_circuit_nights || (rate.rate_model === 'Block Circuit' ? (rt?.travel_time || '') : ''),
+            block_extra_km_rate: Number(rate.block_extra_km_rate) || Number(rate.extra_km_cost || rate.rate_per_km || 0)
           };
         });
 

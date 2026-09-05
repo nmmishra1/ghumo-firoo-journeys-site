@@ -777,17 +777,51 @@ export default function CabContracting() {
                                     <span className="text-slate-600 dark:text-slate-400 font-bold">Season:</span>
                                     <strong className="text-slate-900 dark:text-slate-100 font-bold">{rate.season}</strong>
                                   </div>
+
+                                  {rate.rate_model === 'Block Circuit' && (
+                                    <div className="p-2 bg-amber-500/10 border border-amber-500/20 rounded-lg my-1 space-y-1">
+                                      <div className="flex justify-between text-[11px]">
+                                        <span className="text-amber-500/80 font-bold">Circuit Included:</span>
+                                        <strong className="text-amber-300 font-extrabold">{rate.base_km_included || rate.cab_routes?.distance_km || 0} KM</strong>
+                                      </div>
+                                      <div className="flex justify-between text-[11px]">
+                                        <span className="text-amber-500/80 font-bold">Block Fare:</span>
+                                        <strong className="text-emerald-400 font-black font-mono">₹{Number(rate.base_cost || rate.supplier_cost || 0).toLocaleString('en-IN')}</strong>
+                                      </div>
+                                    </div>
+                                  )}
+
+                                  {rate.rate_model === 'Per KM' && (
+                                    <div className="p-2 bg-emerald-500/10 border border-emerald-500/20 rounded-lg my-1 space-y-1">
+                                      <div className="flex justify-between text-[11px]">
+                                        <span className="text-emerald-500/80 font-bold">Tariff:</span>
+                                        <strong className="text-emerald-300 font-extrabold">₹{rate.rate_per_km}/KM ({rate.min_km_per_day || 300} KM/day min)</strong>
+                                      </div>
+                                      <div className="flex justify-between text-[11px]">
+                                        <span className="text-emerald-500/80 font-bold">Driver Allowance:</span>
+                                        <strong className="text-emerald-300 font-extrabold">₹{rate.driver_allowance || 300}/day</strong>
+                                      </div>
+                                    </div>
+                                  )}
+
+                                  {rate.rate_model !== 'Block Circuit' && rate.rate_model !== 'Per KM' && (
+                                    <div className="flex justify-between py-0.5">
+                                      <span className="text-slate-600 dark:text-slate-400 font-bold">Base Rate:</span>
+                                      <strong className="text-slate-900 dark:text-slate-100 font-mono font-bold">₹{Number(rate.base_cost || rate.transfer_cost || 0).toLocaleString('en-IN')}</strong>
+                                    </div>
+                                  )}
+
                                   <div className="flex justify-between py-0.5">
-                                    <span className="text-slate-600 dark:text-slate-400 font-bold">Base Rate:</span>
-                                    <strong className="text-slate-900 dark:text-slate-100 font-mono font-bold">₹{Number(rate.base_cost || 0).toLocaleString('en-IN')}</strong>
-                                  </div>
-                                  <div className="flex justify-between py-0.5">
-                                    <span className="text-slate-600 dark:text-slate-400 font-bold">GST Applied:</span>
-                                    <strong className="text-slate-900 dark:text-slate-100 font-bold">{Number(rate.gst_percentage || 0)}% (₹{Number(rate.gst_amount || 0).toLocaleString('en-IN')})</strong>
+                                    <span className="text-slate-600 dark:text-slate-400 font-bold">GST (5%):</span>
+                                    <strong className="text-slate-900 dark:text-slate-100 font-bold">
+                                      {rate.gst_included ? 'Included' : `+${rate.gst_percentage || 5}%`}
+                                    </strong>
                                   </div>
                                   <div className="flex justify-between text-xs border-t border-border/40 pt-2 mt-1.5 font-bold">
-                                    <span className="text-slate-700 dark:text-slate-300 font-bold">Final Cost:</span>
-                                    <strong className="text-emerald-600 dark:text-emerald-400 font-black font-mono text-sm">₹{Number(rate.supplier_cost || 0).toLocaleString('en-IN')}</strong>
+                                    <span className="text-slate-700 dark:text-slate-300 font-bold">Net Total:</span>
+                                    <strong className="text-emerald-600 dark:text-emerald-400 font-black font-mono text-sm">
+                                      ₹{Number(rate.supplier_cost || rate.base_cost || 0).toLocaleString('en-IN')}
+                                    </strong>
                                   </div>
                                 </div>
                               </div>
