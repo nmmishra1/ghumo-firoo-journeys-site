@@ -19,6 +19,8 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { buildBreadcrumbJsonLd, buildFaqJsonLd } from '@/components/seo/JsonLd';
+import { FAQAccordion } from '@/components/ui/FAQAccordion';
+import { Button } from '@/components/ui/button';
 import { config } from '@/config';
 
 const Packages: React.FC = () => {
@@ -885,16 +887,47 @@ const Packages: React.FC = () => {
   const displayedInternationalHubs = filterDestinations(internationalDestinations);
   const displayedIndividualPackages = filterPackages(individualPackages);
 
+  const packageCatalogFaqs = [
+    {
+      id: "pkg-faq-1",
+      question: "Are GhumoFiroo holiday packages 100% customizable for families and couples?",
+      answer: "Yes! Every holiday package on GhumoFiroo can be personalized according to your travel dates and group preferences. You can adjust the trip duration, choose 4-star boutique or 5-star luxury hotels/villas, select private airport transfers, include scenic mountain railway or helicopter tours, and customize pure vegetarian, Jain, or multi-cuisine meal plans."
+    },
+    {
+      id: "pkg-faq-2",
+      question: "How does GhumoFiroo assist with international tourist visas and documentation?",
+      answer: "We provide end-to-end tourist visa filing support across all major international destinations: express online e-Visas for Georgia, Dubai (UAE), Singapore, and Thailand, as well as full Schengen Visa documentation (VFS Global appointment scheduling, verified flight & hotel vouchers, itinerary cover letters, and overseas travel insurance) for Europe tours."
+    },
+    {
+      id: "pkg-faq-3",
+      question: "What is included in the Char Dham Yatra and Kedarnath helicopter packages?",
+      answer: "Our Char Dham pilgrimage packages include guaranteed biometric yatra registration, luxury hotel/resort accommodations along the route (Haridwar, Barkot, Uttarkashi, Guptkashi, Badrinath), chauffeured private AC Innova/Tempo Traveller transport, pure vegetarian meals, and priority VIP Darshan coordination, with optional helicopter shuttle/charter bookings for Kedarnath."
+    },
+    {
+      id: "pkg-faq-4",
+      question: "Are private vehicles and dedicated drivers provided for all sightseeing?",
+      answer: "Yes, we prioritize safety and comfort. All our domestic (Kashmir, Kerala, Himachal, Rajasthan, Ladakh, Char Dham) and international (Georgia, Europe, Dubai, Bali, Singapore) packages provide private chauffeured AC vehicles exclusively for your group, ensuring maximum flexibility and zero shared tour bus delays."
+    },
+    {
+      id: "pkg-faq-5",
+      question: "What are the payment terms, advance deposit, and cancellation safety policies?",
+      answer: "You can book your journey with an initial nominal token deposit. The remaining balance is payable in flexible installments before departure. We offer transparent cancellation policies, complimentary date rescheduling options, and complete financial security with GST-compliant invoices."
+    },
+    {
+      id: "pkg-faq-6",
+      question: "Can pure vegetarian, Jain, and Swaminarayan food be arranged during international trips?",
+      answer: "Absolutely! For all international itineraries (Europe, Georgia, Singapore, Dubai, Bali, Thailand, Japan), our team curates Indian restaurant meals or pre-arranges pure vegetarian, Jain, and Swaminarayan dining options free of onion and garlic."
+    }
+  ];
+
   const breadcrumbSchema = buildBreadcrumbJsonLd([
     { name: "Home", item: "/" },
     { name: "All Destinations", item: "/packages" }
   ]);
 
-  const faqSchema = buildFaqJsonLd([
-    { question: "How do GhumoFiroo destination packages work?", answer: "Choose your destination (e.g. Kedarnath, Char Dham, Kashmir, Singapore, Dubai, Thailand, Maldives, Kerala). Each destination hub contains multiple curated itinerary variants tailored for families, couples, and groups." },
-    { question: "Can I customize cab transfers and hotels for any package?", answer: "Yes! Every package detail page features a live vehicle customizer (Sedan, SUV, Innova, Tempo Traveler) and customizable hotel star tiers." },
-    { question: "Are visas included for international destinations?", answer: "Yes, GhumoFiroo offers full express e-visa assistance for Singapore, Dubai, Georgia, Thailand, Bali, and Schengen visa documentation support for Europe." }
-  ]);
+  const faqSchema = buildFaqJsonLd(
+    packageCatalogFaqs.map(f => ({ question: f.question, answer: f.answer }))
+  );
 
   return (
     <Layout>
@@ -1275,6 +1308,20 @@ const Packages: React.FC = () => {
             </div>
           )}
 
+        </section>
+
+        {/* FREQUENTLY ASKED QUESTIONS SECTION */}
+        <section className="py-20 bg-[#060B1A] border-t border-[#C9A25A]/20">
+          <div className="container mx-auto px-6 max-w-5xl">
+            <SectionHeading 
+              kicker="Traveler Assurance & Guide" 
+              title="Frequently Asked Questions" 
+              subtitle="Clear answers about customizable itineraries, international e-visas, private cabs, pure vegetarian meals & booking security." 
+              align="center" 
+              className="mx-auto mb-16" 
+            />
+            <FAQAccordion items={packageCatalogFaqs} />
+          </div>
         </section>
 
         {/* TRUST BADGES FOOTER BANNER */}

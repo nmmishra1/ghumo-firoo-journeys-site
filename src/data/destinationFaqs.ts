@@ -369,6 +369,57 @@ export const DESTINATION_FAQS: Record<string, DestinationFAQ[]> = {
       question: "Which islands should I visit in Seychelles?",
       answer: "The three main granite islands: Mahé (Victoria capital, Morne Seychellois National Park), Praslin (Vallée de Mai UNESCO prehistoric palm forest with Coco de Mer), and La Digue (Anse Source d'Argent, the world's most photographed beach with giant granite boulders)."
     }
+  ],
+
+  europe: [
+    {
+      id: "eu-faq-1",
+      question: "How does the Schengen Visa application process work for Indian travelers in 2026?",
+      answer: "A single Schengen Visa allows Indian passport holders to travel freely across 29 European countries (including Switzerland, France, Italy, Austria, Germany, Netherlands, Belgium, and Czech Republic). GhumoFiroo handles full VFS Global appointment scheduling, certified flight/hotel vouchers, travel insurance coverage (€30,000+), and personalized itinerary cover letters."
+    },
+    {
+      id: "eu-faq-2",
+      question: "Which iconic European mountain excursions and landmarks are included?",
+      answer: "Our curated Europe itineraries include Jungfraujoch 'Top of Europe' (Sphinx Observatory at 3,454m & Aletsch Glacier), Mount Titlis Rotair (world's first revolving cable car & Cliff Walk), Eiffel Tower summit access, Seine River illuminations cruise, Venice Grand Canal gondola ride, Rome Colosseum amphitheatre, and Amsterdam canal cruises."
+    },
+    {
+      id: "eu-faq-3",
+      question: "Are Indian vegetarian and Pure Jain meals easily available across Europe?",
+      answer: "Yes! All major European holiday cities (Paris, Lucerne, Interlaken, Zurich, Rome, Florence, Venice, Amsterdam, Brussels) feature top-rated Indian restaurants serving authentic North & South Indian, vegetarian, and Jain meals without onion/garlic, included in our family package meal plans."
+    },
+    {
+      id: "eu-faq-4",
+      question: "How do we travel between European countries and cities?",
+      answer: "We offer both chauffeured private luxury Mercedes AC coaches with dedicated English-speaking drivers and seamless 1st-Class Eurail Global train passes, including iconic panoramic Swiss rail journeys like the Glacier Express, GoldenPass Line, and high-speed French TGV / Eurostar."
+    },
+    {
+      id: "eu-faq-5",
+      question: "What is the best time of year to visit Switzerland, France, and Europe?",
+      answer: "May to October offers pleasant 18°C-26°C weather, alpine meadows in full bloom, and long daylight hours (sunset around 9:30 PM). December to February is magical for winter wonderland snow sports, Swiss ski resorts, and illuminated Christmas markets in Paris, Vienna, and Strasbourg."
+    }
+  ],
+
+  rannutsav: [
+    {
+      id: "ru-faq-1",
+      question: "What is the best time to experience Rann Utsav at the White Desert in Kutch?",
+      answer: "Rann Utsav operates annually from November to late February. The most spectacular time is during Full Moon nights (Purnima) and the 2 nights before/after, when the infinite white salt desert glows under the moonlit sky."
+    },
+    {
+      id: "ru-faq-2",
+      question: "What is included in the White Rann Tent City luxury packages?",
+      answer: "Our Tent City packages include premium AC Swiss Tents / Darbari Royal Suites, traditional Kutchi & Gujarati buffet meals, live folk music & Kalbeliya dances, sunrise/sunset desert transfers, camel cart safaris, paramotoring, and bonfire evenings."
+    },
+    {
+      id: "ru-faq-3",
+      question: "What permits are required to visit the White Rann of Kutch?",
+      answer: "An official entry permit from the Gujarat Tourism checkpost at Bhirandiyara is mandatory due to proximity to the border. GhumoFiroo arranges digital permits in advance for all travelers."
+    },
+    {
+      id: "ru-faq-4",
+      question: "Which nearby attractions are covered in Kutch tour packages?",
+      answer: "Highlights include Kala Dungar (Black Hill - highest point in Kutch), Dholavira UNESCO Harappan ancient city, Mandvi Private Beach & Vijay Vilas Palace, and Bhuj historic palaces (Aina Mahal, Prag Mahal)."
+    }
   ]
 };
 
@@ -428,6 +479,12 @@ export function getDestinationFaqs(slugOrName: string = ""): DestinationFAQ[] {
   }
   if (query.includes("seychelles")) {
     return DESTINATION_FAQS.seychelles;
+  }
+  if (query.includes("europe") || query.includes("switzerland") || query.includes("france") || query.includes("paris") || query.includes("italy") || query.includes("rome") || query.includes("austria") || query.includes("germany") || query.includes("belgium") || query.includes("netherlands") || query.includes("amsterdam") || query.includes("czech") || query.includes("prague")) {
+    return DESTINATION_FAQS.europe;
+  }
+  if (query.includes("rann") || query.includes("kutch") || query.includes("gujarat")) {
+    return DESTINATION_FAQS.rannutsav;
   }
   
   // Default fallback curated general FAQs
