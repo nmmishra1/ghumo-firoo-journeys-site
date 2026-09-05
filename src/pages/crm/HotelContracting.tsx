@@ -939,102 +939,10 @@ export const HotelContracting: React.FC = () => {
     setHotelFilterStar('all');
   };
 
-  // Filtered Hotels list for grid view
+  // Filtered Hotels list for grid view (hotels is already fetched & filtered by fetchHotels)
   const filteredHotels = React.useMemo(() => {
-    return hotels.filter((h: any) => {
-      // Resolve city name/ID defensively
-      const hCityId = String(h.city_id || '').toLowerCase();
-      let hCityName = String(h.city || h.cities?.city_name || '').toLowerCase();
-      let foundCityObj: any = null;
-      if (!hCityName || /^\d+$/.test(hCityName) || hCityId) {
-        foundCityObj = cities.find(c => String(c.id) === hCityId || (c.city_name || (c as any).name || '').toLowerCase() === hCityName);
-        if (foundCityObj && (foundCityObj.city_name || foundCityObj.name)) {
-          hCityName = (foundCityObj.city_name || foundCityObj.name).toLowerCase();
-        }
-      }
-
-      // Resolve state name/ID defensively
-      const hStateId = String(h.state_id || '').toLowerCase();
-      let hStateName = String(h.state || h.states?.state_name || '').toLowerCase();
-      if (!hStateName || /^\d+$/.test(hStateName)) {
-        const foundState = states.find(s => String(s.id) === hStateId || s.state_name?.toLowerCase() === hStateId);
-        if (foundState && foundState.state_name) {
-          hStateName = foundState.state_name.toLowerCase();
-        } else if (foundCityObj) {
-          hStateName = String(foundCityObj.state || '').toLowerCase();
-          if (!hStateName && foundCityObj.state_id) {
-            const sFromCity = states.find(s => String(s.id) === String(foundCityObj.state_id));
-            if (sFromCity && sFromCity.state_name) hStateName = sFromCity.state_name.toLowerCase();
-          }
-        }
-      }
-
-      // Resolve country name/ID defensively
-      const hCountryId = String(h.country_id || '').toLowerCase();
-      let hCountryName = String(h.country || h.countries?.country_name || '').toLowerCase();
-      if (!hCountryName || /^\d+$/.test(hCountryName)) {
-        const foundCountry = countries.find(c => String(c.id) === hCountryId);
-        if (foundCountry && foundCountry.country_name) hCountryName = foundCountry.country_name.toLowerCase();
-      }
-      if (!hCountryName) hCountryName = 'india';
-
-      // 1. Search Filter
-      if (hotelSearch.trim()) {
-        const q = hotelSearch.trim().toLowerCase();
-        const hName = (h.hotel_name || h.name || '').toLowerCase();
-        const hCode = (h.hotel_code || '').toLowerCase();
-        const hAddress = (h.address || '').toLowerCase();
-        if (!hName.includes(q) && !hCode.includes(q) && !hCityName.includes(q) && !hStateName.includes(q) && !hAddress.includes(q)) {
-          return false;
-        }
-      }
-
-      // 2. Country Filter
-      if (hotelFilterCountry !== 'all') {
-        const selCountryObj = countryOptions.find(c => c.id === hotelFilterCountry || c.name.toLowerCase() === hotelFilterCountry.toLowerCase());
-        const targetCountry = (selCountryObj ? selCountryObj.name : hotelFilterCountry).toLowerCase();
-        
-        const matchesCountry = hCountryId === targetCountry || 
-                               hCountryName === targetCountry || 
-                               hCountryName.includes(targetCountry) || 
-                               targetCountry.includes(hCountryName) ||
-                               (targetCountry === 'india' && (!hCountryName || hCountryName === 'india'));
-        if (!matchesCountry) return false;
-      }
-
-      // 3. State Filter
-      if (hotelFilterState !== 'all') {
-        const selStateObj = stateOptions.find(s => s.id === hotelFilterState || s.name.toLowerCase() === hotelFilterState.toLowerCase());
-        const targetState = (selStateObj ? selStateObj.name : hotelFilterState).toLowerCase();
-
-        const matchesState = hStateId === targetState || 
-                             hStateName === targetState || 
-                             hStateName.includes(targetState) || 
-                             targetState.includes(hStateName);
-        if (!matchesState) return false;
-      }
-
-      // 4. City Filter
-      if (hotelFilterCity !== 'all') {
-        const selCityObj = cityOptions.find(ct => ct.id === hotelFilterCity || ct.name.toLowerCase() === hotelFilterCity.toLowerCase());
-        const targetCity = (selCityObj ? selCityObj.name : hotelFilterCity).toLowerCase();
-
-        const matchesCity = hCityId === targetCity || 
-                            hCityName === targetCity || 
-                            hCityName.includes(targetCity) || 
-                            targetCity.includes(hCityName);
-        if (!matchesCity) return false;
-      }
-
-      // 5. Star Rating Filter
-      if (hotelFilterStar !== 'all') {
-        const targetStar = parseInt(hotelFilterStar);
-        if (Number(h.star_rating) !== targetStar) return false;
-      }
-
-      return true;
-    });
-  }, [hotels, hotelSearch, hotelFilterCountry, hotelFilterState, hotelFilterCity, hotelFilterStar, countryOptions, stateOptions, cityOptions, cities, states, countries]);
+    return hotels;
+  }, [hotels]);
 
   // Helper: detect if an ID is a proper UUID (Supabase) vs a local MySQL integer
   const isUUID = (id: string) =>
