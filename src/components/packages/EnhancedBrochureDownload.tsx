@@ -240,7 +240,46 @@ const EnhancedBrochureDownload: React.FC<EnhancedBrochureDownloadProps> = ({
     } catch {}
   };
 
+  const getOfficialBrochureUrl = (): string | null => {
+    const d = (destination || packageDetails?.title || '').toLowerCase();
+    const dur = (packageDetails?.duration || '').toLowerCase();
+    
+    if (d.includes('kutch') || d.includes('rann') || d.includes('dhordo') || d.includes('white desert')) {
+      if (dur.includes('1n') || dur.includes('2d/1n') || dur.includes('1 night') || dur.includes('2 days / 1 night')) {
+        return '/Ghumo_Firoo_Culture_Kutch_1N2D_Brochure.pdf';
+      }
+      if (dur.includes('3n') || dur.includes('4d/3n') || dur.includes('3 night') || dur.includes('4 days / 3 nights')) {
+        return '/Ghumo_Firoo_Culture_Kutch_3N4D_Brochure.pdf';
+      }
+      if (dur.includes('4n') || dur.includes('5d/4n') || dur.includes('4 night') || dur.includes('5 days / 4 nights')) {
+        return '/Ghumo_Firoo_Culture_Kutch_4N5D_Brochure.pdf';
+      }
+      return '/Ghumo_Firoo_Culture_Kutch_2N3D_Brochure.pdf';
+    }
+    return null;
+  };
+
   const generatePdfBase64 = async (): Promise<string> => {
+    const officialPdf = getOfficialBrochureUrl();
+    if (officialPdf) {
+      try {
+        const resp = await fetch(officialPdf);
+        if (resp.ok) {
+          const ab = await resp.arrayBuffer();
+          const u8 = new Uint8Array(ab);
+          let binary = '';
+          const len = u8.byteLength;
+          for (let i = 0; i < len; i += 1024) {
+            const chunk = u8.subarray(i, Math.min(i + 1024, len));
+            binary += String.fromCharCode.apply(null, chunk as any);
+          }
+          return window.btoa(binary);
+        }
+      } catch (err) {
+        console.warn('Could not fetch static PDF, generating dynamic:', err);
+      }
+    }
+
     const container = document.createElement('div');
     container.innerHTML = generatePagedBrochureContent();
     container.style.position = 'fixed';
@@ -310,13 +349,16 @@ const EnhancedBrochureDownload: React.FC<EnhancedBrochureDownloadProps> = ({
       abortRef.current = false;
       
       toast({
-        title: "Generating Brochure...",
-        description: "Please stay on this page. We are preparing your premium travel brochure.",
+        title: "Preparing Brochure...",
+        description: "Please stay on this page. We are preparing your official travel brochure.",
       });
 
-      // 1. Silent PDF Generation
+      // 1. Silent PDF Generation or Official Brochure Attachment
       const base64Pdf = await generatePdfBase64();
       if (abortRef.current) return;
+
+      const officialPdf = getOfficialBrochureUrl();
+      const pdfFileName = officialPdf ? officialPdf.split('/').pop()! : `${destination.replace(/\s+/g, '_')}_Brochure.pdf`;
 
       // Create PDF blob URL for instant download
       const bin = atob(base64Pdf);
@@ -324,7 +366,6 @@ const EnhancedBrochureDownload: React.FC<EnhancedBrochureDownloadProps> = ({
       for (let i = 0; i < bin.length; i++) u8[i] = bin.charCodeAt(i);
       const pdfBlob = new Blob([u8], { type: 'application/pdf' });
       const pdfUrl = URL.createObjectURL(pdfBlob);
-      const pdfFileName = `${destination.replace(/\s+/g, '_')}_Brochure.pdf`;
 
       setGeneratedPdfData({
         url: pdfUrl,
@@ -619,8 +660,8 @@ const EnhancedBrochureDownload: React.FC<EnhancedBrochureDownloadProps> = ({
                 <div class="meta-val">${packageDetails.duration}</div>
               </div>
               <div class="meta-cell">
-                <div class="meta-label">Starting Tier</div>
-                <div class="meta-val">₹${formatPrice()}</div>
+                <div class="meta-label">Package Charges</div>
+                <div class="meta-val" style="font-size: 20px; font-style: normal; color: #E5C378;">Post Executive Discussion</div>
               </div>
             </div>
             <div style="text-align: right;">
@@ -639,6 +680,17 @@ const EnhancedBrochureDownload: React.FC<EnhancedBrochureDownloadProps> = ({
           <h2 class="page-header-title">The Masterplan</h2>
         </div>
         <div class="content-wrap">
+          <!-- CHARGES CONSULTATION POLICY NOTICE -->
+          <div style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); border: 1px solid #D4AF37; border-radius: 14px; padding: 12px 18px; margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between; color: white;">
+            <div style="display: flex; align-items: center; gap: 12px;">
+              <span style="font-size: 22px;">💼</span>
+              <div>
+                <div style="font-size: 11px; font-weight: 800; color: #D4AF37; text-transform: uppercase; letter-spacing: 1.5px;">Customized Pricing Policy</div>
+                <div style="font-size: 10px; color: #cbd5e1; line-height: 1.4;">Exact package charges will be given post discussion with our executive, tailored to your exact travel dates, chosen vehicle, group size, and hotel star tiers.</div>
+              </div>
+            </div>
+          </div>
+
           <!-- LOGISTICS BAR: TRAVELERS, PICKUP, DROP -->
           <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 16px; padding: 14px 20px; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-bottom: 18px;">
             <div>
@@ -928,6 +980,24 @@ const EnhancedBrochureDownload: React.FC<EnhancedBrochureDownloadProps> = ({
       setIsDownloading(true);
       setProgress(0);
       abortRef.current = false;
+
+      const officialPdf = getOfficialBrochureUrl();
+      if (officialPdf) {
+        const link = document.createElement('a');
+        link.href = officialPdf;
+        link.download = officialPdf.split('/').pop() || `${destination.replace(/\s+/g, '_')}_Brochure.pdf`;
+        link.target = '_blank';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        setIsDownloading(false);
+        toast({
+          title: "Official Brochure Downloaded",
+          description: `Your official ${packageDetails.title} PDF brochure is ready.`,
+          variant: "default"
+        });
+        return;
+      }
 
       const cacheKey = getCacheKey();
       let cached = loadFromCache(cacheKey) || await idbGet(cacheKey);
