@@ -214,11 +214,14 @@ export default function CabContracting() {
       const mappedContracts = contractsData.map((c: any) => ({
         ...c,
         cab_suppliers: {
-          supplier_name: suppliersData.find((s: any) => s.id === c.supplier_id)?.supplier_name || '—'
+          supplier_name: suppliersData.find((s: any) => s.id === c.supplier_id || String(s.id).startsWith(String(c.supplier_id)) || String(c.supplier_id).startsWith(String(s.id)))?.supplier_name || '—'
         }
       }));
       setContracts(mappedContracts);
-      if (mappedContracts.length > 0) setSelectedContractId(mappedContracts[0].id);
+      if (mappedContracts.length > 0) {
+        setSelectedContractId(mappedContracts[0].id);
+        fetchContractRates(mappedContracts[0].id, vehiclesData || [], routesData || []);
+      }
     } catch (err: any) {
       toast({ title: 'Error loading data', description: err.message, variant: 'destructive' });
     } finally {
@@ -338,22 +341,24 @@ export default function CabContracting() {
     }
   };
 
-  const fetchContractRates = async (contractId: string) => {
+  const fetchContractRates = async (contractId: string, currentVehicles?: Vehicle[], currentRoutes?: Route[]) => {
     try {
+      const vList = (currentVehicles && currentVehicles.length > 0) ? currentVehicles : vehicles;
+      const rList = (currentRoutes && currentRoutes.length > 0) ? currentRoutes : routes;
       const res = await fetch(`${API_BASE}/api.php?table=cab_contract_rates`);
       if (!res.ok) throw new Error('Failed to fetch contract rates');
       const ratesData = await res.json();
       
       const filteredRates = ratesData
-        .filter((r: any) => r.contract_id === contractId)
+        .filter((r: any) => r.contract_id === contractId || String(contractId).startsWith(String(r.contract_id)) || String(r.contract_id).startsWith(String(contractId)))
         .map((r: any) => ({
           ...r,
           cab_vehicles: {
-            vehicle_type: vehicles.find((v: any) => v.id === r.vehicle_id)?.vehicle_type || '—'
+            vehicle_type: vList.find((v: any) => v.id === r.vehicle_id || String(v.id).startsWith(String(r.vehicle_id)) || String(r.vehicle_id).startsWith(String(v.id)))?.vehicle_type || r.vehicle_id || '—'
           },
           cab_routes: r.route_id ? {
-            source: routes.find((rt: any) => rt.id === r.route_id)?.source || '—',
-            destination: routes.find((rt: any) => rt.id === r.route_id)?.destination || '—'
+            source: rList.find((rt: any) => rt.id === r.route_id || String(rt.id).startsWith(String(r.route_id)) || String(r.route_id).startsWith(String(rt.id)))?.source || '—',
+            destination: rList.find((rt: any) => rt.id === r.route_id || String(rt.id).startsWith(String(r.route_id)) || String(r.route_id).startsWith(String(rt.id)))?.destination || '—'
           } : null
          }));
       setContractRates(filteredRates);
@@ -700,8 +705,15 @@ export default function CabContracting() {
                             : 'hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-800 dark:text-slate-200 border border-border/50'
                         }`}
                       >
-                        <span className="truncate">{c.cab_suppliers?.supplier_name}</span>
-                        <ChevronRightIcon className="w-3.5 h-3.5" />
+                        <div className="flex flex-col truncate pr-2">
+                          <span className="truncate font-black">{c.contract_name || c.cab_suppliers?.supplier_name || 'Contract'}</span>
+                          {c.cab_suppliers?.supplier_name && (
+                            <span className={`text-[10px] truncate ${selectedContractId === c.id ? 'text-slate-900 font-semibold' : 'text-slate-500 dark:text-slate-400'}`}>
+                              {c.cab_suppliers.supplier_name}
+                            </span>
+                          )}
+                        </div>
+                        <ChevronRightIcon className="w-3.5 h-3.5 shrink-0" />
                       </button>
                     ))}
                   </CardContent>
