@@ -111,6 +111,20 @@ const normalizeRateModel = (modelVal?: string, routeType?: string): string => {
   return modelVal;
 };
 
+const getDefaultRateForVehicle = (vehicleType: string = '') => {
+  const v = (vehicleType || '').toLowerCase();
+  if (v.includes('ertiga') || v.includes('muv') || v.includes('6-seater') || v.includes('6 seater')) {
+    return { rate_per_km: 16, min_km_per_day: 300, driver_allowance: 300 };
+  }
+  if (v.includes('innova') || v.includes('crysta') || v.includes('suv') || v.includes('7-seater') || v.includes('6/7-seater')) {
+    return { rate_per_km: 22, min_km_per_day: 300, driver_allowance: 300 };
+  }
+  if (v.includes('tempo') || v.includes('traveller') || v.includes('12-seater') || v.includes('17-seater') || v.includes('coach')) {
+    return { rate_per_km: 28, min_km_per_day: 300, driver_allowance: 500 };
+  }
+  return { rate_per_km: 14, min_km_per_day: 300, driver_allowance: 300 };
+};
+
 const SEASONS = ['Peak Season', 'Super Peak', 'Festive Season', 'Normal Season', 'Off Season'];
 
 const formatDateForInput = (dateStr: string | null | undefined): string => {
@@ -656,6 +670,9 @@ export const CabContractWizard: React.FC<CabContractWizardProps> = ({
       // 6. Bulk Insert contract rates
       const ratesPayloads: any[] = [];
       savedVehicles.forEach(sVeh => {
+        const matchingVeh = vehicles.find(v => v.id === sVeh.oldId);
+        const vehDefaults = getDefaultRateForVehicle(matchingVeh?.vehicle_type);
+
         savedRoutes.forEach(sRt => {
           SEASONS.forEach(season => {
             const clientRateKey = `${sVeh.oldId}-${sRt.oldId}-${season}`;
@@ -670,9 +687,9 @@ export const CabContractWizard: React.FC<CabContractWizardProps> = ({
               season: season,
               rate_model: rateModel,
               base_km_included: Number(clientRate.base_km_included) || 80,
-              rate_per_km: Number(clientRate.rate_per_km) || 12,
-              min_km_per_day: Number(clientRate.min_km_per_day) || 250,
-              driver_allowance: Number(clientRate.driver_allowance) || 300,
+              rate_per_km: Number(clientRate.rate_per_km) || vehDefaults.rate_per_km,
+              min_km_per_day: Number(clientRate.min_km_per_day) || vehDefaults.min_km_per_day,
+              driver_allowance: Number(clientRate.driver_allowance) || vehDefaults.driver_allowance,
               night_charges: Number(clientRate.night_charges) || 0,
               daily_rate: Number(clientRate.daily_rate) || 0,
               night_allowance: Number(clientRate.night_allowance) || 0,
@@ -704,7 +721,11 @@ export const CabContractWizard: React.FC<CabContractWizardProps> = ({
               profit_margin: Number(clientRate.profit_margin) || 0,
               is_tax_overridden: clientRate.is_tax_overridden || false,
               tax_override_reason: clientRate.tax_override_reason || '',
-              tax_audit_logs: clientRate.tax_audit_logs || []
+              tax_audit_logs: clientRate.tax_audit_logs || [],
+              block_circuit_km: Number(clientRate.block_circuit_km) || 0,
+              block_circuit_nights: clientRate.block_circuit_nights || '',
+              block_circuit_cost: Number(clientRate.block_circuit_cost) || 0,
+              block_extra_km_rate: Number(clientRate.block_extra_km_rate) || 0
             });
           });
         });
@@ -1001,13 +1022,18 @@ export const CabContractWizard: React.FC<CabContractWizardProps> = ({
                     </thead>
                     <tbody className="divide-y divide-slate-800/80 bg-[#161d2f] text-slate-100">
                       {vehicles.map(veh => {
+                        const vehDefaults = getDefaultRateForVehicle(veh.vehicle_type);
                         return routes.map(route => {
                           return SEASONS.map(season => {
                             const rateKey = `${veh.id}-${route.id}-${season}`;
                             const defaultModel = getDefaultRateModelForRoute(route.route_type);
                             const rate = gridRates[rateKey] || {
                               rate_model: defaultModel,
-                              base_km_included: 80, rate_per_km: 12, min_km_per_day: 300, driver_allowance: 300, night_charges: 0,
+                              base_km_included: 80,
+                              rate_per_km: vehDefaults.rate_per_km,
+                              min_km_per_day: vehDefaults.min_km_per_day,
+                              driver_allowance: vehDefaults.driver_allowance,
+                              night_charges: 0,
                               daily_rate: 0, night_allowance: 0, max_km_included: 0, extra_km_charge: 0,
                               airport_name: '', hotel_area: '', transfer_cost: 0, meet_greet_charges: 0, waiting_charges: 0,
                               sightseeing_destination: '', hours_included: 8, km_included: 80, vehicle_cost: 0, extra_hour_cost: 0, extra_km_cost: 0,

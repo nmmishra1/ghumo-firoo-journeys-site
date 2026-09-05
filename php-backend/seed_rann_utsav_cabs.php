@@ -160,162 +160,108 @@ try {
         $contractId = $existingContract['id'];
     }
 
-    // 5. Seed / Upsert Official Rates into cab_contract_rates
-    $rates = [
-        // Swift Dzire Per KM
-        [
-            'id' => 'cr-dzire-perkm-001',
-            'contract_id' => $contractId,
-            'vehicle_id' => $vehicleIdMap['Sedan'] ?? 'v-dzire-kutch-0001',
-            'route_id' => null,
-            'season' => 'Normal Season',
-            'rate_model' => 'Per KM',
-            'base_km_included' => 0,
-            'rate_per_km' => 14,
-            'min_km_per_day' => 300,
-            'driver_allowance' => 300,
-            'base_cost' => 4500,
-            'supplier_cost' => 4500,
-            'selling_cost' => 4500
+    // 5. Build full matrix of rates for all 4 vehicles x 4 routes x 5 seasons
+    $seasons = ['Peak Season', 'Super Peak', 'Festive Season', 'Normal Season', 'Off Season'];
+
+    $fixedRouteRates = [
+        'Ahmedabad' => [
+            'Sedan' => 4500,
+            'MUV' => 5500,
+            'SUV' => 7000,
+            'Tempo Traveller' => 9500
         ],
-        // Maruti Ertiga Per KM
-        [
-            'id' => 'cr-ertiga-perkm-002',
-            'contract_id' => $contractId,
-            'vehicle_id' => $vehicleIdMap['MUV'] ?? 'v-ertiga-kutch-0002',
-            'route_id' => null,
-            'season' => 'Normal Season',
-            'rate_model' => 'Per KM',
-            'base_km_included' => 0,
-            'rate_per_km' => 16,
-            'min_km_per_day' => 300,
-            'driver_allowance' => 300,
-            'base_cost' => 5100,
-            'supplier_cost' => 5100,
-            'selling_cost' => 5100
+        'Rajkot' => [
+            'Sedan' => 4000,
+            'MUV' => 5000,
+            'SUV' => 6500,
+            'Tempo Traveller' => 8500
         ],
-        // Innova Crysta Per KM
-        [
-            'id' => 'cr-innova-perkm-003',
-            'contract_id' => $contractId,
-            'vehicle_id' => $vehicleIdMap['SUV'] ?? 'v-innova-kutch-0003',
-            'route_id' => null,
-            'season' => 'Normal Season',
-            'rate_model' => 'Per KM',
-            'base_km_included' => 0,
-            'rate_per_km' => 22,
-            'min_km_per_day' => 300,
-            'driver_allowance' => 300,
-            'base_cost' => 6900,
-            'supplier_cost' => 6900,
-            'selling_cost' => 6900
+        'White Rann / Dhordo' => [
+            'Sedan' => 2500,
+            'MUV' => 3200,
+            'SUV' => 4200,
+            'Tempo Traveller' => 6000
         ],
-        // AC Tempo Traveller Per KM
-        [
-            'id' => 'cr-tempo-perkm-004',
-            'contract_id' => $contractId,
-            'vehicle_id' => $vehicleIdMap['Tempo Traveller'] ?? 'v-tempo-kutch-0004',
-            'route_id' => null,
-            'season' => 'Normal Season',
-            'rate_model' => 'Per KM',
-            'base_km_included' => 0,
-            'rate_per_km' => 28,
-            'min_km_per_day' => 300,
-            'driver_allowance' => 500,
-            'base_cost' => 8900,
-            'supplier_cost' => 8900,
-            'selling_cost' => 8900
-        ],
-        // Bhuj to Ahmedabad Fixed Routes
-        [
-            'id' => 'cr-amd-sedan-005',
-            'contract_id' => $contractId,
-            'vehicle_id' => $vehicleIdMap['Sedan'] ?? 'v-dzire-kutch-0001',
-            'route_id' => $routeIdMap['Ahmedabad'] ?? 'r-bhuj-amd-0002',
-            'season' => 'Normal Season',
-            'rate_model' => 'Per Route',
-            'base_km_included' => 330,
-            'rate_per_km' => 14,
-            'min_km_per_day' => 300,
-            'driver_allowance' => 300,
-            'base_cost' => 4500,
-            'supplier_cost' => 4500,
-            'selling_cost' => 4500
-        ],
-        [
-            'id' => 'cr-amd-ertiga-006',
-            'contract_id' => $contractId,
-            'vehicle_id' => $vehicleIdMap['MUV'] ?? 'v-ertiga-kutch-0002',
-            'route_id' => $routeIdMap['Ahmedabad'] ?? 'r-bhuj-amd-0002',
-            'season' => 'Normal Season',
-            'rate_model' => 'Per Route',
-            'base_km_included' => 330,
-            'rate_per_km' => 16,
-            'min_km_per_day' => 300,
-            'driver_allowance' => 300,
-            'base_cost' => 5500,
-            'supplier_cost' => 5500,
-            'selling_cost' => 5500
-        ],
-        // Bhuj to Rajkot Fixed Routes
-        [
-            'id' => 'cr-raj-sedan-007',
-            'contract_id' => $contractId,
-            'vehicle_id' => $vehicleIdMap['Sedan'] ?? 'v-dzire-kutch-0001',
-            'route_id' => $routeIdMap['Rajkot'] ?? 'r-bhuj-raj-0003',
-            'season' => 'Normal Season',
-            'rate_model' => 'Per Route',
-            'base_km_included' => 230,
-            'rate_per_km' => 14,
-            'min_km_per_day' => 300,
-            'driver_allowance' => 300,
-            'base_cost' => 4000,
-            'supplier_cost' => 4000,
-            'selling_cost' => 4000
-        ],
-        [
-            'id' => 'cr-raj-ertiga-008',
-            'contract_id' => $contractId,
-            'vehicle_id' => $vehicleIdMap['MUV'] ?? 'v-ertiga-kutch-0002',
-            'route_id' => $routeIdMap['Rajkot'] ?? 'r-bhuj-raj-0003',
-            'season' => 'Normal Season',
-            'rate_model' => 'Per Route',
-            'base_km_included' => 230,
-            'rate_per_km' => 16,
-            'min_km_per_day' => 300,
-            'driver_allowance' => 300,
-            'base_cost' => 5000,
-            'supplier_cost' => 5000,
-            'selling_cost' => 5000
+        'Kutch Sightseeing (Dhordo, Kala Dungar, Mandvi)' => [
+            'Sedan' => 3500,
+            'MUV' => 4200,
+            'SUV' => 5500,
+            'Tempo Traveller' => 7500
         ]
     ];
 
     $seededRates = 0;
-    foreach ($rates as $rate) {
-        $stmt = $pdo->prepare("SELECT id FROM cab_contract_rates WHERE id = ?");
-        $stmt->execute([$rate['id']]);
-        if (!$stmt->fetch()) {
-            $insert = $pdo->prepare("INSERT INTO cab_contract_rates (
-                id, contract_id, vehicle_id, route_id, season, rate_model,
-                base_km_included, rate_per_km, min_km_per_day, driver_allowance,
-                base_cost, supplier_cost, selling_cost, active_status
-            ) VALUES (
-                ?, ?, ?, ?, ?, ?,
-                ?, ?, ?, ?,
-                ?, ?, ?, 1
-            )");
-            $insert->execute([
-                $rate['id'], $rate['contract_id'], $rate['vehicle_id'], $rate['route_id'], $rate['season'], $rate['rate_model'],
-                $rate['base_km_included'], $rate['rate_per_km'], $rate['min_km_per_day'], $rate['driver_allowance'],
-                $rate['base_cost'], $rate['supplier_cost'], $rate['selling_cost']
-            ]);
-            $seededRates++;
+    foreach ($vehicles as $v) {
+        $vId = $vehicleIdMap[$v['category']] ?? $v['id'];
+        foreach ($routes as $r) {
+            $rId = $routeIdMap[$r['destination']] ?? $r['id'];
+            foreach ($seasons as $season) {
+                // Generate a deterministic unique rate ID
+                $seasonSlug = strtolower(preg_replace('/[^a-zA-Z0-9]/', '', $season));
+                $vSlug = strtolower(preg_replace('/[^a-zA-Z0-9]/', '', $v['category']));
+                $rateId = "cr-kutch-{$vSlug}-{$seasonSlug}-" . substr(md5($rId), 0, 8);
+
+                $fixedPrice = $fixedRouteRates[$r['destination']][$v['category']] ?? ($v['rate_per_km'] * 300 + 300);
+                $driverAllowance = ($v['category'] === 'Tempo Traveller') ? 500 : 300;
+                $ratePerKm = ($v['category'] === 'Sedan') ? 14 : (($v['category'] === 'MUV') ? 16 : (($v['category'] === 'SUV') ? 22 : 28));
+
+                // Upsert into cab_contract_rates
+                $checkStmt = $pdo->prepare("SELECT id FROM cab_contract_rates WHERE contract_id = ? AND vehicle_id = ? AND route_id = ? AND season = ?");
+                $checkStmt->execute([$contractId, $vId, $rId, $season]);
+                $existingRate = $checkStmt->fetch(PDO::FETCH_ASSOC);
+
+                if ($existingRate) {
+                    $updateStmt = $pdo->prepare("UPDATE cab_contract_rates SET
+                        rate_model = 'Per KM',
+                        base_km_included = 0,
+                        rate_per_km = ?,
+                        min_km_per_day = 300,
+                        driver_allowance = ?,
+                        transfer_cost = ?,
+                        vehicle_cost = ?,
+                        base_cost = ?,
+                        supplier_cost = ?,
+                        selling_cost = ?,
+                        active_status = 1
+                        WHERE id = ?
+                    ");
+                    $updateStmt->execute([
+                        $ratePerKm,
+                        $driverAllowance,
+                        $fixedPrice,
+                        $fixedPrice,
+                        $fixedPrice,
+                        $fixedPrice,
+                        $fixedPrice,
+                        $existingRate['id']
+                    ]);
+                    $seededRates++;
+                } else {
+                    $insertStmt = $pdo->prepare("INSERT INTO cab_contract_rates (
+                        id, contract_id, vehicle_id, route_id, season, rate_model,
+                        base_km_included, rate_per_km, min_km_per_day, driver_allowance,
+                        transfer_cost, vehicle_cost, base_cost, supplier_cost, selling_cost,
+                        gst_included, gst_percentage, markup_percentage, active_status
+                    ) VALUES (
+                        ?, ?, ?, ?, ?, 'Per KM',
+                        0, ?, 300, ?,
+                        ?, ?, ?, ?, ?,
+                        0, 5, 0, 1
+                    )");
+                    $insertStmt->execute([
+                        $rateId, $contractId, $vId, $rId, $season,
+                        $ratePerKm, $driverAllowance,
+                        $fixedPrice, $fixedPrice, $fixedPrice, $fixedPrice, $fixedPrice
+                    ]);
+                    $seededRates++;
+                }
+            }
         }
     }
 
     echo json_encode([
         'status' => 'success',
-        'message' => 'Official Rann Utsav cab rates & contract successfully seeded into CRM database.',
+        'message' => 'Official Rann Utsav cab rates across all vehicles, routes, and seasons successfully seeded.',
         'contract_id' => $contractId,
         'supplier_id' => $supplierId,
         'seeded_rates_count' => $seededRates,
