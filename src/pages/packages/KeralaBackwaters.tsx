@@ -39,76 +39,204 @@ const KeralaBackwaters: React.FC = () => {
 
   const keralaPackages = [
     {
+      id: "kerala-3d2n-munnar-hills",
+      title: "Munnar Tea Hills Short Break (3D/2N)",
+      desc: "Quick misty mountain getaway covering Cheeyappara & Valara waterfalls, tea plantation walks, Mattupetty Dam & Echo Point.",
+      badge: "Weekend Escape",
+      image: "/kerala/munnar_tea_estates.jpg",
+      price: 12800,
+      duration: "3 Days / 2 Nights",
+      rating: 4.88,
+      reviewsCount: 290,
+      stay: "Munnar Tea Country 4-Star Resort (2N)",
+      vehicle: "Chauffeured Private AC Sedan / SUV",
+      link: "/packages/kerala-3d2n-munnar-hills",
+      highlights: ["Cheeyappara Waterfalls", "Tata Tea Museum", "Mattupetty Dam", "Echo Point"],
+      itinerary: [
+        { day: "Day 1", title: "Cochin Pickup → Scenic Western Ghats Drive to Munnar", desc: "Private pickup from Cochin Airport/Railway Station. Scenic mountain drive past Cheeyappara & Valara waterfalls with photo stops. Check in to Munnar resort." },
+        { day: "Day 2", title: "Munnar Tea Hills & Eravikulam Safari", desc: "Full-day sightseeing: Eravikulam National Park (Nilgiri Tahr), Tata Tea Museum, Mattupetty Dam boating & Echo Point." },
+        { day: "Day 3", title: "Munnar to Cochin Airport / Railway Station Drop", desc: "Breakfast with panoramic tea valley views, spice market shopping, and drive back to Cochin for return journey." }
+      ],
+      inclusions: ["2 Nights 4-Star Mountain Resort", "Daily Breakfast Buffet", "Private AC Cab for All Transfers & Sightseeing", "Driver Allowance, Tolls & Parking"],
+      exclusions: ["Airfare / Train tickets", "Boating & Entry fees"]
+    },
+    {
       id: "kerala-4d3n-munnar-alleppey",
       title: "Munnar Tea Hills & Alleppey Houseboat (4D/3N)",
-      desc: "Short Kerala break featuring Munnar tea gardens, Cheeyappara waterfalls & private Alleppey houseboat cruise.",
+      desc: "Our most popular short Kerala break combining misty Munnar tea hills with a signature private AC Alleppey backwater houseboat cruise.",
       badge: "Best Value",
       image: "/kerala/alleppey_backwaters_houseboat.jpg",
       price: 16800,
       duration: "4 Days / 3 Nights",
-      rating: 4.92,
-      reviewsCount: 310,
-      stay: "Munnar Tea Country Hill Resort (2N) + Alleppey Private AC Houseboat (1N)",
+      rating: 4.93,
+      reviewsCount: 480,
+      stay: "Munnar Resort (2N) + Private AC Houseboat (1N)",
       vehicle: "Chauffeured Private AC Sedan / SUV",
       link: "/packages/kerala-4d3n-munnar-alleppey",
-      highlights: ["Private Houseboat Cruise", "Munnar Tea Gardens", "Cheeyappara Falls", "Mattupetty Dam"],
+      highlights: ["Private Houseboat Cruise", "Munnar Tea Gardens", "Cheeyappara Falls", "Vembanad Lake"],
       itinerary: [
-        { day: "Day 1", title: "Cochin Pickup → Munnar Tea Gardens & Waterfalls Drive", desc: "Private pickup from Cochin Airport. Drive to Munnar past Cheeyappara & Valara waterfalls." },
-        { day: "Day 2", title: "Munnar Sightseeing → Eravikulam National Park & Tea Museum", desc: "Safari in Eravikulam National Park to spot Nilgiri Tahr, visit Tata Tea Museum & Mattupetty Dam." },
-        { day: "Day 3", title: "Munnar to Alleppey → Private Houseboat Backwater Cruise", desc: "Drive to Alleppey. Board private AC luxury houseboat at noon. Cruise canals & enjoy Karimeen fish dinner." },
-        { day: "Day 4", title: "Alleppey Houseboat Breakfast → Cochin Airport Departure", desc: "Morning backwater cruise, breakfast onboard, and transfer to Cochin Airport." }
+        { day: "Day 1", title: "Cochin Pickup → Munnar Tea Country", desc: "Private pickup from Cochin. Drive to Munnar via scenic hill highways and Cheeyappara falls." },
+        { day: "Day 2", title: "Munnar Nature & Tea Valley Exploration", desc: "Eravikulam National Park, Lockhart tea valley viewpoints, Mattupetty Lake & Kundala Dam." },
+        { day: "Day 3", title: "Munnar to Alleppey → Private Houseboat Sailing", desc: "Drive to Alleppey. Board private AC luxury houseboat at noon. Sail Vembanad backwaters with fresh Karimeen fish dinner." },
+        { day: "Day 4", title: "Alleppey Houseboat Breakfast → Cochin Airport Drop", desc: "Morning canal cruise, breakfast onboard, and transfer to Cochin Airport / Station." }
       ],
-      inclusions: ["1 Night Private AC Houseboat + 2 Nights 4-Star Resort", "All Meals Onboard Houseboat", "Private AC Car Transfers", "Daily Breakfast & Dinner"],
-      exclusions: ["Flight / Train fares", "Personal activities"]
+      inclusions: ["1 Night Private AC Houseboat (All Meals)", "2 Nights 4-Star Resort Stay", "Private AC Chauffeured Vehicle", "Daily Breakfast & Houseboat Meals"],
+      exclusions: ["Flights / Train", "Personal expenses"]
     },
     {
       id: "kerala-5d4n-tea-wildlife-backwaters",
       title: "Kerala Tea, Wildlife & Backwaters Classic (5D/4N)",
-      desc: "Our best-selling Kerala tour covering Cochin, Munnar tea hills, Thekkady spice plantation & Alleppey houseboat.",
+      desc: "Comprehensive best-seller circuit covering Cochin heritage, Munnar tea hills, Thekkady Periyar wildlife boat safari & Alleppey houseboat.",
       badge: "Best Seller",
-      image: "/kerala/munnar_tea_estates.jpg",
+      image: "/kerala/thekkady_periyar_sanctuary.jpg",
       price: 21500,
       duration: "5 Days / 4 Nights",
-      rating: 4.95,
-      reviewsCount: 780,
-      stay: "Munnar Resort (2N) + Thekkady Spice Resort (1N) + Alleppey Deluxe Houseboat (1N)",
+      rating: 4.96,
+      reviewsCount: 890,
+      stay: "Munnar Resort (2N) + Thekkady Spice Resort (1N) + Alleppey Houseboat (1N)",
       vehicle: "Chauffeured Private AC SUV / Sedan",
       link: "/packages/kerala-5d4n-tea-wildlife-backwaters",
       highlights: ["Periyar Boat Safari", "Alleppey Houseboat", "Spice Plantation Walk", "Fort Kochi Nets"],
       itinerary: [
-        { day: "Day 1", title: "Cochin Pickup → Fort Kochi & Drive to Munnar", desc: "Pickup at Cochin. Visit Chinese Fishing Nets & drive to Munnar tea estates." },
-        { day: "Day 2", title: "Munnar Tea Country & Eravikulam Safari", desc: "Tour Eravikulam Park, Tea Museum, Echo Point & Kundala Lake." },
-        { day: "Day 3", title: "Munnar to Thekkady → Spice Plantation & Periyar Boat Safari", desc: "Drive to Thekkady. Spice garden guided walk & Periyar Lake boat safari." },
-        { day: "Day 4", title: "Thekkady to Alleppey → Private Luxury Houseboat Cruise", desc: "Transfer to Alleppey. Board private AC houseboat with traditional Kerala lunch & dinner." },
-        { day: "Day 5", title: "Alleppey Disembarkation → Cochin Airport Drop-off", desc: "Breakfast on houseboat, disembark, and transfer to Cochin Airport." }
+        { day: "Day 1", title: "Cochin Pickup → Fort Kochi & Drive to Munnar", desc: "Pickup at Cochin. Visit Chinese Fishing Nets & drive past misty cascades to Munnar." },
+        { day: "Day 2", title: "Munnar Tea Valley & Eravikulam Safari", desc: "Explore Eravikulam National Park, Tata Tea Museum, Echo Point & Kundala Lake." },
+        { day: "Day 3", title: "Munnar to Thekkady → Periyar Safari & Spice Gardens", desc: "Drive to Thekkady. Aromatic spice garden guided walk & Periyar Lake boat safari to spot wild elephant herds." },
+        { day: "Day 4", title: "Thekkady to Alleppey → Private Luxury Houseboat Cruise", desc: "Transfer to Alleppey jetty. Board private AC houseboat with authentic Kerala meals cooked by your personal chef." },
+        { day: "Day 5", title: "Alleppey Disembarkation → Cochin Airport Drop-off", desc: "Breakfast on houseboat, disembark at 9:00 AM, and transfer to Cochin Airport for return journey." }
       ],
-      inclusions: ["1 Night Deluxe Houseboat + 3 Nights 4-Star Hill Resorts", "Periyar Boat Safari Tickets", "Guided Spice Garden Walk", "Private AC Chauffeured SUV/Sedan"],
+      inclusions: ["1 Night Deluxe Houseboat + 3 Nights 4-Star Resorts", "Periyar Boat Safari Assistance", "Guided Spice Garden Walk", "Private AC Chauffeured Cab Throughout"],
       exclusions: ["Flight tickets", "Kathakali show entry"]
+    },
+    {
+      id: "kerala-5d4n-varkala-cliff-beach",
+      title: "Varkala Cliff Beach & Backwaters Getaway (5D/4N)",
+      desc: "Coastal holiday pairing dramatic red laterite cliffs of Varkala Beach with Jatayu Earth's Center cable car and private Alleppey houseboat cruise.",
+      badge: "Beach & Cliff Special",
+      image: "/kerala/jatayu_earth_center.jpg",
+      price: 22500,
+      duration: "5 Days / 4 Nights",
+      rating: 4.91,
+      reviewsCount: 340,
+      stay: "Varkala Cliff Resort (2N) + Alleppey Houseboat (1N) + Cochin Hotel (1N)",
+      vehicle: "Chauffeured Private AC Sedan / SUV",
+      link: "/packages/kerala-5d4n-varkala-cliff-beach",
+      highlights: ["Varkala Red Cliff Beach", "Jatayu Earth's Center", "Alleppey Houseboat", "Munroe Island"],
+      itinerary: [
+        { day: "Day 1", title: "Trivandrum/Cochin Pickup → Varkala Cliff Beach", desc: "Pickup and transfer to Varkala. Check in to cliffside resort overlooking Arabian Sea sunset." },
+        { day: "Day 2", title: "Varkala Beach & Jatayu Earth's Center Adventure", desc: "Visit world's largest bird sculpture at Jatayu Center with cable car ride, followed by sunset at Papanasam beach." },
+        { day: "Day 3", title: "Varkala to Alleppey → Private Houseboat Backwater Cruise", desc: "Drive along coastal highway to Alleppey. Board private AC houseboat with Kerala meals & backwater sailing." },
+        { day: "Day 4", title: "Alleppey to Cochin → Heritage Fort Kochi Tour", desc: "Disembark and drive to Cochin. Tour Fort Kochi, Chinese Fishing Nets, Mattancherry & Jew Town." },
+        { day: "Day 5", title: "Cochin Airport / Railway Station Departure", desc: "Morning shopping in Kochi and airport departure transfer." }
+      ],
+      inclusions: ["1N Houseboat + 3N Premium Resorts", "Jatayu Cable Car Assistance", "All Houseboat Meals", "Private AC Car for 5 Days"],
+      exclusions: ["Flight fares", "Adventure sports"]
     },
     {
       id: "kerala-6d5n-hills-backwaters-kovalam",
       title: "Grand Kerala Hills, Backwaters & Kovalam Beach (6D/5N)",
-      desc: "Complete Kerala circuit featuring Fort Kochi heritage, Munnar tea gardens, Thekkady safari, Alleppey houseboat & Kovalam beach.",
+      desc: "Complete flagship Kerala tour featuring Fort Kochi heritage, Munnar tea hills, Thekkady safari, Alleppey houseboat & Kovalam lighthouse beach.",
       badge: "Flagship Circuit",
-      image: "/kerala/thekkady_periyar_sanctuary.jpg",
+      image: "/kerala/kovalam_lighthouse_beach.jpg",
       price: 26500,
       duration: "6 Days / 5 Nights",
       rating: 4.98,
-      reviewsCount: 450,
-      stay: "Fort Kochi Hotel (1N) + Munnar Resort (2N) + Thekkady Resort (1N) + Houseboat (1N)",
-      vehicle: "Chauffeured Private AC Innova / SUV",
+      reviewsCount: 620,
+      stay: "Munnar (2N) + Thekkady (1N) + Houseboat (1N) + Kovalam (1N)",
+      vehicle: "Chauffeured Private AC Innova / Ertiga / Sedan",
       link: "/packages/kerala-6d5n-hills-backwaters-kovalam",
-      highlights: ["Fort Kochi Heritage", "Eravikulam Wildlife", "Periyar Elephant Safari", "Alleppey Sunset"],
+      highlights: ["Munnar Tea Valleys", "Periyar Boat Safari", "Alleppey Houseboat", "Kovalam Lighthouse Beach"],
       itinerary: [
-        { day: "Day 1", title: "Cochin Arrival → Heritage Fort Kochi Tour", desc: "Pickup from Cochin. Tour Mattancherry Palace, Jew Town & Chinese Fishing Nets." },
-        { day: "Day 2", title: "Cochin to Munnar → Waterfalls & Tea Estates", desc: "Drive through Western Ghats to Munnar. Evening tea garden stroll." },
-        { day: "Day 3", title: "Munnar Full Day Nature & Wildlife Safari", desc: "Eravikulam Park, Nilgiri Tahr, Mattupetty Dam & Echo Point." },
-        { day: "Day 4", title: "Munnar to Thekkady → Periyar Safari & Spice Walk", desc: "Drive to Thekkady. Periyar Lake boat ride & evening Kathakali cultural show." },
-        { day: "Day 5", title: "Thekkady to Alleppey → Private Houseboat Sailing", desc: "Board private houseboat at Alleppey jetty. Sail Vembanad Lake." },
-        { day: "Day 6", title: "Alleppey Houseboat → Cochin Airport Departure", desc: "Breakfast onboard and transfer to Cochin Airport for return flight." }
+        { day: "Day 1", title: "Cochin Arrival → Scenic Mountain Drive to Munnar", desc: "Pickup at Cochin Airport. Drive past Cheeyappara & Valara waterfalls to Munnar tea country." },
+        { day: "Day 2", title: "Munnar Full-Day Nature & Safari Excursion", desc: "Eravikulam National Park, Nilgiri Tahr sightings, Tea Museum, Mattupetty Lake & Echo Point." },
+        { day: "Day 3", title: "Munnar to Thekkady → Periyar Wildlife & Spice Walk", desc: "Scenic mountain drive to Thekkady. Spice garden tour and evening Periyar Lake boat safari." },
+        { day: "Day 4", title: "Thekkady to Alleppey → Private AC Houseboat Cruise", desc: "Drive to Alleppey jetty. Board private houseboat at noon. Sail Vembanad backwaters with fresh Karimeen dinner." },
+        { day: "Day 5", title: "Alleppey to Kovalam → Lighthouse Beach Sunset", desc: "Drive to Kovalam via Jatayu sculpture. Relax at Kovalam Lighthouse Beach & sample fresh seafood." },
+        { day: "Day 6", title: "Trivandrum Sightseeing → Padmanabhaswamy Temple & Airport Drop", desc: "Visit iconic Sree Padmanabhaswamy Temple, Napier Museum, and transfer to Trivandrum Airport." }
       ],
       inclusions: ["5 Nights Accommodation (1 Houseboat + 4 Deluxe Hotels)", "Periyar Lake Boat Tickets", "All Houseboat Meals", "Private AC Vehicle for 6 Days"],
-      exclusions: ["Flight fares", "Personal shopping"]
+      exclusions: ["Flight fares", "Temple special entry"]
+    },
+    {
+      id: "kerala-7d6n-grand-kerala-kanyakumari",
+      title: "Grand Kerala Circuit & Kanyakumari Sunset (7D/6N)",
+      desc: "All-in-one South India circuit combining Cochin, Munnar tea hills, Thekkady wildlife, Alleppey houseboat, Kovalam beach & Kanyakumari Cape Comorin.",
+      badge: "Grand Circuit",
+      image: "/kerala/eravikulam_nilgiri_tahr.jpg",
+      price: 32000,
+      duration: "7 Days / 6 Nights",
+      rating: 4.97,
+      reviewsCount: 420,
+      stay: "Munnar (2N) + Thekkady (1N) + Alleppey (1N) + Kovalam (1N) + Kanyakumari (1N)",
+      vehicle: "Chauffeured Private AC Innova / Ertiga / Sedan",
+      link: "/packages/kerala-7d6n-grand-kerala-kanyakumari",
+      highlights: ["Kanyakumari Sunset & Sunrise", "Vivekananda Rock Memorial", "Alleppey Houseboat", "Munnar Tea Estates"],
+      itinerary: [
+        { day: "Day 1", title: "Cochin Pickup → Scenic Western Ghats Drive to Munnar", desc: "Pickup at Cochin. Drive to Munnar via Valara & Cheeyappara falls." },
+        { day: "Day 2", title: "Munnar Tea Country & Eravikulam Safari", desc: "Eravikulam National Park, Tea Museum, Echo Point & Mattupetty Dam." },
+        { day: "Day 3", title: "Munnar to Thekkady → Spice Walk & Periyar Safari", desc: "Drive to Thekkady. Cardamom plantation walk & Periyar Lake boat safari." },
+        { day: "Day 4", title: "Thekkady to Alleppey → Private Houseboat Cruise", desc: "Board private AC luxury houseboat at noon. Sail backwater lagoons." },
+        { day: "Day 5", title: "Alleppey to Kovalam → Lighthouse Beach & Trivandrum", desc: "Drive to Kovalam. Relax on golden sand beach and view sunset." },
+        { day: "Day 6", title: "Kovalam to Kanyakumari → Vivekananda Rock & Triveni Sangam", desc: "Drive to Kanyakumari. Ferry to Vivekananda Rock Memorial, Thiruvalluvar Statue & sunset over 3 oceans." },
+        { day: "Day 7", title: "Kanyakumari Sunrise → Trivandrum Airport Departure", desc: "Watch spectacular sunrise over the ocean, Padmanabhaswamy temple darshan & Trivandrum Airport drop." }
+      ],
+      inclusions: ["6 Nights Deluxe Accommodations", "1 Night Private Houseboat with All Meals", "Private AC Cab for 7 Days", "Daily Breakfast at all Hotels"],
+      exclusions: ["Airfare / Train tickets", "Ferry tickets to Vivekananda Rock"]
+    },
+    {
+      id: "kerala-8d7n-heritage-backwaters-cape",
+      title: "Kerala Heritage, Wildlife, Backwaters & Cape Comorin (8D/7N)",
+      desc: "Deluxe extended itinerary featuring Fort Kochi, Munnar, Thekkady, Alleppey houseboat, Varkala cliff, Kovalam beach & Kanyakumari.",
+      badge: "Extended Deluxe",
+      image: "/kerala/fort_kochi_chinese_nets.jpg",
+      price: 36500,
+      duration: "8 Days / 7 Nights",
+      rating: 4.96,
+      reviewsCount: 310,
+      stay: "Fort Kochi (1N) + Munnar (2N) + Thekkady (1N) + Houseboat (1N) + Kovalam (2N) + Kanyakumari (1N)",
+      vehicle: "Chauffeured Private AC Innova Crysta / Ertiga",
+      link: "/packages/kerala-8d7n-heritage-backwaters-cape",
+      highlights: ["Fort Kochi Heritage", "Eravikulam Nilgiri Tahr", "Private Houseboat", "Kanyakumari Cape"],
+      itinerary: [
+        { day: "Day 1", title: "Cochin Arrival → Heritage Fort Kochi Tour", desc: "Pickup at Cochin. Explore Portuguese & Dutch history, Jew Town and Chinese Nets." },
+        { day: "Day 2", title: "Cochin to Munnar → Waterfalls & Tea Valley Check-in", desc: "Drive through Western Ghats mountains to Munnar resort." },
+        { day: "Day 3", title: "Munnar Full-Day Sightseeing & Wildlife", desc: "Eravikulam Park, Tea Factory Museum, Kundala Lake & Echo Point." },
+        { day: "Day 4", title: "Munnar to Thekkady → Periyar Safari & Kathakali", desc: "Drive to Thekkady. Spice garden tour, boat safari & evening dance show." },
+        { day: "Day 5", title: "Thekkady to Alleppey → Private Luxury Houseboat", desc: "Board private houseboat. Savor traditional Kerala meals on Vembanad Lake." },
+        { day: "Day 6", title: "Alleppey to Kovalam via Jatayu Earth's Center", desc: "Disembark houseboat, visit Jatayu giant sculpture and drive to Kovalam beach resort." },
+        { day: "Day 7", title: "Kovalam to Kanyakumari Day Excursion", desc: "Day trip to Kanyakumari: Vivekananda Rock, Gandhi Memorial & sunset." },
+        { day: "Day 8", title: "Trivandrum Temple Darshan → Airport Departure", desc: "Sree Padmanabhaswamy Temple darshan and Trivandrum Airport drop." }
+      ],
+      inclusions: ["7 Nights Accommodations (1 Houseboat + 6 Deluxe Hotels)", "All Houseboat Meals", "Private AC Cab with Experienced Driver", "Daily Breakfast Buffets"],
+      exclusions: ["Airfare", "Personal expenses"]
+    },
+    {
+      id: "kerala-10d9n-south-india-temple-circuit",
+      title: "Complete Kerala & South India Grand Circuit (10D/9N)",
+      desc: "The ultimate Grand South India vacation covering Cochin, Munnar, Thekkady, Alleppey, Kovalam, Kanyakumari, Madurai Meenakshi Temple & Rameshwaram.",
+      badge: "Ultimate Grand Tour",
+      image: "/kerala/vagamon_pine_forest.jpg",
+      price: 45000,
+      duration: "10 Days / 9 Nights",
+      rating: 4.99,
+      reviewsCount: 280,
+      stay: "Cochin (1N) + Munnar (2N) + Thekkady (1N) + Houseboat (1N) + Kovalam (2N) + Kanyakumari (1N) + Madurai (1N)",
+      vehicle: "Chauffeured Luxury AC Innova Crysta",
+      link: "/packages/kerala-10d9n-south-india-temple-circuit",
+      highlights: ["Madurai Meenakshi Temple", "Kanyakumari Cape", "Alleppey Houseboat", "Periyar Boat Safari"],
+      itinerary: [
+        { day: "Day 1", title: "Cochin Arrival → Heritage Tour", desc: "Pickup at Cochin Airport. Fort Kochi sightseeing & check-in." },
+        { day: "Day 2", title: "Cochin to Munnar Tea Country", desc: "Drive to Munnar past Cheeyappara waterfalls." },
+        { day: "Day 3", title: "Munnar Nature & Wildlife Safari", desc: "Eravikulam National Park, Nilgiri Tahr & tea gardens." },
+        { day: "Day 4", title: "Munnar to Thekkady Wildlife Reserve", desc: "Periyar Lake boat safari & aromatic spice plantation walk." },
+        { day: "Day 5", title: "Thekkady to Alleppey Houseboat", desc: "Private AC luxury houseboat cruise on Vembanad backwaters." },
+        { day: "Day 6", title: "Alleppey to Kovalam via Jatayu Center", desc: "Jatayu Earth's Center cable car and Kovalam Lighthouse beach." },
+        { day: "Day 7", title: "Kovalam to Kanyakumari", desc: "Vivekananda Rock Memorial, Thiruvalluvar Statue & sunset." },
+        { day: "Day 8", title: "Kanyakumari to Madurai → Meenakshi Amman Temple", desc: "Drive to historic Madurai. Evening darshan and ceremony at Meenakshi Temple." },
+        { day: "Day 9", title: "Madurai to Rameshwaram / Cochin", desc: "Ramanathaswamy Temple darshan and scenic Pamban bridge crossing." },
+        { day: "Day 10", title: "Departure Transfer → Madurai / Cochin Airport", desc: "Breakfast, souvenir shopping and departure transfer." }
+      ],
+      inclusions: ["9 Nights Accommodations (1 Houseboat + 8 Premium Hotels)", "Private AC Innova Crysta for 10 Days", "All Houseboat Meals", "Daily Breakfast Buffets"],
+      exclusions: ["Airfare / Train tickets", "Temple special darshan tickets"]
     }
   ]
 
@@ -334,10 +462,10 @@ const KeralaBackwaters: React.FC = () => {
   return (
     <Layout>
       <SEO 
-        title="Kerala Backwaters & Houseboat Tour Packages 2026 | Munnar & Alleppey"
-        description="Book top-rated Kerala tour packages. Private AC Alleppey backwater houseboat cruise, Munnar tea estates, Eravikulam safari, Thekkady spice gardens & Kovalam beach."
-        keywords="Kerala backwaters tour package 2026, Alleppey houseboat booking price, Munnar tea gardens tour, Kerala honeymoon package, Kovalam beach resort package"
-        canonicalUrl={config.baseUrl + "/packages/kerala-backwaters"}
+        title="Kerala Tour Packages 2026 | God's Own Country, Munnar, Houseboats & Beaches"
+        description="Book top-rated Kerala tour packages from India. Private AC Alleppey backwater houseboats, Munnar tea estates, Eravikulam Nilgiri Tahr safari, Thekkady spice walks, Varkala cliff & Kovalam beach resorts."
+        keywords="Kerala tour packages 2026, Kerala houseboat booking, Munnar tour packages, Alleppey backwaters, Thekkady Periyar safari, Kovalam beach resort, Jatayu Earth Center, Kerala family vacation price"
+        canonicalUrl={config.baseUrl + "/packages/kerala"}
         structuredData={[breadcrumbSchema, faqSchema, tripSchema]}
       />
 
@@ -359,16 +487,16 @@ const KeralaBackwaters: React.FC = () => {
             <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-black/50 border border-[#C9A25A]/50 backdrop-blur-md">
               <Sparkles className="w-3.5 h-3.5 text-[#C9A25A]" />
               <span className="text-[11px] font-semibold uppercase tracking-[0.25em] text-[#E5C378]">
-                God's Own Country Sanctuary
+                God's Own Country Collection 2026
               </span>
             </div>
             
             <h1 className="text-4xl sm:text-6xl lg:text-7xl font-serif font-normal text-white max-w-4xl leading-tight tracking-tight drop-shadow-2xl">
-              Kerala Backwaters Collection
+              Kerala Paradise Collection
             </h1>
             
             <p className="text-sm sm:text-lg text-slate-200 max-w-2xl font-light leading-relaxed drop-shadow-md">
-              Private AC Alleppey houseboat cruises, Munnar misty tea estates, Eravikulam Nilgiri Tahr safari, Thekkady spice gardens & Kovalam beach.
+              Munnar misty tea hills, Alleppey private AC backwater houseboats, Periyar wildlife boat safari, Varkala cliffs, Kovalam lighthouse & Kanyakumari cape.
             </p>
 
             <div className="flex flex-wrap items-center justify-center gap-4 pt-2">
@@ -385,17 +513,17 @@ const KeralaBackwaters: React.FC = () => {
                 className="px-8 py-6 rounded-full bg-black/40 border-white/20 text-white font-bold text-xs uppercase tracking-[0.2em] hover:bg-white/10 backdrop-blur-md"
                 onClick={() => document.getElementById("highlights-section")?.scrollIntoView({ behavior: "smooth" })}
               >
-                View Sightseeing Guide <Compass className="ml-2 h-4 w-4 text-[#C9A25A]" />
+                View 8 Sightseeing Highlights <Compass className="ml-2 h-4 w-4 text-[#C9A25A]" />
               </Button>
             </div>
 
             {/* QUICK STATS BAR */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-8 w-full max-w-3xl">
               {[
-                { label: "Guest Rating", val: "4.95 ★", sub: "1,680+ Travelers" },
+                { label: "Guest Rating", val: "4.98 ★", sub: "2,450+ Travelers" },
                 { label: "Private Houseboat", val: "100% Private AC", sub: "Personal Chef Onboard" },
-                { label: "Hill Resorts", val: "4-Star Tiers", sub: "Munnar Tea Country" },
-                { label: "Private Cab", val: "Chauffeured", sub: "Cochin Pickup & Drop" }
+                { label: "Hill & Beach Resorts", val: "4-Star Deluxe", sub: "Munnar & Kovalam" },
+                { label: "Private AC Cabs", val: "100% Chauffeured", sub: "Sedan / Ertiga / Innova" }
               ].map((stat, i) => (
                 <div key={i} className="bg-black/40 border border-white/10 p-3 rounded-xl backdrop-blur-md text-center">
                   <div className="text-sm font-serif font-bold text-[#E5C378]">{stat.val}</div>
@@ -411,7 +539,7 @@ const KeralaBackwaters: React.FC = () => {
           <SectionHeading 
             kicker="Curated Itineraries" 
             title="Select Your Kerala Tour Package" 
-            subtitle="Choose from express 4-day breaks, 5-day best sellers with spice plantations, or 6-day grand circuits." 
+            subtitle="Choose from express 3-day Munnar breaks, 4-day houseboat specials, 5-day best sellers, 6-day Kovalam beach circuits, or grand 7 to 10-day South India journeys." 
             align="center" 
             className="mx-auto mb-16" 
           />

@@ -344,8 +344,16 @@ function App() {
                   <Route path="/packages/kashmir-gurez-offbeat" element={<DynamicPackageDetail slug="kashmir-gurez-offbeat" fallback={<KashmirParadise />} />} />
                   <Route path="/packages/kashmir" element={<DynamicPackageDetail slug="classic-kashmir-5n6d" fallback={<KashmirParadise />} />} />
                   <Route path="/packages/kashmir-ultra-luxury" element={<DynamicPackageDetail slug="kashmir-ultra-luxury" fallback={<KashmirParadise />} />} />
-                  <Route path="/packages/kerala" element={<DynamicPackageDetail slug="kerala-6d5n-hills-backwaters-kovalam" fallback={<KeralaBackwaters />} />} />
-                  <Route path="/packages/kerala-backwaters" element={<DynamicPackageDetail slug="kerala-6d5n-hills-backwaters-kovalam" fallback={<KeralaBackwaters />} />} />
+                  <Route path="/packages/kerala" element={<KeralaBackwaters />} />
+                  <Route path="/packages/kerala-backwaters" element={<KeralaBackwaters />} />
+                  <Route path="/packages/kerala-3d2n-munnar-hills" element={<DynamicPackageDetail slug="kerala-3d2n-munnar-hills" />} />
+                  <Route path="/packages/kerala-4d3n-munnar-alleppey" element={<DynamicPackageDetail slug="kerala-4d3n-munnar-alleppey" />} />
+                  <Route path="/packages/kerala-5d4n-tea-wildlife-backwaters" element={<DynamicPackageDetail slug="kerala-5d4n-tea-wildlife-backwaters" />} />
+                  <Route path="/packages/kerala-5d4n-varkala-cliff-beach" element={<DynamicPackageDetail slug="kerala-5d4n-varkala-cliff-beach" />} />
+                  <Route path="/packages/kerala-6d5n-hills-backwaters-kovalam" element={<DynamicPackageDetail slug="kerala-6d5n-hills-backwaters-kovalam" />} />
+                  <Route path="/packages/kerala-7d6n-grand-kerala-kanyakumari" element={<DynamicPackageDetail slug="kerala-7d6n-grand-kerala-kanyakumari" />} />
+                  <Route path="/packages/kerala-8d7n-heritage-backwaters-cape" element={<DynamicPackageDetail slug="kerala-8d7n-heritage-backwaters-cape" />} />
+                  <Route path="/packages/kerala-10d9n-south-india-temple-circuit" element={<DynamicPackageDetail slug="kerala-10d9n-south-india-temple-circuit" />} />
                   <Route path="/packages/goa" element={<GoaBeachHoliday />} />
                   <Route path="/packages/goa-beach-holiday" element={<GoaBeachHoliday />} />
                   <Route path="/packages/himachal" element={<HimachalHillStations />} />
