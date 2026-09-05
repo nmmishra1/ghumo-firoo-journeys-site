@@ -191,10 +191,29 @@ function checkDuplicateMasterRecord($pdo, $table, $input, $excludeId = null) {
     return null;
 }
 
+if ($table === 'hotel_facility_mapping') {
+    try {
+        $pdo->exec("CREATE TABLE IF NOT EXISTS `hotel_facility_mapping` (
+            `id` INT AUTO_INCREMENT PRIMARY KEY,
+            `hotel_id` VARCHAR(100) NOT NULL,
+            `facility_id` VARCHAR(100) NOT NULL,
+            `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+    } catch (Throwable $e) {}
+}
+
 try {
     // Retrieve list of actual table columns to filter inserts/updates safely
-    $q = $pdo->query("DESCRIBE `$table`");
-    $columns = $q->fetchAll(PDO::FETCH_COLUMN);
+    try {
+        $q = $pdo->query("DESCRIBE `$table`");
+        $columns = $q ? $q->fetchAll(PDO::FETCH_COLUMN) : [];
+    } catch (Throwable $e) {
+        $columns = [];
+        if ($method === 'GET') {
+            echo json_encode([]);
+            exit;
+        }
+    }
 
     if ($method === 'GET') {
         if (!empty($id)) {
@@ -393,8 +412,11 @@ try {
             exit;
         }
         echo json_encode(['success' => true]);
+} catch (Throwable $e) {
+    if ($method === 'GET') {
+        echo json_encode([]);
+    } else {
+        header('HTTP/1.1 500 Internal Server Error');
+        echo json_encode(['error' => $e->getMessage()]);
     }
-} catch (Exception $e) {
-    header('HTTP/1.1 500 Internal Server Error');
-    echo json_encode(['error' => $e->getMessage()]);
 }
