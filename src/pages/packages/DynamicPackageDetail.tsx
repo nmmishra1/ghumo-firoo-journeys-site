@@ -4045,6 +4045,52 @@ const DynamicPackageDetail: React.FC<DynamicPackageDetailProps> = ({ slug: propS
     }
   }, [passengerCount]);
 
+  const getInitialVariantId = (variants: any[], slug: string) => {
+    if (!variants || variants.length === 0) return '';
+    const s = (slug || '').toLowerCase();
+    let matched: any = null;
+    if (s.includes('2d1n') || s.includes('1n2d') || s.includes('1-night') || s.includes('2-day')) {
+      matched = variants.find((v: any) => 
+        (v.id && (v.id === '1n2d' || v.id.includes('1n'))) || 
+        (v.variant_key && (v.variant_key === '1n2d' || v.variant_key.includes('1n'))) || 
+        (v.label && (v.label.includes('1N') || v.label.includes('2D'))) || 
+        (v.nights === 1 && v.days === 2)
+      );
+    } else if (s.includes('3d2n') || s.includes('2n3d') || s.includes('2-night') || s.includes('3-day')) {
+      matched = variants.find((v: any) => 
+        (v.id && (v.id === '2n3d' || v.id.includes('2n'))) || 
+        (v.variant_key && (v.variant_key === '2n3d' || v.variant_key.includes('2n'))) || 
+        (v.label && (v.label.includes('2N') || v.label.includes('3D'))) || 
+        (v.nights === 2 && v.days === 3)
+      );
+    } else if (s.includes('4d3n') || s.includes('3n4d') || s.includes('3-night') || s.includes('4-day')) {
+      matched = variants.find((v: any) => 
+        (v.id && (v.id === '3n4d' || v.id.includes('3n'))) || 
+        (v.variant_key && (v.variant_key === '3n4d' || v.variant_key.includes('3n'))) || 
+        (v.label && (v.label.includes('3N') || v.label.includes('4D'))) || 
+        (v.nights === 3 && v.days === 4)
+      );
+    } else if (s.includes('5d4n') || s.includes('4n5d') || s.includes('4-night') || s.includes('5-day')) {
+      matched = variants.find((v: any) => 
+        (v.id && (v.id === '4n5d' || v.id.includes('4n'))) || 
+        (v.variant_key && (v.variant_key === '4n5d' || v.variant_key.includes('4n'))) || 
+        (v.label && (v.label.includes('4N') || v.label.includes('5D'))) || 
+        (v.nights === 4 && v.days === 5)
+      );
+    } else if (s.includes('day-trip') || s.includes('daytrip')) {
+      matched = variants.find((v: any) => 
+        (v.id && v.id.includes('day')) || 
+        (v.variant_key && v.variant_key.includes('day')) || 
+        (v.label && v.label.toLowerCase().includes('day')) || 
+        v.nights === 0
+      );
+    }
+    
+    // Default to matched variant, or fallback to first overnight / popular variant
+    const chosen = matched || variants.find((v: any) => v.nights > 0) || variants[0];
+    return String(chosen.id || chosen.variant_key || chosen.variantKey || chosen.label || '');
+  };
+
   useEffect(() => {
     const fetchPackage = async () => {
       try {
@@ -4083,7 +4129,7 @@ const DynamicPackageDetail: React.FC<DynamicPackageDetailProps> = ({ slug: propS
               };
               setPkg(finalPkg);
               if (finalPkg.variants && finalPkg.variants.length > 0) {
-                setActiveVariantId(String(finalPkg.variants[0].id || finalPkg.variants[0].variant_key || finalPkg.variants[0].variantKey || ''));
+                setActiveVariantId(getInitialVariantId(finalPkg.variants, currentSlug));
               }
               setLoading(false);
               return;
@@ -4103,7 +4149,7 @@ const DynamicPackageDetail: React.FC<DynamicPackageDetailProps> = ({ slug: propS
           };
           setPkg(mergedPkg);
           if (mergedPkg.variants && mergedPkg.variants.length > 0) {
-            setActiveVariantId(String(mergedPkg.variants[0].id || mergedPkg.variants[0].variantKey || mergedPkg.variants[0].variant_key || ''));
+            setActiveVariantId(getInitialVariantId(mergedPkg.variants, currentSlug));
           }
           setLoading(false);
           return;
@@ -4112,7 +4158,7 @@ const DynamicPackageDetail: React.FC<DynamicPackageDetailProps> = ({ slug: propS
         if (localPkg) {
           setPkg(localPkg);
           if (localPkg.variants && localPkg.variants.length > 0) {
-            setActiveVariantId(String(localPkg.variants[0].id || localPkg.variants[0].variantKey || localPkg.variants[0].variant_key || ''));
+            setActiveVariantId(getInitialVariantId(localPkg.variants, currentSlug));
           }
         } else {
           // Fuzzy Slug Matcher to guarantee non-empty fallback for any slug format
@@ -4143,7 +4189,7 @@ const DynamicPackageDetail: React.FC<DynamicPackageDetailProps> = ({ slug: propS
           } else if (fallbackData) {
             setPkg(fallbackData);
             if (fallbackData.variants && fallbackData.variants.length > 0) {
-              setActiveVariantId(String(fallbackData.variants[0].id || fallbackData.variants[0].variantKey || ''));
+              setActiveVariantId(getInitialVariantId(fallbackData.variants, currentSlug));
             }
           }
         }
@@ -4180,7 +4226,7 @@ const DynamicPackageDetail: React.FC<DynamicPackageDetailProps> = ({ slug: propS
           }
           setPkg(resolvedPkg);
           if (resolvedPkg.variants && resolvedPkg.variants.length > 0) {
-            setActiveVariantId(resolvedPkg.variants[0].id || resolvedPkg.variants[0].variantKey || '');
+            setActiveVariantId(getInitialVariantId(resolvedPkg.variants, currentSlug));
           }
         }
       } finally {

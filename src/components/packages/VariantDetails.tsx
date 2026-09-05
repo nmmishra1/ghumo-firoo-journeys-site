@@ -154,28 +154,42 @@ export const VariantDetails: React.FC<VariantDetailsProps> = ({ variant }) => {
             Package Pricing Tier ({variant.label})
           </span>
           <h4 className="text-lg font-semibold text-white mt-1">
-            Package includes for {variant.nights} Nights / {variant.days} Days
+            {variant.nights > 0 ? `Package includes for ${variant.nights} Nights / ${variant.days} Days` : `Full Day Guided Excursion (${variant.days} Day)`}
           </h4>
           <div className="flex items-baseline gap-2 mt-2">
             <span className="text-3xl font-extrabold text-[#C9A25A]">
               ₹{variant.pricePerPerson.toLocaleString('en-IN')}
             </span>
-            <span className="text-xs text-white/70">/ person (twin sharing)</span>
+            <span className="text-xs text-slate-300">/ person {variant.nights > 0 ? '(twin sharing)' : '(per pass)'}</span>
           </div>
-          {/* EMI display */}
-          <div className="text-[9px] text-[rgba(255,255,255,0.35)] mt-1">
-            or ₹{Math.round(variant.pricePerPerson / 6).toLocaleString('en-IN')}/mo <span className="text-[rgba(201,162,90,0.6)]">· 6-month easy EMI</span>
-          </div>
-          <p className="text-xs text-white/50 mt-1">
-            Total for 2 adults: ₹{(variant.pricePerPerson * 2).toLocaleString('en-IN')} • Prices may vary during peak season
-          </p>
-          <div className="flex justify-between text-xs border-t border-[rgba(255,255,255,0.06)] mt-3 pt-3">
-            <span className="text-[rgba(255,255,255,0.4)]">Easy EMI (6 months)</span>
-            <span className="text-[#C9A25A] font-bold">₹{Math.round(variant.pricePerPerson / 6).toLocaleString('en-IN')}/month</span>
-          </div>
-          <div className="text-[9px] text-[rgba(255,255,255,0.3)] mt-1 text-right">
-            Zero cost EMI via major credit cards
-          </div>
+
+          {variant.pricePerPerson >= 8000 ? (
+            <>
+              {/* EMI display for long-stay packages */}
+              <div className="text-[10px] text-slate-300 mt-1">
+                or ₹{Math.round(variant.pricePerPerson / 6).toLocaleString('en-IN')}/mo <span className="text-[#C9A25A]">· 6-month easy EMI option</span>
+              </div>
+              <p className="text-xs text-slate-400 mt-1">
+                Total for 2 adults: ₹{(variant.pricePerPerson * 2).toLocaleString('en-IN')} • Inclusive of sightseeing transfers & taxes
+              </p>
+              <div className="flex justify-between text-xs border-t border-white/10 mt-3 pt-3">
+                <span className="text-slate-400">Easy EMI (6 months)</span>
+                <span className="text-[#C9A25A] font-bold">₹{Math.round(variant.pricePerPerson / 6).toLocaleString('en-IN')}/month</span>
+              </div>
+              <div className="text-[10px] text-slate-400 mt-1 text-right">
+                Zero cost EMI available via major credit cards
+              </div>
+            </>
+          ) : (
+            <div className="mt-3 pt-3 border-t border-white/10">
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 text-xs font-bold">
+                ✓ Best Price Guaranteed · Instant Booking Available
+              </div>
+              <p className="text-xs text-slate-300 mt-2">
+                Total for 2 adults: ₹{(variant.pricePerPerson * 2).toLocaleString('en-IN')} • All entry permits & transfers included
+              </p>
+            </div>
+          )}
         </div>
         <div className="flex-shrink-0 w-full md:w-auto">
           <Button

@@ -48,59 +48,59 @@ export const PremiumTimeline: React.FC<PremiumTimelineProps> = ({ itinerary, cla
   if (!itinerary || itinerary.length === 0) return null;
 
   return (
-    <div className={`max-w-3xl mx-auto space-y-12 ${className}`}>
+    <div className={`max-w-3xl mx-auto space-y-8 ${className}`}>
       {itinerary.map((item, idx) => (
-        <ScrollReveal key={idx} variant="fade-in-up" className="flex gap-0 items-start relative">
+        <div key={idx} className="flex gap-0 items-start relative">
           {/* Left: dot + day label + connector line */}
-          <div className="w-[100px] flex-shrink-0 flex flex-col items-center relative">
-            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#C9A25A] to-[#D8B97A] flex items-center justify-center text-[11px] font-extrabold text-[#0B1026] shadow-[0_0_0_4px_rgba(201,162,90,0.15),0_0_20px_rgba(201,162,90,0.2)]">
+          <div className="w-[70px] sm:w-[90px] flex-shrink-0 flex flex-col items-center relative">
+            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#C9A25A] to-[#D8B97A] flex items-center justify-center text-xs font-extrabold text-[#0B1026] shadow-[0_0_0_4px_rgba(201,162,90,0.25),0_0_15px_rgba(201,162,90,0.3)]">
               D{item.day}
             </div>
-            <div className="text-[9px] font-extrabold tracking-[0.12em] uppercase text-[#C9A25A] mt-1.5 text-center">
+            <div className="text-[10px] font-extrabold tracking-[0.12em] uppercase text-[#C9A25A] mt-1.5 text-center">
               Day {item.day}
             </div>
             {/* Connector line — hide on last item */}
             {idx < itinerary.length - 1 && (
-              <div className="absolute left-1/2 top-[52px] bottom-[-48px] w-px bg-gradient-to-b from-[rgba(201,162,90,0.4)] to-[rgba(201,162,90,0.05)] -translate-x-1/2" />
+              <div className="absolute left-1/2 top-[52px] bottom-[-32px] w-px bg-gradient-to-b from-[#C9A25A]/60 to-[#C9A25A]/10 -translate-x-1/2" />
             )}
           </div>
           
           {/* Right: content card */}
-          <div className="flex-1 pl-5 pb-12 last:pb-0">
-            <div className="bg-[rgba(26,35,66,0.5)] border border-[rgba(201,162,90,0.15)] rounded-xl p-4 hover:border-[rgba(201,162,90,0.35)] transition-colors">
+          <div className="flex-1 pl-4 sm:pl-6 pb-6 last:pb-0">
+            <div className="bg-[#0B1226]/95 border border-[#C9A25A]/25 rounded-2xl p-5 hover:border-[#C9A25A]/50 transition-colors shadow-xl">
               
               {/* Optional arrival/departure badge */}
               {idx === 0 && (
-                <div className="inline-flex items-center gap-1 bg-[rgba(52,211,153,0.1)] border border-[rgba(52,211,153,0.2)] text-[#34d399] text-[9px] font-bold px-2 py-0.5 rounded-full mb-2">
-                  ✈ Arrival Day
+                <div className="inline-flex items-center gap-1 bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 text-[10px] font-bold px-2.5 py-0.5 rounded-full mb-2.5">
+                  ✈ Arrival & Welcome
                 </div>
               )}
-              {idx === itinerary.length - 1 && (
-                <div className="inline-flex items-center gap-1 bg-[rgba(239,68,68,0.1)] border border-[rgba(239,68,68,0.2)] text-[#f87171] text-[9px] font-bold px-2 py-0.5 rounded-full mb-2">
+              {idx === itinerary.length - 1 && itinerary.length > 1 && (
+                <div className="inline-flex items-center gap-1 bg-rose-500/15 border border-rose-500/30 text-rose-400 text-[10px] font-bold px-2.5 py-0.5 rounded-full mb-2.5">
                   🏠 Departure Day
                 </div>
               )}
               
-              <h3 className="text-sm font-display font-bold text-white mb-2 leading-snug">
+              <h3 className="text-base font-display font-bold text-white mb-2 leading-snug">
                 {cleanMojibakeText(item.title)}
               </h3>
-              <p className="text-[11px] text-[rgba(255,255,255,0.7)] leading-relaxed font-light">
+              <p className="text-xs sm:text-sm text-slate-200 leading-relaxed font-normal">
                 {cleanMojibakeText(item.description)}
               </p>
               
               {/* Activity pills */}
               {item.activities && item.activities.length > 0 && (
-                <div className="flex flex-wrap gap-1.5 mt-3">
+                <div className="flex flex-wrap gap-2 mt-4 pt-3 border-t border-white/10">
                   {item.activities.map((act, i) => (
-                    <span key={i} className="text-[9px] font-semibold px-2 py-1 rounded-md bg-[rgba(201,162,90,0.1)] border border-[rgba(201,162,90,0.2)] text-[#C9A25A]">
-                      {cleanMojibakeText(act)}
+                    <span key={i} className="text-[10px] sm:text-xs font-semibold px-2.5 py-1 rounded-lg bg-[#C9A25A]/15 border border-[#C9A25A]/30 text-[#E5C378]">
+                      ✓ {cleanMojibakeText(act)}
                     </span>
                   ))}
                 </div>
               )}
             </div>
           </div>
-        </ScrollReveal>
+        </div>
       ))}
     </div>
   );
