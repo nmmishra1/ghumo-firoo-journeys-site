@@ -23,7 +23,7 @@ const KeralaBackwaters: React.FC = () => {
   const [selectedAttraction, setSelectedAttraction] = useState<any | null>(null)
   const [activeCategory, setActiveCategory] = useState<string>("all")
 
-  const FALLBACK_KERALA_IMG = "https://images.unsplash.com/photo-1602216056096-3b40cc0c9944?q=80&w=800"
+  const FALLBACK_KERALA_IMG = "/kerala/alleppey_backwaters_houseboat.jpg"
 
   useEffect(() => {
     const loadReviews = async () => {
@@ -43,7 +43,7 @@ const KeralaBackwaters: React.FC = () => {
       title: "Munnar & Alleppey Express (4D/3N)",
       desc: "Short Kerala break featuring Munnar tea gardens, Cheeyappara waterfalls & private Alleppey houseboat cruise.",
       badge: "Express Escape",
-      image: "https://images.unsplash.com/photo-1602216056096-3b40cc0c9944?q=80&w=800",
+      image: "/kerala/alleppey_backwaters_houseboat.jpg",
       price: 18500,
       duration: "4 Days / 3 Nights",
       rating: 4.9,
@@ -66,7 +66,7 @@ const KeralaBackwaters: React.FC = () => {
       title: "Kerala Backwaters & Tea Sanctuary (5D/4N)",
       desc: "Our best-selling Kerala tour covering Cochin, Munnar tea hills, Thekkady spice plantation & Alleppey houseboat.",
       badge: "Best Seller",
-      image: "https://images.unsplash.com/photo-1593693397690-362cb9666fc2?q=80&w=800",
+      image: "/kerala/munnar_tea_estates.jpg",
       price: 22800,
       duration: "5 Days / 4 Nights",
       rating: 4.95,
@@ -90,7 +90,7 @@ const KeralaBackwaters: React.FC = () => {
       title: "Grand Kerala Hills, Wildlife & Backwaters (6D/5N)",
       desc: "Complete Kerala circuit featuring Fort Kochi heritage, Munnar tea gardens, Thekkady safari, Alleppey houseboat & Marari beach.",
       badge: "Grand Circuit",
-      image: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?q=80&w=800",
+      image: "/kerala/thekkady_periyar_sanctuary.jpg",
       price: 27500,
       duration: "6 Days / 5 Nights",
       rating: 4.98,
@@ -114,56 +114,12 @@ const KeralaBackwaters: React.FC = () => {
 
   const attractions = [
     {
-      id: "alleppey-houseboats",
-      category: "backwaters",
-      categoryName: "Backwaters & Lakes",
-      title: "Alleppey Backwaters & Luxury Houseboats",
-      description: "World-famous palm-fringed backwater canals, Vembanad Lake & private AC houseboats equipped with personal chef and butler service.",
-      image: "https://images.unsplash.com/photo-1602216056096-3b40cc0c9944?q=80&w=800",
-      distance: "Alleppey Jetty",
-      highlights: ["Private AC Houseboat", "Vembanad Lake", "Paddy Field Canals", "Karimeen Fish Dinner"],
-      details: {
-        altitude: "Sea Level (0 m)",
-        bestTime: "September to March | Year-Round Houseboat Cruises",
-        overview: "Known as the 'Venice of the East', Alleppey (Alappuzha) is famous for its intricate network of tranquil backwater canals, lagoons, and emerald paddy fields. Sailing on a traditional Kettuvallam (houseboat) is Kerala's signature travel experience.",
-        experiences: [
-          "Cruise through narrow palm-fringed canals on a private air-conditioned luxury houseboat.",
-          "Savor authentic Kerala meals cooked fresh onboard by your personal chef.",
-          "Witness picturesque rural backwater life, duck farming, and coconut harvesting.",
-          "Enjoy golden hour sunsets over Vembanad Lake from your private open-deck loungers."
-        ],
-        travelTips: "Houseboat check-in is at 12:00 PM and checkout is at 9:00 AM. AC operates continuously from 9:00 PM to 6:00 AM."
-      }
-    },
-    {
-      id: "munnar-tea-gardens",
-      category: "hills",
-      categoryName: "Tea Hills & Nature",
-      title: "Munnar Rolling Green Tea Estates",
-      description: "Rolling emerald green tea plantations, misty mountain valleys, crisp high-altitude mountain air, and colonial tea factory museums at 5,200 ft elevation.",
-      image: "https://images.unsplash.com/photo-1593693397690-362cb9666fc2?q=80&w=800",
-      distance: "Western Ghats (130 km from Cochin)",
-      highlights: ["Tata Tea Museum", "Cheeyappara Waterfalls", "Lockhart Tea Estate", "Misty Peaks"],
-      details: {
-        altitude: "5,200 feet (1,600 m)",
-        bestTime: "September to May | Pleasant 15°C Weather",
-        overview: "Munnar was the favored summer resort of the British administration in South India. Surrounded by vast tea plantations established in the late 19th century, it is South India's premier hill station.",
-        experiences: [
-          "Stroll through endless manicured green tea carpet hills during morning mist.",
-          "Visit the KDHP Tata Tea Museum to learn traditional CTC & orthodox tea processing.",
-          "Photograph cascading Cheeyappara and Valara waterfalls along the scenic highway.",
-          "Sample freshly brewed cardamom and ginger chai directly at estate tea counters."
-        ],
-        travelTips: "Carry light thermals and rain jackets. Morning hours (7:30 AM) offer the best lighting for tea garden photography."
-      }
-    },
-    {
       id: "eravikulam-national-park",
       category: "wildlife",
       categoryName: "Wildlife & Safaris",
       title: "Eravikulam National Park (Nilgiri Tahr)",
       description: "High-altitude national park on the Western Ghats protecting the endangered Nilgiri Tahr wild mountain goat and blooming Neelakurinji flower slopes.",
-      image: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?q=80&w=800",
+      image: "/kerala/eravikulam_nilgiri_tahr.jpg",
       distance: "Munnar (15 km)",
       highlights: ["Nilgiri Tahr Safari", "Anamudi 8,842ft Peak", "Alpine Grasslands", "Neelakurinji Blooms"],
       details: {
@@ -180,12 +136,34 @@ const KeralaBackwaters: React.FC = () => {
       }
     },
     {
+      id: "munnar-tea-gardens",
+      category: "hills",
+      categoryName: "Tea Hills & Nature",
+      title: "Munnar Rolling Green Tea Estates",
+      description: "Rolling emerald green tea plantations, misty mountain valleys, crisp high-altitude mountain air, and colonial tea factory museums at 5,200 ft elevation.",
+      image: "/kerala/munnar_tea_estates.jpg",
+      distance: "Western Ghats (130 km from Cochin)",
+      highlights: ["Tata Tea Museum", "Cheeyappara Waterfalls", "Lockhart Tea Estate", "Misty Peaks"],
+      details: {
+        altitude: "5,200 feet (1,600 m)",
+        bestTime: "September to May | Pleasant 15°C Weather",
+        overview: "Munnar was the favored summer resort of the British administration in South India. Surrounded by vast tea plantations established in the late 19th century, it is South India's premier hill station.",
+        experiences: [
+          "Stroll through endless manicured green tea carpet hills during morning mist.",
+          "Visit the KDHP Tata Tea Museum to learn traditional CTC & orthodox tea processing.",
+          "Photograph cascading Cheeyappara and Valara waterfalls along the scenic highway.",
+          "Sample freshly brewed cardamom and ginger chai directly at estate tea counters."
+        ],
+        travelTips: "Carry light thermals and rain jackets. Morning hours (7:30 AM) offer the best lighting for tea garden photography."
+      }
+    },
+    {
       id: "thekkady-periyar",
       category: "wildlife",
       categoryName: "Wildlife & Safaris",
       title: "Thekkady & Periyar Tiger Sanctuary",
       description: "Dense rainforest tiger reserve offering scenic boat safaris on Periyar Lake to spot wild elephant herds, sambar deer, gaur, and exotic birds.",
-      image: "https://images.unsplash.com/photo-1540555700478-4be289fbecef?q=80&w=800",
+      image: "/kerala/thekkady_periyar_sanctuary.jpg",
       distance: "Thekkady / Kumily (110 km from Munnar)",
       highlights: ["Periyar Lake Boat Safari", "Wild Elephant Herds", "Cardamom Spice Walk", "Kathakali Show"],
       details: {
@@ -207,7 +185,7 @@ const KeralaBackwaters: React.FC = () => {
       categoryName: "Colonial Heritage",
       title: "Fort Kochi & Chinese Fishing Nets",
       description: "14th-century coastal heritage town blending Portuguese, Dutch, British, and Chinese influences with iconic cantilevered Chinese Fishing Nets.",
-      image: "https://images.unsplash.com/photo-1590523741831-ab7e8b8f9c7f?q=80&w=800",
+      image: "/kerala/fort_kochi_chinese_nets.jpg",
       distance: "Cochin / Kochi City",
       highlights: ["Chinese Fishing Nets", "Mattancherry Dutch Palace", "Jew Town Synagogue", "St. Francis Church"],
       details: {
@@ -229,7 +207,7 @@ const KeralaBackwaters: React.FC = () => {
       categoryName: "Coastal Beaches",
       title: "Kovalam Lighthouse Cliff Beach",
       description: "Iconic crescent beach backed by a towering 35-meter red-and-white striped lighthouse, offering shallow turquoise waves, cliffside dining, and Ayurvedic beach resorts.",
-      image: "https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?q=80&w=800",
+      image: "/kerala/kovalam_lighthouse_beach.jpg",
       distance: "Trivandrum (16 km)",
       highlights: ["Lighthouse Beach", "35m Vizhinjam Lighthouse", "Cliffside Dining", "Arabian Sea Sunset"],
       details: {
@@ -243,6 +221,72 @@ const KeralaBackwaters: React.FC = () => {
           "Rejuvenate with traditional Abhyangam oil body massages at seaside Ayurvedic centers."
         ],
         travelTips: "Lighthouse observation tower is open to visitors daily between 3:00 PM and 5:00 PM."
+      }
+    },
+    {
+      id: "alleppey-houseboats",
+      category: "backwaters",
+      categoryName: "Backwaters & Lakes",
+      title: "Alleppey Backwaters & Luxury Houseboats",
+      description: "World-famous palm-fringed backwater canals, Vembanad Lake & private AC houseboats equipped with personal chef and butler service.",
+      image: "/kerala/alleppey_backwaters_houseboat.jpg",
+      distance: "Alleppey Jetty",
+      highlights: ["Private AC Houseboat", "Vembanad Lake", "Paddy Field Canals", "Karimeen Fish Dinner"],
+      details: {
+        altitude: "Sea Level (0 m)",
+        bestTime: "September to March | Year-Round Houseboat Cruises",
+        overview: "Known as the 'Venice of the East', Alleppey (Alappuzha) is famous for its intricate network of tranquil backwater canals, lagoons, and emerald paddy fields. Sailing on a traditional Kettuvallam (houseboat) is Kerala's signature travel experience.",
+        experiences: [
+          "Cruise through narrow palm-fringed canals on a private air-conditioned luxury houseboat.",
+          "Savor authentic Kerala meals cooked fresh onboard by your personal chef.",
+          "Witness picturesque rural backwater life, duck farming, and coconut harvesting.",
+          "Enjoy golden hour sunsets over Vembanad Lake from your private open-deck loungers."
+        ],
+        travelTips: "Houseboat check-in is at 12:00 PM and checkout is at 9:00 AM. AC operates continuously from 9:00 PM to 6:00 AM."
+      }
+    },
+    {
+      id: "jatayu-earth-center",
+      category: "heritage",
+      categoryName: "Monuments & Adventure",
+      title: "Jatayu Earth's Center & Cable Car Adventure",
+      description: "World's largest bird sculpture (200 ft long) resting atop a 1,000 ft hill in Chadayamangalam, featuring state-of-the-art ropeway cable cars and rock adventure park.",
+      image: "/kerala/jatayu_earth_center.jpg",
+      distance: "Kollam / Chadayamangalam (50 km from Trivandrum)",
+      highlights: ["World's Largest Bird Sculpture", "Scenic Hilltop Cable Car", "6D Mythological Theatre", "Rock Adventure Center"],
+      details: {
+        altitude: "1,000 feet (305 m)",
+        bestTime: "October to April | Morning & Sunset",
+        overview: "Jatayu Earth's Center is a unique tourism project symbolizing women's safety and honor, built around the mythical demi-god Jatayu from the Ramayana. The colossal sculpture is 200 feet long, 150 feet wide, and 70 feet tall.",
+        experiences: [
+          "Glide over green rocky hills in modern Swiss cable car gondolas up to the summit.",
+          "Explore the museum and multi-dimensional audio-visual theatre housed inside the bird sculpture.",
+          "Try adventure activities including rock climbing, rappelling, archery, paintball, and valley crossing.",
+          "Photograph the mythical giant bird silhouette framed against the vast Kerala countryside."
+        ],
+        travelTips: "Book cable car and entry passes in advance to avoid weekend queues."
+      }
+    },
+    {
+      id: "vagamon-pine-forest",
+      category: "hills",
+      categoryName: "Tea Hills & Adventure",
+      title: "Vagamon Pine Forests & Glass Skywalk Bridge",
+      description: "Enchanting hill station at 3,600 ft featuring dense pine forests, India's longest cantilever glass bridge, paragliding slopes, and misty green tea meadows.",
+      image: "/kerala/vagamon_pine_forest.jpg",
+      distance: "Idukki Hills (100 km from Cochin)",
+      highlights: ["Pine Forest Trails", "Cantilever Glass Skywalk", "Tandem Paragliding", "Misty Kurisumala Meadows"],
+      details: {
+        altitude: "3,600 feet (1,100 m)",
+        bestTime: "September to May",
+        overview: "Vagamon is an offbeat green paradise in the Western Ghats untouched by commercial rush. It features tall towering British-planted pine woods, rolling Kurisumala hills, and the newly built thrilling glass cantilever bridge.",
+        experiences: [
+          "Walk through the serene, towering shade of the historic British Pine Forest valley.",
+          "Step onto the thrilling glass cantilever skywalk extended out over the sheer mountain drop.",
+          "Experience tandem paragliding flights over green rolling hill ranges during flying season.",
+          "Visit Vagamon Lake for peaceful pedal boating surrounded by rolling tea gardens."
+        ],
+        travelTips: "Vagamon makes an ideal scenic addition when traveling between Munnar and Thekkady."
       }
     }
   ]
@@ -303,10 +347,10 @@ const KeralaBackwaters: React.FC = () => {
         <ScrollReveal variant="fade-in-scale" duration="slow" className="relative h-[85vh] min-h-[560px] flex items-center justify-center overflow-hidden">
           <div className="absolute inset-0 bg-[#0B1026]">
             <img 
-              src="https://images.unsplash.com/photo-1602216056096-3b40cc0c9944?q=80&w=1600" 
+              src="/kerala/alleppey_backwaters_houseboat.jpg" 
               alt="Kerala Backwaters Alleppey Houseboat" 
               onError={(e) => { (e.target as HTMLImageElement).src = FALLBACK_KERALA_IMG }}
-              className="absolute inset-0 w-full h-full object-cover opacity-45 mix-blend-luminosity" 
+              className="absolute inset-0 w-full h-full object-cover opacity-50 mix-blend-luminosity" 
             />
             <div className="absolute inset-0 bg-gradient-to-b from-[#070C1E]/80 via-[#070C1E]/60 to-[#070C1E] z-10" />
           </div>
@@ -462,11 +506,11 @@ const KeralaBackwaters: React.FC = () => {
             {/* CATEGORY FILTER TABS */}
             <div className="flex flex-wrap items-center justify-center gap-2 mb-12">
               {[
-                { key: "all", label: "All Highlights" },
-                { key: "backwaters", label: "Backwaters & Lakes" },
-                { key: "hills", label: "Tea Hills & Nature" },
+                { key: "all", label: "All 8 Highlights" },
+                { key: "backwaters", label: "Backwaters & Houseboats" },
+                { key: "hills", label: "Tea Hills & Adventure" },
                 { key: "wildlife", label: "Wildlife & Safaris" },
-                { key: "heritage", label: "Colonial Heritage" },
+                { key: "heritage", label: "Heritage & Monuments" },
                 { key: "beaches", label: "Coastal Beaches" }
               ].map(tab => (
                 <button

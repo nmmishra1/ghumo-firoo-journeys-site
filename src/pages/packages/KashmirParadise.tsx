@@ -24,7 +24,7 @@ const KashmirParadise: React.FC = () => {
   const [selectedAttraction, setSelectedAttraction] = useState<any | null>(null)
   const [activeCategory, setActiveCategory] = useState<string>("all")
 
-  const FALLBACK_KASHMIR_IMG = "https://images.unsplash.com/photo-1566837945700-30057527ade0?q=80&w=800"
+  const FALLBACK_KASHMIR_IMG = "/kashmir/gulmarg_gondola.jpg"
 
   useEffect(() => {
     const loadReviews = async () => {
@@ -44,7 +44,7 @@ const KashmirParadise: React.FC = () => {
       title: "Classic Kashmir & Dal Lake Houseboat (5D/4N)",
       desc: "Ideal introductory tour covering Srinagar Mughal Gardens, sunset Shikara ride, Gulmarg snow meadows & Pahalgam Lidder valley.",
       badge: "Best Seller",
-      image: "https://images.unsplash.com/photo-1566837945700-30057527ade0?q=80&w=800",
+      image: "/kashmir/dal_lake_shikara.jpg",
       price: 21500,
       duration: "5 Days / 4 Nights",
       rating: 4.9,
@@ -68,7 +68,7 @@ const KashmirParadise: React.FC = () => {
       title: "Kashmir Paradise Spectacular & Sonamarg (6D/5N)",
       desc: "Our most requested itinerary adding Sonamarg Thajiwas Glacier pony trek and Betaab Valley in Pahalgam.",
       badge: "Top Choice",
-      image: "https://images.unsplash.com/photo-1598091383021-15ddea10925d?q=80&w=800",
+      image: "/kashmir/pahalgam_betaab_valley.jpg",
       price: 26500,
       duration: "6 Days / 5 Nights",
       rating: 4.95,
@@ -93,7 +93,7 @@ const KashmirParadise: React.FC = () => {
       title: "Grand Kashmir Valley & Doodhpathri Circuit (7D/6N)",
       desc: "Complete Kashmir circuit covering Srinagar, Gulmarg, Pahalgam, Sonamarg glacier & pristine Doodhpathri meadows.",
       badge: "Grand Circuit",
-      image: "https://images.unsplash.com/photo-1595815771614-ade9d652a65d?q=80&w=800",
+      image: "/kashmir/doodhpathri_kashmir.jpg",
       price: 32500,
       duration: "7 Days / 6 Nights",
       rating: 4.98,
@@ -123,7 +123,7 @@ const KashmirParadise: React.FC = () => {
       categoryName: "Snow & Cable Car",
       title: "Gulmarg Gondola & Apharwat Peak",
       description: "World's 2nd highest cable car carrying travelers to Apharwat Peak at 13,500 ft. Asia's premier ski resort with year-round snow slopes.",
-      image: "https://images.unsplash.com/photo-1548013146-72479768bada?q=80&w=800",
+      image: "/kashmir/gulmarg_gondola.jpg",
       distance: "Gulmarg (50 km from Srinagar)",
       highlights: ["13,500 ft Apharwat Peak", "Phase 1 & 2 Cable Car", "Winter Ski Slopes", "Snow Sledging"],
       details: {
@@ -145,7 +145,7 @@ const KashmirParadise: React.FC = () => {
       categoryName: "Lakes & Houseboats",
       title: "Dal Lake Shikara & Cedar Houseboats",
       description: "Srinagar's iconic jewel. Sail wooden Shikara boats across mirror-like waters past floating vegetable markets, lotus gardens, and handcrafted cedar houseboats.",
-      image: "https://images.unsplash.com/photo-1566837945700-30057527ade0?q=80&w=800",
+      image: "/kashmir/dal_lake_shikara.jpg",
       distance: "Srinagar City Center",
       highlights: ["Floating Market", "Sunset Shikara Ride", "Carved Cedar Houseboats", "Char Chinari"],
       details: {
@@ -167,7 +167,7 @@ const KashmirParadise: React.FC = () => {
       categoryName: "Valleys & Rivers",
       title: "Pahalgam Betaab & Aru Valleys",
       description: "Pahalgam's breathtaking alpine valleys surrounded by pine-covered mountains, crystal clear Lidder river streams, and lush Baisaran 'Mini Switzerland' meadows.",
-      image: "https://images.unsplash.com/photo-1595815771614-ade9d652a65d?q=80&w=800",
+      image: "/kashmir/pahalgam_betaab_valley.jpg",
       distance: "Pahalgam (90 km from Srinagar)",
       highlights: ["Betaab Valley Film Spot", "Aru Valley Village", "Lidder River Rafting", "Baisaran Meadow"],
       details: {
@@ -189,7 +189,7 @@ const KashmirParadise: React.FC = () => {
       categoryName: "Valleys & Rivers",
       title: "Sonamarg Thajiwas Glacier",
       description: "The 'Meadow of Gold' at 9,000 ft elevation. Famous for snow-clad mountains, Sindh river trout fishing, and pony treks up to Thajiwas Glacier snow fields.",
-      image: "https://images.unsplash.com/photo-1598091383021-15ddea10925d?q=80&w=800",
+      image: "/kashmir/sonamarg_thajiwas_glacier.jpg",
       distance: "Sonamarg (80 km from Srinagar)",
       highlights: ["Thajiwas Glacier Trek", "Sindh River Stream", "Year-Round Snow", "Zero Point Zoji La"],
       details: {
@@ -211,7 +211,7 @@ const KashmirParadise: React.FC = () => {
       categoryName: "Heritage & Gardens",
       title: "Srinagar Mughal Gardens (Nishat & Shalimar)",
       description: "UNESCO World Heritage contender gardens built by Mughal Emperors in 1633 AD. Featuring terraced fountains, ancient Chinar trees, and Dal Lake panoramas.",
-      image: "https://images.unsplash.com/photo-1626621341517-bbf3d9990a23?q=80&w=800",
+      image: "/kashmir/srinagar_mughal_gardens.jpg",
       distance: "Srinagar Boulevard",
       highlights: ["Nishat Bagh 12 Terraces", "Shalimar Bagh Fountains", "400yr Chinar Trees", "Pari Mahal View"],
       details: {
@@ -233,7 +233,7 @@ const KashmirParadise: React.FC = () => {
       categoryName: "Valleys & Rivers",
       title: "Doodhpathri 'Valley of Milk'",
       description: "Pristine offbeat mountain meadow located at 8,957 ft altitude. Famous for roaring Shaliganga river streams, lush green rolling hills, and pine forests.",
-      image: "https://images.unsplash.com/photo-1605649487212-47bdab064df7?q=80&w=800",
+      image: "/kashmir/doodhpathri_kashmir.jpg",
       distance: "Budgam (42 km from Srinagar)",
       highlights: ["Shaliganga River Stream", "Valley of Milk", "Pristine Pine Woods", "Offbeat Uncrowded"],
       details: {
@@ -247,6 +247,50 @@ const KashmirParadise: React.FC = () => {
           "Sample fresh local cow milk and traditional Kashmiri bread at shepherd huts."
         ],
         travelTips: "Doodhpathri is ideal for a day excursion from Srinagar. Pack a light sweater even in summer."
+      }
+    },
+    {
+      id: "baisaran-valley",
+      category: "adventure",
+      categoryName: "Snow & Adventure",
+      title: "Baisaran Valley 'Mini Switzerland' & Adventure Park",
+      description: "High-altitude rolling alpine meadow perched 5 km above Pahalgam, surrounded by dense deodar pine forests and snow-capped Himalayan peaks.",
+      image: "/kashmir/baisaran_valley_pahalgam.jpg",
+      distance: "Pahalgam (5 km pony trek)",
+      highlights: ["Mini Switzerland Meadows", "Pine Forest Pony Trek", "Ziplining & Zorbing", "Panoramic Valley View"],
+      details: {
+        altitude: "7,874 feet (2,400 m)",
+        bestTime: "April to November",
+        overview: "Often referred to as the 'Mini Switzerland of India', Baisaran is a hilltop clearing offering postcard-perfect vistas of Pahalgam town and the Lidder River Valley far below.",
+        experiences: [
+          "Ride Kashmiri mountain ponies through scenic pine-wood bridle trails up to Baisaran.",
+          "Experience outdoor adventure sports including zorbing, giant valley ziplining, and ATV quad rides.",
+          "Savor freshly roasted sweet corn and hot Kahwa from meadow stalls with panoramic views.",
+          "Hike deeper toward Tulian Lake trail through virgin birch and pine forests."
+        ],
+        travelTips: "Wear comfortable walking shoes or trekking boots for the hilltop pony trail."
+      }
+    },
+    {
+      id: "sinthan-top",
+      category: "adventure",
+      categoryName: "Snow & High-Altitude Passes",
+      title: "Sinthan Top & Peer Ki Gali (3,800m Snow Pass)",
+      description: "Spectacular high-altitude mountain pass connecting Kashmir Valley with Jammu. Features 360-degree snow peaks, crisp alpine winds, and offbeat adventure.",
+      image: "/kashmir/sinthan_top_kashmir.jpg",
+      distance: "Anantnag / Kishtwar Road (130 km from Srinagar)",
+      highlights: ["12,467 ft Mountain Pass", "Year-Round Snow Slopes", "360° Pir Panjal View", "Offbeat Road Adventure"],
+      details: {
+        altitude: "12,467 feet (3,800 m)",
+        bestTime: "May to October (Pass remains snowbound in deep winter)",
+        overview: "Sinthan Top is a breathtaking mountain pass situated at 12,467 ft on the Breng Valley road. It offers tourists year-round snow experiences and panoramic views of both Jammu and Kashmir provinces.",
+        experiences: [
+          "Stand atop the pass summit with uninterrupted views of snow-capped Pir Panjal peaks.",
+          "Play in pure white snow slopes even during high summer months of June and July.",
+          "Drive past scenic pine gorges, wooden Gujjar shepherd bridges, and crystal mountain brooks.",
+          "Combine with Daksum and Achabal Mughal spring gardens along the Breng Valley route."
+        ],
+        travelTips: "Carry warm thermals and windbreakers as Sinthan Top is known for chilly high-speed mountain winds."
       }
     }
   ]
@@ -307,10 +351,10 @@ const KashmirParadise: React.FC = () => {
         <ScrollReveal variant="fade-in-scale" duration="slow" className="relative h-[85vh] min-h-[560px] flex items-center justify-center overflow-hidden">
           <div className="absolute inset-0 bg-[#0B1026]">
             <img 
-              src="https://images.unsplash.com/photo-1566837945700-30057527ade0?q=80&w=1600" 
-              alt="Kashmir Dal Lake Houseboat" 
+              src="/kashmir/dal_lake_shikara.jpg" 
+              alt="Kashmir Dal Lake Houseboat and Shikara" 
               onError={(e) => { (e.target as HTMLImageElement).src = FALLBACK_KASHMIR_IMG }}
-              className="absolute inset-0 w-full h-full object-cover opacity-45 mix-blend-luminosity" 
+              className="absolute inset-0 w-full h-full object-cover opacity-50 mix-blend-luminosity" 
             />
             <div className="absolute inset-0 bg-gradient-to-b from-[#070C1E]/80 via-[#070C1E]/60 to-[#070C1E] z-10" />
           </div>

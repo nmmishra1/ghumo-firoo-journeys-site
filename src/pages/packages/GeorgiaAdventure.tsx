@@ -23,7 +23,7 @@ const GeorgiaAdventure: React.FC = () => {
   const [selectedAttraction, setSelectedAttraction] = useState<any | null>(null)
   const [activeCategory, setActiveCategory] = useState<string>("all")
 
-  const FALLBACK_GEORGIA_IMG = "https://images.unsplash.com/photo-1565008447742-97f6f38c985c?q=80&w=800"
+  const FALLBACK_GEORGIA_IMG = "/georgia/kazbegi_gergeti_church.jpg"
 
   useEffect(() => {
     const loadReviews = async () => {
@@ -43,7 +43,7 @@ const GeorgiaAdventure: React.FC = () => {
       title: "Tbilisi & Kazbegi Caucasus Express (5D/4N)",
       desc: "Short European Caucasus break featuring Tbilisi Old Town aerial cable car, Ananuri Fortress & Kazbegi Gergeti Trinity Church 4x4 mountain drive.",
       badge: "Express Escape",
-      image: "https://images.unsplash.com/photo-1565008447742-97f6f38c985c?q=80&w=800",
+      image: "/georgia/kazbegi_gergeti_church.jpg",
       price: 49500,
       duration: "5 Days / 4 Nights",
       rating: 4.9,
@@ -67,7 +67,7 @@ const GeorgiaAdventure: React.FC = () => {
       title: "Georgia Grand Caucasus & Kakheti Wine Region (6D/5N)",
       desc: "Our best-selling Georgia tour adding Signagi 'City of Love', Kakheti qvevri wine tasting & Bodbe Monastery.",
       badge: "Best Seller",
-      image: "https://images.unsplash.com/photo-1565008447742-97f6f38c985c?q=80&w=800",
+      image: "/georgia/sighnaghi_kakheti_wine.jpg",
       price: 58500,
       duration: "6 Days / 5 Nights",
       rating: 4.96,
@@ -93,10 +93,10 @@ const GeorgiaAdventure: React.FC = () => {
     {
       id: "kazbegi-gergeti",
       category: "mountains",
-      categoryName: "Caucasus Mountains",
+      categoryName: "Caucasus Mountains & 4x4",
       title: "Kazbegi Gergeti Trinity Church (2,170m)",
       description: "14th-century stone church perched dramatically at 2,170 meters elevation on a lonely mountain ridge beneath Mount Kazbek peak (5,047m).",
-      image: "https://images.unsplash.com/photo-1565008447742-97f6f38c985c?q=80&w=800",
+      image: "/georgia/kazbegi_gergeti_church.jpg",
       distance: "Stepantsminda (165 km from Tbilisi)",
       highlights: ["7,120 ft Elevation", "4x4 Mountain Safari", "Mount Kazbek 5,047m Peak", "Georgian Military Highway"],
       details: {
@@ -115,10 +115,10 @@ const GeorgiaAdventure: React.FC = () => {
     {
       id: "gudauri-ananuri",
       category: "mountains",
-      categoryName: "Caucasus Mountains",
+      categoryName: "Caucasus Mountains & 4x4",
       title: "Gudauri Resort & Ananuri Fortress",
       description: "Premier high-altitude Caucasus ski resort at 2,200m elevation featuring 360-degree cable car views and 16th-century lakeside Ananuri Castle.",
-      image: "https://images.unsplash.com/photo-1565008447742-97f6f38c985c?q=80&w=800",
+      image: "/georgia/gudauri_ananuri_fortress.jpg",
       distance: "Georgian Military Highway (120 km from Tbilisi)",
       highlights: ["2,200m Ski Slopes", "Gudauri Cable Car", "Ananuri Fortress Lake", "Russia-Georgia Monument"],
       details: {
@@ -137,10 +137,10 @@ const GeorgiaAdventure: React.FC = () => {
     {
       id: "tbilisi-old-town",
       category: "heritage",
-      categoryName: "Heritage & Cities",
+      categoryName: "Heritage & Wine Cities",
       title: "Tbilisi Old Town & Narikala Cable Car",
       description: "Historic capital featuring 4th-century Narikala Fortress, colorful wooden carved balconies, ancient sulfur baths, and the glass Bridge of Peace.",
-      image: "https://images.unsplash.com/photo-1565008447742-97f6f38c985c?q=80&w=800",
+      image: "/georgia/tbilisi_old_town_narikala.jpg",
       distance: "Tbilisi City Center",
       highlights: ["Narikala Aerial Cable Car", "Abanotubani Sulfur Baths", "Bridge of Peace", "Mother of Georgia Statue"],
       details: {
@@ -154,6 +154,72 @@ const GeorgiaAdventure: React.FC = () => {
           "Sample hot Georgian Khachapuri cheese bread and Khinkali soup dumplings at traditional taverns."
         ],
         travelTips: "Private thermal sulfur bath chambers can be booked for 1-hour relaxing soaking sessions."
+      }
+    },
+    {
+      id: "signagi-kakheti",
+      category: "heritage",
+      categoryName: "Heritage & Wine Cities",
+      title: "Sighnaghi 'City of Love' & Kakheti Wine Valley",
+      description: "Picturesque 18th-century royal fortified town perched on a hilltop overlooking the Alazani Valley, known as the birthplace of 8,000-year-old Georgian wine culture.",
+      image: "/georgia/sighnaghi_kakheti_wine.jpg",
+      distance: "Kakheti Region (110 km from Tbilisi)",
+      highlights: ["18th-Century Fortress Walls", "Alazani Valley Panorama", "Ancient Qvevri Wine Cellars", "Bodbe Monastery"],
+      details: {
+        altitude: "2,600 feet (790 m)",
+        bestTime: "September to October (Grape harvest Rtveli) | May to November",
+        overview: "Sighnaghi is one of Georgia's smallest and most charming towns, enclosed by historic stone ramparts with 23 defensive towers. The surrounding Kakheti region is UNESCO recognized for its 8,000-year ancient Qvevri clay vessel winemaking method.",
+        experiences: [
+          "Walk along the restored medieval watchtowers with views across the fertile Alazani Valley.",
+          "Visit family-owned Marani wine cellars to taste amber Rkatsiteli and deep red Saperavi wines.",
+          "Bake traditional Shoti bread in clay Tone ovens and make Churchkhela grape-walnut candies.",
+          "Visit sacred Bodbe Monastery, resting place of Saint Nino who brought Christianity to Georgia."
+        ],
+        travelTips: "Participate in grape harvesting (Rtveli) celebrations during autumn in September and October."
+      }
+    },
+    {
+      id: "martvili-canyon",
+      category: "canyons",
+      categoryName: "Canyons & Nature",
+      title: "Martvili Canyon & Okatse Hanging Skywalk",
+      description: "Spectacular emerald river gorge featuring inflatable boat tours through limestone canyons, cascading waterfalls, and Okatse's 140m hanging cliff walkway.",
+      image: "/georgia/martvili_canyon_okatse.jpg",
+      distance: "Samegrelo Region (270 km from Tbilisi)",
+      highlights: ["Emerald Canyon Boat Ride", "Limestone Waterfalls", "140m Suspended Skywalk", "Dadiani Royal Bath"],
+      details: {
+        altitude: "650 feet (200 m)",
+        bestTime: "May to October",
+        overview: "Martvili Canyon is a natural wonder sculpted over millions of years by the Abasha River. Its jade-green water channels pass under mossy limestone cliffs where Georgian noble Dadiani rulers once bathed.",
+        experiences: [
+          "Glide through emerald limestone canyons on inflatable raft boats with local guides.",
+          "Walk the 700-meter paved circular trail past tiered turquoise waterfall cascades.",
+          "Walk across the exhilarating suspended metal bridge hanging 140m over Okatse Canyon.",
+          "Explore nearby Prometheus Cave adorned with illuminated stalactites and underground boat rivers."
+        ],
+        travelTips: "Life jackets are provided for canyon boat rides. Bring non-slip waterproof footwear."
+      }
+    },
+    {
+      id: "uplistsikhe-cave-city",
+      category: "heritage",
+      categoryName: "Heritage & Wine Cities",
+      title: "Uplistsikhe Ancient Cave City & Mtskheta",
+      description: "Ancient 3,000-year-old rock-cut fortress city along the historic Silk Road, paired with UNESCO World Heritage Mtskheta and Jvari Monastery.",
+      image: "/georgia/uplistsikhe_cave_city.jpg",
+      distance: "Gori / Shida Kartli (85 km from Tbilisi)",
+      highlights: ["3,000yr Rock-Cut Cave City", "Silk Road Trading Post", "Jvari Monastery UNESCO", "Ancient Wine Presses"],
+      details: {
+        altitude: "1,800 feet (550 m)",
+        bestTime: "April to November",
+        overview: "Uplistsikhe ('Fortress of the Lord') is an ancient rock-hewn town dating back to the Early Iron Age. It features complex tunnels, pagan temples, Christian basilicas, and rock-carved living quarters overlooking the Mtkvari River.",
+        experiences: [
+          "Explore ancient rock-carved chambers, royal throne rooms, and pagan sacrificial sites.",
+          "Walk through the secret underground escape tunnel descending toward the riverbank.",
+          "Visit Mtskheta's 6th-century Jvari Monastery perched over the Aragvi-Mtkvari confluence.",
+          "Tour 11th-century Svetitskhoveli Cathedral, the spiritual heart of the Georgian Orthodox Church."
+        ],
+        travelTips: "Wear comfortable walking sneakers with grip as rock surfaces can be smooth."
       }
     }
   ]
@@ -180,11 +246,11 @@ const GeorgiaAdventure: React.FC = () => {
     name: "Georgia Adventure & Caucasus Packages 2026",
     description: "Book top-rated Georgia tour packages with GhumoFiroo. Includes Kazbegi Gergeti Trinity Church 4x4 drive under Mount Kazbek 5,047m, Gudauri ski resort cable car, Tbilisi Old Town & Kakheti wine tasting.",
     url: config.baseUrl + "/packages/georgia-adventure",
-    image: "https://images.unsplash.com/photo-1565008447742-97f6f38c985c?w=800&q=80",
+    image: "/georgia/kazbegi_gergeti_church.jpg",
     duration: "P6D",
     itinerary: [
-      { position: 1, name: "Tbilisi Old Town & Cable Car", description: "Narikala fortress aerial cable car & sulfur baths." },
-      { position: 2, name: "Georgian Military Highway & Gudauri", description: "Ananuri fortress lake & Gudauri cable car." },
+      { position: 1, name: "Tbilisi Old Town & Narikala", description: "Old town walking tour & cable car to 4th-century fortress." },
+      { position: 2, name: "Ananuri & Gudauri Resort", description: "Georgian Military Highway, Zhinvali lake & ski resort cable car." },
       { position: 3, name: "Kazbegi 4x4 Mountain Safari", description: "4x4 jeep drive to 2,170m Gergeti Trinity Church." }
     ],
     offer: {
@@ -203,7 +269,7 @@ const GeorgiaAdventure: React.FC = () => {
       <SEO 
         title="Georgia Tour Packages 2026 | Tbilisi, Kazbegi 4x4 & Gudauri"
         description="Book top-rated Georgia tour packages. Includes Kazbegi Gergeti Trinity Church 4x4 drive under Mount Kazbek 5,047m, Gudauri ski resort cable car, Tbilisi Old Town & Kakheti wine tasting."
-        keywords="Georgia tour package 2026, Georgia visa for Indians, Kazbegi 4x4 tour price, Tbilisi Gudauri tour package cost"
+        keywords="Georgia tour package 2026, Georgia visa for Indians, Kazbegi 4x4 tour price, Tbilisi Gudauri tour package cost, Martvili canyon Georgia, Sighnaghi Kakheti wine"
         canonicalUrl={config.baseUrl + "/packages/georgia-adventure"}
         structuredData={[breadcrumbSchema, faqSchema, tripSchema]}
       />
@@ -214,10 +280,10 @@ const GeorgiaAdventure: React.FC = () => {
         <ScrollReveal variant="fade-in-scale" duration="slow" className="relative h-[85vh] min-h-[560px] flex items-center justify-center overflow-hidden">
           <div className="absolute inset-0 bg-[#0B1026]">
             <img 
-              src="https://images.unsplash.com/photo-1565008447742-97f6f38c985c?q=80&w=1600" 
+              src="/georgia/kazbegi_gergeti_church.jpg" 
               alt="Georgia Kazbegi Caucasus Mountains" 
               onError={(e) => { (e.target as HTMLImageElement).src = FALLBACK_GEORGIA_IMG }}
-              className="absolute inset-0 w-full h-full object-cover opacity-45 mix-blend-luminosity" 
+              className="absolute inset-0 w-full h-full object-cover opacity-50 mix-blend-luminosity" 
             />
             <div className="absolute inset-0 bg-gradient-to-b from-[#070C1E]/80 via-[#070C1E]/60 to-[#070C1E] z-10" />
           </div>
@@ -373,9 +439,10 @@ const GeorgiaAdventure: React.FC = () => {
             {/* CATEGORY FILTER TABS */}
             <div className="flex flex-wrap items-center justify-center gap-2 mb-12">
               {[
-                { key: "all", label: "All Highlights" },
-                { key: "mountains", label: "Caucasus Mountains" },
-                { key: "heritage", label: "Heritage & Cities" }
+                { key: "all", label: "All 6 Highlights" },
+                { key: "mountains", label: "Caucasus Mountains & 4x4" },
+                { key: "canyons", label: "Canyons & Nature" },
+                { key: "heritage", label: "Heritage & Wine Cities" }
               ].map(tab => (
                 <button
                   key={tab.key}
