@@ -163,33 +163,14 @@ export const VariantDetails: React.FC<VariantDetailsProps> = ({ variant }) => {
             <span className="text-xs text-slate-300">/ person {variant.nights > 0 ? '(twin sharing)' : '(per pass)'}</span>
           </div>
 
-          {variant.pricePerPerson >= 8000 ? (
-            <>
-              {/* EMI display for long-stay packages */}
-              <div className="text-[10px] text-slate-300 mt-1">
-                or ₹{Math.round(variant.pricePerPerson / 6).toLocaleString('en-IN')}/mo <span className="text-[#C9A25A]">· 6-month easy EMI option</span>
-              </div>
-              <p className="text-xs text-slate-400 mt-1">
-                Total for 2 adults: ₹{(variant.pricePerPerson * 2).toLocaleString('en-IN')} • Inclusive of sightseeing transfers & taxes
-              </p>
-              <div className="flex justify-between text-xs border-t border-white/10 mt-3 pt-3">
-                <span className="text-slate-400">Easy EMI (6 months)</span>
-                <span className="text-[#C9A25A] font-bold">₹{Math.round(variant.pricePerPerson / 6).toLocaleString('en-IN')}/month</span>
-              </div>
-              <div className="text-[10px] text-slate-400 mt-1 text-right">
-                Zero cost EMI available via major credit cards
-              </div>
-            </>
-          ) : (
-            <div className="mt-3 pt-3 border-t border-white/10">
-              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 text-xs font-bold">
-                ✓ Best Price Guaranteed · Instant Booking Available
-              </div>
-              <p className="text-xs text-slate-300 mt-2">
-                Total for 2 adults: ₹{(variant.pricePerPerson * 2).toLocaleString('en-IN')} • All entry permits & transfers included
-              </p>
+          <div className="mt-3 pt-3 border-t border-white/10 space-y-2">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 text-xs font-bold">
+              ✓ Best Price Guaranteed · All Entry Permits & Sightseeing Included
             </div>
-          )}
+            <p className="text-xs text-slate-300">
+              Total for 2 adults: <span className="text-[#E5C378] font-bold">₹{(variant.pricePerPerson * 2).toLocaleString('en-IN')}</span> • Inclusive of {variant.hotelCategory}, sightseeing transfers & buffet meals
+            </p>
+          </div>
         </div>
         <div className="flex-shrink-0 w-full md:w-auto">
           <Button

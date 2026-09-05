@@ -81,23 +81,9 @@ export const PackageVariantSelector: React.FC<PackageVariantSelectorProps> = ({
                 }`}>
                   ₹{v.pricePerPerson.toLocaleString('en-IN')}/person
                 </div>
-                {/* EMI or Instant Pass badge */}
-                {v.pricePerPerson >= 8000 ? (
-                  <div className={`text-[9px] mt-0.5 ${
-                    activeId === v.id ? 'text-[#0B1026]/80 font-medium' : 'text-slate-400'
-                  }`}>
-                    or ₹{Math.round(v.pricePerPerson / 6).toLocaleString('en-IN')}/mo <span className={activeId === v.id ? 'text-[#0B1026] font-bold' : 'text-[#C9A25A]'}>· 6-mo EMI</span>
-                  </div>
-                ) : (
-                  <div className={`text-[9px] mt-0.5 font-medium ${
-                    activeId === v.id ? 'text-[#0B1026]' : 'text-emerald-400'
-                  }`}>
-                    Instant Pass · All Permits Included
-                  </div>
-                )}
-                <div className={`text-[10px] mt-0.5 ${
+                <div className={`text-[10px] mt-0.5 font-medium ${
                   activeId === v.id 
-                    ? 'text-[#0B1026]/70' 
+                    ? 'text-[#0B1026]/80' 
                     : 'text-slate-400'
                 }`}>
                   {v.hotelCategory}
