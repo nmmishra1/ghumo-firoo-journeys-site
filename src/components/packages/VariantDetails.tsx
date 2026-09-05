@@ -19,7 +19,7 @@ export const VariantDetails: React.FC<VariantDetailsProps> = ({ variant }) => {
     <div className="space-y-10 my-10">
       {/* A. Inclusions & Exclusions */}
       <div>
-        <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+        <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
           <ShieldCheck className="w-5 h-5 text-[#C9A25A]" />
           Inclusions & Exclusions ({variant.label})
         </h3>
@@ -32,7 +32,7 @@ export const VariantDetails: React.FC<VariantDetailsProps> = ({ variant }) => {
       {/* B. Hotels Included */}
       {variant.hotels && variant.hotels.length > 0 && (
         <div className="space-y-4">
-          <h3 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+          <h3 className="text-xl font-bold text-white flex items-center gap-2">
             <Building2 className="w-5 h-5 text-[#C9A25A]" />
             Hotels Included ({variant.hotelCategory})
           </h3>
@@ -74,7 +74,7 @@ export const VariantDetails: React.FC<VariantDetailsProps> = ({ variant }) => {
       {/* C. Excursions */}
       {variant.excursions && variant.excursions.length > 0 && (
         <div className="space-y-6">
-          <h3 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+          <h3 className="text-xl font-bold text-white flex items-center gap-2">
             <Compass className="w-5 h-5 text-[#C9A25A]" />
             Activities & Excursions
           </h3>
@@ -139,7 +139,7 @@ export const VariantDetails: React.FC<VariantDetailsProps> = ({ variant }) => {
       {/* D. Variant Itinerary Timeline */}
       {variant.itinerary && variant.itinerary.length > 0 && (
         <div className="space-y-4">
-          <h3 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+          <h3 className="text-xl font-bold text-white flex items-center gap-2">
             <Calendar className="w-5 h-5 text-[#C9A25A]" />
             Day-wise Itinerary ({variant.label})
           </h3>
