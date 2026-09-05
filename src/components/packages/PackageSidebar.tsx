@@ -39,6 +39,8 @@ interface PackageSidebarProps {
   destination: string;
   ctaLabel?: string;
   enquireLabel?: string;
+  selectedCabName?: string;
+  selectedCabId?: string;
   quickFacts?: {
     groupSize?: string;
     bestTime?: string;
@@ -56,6 +58,8 @@ const PackageSidebar: React.FC<PackageSidebarProps> = ({
   destination, 
   ctaLabel,
   enquireLabel,
+  selectedCabName,
+  selectedCabId,
   quickFacts = {} 
 }) => {
   const {
@@ -185,6 +189,27 @@ const PackageSidebar: React.FC<PackageSidebarProps> = ({
     }
   }, [contextStr]);
 
+  const isEvokeSharedCoach = contextStr.includes('rann-utsav-tent') || (contextStr.includes('rann') && contextStr.includes('evoke'));
+  
+  const cabOptions = isEvokeSharedCoach 
+    ? [{ id: 'shared_coach', name: 'Official Fixed AC Coach (Included)' }]
+    : [
+        { id: 'swift_dzire', name: 'Swift Dzire (4-Seater Sedan)' },
+        { id: 'maruti_ertiga', name: 'Maruti Ertiga (6-Seater MUV)' },
+        { id: 'innova_crysta', name: 'Innova Crysta (6/7-Seater SUV)' },
+        { id: 'tempo_traveller', name: 'AC Tempo Traveller (12/17-Seater)' }
+      ];
+
+  const [cabId, setCabId] = React.useState(selectedCabId || (isEvokeSharedCoach ? 'shared_coach' : 'swift_dzire'));
+  
+  React.useEffect(() => {
+    if (selectedCabId) {
+      setCabId(selectedCabId);
+    }
+  }, [selectedCabId]);
+
+  const activeCab = cabOptions.find(c => c.id === cabId) || { id: cabId, name: selectedCabName || 'Swift Dzire (4-Seater Sedan)' };
+
   return (
     <div className="space-y-6">
       {/* Premium Unified Booking & Quick Facts Card */}
@@ -250,7 +275,7 @@ const PackageSidebar: React.FC<PackageSidebarProps> = ({
           <div className="bg-slate-900/90 dark:bg-zinc-900/90 p-4 rounded-2xl border border-amber-500/30 space-y-3.5 shadow-md">
             <div className="flex items-center justify-between">
               <h3 className="text-xs font-extrabold text-amber-400 uppercase tracking-wider flex items-center gap-1.5">
-                <Car className="w-4 h-4 text-amber-400" /> Private Transport & Transfer Route
+                <Car className="w-4 h-4 text-amber-400" /> {isEvokeSharedCoach ? 'Official Transport Schedule' : 'Private Transport & Transfer Route'}
               </h3>
               <span className="text-[10px] bg-amber-500/15 text-amber-300 border border-amber-500/30 px-2.5 py-0.5 rounded-full font-bold uppercase tracking-wider">
                 Included
@@ -258,6 +283,24 @@ const PackageSidebar: React.FC<PackageSidebarProps> = ({
             </div>
 
             <div className="space-y-2.5 text-xs">
+              {!isEvokeSharedCoach && (
+                <div className="space-y-1">
+                  <Label className="text-[11px] text-slate-300 font-bold flex items-center gap-1">
+                    <Car className="w-3 h-3 text-amber-400" /> Select Vehicle / Cab Type
+                  </Label>
+                  <Select value={cabId} onValueChange={setCabId}>
+                    <SelectTrigger className="h-9 bg-slate-950 border-slate-700 text-slate-100 font-semibold text-xs">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {cabOptions.map(option => (
+                        <SelectItem key={option.id} value={option.id}>{option.name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+
               <div className="space-y-1">
                 <Label className="text-[11px] text-slate-300 font-bold flex items-center gap-1">
                   <MapPin className="w-3 h-3 text-amber-400" /> Pickup Station / Location
@@ -293,8 +336,8 @@ const PackageSidebar: React.FC<PackageSidebarProps> = ({
             </div>
 
             <div className="p-2.5 bg-slate-950/80 rounded-xl border border-slate-800 text-[11px] text-slate-300 font-semibold flex items-center justify-between">
-              <span>Selected Route:</span>
-              <span className="text-amber-400 font-extrabold">{pickupStation.split(' ')[0]} → {dropStation.split(' ')[0]}</span>
+              <span>Vehicle & Route:</span>
+              <span className="text-amber-400 font-extrabold">{activeCab.name.split(' ')[0]} ({pickupStation.split(' ')[0]} → {dropStation.split(' ')[0]})</span>
             </div>
           </div>
           
@@ -314,6 +357,8 @@ const PackageSidebar: React.FC<PackageSidebarProps> = ({
               travelDate={travelDate}
               returnDate={returnDate}
               passengersCount={travelers}
+              selectedCabName={activeCab.name}
+              selectedCabId={activeCab.id}
               selectedHotels={(packageDetails as any).hotels || []}
               selectedSightseeing={(packageDetails as any).attractions || []}
               itinerary={packageDetails.itinerary || []}

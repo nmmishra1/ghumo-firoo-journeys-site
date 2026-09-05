@@ -166,6 +166,10 @@ const BookingForm: React.FC<BookingFormProps> = ({ packageData, onSubmit }) => {
       const bookingData = {
         ...formData,
         packageData,
+        cabType: pkgAny?.cabType || pkgAny?.selectedCabName || (pkgAny?.isEvoke ? 'Official Fixed AC Coach (Included)' : 'Swift Dzire (4-Seater Sedan)'),
+        cabId: pkgAny?.cabId || pkgAny?.selectedCabId,
+        pickupLocation: pkgAny?.pickupLocation || pkgAny?.pickupStation || 'Bhuj Railway Station / Airport',
+        dropLocation: pkgAny?.dropLocation || pkgAny?.dropStation || 'Bhuj Railway Station / Airport',
         totalAmount: finalTotalAmount,
         bookingDate: new Date().toISOString(),
         bookingId: `BK${Date.now()}`
@@ -476,6 +480,31 @@ const BookingForm: React.FC<BookingFormProps> = ({ packageData, onSubmit }) => {
               <span className="text-slate-600 font-semibold">Accommodation Category:</span>
               <span className="font-bold text-indigo-700">{formData.roomType || 'Premium AC Tent'}</span>
             </div>
+
+            {(() => {
+              const pkgAny = packageData as any;
+              const cabDisplay = pkgAny?.cabType || pkgAny?.selectedCabName || (pkgAny?.isEvoke ? 'Official Fixed AC Coach (Included)' : 'Swift Dzire (4-Seater Sedan)');
+              const pickupDisplay = pkgAny?.pickupLocation || pkgAny?.pickupStation;
+              const dropDisplay = pkgAny?.dropLocation || pkgAny?.dropStation;
+
+              return (
+                <>
+                  <div className="flex justify-between items-center pb-2 border-b border-purple-100">
+                    <span className="text-slate-600 font-semibold">Assigned Transport / Cab:</span>
+                    <span className="font-bold text-amber-700 text-right">{cabDisplay}</span>
+                  </div>
+
+                  {(pickupDisplay || dropDisplay) && (
+                    <div className="flex justify-between items-center pb-2 border-b border-purple-100">
+                      <span className="text-slate-600 font-semibold">Pickup & Drop Route:</span>
+                      <span className="font-bold text-emerald-700 text-right">
+                        {pickupDisplay || 'Bhuj'} → {dropDisplay || 'Bhuj'}
+                      </span>
+                    </div>
+                  )}
+                </>
+              );
+            })()}
 
             <div className="flex justify-between items-center pb-2 border-b border-purple-100">
               <span className="text-slate-600 font-semibold">Duration:</span>

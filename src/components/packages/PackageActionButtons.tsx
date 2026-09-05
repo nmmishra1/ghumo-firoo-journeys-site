@@ -19,6 +19,8 @@ interface PackageActionButtonsProps {
   travelDate?: string;
   returnDate?: string;
   passengersCount?: number;
+  selectedCabName?: string;
+  selectedCabId?: string;
   selectedHotels?: any[];
   selectedSightseeing?: any[];
   itinerary?: any[];
@@ -39,6 +41,8 @@ const PackageActionButtons: React.FC<PackageActionButtonsProps> = ({
   travelDate,
   returnDate,
   passengersCount,
+  selectedCabName,
+  selectedCabId,
   selectedHotels,
   selectedSightseeing,
   itinerary,
@@ -67,6 +71,8 @@ const PackageActionButtons: React.FC<PackageActionButtonsProps> = ({
         travelDate: travelDate || '',
         returnDate: returnDate || '',
         passengersCount: passengersCount || 2,
+        cabType: selectedCabName || 'AC Private Vehicle',
+        selectedCabId: selectedCabId || 'sedan',
         hotels: selectedHotels || [],
         sightseeing: selectedSightseeing || [],
         itinerary: itinerary || [],
@@ -104,6 +110,12 @@ const PackageActionButtons: React.FC<PackageActionButtonsProps> = ({
       }
       if (passengersCount) {
         queryParams.append('travelers', passengersCount.toString());
+      }
+      if (selectedCabName) {
+        queryParams.append('cabType', selectedCabName);
+      }
+      if (selectedCabId) {
+        queryParams.append('cabId', selectedCabId);
       }
 
       // Track the event

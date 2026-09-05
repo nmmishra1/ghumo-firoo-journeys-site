@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate, useLocation } from 'react-router-dom';
 import OptimizedImage from '@/components/ui/OptimizedImage';
-import { ArrowLeft, Shield, Clock, Award, CheckCircle, Smartphone, Building, CreditCard, Copy, Mail, ChevronRight, Check, Phone } from 'lucide-react';
+import { ArrowLeft, Shield, Clock, Award, CheckCircle, Smartphone, Building, CreditCard, Copy, Mail, ChevronRight, Check, Phone, Car, MapPin, Users, Calendar, Navigation } from 'lucide-react';
 import BookingForm from '@/components/BookingForm';
 import { Button } from '@/components/ui/button';
 import { trackInitiateCheckout, trackPurchase } from '@/lib/pixel';
@@ -66,14 +66,30 @@ const Booking: React.FC = () => {
     const fetchPackageData = async () => {
       setIsLoading(true);
 
+      const hydrateQueryParams = (pkg: any) => {
+        const qpTravelDate = searchParams.get('travelDate') || searchParams.get('checkInDate');
+        const qpReturnDate = searchParams.get('returnDate') || searchParams.get('checkOutDate');
+        const qpCabType = searchParams.get('cabType');
+        const qpCabId = searchParams.get('cabId');
+        const qpPickup = searchParams.get('pickup');
+        const qpDrop = searchParams.get('drop');
+        const qpTravelers = searchParams.get('travelers');
+
+        if (qpTravelDate) pkg.travelDate = qpTravelDate;
+        if (qpReturnDate) pkg.returnDate = qpReturnDate;
+        if (qpCabType) pkg.cabType = qpCabType;
+        if (qpCabId) pkg.cabId = qpCabId;
+        if (qpPickup) pkg.pickupLocation = qpPickup;
+        if (qpDrop) pkg.dropLocation = qpDrop;
+        if (qpTravelers) pkg.passengersCount = parseInt(qpTravelers, 10);
+        return pkg;
+      };
+
       // Check location state or localStorage payload first
       if (location.state?.packageData) {
-         const pkg = { ...location.state.packageData };
+         let pkg = { ...location.state.packageData };
          if (pkg.title) pkg.title = pkg.title.replace(/Rann Utsav Kutch/gi, 'Evoke Tent City Package');
-         const qpTravelDate = searchParams.get('travelDate') || searchParams.get('checkInDate');
-         const qpReturnDate = searchParams.get('returnDate') || searchParams.get('checkOutDate');
-         if (qpTravelDate) pkg.travelDate = qpTravelDate;
-         if (qpReturnDate) pkg.returnDate = qpReturnDate;
+         pkg = hydrateQueryParams(pkg);
          setPackageData(pkg);
          trackInitiateCheckout(pkg.title, pkg.id, pkg.price);
          setIsLoading(false);
@@ -83,14 +99,11 @@ const Booking: React.FC = () => {
       const pendingStr = localStorage.getItem('pending_booking_payload');
       if (pendingStr) {
         try {
-          const pkg = JSON.parse(pendingStr);
+          let pkg = JSON.parse(pendingStr);
           if (pkg && (pkg.title || pkg.name)) {
             if (pkg.title) pkg.title = pkg.title.replace(/Rann Utsav Kutch/gi, 'Evoke Tent City Package');
             if (pkg.name) pkg.name = pkg.name.replace(/Rann Utsav Kutch/gi, 'Evoke Tent City Package');
-            const qpTravelDate = searchParams.get('travelDate') || searchParams.get('checkInDate');
-            const qpReturnDate = searchParams.get('returnDate') || searchParams.get('checkOutDate');
-            if (qpTravelDate) pkg.travelDate = qpTravelDate;
-            if (qpReturnDate) pkg.returnDate = qpReturnDate;
+            pkg = hydrateQueryParams(pkg);
             setPackageData(pkg);
             trackInitiateCheckout(pkg.title || pkg.name, pkg.id || 'custom-pkg', pkg.price || 0);
             setIsLoading(false);
@@ -461,11 +474,81 @@ const Booking: React.FC = () => {
                    </p>
                  </div>
                  
-                 <div className="p-8 bg-white">
-                   <h3 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2">
-                     <CreditCard className="w-5 h-5 text-blue-600" />
-                     Select Payment Method
-                   </h3>
+                 <div className="p-6 sm:p-8 bg-white space-y-6">
+                    {/* Official Reservation Voucher Summary */}
+                    <div className="bg-gradient-to-br from-slate-900 via-purple-950 to-slate-900 text-white rounded-2xl p-6 shadow-xl border border-purple-800/40 relative overflow-hidden">
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-purple-800/60 pb-4">
+                        <div>
+                          <span className="text-[11px] font-black uppercase tracking-widest text-amber-400 bg-amber-400/10 px-2.5 py-1 rounded-full border border-amber-400/20 inline-block mb-1.5">
+                            Official Travel Voucher Summary
+                          </span>
+                          <h3 className="text-xl font-extrabold text-white">
+                            {(packageData?.title || 'Evoke Tent City Package').replace(/Rann Utsav Kutch/gi, 'Evoke Tent City Package')}
+                          </h3>
+                        </div>
+                        <div className="sm:text-right">
+                          <p className="text-xs text-purple-300 font-semibold uppercase tracking-wider">Total Payable (All-Inclusive)</p>
+                          <p className="text-2xl font-black text-amber-400">
+                            ₹{(confirmedBooking?.totalAmount || packageData?.price || 0).toLocaleString('en-IN')}
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 pt-4 text-xs">
+                        <div className="bg-white/5 backdrop-blur-sm p-3 rounded-xl border border-white/10 space-y-1">
+                          <div className="flex items-center gap-1.5 text-amber-400 font-bold">
+                            <Calendar className="w-3.5 h-3.5" /> Travel Dates
+                          </div>
+                          <p className="text-slate-100 font-extrabold text-sm">
+                            {confirmedBooking?.travelDate || (packageData as any)?.travelDate || 'Selected Dates'}
+                          </p>
+                          {(confirmedBooking?.returnDate || (packageData as any)?.returnDate) && (
+                            <p className="text-slate-400 text-[11px]">
+                              Return: {confirmedBooking?.returnDate || (packageData as any)?.returnDate}
+                            </p>
+                          )}
+                        </div>
+
+                        <div className="bg-white/5 backdrop-blur-sm p-3 rounded-xl border border-white/10 space-y-1">
+                          <div className="flex items-center gap-1.5 text-blue-400 font-bold">
+                            <Users className="w-3.5 h-3.5" /> Passengers / Guests
+                          </div>
+                          <p className="text-slate-100 font-extrabold text-sm">
+                            {confirmedBooking?.numberOfTravelers || 2} {Number(confirmedBooking?.numberOfTravelers) === 1 ? 'Guest' : 'Guests'}
+                          </p>
+                          <p className="text-slate-400 text-[11px] truncate">
+                            {confirmedBooking?.firstName} {confirmedBooking?.lastName}
+                          </p>
+                        </div>
+
+                        <div className="bg-white/5 backdrop-blur-sm p-3 rounded-xl border border-white/10 space-y-1">
+                          <div className="flex items-center gap-1.5 text-emerald-400 font-bold">
+                            <Car className="w-3.5 h-3.5" /> Transport / Cab
+                          </div>
+                          <p className="text-slate-100 font-extrabold text-sm truncate">
+                            {confirmedBooking?.cabType || (packageData as any)?.cabType || (packageData as any)?.selectedCabName || 'Swift Dzire (4-Seater)'}
+                          </p>
+                          <p className="text-emerald-300 text-[11px]">Chauffeur & DA Included</p>
+                        </div>
+
+                        <div className="bg-white/5 backdrop-blur-sm p-3 rounded-xl border border-white/10 space-y-1">
+                          <div className="flex items-center gap-1.5 text-pink-400 font-bold">
+                            <Navigation className="w-3.5 h-3.5" /> Transfer Route
+                          </div>
+                          <p className="text-slate-100 font-extrabold text-xs leading-snug">
+                            {confirmedBooking?.pickupLocation || (packageData as any)?.pickupLocation || 'Bhuj'} 
+                            <span className="text-amber-400 mx-1">→</span> 
+                            {confirmedBooking?.dropLocation || (packageData as any)?.dropLocation || 'Bhuj'}
+                          </p>
+                          <p className="text-slate-400 text-[11px]">Direct Doorstep Transfer</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <h3 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2">
+                      <CreditCard className="w-5 h-5 text-blue-600" />
+                      Select Payment Method
+                    </h3>
                    
                    <Tabs defaultValue="upi" className="w-full">
                       <TabsList className="grid w-full grid-cols-2 md:grid-cols-4 mb-8 bg-gray-100 p-1 rounded-xl h-auto">

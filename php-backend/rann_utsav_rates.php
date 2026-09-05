@@ -168,9 +168,87 @@ if ($method === 'POST') {
         $roomTotal = $baseAdultsCost + $extraChildCost;
     }
 
-    // Cab Rate (AC Shared Coach Bus Included in Package)
-    $cabObj = ["label" => "AC Shared Coach Bus Transfer", "sub" => "Scheduled Pickup from Bhuj Railway Station / Airport (Included)", "cost" => 0];
-    $cabTotal = 0;
+    // Rann Utsav Official Vehicle & Cab Tariff Engine (Applies only to Rann Utsav packages)
+    $transfer = strtolower(trim($input['transfer'] ?? $input['transfer_type'] ?? $input['cab_type'] ?? 'shared_coach'));
+    $pickup = strtolower(trim($input['pickup_location'] ?? $input['pickup'] ?? ''));
+    $drop = strtolower(trim($input['drop_location'] ?? $input['drop'] ?? ''));
+    $driverAllowancePerDay = 300;
+    $minKmPerDay = 300;
+    $totalBillableKm = $days * $minKmPerDay;
+    $totalDriverAllowance = $days * $driverAllowancePerDay;
+
+    // 1. Point-to-Point Outstation Fixed Routes (All Inclusive)
+    $isAhmedabadRoute = (strpos($pickup, 'ahmedabad') !== false || strpos($drop, 'ahmedabad') !== false);
+    $isRajkotRoute = (strpos($pickup, 'rajkot') !== false || strpos($drop, 'rajkot') !== false);
+
+    if ($isAhmedabadRoute && ($transfer === 'sedan' || $transfer === 'private_sedan' || $transfer === 'swift_dzire')) {
+        $cabObj = ["label" => "Private AC Sedan (Ahmedabad ↔ Bhuj)", "sub" => "Swift Dzire • All Inclusive Point-to-Point Transfer", "cost" => 4500];
+        $cabTotal = 4500;
+    } else if ($isAhmedabadRoute && ($transfer === 'suv_ertiga' || $transfer === 'ertiga')) {
+        $cabObj = ["label" => "Private AC SUV Ertiga (Ahmedabad ↔ Bhuj)", "sub" => "Maruti Ertiga • All Inclusive Point-to-Point Transfer", "cost" => 5500];
+        $cabTotal = 5500;
+    } else if ($isAhmedabadRoute && ($transfer === 'suv_innova' || $transfer === 'innova' || $transfer === 'private_suv')) {
+        $cabObj = ["label" => "Private AC Innova Crysta (Ahmedabad ↔ Bhuj)", "sub" => "Toyota Innova Crysta • All Inclusive Transfer", "cost" => 7500];
+        $cabTotal = 7500;
+    } else if ($isRajkotRoute && ($transfer === 'sedan' || $transfer === 'private_sedan' || $transfer === 'swift_dzire')) {
+        $cabObj = ["label" => "Private AC Sedan (Rajkot ↔ Bhuj)", "sub" => "Swift Dzire • All Inclusive Point-to-Point Transfer", "cost" => 4000];
+        $cabTotal = 4000;
+    } else if ($isRajkotRoute && ($transfer === 'suv_ertiga' || $transfer === 'ertiga')) {
+        $cabObj = ["label" => "Private AC SUV Ertiga (Rajkot ↔ Bhuj)", "sub" => "Maruti Ertiga • All Inclusive Point-to-Point Transfer", "cost" => 5000];
+        $cabTotal = 5000;
+    } else if ($isRajkotRoute && ($transfer === 'suv_innova' || $transfer === 'innova' || $transfer === 'private_suv')) {
+        $cabObj = ["label" => "Private AC Innova Crysta (Rajkot ↔ Bhuj)", "sub" => "Toyota Innova Crysta • All Inclusive Transfer", "cost" => 6500];
+        $cabTotal = 6500;
+    } else if ($transfer === 'sedan' || $transfer === 'private_sedan' || $transfer === 'swift_dzire') {
+        // Swift Dzire: 14 Rs/KM + 300/Day DA (300 km/day avg min)
+        $dzireKmCost = $totalBillableKm * 14;
+        $dzireTotal = $dzireKmCost + $totalDriverAllowance;
+        $cabObj = [
+            "label" => "Private AC Sedan (Swift Dzire / Etios)", 
+            "sub" => "{$days} Days Tour • ₹14/km ({$totalBillableKm} km min) + ₹{$totalDriverAllowance} Driver Allowance", 
+            "cost" => $dzireTotal
+        ];
+        $cabTotal = $dzireTotal;
+    } else if ($transfer === 'suv_ertiga' || $transfer === 'ertiga') {
+        // Maruti Ertiga: 16 Rs/KM + 300/Day DA (300 km/day avg min)
+        $ertigaKmCost = $totalBillableKm * 16;
+        $ertigaTotal = $ertigaKmCost + $totalDriverAllowance;
+        $cabObj = [
+            "label" => "Private AC SUV (Maruti Ertiga)", 
+            "sub" => "{$days} Days Tour • ₹16/km ({$totalBillableKm} km min) + ₹{$totalDriverAllowance} Driver Allowance", 
+            "cost" => $ertigaTotal
+        ];
+        $cabTotal = $ertigaTotal;
+    } else if ($transfer === 'suv_innova' || $transfer === 'innova' || $transfer === 'private_suv') {
+        // Innova Crysta: 22 Rs/KM + 300/Day DA (300 km/day avg min)
+        $innovaKmCost = $totalBillableKm * 22;
+        $innovaTotal = $innovaKmCost + $totalDriverAllowance;
+        $cabObj = [
+            "label" => "Private AC Premium SUV (Toyota Innova Crysta)", 
+            "sub" => "{$days} Days Tour • ₹22/km ({$totalBillableKm} km min) + ₹{$totalDriverAllowance} Driver Allowance", 
+            "cost" => $innovaTotal
+        ];
+        $cabTotal = $innovaTotal;
+    } else if ($transfer === 'tempo' || $transfer === 'tempo_12' || $transfer === 'tempo_traveller') {
+        // Tempo Traveller: 28 Rs/KM + 500/Day DA
+        $tempoKmCost = $totalBillableKm * 28;
+        $tempoDA = $days * 500;
+        $tempoTotal = $tempoKmCost + $tempoDA;
+        $cabObj = [
+            "label" => "Private AC Luxury Tempo Traveller (12-Seater)", 
+            "sub" => "{$days} Days Tour • ₹28/km ({$totalBillableKm} km min) + ₹{$tempoDA} Driver Allowance", 
+            "cost" => $tempoTotal
+        ];
+        $cabTotal = $tempoTotal;
+    } else {
+        // Default / Official Evoke Tent City: Fixed AC Shared Coach Bus Included (₹0)
+        $cabObj = [
+            "label" => "Official AC Shared Coach Bus Transfer", 
+            "sub" => "Scheduled Pickup from Bhuj (08:15 AM, 10:00 AM, 01:30 PM, 03:30 PM) • Included at ₹0", 
+            "cost" => 0
+        ];
+        $cabTotal = 0;
+    }
 
     // Activities Rate
     $activityMap = [

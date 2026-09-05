@@ -118,46 +118,70 @@ $roomRatesBase = [
     'darbari' => ['label' => 'Darbari Royal Suite', 'sub' => 'Royal VIP Suite • Separate Lounge & Butler', 1 => 35000, 2 => 70000, 3 => 105000]
 ];
 
-$cabsRates = [
-    'shared_bus' => ['label' => 'Shared AC Bus Transfer', 'sub' => 'Scheduled Daily Transfers from Bhuj', 'cost' => 1500 * $totalOccupants],
-    'private_sedan' => ['label' => 'Private AC Sedan Cab', 'sub' => 'Swift Dzire / Toyota Etios • Max 4 Pax', 'cost' => 3600],
-    'private_suv' => ['label' => 'Private AC SUV Cab', 'sub' => 'Toyota Innova Crysta / Ertiga • Max 6 Pax', 'cost' => 6400],
-    'tempo' => ['label' => 'Private AC Luxury Tempo', 'sub' => 'Exclusive Luxury Coach • Max 12 Pax', 'cost' => 12000]
-];
+    // Official Rann Utsav Cab Rates & Driver Allowance Engine (300 km/day average minimum)
+    $pickup = strtolower(trim($data['pickup_location'] ?? $data['pickup'] ?? ''));
+    $drop = strtolower(trim($data['drop_location'] ?? $data['drop'] ?? ''));
+    $driverAllowancePerDay = 300;
+    $minKmPerDay = 300;
+    $totalBillableKm = $days * $minKmPerDay;
+    $totalDriverAllowance = $days * $driverAllowancePerDay;
 
-$activityRates = [
-    'paramotoring' => ['label' => 'White Rann Paramotoring', 'rate' => 2800],
-    'camel_safari' => ['label' => 'Camel Safari at Sunset', 'rate' => 1200],
-    'road_to_heaven' => ['label' => 'Road to Heaven Drive & Photo Tour', 'rate' => 1500]
-];
+    $isAhmedabadRoute = (strpos($pickup, 'ahmedabad') !== false || strpos($drop, 'ahmedabad') !== false);
+    $isRajkotRoute = (strpos($pickup, 'rajkot') !== false || strpos($drop, 'rajkot') !== false);
 
-// Room calculation logic
-$selectedRoom = isset($roomRatesBase[$accType]) ? $roomRatesBase[$accType] : $roomRatesBase['ac_premium'];
-$nightKey = min(3, max(1, $nights));
-$basePerAdult = isset($selectedRoom[$nightKey]) ? $selectedRoom[$nightKey] : ($selectedRoom[3] * ($nights / 3));
-
-$totalRoomCost = 0;
-if ($accType === 'darbari') {
-    $totalRoomCost = $basePerAdult;
-} elseif ($adults === 1 && $childrenAbove6 === 0) {
-    // Single Occupancy Rule: 75% of double occupancy cost
-    $totalRoomCost = round(($basePerAdult * 2) * 0.75) + ($seasonInfo['surcharge_per_pax'] * 0.75);
-} else {
-    // Double / Multiple Occupancy Base Adults
-    $baseAdultsCost = ($basePerAdult + $seasonInfo['surcharge_per_pax']) * $adults;
-    
-    // Extra Person / Child above 6 yrs (Extra Mattress Charge per night)
-    $mattressRatePerNight = ($accType === 'non_ac')
-        ? ($seasonInfo['tier'] > 1 ? 5000 : 4500)
-        : ($seasonInfo['tier'] > 1 ? 6000 : 5500);
-        
-    $extraChildCost = $childrenAbove6 * $mattressRatePerNight * $nights;
-    $totalRoomCost = $baseAdultsCost + $extraChildCost;
-}
-
-// Cab cost
-$selectedCab = isset($cabsRates[$transferType]) ? $cabsRates[$transferType] : $cabsRates['private_suv'];
-$cabCost = $selectedCab['cost'];
+    if ($isAhmedabadRoute && ($transferType === 'private_sedan' || $transferType === 'sedan' || $transferType === 'swift_dzire')) {
+        $selectedCab = ['label' => 'Private AC Sedan (Ahmedabad ↔ Bhuj)', 'sub' => 'Swift Dzire • All Inclusive Point-to-Point Transfer', 'cost' => 4500];
+    } else if ($isAhmedabadRoute && ($transferType === 'suv_ertiga' || $transferType === 'ertiga')) {
+        $selectedCab = ['label' => 'Private AC SUV Ertiga (Ahmedabad ↔ Bhuj)', 'sub' => 'Maruti Ertiga • All Inclusive Point-to-Point Transfer', 'cost' => 5500];
+    } else if ($isAhmedabadRoute && ($transferType === 'private_suv' || $transferType === 'suv_innova' || $transferType === 'innova')) {
+        $selectedCab = ['label' => 'Private AC Innova Crysta (Ahmedabad ↔ Bhuj)', 'sub' => 'Toyota Innova Crysta • All Inclusive Transfer', 'cost' => 7500];
+    } else if ($isRajkotRoute && ($transferType === 'private_sedan' || $transferType === 'sedan' || $transferType === 'swift_dzire')) {
+        $selectedCab = ['label' => 'Private AC Sedan (Rajkot ↔ Bhuj)', 'sub' => 'Swift Dzire • All Inclusive Point-to-Point Transfer', 'cost' => 4000];
+    } else if ($isRajkotRoute && ($transferType === 'suv_ertiga' || $transferType === 'ertiga')) {
+        $selectedCab = ['label' => 'Private AC SUV Ertiga (Rajkot ↔ Bhuj)', 'sub' => 'Maruti Ertiga • All Inclusive Point-to-Point Transfer', 'cost' => 5000];
+    } else if ($isRajkotRoute && ($transferType === 'private_suv' || $transferType === 'suv_innova' || $transferType === 'innova')) {
+        $selectedCab = ['label' => 'Private AC Innova Crysta (Rajkot ↔ Bhuj)', 'sub' => 'Toyota Innova Crysta • All Inclusive Transfer', 'cost' => 6500];
+    } else if ($transferType === 'private_sedan' || $transferType === 'sedan' || $transferType === 'swift_dzire') {
+        $dzireKmCost = $totalBillableKm * 14;
+        $dzireTotal = $dzireKmCost + $totalDriverAllowance;
+        $selectedCab = [
+            'label' => 'Private AC Sedan (Swift Dzire / Etios)', 
+            'sub' => "{$days} Days Tour • ₹14/km ({$totalBillableKm} km min) + ₹{$totalDriverAllowance} Driver Allowance", 
+            'cost' => $dzireTotal
+        ];
+    } else if ($transferType === 'suv_ertiga' || $transferType === 'ertiga') {
+        $ertigaKmCost = $totalBillableKm * 16;
+        $ertigaTotal = $ertigaKmCost + $totalDriverAllowance;
+        $selectedCab = [
+            'label' => 'Private AC SUV (Maruti Ertiga)', 
+            'sub' => "{$days} Days Tour • ₹16/km ({$totalBillableKm} km min) + ₹{$totalDriverAllowance} Driver Allowance", 
+            'cost' => $ertigaTotal
+        ];
+    } else if ($transferType === 'private_suv' || $transferType === 'suv_innova' || $transferType === 'innova') {
+        $innovaKmCost = $totalBillableKm * 22;
+        $innovaTotal = $innovaKmCost + $totalDriverAllowance;
+        $selectedCab = [
+            'label' => 'Private AC Premium SUV (Toyota Innova Crysta)', 
+            'sub' => "{$days} Days Tour • ₹22/km ({$totalBillableKm} km min) + ₹{$totalDriverAllowance} Driver Allowance", 
+            'cost' => $innovaTotal
+        ];
+    } else if ($transferType === 'tempo' || $transferType === 'tempo_12') {
+        $tempoKmCost = $totalBillableKm * 28;
+        $tempoDA = $days * 500;
+        $tempoTotal = $tempoKmCost + $tempoDA;
+        $selectedCab = [
+            'label' => 'Private AC Luxury Tempo Traveller (12-Seater)', 
+            'sub' => "{$days} Days Tour • ₹28/km ({$totalBillableKm} km min) + ₹{$tempoDA} Driver Allowance", 
+            'cost' => $tempoTotal
+        ];
+    } else {
+        $selectedCab = [
+            'label' => 'Official AC Shared Coach Bus Transfer', 
+            'sub' => 'Scheduled Pickup from Bhuj (08:15 AM, 10:00 AM, 01:30 PM, 03:30 PM) • Included at ₹0', 
+            'cost' => 0
+        ];
+    }
+    $cabCost = $selectedCab['cost'];
 
 // Activities cost
 $activitiesCost = 0;
