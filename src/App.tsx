@@ -342,14 +342,22 @@ function App() {
                   <Route path="/packages/kashmir-winter-snow" element={<DynamicPackageDetail slug="kashmir-winter-snow" fallback={<KashmirParadise />} />} />
                   <Route path="/packages/kashmir-family-fun" element={<DynamicPackageDetail slug="kashmir-family-fun" fallback={<KashmirParadise />} />} />
                   <Route path="/packages/kashmir-gurez-offbeat" element={<DynamicPackageDetail slug="kashmir-gurez-offbeat" fallback={<KashmirParadise />} />} />
+                  <Route path="/packages/kashmir" element={<DynamicPackageDetail slug="classic-kashmir-5n6d" fallback={<KashmirParadise />} />} />
                   <Route path="/packages/kashmir-ultra-luxury" element={<DynamicPackageDetail slug="kashmir-ultra-luxury" fallback={<KashmirParadise />} />} />
-                 <Route path="/packages/kerala-backwaters" element={<KeralaBackwaters />} />
-                 <Route path="/packages/goa-beach-holiday" element={<GoaBeachHoliday />} />
-                 <Route path="/packages/himachal-hill-stations" element={<HimachalHillStations />} />
-                 <Route path="/packages/golden-triangle" element={<GoldenTriangle />} />
-                 <Route path="/packages/leh-ladakh-tour" element={<LehLadakhTour />} />
-                 <Route path="/packages/dubai-delights" element={<DubaiDelights />} />
+                  <Route path="/packages/kerala" element={<DynamicPackageDetail slug="kerala-backwaters" fallback={<KeralaBackwaters />} />} />
+                  <Route path="/packages/kerala-backwaters" element={<KeralaBackwaters />} />
+                  <Route path="/packages/goa" element={<GoaBeachHoliday />} />
+                  <Route path="/packages/goa-beach-holiday" element={<GoaBeachHoliday />} />
+                  <Route path="/packages/himachal" element={<HimachalHillStations />} />
+                  <Route path="/packages/himachal-hill-stations" element={<HimachalHillStations />} />
+                  <Route path="/packages/golden-triangle" element={<GoldenTriangle />} />
+                  <Route path="/packages/ladakh" element={<LehLadakhTour />} />
+                  <Route path="/packages/leh-ladakh-tour" element={<LehLadakhTour />} />
+                  <Route path="/packages/dubai" element={<DubaiDelights />} />
+                  <Route path="/packages/dubai-delights" element={<DubaiDelights />} />
+                  <Route path="/packages/thailand" element={<ThailandTropical />} />
                   <Route path="/packages/thailand-tropical" element={<ThailandTropical />} />
+                  <Route path="/packages/maldives" element={<Maldives />} />
                   <Route path="/packages/maldives-paradise" element={<Maldives />} />
                   <Route path="/packages/singapore" element={<Singapore />} />
                   <Route path="/packages/singapore-4d-3n" element={<DynamicPackageDetail slug="singapore-4d3n" fallback={<Singapore4D3N />} />} />
@@ -362,16 +370,23 @@ function App() {
                   <Route path="/packages/singapore-honeymoon" element={<DynamicPackageDetail slug="singapore-honeymoon" fallback={<SingaporeHoneymoon />} />} />
                   <Route path="/packages/singapore-luxury" element={<DynamicPackageDetail slug="singapore-luxury" fallback={<SingaporeLuxury />} />} />
                   <Route path="/packages/singapore-city-delight" element={<DynamicPackageDetail slug="singapore-city-delight" fallback={<SingaporeCityDelight />} />} />
+                  <Route path="/packages/bali" element={<BaliParadise />} />
                   <Route path="/packages/bali-paradise" element={<BaliParadise />} />
-                 <Route path="/packages/japan-cherry-blossom" element={<JapanCherryBlossom />} />
-                 <Route path="/packages/turkey-adventure" element={<TurkeyAdventure />} />
-                 <Route path="/packages/mauritius-bliss" element={<MauritiusBliss />} />
-                 <Route path="/packages/seychelles-escape" element={<SeychellesEscape />} />
-                     <Route path="/packages/kutch-rann-utsav" element={<RannUtsav />} />
-                     <Route path="/packages/kutch-rann-utsav/*" element={<RannUtsav />} />
-                     <Route path="/packages/rann-utsav" element={<RannUtsav />} />
-                     <Route path="/packages/rann-utsav-tent" element={<RannUtsavMockupPage />} />
-                     <Route path="/packages/rann-utsav-tent-city" element={<RannUtsavMockupPage />} />
+                  <Route path="/packages/japan" element={<JapanCherryBlossom />} />
+                  <Route path="/packages/japan-cherry-blossom" element={<JapanCherryBlossom />} />
+                  <Route path="/packages/turkey" element={<TurkeyAdventure />} />
+                  <Route path="/packages/turkey-adventure" element={<TurkeyAdventure />} />
+                  <Route path="/packages/mauritius" element={<MauritiusBliss />} />
+                  <Route path="/packages/mauritius-bliss" element={<MauritiusBliss />} />
+                  <Route path="/packages/seychelles" element={<SeychellesEscape />} />
+                  <Route path="/packages/seychelles-escape" element={<SeychellesEscape />} />
+                  <Route path="/packages/georgia" element={<DynamicPackageDetail slug="georgia-adventure" />} />
+                  <Route path="/packages/rajasthan" element={<RajasthanRoyal />} />
+                  <Route path="/packages/kutch-rann-utsav" element={<RannUtsav />} />
+                  <Route path="/packages/kutch-rann-utsav/*" element={<RannUtsav />} />
+                  <Route path="/packages/rann-utsav" element={<RannUtsav />} />
+                  <Route path="/packages/rann-utsav-tent" element={<RannUtsavMockupPage />} />
+                  <Route path="/packages/rann-utsav-tent-city" element={<RannUtsavMockupPage />} />
                      <Route path="/packages/rann-utsav-booking" element={<RannUtsavMockupPage />} />
                     <Route path="/packages/rann-utsav-2d1n" element={<DynamicPackageDetail slug="rann-utsav-2d1n" fallback={<RannUtsav />} />} />
                     <Route path="/packages/rann-utsav-3d2n" element={<DynamicPackageDetail slug="rann-utsav-3d2n" fallback={<RannUtsav />} />} />

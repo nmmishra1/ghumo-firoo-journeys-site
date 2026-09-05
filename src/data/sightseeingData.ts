@@ -120,7 +120,7 @@ export const SIGHTSEEING_SPOTS: SightseeingSpot[] = [
     description: "The Gulmarg Gondola is Kashmir's flagship attraction and the world's second-highest operating cable car. Phase 1 takes you to Kongdoori Valley (8,530 ft), while Phase 2 soars to Apharwat Peak (13,780 ft), offering thrilling snow skiing, sledding, and breathtaking views of the Nanga Parbat peak.",
     duration: "4–5 Hours",
     bestTime: "December to April (Snow) / May to Oct (Green Valleys)",
-    image: "/kashmir.jpg",
+    image: "/kashmir/gulmarg_gondola.jpg",
     location: "Gulmarg, Baramulla District, Jammu & Kashmir",
     highlights: [
       "World's 2nd Highest Cable Car (13,780 ft)",
@@ -154,7 +154,7 @@ export const SIGHTSEEING_SPOTS: SightseeingSpot[] = [
     description: "A Shikara ride on Dal Lake in Srinagar is the soulful heart of Kashmir tourism. Glide past majestic Zabarwan mountains, ancient wooden houseboats, floating vegetable markets, and floating flower vendors while sipping authentic warm Kashmiri Kahwa tea.",
     duration: "1–2 Hours",
     bestTime: "Sunset (5:00 PM - 7:00 PM)",
-    image: "/kashmir.jpg",
+    image: "/kashmir/dal_lake_shikara.jpg",
     location: "Dal Lake, Boulevard Road, Srinagar",
     highlights: [
       "Traditional Decorated Wooden Shikara Ride",
@@ -181,7 +181,7 @@ export const SIGHTSEEING_SPOTS: SightseeingSpot[] = [
     description: "Betaab Valley (named after the famous Bollywood film Betaab) is a pristine valley near Pahalgam surrounded by snow-capped mountains, dense pine forests, and the crystal-clear Lidder River. Nearby Aru Valley offers scenic pony rides and tranquil alpine meadows.",
     duration: "Full Day Excursion",
     bestTime: "April to October",
-    image: "/kashmir.jpg",
+    image: "/kashmir/pahalgam_betaab_valley.jpg",
     location: "Pahalgam, Anantnag District, Kashmir",
     highlights: [
       "Pristine Lidder River Bank Views",
@@ -210,7 +210,7 @@ export const SIGHTSEEING_SPOTS: SightseeingSpot[] = [
     description: "Cruising the serene backwaters of Alleppey (Alappuzha) aboard a traditional Kettuvallam (wooden houseboat) is Kerala's quintessential travel experience. Relax as you glide past lush green paddy fields, coconut groves, water lilies, and local village life while enjoying authentic Karimeen fish curry and coconut water.",
     duration: "Full Day / Overnight Stay",
     bestTime: "September to March",
-    image: "/kerala.jpg",
+    image: "/kerala/alleppey_backwaters_houseboat.jpg",
     location: "Alappuzha, Kerala",
     highlights: [
       "Traditional Luxury Kettuvallam Stay",
@@ -237,7 +237,7 @@ export const SIGHTSEEING_SPOTS: SightseeingSpot[] = [
     description: "Munnar is South India's premier hill station situated 1,600m above sea level at the confluence of three mountain streams. Walk through sprawling Tata Tea estates, visit the Kannan Devan Tea Museum, and spot the endangered Nilgiri Tahr at Eravikulam National Park (Anamudi Peak).",
     duration: "Half Day / Full Day",
     bestTime: "September to May",
-    image: "/kerala.jpg",
+    image: "/kerala/munnar_tea_estates.jpg",
     location: "Munnar, Idukki District, Kerala",
     highlights: [
       "Endless Rolling Tea Plantation Estates",
@@ -264,7 +264,7 @@ export const SIGHTSEEING_SPOTS: SightseeingSpot[] = [
     description: "Eravikulam National Park is Kerala's first national park, spanning 97 sq km of rolling high-altitude grasslands and shola forests. It protects the largest surviving population of the rare Nilgiri Tahr mountain goat and offers views of South India's highest peak, Anamudi Peak (2,695m).",
     duration: "3–4 Hours",
     bestTime: "September to May (Entry Fee: ₹200)",
-    image: "/kerala.jpg",
+    image: "/kerala/eravikulam_national_park.jpg",
     location: "Kannan Devan Hills, Munnar, Kerala",
     highlights: [
       "Spot Endangered Nilgiri Tahr Mountain Goats",
@@ -291,7 +291,7 @@ export const SIGHTSEEING_SPOTS: SightseeingSpot[] = [
     description: "Built in 1953, Mattupetty Dam is a vital water reservoir nestled amidst misty tea gardens and hills. Visitors can enjoy high-speed motorboat rides (₹500-₹700 per boat), pedal boating, and visits to nearby Echo Point where calls echo across the mountain slopes.",
     duration: "2–3 Hours",
     bestTime: "September to May (Speed Boat: ₹500/5 pax)",
-    image: "/kerala.jpg",
+    image: "/kerala/munnar_tea_estates.jpg",
     location: "Mattupetty, 13km from Munnar Town, Kerala",
     highlights: [
       "High-Speed Motorboat Rides across Reservoir",
@@ -318,7 +318,7 @@ export const SIGHTSEEING_SPOTS: SightseeingSpot[] = [
     description: "Located on the Mattupetty road, Carmelagiri Elephant Park provides private guided elephant rides through scenic tea and spice plantations. Visitors can interact with domesticated Asian elephants, feed them fruit baskets, and take memorable family photographs.",
     duration: "1–2 Hours",
     bestTime: "Year-Round (Elephant Ride: ₹350–₹800/person)",
-    image: "/kerala.jpg",
+    image: "/kerala/thekkady_periyar_wildlife.jpg",
     location: "Mattupetty Road, Munnar, Kerala",
     highlights: [
       "15-Minute Forest Trail Elephant Ride",
@@ -345,7 +345,7 @@ export const SIGHTSEEING_SPOTS: SightseeingSpot[] = [
     description: "Kolukkumalai is world-renowned as the highest tea estate in the world, standing at 7,900 ft above sea level on the Kerala-Tamil Nadu border. Reaching the peak requires an adrenaline-pumping 4x4 off-road jeep safari over rugged mountain terrain, rewarding travelers with a cloud-sea sunrise view and authentic orthodox tea tasting.",
     duration: "4–5 Hours",
     bestTime: "Early Morning Sunrise (4:30 AM Jeep Safari: ₹3,000/jeep)",
-    image: "/kerala.jpg",
+    image: "/kerala/munnar_tea_estates.jpg",
     location: "Kolukkumalai, Bodinayakanur / Munnar Border",
     highlights: [
       "World's Highest Organic Tea Estate (7,900 ft)",
@@ -372,7 +372,7 @@ export const SIGHTSEEING_SPOTS: SightseeingSpot[] = [
     description: "Wonder Valley is Munnar's premier adventure and eco-theme park set amidst forest hills. It offers high-line ziplining over tree canopies, low & high rope courses, rock climbing, 12D motion theater, bungee trampolines, and water slides.",
     duration: "Half Day / Full Day",
     bestTime: "Year-Round (Pass: ₹1,000/person)",
-    image: "/kerala.jpg",
+    image: "/kerala/eravikulam_national_park.jpg",
     location: "Anachel, 14km from Munnar Town, Kerala",
     highlights: [
       "High-Line Canopy Zipline Ride",

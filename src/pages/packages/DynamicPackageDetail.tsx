@@ -1297,7 +1297,7 @@ const STATIC_PACKAGE_REGISTRY: Record<string, any> = {
     price: 48000,
     rating: 4.8,
     reviews: 185,
-    image: "https://images.unsplash.com/photo-1525625293386-3f8f99389edd?q=80&w=800",
+    image: "/singapore/gardens_by_the_bay.jpg",
     destinations: ["Singapore", "Gardens by the Bay", "Marina Bay Sands", "Sentosa Island", "Jewel Changi"],
     highlights: [
       "Short City Escape Covering Major Lion City Icons",
@@ -1333,12 +1333,16 @@ const STATIC_PACKAGE_REGISTRY: Record<string, any> = {
       }
     ],
     images: [
-      "https://images.unsplash.com/photo-1525625293386-3f8f99389edd?q=80&w=800",
-      "https://images.unsplash.com/photo-1546519638-68e109498ffc?q=80&w=800"
+      "/singapore/gardens_by_the_bay.jpg",
+      "/singapore/jewel_changi.jpg",
+      "/singapore/merlion_park.jpg",
+      "/singapore/cable_car_sentosa.jpg",
+      "/singapore/wings_of_time_sentosa.jpg"
     ],
     attractions: [
-      { name: "Gardens by the Bay", description: "Futuristic botanical park featuring 50m Supertrees.", image: "https://images.unsplash.com/photo-1546519638-68e109498ffc?q=80&w=800" },
-      { name: "Marina Bay Sands SkyPark", description: "World-famous rooftop observation deck.", image: "https://images.unsplash.com/photo-1525625293386-3f8f99389edd?q=80&w=800" }
+      { name: "Gardens by the Bay & Supertree Grove", description: "Futuristic botanical park featuring 50m Supertrees and Cloud Forest.", image: "/singapore/gardens_by_the_bay.jpg" },
+      { name: "Jewel Changi Airport & Rain Vortex", description: "World's tallest 40m indoor waterfall and lush canopy park.", image: "/singapore/jewel_changi.jpg" },
+      { name: "Merlion Park & Singapore River", description: "Iconic national symbol overlooking Marina Bay skyline.", image: "/singapore/merlion_park.jpg" }
     ],
     inclusions: ["3 Nights 4-Star Hotel Stay with Breakfast", "Singapore E-Visa", "Gardens by the Bay Tickets", "Sentosa Cable Car Passes", "Private Transfers"],
     exclusions: ["International Flights", "GST / TCS"],
@@ -1351,7 +1355,7 @@ const STATIC_PACKAGE_REGISTRY: Record<string, any> = {
     price: 56000,
     rating: 4.9,
     reviews: 195,
-    image: "https://images.unsplash.com/photo-1546519638-68e109498ffc?q=80&w=800",
+    image: "/singapore/universal_studios.jpg",
     destinations: ["Singapore", "Universal Studios Sentosa", "Night Safari", "Gardens by the Bay", "Marina Bay"],
     highlights: [
       "Best Selling 5-Day Singapore Comprehensive Experience",
@@ -1393,12 +1397,16 @@ const STATIC_PACKAGE_REGISTRY: Record<string, any> = {
       }
     ],
     images: [
-      "https://images.unsplash.com/photo-1546519638-68e109498ffc?q=80&w=800",
-      "https://images.unsplash.com/photo-1596422846543-75c6fc197f07?q=80&w=800"
+      "/singapore/universal_studios.jpg",
+      "/singapore/gardens_by_the_bay.jpg",
+      "/singapore/night_safari.jpg",
+      "/singapore/jewel_changi.jpg",
+      "/singapore/merlion_park.jpg"
     ],
     attractions: [
-      { name: "Universal Studios Sentosa", description: "Premier movie-theme park with 24 rides and attractions.", image: "https://images.unsplash.com/photo-1596422846543-75c6fc197f07?q=80&w=800" },
-      { name: "Night Safari", description: "World's first nocturnal wildlife park.", image: "https://images.unsplash.com/photo-1534447677768-be436bb09401?q=80&w=800" }
+      { name: "Universal Studios Sentosa", description: "Premier movie-theme park with 24 rides and attractions.", image: "/singapore/universal_studios.jpg" },
+      { name: "Mandai Night Safari", description: "World's first nocturnal wildlife park with open tram safari.", image: "/singapore/night_safari.jpg" },
+      { name: "Gardens by the Bay", description: "Futuristic Supertree Grove and Flower Dome conservatories.", image: "/singapore/gardens_by_the_bay.jpg" }
     ],
     inclusions: ["4 Nights 4-Star Hotel Stay with Breakfast", "Universal Studios Ticket", "Night Safari Ticket", "Singapore E-Visa", "Private Transfers"],
     exclusions: ["International Flights", "GST / TCS"],
@@ -1411,7 +1419,7 @@ const STATIC_PACKAGE_REGISTRY: Record<string, any> = {
     price: 64000,
     rating: 4.9,
     reviews: 175,
-    image: "https://images.unsplash.com/photo-1596422846543-75c6fc197f07?q=80&w=800",
+    image: "/singapore/cable_car_sentosa.jpg",
     destinations: ["Sentosa Island", "Universal Studios", "S.E.A. Aquarium", "Skyline Luge", "Siloso Beach"],
     highlights: [
       "Dedicated Stay at Sentosa Island 4-Star Beach Resort",
@@ -1453,10 +1461,16 @@ const STATIC_PACKAGE_REGISTRY: Record<string, any> = {
       }
     ],
     images: [
-      "https://images.unsplash.com/photo-1596422846543-75c6fc197f07?q=80&w=800"
+      "/singapore/cable_car_sentosa.jpg",
+      "/singapore/universal_studios.jpg",
+      "/singapore/sea_aquarium.jpg",
+      "/singapore/wings_of_time_sentosa.jpg",
+      "/singapore/gardens_by_the_bay.jpg"
     ],
     attractions: [
-      { name: "Sentosa Island", description: "Singapore's premier island resort destination with beaches and theme parks.", image: "https://images.unsplash.com/photo-1596422846543-75c6fc197f07?q=80&w=800" }
+      { name: "Sentosa Cable Car SkyPass", description: "360-degree aerial views over Mount Faber and Sentosa harbor.", image: "/singapore/cable_car_sentosa.jpg" },
+      { name: "Universal Studios Sentosa", description: "World-class rollercoasters, 3D simulators and movie sets.", image: "/singapore/universal_studios.jpg" },
+      { name: "S.E.A. Aquarium", description: "Over 100,000 marine animals and majestic manta rays.", image: "/singapore/sea_aquarium.jpg" }
     ],
     inclusions: ["2 Nights Sentosa Beach Resort + 2 Nights City Hotel", "Universal Studios Express Ticket", "Skyline Luge Pass", "Singapore E-Visa"],
     exclusions: ["International Flights", "GST / TCS"],
@@ -1469,7 +1483,7 @@ const STATIC_PACKAGE_REGISTRY: Record<string, any> = {
     price: 145000,
     rating: 4.9,
     reviews: 160,
-    image: "https://images.unsplash.com/photo-1548574505-5e239809ee19?q=80&w=800",
+    image: "/singapore/marina_bay_sands.jpg",
     destinations: ["Singapore", "Marina Bay Cruise Centre", "High Seas Ocean Cruise", "Universal Studios"],
     highlights: [
       "4 Nights Singapore Land Stay + 2 Nights Genting Dream Luxury Ocean Cruise",
@@ -1522,8 +1536,16 @@ const STATIC_PACKAGE_REGISTRY: Record<string, any> = {
         activities: ["Jewel Changi", "Airport Drop-off"]
       }
     ],
-    images: ["https://images.unsplash.com/photo-1548574505-5e239809ee19?q=80&w=800"],
-    attractions: [{ name: "Genting Dream Cruise", description: "Luxury 18-deck ocean liner with world-class entertainment.", image: "https://images.unsplash.com/photo-1548574505-5e239809ee19?q=80&w=800" }],
+    images: [
+      "/singapore/marina_bay_sands.jpg",
+      "/singapore/gardens_by_the_bay.jpg",
+      "/singapore/universal_studios.jpg",
+      "/singapore/jewel_changi.jpg"
+    ],
+    attractions: [
+      { name: "Marina Bay Cruise & Sands", description: "World-class cruise terminal and waterfront skyline panorama.", image: "/singapore/marina_bay_sands.jpg" },
+      { name: "Gardens by the Bay", description: "Supertree Grove light show and Cloud Forest conservatories.", image: "/singapore/gardens_by_the_bay.jpg" }
+    ],
     inclusions: ["2 Nights Genting Dream Ocean Balcony Suite", "4 Nights Singapore City Hotel", "All Onboard Meals", "Singapore E-Visa"],
     exclusions: ["Port Taxes (~₹6,500)", "International Flights"],
     hotels: [{ name: "Grand Copthorne Waterfront", location: "Singapore", stars: 4, room_type: "Deluxe Room", meal_plan: "Breakfast Included" }]
@@ -1535,7 +1557,7 @@ const STATIC_PACKAGE_REGISTRY: Record<string, any> = {
     price: 82000,
     rating: 4.9,
     reviews: 180,
-    image: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=800",
+    image: "/singapore/universal_studios.jpg",
     destinations: ["Singapore", "Universal Studios Sentosa", "River Wonders", "Night Safari", "Wild Wild Wet", "Jewel Changi"],
     highlights: [
       "Kid-Friendly 6-Day Family Vacation in Lion City",
@@ -1584,12 +1606,16 @@ const STATIC_PACKAGE_REGISTRY: Record<string, any> = {
       }
     ],
     images: [
-      "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=800",
-      "https://images.unsplash.com/photo-1596422846543-75c6fc197f07?q=80&w=800"
+      "/singapore/universal_studios.jpg",
+      "/singapore/mandai_river_wonders.jpg",
+      "/singapore/night_safari.jpg",
+      "/singapore/gardens_by_the_bay.jpg",
+      "/singapore/jewel_changi.jpg"
     ],
     attractions: [
-      { name: "Universal Studios Sentosa", description: "Southeast Asia's premier movie theme park.", image: "https://images.unsplash.com/photo-1596422846543-75c6fc197f07?q=80&w=800" },
-      { name: "Wild Wild Wet Water Park", description: "Top award-winning waterpark with slides for all ages.", image: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=800" }
+      { name: "Universal Studios Sentosa", description: "Southeast Asia's premier movie theme park with world-class rides.", image: "/singapore/universal_studios.jpg" },
+      { name: "Mandai River Wonders & Pandas", description: "Asia's only river-themed wildlife park with Giant Panda forest.", image: "/singapore/mandai_river_wonders.jpg" },
+      { name: "Jewel Changi Airport Rain Vortex", description: "Spectacular 40m indoor waterfall and canopy park bouncing nets.", image: "/singapore/jewel_changi.jpg" }
     ],
     inclusions: [
       "5 Nights 4-Star Family Suite Accommodation with Breakfast",
@@ -1607,7 +1633,7 @@ const STATIC_PACKAGE_REGISTRY: Record<string, any> = {
     price: 95000,
     rating: 4.9,
     reviews: 165,
-    image: "https://images.unsplash.com/photo-1510414842594-a61c69b5ae57?q=80&w=800",
+    image: "/singapore/cable_car_sentosa.jpg",
     destinations: ["Singapore", "Southern Islands", "Marina Bay Sands", "Gardens by the Bay", "Sentosa Island"],
     highlights: [
       "Romantic 5-Day Luxury Couples Escape",
@@ -1650,12 +1676,15 @@ const STATIC_PACKAGE_REGISTRY: Record<string, any> = {
       }
     ],
     images: [
-      "https://images.unsplash.com/photo-1510414842594-a61c69b5ae57?q=80&w=800",
-      "https://images.unsplash.com/photo-1565967511849-76a60a516170?q=80&w=800"
+      "/singapore/cable_car_sentosa.jpg",
+      "/singapore/gardens_by_the_bay.jpg",
+      "/singapore/marina_bay_sands.jpg",
+      "/singapore/wings_of_time_sentosa.jpg"
     ],
     attractions: [
-      { name: "Southern Islands Private Yacht", description: "Exclusive yacht cruise to secluded Lazarus & St. John's beaches.", image: "https://images.unsplash.com/photo-1510414842594-a61c69b5ae57?q=80&w=800" },
-      { name: "Cable Car Sky Dining", description: "Romantic 4-course dinner high above HarbourFront and Sentosa.", image: "https://images.unsplash.com/photo-1510414842594-a61c69b5ae57?q=80&w=800" }
+      { name: "Cable Car Sky Dining", description: "Romantic 4-course dinner high above HarbourFront and Sentosa.", image: "/singapore/cable_car_sentosa.jpg" },
+      { name: "Gardens by the Bay & Supertrees", description: "Cloud Forest conservatory and dazzling evening light show.", image: "/singapore/gardens_by_the_bay.jpg" },
+      { name: "Marina Bay Sands SkyPark", description: "Iconic 57th-floor skyline observatory and infinity views.", image: "/singapore/marina_bay_sands.jpg" }
     ],
     inclusions: [
       "4 Nights 5-Star Hotel Stay with Champagne Breakfast",
@@ -1674,7 +1703,7 @@ const STATIC_PACKAGE_REGISTRY: Record<string, any> = {
     price: 210000,
     rating: 5.0,
     reviews: 140,
-    image: "https://images.unsplash.com/photo-1565967511849-76a60a516170?q=80&w=800",
+    image: "/singapore/marina_bay_sands.jpg",
     destinations: ["Marina Bay Sands", "Universal Studios VIP", "Changi JetQuay VVIP", "Sentosa Island"],
     highlights: [
       "Ultra-Exclusive VVIP 5-Day Singapore Experience",
@@ -1716,8 +1745,16 @@ const STATIC_PACKAGE_REGISTRY: Record<string, any> = {
         activities: ["MBS Shoppes Personal Shopper", "JetQuay VIP Lounge Drop-off"]
       }
     ],
-    images: ["https://images.unsplash.com/photo-1565967511849-76a60a516170?q=80&w=800"],
-    attractions: [{ name: "Marina Bay Sands Club Suite", description: "57th floor infinity pool and VVIP lounge privileges.", image: "https://images.unsplash.com/photo-1565967511849-76a60a516170?q=80&w=800" }],
+    images: [
+      "/singapore/marina_bay_sands.jpg",
+      "/singapore/gardens_by_the_bay.jpg",
+      "/singapore/universal_studios.jpg",
+      "/singapore/singapore_flyer.jpg"
+    ],
+    attractions: [
+      { name: "Marina Bay Sands Club Suite", description: "57th floor infinity pool and VVIP lounge privileges.", image: "/singapore/marina_bay_sands.jpg" },
+      { name: "Singapore Flyer & Time Capsule", description: "Giant observation wheel with 45km panoramic skyline views.", image: "/singapore/singapore_flyer.jpg" }
+    ],
     inclusions: ["4 Nights Marina Bay Sands Club Suite Stay", "Unlimited Infinity Pool Access", "Helicopter Flight", "Maybach Transfers", "Universal VIP Host"],
     exclusions: ["First Class Airfare"],
     hotels: [{ name: "Marina Bay Sands", location: "Singapore", stars: 5, room_type: "Sands Premier Club Suite", meal_plan: "Full Club Privileges Included" }]
@@ -1729,7 +1766,7 @@ const STATIC_PACKAGE_REGISTRY: Record<string, any> = {
     price: 45000,
     rating: 4.8,
     reviews: 130,
-    image: "https://images.unsplash.com/photo-1525625293386-3f8f99389edd?q=80&w=800",
+    image: "/singapore/merlion_park.jpg",
     destinations: ["Singapore", "Gardens by the Bay", "Merlion Park", "Orchard Road", "Jewel Changi"],
     highlights: [
       "Budget-Friendly 4-Day Singapore Highlights Package",
@@ -1764,8 +1801,17 @@ const STATIC_PACKAGE_REGISTRY: Record<string, any> = {
         activities: ["Jewel Rain Vortex", "Departure Flight"]
       }
     ],
-    images: ["https://images.unsplash.com/photo-1525625293386-3f8f99389edd?q=80&w=800"],
-    attractions: [{ name: "Merlion Park", description: "Iconic Singapore landmark statue.", image: "https://images.unsplash.com/photo-1525625293386-3f8f99389edd?q=80&w=800" }],
+    images: [
+      "/singapore/merlion_park.jpg",
+      "/singapore/gardens_by_the_bay.jpg",
+      "/singapore/haji_lane_heritage.jpg",
+      "/singapore/jewel_changi.jpg"
+    ],
+    attractions: [
+      { name: "Merlion Park & Marina Bay", description: "Iconic Singapore landmark statue overlooking Marina Bay.", image: "/singapore/merlion_park.jpg" },
+      { name: "Cultural Quarters: Haji Lane & Chinatown", description: "Vibrant shophouses, street art murals and heritage cafes.", image: "/singapore/haji_lane_heritage.jpg" },
+      { name: "Jewel Changi Rain Vortex", description: "World's tallest indoor waterfall surrounded by lush terraced gardens.", image: "/singapore/jewel_changi.jpg" }
+    ],
     inclusions: ["3 Nights 4-Star Hotel Stay with Breakfast", "Singapore E-Visa", "City Tour", "Transfers"],
     exclusions: ["International Flights", "GST / TCS"],
     hotels: [{ name: "V Hotel Lavender", location: "Singapore", stars: 4, room_type: "Standard Room", meal_plan: "Breakfast Included" }]
@@ -2051,7 +2097,6 @@ const STATIC_PACKAGE_REGISTRY: Record<string, any> = {
     price: 26500,
     rating: 4.9,
     reviews: 240,
-    image: "https://images.unsplash.com/photo-1595815771614-ade9d652a65d?q=80&w=800",
     destinations: ["Srinagar", "Dal Lake", "Gulmarg", "Pahalgam", "Mughal Gardens"],
     highlights: ["1 Night Luxury Dal Lake Cedar Houseboat", "Gulmarg Gondola Cable Car Passes Phase 1 & 2", "Pahalgam Betaab Valley & Lidder River", "Mughal Gardens Nishat & Shalimar"],
     itinerary: [
@@ -2092,6 +2137,22 @@ const STATIC_PACKAGE_REGISTRY: Record<string, any> = {
         activities: ["Mountain View Breakfast", "Polo View Handicraft Shopping", "Pashmina & Saffron Procurement", "Airport Departure Transfer"]
       }
     ],
+    image: "/kashmir/gulmarg_gondola.jpg",
+    images: [
+      "/kashmir/gulmarg_gondola.jpg",
+      "/kashmir/dal_lake_shikara.jpg",
+      "/kashmir/pahalgam_betaab_valley.jpg",
+      "/kashmir/sonamarg_thajiwas_glacier.jpg",
+      "/kashmir/srinagar_mughal_gardens.jpg",
+      "/kashmir/doodhpathri_kashmir.jpg",
+      "/kashmir/baisaran_valley_pahalgam.jpg",
+      "/kashmir/sinthan_top_kashmir.jpg"
+    ],
+    attractions: [
+      { name: "Gulmarg Gondola & Apharwat Peak", description: "World's 2nd highest cable car to 13,780 ft with panoramic snow views.", image: "/kashmir/gulmarg_gondola.jpg" },
+      { name: "Dal Lake Shikara & Cedar Houseboats", description: "Traditional wooden Shikara cruise and heritage floating stays.", image: "/kashmir/dal_lake_shikara.jpg" },
+      { name: "Pahalgam Betaab & Aru Valleys", description: "Lush pine meadows, roaring Lidder river and alpine trails.", image: "/kashmir/pahalgam_betaab_valley.jpg" }
+    ],
     inclusions: ["Private Chauffeured AC SUV/Sedan from Srinagar Airport throughout", "1 Night Luxury Dal Lake Cedar Houseboat + 4 Nights 4-Star Hotel", "Pre-booked Gulmarg Gondola Cable Car Tickets Included", "1-Hour Sunset Shikara Ride on Dal Lake", "Daily Breakfast & Dinner Included", "Betaab Valley & Aru Valley Union Cabs Included"],
     exclusions: ["Flight / Train fares to Srinagar", "Personal ski equipment hire", "GST / TCS extra as applicable"],
     hotels: [{ name: "Dal Lake Luxury Cedar Houseboat & Srinagar 4-Star Resort", location: "Srinagar & Gulmarg", stars: 4, room_type: "Luxury Lake View Suite", meal_plan: "Breakfast & Dinner" }]
@@ -2103,7 +2164,15 @@ const STATIC_PACKAGE_REGISTRY: Record<string, any> = {
     price: 42500,
     rating: 4.9,
     reviews: 310,
-    image: "https://images.unsplash.com/photo-1626621341517-bbf3d9990a23?q=80&w=800",
+    image: "/kashmir/sonamarg_thajiwas_glacier.jpg",
+    images: [
+      "/kashmir/sonamarg_thajiwas_glacier.jpg",
+      "/kashmir/gulmarg_gondola.jpg",
+      "/kashmir/dal_lake_shikara.jpg",
+      "/kashmir/pahalgam_betaab_valley.jpg",
+      "/kashmir/srinagar_mughal_gardens.jpg",
+      "/kashmir/baisaran_valley_pahalgam.jpg"
+    ],
     destinations: ["Srinagar", "Sonamarg", "Gulmarg", "Pahalgam"],
     highlights: ["Sonamarg Thajiwas Glacier Day Trip", "Gulmarg Gondola Phase 1 & 2 Pass", "Dal Lake Houseboat Stay", "Pahalgam Aru & Betaab Valleys"],
     itinerary: [
@@ -2156,6 +2225,11 @@ const STATIC_PACKAGE_REGISTRY: Record<string, any> = {
         activities: ["Hotel Breakfast", "Airport Departure Drop-off"]
       }
     ],
+    attractions: [
+      { name: "Sonamarg Thajiwas Glacier", description: "Meadow of Gold glacier trek with snow activities.", image: "/kashmir/sonamarg_thajiwas_glacier.jpg" },
+      { name: "Gulmarg Gondola Cable Car", description: "World's second highest operating cable car to 13,780 ft.", image: "/kashmir/gulmarg_gondola.jpg" },
+      { name: "Dal Lake Shikara Cruise", description: "Sunset cruise on hand-carved wooden Shikara.", image: "/kashmir/dal_lake_shikara.jpg" }
+    ],
     inclusions: ["Full Chauffeured AC SUV/Vehicle for 8 Days", "7 Nights Accommodation (1 Houseboat + 6 Deluxe Hotels)", "Sonamarg Day Trip Included", "Gulmarg Gondola Passes (Phase 1 & 2)", "Daily Breakfast & Dinner"],
     exclusions: ["Lunch and personal shopping expenses"],
     hotels: [{ name: "Srinagar Boutique Houseboat & Gulmarg Ski Resort", location: "Kashmir", stars: 4, room_type: "Deluxe Suite", meal_plan: "Breakfast & Dinner" }]
@@ -2167,7 +2241,12 @@ const STATIC_PACKAGE_REGISTRY: Record<string, any> = {
     price: 21500,
     rating: 4.8,
     reviews: 165,
-    image: "https://images.unsplash.com/photo-1548013146-72479768bada?q=80&w=800",
+    image: "/kashmir/gulmarg_gondola.jpg",
+    images: [
+      "/kashmir/gulmarg_gondola.jpg",
+      "/kashmir/dal_lake_shikara.jpg",
+      "/kashmir/srinagar_mughal_gardens.jpg"
+    ],
     destinations: ["Srinagar", "Gulmarg", "Dal Lake"],
     highlights: ["Dal Lake Cedar Houseboat 1 Night", "Gulmarg Gondola Cable Car Ride", "Mughal Gardens Tour"],
     itinerary: [
@@ -2202,6 +2281,10 @@ const STATIC_PACKAGE_REGISTRY: Record<string, any> = {
         activities: ["Breakfast", "Airport Drop-off"]
       }
     ],
+    attractions: [
+      { name: "Gulmarg Gondola", description: "Cable car flight with 360-degree snow peak vistas.", image: "/kashmir/gulmarg_gondola.jpg" },
+      { name: "Dal Lake Shikara", description: "Iconic wooden Shikara cruise on Dal Lake.", image: "/kashmir/dal_lake_shikara.jpg" }
+    ],
     inclusions: ["Dedicated Chauffeured Vehicle throughout 5 Days", "1 Night Houseboat + 3 Nights Deluxe Hotels", "Gulmarg Gondola Passes", "Shikara Ride & Daily Meals (Breakfast & Dinner)"],
     exclusions: ["Personal equipment rentals", "Airfare to Srinagar"],
     hotels: [{ name: "Dal Lake Houseboat & Srinagar Hotel", location: "Srinagar", stars: 4, room_type: "Standard Deluxe", meal_plan: "Breakfast & Dinner" }]
@@ -2213,7 +2296,13 @@ const STATIC_PACKAGE_REGISTRY: Record<string, any> = {
     price: 38000,
     rating: 5.0,
     reviews: 289,
-    image: "https://images.unsplash.com/photo-1598091383021-15ddea10925d?q=80&w=800",
+    image: "/kashmir/dal_lake_shikara.jpg",
+    images: [
+      "/kashmir/dal_lake_shikara.jpg",
+      "/kashmir/gulmarg_gondola.jpg",
+      "/kashmir/pahalgam_betaab_valley.jpg",
+      "/kashmir/srinagar_mughal_gardens.jpg"
+    ],
     destinations: ["Srinagar", "Dal Lake", "Gulmarg", "Pahalgam"],
     highlights: ["Flower Bed Decoration & Honeymoon Cake", "Candlelight Dinner on Dal Lake Houseboat", "Private Snow Photography Session in Gulmarg"],
     itinerary: [
@@ -2260,6 +2349,10 @@ const STATIC_PACKAGE_REGISTRY: Record<string, any> = {
         activities: ["Breakfast", "Airport Drop-off"]
       }
     ],
+    attractions: [
+      { name: "Dal Lake Houseboat & Shikara", description: "Romantic candlelit wooden houseboat stay.", image: "/kashmir/dal_lake_shikara.jpg" },
+      { name: "Gulmarg Gondola Ride", description: "Snowy cable car flight to Apharwat peak.", image: "/kashmir/gulmarg_gondola.jpg" }
+    ],
     inclusions: ["Flower Bed Decoration & Honeymoon Cake on Day 1", "Candlelight Dinner on Houseboat", "Gondola Cable Car Passes (Phase 1 & 2)", "Private Chauffeured SUV throughout the trip", "Daily Breakfast & Special Dinners"],
     hotels: [{ name: "Dal Lake Honeymoon Houseboat & Gulmarg Boutique Suite", location: "Kashmir", stars: 5, room_type: "Honeymoon Suite", meal_plan: "Breakfast & Candlelight Dinners" }]
   },
@@ -2270,7 +2363,13 @@ const STATIC_PACKAGE_REGISTRY: Record<string, any> = {
     price: 29500,
     rating: 4.9,
     reviews: 198,
-    image: "https://images.unsplash.com/photo-1548013146-72479768bada?q=80&w=800",
+    image: "/kashmir/gulmarg_gondola.jpg",
+    images: [
+      "/kashmir/gulmarg_gondola.jpg",
+      "/kashmir/dal_lake_shikara.jpg",
+      "/kashmir/sinthan_top_kashmir.jpg",
+      "/kashmir/pahalgam_betaab_valley.jpg"
+    ],
     destinations: ["Srinagar", "Gulmarg", "Drung Frozen Waterfall", "Dal Lake"],
     highlights: [
       "Heavy Snowfall & Skiing Slopes Excursion at Gulmarg",
@@ -2317,9 +2416,9 @@ const STATIC_PACKAGE_REGISTRY: Record<string, any> = {
         activities: ["Pashmina & Kesar Shopping", "Airport Drop-off"]
       }
     ],
-    images: [
-      "https://images.unsplash.com/photo-1548013146-72479768bada?q=80&w=800",
-      "https://images.unsplash.com/photo-1595815771614-ade9d652a65d?q=80&w=800"
+    attractions: [
+      { name: "Gulmarg Snow Gondola", description: "Phase 1 & 2 Gondola ascending to 13,780 ft.", image: "/kashmir/gulmarg_gondola.jpg" },
+      { name: "Sinthan Top Snow Pass", description: "High-altitude 3,800m mountain snow pass.", image: "/kashmir/sinthan_top_kashmir.jpg" }
     ],
     inclusions: [
       "1 Night Heated Dal Lake Cedar Houseboat + 4 Nights 4-Star Heated Resort",
@@ -2338,7 +2437,7 @@ const STATIC_PACKAGE_REGISTRY: Record<string, any> = {
     price: 34000,
     rating: 4.9,
     reviews: 215,
-    image: "https://images.unsplash.com/photo-1595815771614-ade9d652a65d?q=80&w=800",
+    image: "/kashmir/doodhpathri_kashmir.jpg",
     destinations: ["Srinagar", "Gulmarg", "Pahalgam", "Doodhpathri"],
     highlights: [
       "Complete Family Vacation Circuit with Kids Amusement",
@@ -2391,7 +2490,16 @@ const STATIC_PACKAGE_REGISTRY: Record<string, any> = {
         activities: ["Polo View Shopping", "Airport Drop-off"]
       }
     ],
-    images: ["https://images.unsplash.com/photo-1595815771614-ade9d652a65d?q=80&w=800"],
+    images: [
+      "/kashmir/doodhpathri_kashmir.jpg",
+      "/kashmir/baisaran_valley_pahalgam.jpg",
+      "/kashmir/gulmarg_gondola.jpg",
+      "/kashmir/dal_lake_shikara.jpg"
+    ],
+    attractions: [
+      { name: "Doodhpathri 'Valley of Milk'", description: "Emerald alpine meadow bowl and trout streams.", image: "/kashmir/doodhpathri_kashmir.jpg" },
+      { name: "Baisaran Mini Switzerland", description: "Pony rides, zorbing and pine forest panoramas.", image: "/kashmir/baisaran_valley_pahalgam.jpg" }
+    ],
     inclusions: [
       "6 Nights Accommodation (1 Houseboat + 5 4-Star Hotels)",
       "Doodhpathri Day Trip Included",
@@ -2409,7 +2517,13 @@ const STATIC_PACKAGE_REGISTRY: Record<string, any> = {
     price: 46500,
     rating: 5.0,
     reviews: 145,
-    image: "https://images.unsplash.com/photo-1626621341517-bbf3d9990a23?q=80&w=800",
+    image: "/kashmir/sinthan_top_kashmir.jpg",
+    images: [
+      "/kashmir/sinthan_top_kashmir.jpg",
+      "/kashmir/gulmarg_gondola.jpg",
+      "/kashmir/pahalgam_betaab_valley.jpg",
+      "/kashmir/dal_lake_shikara.jpg"
+    ],
     destinations: ["Srinagar", "Razdan Pass", "Gurez Valley", "Dawar", "Gulmarg", "Pahalgam"],
     highlights: [
       "Offbeat Border Circuit to Remote Gurez Valley",
@@ -2468,7 +2582,10 @@ const STATIC_PACKAGE_REGISTRY: Record<string, any> = {
         activities: ["Breakfast", "Airport Drop-off"]
       }
     ],
-    images: ["https://images.unsplash.com/photo-1626621341517-bbf3d9990a23?q=80&w=800"],
+    attractions: [
+      { name: "Sinthan Top & High Passes", description: "3,800m altitude drive offering 360-degree snow peaks.", image: "/kashmir/sinthan_top_kashmir.jpg" },
+      { name: "Gulmarg Gondola", description: "Phase 1 & 2 Gondola ascending to 13,780 ft.", image: "/kashmir/gulmarg_gondola.jpg" }
+    ],
     inclusions: [
       "7 Nights Accommodation (1 Houseboat + 2 Gurez Log Cabins + 4 Hotels)",
       "Gurez Valley & Razdan Pass Permits Included",
@@ -2486,7 +2603,13 @@ const STATIC_PACKAGE_REGISTRY: Record<string, any> = {
     price: 75000,
     rating: 5.0,
     reviews: 110,
-    image: "https://images.unsplash.com/photo-1598091383021-15ddea10925d?q=80&w=800",
+    image: "/kashmir/gulmarg_gondola.jpg",
+    images: [
+      "/kashmir/gulmarg_gondola.jpg",
+      "/kashmir/dal_lake_shikara.jpg",
+      "/kashmir/srinagar_mughal_gardens.jpg",
+      "/kashmir/pahalgam_betaab_valley.jpg"
+    ],
     destinations: ["The Khyber Gulmarg", "Royal Cedar Houseboat", "Pahalgam Villa"],
     highlights: [
       "5-Star Stay at The Khyber Himalayan Resort & Spa Gulmarg",
@@ -2532,7 +2655,10 @@ const STATIC_PACKAGE_REGISTRY: Record<string, any> = {
         activities: ["Gourmet Breakfast", "VVIP Airport Drop-off"]
       }
     ],
-    images: ["https://images.unsplash.com/photo-1598091383021-15ddea10925d?q=80&w=800"],
+    attractions: [
+      { name: "Gulmarg Gondola & The Khyber", description: "VIP fast-track cable car entry and 5-star mountain resort.", image: "/kashmir/gulmarg_gondola.jpg" },
+      { name: "Dal Lake Royal Cedar Houseboat", description: "Hand-carved cedar floating suite with butler service.", image: "/kashmir/dal_lake_shikara.jpg" }
+    ],
     inclusions: [
       "5 Nights Luxury 5-Star Stay (The Khyber Gulmarg + Royal Cedar Houseboat)",
       "7-Course Authentic Kashmiri Wazwan Dinner Included",
@@ -2620,7 +2746,17 @@ const STATIC_PACKAGE_REGISTRY: Record<string, any> = {
     price: 22800,
     rating: 4.9,
     reviews: 295,
-    image: "https://images.unsplash.com/photo-1602216056096-3b40cc0c9944?q=80&w=800",
+    image: "/kerala/alleppey_backwaters_houseboat.jpg",
+    images: [
+      "/kerala/alleppey_backwaters_houseboat.jpg",
+      "/kerala/munnar_tea_estates.jpg",
+      "/kerala/eravikulam_nilgiri_tahr.jpg",
+      "/kerala/thekkady_periyar_sanctuary.jpg",
+      "/kerala/fort_kochi_chinese_nets.jpg",
+      "/kerala/kovalam_lighthouse_beach.jpg",
+      "/kerala/jatayu_earth_center.jpg",
+      "/kerala/vagamon_pine_forest.jpg"
+    ],
     destinations: ["Cochin", "Munnar", "Thekkady", "Alleppey Houseboat", "Kovalam"],
     highlights: [
       "1 Night Private Air-Conditioned Alleppey Backwater Houseboat Cruise",
@@ -2666,6 +2802,16 @@ const STATIC_PACKAGE_REGISTRY: Record<string, any> = {
         description: "Enjoy breakfast while cruising morning backwaters. Disembark at Alleppey jetty and private transfer to Cochin Airport for your return flight.",
         activities: ["Morning Houseboat Breakfast", "Backwater Disembarkation", "Airport Departure Transfer"]
       }
+    ],
+    attractions: [
+      { name: "Alleppey Backwaters & Luxury Houseboat", description: "Private luxury Kettuvallam cruising through palm-fringed emerald canals.", image: "/kerala/alleppey_backwaters_houseboat.jpg" },
+      { name: "Munnar Rolling Tea Estates", description: "Endless emerald tea carpets, mist trails and tea factory tastings.", image: "/kerala/munnar_tea_estates.jpg" },
+      { name: "Eravikulam National Park (Nilgiri Tahr)", description: "High altitude sanctuary home to the endangered mountain goat.", image: "/kerala/eravikulam_nilgiri_tahr.jpg" },
+      { name: "Thekkady Periyar Wildlife Sanctuary", description: "Lake boat safari watching wild elephant herds and spice plantations.", image: "/kerala/thekkady_periyar_sanctuary.jpg" },
+      { name: "Fort Kochi & Chinese Fishing Nets", description: "Iconic cantilevered shore nets and colonial spice port heritage.", image: "/kerala/fort_kochi_chinese_nets.jpg" },
+      { name: "Kovalam Lighthouse Cliff Beach", description: "Crescent golden beach with panoramic 35m striped beacon cliff views.", image: "/kerala/kovalam_lighthouse_beach.jpg" },
+      { name: "Jatayu Earth's Center", description: "World's largest bird sculpture, Swiss cable car and adventure park.", image: "/kerala/jatayu_earth_center.jpg" },
+      { name: "Vagamon Pine Forest & Glass Bridge", description: "Whispering pine woods, paragliding and India's longest glass skywalk.", image: "/kerala/vagamon_pine_forest.jpg" }
     ],
     inclusions: [
       "1 Night Private AC Houseboat Stay in Alleppey with All Meals (Lunch, Tea, Dinner, Breakfast)",
@@ -2806,7 +2952,15 @@ const STATIC_PACKAGE_REGISTRY: Record<string, any> = {
     price: 58000,
     rating: 4.9,
     reviews: 185,
-    image: "https://images.unsplash.com/photo-1565008447742-97f6f38c985c?q=80&w=800",
+    image: "/georgia/kazbegi_gergeti_church.jpg",
+    images: [
+      "/georgia/kazbegi_gergeti_church.jpg",
+      "/georgia/gudauri_ananuri_fortress.jpg",
+      "/georgia/tbilisi_old_town_narikala.jpg",
+      "/georgia/sighnaghi_kakheti_wine.jpg",
+      "/georgia/martvili_canyon_okatse.jpg",
+      "/georgia/uplistsikhe_cave_city.jpg"
+    ],
     destinations: ["Tbilisi", "Kazbegi", "Gudauri", "Mtskheta", "Signagi", "Kakheti"],
     highlights: [
       "Kazbegi Gergeti Trinity Church 4x4 Drive under Mount Kazbek (5,047m)",
@@ -2852,6 +3006,14 @@ const STATIC_PACKAGE_REGISTRY: Record<string, any> = {
         description: "Enjoy Georgian coffee and Churchkhela sweet procurement before chauffeured transfer to Tbilisi Airport.",
         activities: ["Hotel Breakfast", "Churchkhela Procurement", "TBS Airport Drop-off"]
       }
+    ],
+    attractions: [
+      { name: "Kazbegi Gergeti Trinity Church (2,170m)", description: "14th-century church on mountain ridge under Mount Kazbek 5,047m peak.", image: "/georgia/kazbegi_gergeti_church.jpg" },
+      { name: "Gudauri Resort & Ananuri Fortress", description: "Caucasus mountain ski resort and 16th-century lakeside fortress.", image: "/georgia/gudauri_ananuri_fortress.jpg" },
+      { name: "Tbilisi Old Town & Narikala Cable Car", description: "Pastel wooden balconies, sulfur baths & Narikala fortress views.", image: "/georgia/tbilisi_old_town_narikala.jpg" },
+      { name: "Sighnaghi & Kakheti Wine Valley", description: "Walled 'City of Love' overlooking Alazani valley with UNESCO Qvevri wine tasting.", image: "/georgia/sighnaghi_kakheti_wine.jpg" },
+      { name: "Martvili Canyon & Okatse Skywalk", description: "Turquoise canyon river rafting and cliffside hanging walkways.", image: "/georgia/martvili_canyon_okatse.jpg" },
+      { name: "Uplistsikhe Cave City & Mtskheta", description: "3,000-year-old rock-cut fortress city along ancient Silk Road.", image: "/georgia/uplistsikhe_cave_city.jpg" }
     ],
     inclusions: [
       "5 Nights Accommodation in 4-Star Boutique Hotels with Daily Breakfast",
@@ -3432,10 +3594,16 @@ const DynamicPackageDetail: React.FC<DynamicPackageDetailProps> = ({ slug: propS
             setPkg(STATIC_PACKAGE_REGISTRY['do-dham-yatra']);
           } else if (normSlug.includes('kedarnath')) {
             setPkg(STATIC_PACKAGE_REGISTRY['kedarnath-yatra']);
-          } else if (normSlug.includes('rann')) {
-            setPkg(STATIC_PACKAGE_REGISTRY['rann-utsav-3d2n'] || STATIC_PACKAGE_REGISTRY['rann-utsav-4d3n']);
+          } else if (normSlug.includes('georgia')) {
+            setPkg(STATIC_PACKAGE_REGISTRY['georgia-adventure'] || STATIC_PACKAGE_REGISTRY['georgia-6d-5n']);
+          } else if (normSlug.includes('kashmir')) {
+            setPkg(STATIC_PACKAGE_REGISTRY['classic-kashmir-5n6d'] || STATIC_PACKAGE_REGISTRY['grand-kashmir-7n8d']);
           } else if (normSlug.includes('kerala')) {
             setPkg(STATIC_PACKAGE_REGISTRY['kerala-backwaters']);
+          } else if (normSlug.includes('singapore')) {
+            setPkg(STATIC_PACKAGE_REGISTRY['singapore-5d-4n'] || STATIC_PACKAGE_REGISTRY['singapore-4d-3n']);
+          } else if (normSlug.includes('rann') || normSlug.includes('kutch')) {
+            setPkg(STATIC_PACKAGE_REGISTRY['rann-utsav-3d2n'] || STATIC_PACKAGE_REGISTRY['rann-utsav-4d3n']);
           } else if (fallbackData) {
             setPkg(fallbackData);
             if (fallbackData.variants && fallbackData.variants.length > 0) {
@@ -3522,7 +3690,7 @@ const DynamicPackageDetail: React.FC<DynamicPackageDetailProps> = ({ slug: propS
     price: formattedPrice,
     rating: Number(effectivePkg.rating) || 5.0,
     reviews: effectivePkg.reviews || 0,
-    image: effectivePkg.image || 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?q=80',
+    image: effectivePkg.image || '',
     destinations: effectivePkg.destinations || [],
     highlights: effectivePkg.highlights || [],
     itinerary: effectivePkg.itinerary || [],
@@ -3530,21 +3698,93 @@ const DynamicPackageDetail: React.FC<DynamicPackageDetailProps> = ({ slug: propS
     exclusions: effectivePkg.exclusions || []
   };
 
-  const defaultGalleryImages = [
-    "/rann_utsav_white_desert.jpg",
-    "/rann_utsav_tent_city.jpg",
-    "/rann_utsav_kalo_dungar.jpg",
-    "/rann_utsav_road_to_heaven.jpg",
-    "/Rann-Utsav-Gujarat.png"
-  ];
+  const getDestinationGalleryImages = (pkg: any, primaryImg: string) => {
+    // If package has explicit multiple images, use them
+    if (pkg.images && Array.isArray(pkg.images) && pkg.images.length > 1) {
+      return pkg.images;
+    }
 
-  const rawImages = (effectivePkg.images && effectivePkg.images.length > 0) 
-    ? effectivePkg.images 
-    : (packageDetails.image ? [packageDetails.image] : defaultGalleryImages);
+    const destStr = ((pkg.destinations || []).join(' ') + ' ' + (pkg.name || pkg.title || '') + ' ' + (pkg.slug || '')).toLowerCase();
 
-  const imagesSlider = rawImages.length > 1 
-    ? rawImages 
-    : Array.from(new Set([packageDetails.image, ...defaultGalleryImages])).filter(Boolean);
+    let destGallery: string[] = [];
+
+    if (destStr.includes('georgia') || destStr.includes('tbilisi') || destStr.includes('kazbegi') || destStr.includes('gudauri')) {
+      destGallery = [
+        "/georgia/kazbegi_gergeti_church.jpg",
+        "/georgia/gudauri_ananuri_fortress.jpg",
+        "/georgia/tbilisi_old_town_narikala.jpg",
+        "/georgia/sighnaghi_kakheti_wine.jpg",
+        "/georgia/martvili_canyon_okatse.jpg",
+        "/georgia/uplistsikhe_cave_city.jpg"
+      ];
+    } else if (destStr.includes('kashmir') || destStr.includes('srinagar') || destStr.includes('gulmarg') || destStr.includes('pahalgam') || destStr.includes('sonamarg')) {
+      destGallery = [
+        "/kashmir/gulmarg_gondola.jpg",
+        "/kashmir/dal_lake_shikara.jpg",
+        "/kashmir/pahalgam_betaab_valley.jpg",
+        "/kashmir/sonamarg_thajiwas_glacier.jpg",
+        "/kashmir/srinagar_mughal_gardens.jpg",
+        "/kashmir/doodhpathri_kashmir.jpg",
+        "/kashmir/baisaran_valley_pahalgam.jpg",
+        "/kashmir/sinthan_top_kashmir.jpg"
+      ];
+    } else if (destStr.includes('kerala') || destStr.includes('munnar') || destStr.includes('alleppey') || destStr.includes('thekkady') || destStr.includes('kovalam') || destStr.includes('kochi')) {
+      destGallery = [
+        "/kerala/alleppey_backwaters_houseboat.jpg",
+        "/kerala/munnar_tea_estates.jpg",
+        "/kerala/eravikulam_nilgiri_tahr.jpg",
+        "/kerala/thekkady_periyar_sanctuary.jpg",
+        "/kerala/fort_kochi_chinese_nets.jpg",
+        "/kerala/kovalam_lighthouse_beach.jpg",
+        "/kerala/jatayu_earth_center.jpg",
+        "/kerala/vagamon_pine_forest.jpg"
+      ];
+    } else if (destStr.includes('singapore') || destStr.includes('sentosa') || destStr.includes('marina bay')) {
+      destGallery = [
+        "/singapore/gardens_by_the_bay.jpg",
+        "/singapore/universal_studios.jpg",
+        "/singapore/singapore_flyer.jpg",
+        "/singapore/jewel_changi.jpg",
+        "/singapore/marina_bay_sands.jpg",
+        "/singapore/merlion_park.jpg",
+        "/singapore/cable_car_sentosa.jpg",
+        "/singapore/wings_of_time_sentosa.jpg",
+        "/singapore/haji_lane_heritage.jpg",
+        "/singapore/mandai_river_wonders.jpg"
+      ];
+    } else if (destStr.includes('dham') || destStr.includes('kedarnath') || destStr.includes('badrinath') || destStr.includes('yamunotri') || destStr.includes('gangotri')) {
+      destGallery = [
+        "/Kedarnath.png",
+        "/Badrinath.png",
+        "/Gangotri.png",
+        "/Yamunotri.png"
+      ];
+    } else if (destStr.includes('rann') || destStr.includes('kutch') || destStr.includes('dhordo') || destStr.includes('utsav')) {
+      destGallery = [
+        "/rann_utsav_white_desert.jpg",
+        "/rann_utsav_tent_city.jpg",
+        "/rann_utsav_kalo_dungar.jpg",
+        "/rann_utsav_road_to_heaven.jpg",
+        "/Rann-Utsav-Gujarat.png"
+      ];
+    } else if (destStr.includes('europe') || destStr.includes('paris') || destStr.includes('swiss')) {
+      destGallery = [
+        "/Europe Image New.png",
+        "/Europe Image Neww.png",
+        "/Europe Image.png"
+      ];
+    }
+
+    if (destGallery.length > 0) {
+      return primaryImg ? Array.from(new Set([primaryImg, ...destGallery])).filter(Boolean) : destGallery;
+    }
+
+    const attractionImgs = (pkg.attractions || []).map((a: any) => typeof a === 'object' ? a.image : '').filter(Boolean);
+    const combined = Array.from(new Set([primaryImg, ...attractionImgs, ...(pkg.images || [])])).filter(Boolean);
+    return combined.length > 0 ? combined : [primaryImg || '/Europe Image New.png'];
+  };
+
+  const imagesSlider = getDestinationGalleryImages(effectivePkg, packageDetails.image);
   const packageType = effectivePkg.package_type || effectivePkg.packageType || 'domestic';
   const bestTime = effectivePkg.best_time || effectivePkg.bestTime || 'October to March';
   const groupSize = effectivePkg.group_size || effectivePkg.groupSize || 'Custom Group';
