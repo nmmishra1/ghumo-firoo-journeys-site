@@ -188,59 +188,59 @@ const BookingForm: React.FC<BookingFormProps> = ({ packageData, onSubmit }) => {
   return (
     <form onSubmit={handleSubmit} className="space-y-8">
       {/* Personal Information */}
-      <Card className="glass-card shadow-glass-lg">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-gradient-sunset">
-            <Users className="w-5 h-5" />
+      <Card className="bg-white/95 backdrop-blur-md border border-slate-200/90 shadow-md rounded-2xl overflow-hidden">
+        <CardHeader className="bg-slate-50/70 border-b border-slate-100 py-4">
+          <CardTitle className="flex items-center gap-2 text-xl font-serif font-bold text-slate-900">
+            <Users className="w-5 h-5 text-indigo-600" />
             Personal Information
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-4 pt-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <Label htmlFor="firstName">First Name *</Label>
+              <Label htmlFor="firstName" className="text-xs font-bold text-slate-800 mb-1.5 block">First Name *</Label>
               <Input autoComplete="name"
                 id="firstName"
                 value={formData.firstName}
                 onChange={(e) => handleInputChange('firstName', e.target.value)}
-                className={errors.firstName ? 'border-red-500' : ''}
+                className={`bg-white text-slate-900 border-slate-300 placeholder:text-slate-400 focus:border-indigo-600 focus:ring-indigo-600 font-medium ${errors.firstName ? 'border-red-500' : ''}`}
                 placeholder="Enter your first name"
               />
-              {errors.firstName && <p className="text-red-500 text-sm mt-1">{errors.firstName}</p>}
+              {errors.firstName && <p className="text-red-500 text-xs mt-1 font-medium">{errors.firstName}</p>}
             </div>
             <div>
-              <Label htmlFor="lastName">Last Name *</Label>
+              <Label htmlFor="lastName" className="text-xs font-bold text-slate-800 mb-1.5 block">Last Name *</Label>
               <Input autoComplete="name"
                 id="lastName"
                 value={formData.lastName}
                 onChange={(e) => handleInputChange('lastName', e.target.value)}
-                className={errors.lastName ? 'border-red-500' : ''}
+                className={`bg-white text-slate-900 border-slate-300 placeholder:text-slate-400 focus:border-indigo-600 focus:ring-indigo-600 font-medium ${errors.lastName ? 'border-red-500' : ''}`}
                 placeholder="Enter your last name"
               />
-              {errors.lastName && <p className="text-red-500 text-sm mt-1">{errors.lastName}</p>}
+              {errors.lastName && <p className="text-red-500 text-xs mt-1 font-medium">{errors.lastName}</p>}
             </div>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <Label htmlFor="email">Email Address *</Label>
+              <Label htmlFor="email" className="text-xs font-bold text-slate-800 mb-1.5 block">Email Address *</Label>
               <div className="relative">
-                <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4" />
                 <Input autoComplete="email"
                   id="email"
                   type="email"
                   value={formData.email}
                   onChange={(e) => handleInputChange('email', e.target.value)}
-                  className={`pl-10 ${errors.email ? 'border-red-500' : ''}`}
+                  className={`pl-10 bg-white text-slate-900 border-slate-300 placeholder:text-slate-400 focus:border-indigo-600 focus:ring-indigo-600 font-medium ${errors.email ? 'border-red-500' : ''}`}
                   placeholder="Enter your email address"
                 />
               </div>
-              {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email}</p>}
+              {errors.email && <p className="text-red-500 text-xs mt-1 font-medium">{errors.email}</p>}
             </div>
             <div>
-              <Label htmlFor="phone">Phone Number *</Label>
+              <Label htmlFor="phone" className="text-xs font-bold text-slate-800 mb-1.5 block">Phone Number *</Label>
               <div className="relative">
-                <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4" />
                 <Input autoComplete="tel"
                   id="phone"
                   type="tel"
@@ -248,112 +248,112 @@ const BookingForm: React.FC<BookingFormProps> = ({ packageData, onSubmit }) => {
                   maxLength={10}
                   value={formData.phone}
                   onChange={(e) => handleInputChange('phone', sanitizePhone(e.target.value))}
-                  className={`pl-10 ${errors.phone ? 'border-red-500' : ''}`}
+                  className={`pl-10 bg-white text-slate-900 border-slate-300 placeholder:text-slate-400 focus:border-indigo-600 focus:ring-indigo-600 font-medium ${errors.phone ? 'border-red-500' : ''}`}
                   placeholder="10-digit mobile (e.g. 9876543210)"
                 />
               </div>
-              {errors.phone && <p className="text-red-500 text-sm mt-1">{errors.phone}</p>}
+              {errors.phone && <p className="text-red-500 text-xs mt-1 font-medium">{errors.phone}</p>}
             </div>
           </div>
           
           <div>
-            <Label htmlFor="address">Address *</Label>
+            <Label htmlFor="address" className="text-xs font-bold text-slate-800 mb-1.5 block">Address *</Label>
             <div className="relative">
-              <MapPin className="absolute left-3 top-3 text-gray-400 w-4 h-4" />
+              <MapPin className="absolute left-3 top-3 text-slate-400 w-4 h-4" />
               <Textarea autoComplete="street-address"
                 id="address"
                 value={formData.address}
                 onChange={(e) => handleInputChange('address', e.target.value)}
-                className={`pl-10 ${errors.address ? 'border-red-500' : ''}`}
+                className={`pl-10 bg-white text-slate-900 border-slate-300 placeholder:text-slate-400 focus:border-indigo-600 focus:ring-indigo-600 font-medium ${errors.address ? 'border-red-500' : ''}`}
                 placeholder="Enter your complete address"
                 rows={3}
               />
             </div>
-            {errors.address && <p className="text-red-500 text-sm mt-1">{errors.address}</p>}
+            {errors.address && <p className="text-red-500 text-xs mt-1 font-medium">{errors.address}</p>}
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
-              <Label htmlFor="city">City *</Label>
+              <Label htmlFor="city" className="text-xs font-bold text-slate-800 mb-1.5 block">City *</Label>
               <Input
                 id="city"
                 value={formData.city}
                 onChange={(e) => handleInputChange('city', e.target.value)}
-                className={errors.city ? 'border-red-500' : ''}
+                className={`bg-white text-slate-900 border-slate-300 placeholder:text-slate-400 focus:border-indigo-600 focus:ring-indigo-600 font-medium ${errors.city ? 'border-red-500' : ''}`}
                 placeholder="Enter your city"
               />
-              {errors.city && <p className="text-red-500 text-sm mt-1">{errors.city}</p>}
+              {errors.city && <p className="text-red-500 text-xs mt-1 font-medium">{errors.city}</p>}
             </div>
             <div>
-              <Label htmlFor="state">State *</Label>
+              <Label htmlFor="state" className="text-xs font-bold text-slate-800 mb-1.5 block">State *</Label>
               <Input
                 id="state"
                 value={formData.state}
                 onChange={(e) => handleInputChange('state', e.target.value)}
-                className={errors.state ? 'border-red-500' : ''}
+                className={`bg-white text-slate-900 border-slate-300 placeholder:text-slate-400 focus:border-indigo-600 focus:ring-indigo-600 font-medium ${errors.state ? 'border-red-500' : ''}`}
                 placeholder="Enter your state"
               />
-              {errors.state && <p className="text-red-500 text-sm mt-1">{errors.state}</p>}
+              {errors.state && <p className="text-red-500 text-xs mt-1 font-medium">{errors.state}</p>}
             </div>
             <div>
-              <Label htmlFor="pincode">Pincode *</Label>
+              <Label htmlFor="pincode" className="text-xs font-bold text-slate-800 mb-1.5 block">Pincode *</Label>
               <Input
                 id="pincode"
                 value={formData.pincode}
                 onChange={(e) => handleInputChange('pincode', e.target.value)}
-                className={errors.pincode ? 'border-red-500' : ''}
+                className={`bg-white text-slate-900 border-slate-300 placeholder:text-slate-400 focus:border-indigo-600 focus:ring-indigo-600 font-medium ${errors.pincode ? 'border-red-500' : ''}`}
                 placeholder="Enter your pincode"
               />
-              {errors.pincode && <p className="text-red-500 text-sm mt-1">{errors.pincode}</p>}
+              {errors.pincode && <p className="text-red-500 text-xs mt-1 font-medium">{errors.pincode}</p>}
             </div>
           </div>
         </CardContent>
       </Card>
 
       {/* Travel Details */}
-      <Card className="glass-card shadow-glass-lg">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-gradient-sunset">
-            <Calendar className="w-5 h-5" />
+      <Card className="bg-white/95 backdrop-blur-md border border-slate-200/90 shadow-md rounded-2xl overflow-hidden">
+        <CardHeader className="bg-slate-50/70 border-b border-slate-100 py-4">
+          <CardTitle className="flex items-center gap-2 text-xl font-serif font-bold text-slate-900">
+            <Calendar className="w-5 h-5 text-indigo-600" />
             Travel Details
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-4 pt-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <Label htmlFor="travelDate">Travel Date *</Label>
+              <Label htmlFor="travelDate" className="text-xs font-bold text-slate-800 mb-1.5 block">Travel Date *</Label>
               <Input
                 id="travelDate"
                 type="date"
                 value={formData.travelDate}
                 onChange={(e) => handleInputChange('travelDate', e.target.value)}
-                className={errors.travelDate ? 'border-red-500' : ''}
+                className={`bg-white text-slate-900 border-slate-300 focus:border-indigo-600 focus:ring-indigo-600 font-medium ${errors.travelDate ? 'border-red-500' : ''}`}
                 min={new Date().toISOString().split('T')[0]}
               />
-              {errors.travelDate && <p className="text-red-500 text-sm mt-1">{errors.travelDate}</p>}
+              {errors.travelDate && <p className="text-red-500 text-xs mt-1 font-medium">{errors.travelDate}</p>}
             </div>
             <div>
-              <Label htmlFor="returnDate">Return Date *</Label>
+              <Label htmlFor="returnDate" className="text-xs font-bold text-slate-800 mb-1.5 block">Return Date *</Label>
               <Input
                 id="returnDate"
                 type="date"
                 value={formData.returnDate}
                 onChange={(e) => handleInputChange('returnDate', e.target.value)}
-                className={errors.returnDate ? 'border-red-500' : ''}
+                className={`bg-white text-slate-900 border-slate-300 focus:border-indigo-600 focus:ring-indigo-600 font-medium ${errors.returnDate ? 'border-red-500' : ''}`}
                 min={formData.travelDate || new Date().toISOString().split('T')[0]}
               />
-              {errors.returnDate && <p className="text-red-500 text-sm mt-1">{errors.returnDate}</p>}
+              {errors.returnDate && <p className="text-red-500 text-xs mt-1 font-medium">{errors.returnDate}</p>}
             </div>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <Label htmlFor="numberOfTravelers">Number of Travelers</Label>
+              <Label htmlFor="numberOfTravelers" className="text-xs font-bold text-slate-800 mb-1.5 block">Number of Travelers</Label>
               <Select value={formData.numberOfTravelers.toString()} onValueChange={(value) => handleInputChange('numberOfTravelers', parseInt(value))}>
-                <SelectTrigger id="numberOfTravelers">
+                <SelectTrigger id="numberOfTravelers" className="bg-white text-slate-900 border-slate-300 font-medium">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="bg-white text-slate-900 border-slate-200">
                   {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(num => (
                     <SelectItem key={num} value={num.toString()}>
                       {num} {num === 1 ? 'Person' : 'People'}
@@ -363,12 +363,12 @@ const BookingForm: React.FC<BookingFormProps> = ({ packageData, onSubmit }) => {
               </Select>
             </div>
             <div>
-              <Label htmlFor="roomType">Accommodation Category / Room Type</Label>
+              <Label htmlFor="roomType" className="text-xs font-bold text-slate-800 mb-1.5 block">Accommodation Category / Room Type</Label>
               <Select value={formData.roomType} onValueChange={(value) => handleInputChange('roomType', value)}>
-                <SelectTrigger id="roomType">
+                <SelectTrigger id="roomType" className="bg-white text-slate-900 border-slate-300 font-medium">
                   <SelectValue placeholder="Select Category" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="bg-white text-slate-900 border-slate-200">
                   {Array.from(new Set([
                     ...((packageData as any)?.selectedCategory ? [(packageData as any).selectedCategory] : []),
                     "Premium AC Tent",
@@ -392,11 +392,12 @@ const BookingForm: React.FC<BookingFormProps> = ({ packageData, onSubmit }) => {
           </div>
           
           <div>
-            <Label htmlFor="specialRequests">Special Requests</Label>
+            <Label htmlFor="specialRequests" className="text-xs font-bold text-slate-800 mb-1.5 block">Special Requests</Label>
             <Textarea
               id="specialRequests"
               value={formData.specialRequests}
               onChange={(e) => handleInputChange('specialRequests', e.target.value)}
+              className="bg-white text-slate-900 border-slate-300 placeholder:text-slate-400 focus:border-indigo-600 focus:ring-indigo-600 font-medium"
               placeholder="Any special requirements, dietary restrictions, or requests..."
               rows={3}
             />
@@ -405,28 +406,28 @@ const BookingForm: React.FC<BookingFormProps> = ({ packageData, onSubmit }) => {
       </Card>
 
       {/* Emergency Contact */}
-      <Card className="glass-card shadow-glass-lg">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-gradient-sunset">
-            <Phone className="w-5 h-5" />
+      <Card className="bg-white/95 backdrop-blur-md border border-slate-200/90 shadow-md rounded-2xl overflow-hidden">
+        <CardHeader className="bg-slate-50/70 border-b border-slate-100 py-4">
+          <CardTitle className="flex items-center gap-2 text-xl font-serif font-bold text-slate-900">
+            <Phone className="w-5 h-5 text-indigo-600" />
             Emergency Contact
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-4 pt-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <Label htmlFor="emergencyContactName">Contact Name *</Label>
+              <Label htmlFor="emergencyContactName" className="text-xs font-bold text-slate-800 mb-1.5 block">Contact Name *</Label>
               <Input autoComplete="name"
                 id="emergencyContactName"
                 value={formData.emergencyContactName}
                 onChange={(e) => handleInputChange('emergencyContactName', e.target.value)}
-                className={errors.emergencyContactName ? 'border-red-500' : ''}
+                className={`bg-white text-slate-900 border-slate-300 placeholder:text-slate-400 focus:border-indigo-600 focus:ring-indigo-600 font-medium ${errors.emergencyContactName ? 'border-red-500' : ''}`}
                 placeholder="Emergency contact name"
               />
-              {errors.emergencyContactName && <p className="text-red-500 text-sm mt-1">{errors.emergencyContactName}</p>}
+              {errors.emergencyContactName && <p className="text-red-500 text-xs mt-1 font-medium">{errors.emergencyContactName}</p>}
             </div>
             <div>
-              <Label htmlFor="emergencyContactPhone">Contact Phone *</Label>
+              <Label htmlFor="emergencyContactPhone" className="text-xs font-bold text-slate-800 mb-1.5 block">Contact Phone *</Label>
               <Input autoComplete="tel"
                 id="emergencyContactPhone"
                 type="tel"
@@ -434,22 +435,22 @@ const BookingForm: React.FC<BookingFormProps> = ({ packageData, onSubmit }) => {
                 maxLength={10}
                 value={formData.emergencyContactPhone}
                 onChange={(e) => handleInputChange('emergencyContactPhone', sanitizePhone(e.target.value))}
-                className={errors.emergencyContactPhone ? 'border-red-500' : ''}
+                className={`bg-white text-slate-900 border-slate-300 placeholder:text-slate-400 focus:border-indigo-600 focus:ring-indigo-600 font-medium ${errors.emergencyContactPhone ? 'border-red-500' : ''}`}
                 placeholder="10-digit emergency phone"
               />
-              {errors.emergencyContactPhone && <p className="text-red-500 text-sm mt-1">{errors.emergencyContactPhone}</p>}
+              {errors.emergencyContactPhone && <p className="text-red-500 text-xs mt-1 font-medium">{errors.emergencyContactPhone}</p>}
             </div>
           </div>
           <div>
-            <Label htmlFor="emergencyContactRelation">Relationship *</Label>
+            <Label htmlFor="emergencyContactRelation" className="text-xs font-bold text-slate-800 mb-1.5 block">Relationship *</Label>
             <Input
               id="emergencyContactRelation"
               value={formData.emergencyContactRelation}
               onChange={(e) => handleInputChange('emergencyContactRelation', e.target.value)}
-              className={errors.emergencyContactRelation ? 'border-red-500' : ''}
+              className={`bg-white text-slate-900 border-slate-300 placeholder:text-slate-400 focus:border-indigo-600 focus:ring-indigo-600 font-medium ${errors.emergencyContactRelation ? 'border-red-500' : ''}`}
               placeholder="Relationship (e.g., Spouse, Parent, Sibling)"
             />
-            {errors.emergencyContactRelation && <p className="text-red-500 text-sm mt-1">{errors.emergencyContactRelation}</p>}
+            {errors.emergencyContactRelation && <p className="text-red-500 text-xs mt-1 font-medium">{errors.emergencyContactRelation}</p>}
           </div>
         </CardContent>
       </Card>
