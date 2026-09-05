@@ -344,8 +344,8 @@ function App() {
                   <Route path="/packages/kashmir-gurez-offbeat" element={<DynamicPackageDetail slug="kashmir-gurez-offbeat" fallback={<KashmirParadise />} />} />
                   <Route path="/packages/kashmir" element={<DynamicPackageDetail slug="classic-kashmir-5n6d" fallback={<KashmirParadise />} />} />
                   <Route path="/packages/kashmir-ultra-luxury" element={<DynamicPackageDetail slug="kashmir-ultra-luxury" fallback={<KashmirParadise />} />} />
-                  <Route path="/packages/kerala" element={<DynamicPackageDetail slug="kerala-backwaters" fallback={<KeralaBackwaters />} />} />
-                  <Route path="/packages/kerala-backwaters" element={<KeralaBackwaters />} />
+                  <Route path="/packages/kerala" element={<DynamicPackageDetail slug="kerala-6d5n-hills-backwaters-kovalam" fallback={<KeralaBackwaters />} />} />
+                  <Route path="/packages/kerala-backwaters" element={<DynamicPackageDetail slug="kerala-6d5n-hills-backwaters-kovalam" fallback={<KeralaBackwaters />} />} />
                   <Route path="/packages/goa" element={<GoaBeachHoliday />} />
                   <Route path="/packages/goa-beach-holiday" element={<GoaBeachHoliday />} />
                   <Route path="/packages/himachal" element={<HimachalHillStations />} />

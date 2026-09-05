@@ -190,20 +190,62 @@ const Packages: React.FC = () => {
       link: '/packages/leh-ladakh-tour'
     },
 
-    // KERALA
+    // KERALA CIRCUITS
     {
-      id: 'kerala-houseboat-6d',
-      title: 'Kerala Backwaters Alleppey Houseboat & Munnar (6D/5N)',
-      destination: 'Kerala Backwaters',
+      id: 'kerala-4d3n-munnar-alleppey',
+      title: 'Munnar Tea Hills & Alleppey Houseboat (4D/3N)',
+      destination: 'Kerala Backwaters & Munnar',
       category: 'domestic',
       region: 'Kerala',
       image: '/kerala/alleppey_backwaters_houseboat.jpg',
-      price: '₹22,800',
+      price: '₹16,800',
+      duration: '4 Days / 3 Nights',
+      rating: 4.92,
+      badge: 'Best Value',
+      keywords: ['kerala', 'alleppey', 'houseboat', 'munnar', 'tea gardens', 'cochin'],
+      link: '/packages/kerala-4d3n-munnar-alleppey'
+    },
+    {
+      id: 'kerala-5d4n-tea-wildlife-backwaters',
+      title: 'Kerala Tea, Wildlife & Backwaters Classic (5D/4N)',
+      destination: 'Munnar, Thekkady & Alleppey',
+      category: 'domestic',
+      region: 'Kerala',
+      image: '/kerala/thekkady_periyar_sanctuary.jpg',
+      price: '₹21,500',
+      duration: '5 Days / 4 Nights',
+      rating: 4.95,
+      badge: 'Best Seller',
+      keywords: ['kerala', 'thekkady', 'periyar', 'wildlife', 'alleppey', 'houseboat', 'munnar'],
+      link: '/packages/kerala-5d4n-tea-wildlife-backwaters'
+    },
+    {
+      id: 'kerala-6d5n-hills-backwaters-kovalam',
+      title: 'Grand Kerala Hills, Backwaters & Kovalam Beach (6D/5N)',
+      destination: 'Munnar, Thekkady, Alleppey & Kovalam',
+      category: 'domestic',
+      region: 'Kerala',
+      image: '/kerala/alleppey_backwaters_houseboat.jpg',
+      price: '₹26,500',
       duration: '6 Days / 5 Nights',
-      rating: 4.9,
-      badge: 'Top Rated',
-      keywords: ['kerala', 'alleppey', 'houseboat', 'munnar', 'tea gardens', 'thekkady', 'kochi', 'kovalam', 'wayanad'],
-      link: '/packages/kerala-backwaters'
+      rating: 4.98,
+      badge: 'Flagship Tour',
+      keywords: ['kerala', 'alleppey', 'houseboat', 'munnar', 'tea gardens', 'thekkady', 'kovalam', 'beach'],
+      link: '/packages/kerala-6d5n-hills-backwaters-kovalam'
+    },
+    {
+      id: 'kerala-7d6n-grand-kerala-kanyakumari',
+      title: 'Complete Kerala & Kanyakumari Sunset Tour (7D/6N)',
+      destination: 'Kerala & Kanyakumari Cape',
+      category: 'domestic',
+      region: 'Kerala',
+      image: '/kerala/kovalam_lighthouse_beach.jpg',
+      price: '₹31,500',
+      duration: '7 Days / 6 Nights',
+      rating: 4.97,
+      badge: 'Grand Tour',
+      keywords: ['kerala', 'kanyakumari', 'kovalam', 'alleppey', 'houseboat', 'munnar', 'thekkady'],
+      link: '/packages/kerala-7d6n-grand-kerala-kanyakumari'
     },
 
     // HIMACHAL PRADESH

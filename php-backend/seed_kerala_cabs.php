@@ -254,13 +254,39 @@ try {
         }
     }
 
+    // 5. Seed / Update Kerala Packages in packages table if table exists
+    try {
+        $pdo->exec("DELETE FROM packages WHERE slug = 'kerala-backwaters'");
+    } catch (Exception $ign) {}
+
+    $keralaPackagesToSeed = [
+        ['id' => 'pkg-ker-4d3n', 'name' => 'Munnar Tea Hills & Alleppey Houseboat (4D/3N)', 'slug' => 'kerala-4d3n-munnar-alleppey', 'price' => 16800, 'duration' => '4 Days / 3 Nights', 'destinations' => '["Munnar", "Alleppey", "Cochin"]', 'image' => '/kerala/alleppey_backwaters_houseboat.jpg'],
+        ['id' => 'pkg-ker-5d4n', 'name' => 'Kerala Tea, Wildlife & Backwaters Classic (5D/4N)', 'slug' => 'kerala-5d4n-tea-wildlife-backwaters', 'price' => 21500, 'duration' => '5 Days / 4 Nights', 'destinations' => '["Munnar", "Thekkady", "Alleppey"]', 'image' => '/kerala/thekkady_periyar_sanctuary.jpg'],
+        ['id' => 'pkg-ker-6d5n', 'name' => 'Grand Kerala Hills, Backwaters & Kovalam Beach (6D/5N)', 'slug' => 'kerala-6d5n-hills-backwaters-kovalam', 'price' => 26500, 'duration' => '6 Days / 5 Nights', 'destinations' => '["Munnar", "Thekkady", "Alleppey", "Kovalam"]', 'image' => '/kerala/alleppey_backwaters_houseboat.jpg'],
+        ['id' => 'pkg-ker-7d6n', 'name' => 'Complete Kerala & Kanyakumari Sunset Tour (7D/6N)', 'slug' => 'kerala-7d6n-grand-kerala-kanyakumari', 'price' => 31500, 'duration' => '7 Days / 6 Nights', 'destinations' => '["Munnar", "Thekkady", "Alleppey", "Kovalam", "Kanyakumari"]', 'image' => '/kerala/kovalam_lighthouse_beach.jpg'],
+        ['id' => 'pkg-ker-8d7n', 'name' => 'Signature Kerala Heritage, Backwaters & Cape Comorin (8D/7N)', 'slug' => 'kerala-8d7n-heritage-backwaters-cape', 'price' => 36000, 'duration' => '8 Days / 7 Nights', 'destinations' => '["Cochin", "Munnar", "Thekkady", "Alleppey", "Kovalam", "Kanyakumari"]', 'image' => '/kerala/fort_kochi_chinese_nets.jpg'],
+        ['id' => 'pkg-ker-10d9n', 'name' => 'Grand South India & Kerala Temple Circuit (10D/9N)', 'slug' => 'kerala-10d9n-south-india-temple-circuit', 'price' => 44500, 'duration' => '10 Days / 9 Nights', 'destinations' => '["Munnar", "Thekkady", "Alleppey", "Kovalam", "Kanyakumari", "Rameswaram", "Madurai"]', 'image' => '/kerala/alleppey_backwaters_houseboat.jpg']
+    ];
+
+    try {
+        foreach ($keralaPackagesToSeed as $pkg) {
+            $stmt = $pdo->prepare("SELECT id FROM packages WHERE slug = ?");
+            $stmt->execute([$pkg['slug']]);
+            if (!$stmt->fetch()) {
+                $ins = $pdo->prepare("INSERT INTO packages (id, name, slug, price, duration, destinations, image, is_active) VALUES (?, ?, ?, ?, ?, ?, ?, 1)");
+                $ins->execute([$pkg['id'], $pkg['name'], $pkg['slug'], $pkg['price'], $pkg['duration'], $pkg['destinations'], $pkg['image']]);
+            }
+        }
+    } catch (Exception $ign) {}
+
     echo json_encode([
         'status' => 'success',
-        'message' => 'LEDD Cabs Kerala 2026-2027 Contract & 16 Circuits successfully seeded.',
+        'message' => 'LEDD Cabs Kerala 2026-2027 Contract, 16 Circuits & Package Suite successfully seeded.',
         'supplier_id' => $supplierId,
         'contract_id' => $contractId,
         'total_circuits' => count($circuits),
-        'total_rates_inserted' => $totalRatesInserted
+        'total_rates_inserted' => $totalRatesInserted,
+        'packages_seeded' => count($keralaPackagesToSeed)
     ]);
 } catch (Exception $e) {
     http_response_code(500);
