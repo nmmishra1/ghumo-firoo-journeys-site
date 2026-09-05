@@ -452,6 +452,47 @@ function generateUuid() {
     );
 }
 
+function cleanMojibakeStr($str) {
+    if (!is_string($str)) return $str;
+    $replacements = [
+        'ÔåÆ' => '→',
+        'â†’' => '→',
+        '&rarr;' => '→',
+        '->' => '→',
+        'ÔÇö' => '—',
+        'â€”' => '—',
+        'ÔÇô' => '–',
+        'â€“' => '–',
+        'ÔÇÖ' => '’',
+        'â€™' => '’',
+        'ÔÇÿ' => '‘',
+        'â€˜' => '‘',
+        'ÔÇ£' => '“',
+        'â€œ' => '“',
+        'ÔÇØ' => '”',
+        'â€ ' => '”',
+        'ÔÇª' => '…',
+        'â€¦' => '…',
+        'â€¢' => '•',
+        'â‚¹' => '₹',
+        'Â₹' => '₹',
+        'Â' => ''
+    ];
+    return str_replace(array_keys($replacements), array_values($replacements), $str);
+}
+
+function cleanMojibakeData($data) {
+    if (is_string($data)) {
+        return cleanMojibakeStr($data);
+    }
+    if (is_array($data)) {
+        foreach ($data as $k => $v) {
+            $data[$k] = cleanMojibakeData($v);
+        }
+    }
+    return $data;
+}
+
 function parsePackageJSONFields($pkg) {
     if (!$pkg) return $pkg;
 
@@ -473,7 +514,7 @@ function parsePackageJSONFields($pkg) {
         $pkg['is_active'] = (bool)$pkg['is_active'];
     }
 
-    return $pkg;
+    return cleanMojibakeData($pkg);
 }
 
 function fetchPackageHotels(PDO $pdo, $packageId) {
@@ -575,5 +616,5 @@ function fetchPackageVariants(PDO $pdo, $packageId) {
         $v['cancellationPolicy'] = $cancelList;
     }
 
-    return $variants;
+    return cleanMojibakeData($variants);
 }

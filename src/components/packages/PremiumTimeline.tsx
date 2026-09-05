@@ -1,6 +1,39 @@
 import React from 'react';
 import ScrollReveal from '@/components/ui/ScrollReveal';
 
+export function cleanMojibakeText(str: any): string {
+  if (typeof str !== 'string') return String(str || '');
+  return str
+    // Right arrows (UTF-8 E2 86 92 misdecoded as Windows-1252 or Mac Roman)
+    .replace(/ÔåÆ/g, '→')
+    .replace(/â†’/g, '→')
+    .replace(/&rarr;/gi, '→')
+    .replace(/->/g, '→')
+    // Em & En Dashes (E2 80 94 / E2 80 93)
+    .replace(/ÔÇö/g, '—')
+    .replace(/â€”/g, '—')
+    .replace(/ÔÇô/g, '–')
+    .replace(/â€“/g, '–')
+    // Quotes (E2 80 99 / E2 80 98 / E2 80 9C / E2 80 9D)
+    .replace(/ÔÇÖ/g, "’")
+    .replace(/â€™/g, "’")
+    .replace(/ÔÇÿ/g, "‘")
+    .replace(/â€˜/g, "‘")
+    .replace(/ÔÇ£/g, '“')
+    .replace(/â€œ/g, '“')
+    .replace(/ÔÇØ/g, '”')
+    .replace(/â€/g, '”')
+    // Bullets & Ellipsis
+    .replace(/ÔÇª/g, '…')
+    .replace(/â€¦/g, '…')
+    .replace(/â€¢/g, '•')
+    // Currency & Specials
+    .replace(/â‚¹/g, '₹')
+    .replace(/Â₹/g, '₹')
+    .replace(/Â/g, '')
+    .trim();
+}
+
 export interface PremiumTimelineProps {
   itinerary: Array<{
     day: number;
@@ -49,10 +82,10 @@ export const PremiumTimeline: React.FC<PremiumTimelineProps> = ({ itinerary, cla
               )}
               
               <h3 className="text-sm font-display font-bold text-white mb-2 leading-snug">
-                {item.title}
+                {cleanMojibakeText(item.title)}
               </h3>
-              <p className="text-[11px] text-[rgba(255,255,255,0.5)] leading-relaxed font-light">
-                {item.description}
+              <p className="text-[11px] text-[rgba(255,255,255,0.7)] leading-relaxed font-light">
+                {cleanMojibakeText(item.description)}
               </p>
               
               {/* Activity pills */}
@@ -60,7 +93,7 @@ export const PremiumTimeline: React.FC<PremiumTimelineProps> = ({ itinerary, cla
                 <div className="flex flex-wrap gap-1.5 mt-3">
                   {item.activities.map((act, i) => (
                     <span key={i} className="text-[9px] font-semibold px-2 py-1 rounded-md bg-[rgba(201,162,90,0.1)] border border-[rgba(201,162,90,0.2)] text-[#C9A25A]">
-                      {act}
+                      {cleanMojibakeText(act)}
                     </span>
                   ))}
                 </div>

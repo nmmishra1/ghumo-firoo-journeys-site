@@ -18,7 +18,7 @@ import { HotelList } from '@/components/shared/HotelList';
 import { AttractionCard } from '@/components/packages/AttractionCard';
 import PackageVariantSelector, { PackageVariant } from '@/components/packages/PackageVariantSelector';
 import VariantDetails from '@/components/packages/VariantDetails';
-import PremiumTimeline from '@/components/packages/PremiumTimeline';
+import PremiumTimeline, { cleanMojibakeText } from '@/components/packages/PremiumTimeline';
 import { getDestinationFaqs } from '@/data/destinationFaqs';
 import { itineraryService } from '@/services/itineraryService';
 
@@ -4221,17 +4221,22 @@ const DynamicPackageDetail: React.FC<DynamicPackageDetailProps> = ({ slug: propS
   const formattedPrice = numericPrice.toLocaleString('en-IN');
 
   const packageDetails = {
-    title: effectivePkg.name || effectivePkg.title,
-    duration: effectivePkg.duration || 'Flexible',
+    title: cleanMojibakeText(effectivePkg.name || effectivePkg.title),
+    duration: cleanMojibakeText(effectivePkg.duration || 'Flexible'),
     price: formattedPrice,
     rating: Number(effectivePkg.rating) || 5.0,
     reviews: effectivePkg.reviews || 0,
     image: effectivePkg.image || '',
-    destinations: effectivePkg.destinations || [],
-    highlights: effectivePkg.highlights || [],
-    itinerary: effectivePkg.itinerary || [],
-    inclusions: effectivePkg.inclusions || [],
-    exclusions: effectivePkg.exclusions || []
+    destinations: (effectivePkg.destinations || []).map(cleanMojibakeText),
+    highlights: (effectivePkg.highlights || []).map(cleanMojibakeText),
+    itinerary: (effectivePkg.itinerary || []).map((it: any) => ({
+      ...it,
+      title: cleanMojibakeText(it.title || it.day_title || ''),
+      description: cleanMojibakeText(it.description || ''),
+      activities: (it.activities || []).map(cleanMojibakeText)
+    })),
+    inclusions: (effectivePkg.inclusions || []).map(cleanMojibakeText),
+    exclusions: (effectivePkg.exclusions || []).map(cleanMojibakeText)
   };
 
   const getDestinationGalleryImages = (pkg: any, primaryImg: string) => {
