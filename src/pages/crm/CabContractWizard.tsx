@@ -33,13 +33,21 @@ const WIZARD_STEPS = [
 ];
 
 const VEHICLE_TYPES = [
-  'Hatchback',
+  'Swift Dzire (4-Seater)',
+  'Swift Dzire',
   'Sedan',
-  'SUV',
-  'Innova',
+  'Maruti Ertiga (6-Seater)',
+  'Maruti Ertiga',
+  'MUV',
+  'Innova Crysta (6/7-Seater)',
   'Innova Crysta',
+  'Innova',
+  'SUV',
+  'AC Tempo Traveller (12/17-Seater)',
   'Tempo Traveller 12',
   'Tempo Traveller 17',
+  'Tempo Traveller',
+  'Hatchback',
   'Mini Bus',
   'Luxury Coach',
   'Volvo Coach',
@@ -47,7 +55,17 @@ const VEHICLE_TYPES = [
   'Luxury Sedan'
 ];
 
-const VEHICLE_CATEGORIES = ['Economy', 'Standard', 'Premium', 'Luxury'];
+const VEHICLE_CATEGORIES = [
+  'Standard',
+  'Economy',
+  'Premium',
+  'Luxury',
+  'Sedan',
+  'MUV',
+  'SUV',
+  'Tempo Traveller',
+  'Coach'
+];
 const AVAILABILITY_STATUSES = ['Available', 'Booked', 'Blocked', 'Maintenance', 'Inactive'];
 const ROUTE_TYPES = [
   'Airport Transfer',
@@ -855,18 +873,18 @@ export const CabContractWizard: React.FC<CabContractWizardProps> = ({
                         <div className="space-y-1">
                           <Label>Vehicle Type</Label>
                           <Select value={veh.vehicle_type} onValueChange={val => handleUpdateVehicle(veh.id, 'vehicle_type', val)}>
-                            <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
+                            <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Select vehicle type" /></SelectTrigger>
                             <SelectContent>
-                              {VEHICLE_TYPES.map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}
+                              {Array.from(new Set([...VEHICLE_TYPES, veh.vehicle_type].filter(Boolean))).map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}
                             </SelectContent>
                           </Select>
                         </div>
                         <div className="space-y-1">
                           <Label>Vehicle Category</Label>
                           <Select value={veh.vehicle_category} onValueChange={val => handleUpdateVehicle(veh.id, 'vehicle_category', val)}>
-                            <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
+                            <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Select vehicle category" /></SelectTrigger>
                             <SelectContent>
-                              {VEHICLE_CATEGORIES.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+                              {Array.from(new Set([...VEHICLE_CATEGORIES, veh.vehicle_category].filter(Boolean))).map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
                             </SelectContent>
                           </Select>
                         </div>
@@ -888,9 +906,9 @@ export const CabContractWizard: React.FC<CabContractWizardProps> = ({
                         <div className="space-y-1">
                           <Label>Availability Status</Label>
                           <Select value={veh.availability_status} onValueChange={val => handleUpdateVehicle(veh.id, 'availability_status', val)}>
-                            <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
+                            <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Select availability" /></SelectTrigger>
                             <SelectContent>
-                              {AVAILABILITY_STATUSES.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
+                              {Array.from(new Set([...AVAILABILITY_STATUSES, veh.availability_status].filter(Boolean))).map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
                             </SelectContent>
                           </Select>
                         </div>
@@ -931,9 +949,9 @@ export const CabContractWizard: React.FC<CabContractWizardProps> = ({
                         <div className="space-y-1">
                           <Label>Route Type</Label>
                           <Select value={rt.route_type} onValueChange={val => handleUpdateRoute(rt.id, 'route_type', val)}>
-                            <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
+                            <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Select route type" /></SelectTrigger>
                             <SelectContent>
-                              {ROUTE_TYPES.map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}
+                              {Array.from(new Set([...ROUTE_TYPES, rt.route_type].filter(Boolean))).map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}
                             </SelectContent>
                           </Select>
                         </div>
