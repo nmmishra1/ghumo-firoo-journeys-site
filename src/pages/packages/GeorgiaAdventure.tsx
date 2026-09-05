@@ -24,7 +24,7 @@ const GeorgiaAdventure: React.FC = () => {
   const [selectedAttraction, setSelectedAttraction] = useState<any | null>(null)
   const [activeCategory, setActiveCategory] = useState<string>("all")
 
-  const FALLBACK_GEORGIA_IMG = "/georgia/kazbegi_gergeti_church.jpg"
+  const FALLBACK_GEORGIA_IMG = "/georgia/kazbegi_caucasus_mountain.jpg"
 
   useEffect(() => {
     const loadReviews = async () => {
@@ -44,7 +44,7 @@ const GeorgiaAdventure: React.FC = () => {
       title: "Tbilisi & Kazbegi Caucasus Express (5D/4N)",
       desc: "Short European Caucasus break featuring Tbilisi Old Town aerial cable car, Ananuri Fortress & Kazbegi Gergeti Trinity Church 4x4 mountain drive.",
       badge: "Express Escape",
-      image: "/georgia/kazbegi_gergeti_church.jpg",
+      image: "/georgia/kazbegi_caucasus_mountain.jpg",
       price: 49500,
       duration: "5 Days / 4 Nights",
       rating: 4.9,
@@ -97,7 +97,7 @@ const GeorgiaAdventure: React.FC = () => {
       categoryName: "Caucasus Mountains & 4x4",
       title: "Kazbegi Gergeti Trinity Church (2,170m)",
       description: "14th-century stone church perched dramatically at 2,170 meters elevation on a lonely mountain ridge beneath Mount Kazbek peak (5,047m).",
-      image: "/georgia/kazbegi_gergeti_church.jpg",
+      image: "/georgia/kazbegi_caucasus_mountain.jpg",
       distance: "Stepantsminda (165 km from Tbilisi)",
       highlights: ["7,120 ft Elevation", "4x4 Mountain Safari", "Mount Kazbek 5,047m Peak", "Georgian Military Highway"],
       details: {
@@ -243,7 +243,7 @@ const GeorgiaAdventure: React.FC = () => {
     name: "Georgia Adventure & Caucasus Packages 2026",
     description: "Book top-rated Georgia tour packages with GhumoFiroo. Includes Kazbegi Gergeti Trinity Church 4x4 drive under Mount Kazbek 5,047m, Gudauri ski resort cable car, Tbilisi Old Town & Kakheti wine tasting.",
     url: config.baseUrl + "/packages/georgia-adventure",
-    image: "/georgia/kazbegi_gergeti_church.jpg",
+    image: "/georgia/kazbegi_caucasus_mountain.jpg",
     duration: "P6D",
     itinerary: [
       { position: 1, name: "Tbilisi Old Town & Narikala", description: "Old town walking tour & cable car to 4th-century fortress." },
@@ -277,7 +277,7 @@ const GeorgiaAdventure: React.FC = () => {
         <ScrollReveal variant="fade-in-scale" duration="slow" className="relative h-[85vh] min-h-[560px] flex items-center justify-center overflow-hidden">
           <div className="absolute inset-0 bg-[#0B1026]">
             <img 
-              src="/georgia/kazbegi_gergeti_church.jpg" 
+              src="/georgia/kazbegi_caucasus_mountain.jpg" 
               alt="Georgia Kazbegi Caucasus Mountains" 
               onError={(e) => { (e.target as HTMLImageElement).src = FALLBACK_GEORGIA_IMG }}
               className="absolute inset-0 w-full h-full object-cover opacity-50 mix-blend-luminosity" 

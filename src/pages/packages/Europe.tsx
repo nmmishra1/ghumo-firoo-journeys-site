@@ -23,7 +23,7 @@ const Europe: React.FC = () => {
   const [selectedAttraction, setSelectedAttraction] = useState<any | null>(null)
   const [activeCategory, setActiveCategory] = useState<string>("all")
 
-  const FALLBACK_EUROPE_IMG = "https://images.unsplash.com/photo-1502602898657-3e91760cbb34?q=80&w=800"
+  const FALLBACK_EUROPE_IMG = "/europe/paris_eiffel_tower.jpg"
 
   useEffect(() => {
     const loadReviews = async () => {
@@ -38,14 +38,14 @@ const Europe: React.FC = () => {
   }, [])
 
   const countries = [
-    { name: "Switzerland", code: "CH", image: "https://images.unsplash.com/photo-1530122037265-a5f1f91d3b99?q=80&w=800", link: "/packages/switzerland" },
-    { name: "France", code: "FR", image: "https://images.unsplash.com/photo-1502602898657-3e91760cbb34?q=80&w=800", link: "/packages/france" },
-    { name: "Italy", code: "IT", image: "https://images.unsplash.com/photo-1516483638261-f4dbaf036963?q=80&w=800", link: "/packages/italy" },
-    { name: "Austria", code: "AT", image: "https://images.unsplash.com/photo-1516550893923-42d28e5677af?q=80&w=800", link: "/packages/austria" },
-    { name: "Germany", code: "DE", image: "https://images.unsplash.com/photo-1467269204594-9661b134dd2b?q=80&w=800", link: "/packages/germany" },
-    { name: "Netherlands", code: "NL", image: "https://images.unsplash.com/photo-1512470876302-972faa2aa9a4?q=80&w=800", link: "/packages/netherlands" },
-    { name: "Belgium", code: "BE", image: "https://images.unsplash.com/photo-1554072675-66db59dba46f?q=80&w=800", link: "/packages/belgium" },
-    { name: "Czech Republic", code: "CZ", image: "https://images.unsplash.com/photo-1541849546-216549ae216d?q=80&w=800", link: "/packages/czech-republic" },
+    { name: "Switzerland", code: "CH", image: "/europe/switzerland.jpg", link: "/packages/switzerland" },
+    { name: "France", code: "FR", image: "/europe/france.jpg", link: "/packages/france" },
+    { name: "Italy", code: "IT", image: "/europe/italy.jpg", link: "/packages/italy" },
+    { name: "Austria", code: "AT", image: "/europe/austria.jpg", link: "/packages/austria" },
+    { name: "Germany", code: "DE", image: "/europe/germany.jpg", link: "/packages/germany" },
+    { name: "Netherlands", code: "NL", image: "/europe/netherlands.jpg", link: "/packages/netherlands" },
+    { name: "Belgium", code: "BE", image: "/europe/belgium.jpg", link: "/packages/belgium" },
+    { name: "Czech Republic", code: "CZ", image: "/europe/czech_republic.jpg", link: "/packages/czech-republic" },
   ]
 
   const attractions = [
@@ -55,7 +55,7 @@ const Europe: React.FC = () => {
       categoryName: "Royal Palaces & Castles",
       title: "Paris Eiffel Tower & Seine River Cruise",
       description: "Iconic 330-meter wrought-iron tower overlooking Paris, paired with a sunset glass-canopy Seine River cruise past Notre-Dame.",
-      image: "https://images.unsplash.com/photo-1502602898657-3e91760cbb34?q=80&w=800",
+      image: "/europe/paris_eiffel_tower.jpg",
       distance: "Paris, France",
       highlights: ["Eiffel Tower 2nd Floor Access", "Glass-Canopy Seine Cruise", "Champs-Élysées Walk", "Louvre Museum"],
       details: {
@@ -77,7 +77,7 @@ const Europe: React.FC = () => {
       categoryName: "Alpine Nature & Mountains",
       title: "Jungfraujoch — Top of Europe",
       description: "Highest railway station in Europe at 3,454m altitude, featuring glacier ice palaces, Sphinx Observatory & eternal snow.",
-      image: "https://images.unsplash.com/photo-1530122037265-a5f1f91d3b99?q=80&w=800",
+      image: "/europe/jungfraujoch_top_of_europe.jpg",
       distance: "Bernese Oberland, Switzerland",
       highlights: ["Eiger Express Cable Car", "3,454m Altitude Station", "Ice Palace Sculptures", "Sphinx Panorama Deck"],
       details: {
@@ -99,7 +99,7 @@ const Europe: React.FC = () => {
       categoryName: "Alpine Nature & Mountains",
       title: "Mount Titlis & Rotair Revolving Cable Car",
       description: "Glacier mountain peak in Engelberg at 3,020m featuring Titlis Rotair (world's first revolving cable car) & Europe's highest suspension bridge.",
-      image: "https://images.unsplash.com/photo-1530122037265-a5f1f91d3b99?q=80&w=800",
+      image: "/europe/mount_titlis_rotair.jpg",
       distance: "Engelberg, Switzerland",
       highlights: ["Rotair 360° Cable Car", "Cliff Walk Suspension Bridge", "Ice Flyer Chairlift", "Glacier Cave Tunnels"],
       details: {
@@ -121,7 +121,7 @@ const Europe: React.FC = () => {
       categoryName: "Historic Cities & Canals",
       title: "Venice Grand Canal & Private Gondola Cruise",
       description: "Romantic boat ride along Venice's labyrinthine canals, passing Renaissance palaces, Rialto Bridge & St. Mark's Square.",
-      image: "https://images.unsplash.com/photo-1516483638261-f4dbaf036963?q=80&w=800",
+      image: "/europe/venice_grand_canal.jpg",
       distance: "Venice, Italy",
       highlights: ["Private Venetian Gondola", "Rialto Bridge Views", "St. Mark's Basilica", "Murano Glass Workshop"],
       details: {
@@ -143,7 +143,7 @@ const Europe: React.FC = () => {
       categoryName: "Historic Cities & Canals",
       title: "Rome Colosseum & Vatican City",
       description: "Step into 2,000 years of history at the ancient Flavian Amphitheatre, Roman Forum, Trevi Fountain & Vatican Museums.",
-      image: "https://images.unsplash.com/photo-1552832230-c0197dd311b5?q=80&w=800",
+      image: "/europe/rome_colosseum.jpg",
       distance: "Rome, Italy",
       highlights: ["Colosseum Gladiator Arena", "Trevi Fountain Coin Toss", "St. Peter's Basilica Dome", "Sistine Chapel Ceilings"],
       details: {
@@ -165,7 +165,7 @@ const Europe: React.FC = () => {
       categoryName: "Royal Palaces & Castles",
       title: "Neuschwanstein Fairy Tale Castle",
       description: "19th-century Romanesque Revival palace perched on a rugged Bavarian hill; the real-life inspiration for Disney's Sleeping Beauty castle.",
-      image: "https://images.unsplash.com/photo-1467269204594-9661b134dd2b?q=80&w=800",
+      image: "/europe/neuschwanstein_castle.jpg",
       distance: "Bavaria, Germany",
       highlights: ["Disney Castle Inspiration", "Mary's Bridge Panorama", "Throne Room Murals", "Alpsee Lake Walk"],
       details: {
@@ -187,7 +187,7 @@ const Europe: React.FC = () => {
       categoryName: "Historic Cities & Canals",
       title: "Amsterdam Canals & Zaanse Schans Windmills",
       description: "Glide along 17th-century UNESCO canal rings, past gabled merchant houses, followed by a visit to historic wooden windmills & cheese farms.",
-      image: "https://images.unsplash.com/photo-1512470876302-972faa2aa9a4?q=80&w=800",
+      image: "/europe/amsterdam_canals.jpg",
       distance: "Amsterdam, Netherlands",
       highlights: ["UNESCO Canal Belt Cruise", "Zaanse Schans Windmills", "Henri Willig Cheese Tasting", "Clog Crafting Demo"],
       details: {
@@ -209,7 +209,7 @@ const Europe: React.FC = () => {
       categoryName: "Royal Palaces & Castles",
       title: "Prague Old Town & Astronomical Clock",
       description: "Gothic and Baroque fairy-tale city featuring the 600-year-old Astronomical Clock, Charles Bridge statues & Prague Castle complex.",
-      image: "https://images.unsplash.com/photo-1541849546-216549ae216d?q=80&w=800",
+      image: "/europe/prague_astronomical_clock.jpg",
       distance: "Prague, Czech Republic",
       highlights: ["600-Year-Old Astronomical Clock", "Charles Bridge Statue Walk", "Prague Castle Complex", "Vltava River Cruise"],
       details: {
@@ -231,7 +231,7 @@ const Europe: React.FC = () => {
       categoryName: "Royal Palaces & Castles",
       title: "Vienna Schönbrunn Palace & Classical Opera",
       description: "1,441-room Baroque summer residence of Habsburg monarchs, featuring Gloriette hill gardens, St. Stephen's & Mozart concerts.",
-      image: "https://images.unsplash.com/photo-1516550893923-42d28e5677af?q=80&w=800",
+      image: "/europe/vienna_schonbrunn_palace.jpg",
       distance: "Vienna, Austria",
       highlights: ["Schönbrunn Imperial Apartments", "Gloriette Hill Gardens", "St. Stephen's Cathedral", "Mozart & Strauss Concert"],
       details: {
@@ -253,7 +253,7 @@ const Europe: React.FC = () => {
       categoryName: "Alpine Nature & Mountains",
       title: "Lucerne Chapel Bridge & Lake Steamer Cruise",
       description: "Picturesque medieval Swiss city set on Lake Lucerne, featuring 14th-century covered Kapellbrücke, Lion Monument & Rigi views.",
-      image: "https://images.unsplash.com/photo-1530122037265-a5f1f91d3b99?q=80&w=800",
+      image: "/europe/lucerne_chapel_bridge.jpg",
       distance: "Lucerne, Switzerland",
       highlights: ["Kapellbrücke Wooden Bridge", "Lake Lucerne Steamer Cruise", "Lion Monument Sculpture", "Old Town Frescoes"],
       details: {
@@ -275,7 +275,7 @@ const Europe: React.FC = () => {
       categoryName: "Historic Cities & Canals",
       title: "Florence Duomo & Ponte Vecchio",
       description: "Birthplace of the Italian Renaissance featuring Santa Maria del Fiore red-tiled dome, Uffizi Gallery & Ponte Vecchio gold shops.",
-      image: "https://images.unsplash.com/photo-1543429776-2782fc8e1acd?q=80&w=800",
+      image: "/europe/florence_duomo.jpg",
       distance: "Tuscany, Italy",
       highlights: ["Brunelleschi's Red Duomo", "Uffizi Gallery Botticelli", "Ponte Vecchio Gold Bridge", "Piazzale Michelangelo View"],
       details: {
@@ -297,7 +297,7 @@ const Europe: React.FC = () => {
       categoryName: "Royal Palaces & Castles",
       title: "Brussels Grand Place & Atomium Sphere",
       description: "UNESCO world heritage central market square lined with gilded 17th-century guildhouses, chocolate ateliers & futuristic Atomium.",
-      image: "https://images.unsplash.com/photo-1554072675-66db59dba46f?q=80&w=800",
+      image: "/europe/brussels_grand_place.jpg",
       distance: "Brussels, Belgium",
       highlights: ["UNESCO Gilded Grand Place", "Atomium 102m Futuristic Sphere", "Belgian Chocolate Tasting", "Manneken Pis Fountain"],
       details: {

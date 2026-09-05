@@ -2953,9 +2953,9 @@ const STATIC_PACKAGE_REGISTRY: Record<string, any> = {
     price: 58000,
     rating: 4.9,
     reviews: 185,
-    image: "/georgia/kazbegi_gergeti_church.jpg",
+    image: "/georgia/kazbegi_caucasus_mountain.jpg",
     images: [
-      "/georgia/kazbegi_gergeti_church.jpg",
+      "/georgia/kazbegi_caucasus_mountain.jpg",
       "/georgia/gudauri_ananuri_fortress.jpg",
       "/georgia/tbilisi_old_town_narikala.jpg",
       "/georgia/sighnaghi_kakheti_wine.jpg",
@@ -3009,7 +3009,7 @@ const STATIC_PACKAGE_REGISTRY: Record<string, any> = {
       }
     ],
     attractions: [
-      { name: "Kazbegi Gergeti Trinity Church (2,170m)", description: "14th-century church on mountain ridge under Mount Kazbek 5,047m peak.", image: "/georgia/kazbegi_gergeti_church.jpg" },
+      { name: "Kazbegi Gergeti Trinity Church (2,170m)", description: "14th-century church on mountain ridge under Mount Kazbek 5,047m peak.", image: "/georgia/kazbegi_caucasus_mountain.jpg" },
       { name: "Gudauri Resort & Ananuri Fortress", description: "Caucasus mountain ski resort and 16th-century lakeside fortress.", image: "/georgia/gudauri_ananuri_fortress.jpg" },
       { name: "Tbilisi Old Town & Narikala Cable Car", description: "Pastel wooden balconies, sulfur baths & Narikala fortress views.", image: "/georgia/tbilisi_old_town_narikala.jpg" },
       { name: "Sighnaghi & Kakheti Wine Valley", description: "Walled 'City of Love' overlooking Alazani valley with UNESCO Qvevri wine tasting.", image: "/georgia/sighnaghi_kakheti_wine.jpg" },
@@ -3711,7 +3711,7 @@ const DynamicPackageDetail: React.FC<DynamicPackageDetailProps> = ({ slug: propS
 
     if (destStr.includes('georgia') || destStr.includes('tbilisi') || destStr.includes('kazbegi') || destStr.includes('gudauri')) {
       destGallery = [
-        "/georgia/kazbegi_gergeti_church.jpg",
+        "/georgia/kazbegi_caucasus_mountain.jpg",
         "/georgia/gudauri_ananuri_fortress.jpg",
         "/georgia/tbilisi_old_town_narikala.jpg",
         "/georgia/sighnaghi_kakheti_wine.jpg",
