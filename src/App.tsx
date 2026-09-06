@@ -269,8 +269,14 @@ function App() {
                <Route path="/crm/suppliers/*" element={<CRM />} />
                <Route path="/crm/activities" element={<CRM />} />
                <Route path="/crm/activities/*" element={<CRM />} />
+               <Route path="/crm/activity" element={<CRM />} />
+               <Route path="/crm/activity/*" element={<CRM />} />
                <Route path="/crm/sightseeings" element={<CRM />} />
                <Route path="/crm/sightseeings/*" element={<CRM />} />
+               <Route path="/crm/sightseeing" element={<CRM />} />
+               <Route path="/crm/sightseeing/*" element={<CRM />} />
+               <Route path="/crm/sightings" element={<CRM />} />
+               <Route path="/crm/sightings/*" element={<CRM />} />
                <Route path="/crm/visas" element={<CRM />} />
                <Route path="/crm/visas/*" element={<CRM />} />
                <Route path="/crm/india-explorer" element={<CRM />} />

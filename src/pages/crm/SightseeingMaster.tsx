@@ -219,9 +219,9 @@ export default function SightseeingMaster() {
   const [filterStatus, setFilterStatus] = useState('all');
   const [rateFilterMode, setRateFilterMode] = useState<'all' | 'with_rates' | 'info_only'>('all');
 
-  const isFormView = location.pathname === '/crm/sightseeings/new' || location.pathname.startsWith('/crm/sightseeings/edit/');
-  const isEdit = location.pathname.startsWith('/crm/sightseeings/edit/');
-  const editId = isEdit ? location.pathname.replace('/crm/sightseeings/edit/', '') : null;
+  const isFormView = location.pathname.includes('/new') || location.pathname.includes('/edit');
+  const isEdit = location.pathname.includes('/edit');
+  const editId = isEdit ? (location.pathname.split('/edit/')[1] || location.pathname.split('/edit')[1] || null) : null;
 
   useEffect(() => { loadBaseline(); loadSightseeings(); }, []);
 
@@ -567,6 +567,15 @@ export default function SightseeingMaster() {
       })
   ).sort((a, b) => (a.city_name || (a as any).name || '').localeCompare(b.city_name || (b as any).name || ''));
 
+  const getCountryName = (id: string | null) => id ? (countries.find(c => String(c.id) === String(id))?.country_name || '—') : '—';
+  const getStateName = (id: string | null) => id ? (states.find(s => String(s.id) === String(id))?.state_name || '—') : '—';
+  const getCityName = (id: string | null) => id ? (cities.find(c => String(c.id) === String(id))?.city_name || '—') : '—';
+  const getCategoryMeta = (cat: string) => ({
+    icon: CATEGORY_ICONS[cat] || Compass,
+    bg: 'bg-amber-500/15',
+    color: 'text-amber-600 dark:text-amber-400'
+  });
+
   const filtered = sightseeings.filter(s => {
     const hasRates = Number(s.supplier_cost) > 0 || Number(s.selling_cost) > 0 || Number((s as any).adult_cost) > 0;
     if (rateFilterMode === 'with_rates' && !hasRates) return false;
@@ -613,15 +622,6 @@ export default function SightseeingMaster() {
     if (filterStatus === 'active' && !s.active_status) return false;
     if (filterStatus === 'inactive' && s.active_status) return false;
     return true;
-  });
-
-  const getCountryName = (id: string | null) => id ? (countries.find(c => String(c.id) === String(id))?.country_name || '—') : '—';
-  const getStateName = (id: string | null) => id ? (states.find(s => String(s.id) === String(id))?.state_name || '—') : '—';
-  const getCityName = (id: string | null) => id ? (cities.find(c => String(c.id) === String(id))?.city_name || '—') : '—';
-  const getCategoryMeta = (cat: string) => ({
-    icon: CATEGORY_ICONS[cat] || Compass,
-    bg: 'bg-amber-500/15',
-    color: 'text-amber-600 dark:text-amber-400'
   });
 
   // ── Form View ──────────────────────────────────────────────────────────────

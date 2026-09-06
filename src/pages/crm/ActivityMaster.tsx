@@ -246,9 +246,9 @@ export default function ActivityMaster() {
   const [editingId, setEditingId] = useState<string | null>(null);
 
   // Determine view from URL
-  const isFormView = location.pathname === '/crm/activities/new' || location.pathname.startsWith('/crm/activities/edit/');
-  const isEdit = location.pathname.startsWith('/crm/activities/edit/');
-  const editId = isEdit ? location.pathname.replace('/crm/activities/edit/', '') : null;
+  const isFormView = location.pathname.includes('/new') || location.pathname.includes('/edit');
+  const isEdit = location.pathname.includes('/edit');
+  const editId = isEdit ? (location.pathname.split('/edit/')[1] || location.pathname.split('/edit')[1] || null) : null;
 
   useEffect(() => { loadBaseline(); loadActivities(); }, []);
 
@@ -575,6 +575,11 @@ export default function ActivityMaster() {
       })
   ).sort((a, b) => (a.city_name || (a as any).name || '').localeCompare(b.city_name || (b as any).name || ''));
 
+  const getCountryName = (id: string | null) => id ? (countries.find(c => String(c.id) === String(id))?.country_name || '—') : '—';
+  const getStateName = (id: string | null) => id ? (states.find(s => String(s.id) === String(id))?.state_name || '—') : '—';
+  const getCityName = (id: string | null) => id ? (cities.find(c => String(c.id) === String(id))?.city_name || '—') : '—';
+  const getCategoryMeta = (cat: string) => ACTIVITY_CATEGORIES.find(c => c.value === cat) || ACTIVITY_CATEGORIES[0];
+
   const filtered = activities.filter(a => {
     const hasRates = Number(a.supplier_cost) > 0 || Number(a.selling_cost) > 0 || Number((a as any).adult_cost) > 0;
     if (rateFilterMode === 'with_rates' && !hasRates) return false;
@@ -621,11 +626,6 @@ export default function ActivityMaster() {
     if (filterStatus === 'inactive' && a.active_status) return false;
     return true;
   });
-
-  const getCountryName = (id: string | null) => id ? (countries.find(c => String(c.id) === String(id))?.country_name || '—') : '—';
-  const getStateName = (id: string | null) => id ? (states.find(s => String(s.id) === String(id))?.state_name || '—') : '—';
-  const getCityName = (id: string | null) => id ? (cities.find(c => String(c.id) === String(id))?.city_name || '—') : '—';
-  const getCategoryMeta = (cat: string) => ACTIVITY_CATEGORIES.find(c => c.value === cat) || ACTIVITY_CATEGORIES[0];
 
   // ── Form View ──────────────────────────────────────────────────────────────
   if (isFormView) {
