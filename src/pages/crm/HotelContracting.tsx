@@ -784,8 +784,8 @@ export const HotelContracting: React.FC = () => {
     const seenIds = new Set<string>();
     const seenNames = new Set<string>();
 
-    const addOption = (rawId: string, rawName: string) => {
-      const name = rawName.trim();
+    const addOption = (rawId: any, rawName: any) => {
+      const name = String(rawName || '').trim();
       const id = String(rawId || name).trim();
       if (name && id && !/^\d+$/.test(name) && !seenIds.has(id.toLowerCase()) && !seenNames.has(name.toLowerCase())) {
         seenIds.add(id.toLowerCase());
@@ -803,7 +803,7 @@ export const HotelContracting: React.FC = () => {
     });
 
     hotels.forEach((h: any) => {
-      let name = (h.country || h.countries?.country_name || '').trim();
+      let name = String(h.country || h.countries?.country_name || '').trim();
       if (name) addOption(name, name);
     });
 
@@ -820,16 +820,17 @@ export const HotelContracting: React.FC = () => {
     const seenIds = new Set<string>();
     const seenNames = new Set<string>();
 
-    const selCountryObj = countryOptions.find(c => c.id === hotelFilterCountry || c.name.toLowerCase() === hotelFilterCountry.toLowerCase());
-    const selCountryName = selCountryObj ? selCountryObj.name.toLowerCase() : (hotelFilterCountry !== 'all' ? hotelFilterCountry.toLowerCase() : null);
+    const selCountryObj = countryOptions.find(c => c.id === hotelFilterCountry || String(c.name).toLowerCase() === String(hotelFilterCountry).toLowerCase());
+    const selCountryName = selCountryObj ? String(selCountryObj.name).toLowerCase() : (hotelFilterCountry !== 'all' ? String(hotelFilterCountry).toLowerCase() : null);
 
-    const addState = (rawId: string, rawName: string, countryName?: string) => {
-      const name = rawName.trim();
+    const addState = (rawId: any, rawName: any, rawCountry?: any) => {
+      const name = String(rawName || '').trim();
       const id = String(rawId || name).trim();
+      const countryStr = String(rawCountry || '').trim();
       if (!name || !id || /^\d+$/.test(name)) return;
 
-      if (selCountryName && countryName) {
-        const cLower = countryName.toLowerCase();
+      if (selCountryName && countryStr) {
+        const cLower = countryStr.toLowerCase();
         if (!cLower.includes(selCountryName) && !selCountryName.includes(cLower) && selCountryName !== 'india') {
           return;
         }
@@ -843,7 +844,9 @@ export const HotelContracting: React.FC = () => {
     };
 
     states.forEach(s => {
-      addState(s.id, s.state_name || (s as any).name || '', s.country_id);
+      const cObj = countries.find(c => String(c.id) === String(s.country_id));
+      const cName = cObj?.country_name || (cObj as any)?.name || s.country_id;
+      addState(s.id, s.state_name || (s as any).name || '', cName);
     });
 
     masterHotelsList.forEach(h => {
@@ -851,8 +854,8 @@ export const HotelContracting: React.FC = () => {
     });
 
     hotels.forEach((h: any) => {
-      const name = (h.state || h.states?.state_name || '').trim();
-      const hCountry = (h.country || h.countries?.country_name || '').trim();
+      const name = String(h.state || h.states?.state_name || '').trim();
+      const hCountry = String(h.country || h.countries?.country_name || '').trim();
       if (name) addState(name, name, hCountry);
     });
 
@@ -865,24 +868,26 @@ export const HotelContracting: React.FC = () => {
     const seenIds = new Set<string>();
     const seenNames = new Set<string>();
 
-    const selStateObj = stateOptions.find(s => s.id === hotelFilterState || s.name.toLowerCase() === hotelFilterState.toLowerCase());
-    const selStateName = selStateObj ? selStateObj.name.toLowerCase() : (hotelFilterState !== 'all' ? hotelFilterState.toLowerCase() : null);
+    const selStateObj = stateOptions.find(s => s.id === hotelFilterState || String(s.name).toLowerCase() === String(hotelFilterState).toLowerCase());
+    const selStateName = selStateObj ? String(selStateObj.name).toLowerCase() : (hotelFilterState !== 'all' ? String(hotelFilterState).toLowerCase() : null);
 
-    const selCountryObj = countryOptions.find(c => c.id === hotelFilterCountry || c.name.toLowerCase() === hotelFilterCountry.toLowerCase());
-    const selCountryName = selCountryObj ? selCountryObj.name.toLowerCase() : (hotelFilterCountry !== 'all' ? hotelFilterCountry.toLowerCase() : null);
+    const selCountryObj = countryOptions.find(c => c.id === hotelFilterCountry || String(c.name).toLowerCase() === String(hotelFilterCountry).toLowerCase());
+    const selCountryName = selCountryObj ? String(selCountryObj.name).toLowerCase() : (hotelFilterCountry !== 'all' ? String(hotelFilterCountry).toLowerCase() : null);
 
-    const addCity = (rawId: string, rawName: string, stateName?: string, countryName?: string) => {
-      const name = rawName.trim();
+    const addCity = (rawId: any, rawName: any, rawState?: any, rawCountry?: any) => {
+      const name = String(rawName || '').trim();
       const id = String(rawId || name).trim();
+      const stateStr = String(rawState || '').trim();
+      const countryStr = String(rawCountry || '').trim();
       if (!name || !id || /^\d+$/.test(name)) return;
 
-      if (selStateName && stateName) {
-        const sLower = stateName.toLowerCase();
+      if (selStateName && stateStr) {
+        const sLower = stateStr.toLowerCase();
         if (!sLower.includes(selStateName) && !selStateName.includes(sLower)) return;
       }
 
-      if (selCountryName && countryName) {
-        const cLower = countryName.toLowerCase();
+      if (selCountryName && countryStr) {
+        const cLower = countryStr.toLowerCase();
         if (!cLower.includes(selCountryName) && !selCountryName.includes(cLower) && selCountryName !== 'india') return;
       }
 
@@ -894,7 +899,9 @@ export const HotelContracting: React.FC = () => {
     };
 
     cities.forEach(c => {
-      addCity(c.id, c.city_name || (c as any).name || '', c.state_id);
+      const sObj = states.find(s => String(s.id) === String(c.state_id));
+      const sName = sObj?.state_name || (sObj as any)?.name || (c as any).state || c.state_id;
+      addCity(c.id, c.city_name || (c as any).name || '', sName, (c as any).country);
     });
 
     masterHotelsList.forEach(h => {
@@ -902,9 +909,9 @@ export const HotelContracting: React.FC = () => {
     });
 
     hotels.forEach((h: any) => {
-      const name = (h.city || h.cities?.city_name || '').trim();
-      const hState = (h.state || h.states?.state_name || '').trim();
-      const hCountry = (h.country || h.countries?.country_name || '').trim();
+      const name = String(h.city || h.cities?.city_name || '').trim();
+      const hState = String(h.state || h.states?.state_name || '').trim();
+      const hCountry = String(h.country || h.countries?.country_name || '').trim();
       if (name) addCity(name, name, hState, hCountry);
     });
 
