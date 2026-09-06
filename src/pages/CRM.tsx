@@ -55,6 +55,7 @@ const EmailMarketingHub = React.lazy(() => import('@/components/crm/EmailMarketi
 const CabContracting = React.lazy(() => import('@/pages/crm/CabContracting'));
 const ItineraryBuilder = React.lazy(() => import('@/pages/crm/ItineraryBuilder'));
 const LeadProposalsWorkspace = React.lazy(() => import('@/pages/crm/LeadProposalsWorkspace'));
+const BookingConfirmationPanel = React.lazy(() => import('@/components/crm/BookingConfirmationPanel').then(m => ({ default: m.BookingConfirmationPanel })));
 const ActivityMaster = React.lazy(() => import('@/pages/crm/ActivityMaster'));
 const SightseeingMaster = React.lazy(() => import('@/pages/crm/SightseeingMaster'));
 const VisaMaster = React.lazy(() => import('@/pages/crm/VisaMaster'));
@@ -5183,6 +5184,14 @@ Ghumo Firoo Travels`
                 onOpenBuilderForProposal={(propId) => navigate(`/crm/leads/${leadId || 19}/itinerary?proposalId=${propId}`)}
                 onBackToLeads={() => navigate('/crm/leads')}
               />
+              <div className="mt-6">
+                <BookingConfirmationPanel
+                  leadId={Number(leadId || activeLead?.id || 19)}
+                  customerName={activeLead?.customer_name}
+                  customerPhone={activeLead?.customer_phone}
+                  customerEmail={activeLead?.customer_email}
+                />
+              </div>
             </Suspense>
           )}
 

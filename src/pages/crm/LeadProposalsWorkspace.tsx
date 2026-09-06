@@ -146,9 +146,8 @@ export default function LeadProposalsWorkspace({ activeLead, onOpenBuilderForPro
     const estimatedPrice = 75000 + (nextNum - 1) * 12000;
     const pax = Number(activeLead?.number_of_pax) || 2;
     const perPerson = Math.round(estimatedPrice / (pax > 0 ? pax : 1));
-    const tokenAmount = Math.round(estimatedPrice * 0.2);
-    const advanceAmount = Math.round(estimatedPrice * 0.3);
-    const balanceAmount = estimatedPrice - tokenAmount - advanceAmount;
+    const advanceRequired = Math.round(estimatedPrice * 0.30);
+    const balanceAmount = estimatedPrice - advanceRequired;
 
     const newOptData: any = {
       lead_id: activeLead?.id || 1,
@@ -157,15 +156,15 @@ export default function LeadProposalsWorkspace({ activeLead, onOpenBuilderForPro
       title: `${activeLead?.destination || 'Trip'} - Customized Option ${nextNum}`,
       total_price: estimatedPrice,
       price_per_person: perPerson,
+      advance_required: advanceRequired,
       currency: 'INR',
       status: 'Draft',
       expiry_date: new Date(Date.now() + 7 * 86400000).toISOString().split('T')[0],
       star_category: 4,
       cover_image: 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=800&q=80',
       payment_schedule: [
-        { label: 'Booking Amount (Token)', amount: tokenAmount, due_date: new Date(Date.now() + 2 * 86400000).toISOString().split('T')[0] },
-        { label: '1st Installment (50% Advance)', amount: advanceAmount, due_date: new Date(Date.now() + 5 * 86400000).toISOString().split('T')[0] },
-        { label: 'Final Balance', amount: balanceAmount, due_date: new Date(Date.now() + 15 * 86400000).toISOString().split('T')[0] }
+        { label: 'Booking Deposit (30% Advance)', amount: advanceRequired, due_date: new Date(Date.now() + 2 * 86400000).toISOString().split('T')[0] },
+        { label: 'Balance Before Departure (70%)', amount: balanceAmount, due_date: new Date(Date.now() + 15 * 86400000).toISOString().split('T')[0] }
       ],
       itinerary_data: {
         destination: activeLead?.destination || 'Destination',

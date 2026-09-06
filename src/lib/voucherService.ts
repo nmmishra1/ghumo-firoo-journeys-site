@@ -363,3 +363,74 @@ export function generateCabVoucherPDF(data: CabVoucherData): jsPDF {
 
   return doc;
 }
+
+/**
+ * Generate Activity & Sightseeing Confirmation Voucher PDF
+ */
+export function generateActivityVoucherPDF(data: ActivityVoucherData): jsPDF {
+  const doc = new jsPDF();
+
+  // Header Background
+  doc.setFillColor(BRAND_NAVY[0], BRAND_NAVY[1], BRAND_NAVY[2]);
+  doc.rect(0, 0, 210, 36, 'F');
+
+  // Header Title
+  doc.setTextColor(255, 255, 255);
+  doc.setFontSize(20);
+  doc.setFont('helvetica', 'bold');
+  doc.text('ACTIVITY & SIGHTSEEING VOUCHER', 14, 18);
+
+  doc.setFontSize(9);
+  doc.setFont('helvetica', 'normal');
+  doc.text('Ghumo Firoo Journeys | Concierge Desk: +91-9876543210', 14, 27);
+
+  doc.text(`Voucher #: ${data.voucherNumber}`, 145, 18);
+  doc.text(`Date: ${data.bookingDate}`, 145, 25);
+
+  // Details Box
+  doc.setFillColor(BRAND_LIGHT[0], BRAND_LIGHT[1], BRAND_LIGHT[2]);
+  doc.rect(14, 44, 182, 50, 'F');
+  doc.rect(14, 44, 182, 50, 'S');
+
+  doc.setTextColor(BRAND_DARK[0], BRAND_DARK[1], BRAND_DARK[2]);
+  doc.setFontSize(10);
+  doc.setFont('helvetica', 'bold');
+  doc.text('Excursion & Booking Details:', 18, 53);
+
+  doc.setFontSize(9);
+  doc.setFont('helvetica', 'normal');
+  doc.text(`Guest Name: ${data.guestName}`, 18, 61);
+  doc.text(`Guest Phone: ${data.guestPhone}`, 18, 67);
+  doc.text(`Activity / Tour: ${data.activityName}`, 18, 73);
+  doc.text(`Location / City: ${data.location || data.city}`, 18, 79);
+  doc.text(`Ticket / Ref #: ${(data as any).confirmationNumber || 'Confirmed by Agency'}`, 18, 85);
+
+  doc.setFont('helvetica', 'bold');
+  doc.text(`Activity Date: ${data.activityDate}`, 115, 61);
+  doc.setFont('helvetica', 'normal');
+  doc.text(`Time Slot: ${data.timeSlot || 'As per itinerary schedule'}`, 115, 67);
+  doc.text(`Adults: ${data.adultsCount} | Children: ${data.childrenCount}`, 115, 73);
+  doc.text(`Operator/Guide: ${data.supplierContact || 'On-site Concierge'}`, 115, 79);
+
+  // Instructions
+  let y = 104;
+  doc.setFont('helvetica', 'bold');
+  doc.text('Important Instructions:', 14, y);
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(8);
+  [
+    'Please present a digital or printed copy of this voucher at the activity counter / boarding point.',
+    'Arrive at least 15-30 minutes prior to your scheduled time slot.',
+    'Carry a valid government photo ID for each passenger.'
+  ].forEach(inst => {
+    y += 5;
+    doc.text(`• ${inst}`, 18, y);
+  });
+
+  doc.setFontSize(8);
+  doc.setTextColor(100, 116, 139);
+  doc.text('Ghumo Firoo Journeys — Official Activity Voucher', 14, 280);
+
+  return doc;
+}
+

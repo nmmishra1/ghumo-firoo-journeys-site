@@ -30,6 +30,7 @@ try {
         `title` VARCHAR(255) NULL,
         `total_price` DECIMAL(12,2) DEFAULT 0.00,
         `price_per_person` DECIMAL(12,2) DEFAULT 0.00,
+        `advance_required` DECIMAL(12,2) DEFAULT 0.00,
         `currency` VARCHAR(10) DEFAULT 'INR',
         `status` VARCHAR(50) DEFAULT 'Draft',
         `expiry_date` DATE NULL,
@@ -39,20 +40,18 @@ try {
         `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         INDEX `idx_lead_option` (`lead_id`, `option_number`)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;");
+
+    $hasAdv = $pdo->query("SHOW COLUMNS FROM `proposals` LIKE 'advance_required'")->fetch();
+    if (!$hasAdv) {
+        $pdo->exec("ALTER TABLE `proposals` ADD COLUMN `advance_required` DECIMAL(12,2) NOT NULL DEFAULT 0.00 AFTER `price_per_person`");
+    }
 } catch (Exception $e) {
     error_log("Proposals table check error: " . $e->getMessage());
 }
 
-// 3. Authentication
-$user = null;
-try {
-    $user = authenticate();
-} catch (Throwable $t) {
-    // If GET and no auth token, only allow read-only preview if lead_id or proposal_id is specified
-    if ($method !== 'GET') {
-        respondUnauthorized("Authentication required to modify proposals: " . $t->getMessage());
-    }
-}
+// 3. Authentication & Role Authorization (Strict JWT Bearer token check)
+$user = authenticate();
+$profile = requireRole($user, $pdo, ['admin', 'manager', 'agent']);
 
 try {
     if ($method === 'GET') {
@@ -70,6 +69,7 @@ try {
             }
             $p['payment_schedule'] = is_string($p['payment_schedule']) ? json_decode($p['payment_schedule'], true) : ($p['payment_schedule'] ?? []);
             $p['itinerary_data'] = is_string($p['itinerary_data']) ? json_decode($p['itinerary_data'], true) : ($p['itinerary_data'] ?? []);
+            $p['advance_required'] = (float)($p['advance_required'] ?? 0) > 0 ? (float)$p['advance_required'] : round((float)($p['total_price'] ?? 0) * 0.30, 2);
             echo json_encode(['status' => 'success', 'action' => $realAction ?: 'get_proposal', 'data' => $p]);
             exit();
         }
@@ -88,6 +88,7 @@ try {
         foreach ($proposals as &$p) {
             $p['payment_schedule'] = is_string($p['payment_schedule']) ? json_decode($p['payment_schedule'], true) : ($p['payment_schedule'] ?? []);
             $p['itinerary_data'] = is_string($p['itinerary_data']) ? json_decode($p['itinerary_data'], true) : ($p['itinerary_data'] ?? []);
+            $p['advance_required'] = (float)($p['advance_required'] ?? 0) > 0 ? (float)$p['advance_required'] : round((float)($p['total_price'] ?? 0) * 0.30, 2);
         }
 
         echo json_encode([
@@ -97,13 +98,6 @@ try {
             'count' => count($proposals)
         ]);
         exit();
-    }
-
-    // Require staff role for mutating methods (POST, PUT, DELETE)
-    if ($user) {
-        requireRole($user, $pdo, ['admin', 'manager', 'agent']);
-    } else {
-        respondUnauthorized("Authentication required to create or modify proposals");
     }
 
     if ($method === 'POST') {
@@ -127,23 +121,23 @@ try {
         $title = trim($input['title'] ?? ("Trip Proposal Option " . $option_number));
         $total_price = floatval($input['total_price'] ?? 0);
         $price_per_person = floatval($input['price_per_person'] ?? ($total_price > 0 ? $total_price / 2 : 0));
+        $advance_required = isset($input['advance_required']) ? floatval($input['advance_required']) : round($total_price * 0.30, 2);
         $currency = $input['currency'] ?? 'INR';
         $status = $input['status'] ?? 'Draft';
         $expiry_date = $input['expiry_date'] ?? date('Y-m-d', strtotime('+7 days'));
         
         $payment_schedule = isset($input['payment_schedule']) ? json_encode($input['payment_schedule']) : json_encode([
-            ['label' => 'Booking Amount (Token)', 'amount' => round($total_price * 0.20), 'due_date' => date('Y-m-d')],
-            ['label' => '1st Installment (50% Advance)', 'amount' => round($total_price * 0.30), 'due_date' => date('Y-m-d', strtotime('+5 days'))],
-            ['label' => 'Final Balance', 'amount' => round($total_price * 0.50), 'due_date' => date('Y-m-d', strtotime('+15 days'))]
+            ['label' => 'Booking Deposit (30% Advance)', 'amount' => round($total_price * 0.30), 'due_date' => date('Y-m-d')],
+            ['label' => 'Balance Before Departure (70%)', 'amount' => round($total_price * 0.70), 'due_date' => date('Y-m-d', strtotime('+15 days'))]
         ]);
         $itinerary_data = isset($input['itinerary_data']) ? json_encode($input['itinerary_data']) : json_encode([]);
 
-        $stmt = $pdo->prepare("INSERT INTO proposals (lead_id, option_number, option_name, title, total_price, price_per_person, currency, status, expiry_date, payment_schedule, itinerary_data) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-        $stmt->execute([$lead_id, $option_number, $option_name, $title, $total_price, $price_per_person, $currency, $status, $expiry_date, $payment_schedule, $itinerary_data]);
+        $stmt = $pdo->prepare("INSERT INTO proposals (lead_id, option_number, option_name, title, total_price, price_per_person, advance_required, currency, status, expiry_date, payment_schedule, itinerary_data) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        $stmt->execute([$lead_id, $option_number, $option_name, $title, $total_price, $price_per_person, $advance_required, $currency, $status, $expiry_date, $payment_schedule, $itinerary_data]);
         
         $new_id = (int)$pdo->lastInsertId();
 
-        writeAuditLog($pdo, 'proposals', (string)$new_id, 'CREATE_PROPOSAL_OPTION', null, "Created Option {$option_number}: {$title} (₹{$total_price})", $user);
+        writeAuditLog($pdo, 'proposals', (string)$new_id, 'CREATE_PROPOSAL_OPTION', null, "Created Option {$option_number}: {$title} (₹{$total_price}, Advance: ₹{$advance_required})", $user);
 
         echo json_encode([
             'status' => 'success', 
@@ -151,7 +145,8 @@ try {
             'message' => "Proposal Option {$option_number} created successfully", 
             'proposal_id' => $new_id,
             'option_number' => $option_number,
-            'option_name' => $option_name
+            'option_name' => $option_name,
+            'advance_required' => $advance_required
         ]);
         exit();
     }
@@ -253,6 +248,7 @@ try {
             if (isset($input['status'])) { $fields[] = "status = ?"; $params[] = $input['status']; }
             if (isset($input['total_price'])) { $fields[] = "total_price = ?"; $params[] = floatval($input['total_price']); }
             if (isset($input['price_per_person'])) { $fields[] = "price_per_person = ?"; $params[] = floatval($input['price_per_person']); }
+            if (isset($input['advance_required'])) { $fields[] = "advance_required = ?"; $params[] = floatval($input['advance_required']); }
             if (isset($input['currency'])) { $fields[] = "currency = ?"; $params[] = $input['currency']; }
             if (isset($input['expiry_date'])) { $fields[] = "expiry_date = ?"; $params[] = $input['expiry_date']; }
             if (isset($input['payment_schedule'])) { 
