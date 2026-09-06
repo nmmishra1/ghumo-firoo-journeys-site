@@ -5380,6 +5380,11 @@ const DynamicPackageDetail: React.FC<DynamicPackageDetailProps> = ({ slug: propS
                   packageType={packageType}
                   destination={packageDetails.destinations[0] || ""}
                   quickFacts={quickFacts}
+                  selectedCabName={selectedCab.name}
+                  selectedCabId={selectedCabId}
+                  passengerCount={isDhamPackage ? dhamAdultsCount : passengerCount}
+                  adultsCount={isDhamPackage ? dhamAdultsCount : passengerCount}
+                  totalPayablePrice={finalPricePerPerson * (isDhamPackage ? dhamAdultsCount : passengerCount)}
                 />
               </div>
             </div>

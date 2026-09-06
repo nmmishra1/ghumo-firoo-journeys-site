@@ -40,7 +40,9 @@ interface PackageSidebarProps {
   ctaLabel?: string;
   enquireLabel?: string;
   selectedCabName?: string;
-  selectedCabId?: string;
+  passengerCount?: number;
+  totalPayablePrice?: number;
+  adultsCount?: number;
   quickFacts?: {
     groupSize?: string;
     bestTime?: string;
@@ -60,6 +62,9 @@ const PackageSidebar: React.FC<PackageSidebarProps> = ({
   enquireLabel,
   selectedCabName,
   selectedCabId,
+  passengerCount,
+  totalPayablePrice,
+  adultsCount,
   quickFacts = {} 
 }) => {
   const {
@@ -72,7 +77,7 @@ const PackageSidebar: React.FC<PackageSidebarProps> = ({
     transport = "Flights & Transfers"
   } = quickFacts;
 
-  const contextStr = `${destination || ''} ${packageDetails?.title || ''}`.toLowerCase();
+  const contextStr = `${destination || ''} ${packageDetails?.title || ''} ${(packageDetails as any)?.slug || ''}`.toLowerCase();
   
   let pickupOptions: string[] = [];
   let dropOptions: string[] = [];
@@ -93,12 +98,12 @@ const PackageSidebar: React.FC<PackageSidebarProps> = ({
       'Rishikesh Railway Station',
       'Dehradun Railway Station'
     ];
-  } else if (contextStr.includes('rann') || contextStr.includes('gujarat') || contextStr.includes('bhuj') || contextStr.includes('utsav')) {
+  } else if (contextStr.includes('rann') || contextStr.includes('gujarat') || contextStr.includes('bhuj') || contextStr.includes('utsav') || contextStr.includes('kutch')) {
     pickupOptions = [
       'Bhuj Railway Station',
       'Bhuj Airport (BHJ)',
-      'Rajkot Airport (RAJ)',
       'Gandhidham Railway Station',
+      'Rajkot Airport (RAJ)',
       'Ahmedabad Airport (AMD)'
     ];
     dropOptions = [
@@ -283,23 +288,22 @@ const PackageSidebar: React.FC<PackageSidebarProps> = ({
             </div>
 
             <div className="space-y-2.5 text-xs">
-              {!isEvokeSharedCoach && (
-                <div className="space-y-1">
-                  <Label className="text-[11px] text-slate-300 font-bold flex items-center gap-1">
-                    <Car className="w-3 h-3 text-amber-400" /> Select Vehicle / Cab Type
-                  </Label>
-                  <Select value={cabId} onValueChange={setCabId}>
-                    <SelectTrigger className="h-9 bg-slate-950 border-slate-700 text-slate-100 font-semibold text-xs">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {cabOptions.map(option => (
-                        <SelectItem key={option.id} value={option.id}>{option.name}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+              <div className="space-y-1">
+                <Label className="text-[11px] text-slate-300 font-bold flex items-center gap-1">
+                  <Car className="w-3 h-3 text-amber-400" /> Private Vehicle / Cab Type
+                </Label>
+                <div className="p-2.5 bg-slate-950/90 rounded-xl border border-amber-500/30 flex items-center justify-between shadow-inner">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <Car className="w-4 h-4 text-amber-400 shrink-0" />
+                    <span className="text-xs font-bold text-slate-100 truncate">
+                      {isEvokeSharedCoach ? 'Official Fixed AC Coach (Included)' : (selectedCabName || activeCab.name)}
+                    </span>
+                  </div>
+                  <span className="text-[10px] bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 px-2 py-0.5 rounded-full font-bold uppercase tracking-wider shrink-0">
+                    Auto-Selected
+                  </span>
                 </div>
-              )}
+              </div>
 
               <div className="space-y-1">
                 <Label className="text-[11px] text-slate-300 font-bold flex items-center gap-1">
@@ -459,15 +463,23 @@ const PackageSidebar: React.FC<PackageSidebarProps> = ({
               }}
               packageType={packageType}
               destination={destination}
-              pickupLocation={pickupOptions[0] || `${destination} Pickup (Station/Airport)`}
-              dropLocation={dropOptions[0] || `${destination} Drop-off Point`}
-              groupSize={groupSize}
+              pickupLocation={pickupStation}
+              dropLocation={dropStation}
+              groupSize={passengerCount ? `${passengerCount} Travelers` : groupSize}
               bestTime={bestTime}
               difficulty={difficulty}
               ageLimit={ageLimit}
               accommodation={accommodation}
               meals={meals}
-              transport={transport}
+              transport={selectedCabName || activeCab.name || transport}
+              selectedCabName={selectedCabName || activeCab.name}
+              travelDate={travelDate}
+              returnDate={returnDate}
+              passengersCount={passengerCount || travelers}
+              adultsCount={adultsCount || passengerCount || travelers}
+              totalPrice={totalPayablePrice || packageDetails.price}
+              isQuoteMode={true}
+              buttonLabel="Download Quote PDF"
             />
             
             <div className="grid grid-cols-2 gap-2">

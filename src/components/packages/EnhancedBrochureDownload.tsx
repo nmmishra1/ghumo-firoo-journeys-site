@@ -74,6 +74,16 @@ interface EnhancedBrochureDownloadProps {
   transport?: string;
   pickupLocation?: string;
   dropLocation?: string;
+  buttonLabel?: string;
+  isQuoteMode?: boolean;
+  selectedCabName?: string;
+  travelDate?: string;
+  returnDate?: string;
+  passengersCount?: number;
+  adultsCount?: number;
+  childrenCount?: number;
+  infantsCount?: number;
+  totalPrice?: number | string;
 }
 
 const EnhancedBrochureDownload: React.FC<EnhancedBrochureDownloadProps> = ({
@@ -89,7 +99,17 @@ const EnhancedBrochureDownload: React.FC<EnhancedBrochureDownloadProps> = ({
   meals,
   transport,
   pickupLocation,
-  dropLocation
+  dropLocation,
+  buttonLabel,
+  isQuoteMode = false,
+  selectedCabName,
+  travelDate,
+  returnDate,
+  passengersCount,
+  adultsCount,
+  childrenCount,
+  infantsCount,
+  totalPrice
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
@@ -107,10 +127,19 @@ const EnhancedBrochureDownload: React.FC<EnhancedBrochureDownloadProps> = ({
     return () => { abortRef.current = true; };
   }, []);
 
-  const { register, handleSubmit, formState: { errors }, reset, watch } = useForm<LeadFormData>({
+  const { register, handleSubmit, formState: { errors }, reset, watch, setValue } = useForm<LeadFormData>({
     resolver: zodResolver(leadSchema),
-    mode: 'onChange' // Live validation
+    mode: 'onChange',
+    defaultValues: {
+      numberOfTravelers: String(passengersCount || 2)
+    }
   });
+
+  useEffect(() => {
+    if (passengersCount) {
+      setValue('numberOfTravelers', String(passengersCount));
+    }
+  }, [passengersCount, setValue]);
 
   const watchedName = watch("name");
   const watchedPhone = watch("phone");
@@ -126,8 +155,21 @@ const EnhancedBrochureDownload: React.FC<EnhancedBrochureDownloadProps> = ({
   };
 
   const getCacheKey = () => {
-    const schemaVersion = 'v5';
-    const s = JSON.stringify({ v: schemaVersion, packageDetails, packageType, destination }).slice(0, 10000);
+    const schemaVersion = 'v8';
+    const s = JSON.stringify({ 
+      v: schemaVersion, 
+      packageDetails, 
+      packageType, 
+      destination,
+      isQuoteMode,
+      selectedCabName,
+      travelDate,
+      returnDate,
+      pickupLocation,
+      dropLocation,
+      passengersCount,
+      totalPrice
+    }).slice(0, 10000);
     let h = 5381;
     for (let i = 0; i < s.length; i++) h = ((h << 5) + h) ^ s.charCodeAt(i);
     return `brochure:${h >>> 0}`;
@@ -241,6 +283,11 @@ const EnhancedBrochureDownload: React.FC<EnhancedBrochureDownloadProps> = ({
   };
 
   const getOfficialBrochureUrl = (): string | null => {
+    // When generating an official quote with user's customized cab, dates, or price, always render dynamic quote PDF!
+    if (isQuoteMode || selectedCabName || travelDate || totalPrice) {
+      return null;
+    }
+
     const d = (destination || packageDetails?.title || '').toLowerCase();
     const dur = (packageDetails?.duration || '').toLowerCase();
     
@@ -349,8 +396,10 @@ const EnhancedBrochureDownload: React.FC<EnhancedBrochureDownloadProps> = ({
       abortRef.current = false;
       
       toast({
-        title: "Preparing Brochure...",
-        description: "Please stay on this page. We are preparing your official travel brochure.",
+        title: isQuoteMode ? "Preparing Official Quotation..." : "Preparing Brochure...",
+        description: isQuoteMode 
+          ? "Please stay on this page. We are preparing your official customized travel quotation."
+          : "Please stay on this page. We are preparing your official travel brochure.",
       });
 
       // 1. Silent PDF Generation or Official Brochure Attachment
@@ -358,7 +407,10 @@ const EnhancedBrochureDownload: React.FC<EnhancedBrochureDownloadProps> = ({
       if (abortRef.current) return;
 
       const officialPdf = getOfficialBrochureUrl();
-      const pdfFileName = officialPdf ? officialPdf.split('/').pop()! : `${destination.replace(/\s+/g, '_')}_Brochure.pdf`;
+      const cleanPkgName = packageDetails.title.replace(/[^\w\s-]/g, '').trim().replace(/\s+/g, '_');
+      const pdfFileName = officialPdf 
+        ? officialPdf.split('/').pop()! 
+        : (isQuoteMode ? `${cleanPkgName}_Official_Quote.pdf` : `${destination.replace(/\s+/g, '_')}_Brochure.pdf`);
 
       // Create PDF blob URL for instant download
       const bin = atob(base64Pdf);
@@ -381,9 +433,9 @@ const EnhancedBrochureDownload: React.FC<EnhancedBrochureDownloadProps> = ({
         customerName: data.name,
         customerEmail: data.email,
         customerPhone: data.phone,
-        source: 'Brochure Download',
+        source: isQuoteMode ? ('Quote PDF Download' as const) : ('Brochure Download' as const),
         status: 'New Inquiry',
-        notes: `Requested brochure for ${packageDetails.title}. City: ${data.city}, Travel Month: ${data.travelMonth}, Travelers: ${data.numberOfTravelers}, Budget: ${data.budget}`,
+        notes: `Requested ${isQuoteMode ? 'Official Quotation' : 'Brochure'} for ${packageDetails.title}. Cab: ${selectedCabName || transport || 'Standard'}, Travel Dates: ${travelDate || 'Not specified'} to ${returnDate || 'Not specified'}, Pickup: ${pickupLocation || 'Default'}, Drop: ${dropLocation || 'Default'}, City: ${data.city}, Travel Month: ${data.travelMonth}, Travelers: ${data.numberOfTravelers}, Budget: ${data.budget}`,
         brochureRequested: 'Yes' as const,
         brochureSent: 'Pending' as const,
         brochureEmailStatus: 'Pending' as const,
@@ -520,6 +572,47 @@ const EnhancedBrochureDownload: React.FC<EnhancedBrochureDownloadProps> = ({
     const bgImage = selectBrochureHeroImage();
     const brandLogo = '/Ghumo_Firoo.png';
 
+    const effectivePax = passengersCount || Number(watchedNumberOfTravelers) || 2;
+    const effectiveAdults = adultsCount || effectivePax;
+    const effectiveChildren = childrenCount || 0;
+    const effectiveCabName = selectedCabName || transport || 'AC Sedan (Swift Dzire / Toyota Etios)';
+    const effectivePickup = pickupLocation || 'Bhuj Railway Station';
+    const effectiveDrop = dropLocation || 'Bhuj Railway Station';
+
+    const formatDateDisplay = (dateStr?: string) => {
+      if (!dateStr) return '';
+      try {
+        const d = new Date(dateStr);
+        if (isNaN(d.getTime())) return dateStr;
+        return d.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+      } catch {
+        return dateStr;
+      }
+    };
+
+    const effectiveTravelDate = formatDateDisplay(travelDate) || 'As Confirmed';
+    const effectiveReturnDate = formatDateDisplay(returnDate) || 'As Confirmed';
+
+    let computedTotalCost = 0;
+    if (totalPrice) {
+      if (typeof totalPrice === 'number') {
+        computedTotalCost = totalPrice;
+      } else {
+        const n = Number(String(totalPrice).replace(/[^\d]/g, ''));
+        computedTotalCost = isNaN(n) ? 0 : n;
+      }
+    }
+    if (!computedTotalCost || computedTotalCost <= 0) {
+      const unit = Number(String(packageDetails.price).replace(/[^\d]/g, '')) || 0;
+      computedTotalCost = unit * effectivePax;
+    }
+    const formattedTotalCost = computedTotalCost.toLocaleString('en-IN');
+    const displayPerPaxPrice = Math.round(computedTotalCost / Math.max(1, effectivePax)).toLocaleString('en-IN');
+
+    // Quote ref and issue date
+    const quoteRef = Math.floor(100000 + Math.random() * 900000);
+    const quoteDate = new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+
     return `
       <style>
         @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=Inter:wght@400;500;600;700;800&display=swap');
@@ -645,10 +738,10 @@ const EnhancedBrochureDownload: React.FC<EnhancedBrochureDownloadProps> = ({
             <div class="cover-overlay"></div>
             <div class="brand-header">
               <img src="${brandLogo}" class="brand-logo-main" crossorigin="anonymous" />
-              <div class="brand-tag-luxe">Elite Curations</div>
+              <div class="brand-tag-luxe">${isQuoteMode ? 'Official Travel Quotation' : 'Elite Curations'}</div>
             </div>
             <div class="cover-info">
-              <div class="exclusive-badge">Private Experience</div>
+              <div class="exclusive-badge">${isQuoteMode ? `Quote Ref: GFQ-${quoteRef}` : 'Private Experience'}</div>
               <h1 class="cover-main-title">${packageDetails.title}</h1>
               <div class="gold-line" style="margin-top: 30px;"></div>
             </div>
@@ -660,13 +753,17 @@ const EnhancedBrochureDownload: React.FC<EnhancedBrochureDownloadProps> = ({
                 <div class="meta-val">${packageDetails.duration}</div>
               </div>
               <div class="meta-cell">
-                <div class="meta-label">Package Charges</div>
-                <div class="meta-val" style="font-size: 20px; font-style: normal; color: #E5C378;">Post Executive Discussion</div>
+                <div class="meta-label">${isQuoteMode ? 'Total Quotation' : 'Package Charges'}</div>
+                <div class="meta-val" style="font-size: 22px; font-style: normal; color: #E5C378;">
+                  ${isQuoteMode ? `₹${formattedTotalCost} <span style="font-size: 11px; font-weight: 600; color: #cbd5e1;">(₹${displayPerPaxPrice}/pax)</span>` : 'Post Executive Discussion'}
+                </div>
               </div>
             </div>
             <div style="text-align: right;">
-              <div class="meta-label">Curated For You</div>
-              <div style="font-family: var(--serif); font-size: 18px; color: white; font-weight: 700;">Ghumo Firoo Travels</div>
+              <div class="meta-label">${isQuoteMode ? 'Quotation Date' : 'Curated For You'}</div>
+              <div style="font-family: var(--serif); font-size: 16px; color: white; font-weight: 700;">
+                ${isQuoteMode ? quoteDate : 'Ghumo Firoo Travels'}
+              </div>
             </div>
           </div>
         </div>
@@ -677,33 +774,51 @@ const EnhancedBrochureDownload: React.FC<EnhancedBrochureDownloadProps> = ({
         <div class="corner-accent corner-tl"></div>
         <div class="page-header-luxe">
           <div class="page-number-giant">02</div>
-          <h2 class="page-header-title">The Masterplan</h2>
+          <h2 class="page-header-title">${isQuoteMode ? 'Quotation & Masterplan' : 'The Masterplan'}</h2>
         </div>
         <div class="content-wrap">
-          <!-- CHARGES CONSULTATION POLICY NOTICE -->
-          <div style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); border: 1px solid #D4AF37; border-radius: 14px; padding: 12px 18px; margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between; color: white;">
-            <div style="display: flex; align-items: center; gap: 12px;">
-              <span style="font-size: 22px;">💼</span>
-              <div>
-                <div style="font-size: 11px; font-weight: 800; color: #D4AF37; text-transform: uppercase; letter-spacing: 1.5px;">Customized Pricing Policy</div>
-                <div style="font-size: 10px; color: #cbd5e1; line-height: 1.4;">Exact package charges will be given post discussion with our executive, tailored to your exact travel dates, chosen vehicle, group size, and hotel star tiers.</div>
+          <!-- OFFICIAL QUOTATION & VEHICLE DETAILS -->
+          <div style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); border: 1.5px solid #D4AF37; border-radius: 14px; padding: 13px 18px; margin-bottom: 15px; color: white; box-shadow: 0 8px 20px rgba(0,0,0,0.12);">
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(212,175,55,0.3); padding-bottom: 8px; margin-bottom: 10px;">
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <span style="font-size: 20px;">📜</span>
+                <div>
+                  <div style="font-size: 11px; font-weight: 900; color: #D4AF37; text-transform: uppercase; letter-spacing: 1.5px;">Official Travel Quotation</div>
+                  <div style="font-size: 9px; color: #cbd5e1;">Quote Ref: GFQ-${quoteRef} • Date: ${quoteDate} • Status: Confirmed Proposal</div>
+                </div>
+              </div>
+              <div style="text-align: right;">
+                <div style="font-size: 8.5px; text-transform: uppercase; letter-spacing: 1px; color: #94a3b8; font-weight: 700;">Total Package Cost</div>
+                <div style="font-size: 20px; font-weight: 900; color: #fbbf24;">₹${formattedTotalCost}</div>
+                <div style="font-size: 8.5px; color: #cbd5e1;">(₹${displayPerPaxPrice} per adult pax)</div>
               </div>
             </div>
-          </div>
 
-          <!-- LOGISTICS BAR: TRAVELERS, PICKUP, DROP -->
-          <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 16px; padding: 14px 20px; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-bottom: 18px;">
-            <div>
-              <div style="font-size: 9px; font-weight: 800; text-transform: uppercase; color: ${primaryColor}; letter-spacing: 1.5px; margin-bottom: 3px;">👥 Total Travelers</div>
-              <div style="font-size: 13px; font-weight: 800; color: ${secondaryColor};">${watchedNumberOfTravelers ? `${watchedNumberOfTravelers} Travelers` : (groupSize || 'Custom Private Group')}</div>
-            </div>
-            <div>
-              <div style="font-size: 9px; font-weight: 800; text-transform: uppercase; color: ${primaryColor}; letter-spacing: 1.5px; margin-bottom: 3px;">🛫 Pickup Point</div>
-              <div style="font-size: 12px; font-weight: 700; color: ${secondaryColor};">${pickupLocation || `${destination} Pickup (Station/Airport)`}</div>
-            </div>
-            <div>
-              <div style="font-size: 9px; font-weight: 800; text-transform: uppercase; color: ${primaryColor}; letter-spacing: 1.5px; margin-bottom: 3px;">🛬 Drop-off Point</div>
-              <div style="font-size: 12px; font-weight: 700; color: ${secondaryColor};">${dropLocation || `${destination} Drop-off Point`}</div>
+            <!-- Parameters 4-Column Grid -->
+            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; font-size: 9.5px;">
+              <div style="background: rgba(255,255,255,0.06); padding: 8px 10px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1);">
+                <div style="color: #F59E0B; font-weight: 800; text-transform: uppercase; font-size: 8px; margin-bottom: 2px;">🚗 Vehicle / Cab Type</div>
+                <div style="font-weight: 800; color: #ffffff; font-size: 10.5px; line-height: 1.25;">${effectiveCabName}</div>
+                <div style="color: #34d399; font-size: 8px; font-weight: 700; margin-top: 2px;">✓ Private Dedicated AC</div>
+              </div>
+
+              <div style="background: rgba(255,255,255,0.06); padding: 8px 10px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1);">
+                <div style="color: #F59E0B; font-weight: 800; text-transform: uppercase; font-size: 8px; margin-bottom: 2px;">📅 Travel Schedule</div>
+                <div style="font-weight: 800; color: #ffffff; font-size: 10.5px; line-height: 1.25;">${effectiveTravelDate}</div>
+                <div style="color: #94a3b8; font-size: 8px; margin-top: 2px;">Return: ${effectiveReturnDate}</div>
+              </div>
+
+              <div style="background: rgba(255,255,255,0.06); padding: 8px 10px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1);">
+                <div style="color: #F59E0B; font-weight: 800; text-transform: uppercase; font-size: 8px; margin-bottom: 2px;">👥 Guest Count</div>
+                <div style="font-weight: 800; color: #ffffff; font-size: 10.5px; line-height: 1.25;">${effectiveAdults} Adult${effectiveAdults > 1 ? 's' : ''}${effectiveChildren > 0 ? ` + ${effectiveChildren} Child` : ''}</div>
+                <div style="color: #94a3b8; font-size: 8px; margin-top: 2px;">Total: ${effectivePax} Guests</div>
+              </div>
+
+              <div style="background: rgba(255,255,255,0.06); padding: 8px 10px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1);">
+                <div style="color: #F59E0B; font-weight: 800; text-transform: uppercase; font-size: 8px; margin-bottom: 2px;">📍 Transfer Route</div>
+                <div style="font-weight: 700; color: #ffffff; font-size: 9.5px; line-height: 1.2;">Pickup: ${effectivePickup}</div>
+                <div style="color: #cbd5e1; font-size: 9px; line-height: 1.2; margin-top: 2px;">Drop: ${effectiveDrop}</div>
+              </div>
             </div>
           </div>
 
@@ -922,9 +1037,31 @@ const EnhancedBrochureDownload: React.FC<EnhancedBrochureDownloadProps> = ({
               </div>
             </div>
             
-            <div style="margin-top: 30px; background: rgba(15,23,42,0.85); padding: 16px 25px; border-radius: 18px; border: 1px solid rgba(245,158,11,0.4); width: 100%; text-align: center;">
-              <div style="font-size: 11px; color: #F59E0B; font-weight: 800; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 6px;">Booking Advance Policy</div>
-              <div style="font-size: 12px; color: #ffffff; font-weight: 700;">25% at booking confirmation • 50% 30 days prior • 100% 15 days prior to travel date</div>
+            <div style="margin-top: 22px; background: rgba(15,23,42,0.9); padding: 16px 22px; border-radius: 18px; border: 1.5px solid rgba(212,175,55,0.4); width: 100%; text-align: left;">
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                <div>
+                  <div style="font-size: 10px; color: #F59E0B; font-weight: 800; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 5px; display: flex; align-items: center; gap: 4px;">
+                    <span>💳</span> Booking Advance Terms
+                  </div>
+                  <div style="font-size: 10px; color: #ffffff; line-height: 1.5;">
+                    • <strong>25% Advance:</strong> Upon booking confirmation<br/>
+                    • <strong>50% Payment:</strong> 30 days prior to departure<br/>
+                    • <strong>100% Balance:</strong> 15 days prior to travel date
+                  </div>
+                </div>
+
+                <div>
+                  <div style="font-size: 10px; color: #ef4444; font-weight: 800; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 5px; display: flex; align-items: center; gap: 4px;">
+                    <span>🛡️</span> Cancellation Policy
+                  </div>
+                  <div style="font-size: 10px; color: #ffffff; line-height: 1.5;">
+                    • <strong>30+ Days Prior:</strong> 10% administrative retention<br/>
+                    • <strong>15–29 Days Prior:</strong> 25% cancellation charge<br/>
+                    • <strong>7–14 Days Prior:</strong> 50% cancellation charge<br/>
+                    • <strong>Within 7 Days / No Show:</strong> 100% non-refundable
+                  </div>
+                </div>
+              </div>
             </div>
 
             <div style="margin-top: 35px;">
@@ -1016,12 +1153,15 @@ const EnhancedBrochureDownload: React.FC<EnhancedBrochureDownloadProps> = ({
           if (d1) { legacyBuf = d1; break; }
         }
       }
+
       if (cached && !abortRef.current) {
+        const cleanPkgName = packageDetails.title.replace(/[^\w\s-]/g, '').trim().replace(/\s+/g, '_');
+        const quotePdfName = isQuoteMode ? `${cleanPkgName}_Official_Quote.pdf` : `${destination.replace(/\s+/g, '_')}_Brochure.pdf`;
         const blob = new Blob([cached], { type: 'application/pdf' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `${destination.replace(/\s+/g, '_')}_Brochure.pdf`;
+        a.download = quotePdfName;
         a.click();
         URL.revokeObjectURL(url);
         await clearLegacyCaches();
@@ -1087,9 +1227,11 @@ const EnhancedBrochureDownload: React.FC<EnhancedBrochureDownloadProps> = ({
       idbPut(cacheKey, u8);
       const blob = new Blob([u8], { type: 'application/pdf' });
       const url = URL.createObjectURL(blob);
+      const cleanPkgName = packageDetails.title.replace(/[^\w\s-]/g, '').trim().replace(/\s+/g, '_');
+      const quotePdfName = isQuoteMode ? `${cleanPkgName}_Official_Quote.pdf` : `${destination.replace(/\s+/g, '_')}_Brochure.pdf`;
       const a = document.createElement('a');
       a.href = url;
-      a.download = `${destination.replace(/\s+/g, '_')}_Brochure.pdf`;
+      a.download = quotePdfName;
       a.click();
       URL.revokeObjectURL(url);
       await clearLegacyCaches();
@@ -1164,13 +1306,13 @@ const EnhancedBrochureDownload: React.FC<EnhancedBrochureDownloadProps> = ({
 
   return (
     <>
-      <Button onClick={onDownloadClick} className={`${className} bg-accent hover:bg-accent/90 text-white font-semibold py-2 px-4 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 flex items-center gap-2`} aria-label="Download brochure">
-        <FileText className="w-5 h-5" aria-hidden="true" /> Download PDF Brochure
+      <Button onClick={onDownloadClick} className={`${className} bg-accent hover:bg-accent/90 text-white font-semibold py-2 px-4 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 flex items-center gap-2`} aria-label={isQuoteMode ? "Download Quote PDF" : "Download brochure"}>
+        <FileText className="w-5 h-5" aria-hidden="true" /> {buttonLabel || (isQuoteMode ? "Download Quote PDF" : "Download PDF Brochure")}
       </Button>
       <Dialog open={isOpen} onOpenChange={handleOpenChange}>
-        <DialogContent className="max-w-[95vw] md:max-w-4xl lg:max-w-5xl p-0 overflow-hidden bg-[#0a1128] text-white border-white/10 rounded-2xl shadow-[0_25px_50px_-12px_rgba(0,0,0,0.5)] focus:outline-none" aria-label="Luxury Travel Consultation">
-          <DialogTitle className="sr-only">Download Brochure & Consultation</DialogTitle>
-          <DialogDescription className="sr-only">Request custom itinerary and download brochure</DialogDescription>
+        <DialogContent className="max-w-[95vw] md:max-w-4xl lg:max-w-5xl p-0 overflow-hidden bg-[#0a1128] text-white border-white/10 rounded-2xl shadow-[0_25px_50px_-12px_rgba(0,0,0,0.5)] focus:outline-none" aria-label={isQuoteMode ? "Official Travel Quotation" : "Luxury Travel Consultation"}>
+          <DialogTitle className="sr-only">{isQuoteMode ? "Download Official Travel Quote" : "Download Brochure & Consultation"}</DialogTitle>
+          <DialogDescription className="sr-only">{isQuoteMode ? "Request and download official personalized travel quotation" : "Request custom itinerary and download brochure"}</DialogDescription>
           <div className="flex flex-col md:flex-row h-auto md:h-[620px] overflow-hidden">
             
             {/* LEFT SIDE (40% width on desktop, top on mobile) */}
@@ -1189,7 +1331,7 @@ const EnhancedBrochureDownload: React.FC<EnhancedBrochureDownloadProps> = ({
               <div className="relative z-10 flex flex-col justify-between h-full text-left">
                 <div>
                   <span className="inline-block px-2.5 py-0.5 text-[9px] font-bold tracking-widest text-[#D4AF37] uppercase bg-[#D4AF37]/10 border border-[#D4AF37]/30 rounded-full mb-2">
-                    Luxury Consult
+                    {isQuoteMode ? "Official Quotation" : "Luxury Consult"}
                   </span>
                   <h3 className="font-display text-xl md:text-2xl font-bold tracking-tight text-white leading-tight">
                     {packageDetails.title.replace(/^\d+-Day\s+/, '')}
@@ -1233,25 +1375,29 @@ const EnhancedBrochureDownload: React.FC<EnhancedBrochureDownloadProps> = ({
                     </div>
                   </div>
 
-                  {/* Starting Price */}
+                  {/* Starting Price / Quotation */}
                   <div className="flex items-center gap-3">
                     <span className="flex items-center justify-center w-7 h-7 rounded-lg bg-white/5 border border-white/10 text-[#D4AF37]">
                       <span className="text-xs font-bold">₹</span>
                     </span>
                     <div>
-                      <p className="text-[9px] text-white/50 uppercase tracking-wider font-semibold">Starting Price</p>
-                      <p className="text-xs font-bold text-white">₹{formatPrice()}</p>
+                      <p className="text-[9px] text-white/50 uppercase tracking-wider font-semibold">{isQuoteMode ? "Total Quotation" : "Starting Price"}</p>
+                      <p className="text-xs font-bold text-white">
+                        {isQuoteMode && totalPrice 
+                          ? `₹${Number(String(totalPrice).replace(/[^\d]/g, '')).toLocaleString('en-IN')}` 
+                          : `₹${formatPrice()}`}
+                      </p>
                     </div>
                   </div>
 
-                  {/* Travel Style */}
+                  {/* Travel Style / Cab */}
                   <div className="flex items-center gap-3">
                     <span className="flex items-center justify-center w-7 h-7 rounded-lg bg-white/5 border border-white/10 text-[#D4AF37]">
                       <ShieldCheck className="w-3.5 h-3.5" />
                     </span>
                     <div>
-                      <p className="text-[9px] text-white/50 uppercase tracking-wider font-semibold">Travel Style</p>
-                      <p className="text-xs font-semibold text-white">{transport || "Airport Transfers Included"}</p>
+                      <p className="text-[9px] text-white/50 uppercase tracking-wider font-semibold">{isQuoteMode ? "Selected Vehicle" : "Travel Style"}</p>
+                      <p className="text-xs font-semibold text-white truncate max-w-[180px]">{selectedCabName || transport || "Private Transfers Included"}</p>
                     </div>
                   </div>
                 </div>
@@ -1321,10 +1467,12 @@ const EnhancedBrochureDownload: React.FC<EnhancedBrochureDownloadProps> = ({
                   {/* Header */}
                   <div>
                     <h2 className="font-display text-xl md:text-2xl font-bold tracking-tight text-white mb-1.5 leading-tight">
-                      Download Premium Travel Guide
+                      {isQuoteMode ? "Download Official Travel Quote" : "Download Premium Travel Guide"}
                     </h2>
                     <p className="text-white/70 text-[11px] leading-relaxed md:text-xs">
-                      Receive complete itinerary, hotel options, sightseeing, inclusions, exclusions, and pricing details.
+                      {isQuoteMode 
+                        ? "Receive personalized quotation PDF with your selected vehicle, travel dates, pickup/drop station, hotel details, and price."
+                        : "Receive complete itinerary, hotel options, sightseeing, inclusions, exclusions, and pricing details."}
                     </p>
                   </div>
 
@@ -1574,9 +1722,9 @@ const EnhancedBrochureDownload: React.FC<EnhancedBrochureDownloadProps> = ({
                         className="w-full h-11 rounded-xl bg-gradient-to-r from-[#D4AF37] via-[#F3E5AB] to-[#AA7C11] text-[#0a1128] font-bold text-xs shadow-[0_4px_15px_rgba(212,175,55,0.2)] hover:opacity-95 hover:scale-[1.005] active:scale-[0.995] transition-all flex items-center justify-center gap-2"
                       >
                         {isDownloading ? (
-                          <><Loader2 className="w-4 h-4 animate-spin text-[#0a1128]" /> Preparing Itinerary {progress ? `${progress}%` : ''}</>
+                          <><Loader2 className="w-4 h-4 animate-spin text-[#0a1128]" /> {isQuoteMode ? 'Generating Official Quote' : 'Preparing Itinerary'} {progress ? `${progress}%` : ''}</>
                         ) : (
-                          <><Download className="w-3.5 h-3.5" /> Download Premium Brochure</>
+                          <><Download className="w-3.5 h-3.5" /> {isQuoteMode ? 'Download Official Quote PDF' : 'Download Premium Brochure'}</>
                         )}
                       </Button>
                     </div>
