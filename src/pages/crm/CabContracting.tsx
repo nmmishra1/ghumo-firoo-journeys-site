@@ -18,6 +18,7 @@ import {
   ArrowRight, Landmark, Calendar, Trash2, Layers, RefreshCw, Clock, ArrowLeft, Save
 } from 'lucide-react';
 import { CabContractWizard } from './CabContractWizard';
+import { resolveGeography } from '@/data/geographyMaster';
 
 const API_BASE = import.meta.env.VITE_PHP_BASE_URL || import.meta.env.VITE_API_BASE_URL || '/php-backend';
 
@@ -1000,11 +1001,41 @@ export default function CabContracting() {
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1">
                 <Label>Source Station *</Label>
-                <Input required value={routeForm.source} onChange={e => setRouteForm({ ...routeForm, source: e.target.value })} className="bg-slate-900 border-slate-700 h-8" placeholder="e.g. Delhi Airport" />
+                <Input
+                  required
+                  value={routeForm.source}
+                  onChange={e => {
+                    const val = e.target.value;
+                    const geo = resolveGeography(val);
+                    setRouteForm(prev => ({
+                      ...prev,
+                      source: val,
+                      state: (!prev.state || prev.state === '') && geo.state ? geo.state : prev.state,
+                      country: (!prev.country || prev.country === '') && geo.country ? geo.country : prev.country
+                    }));
+                  }}
+                  className="bg-slate-900 border-slate-700 h-8"
+                  placeholder="e.g. Delhi Airport"
+                />
               </div>
               <div className="space-y-1">
                 <Label>Destination Station *</Label>
-                <Input required value={routeForm.destination} onChange={e => setRouteForm({ ...routeForm, destination: e.target.value })} className="bg-slate-900 border-slate-700 h-8" placeholder="e.g. Jaipur Hotel" />
+                <Input
+                  required
+                  value={routeForm.destination}
+                  onChange={e => {
+                    const val = e.target.value;
+                    const geo = resolveGeography(val);
+                    setRouteForm(prev => ({
+                      ...prev,
+                      destination: val,
+                      state: (!prev.state || prev.state === '') && geo.state ? geo.state : prev.state,
+                      country: (!prev.country || prev.country === '') && geo.country ? geo.country : prev.country
+                    }));
+                  }}
+                  className="bg-slate-900 border-slate-700 h-8"
+                  placeholder="e.g. Jaipur Hotel"
+                />
               </div>
               <div className="space-y-1">
                 <Label>Route Type</Label>

@@ -13,6 +13,7 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { SIGHTSEEING_SPOTS } from '@/data/sightseeingData';
 import { MASTER_DESTINATIONS } from '@/data/masterDestinations';
+import { isStateInIndia } from '@/data/geographyMaster';
 import { 
   Globe, Map, MapPin, Plus, Search, Edit, Power, Download, Upload, 
   ArrowLeft, Check, X, Loader2, RefreshCw, HelpCircle, Layers, Trash2,
@@ -208,10 +209,18 @@ export const DestinationManagement: React.FC = () => {
       }
 
       // Calculate state count per country
-      const countriesWithCounts = allCountries.map(c => ({
-        ...c,
-        state_count: allStates.filter(s => String(s.country_id) === String(c.id)).length
-      }));
+      const countriesWithCounts = allCountries.map(c => {
+        const isInd = (c.country_name || '').toLowerCase() === 'india';
+        const validStates = allStates.filter(s => {
+          if (String(s.country_id) !== String(c.id)) return false;
+          if (isInd && !isStateInIndia(s.state_name)) return false;
+          return true;
+        });
+        return {
+          ...c,
+          state_count: validStates.length
+        };
+      });
 
       setCountries(countriesWithCounts);
 
@@ -219,7 +228,7 @@ export const DestinationManagement: React.FC = () => {
       if (countriesWithCounts.length > 0) {
         const first = countriesWithCounts[0];
         setSelectedCountry(first);
-        loadStatesForCountry(first.id, allStates, allCities);
+        loadStatesForCountry(first.id, allStates, allCities, first);
       }
     } catch (err: any) {
       toast({ title: "Error", description: err.message || "Failed to initialize destinations", variant: "destructive" });
@@ -229,9 +238,12 @@ export const DestinationManagement: React.FC = () => {
   };
 
   // Fetch / Refresh States for a selected Country
-  const loadStatesForCountry = async (countryId: string, preloadedStates?: State[], preloadedCities?: City[]) => {
+  const loadStatesForCountry = async (countryId: string, preloadedStates?: State[], preloadedCities?: City[], explicitCountry?: Country) => {
     try {
       const authHeaders = await getAuthHeader();
+      const currentCountry = explicitCountry || selectedCountry;
+      const isIndia = (currentCountry?.country_name || '').toLowerCase() === 'india';
+
       const res = await fetch(`${API_BASE}/api.php?table=states&country_id=${countryId}`, {
         headers: authHeaders
       });
@@ -241,13 +253,13 @@ export const DestinationManagement: React.FC = () => {
         const stateList = Array.isArray(raw) ? raw : [];
 
         // Bug 3: If country has 0 states (e.g. Singapore, UAE), load direct/unlinked cities for this country
-        if (stateList.length === 0 && selectedCountry) {
+        if (stateList.length === 0 && currentCountry) {
           const ciRes = await fetch(`${API_BASE}/api.php?table=cities`, { headers: authHeaders });
           if (ciRes.ok) {
             const ciRaw = await ciRes.json();
             const intlCities = (ciRaw || []).filter((c: any) => 
               (!c.state_id || c.state_id === 'null' || c.state_id === '0' || c.state_id === 0) &&
-              (c.country?.toLowerCase() === selectedCountry.country_name.toLowerCase() || c.country === selectedCountry.country_name)
+              (c.country?.toLowerCase() === currentCountry.country_name.toLowerCase() || c.country === currentCountry.country_name)
             ).map((ci: any) => ({
               ...ci,
               id: String(ci.id),
@@ -261,13 +273,18 @@ export const DestinationManagement: React.FC = () => {
           return;
         }
 
-        const parsedStates: State[] = stateList.map((s: any) => ({
+        let parsedStates: State[] = stateList.map((s: any) => ({
           ...s,
           id: String(s.id),
           country_id: String(s.country_id),
           active_status: Boolean(s.active_status === 1 || s.active_status === true || s.active_status === '1'),
           city_count: cityCountMap[String(s.id)] ?? 0
         }));
+
+        if (isIndia) {
+          parsedStates = parsedStates.filter(s => isStateInIndia(s.state_name));
+        }
+
         setStates(parsedStates);
       }
     } catch (err: any) {

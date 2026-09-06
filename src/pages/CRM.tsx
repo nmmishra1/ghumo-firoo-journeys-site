@@ -42,6 +42,7 @@ import {
 } from 'recharts';
 import Breadcrumb from '@/components/Breadcrumb';
 import { fetchCachedJson } from '@/utils/crmCache';
+import { INDIAN_STATES, CANONICAL_COUNTRIES, isStateInIndia } from '@/data/geographyMaster';
 
 const API_BASE = import.meta.env.VITE_PHP_BASE_URL || import.meta.env.VITE_API_BASE_URL || '/php-backend';
 
@@ -318,6 +319,53 @@ const CRM = () => {
   const [filterAssignedTo, setFilterAssignedTo] = useState('all');
   const [filterStatus, setFilterStatus] = useState('all');
   const [filterTravelDate, setFilterTravelDate] = useState('');
+
+  const crmCountryOptions = React.useMemo(() => {
+    const set = new Set<string>(CANONICAL_COUNTRIES);
+    leads.forEach(l => {
+      if (l.country) set.add(l.country);
+    });
+    return Array.from(set).sort();
+  }, [leads]);
+
+  const crmFilterStateOptions = React.useMemo(() => {
+    if (filterCountry.toLowerCase() === 'india') {
+      return INDIAN_STATES;
+    }
+    if (filterCountry === 'all') {
+      const allStatesSet = new Set<string>(INDIAN_STATES);
+      leads.forEach(l => {
+        if (l.state) allStatesSet.add(l.state);
+      });
+      return Array.from(allStatesSet).sort();
+    }
+    const set = new Set<string>();
+    leads.filter(l => (l.country || '').toLowerCase() === filterCountry.toLowerCase() && l.state).forEach(l => set.add(l.state!));
+    return Array.from(set).sort();
+  }, [filterCountry, leads]);
+
+  const crmFilterDestinationOptions = React.useMemo(() => {
+    const set = new Set<string>();
+    leads.forEach(l => {
+      if (filterCountry !== 'all' && (l.country || '').toLowerCase() !== filterCountry.toLowerCase()) return;
+      if (filterState !== 'all' && (l.state || '').toLowerCase() !== filterState.toLowerCase()) return;
+      if (l.destinations) {
+        l.destinations.split(/[,+]/).map(d => d.trim()).filter(Boolean).forEach(d => set.add(d));
+      }
+    });
+    return Array.from(set).sort();
+  }, [filterCountry, filterState, leads]);
+
+  const handleCrmCountryChange = (val: string) => {
+    setFilterCountry(val);
+    setFilterState('all');
+    setFilterDestination('all');
+  };
+
+  const handleCrmStateChange = (val: string) => {
+    setFilterState(val);
+    setFilterDestination('all');
+  };
 
   // Dialog & Modal states
   const [csvImportOpen, setCsvImportOpen] = useState(false);
@@ -4149,32 +4197,26 @@ const CRM = () => {
                     <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3">
                       <div className="space-y-1">
                         <label className="text-[10px] font-extrabold text-slate-700 dark:text-slate-300 uppercase">Country</label>
-                        <Select value={filterCountry} onValueChange={setFilterCountry}>
+                        <Select value={filterCountry} onValueChange={handleCrmCountryChange}>
                           <SelectTrigger className="h-8 text-xs font-medium"><SelectValue placeholder="All" /></SelectTrigger>
                           <SelectContent>
                             <SelectItem value="all">All Countries</SelectItem>
-                            <SelectItem value="India">India</SelectItem>
-                            <SelectItem value="United Arab Emirates">UAE</SelectItem>
-                            <SelectItem value="Thailand">Thailand</SelectItem>
-                            <SelectItem value="Singapore">Singapore</SelectItem>
+                            {crmCountryOptions.map(c => (
+                              <SelectItem key={c} value={c}>{c}</SelectItem>
+                            ))}
                           </SelectContent>
                         </Select>
                       </div>
 
                       <div className="space-y-1">
                         <label className="text-[10px] font-extrabold text-slate-700 dark:text-slate-300 uppercase">State</label>
-                        <Select value={filterState} onValueChange={setFilterState}>
+                        <Select value={filterState} onValueChange={handleCrmStateChange}>
                           <SelectTrigger className="h-8 text-xs font-medium"><SelectValue placeholder="All" /></SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="all">All States</SelectItem>
-                            <SelectItem value="Delhi">Delhi</SelectItem>
-                            <SelectItem value="Maharashtra">Maharashtra</SelectItem>
-                            <SelectItem value="Rajasthan">Rajasthan</SelectItem>
-                            <SelectItem value="Goa">Goa</SelectItem>
-                            <SelectItem value="Kerala">Kerala</SelectItem>
-                            <SelectItem value="Himachal Pradesh">Himachal</SelectItem>
-                            <SelectItem value="Uttarakhand">Uttarakhand</SelectItem>
-                            <SelectItem value="Kashmir">Kashmir</SelectItem>
+                            <SelectItem value="all">All States ({crmFilterStateOptions.length})</SelectItem>
+                            {crmFilterStateOptions.map(s => (
+                              <SelectItem key={s} value={s}>{s}</SelectItem>
+                            ))}
                           </SelectContent>
                         </Select>
                       </div>
@@ -4184,13 +4226,10 @@ const CRM = () => {
                         <Select value={filterDestination} onValueChange={setFilterDestination}>
                           <SelectTrigger className="h-8 text-xs font-medium"><SelectValue placeholder="All" /></SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="all">All Cities</SelectItem>
-                            <SelectItem value="Rishikesh">Rishikesh</SelectItem>
-                            <SelectItem value="Haridwar">Haridwar</SelectItem>
-                            <SelectItem value="Shimla">Shimla</SelectItem>
-                            <SelectItem value="Manali">Manali</SelectItem>
-                            <SelectItem value="Jaipur">Jaipur</SelectItem>
-                            <SelectItem value="Munnar">Munnar</SelectItem>
+                            <SelectItem value="all">All Cities ({crmFilterDestinationOptions.length})</SelectItem>
+                            {crmFilterDestinationOptions.map(d => (
+                              <SelectItem key={d} value={d}>{d}</SelectItem>
+                            ))}
                           </SelectContent>
                         </Select>
                       </div>

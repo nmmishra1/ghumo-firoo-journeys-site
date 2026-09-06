@@ -261,3 +261,23 @@ export function resolveGeography(cityName?: string | null, rawState?: string | n
     country: co || 'India'
   };
 }
+
+export const CANONICAL_COUNTRIES: string[] = [
+  'India',
+  'Indonesia',
+  'Malaysia',
+  'Maldives',
+  'Singapore',
+  'Switzerland',
+  'Thailand',
+  'United Arab Emirates',
+  'Vietnam',
+  'France'
+];
+
+export function isStateInIndia(stateName?: string | null): boolean {
+  if (!stateName) return false;
+  const sLower = stateName.toLowerCase().trim();
+  return INDIAN_STATES.some(st => st.toLowerCase() === sLower);
+}
+

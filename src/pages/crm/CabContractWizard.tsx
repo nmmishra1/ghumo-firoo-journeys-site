@@ -15,6 +15,7 @@ import {
   MapPin, Users, Phone, Mail, Globe, Sparkles, DollarSign,
   ArrowRight, Landmark, Calendar, Trash2, Layers, RefreshCw, Clock, ArrowLeft, Save
 } from 'lucide-react';
+import { resolveGeography } from '@/data/geographyMaster';
 
 const API_BASE = import.meta.env.VITE_PHP_BASE_URL || import.meta.env.VITE_API_BASE_URL || '/php-backend';
 
@@ -403,7 +404,20 @@ export const CabContractWizard: React.FC<CabContractWizardProps> = ({
   };
 
   const handleUpdateRoute = (id: string, field: string, val: any) => {
-    setRoutes(prev => prev.map(r => r.id === id ? { ...r, [field]: val } : r));
+    setRoutes(prev => prev.map(r => {
+      if (r.id !== id) return r;
+      const updated = { ...r, [field]: val };
+      if ((field === 'destination' || field === 'source') && typeof val === 'string' && val.trim().length >= 3) {
+        const geo = resolveGeography(val);
+        if (geo.state && (!r.state || r.state === '')) {
+          updated.state = geo.state;
+        }
+        if (geo.country && (!r.country || r.country === '')) {
+          updated.country = geo.country;
+        }
+      }
+      return updated;
+    }));
   };
 
   const handleAddRoute = () => {
