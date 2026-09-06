@@ -21,7 +21,7 @@ import {
 import {
   UploadCloud, Download, FileSpreadsheet, CheckCircle2, AlertTriangle, XCircle,
   Landmark, Car, MapPin, Activity, Users, RefreshCw, FileText, ArrowRight, Sparkles, Check, Trash2, Edit3, Globe,
-  Zap, Eye
+  Zap, Eye, Copy
 } from 'lucide-react';
 
 export interface RowInspection {
@@ -352,6 +352,8 @@ export const BulkUploadHub: React.FC<{ initialModule?: any }> = ({ initialModule
   const [selectedInspection, setSelectedInspection] = useState<RowInspection | null>(null);
   const [inspections, setInspections] = useState<Record<string, RowInspection>>({});
   const [singleRowLoading, setSingleRowLoading] = useState<string | null>(null);
+  const [copiedPayload, setCopiedPayload] = useState(false);
+  const [copiedResponse, setCopiedResponse] = useState(false);
 
   const currentConfig = MODULE_CONFIGS[activeModule] || MODULE_CONFIGS['hotels'];
 
@@ -600,14 +602,15 @@ export const BulkUploadHub: React.FC<{ initialModule?: any }> = ({ initialModule
             diagnosis: `Sightseeing "${dataPayload.sightseeing_name}" saved to MySQL.`
           };
         } else {
+          const failMsg = resData.error || resData.message || resData.details || `HTTP ${res.status} Error from server.`;
           return {
             ok: false,
             endpoint,
             payload,
             status: res.status,
             data: resData,
-            error: resData.error || `HTTP ${res.status}`,
-            diagnosis: resData.error || 'Server rejected sightseeing entry'
+            error: failMsg,
+            diagnosis: failMsg
           };
         }
       } catch (err: any) {
@@ -659,14 +662,15 @@ export const BulkUploadHub: React.FC<{ initialModule?: any }> = ({ initialModule
             diagnosis: `Activity "${dataPayload.activity_name}" saved to MySQL.`
           };
         } else {
+          const failMsg = resData.error || resData.message || resData.details || `HTTP ${res.status} Error from server.`;
           return {
             ok: false,
             endpoint,
             payload,
             status: res.status,
             data: resData,
-            error: resData.error || `HTTP ${res.status}`,
-            diagnosis: resData.error || 'Server rejected activity entry'
+            error: failMsg,
+            diagnosis: failMsg
           };
         }
       } catch (err: any) {
@@ -713,7 +717,7 @@ export const BulkUploadHub: React.FC<{ initialModule?: any }> = ({ initialModule
             diagnosis: `Hotel "${dataPayload.hotel_name}" saved to MySQL.`
           };
         } else {
-          const failMsg = resData.error || resData.message || `HTTP ${res.status} Error`;
+          const failMsg = resData.error || resData.message || resData.details || `HTTP ${res.status} Error from server.`;
           return {
             ok: false,
             endpoint,
@@ -773,14 +777,15 @@ export const BulkUploadHub: React.FC<{ initialModule?: any }> = ({ initialModule
             diagnosis: `Cab rate for "${dataPayload.vehicle_type}" saved to MySQL.`
           };
         } else {
+          const failMsg = resData.error || resData.message || resData.details || `HTTP ${res.status} Error from server.`;
           return {
             ok: false,
             endpoint,
             payload,
             status: res.status,
             data: resData,
-            error: resData.error || `HTTP ${res.status}`,
-            diagnosis: resData.error || 'Cab rate insert error'
+            error: failMsg,
+            diagnosis: failMsg
           };
         }
       } catch (err: any) {
@@ -831,14 +836,15 @@ export const BulkUploadHub: React.FC<{ initialModule?: any }> = ({ initialModule
             diagnosis: `Package "${pkgName}" saved to MySQL.`
           };
         } else {
+          const failMsg = resData.error || resData.message || resData.details || `HTTP ${res.status} Error from server.`;
           return {
             ok: false,
             endpoint,
             payload,
             status: res.status,
             data: resData,
-            error: resData.error || `HTTP ${res.status}`,
-            diagnosis: resData.error || 'Package insert error'
+            error: failMsg,
+            diagnosis: failMsg
           };
         }
       } catch (err: any) {
@@ -1482,14 +1488,60 @@ export const BulkUploadHub: React.FC<{ initialModule?: any }> = ({ initialModule
               </TabsTrigger>
             </TabsList>
 
-            <TabsContent value="payload" className="mt-3">
-              <div className="bg-slate-950 p-3.5 rounded-xl border border-slate-800 text-xs font-mono text-emerald-300 overflow-x-auto max-h-60 relative">
+            <TabsContent value="payload" className="mt-3 space-y-2">
+              <div className="flex justify-between items-center text-[11px] text-slate-400">
+                <span>Exact structured JSON payload transmitted by client:</span>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => {
+                    navigator.clipboard.writeText(JSON.stringify(selectedInspection?.payload, null, 2));
+                    setCopiedPayload(true);
+                    setTimeout(() => setCopiedPayload(false), 2000);
+                  }}
+                  className="h-6 px-2 text-[10px] text-slate-300 hover:text-amber-400 hover:bg-slate-800"
+                >
+                  {copiedPayload ? (
+                    <span className="flex items-center gap-1 text-emerald-400 font-bold">
+                      <Check className="w-3 h-3" /> Copied!
+                    </span>
+                  ) : (
+                    <span className="flex items-center gap-1">
+                      <Copy className="w-3 h-3" /> Copy Payload JSON
+                    </span>
+                  )}
+                </Button>
+              </div>
+              <div className="bg-slate-950 p-4 rounded-xl border border-slate-800 text-xs font-mono text-emerald-300 overflow-x-auto max-h-72 shadow-inner">
                 <pre>{JSON.stringify(selectedInspection?.payload, null, 2)}</pre>
               </div>
             </TabsContent>
 
-            <TabsContent value="response" className="mt-3">
-              <div className="bg-slate-950 p-3.5 rounded-xl border border-slate-800 text-xs font-mono text-cyan-300 overflow-x-auto max-h-60 relative">
+            <TabsContent value="response" className="mt-3 space-y-2">
+              <div className="flex justify-between items-center text-[11px] text-slate-400">
+                <span>Raw server response returned from PHP/MySQL:</span>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => {
+                    navigator.clipboard.writeText(JSON.stringify(selectedInspection?.response, null, 2));
+                    setCopiedResponse(true);
+                    setTimeout(() => setCopiedResponse(false), 2000);
+                  }}
+                  className="h-6 px-2 text-[10px] text-slate-300 hover:text-amber-400 hover:bg-slate-800"
+                >
+                  {copiedResponse ? (
+                    <span className="flex items-center gap-1 text-emerald-400 font-bold">
+                      <Check className="w-3 h-3" /> Copied!
+                    </span>
+                  ) : (
+                    <span className="flex items-center gap-1">
+                      <Copy className="w-3 h-3" /> Copy Response JSON
+                    </span>
+                  )}
+                </Button>
+              </div>
+              <div className="bg-slate-950 p-4 rounded-xl border border-slate-800 text-xs font-mono text-cyan-300 overflow-x-auto max-h-72 shadow-inner">
                 <pre>{JSON.stringify(selectedInspection?.response, null, 2)}</pre>
               </div>
             </TabsContent>
