@@ -5,8 +5,7 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-const PIXEL_ID = '1111618530664737';
-const FALLBACK_TOKEN = 'REDACTED_META_TOKEN';
+const PIXEL_ID = Deno.env.get('META_PIXEL_ID') || '1111618530664737';
 
 async function sha256(message: string) {
   const encoder = new TextEncoder();
@@ -24,7 +23,14 @@ serve(async (req) => {
   try {
     const { event_name, event_time, user_data, custom_data, event_source_url, action_source } = await req.json();
 
-    const accessToken = Deno.env.get('META_ACCESS_TOKEN') || FALLBACK_TOKEN;
+    const accessToken = Deno.env.get('META_ACCESS_TOKEN');
+    if (!accessToken) {
+      console.error('META_ACCESS_TOKEN is not configured in environment variables');
+      return new Response(
+        JSON.stringify({ error: 'Meta Conversions API is not configured' }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
 
     const processedUserData: any = {};
     if (user_data) {

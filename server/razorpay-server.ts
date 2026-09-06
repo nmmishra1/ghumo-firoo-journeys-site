@@ -44,9 +44,66 @@ app.use('/api', (req, res, next) => {
   next();
 });
 
-app.use(cors());
+const allowedOrigins = [
+  'https://ghumofiroo.com',
+  'https://www.ghumofiroo.com',
+  'http://localhost:5173',
+  'http://localhost:8080',
+  'http://localhost:8081',
+  'http://127.0.0.1:5173',
+  'http://127.0.0.1:8080',
+  'http://127.0.0.1:8081'
+];
+
+app.use(cors({
+  origin: (origin, callback) => {
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.includes(origin) || origin.endsWith('.ghumofiroo.com')) {
+      return callback(null, true);
+    }
+    return callback(new Error('CORS access denied'), false);
+  },
+  credentials: true
+}));
+
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true }));
+
+const SUPABASE_URL = process.env.VITE_SUPABASE_URL || '';
+const SUPABASE_ANON_KEY = process.env.VITE_SUPABASE_ANON_KEY || '';
+const supabaseAdmin = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+// Authentication middleware to protect sensitive CRUD endpoints
+async function requireAuth(req: express.Request, res: express.Response, next: express.NextFunction) {
+  try {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return res.status(401).json({ error: 'Unauthorized: Missing or invalid Authorization header' });
+    }
+    const token = authHeader.split(' ')[1];
+    
+    // Check if internal server secret matches or verify via Supabase JWT
+    const internalSecret = process.env.INTERNAL_API_SECRET;
+    if (internalSecret && token === internalSecret) {
+      return next();
+    }
+
+    if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
+      return res.status(500).json({ error: 'Authentication service not configured' });
+    }
+
+    const { data: { user }, error } = await supabaseAdmin.auth.getUser(token);
+    if (error || !user) {
+      return res.status(401).json({ error: 'Unauthorized: Invalid or expired session' });
+    }
+
+    (req as any).user = user;
+    next();
+  } catch (err) {
+    console.error('Auth middleware error:', err);
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+}
 
 const key_id = process.env.RAZORPAY_KEY_ID || '';
 const key_secret = process.env.RAZORPAY_KEY_SECRET || '';
@@ -76,13 +133,10 @@ app.post('/api/razorpay/create-order', async (req, res) => {
     });
     res.json({ id: order.id, amount: order.amount, currency: order.currency, receipt: order.receipt });
   } catch (e: any) {
+    console.error('Create order error:', e);
     res.status(500).json({ error: 'create_order_failed' });
   }
 });
-
-const SUPABASE_URL = process.env.VITE_SUPABASE_URL || '';
-const SUPABASE_ANON_KEY = process.env.VITE_SUPABASE_ANON_KEY || '';
-const supabaseAdmin = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 // SMTP Transporter for official emails
 const transporter = nodemailer.createTransport({
@@ -303,7 +357,11 @@ app.post('/api/razorpay/verify', async (req, res) => {
     const payload = `${razorpay_order_id}|${razorpay_payment_id}`;
     const expectedSignature = crypto.createHmac('sha256', key_secret).update(payload).digest('hex');
     
-    if (expectedSignature === razorpay_signature) {
+    const expectedBuf = Buffer.from(expectedSignature, 'utf8');
+    const receivedBuf = Buffer.from(String(razorpay_signature || ''), 'utf8');
+    const isSignatureValid = expectedBuf.length === receivedBuf.length && crypto.timingSafeEqual(expectedBuf, receivedBuf);
+
+    if (isSignatureValid) {
       let finalLeadId = lead_id || '';
       if (!finalLeadId) {
         finalLeadId = await findLeadByContact(email, phone) || '';
@@ -1653,7 +1711,7 @@ app.get('/api/blog-categories', async (req, res) => {
 
 
 // Generic CRUD GET
-app.get('/api/:tableName', async (req, res, _next) => {
+app.get('/api/:tableName', requireAuth, async (req, res, _next) => {
   const { tableName } = req.params;
   const mappedTable = tableName.replace(/-/g, '_');
   if (!allowedLocalTables.includes(mappedTable)) {
@@ -1688,6 +1746,7 @@ app.get('/api/:tableName', async (req, res, _next) => {
     const [rows]: any = await pool.query(sql, queryValues);
     res.json(rows.map((r: any) => parseGenericRowLocal(r, mappedTable)));
   } catch (err: any) {
+    console.error(`[Express] GET /api/${mappedTable} error:`, err);
     // If the table simply doesn't exist in this environment, return empty array
     // rather than a 500 so that callers that check res.ok still get usable data.
     const isTableNotFound = err.message && (
@@ -1696,14 +1755,13 @@ app.get('/api/:tableName', async (req, res, _next) => {
       err.code === 'ER_NO_SUCH_TABLE'
     );
     if (isTableNotFound) {
-      console.warn(`[Express] Table '${mappedTable}' not found in local DB — returning []`);
       return res.json([]);
     }
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: 'Failed to retrieve records' });
   }
 });
 
-app.get('/api/:tableName/:id', async (req, res, _next) => {
+app.get('/api/:tableName/:id', requireAuth, async (req, res, _next) => {
   const { tableName, id } = req.params;
   const mappedTable = tableName.replace(/-/g, '_');
   if (!allowedLocalTables.includes(mappedTable)) {
@@ -1717,12 +1775,13 @@ app.get('/api/:tableName/:id', async (req, res, _next) => {
       res.status(404).json({ error: 'Record not found' });
     }
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    console.error(`[Express] GET /api/${mappedTable}/${id} error:`, err);
+    res.status(500).json({ error: 'Failed to retrieve record' });
   }
 });
 
 // Generic CRUD POST
-app.post('/api/:tableName', async (req, res, _next) => {
+app.post('/api/:tableName', requireAuth, async (req, res, _next) => {
   const { tableName } = req.params;
   const mappedTable = tableName.replace(/-/g, '_');
   if (!allowedLocalTables.includes(mappedTable)) {
@@ -1753,13 +1812,13 @@ app.post('/api/:tableName', async (req, res, _next) => {
     );
     res.json({ success: true, id: newId });
   } catch (err: any) {
-    console.error('POST /api/:tableName error:', req.params.tableName, err.message, err.stack);
-    res.status(500).json({ error: err.message });
+    console.error('POST /api/:tableName error:', req.params.tableName, err);
+    res.status(500).json({ error: 'Failed to create record' });
   }
 });
 
 // Generic CRUD PUT
-app.put('/api/:tableName/:id', async (req, res, _next) => {
+app.put('/api/:tableName/:id', requireAuth, async (req, res, _next) => {
   const { tableName, id } = req.params;
   const mappedTable = tableName.replace(/-/g, '_');
   if (!allowedLocalTables.includes(mappedTable)) {
@@ -1791,15 +1850,13 @@ app.put('/api/:tableName/:id', async (req, res, _next) => {
     );
     res.json({ success: true });
   } catch (err: any) {
-    console.error('PUT /api/:tableName/:id error:', 
-      req.params.tableName, req.params.id, 
-      err.message, err.stack);
-    res.status(500).json({ error: err.message });
+    console.error('PUT /api/:tableName/:id error:', req.params.tableName, req.params.id, err);
+    res.status(500).json({ error: 'Failed to update record' });
   }
 });
 
 // Generic CRUD DELETE
-app.delete('/api/:tableName', async (req, res, _next) => {
+app.delete('/api/:tableName', requireAuth, async (req, res, _next) => {
   const { tableName } = req.params;
   const mappedTable = tableName.replace(/-/g, '_');
   if (!allowedLocalTables.includes(mappedTable)) {
@@ -1819,12 +1876,12 @@ app.delete('/api/:tableName', async (req, res, _next) => {
     }
     res.json({ success: true });
   } catch (err: any) {
-    console.error('DELETE /api/:tableName error:', req.params.tableName, err.message, err.stack);
-    res.status(500).json({ error: err.message });
+    console.error('DELETE /api/:tableName error:', req.params.tableName, err);
+    res.status(500).json({ error: 'Failed to delete record' });
   }
 });
 
-app.delete('/api/:tableName/:id', async (req, res, _next) => {
+app.delete('/api/:tableName/:id', requireAuth, async (req, res, _next) => {
   const { tableName, id } = req.params;
   const mappedTable = tableName.replace(/-/g, '_');
   if (!allowedLocalTables.includes(mappedTable)) {
@@ -1834,8 +1891,8 @@ app.delete('/api/:tableName/:id', async (req, res, _next) => {
     await pool.query(`DELETE FROM \`${mappedTable}\` WHERE id = ?`, [id]);
     res.json({ success: true });
   } catch (err: any) {
-    console.error('DELETE /api/:tableName/:id error:', req.params.tableName, req.params.id, err.message, err.stack);
-    res.status(500).json({ error: err.message });
+    console.error('DELETE /api/:tableName/:id error:', req.params.tableName, req.params.id, err);
+    res.status(500).json({ error: 'Failed to delete record' });
   }
 });
 

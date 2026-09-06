@@ -12,11 +12,23 @@ staging_deploy_pkg/
 uploads/
 
 # Security & Credentials
-.env
-.env.production
-.env.staging
-.env.example
+.env*
+*.env*
+*.env
+*.env.*
+*.local*
+*.backup*
+*backup*
+*.bak
+*.secret*
+*.key
+*.pem
+*.cert
+*.crt
+*.pfx
+*.p12
 *.sql
+*.dump
 
 # Logs
 logs

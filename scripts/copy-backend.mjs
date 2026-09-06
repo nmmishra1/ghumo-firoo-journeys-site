@@ -16,10 +16,10 @@ console.log(`📦 Copying PHP backend to dist/php-backend and dist/public_html/p
 
 // Copy recursively to both locations, filtering out sensitive files
 const copyFilter = (src) => {
-  const base = path.basename(src);
-  if (base.startsWith('backup_') && base.endsWith('.json')) return false;
-  if (base.endsWith('.sql') || base.endsWith('.bak') || base.endsWith('.log')) return false;
-  if (base === '.env' || base === '.env.local') return false;
+  const base = path.basename(src).toLowerCase();
+  if (base.startsWith('.env') || base.includes('.env')) return false;
+  if (base.includes('backup') || base.endsWith('.bak')) return false;
+  if (base.endsWith('.sql') || base.endsWith('.log') || base.endsWith('.key') || base.endsWith('.pem')) return false;
   return true;
 };
 
