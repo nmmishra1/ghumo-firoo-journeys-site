@@ -21,7 +21,7 @@ This guide outlines the step-by-step procedure to deploy the React frontend, PHP
 
 ### STEP 1 — Database Import
 1. Log into your cPanel account.
-2. Navigate to **MySQL Databases** and verify your production database (`a17511nd_GFPackage` or `a17511nd_GFStaging`).
+2. Navigate to **MySQL Databases** and verify your production database (`a17511nd_Ghumofiroo`).
 3. Open **phpMyAdmin** in cPanel.
 4. Import `database/migrations/20260803_step1_city_id_fk_refactor.sql` and `database/migrations/20260803_step2_seed_chardham_kashmir.sql`.
 
@@ -48,8 +48,8 @@ This guide outlines the step-by-step procedure to deploy the React frontend, PHP
 ```env
 # MySQL Database Connection details
 MYSQL_HOST=localhost
-MYSQL_DATABASE=a17511nd_GFPackage
-MYSQL_USER=a17511nd_GFPackage
+MYSQL_DATABASE=a17511nd_Ghumofiroo
+MYSQL_USER=a17511nd_Ghumofiroo_live
 MYSQL_PASSWORD=[YOUR_DB_PASSWORD_HERE]
 
 # Supabase Configurations
