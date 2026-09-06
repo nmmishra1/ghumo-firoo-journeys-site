@@ -247,6 +247,18 @@ const staticRoutesMeta: Record<string, { title: string; description: string; h1:
       </section>
     `
   },
+  '/crm': {
+    title: 'CRM Travel Operations Portal | Ghumo Firoo Travels',
+    description: 'Internal operations, itinerary generation, lead management, and booking administration portal for Ghumo Firoo Travels.',
+    h1: 'Ghumo Firoo CRM & Travel Operations Portal',
+    h2: 'Enterprise Travel Management & Itinerary Builder',
+    bodyHtml: `
+      <section>
+        <h2>Travel Operations & Enterprise CRM</h2>
+        <p>Welcome to the Ghumo Firoo Travels central enterprise management portal. Authorized agents and managers can administer itineraries, lead lifecycles, hotel contracting, cab inventory, and customer bookings.</p>
+      </section>
+    `
+  },
   '/thank-you': {
     title: 'Thank You | Ghumo Firoo Travels',
     description: 'Thank you for choosing Ghumo Firoo Travels. Your booking details and travel confirmation have been safely registered with our operations desk.',

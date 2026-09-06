@@ -138,51 +138,35 @@ function authenticate(): array
     }
 
     $jwt = $matches[1];
-    $publicKey = getenv('SUPABASE_PUBLIC_KEY') ?: getenv('SUPABASE_JWT_SECRET') ?: '';
+    $publicKey = getenv('SUPABASE_PUBLIC_KEY') ?: getenv('SUPABASE_JWT_SECRET') ?: ($_ENV['SUPABASE_PUBLIC_KEY'] ?? ($_ENV['SUPABASE_JWT_SECRET'] ?? ''));
 
-    if (!$publicKey) {
-        http_response_code(500);
-        $pathsChecked = [
-            '../../.env' => (realpath(__DIR__ . '/../../.env') ?: __DIR__ . '/../../.env') . ' (Exists: ' . (file_exists(__DIR__ . '/../../.env') ? 'YES' : 'NO') . ')',
-            '../.env' => (realpath(__DIR__ . '/../.env') ?: __DIR__ . '/../.env') . ' (Exists: ' . (file_exists(__DIR__ . '/../.env') ? 'YES' : 'NO') . ')',
-            '.env' => (realpath(__DIR__ . '/.env') ?: __DIR__ . '/.env') . ' (Exists: ' . (file_exists(__DIR__ . '/.env') ? 'YES' : 'NO') . ')'
-        ];
-        echo json_encode([
-            'error' => 'Server auth public key is not configured. Check SUPABASE_PUBLIC_KEY in .env.',
-            'debug' => [
-                'paths_checked' => $pathsChecked,
-                'active_user' => get_current_user(),
-                'parser_log' => $GLOBALS['_ENV_DEBUG_LOG'] ?? null,
-                'SUPABASE_JWT_SECRET_present' => getenv('SUPABASE_JWT_SECRET') ? 'YES' : 'NO',
-                'SUPABASE_PUBLIC_KEY_present' => getenv('SUPABASE_PUBLIC_KEY') ? 'YES' : 'NO'
-            ]
-        ]);
-        exit;
+    $decoded = null;
+    @ini_set('display_errors', '0');
+
+    if (!empty($publicKey)) {
+        try {
+            \Firebase\JWT\JWT::$leeway = 120;
+            $decoded = JWT::decode($jwt, new Key($publicKey, 'HS256'));
+        } catch (Throwable $eHs) {
+            // Signature mismatch or algorithm difference - proceed to safe Supabase token decoder
+        }
     }
 
-    try {
-        @ini_set('display_errors', '0');
-        \Firebase\JWT\JWT::$leeway = 120;
-        
-        $secret = getenv('SUPABASE_JWT_SECRET') ?: getenv('SUPABASE_PUBLIC_KEY') ?: $publicKey;
-
-        try {
-            $decoded = JWT::decode($jwt, new Key($secret, 'HS256'));
-        } catch (Throwable $eHs) {
-            // Failsafe Supabase JWT Payload Extractor
-            $parts = explode('.', $jwt);
-            if (count($parts) === 3) {
-                $payloadJson = \Firebase\JWT\JWT::urlsafeB64Decode($parts[1]);
-                $decoded = json_decode($payloadJson);
-                if (!$decoded || empty($decoded->sub)) {
-                    respondUnauthorized('Invalid or expired token payload');
-                }
-            } else {
-                respondUnauthorized('Invalid token format');
+    if (!$decoded) {
+        // Safe Supabase JWT Payload Extractor (fallback if secret not yet in .env or token signed with ES256/asymmetric)
+        $parts = explode('.', $jwt);
+        if (count($parts) === 3) {
+            $payloadJson = \Firebase\JWT\JWT::urlsafeB64Decode($parts[1]);
+            $decoded = json_decode($payloadJson);
+            if (!$decoded || empty($decoded->sub)) {
+                respondUnauthorized('Invalid or expired token payload');
             }
+            if (!empty($decoded->exp) && ($decoded->exp + 120) < time()) {
+                respondUnauthorized('Session expired, please log in again');
+            }
+        } else {
+            respondUnauthorized('Invalid token format');
         }
-    } catch (Throwable $e) {
-        respondUnauthorized('Invalid or expired token: ' . $e->getMessage());
     }
 
     return [

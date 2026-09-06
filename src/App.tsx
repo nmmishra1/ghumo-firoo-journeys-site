@@ -239,6 +239,7 @@ function App() {
                <Route path="/profile" element={<Profile />} />
                <Route path="/booking" element={<Booking />} />
                <Route path="/crm" element={<CRM />} />
+               <Route path="/crm/*" element={<CRM />} />
                <Route path="/crm/user-dashboard" element={<CRM />} />
                <Route path="/crm/leads" element={<CRM />} />
                <Route path="/crm/leads/new" element={<CRM />} />

@@ -42,6 +42,7 @@ jobs:
               'MYSQL_DATABASE' => 'a17511nd_Ghumofiroo',
               'MYSQL_USER'     => 'a17511nd_Ghumofiroo_live',
               'MYSQL_PASSWORD' => '${{ secrets.MYSQL_PASSWORD }}',
+              'SUPABASE_JWT_SECRET' => '${{ secrets.SUPABASE_JWT_SECRET }}',
           ];
           EOF
           cp dist/php-backend/db_config.php dist/public_html/php-backend/db_config.php || true

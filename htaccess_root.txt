@@ -79,7 +79,6 @@ ErrorDocument 500 /index.html
   RewriteCond %{HTTPS} off
   RewriteCond %{HTTP:X-Forwarded-Proto} !https
   RewriteRule ^(.*)$ https://ghumofiroo.com/$1 [R=301,L]
-  RewriteRule ^(.*)$ https://ghumofiroo.com/$1 [L,R=301]
 
   # Skip rewrites for root static assets
   RewriteRule ^favicon\.ico$ - [L]
@@ -87,8 +86,17 @@ ErrorDocument 500 /index.html
   RewriteRule ^sitemap\.xml$ - [L]
   RewriteRule ^ads\.txt$ - [L]
 
-  # Allow direct access to php-backend
-  RewriteRule ^php-backend/(.*)$ php-backend/$1 [L]
+  # Pass Authorization header to PHP in CGI/FastCGI environments (cPanel)
+  SetEnvIf Authorization "(.*)" HTTP_AUTHORIZATION=$1
+
+  # Allow direct access to php-backend (no rewrite loop)
+  RewriteRule ^php-backend/ - [L]
+
+  # Map root api.php and direct PHP APIs to php-backend
+  RewriteRule ^api\.php$ /php-backend/api.php [L,QSA]
+  RewriteRule ^destinations_api\.php$ /php-backend/destinations_api.php [L,QSA]
+  RewriteRule ^hotels\.php$ /php-backend/hotels.php [L,QSA]
+  RewriteRule ^hotel-rates\.php$ /php-backend/hotel-rates.php [L,QSA]
 
   # Map Leads API calls — secured, routes to php-backend
   RewriteRule ^api/leads/create-public$ /php-backend/leads_create_public.php [L,QSA]
@@ -129,6 +137,10 @@ ErrorDocument 500 /index.html
 
   # Map Reports API — secured, routes to php-backend
   RewriteRule ^api/reports$ /php-backend/reports.php [L,QSA]
+
+  # Map Reviews API — secured, routes to php-backend
+  RewriteRule ^api/reviews$ /php-backend/reviews.php [L,QSA]
+  RewriteRule ^api/reviews/upload$ /php-backend/upload_review_media.php [L,QSA]
 
   # Map secondary MySQL tables to secured mysql-crud.php in php-backend
   RewriteRule ^api/destinations$ /php-backend/mysql-crud.php?table=destinations [L,QSA]
@@ -171,9 +183,28 @@ ErrorDocument 500 /index.html
   RewriteCond %{REQUEST_URI} ^/packages/.+/$ [NC]
   RewriteRule ^packages/(.+)/$ https://ghumofiroo.com/packages/$1 [L,R=301]
 
-  # React SPA Client-Side Routing
-  RewriteCond %{REQUEST_URI} ^/$ [OR]
-  RewriteCond %{REQUEST_URI} ^/(about|contact|packages|privacy-policy|terms-conditions|terms-of-service|refund-policy|blog|career|enquire-now|enquire-success|products|booking|pictramapdemo|custom-tour-packages|thank-you|guides|guide|landing|profile|faq|crm|signup|forgot-password|reset-password|auth|review|destinations|payment|pay)(/.*)?$ [NC]
+  # Explicitly map all /crm requests directly to the React SPA entry point
+  RewriteRule ^crm(/.*)?$ /index.html [L]
+
+  # Serve Pre-rendered Static Route HTML if folder/index.html exists
+  RewriteCond %{DOCUMENT_ROOT}%{REQUEST_URI}/index.html -f
+  RewriteRule ^(.*)/?$ $1/index.html [L]
+
+  # Serve Pre-rendered Static HTML if .html exists
+  RewriteCond %{DOCUMENT_ROOT}%{REQUEST_URI}.html -f
+  RewriteRule ^(.*)$ $1.html [L]
+
+  # Do NOT rewrite missing static assets or JS chunks to index.html — return 404 so browsers can detect version changes
+  RewriteCond %{REQUEST_URI} ^/assets/ [NC,OR]
+  RewriteCond %{REQUEST_URI} \.(js|css|png|jpg|jpeg|gif|svg|ico|webp|woff|woff2|ttf|eot|pdf|json|map)$ [NC]
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteRule ^ - [R=404,L]
+
+  # React SPA Client-Side Routing Fallback (for dynamic or ungenerated routes):
+  # If request is not a physical file and no index.html exists in the target path,
+  # serve /index.html with HTTP 200 OK (handles SPA virtual routes and directories without index.html)
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME}/index.html !-f
   RewriteRule ^ /index.html [L]
 </IfModule>
 
