@@ -187,6 +187,12 @@ ErrorDocument 500 /index.html
   RewriteCond %{DOCUMENT_ROOT}%{REQUEST_URI}.html -f
   RewriteRule ^(.*)$ $1.html [L]
 
+  # Do NOT rewrite missing static assets or JS chunks to index.html — return 404 so browsers can detect version changes
+  RewriteCond %{REQUEST_URI} ^/assets/ [NC,OR]
+  RewriteCond %{REQUEST_URI} \.(js|css|png|jpg|jpeg|gif|svg|ico|webp|woff|woff2|ttf|eot|pdf|json|map)$ [NC]
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteRule ^ - [R=404,L]
+
   # React SPA Client-Side Routing Fallback (for dynamic or ungenerated routes)
   RewriteCond %{REQUEST_FILENAME} !-f
   RewriteCond %{REQUEST_FILENAME} !-d

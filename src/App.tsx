@@ -26,7 +26,7 @@ const PageLoader = memo(() => (
 
 PageLoader.displayName = 'PageLoader';
 
-// Error boundary component for lazy loaded routes
+// Error boundary component for lazy loaded routes with auto-reload on version deployment
 class LazyErrorBoundary extends React.Component<
   { children: React.ReactNode },
   { hasError: boolean }
@@ -42,6 +42,21 @@ class LazyErrorBoundary extends React.Component<
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
     console.error('Lazy loading error:', error, errorInfo);
+    const msg = String(error?.message || '').toLowerCase();
+    if (
+      msg.includes('failed to fetch dynamically imported module') ||
+      msg.includes('loading chunk') ||
+      msg.includes('mime type') ||
+      error.name === 'ChunkLoadError'
+    ) {
+      const storageKey = 'gf_chunk_reload_ts';
+      const lastReload = parseInt(sessionStorage.getItem(storageKey) || '0', 10);
+      const now = Date.now();
+      if (now - lastReload > 10000) {
+        sessionStorage.setItem(storageKey, String(now));
+        window.location.reload();
+      }
+    }
   }
 
   render() {
@@ -49,13 +64,13 @@ class LazyErrorBoundary extends React.Component<
       return (
         <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-red-50 via-white to-orange-50">
           <div className="glass-card p-8 rounded-2xl shadow-glass-lg text-center">
-            <h2 className="text-xl font-semibold text-red-600 mb-4">Something went wrong</h2>
-            <p className="text-gray-600 mb-4">Failed to load the page. Please try refreshing.</p>
+            <h2 className="text-xl font-semibold text-red-600 mb-4">New Version Available</h2>
+            <p className="text-gray-600 mb-4">A fresh update has been deployed. Click below to refresh.</p>
             <button 
               onClick={() => { this.setState({ hasError: false }); window.location.reload(); }} 
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium shadow-md"
             >
-              Refresh Page & Retry
+              Refresh & Continue
             </button>
           </div>
         </div>
@@ -66,111 +81,140 @@ class LazyErrorBoundary extends React.Component<
   }
 }
 
-// Lazy load main pages with better chunking
-const Index = React.lazy(() => import('@/pages/Index'));
-const About = React.lazy(() => import('@/pages/About'));
-const Contact = React.lazy(() => import('@/pages/Contact'));
-const Blog = React.lazy(() => import('@/pages/Blog'));
-const FAQ = React.lazy(() => import('@/pages/FAQ'));
-const Career = React.lazy(() => import('@/pages/Career'));
-const Products = React.lazy(() => import('@/pages/Products'));
-const Profile = React.lazy(() => import('@/pages/Profile'));
-const NotFound = React.lazy(() => import('@/pages/NotFound'));
-const Booking = React.lazy(() => import('@/pages/Booking'));
-const CRM = React.lazy(() => import('@/pages/CRM'));
-const Auth = React.lazy(() => import('@/pages/Auth'));
-const SignUp = React.lazy(() => import('@/pages/SignUp'));
-const ForgotPassword = React.lazy(() => import('@/pages/ForgotPassword'));
-const ResetPassword = React.lazy(() => import('@/pages/ResetPassword'));
-const ReviewForm = React.lazy(() => import('@/pages/ReviewForm'));
+// Auto-retrying lazy import helper for smooth zero-downtime updates
+function lazyRetry<T extends React.ComponentType<any>>(
+  factory: () => Promise<{ default: T } | { default: { default: T } }>
+) {
+  return React.lazy(async () => {
+    try {
+      return await factory() as any;
+    } catch (error: any) {
+      const msg = String(error?.message || '').toLowerCase();
+      const isChunkError = 
+        error?.name === 'ChunkLoadError' ||
+        msg.includes('failed to fetch dynamically imported module') ||
+        msg.includes('loading chunk') ||
+        msg.includes('mime type');
+
+      const storageKey = 'gf_chunk_reload_ts';
+      const lastReload = parseInt(sessionStorage.getItem(storageKey) || '0', 10);
+      const now = Date.now();
+
+      if (isChunkError && (now - lastReload > 10000)) {
+        sessionStorage.setItem(storageKey, String(now));
+        window.location.reload();
+        return new Promise(() => {}); // pause execution until page reloads
+      }
+      throw error;
+    }
+  });
+}
+
+// Lazy load main pages with better chunking and retry resilience
+const Index = lazyRetry(() => import('@/pages/Index'));
+const About = lazyRetry(() => import('@/pages/About'));
+const Contact = lazyRetry(() => import('@/pages/Contact'));
+const Blog = lazyRetry(() => import('@/pages/Blog'));
+const FAQ = lazyRetry(() => import('@/pages/FAQ'));
+const Career = lazyRetry(() => import('@/pages/Career'));
+const Products = lazyRetry(() => import('@/pages/Products'));
+const Profile = lazyRetry(() => import('@/pages/Profile'));
+const NotFound = lazyRetry(() => import('@/pages/NotFound'));
+const Booking = lazyRetry(() => import('@/pages/Booking'));
+const CRM = lazyRetry(() => import('@/pages/CRM'));
+const Auth = lazyRetry(() => import('@/pages/Auth'));
+const SignUp = lazyRetry(() => import('@/pages/SignUp'));
+const ForgotPassword = lazyRetry(() => import('@/pages/ForgotPassword'));
+const ResetPassword = lazyRetry(() => import('@/pages/ResetPassword'));
+const ReviewForm = lazyRetry(() => import('@/pages/ReviewForm'));
 
 // Lazy load policy pages (grouped for better caching)
-const PrivacyPolicy = React.lazy(() => import('@/pages/PrivacyPolicy'));
-const TermsConditions = React.lazy(() => import('@/pages/TermsConditions'));
-const TermsOfService = React.lazy(() => import('@/pages/TermsOfService'));
-const RefundPolicy = React.lazy(() => import('@/pages/RefundPolicy'));
+const PrivacyPolicy = lazyRetry(() => import('@/pages/PrivacyPolicy'));
+const TermsConditions = lazyRetry(() => import('@/pages/TermsConditions'));
+const TermsOfService = lazyRetry(() => import('@/pages/TermsOfService'));
+const RefundPolicy = lazyRetry(() => import('@/pages/RefundPolicy'));
 
 // Lazy load service pages
-const CustomTourPackages = React.lazy(() => import('@/pages/CustomTourPackages'));
-const Packages = React.lazy(() => import('@/pages/Packages'));
-const EnquireNow = React.lazy(() => import('@/pages/EnquireNow'));
-const EnquireSuccess = React.lazy(() => import('@/pages/EnquireSuccess'));
-const ThankYou = React.lazy(() => import('@/pages/ThankYou'));
-const QuickPayment = React.lazy(() => import('@/pages/QuickPayment'));
-const QuoteView = React.lazy(() => import('@/pages/QuoteView'));
-const PublicIndiaExplorer = React.lazy(() => import('@/pages/public/PublicIndiaExplorer'));
-const PublicDestinationDetail = React.lazy(() => import('@/pages/public/PublicDestinationDetail'));
+const CustomTourPackages = lazyRetry(() => import('@/pages/CustomTourPackages'));
+const Packages = lazyRetry(() => import('@/pages/Packages'));
+const EnquireNow = lazyRetry(() => import('@/pages/EnquireNow'));
+const EnquireSuccess = lazyRetry(() => import('@/pages/EnquireSuccess'));
+const ThankYou = lazyRetry(() => import('@/pages/ThankYou'));
+const QuickPayment = lazyRetry(() => import('@/pages/QuickPayment'));
+const QuoteView = lazyRetry(() => import('@/pages/QuoteView'));
+const PublicIndiaExplorer = lazyRetry(() => import('@/pages/public/PublicIndiaExplorer'));
+const PublicDestinationDetail = lazyRetry(() => import('@/pages/public/PublicDestinationDetail'));
 
 // Lazy load package pages with route-based code splitting
-const CharDham = React.lazy(() => import('@/pages/packages/CharDham'));
-const DoDham = React.lazy(() => import('@/pages/packages/DoDham'));
-const KedarnathBadrinath = React.lazy(() => import('@/pages/packages/KedarnathBadrinath'));
-const GangotriYamunotri = React.lazy(() => import('@/pages/packages/GangotriYamunotri'));
-const Kedarnath = React.lazy(() => import('@/pages/packages/Kedarnath'));
-const Badrinath = React.lazy(() => import('@/pages/packages/Badrinath'));
-const Gangotri = React.lazy(() => import('@/pages/packages/Gangotri'));
-const Yamunotri = React.lazy(() => import('@/pages/packages/Yamunotri'));
-const CharDhamYatra = React.lazy(() => import('@/pages/packages/CharDhamYatra').then(module => ({ default: module.default })));
-const Europe = React.lazy(() => import('@/pages/packages/Europe'));
-const Switzerland = React.lazy(() => import('@/pages/packages/Switzerland'));
-const France = React.lazy(() => import('@/pages/packages/France'));
-const Italy = React.lazy(() => import('@/pages/packages/Italy'));
-const Germany = React.lazy(() => import('@/pages/packages/Germany'));
-const Austria = React.lazy(() => import('@/pages/packages/Austria'));
-const Netherlands = React.lazy(() => import('@/pages/packages/Netherlands'));
-const Belgium = React.lazy(() => import('@/pages/packages/Belgium'));
-const CzechRepublic = React.lazy(() => import('@/pages/packages/CzechRepublic'));
-const EuropeTour = React.lazy(() => import('@/pages/packages/EuropeTour').then(module => ({ default: module.default })));
-const EuropeSwitzerlandParis = React.lazy(() => import('@/pages/packages/EuropeSwitzerlandParis'));
-const EuropeSwitzerlandItaly = React.lazy(() => import('@/pages/packages/EuropeSwitzerlandItaly'));
-const EuropeFranceSwitzerland = React.lazy(() => import('@/pages/packages/EuropeFranceSwitzerland'));
-const EuropeHighlights = React.lazy(() => import('@/pages/packages/EuropeHighlights'));
-const EuropeSwissItalyFrance = React.lazy(() => import('@/pages/packages/EuropeSwissItalyFrance'));
-const EuropeGrandTour = React.lazy(() => import('@/pages/packages/EuropeGrandTour'));
-const RajasthanRoyal = React.lazy(() => import('@/pages/packages/RajasthanRoyal').then(module => ({ default: module.default })));
-const KashmirParadise = React.lazy(() => import('@/pages/packages/KashmirParadise').then(module => ({ default: module.default })));
-const KeralaBackwaters = React.lazy(() => import('@/pages/packages/KeralaBackwaters').then(module => ({ default: module.default })));
-const GoaBeachHoliday = React.lazy(() => import('@/pages/packages/GoaBeachHoliday').then(module => ({ default: module.default })));
-const HimachalHillStations = React.lazy(() => import('@/pages/packages/HimachalHillStations').then(module => ({ default: module.default })));
-const GoldenTriangle = React.lazy(() => import('@/pages/packages/GoldenTriangle').then(module => ({ default: module.default })));
-const LehLadakhTour = React.lazy(() => import('@/pages/packages/LehLadakhTour').then(module => ({ default: module.default })));
-const DubaiDelights = React.lazy(() => import('@/pages/packages/DubaiDelights').then(module => ({ default: module.default })));
-const ThailandTropical = React.lazy(() => import('@/pages/packages/ThailandTropical'));
-const Singapore = React.lazy(() => import('@/pages/packages/Singapore'));
-const Singapore4D3N = React.lazy(() => import('@/pages/packages/Singapore4D3N'));
-const Singapore5D4N = React.lazy(() => import('@/pages/packages/Singapore5D4N'));
-const SingaporeSentosa = React.lazy(() => import('@/pages/packages/SingaporeSentosa'));
-const SingaporeCruise = React.lazy(() => import('@/pages/packages/SingaporeCruise'));
-const SingaporeMalaysia = React.lazy(() => import('@/pages/packages/SingaporeMalaysia'));
-const SingaporeMalaysiaCombo = React.lazy(() => import('@/pages/packages/SingaporeMalaysiaCombo'));
-const SingaporeFamily = React.lazy(() => import('@/pages/packages/SingaporeFamily'));
-const SingaporeHoneymoon = React.lazy(() => import('@/pages/packages/SingaporeHoneymoon'));
-const SingaporeLuxury = React.lazy(() => import('@/pages/packages/SingaporeLuxury'));
-const BaliParadise = React.lazy(() => import('@/pages/packages/BaliParadise'));
-const JapanCherryBlossom = React.lazy(() => import('@/pages/packages/JapanCherryBlossom'));
-const Maldives = React.lazy(() => import('@/pages/packages/Maldives'));
-const TurkeyAdventure = React.lazy(() => import('@/pages/packages/TurkeyAdventure'));
-const MauritiusBliss = React.lazy(() => import('@/pages/packages/MauritiusBliss'));
-const SeychellesEscape = React.lazy(() => import('@/pages/packages/SeychellesEscape'));
-const SingaporeCityDelight = React.lazy(() => import('@/pages/packages/SingaporeCityDelight'));
-const RannUtsav = React.lazy(() => import('@/pages/packages/RannUtsav'));
-const RannUtsavMockupPage = React.lazy(() => import('@/pages/packages/RannUtsavMockupPage'));
-const JaisalmerTour = React.lazy(() => import('@/pages/packages/JaisalmerTour'));
-const GeorgiaAdventure = React.lazy(() => import('@/pages/packages/GeorgiaAdventure'));
-const CharDhamHeli = React.lazy(() => import('@/pages/landing/CharDhamHeli'));
-const CharDhamRoad = React.lazy(() => import('@/pages/landing/CharDhamRoad'));
-const CharDhamYatraFromDelhi = React.lazy(() => import('@/pages/packages/CharDhamYatraFromDelhi'));
-const CharDhamYatraFromHaridwar = React.lazy(() => import('@/pages/packages/CharDhamYatraFromHaridwar'));
-const CharDhamYatraFromDehradun = React.lazy(() => import('@/pages/packages/CharDhamYatraFromDehradun'));
-const DynamicPackageDetail = React.lazy(() => import('@/pages/packages/DynamicPackageDetail'));
+const CharDham = lazyRetry(() => import('@/pages/packages/CharDham'));
+const DoDham = lazyRetry(() => import('@/pages/packages/DoDham'));
+const KedarnathBadrinath = lazyRetry(() => import('@/pages/packages/KedarnathBadrinath'));
+const GangotriYamunotri = lazyRetry(() => import('@/pages/packages/GangotriYamunotri'));
+const Kedarnath = lazyRetry(() => import('@/pages/packages/Kedarnath'));
+const Badrinath = lazyRetry(() => import('@/pages/packages/Badrinath'));
+const Gangotri = lazyRetry(() => import('@/pages/packages/Gangotri'));
+const Yamunotri = lazyRetry(() => import('@/pages/packages/Yamunotri'));
+const CharDhamYatra = lazyRetry(() => import('@/pages/packages/CharDhamYatra').then(module => ({ default: module.default })));
+const Europe = lazyRetry(() => import('@/pages/packages/Europe'));
+const Switzerland = lazyRetry(() => import('@/pages/packages/Switzerland'));
+const France = lazyRetry(() => import('@/pages/packages/France'));
+const Italy = lazyRetry(() => import('@/pages/packages/Italy'));
+const Germany = lazyRetry(() => import('@/pages/packages/Germany'));
+const Austria = lazyRetry(() => import('@/pages/packages/Austria'));
+const Netherlands = lazyRetry(() => import('@/pages/packages/Netherlands'));
+const Belgium = lazyRetry(() => import('@/pages/packages/Belgium'));
+const CzechRepublic = lazyRetry(() => import('@/pages/packages/CzechRepublic'));
+const EuropeTour = lazyRetry(() => import('@/pages/packages/EuropeTour').then(module => ({ default: module.default })));
+const EuropeSwitzerlandParis = lazyRetry(() => import('@/pages/packages/EuropeSwitzerlandParis'));
+const EuropeSwitzerlandItaly = lazyRetry(() => import('@/pages/packages/EuropeSwitzerlandItaly'));
+const EuropeFranceSwitzerland = lazyRetry(() => import('@/pages/packages/EuropeFranceSwitzerland'));
+const EuropeHighlights = lazyRetry(() => import('@/pages/packages/EuropeHighlights'));
+const EuropeSwissItalyFrance = lazyRetry(() => import('@/pages/packages/EuropeSwissItalyFrance'));
+const EuropeGrandTour = lazyRetry(() => import('@/pages/packages/EuropeGrandTour'));
+const RajasthanRoyal = lazyRetry(() => import('@/pages/packages/RajasthanRoyal').then(module => ({ default: module.default })));
+const KashmirParadise = lazyRetry(() => import('@/pages/packages/KashmirParadise').then(module => ({ default: module.default })));
+const KeralaBackwaters = lazyRetry(() => import('@/pages/packages/KeralaBackwaters').then(module => ({ default: module.default })));
+const GoaBeachHoliday = lazyRetry(() => import('@/pages/packages/GoaBeachHoliday').then(module => ({ default: module.default })));
+const HimachalHillStations = lazyRetry(() => import('@/pages/packages/HimachalHillStations').then(module => ({ default: module.default })));
+const GoldenTriangle = lazyRetry(() => import('@/pages/packages/GoldenTriangle').then(module => ({ default: module.default })));
+const LehLadakhTour = lazyRetry(() => import('@/pages/packages/LehLadakhTour').then(module => ({ default: module.default })));
+const DubaiDelights = lazyRetry(() => import('@/pages/packages/DubaiDelights').then(module => ({ default: module.default })));
+const ThailandTropical = lazyRetry(() => import('@/pages/packages/ThailandTropical'));
+const Singapore = lazyRetry(() => import('@/pages/packages/Singapore'));
+const Singapore4D3N = lazyRetry(() => import('@/pages/packages/Singapore4D3N'));
+const Singapore5D4N = lazyRetry(() => import('@/pages/packages/Singapore5D4N'));
+const SingaporeSentosa = lazyRetry(() => import('@/pages/packages/SingaporeSentosa'));
+const SingaporeCruise = lazyRetry(() => import('@/pages/packages/SingaporeCruise'));
+const SingaporeMalaysia = lazyRetry(() => import('@/pages/packages/SingaporeMalaysia'));
+const SingaporeMalaysiaCombo = lazyRetry(() => import('@/pages/packages/SingaporeMalaysiaCombo'));
+const SingaporeFamily = lazyRetry(() => import('@/pages/packages/SingaporeFamily'));
+const SingaporeHoneymoon = lazyRetry(() => import('@/pages/packages/SingaporeHoneymoon'));
+const SingaporeLuxury = lazyRetry(() => import('@/pages/packages/SingaporeLuxury'));
+const BaliParadise = lazyRetry(() => import('@/pages/packages/BaliParadise'));
+const JapanCherryBlossom = lazyRetry(() => import('@/pages/packages/JapanCherryBlossom'));
+const Maldives = lazyRetry(() => import('@/pages/packages/Maldives'));
+const TurkeyAdventure = lazyRetry(() => import('@/pages/packages/TurkeyAdventure'));
+const MauritiusBliss = lazyRetry(() => import('@/pages/packages/MauritiusBliss'));
+const SeychellesEscape = lazyRetry(() => import('@/pages/packages/SeychellesEscape'));
+const SingaporeCityDelight = lazyRetry(() => import('@/pages/packages/SingaporeCityDelight'));
+const RannUtsav = lazyRetry(() => import('@/pages/packages/RannUtsav'));
+const RannUtsavMockupPage = lazyRetry(() => import('@/pages/packages/RannUtsavMockupPage'));
+const JaisalmerTour = lazyRetry(() => import('@/pages/packages/JaisalmerTour'));
+const GeorgiaAdventure = lazyRetry(() => import('@/pages/packages/GeorgiaAdventure'));
+const CharDhamHeli = lazyRetry(() => import('@/pages/landing/CharDhamHeli'));
+const CharDhamRoad = lazyRetry(() => import('@/pages/landing/CharDhamRoad'));
+const CharDhamYatraFromDelhi = lazyRetry(() => import('@/pages/packages/CharDhamYatraFromDelhi'));
+const CharDhamYatraFromHaridwar = lazyRetry(() => import('@/pages/packages/CharDhamYatraFromHaridwar'));
+const CharDhamYatraFromDehradun = lazyRetry(() => import('@/pages/packages/CharDhamYatraFromDehradun'));
+const DynamicPackageDetail = lazyRetry(() => import('@/pages/packages/DynamicPackageDetail'));
 
 // Guides
-const GuidesIndex = React.lazy(() => import('@/pages/guides/GuidesIndex'));
-const GuidePage = React.lazy(() => import('@/pages/guides/Guide'));
+const GuidesIndex = lazyRetry(() => import('@/pages/guides/GuidesIndex'));
+const GuidePage = lazyRetry(() => import('@/pages/guides/Guide'));
 
 // Sightseeing & Activities
-const SightseeingIndex = React.lazy(() => import('@/pages/sightseeing/SightseeingIndex'));
-const SightseeingDetail = React.lazy(() => import('@/pages/sightseeing/SightseeingDetail'));
+const SightseeingIndex = lazyRetry(() => import('@/pages/sightseeing/SightseeingIndex'));
+const SightseeingDetail = lazyRetry(() => import('@/pages/sightseeing/SightseeingDetail'));
 
 function App() {
 
