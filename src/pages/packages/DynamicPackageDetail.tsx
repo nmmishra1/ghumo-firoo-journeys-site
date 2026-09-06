@@ -4030,7 +4030,11 @@ const DynamicPackageDetail: React.FC<DynamicPackageDetailProps> = ({ slug: propS
   const currentSlug = propSlug || params.slug || window.location.pathname.split('/').pop() || '';
 
   useEffect(() => {
-    if (passengerCount >= 1 && passengerCount <= 4) {
+    if (passengerCount >= 1 && passengerCount <= 3) {
+      if (selectedCabId !== 'sedan') {
+        setSelectedCabId('sedan');
+      }
+    } else if (passengerCount === 4) {
       if (selectedCabId === 'tempo') {
         setSelectedCabId('sedan');
       }
@@ -4965,8 +4969,11 @@ const DynamicPackageDetail: React.FC<DynamicPackageDetailProps> = ({ slug: propS
                 {(() => {
                   let visibleCabs = CAB_OPTIONS;
 
-                  if (passengerCount >= 1 && passengerCount <= 4) {
-                    // For 1–4 adults: Sedan, AC SUV (Ertiga), AC Premium SUV (Innova)
+                  if (passengerCount >= 1 && passengerCount <= 3) {
+                    // For 1–3 adults: Only 1 vehicle shown (AC Sedan included in base fare)
+                    visibleCabs = CAB_OPTIONS.filter(c => c.id === 'sedan');
+                  } else if (passengerCount === 4) {
+                    // For 4 adults: Sedan, AC SUV (Ertiga), AC Premium SUV (Innova)
                     visibleCabs = CAB_OPTIONS.filter(c => c.id !== 'tempo');
                   } else if (passengerCount === 5) {
                     // For 5 adults: Exclude Sedan. Show AC SUV (Ertiga) & AC Premium SUV (Innova)
