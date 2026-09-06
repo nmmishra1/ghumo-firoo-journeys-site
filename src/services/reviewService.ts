@@ -123,7 +123,7 @@ const computeStats = (reviews: GoogleReview[]): ReviewStats => {
   return { total, averageRating, ratingDistribution, recentCount, responseRate };
 };
 
-const API_BASE = import.meta.env.VITE_PHP_BASE_URL || import.meta.env.VITE_API_BASE_URL || '/php-backend';
+const API_BASE = '/api/reviews';
 
 async function getAuthHeader(): Promise<Record<string, string>> {
   const { data: { session } } = await supabase.auth.getSession();
@@ -135,13 +135,13 @@ export const reviewService = {
   // Get all approved reviews
   async getAllReviews(): Promise<GoogleReview[]> {
     try {
-      const res = await fetch(`${API_BASE}/reviews.php?status=Approved`);
+      const res = await fetch(`${API_BASE}?status=Approved`);
       if (!res.ok) throw new Error('Failed to fetch reviews');
       const data = await res.json();
       const reviews = data.reviews || [];
       return reviews.map(mapDbReviewToGoogleReview);
     } catch (error) {
-      console.error('Error fetching reviews from PHP API:', error);
+      console.error('Error fetching reviews:', error);
       return [];
     }
   },
@@ -149,7 +149,7 @@ export const reviewService = {
   // Get reviews with pagination
   async getReviews(limit: number = 10, offset: number = 0): Promise<GoogleReview[]> {
     try {
-      const res = await fetch(`${API_BASE}/reviews.php?status=Approved&limit=${limit}&offset=${offset}`);
+      const res = await fetch(`${API_BASE}?status=Approved&limit=${limit}&offset=${offset}`);
       if (!res.ok) throw new Error('Failed to fetch reviews');
       const data = await res.json();
       const reviews = data.reviews || [];
@@ -163,26 +163,19 @@ export const reviewService = {
   // Get featured reviews
   async getFeaturedReviews(limit: number = 6): Promise<GoogleReview[]> {
     try {
-      const res = await fetch(`${API_BASE}/reviews.php?status=Approved&featured=1&limit=${limit}`);
+      // Query approved reviews directly
+      const res = await fetch(`${API_BASE}?status=Approved&limit=${limit}`);
       if (!res.ok) throw new Error('Failed to fetch reviews');
       const data = await res.json();
       const reviews = data.reviews || [];
       
-      // If we don't have enough featured reviews, fall back to high rated reviews
-      if (reviews.length < limit) {
-        const fallbackRes = await fetch(`${API_BASE}/reviews.php?status=Approved&limit=${limit}`);
-        if (fallbackRes.ok) {
-          const fallbackData = await fallbackRes.json();
-          const fallbackReviews = fallbackData.reviews || [];
-          if (fallbackReviews.length > 0) {
-            // Sort by rating descending
-            fallbackReviews.sort((a: any, b: any) => b.rating - a.rating);
-            return fallbackReviews.map(mapDbReviewToGoogleReview);
-          }
-        }
-      }
+      // Sort featured first, then highest rating
+      reviews.sort((a: any, b: any) => {
+        if (b.featured !== a.featured) return (b.featured ? 1 : 0) - (a.featured ? 1 : 0);
+        return (b.rating || 0) - (a.rating || 0);
+      });
       
-      return reviews.map(mapDbReviewToGoogleReview);
+      return reviews.slice(0, limit).map(mapDbReviewToGoogleReview);
     } catch (error) {
       console.error('Error fetching featured reviews:', error);
       return [];
@@ -212,7 +205,7 @@ export const reviewService = {
         travel_date: review.review_date ? new Date(review.review_date).toISOString().split('T')[0] : new Date().toISOString().split('T')[0]
       };
       
-      const res = await fetch(`${API_BASE}/reviews.php`, {
+      const res = await fetch(API_BASE, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -249,7 +242,7 @@ export const reviewService = {
       if (updates.response !== undefined) dbUpdates.response = updates.response;
       if (updates.platform !== undefined) dbUpdates.platform = updates.platform;
       
-      const res = await fetch(`${API_BASE}/reviews.php?id=${id}`, {
+      const res = await fetch(`${API_BASE}?id=${id}`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -272,7 +265,7 @@ export const reviewService = {
   async deleteReview(id: string): Promise<void> {
     try {
       const authHeaders = await getAuthHeader();
-      const res = await fetch(`${API_BASE}/reviews.php?id=${id}`, {
+      const res = await fetch(`${API_BASE}?id=${id}`, {
         method: 'DELETE',
         headers: authHeaders
       });
@@ -300,9 +293,6 @@ export const reviewService = {
 
   // Real-time subscription to reviews (replaced with polling)
   subscribeToReviews(callback: (reviews: GoogleReview[]) => void): ReviewSubscription {
-    // TODO: audit_logs calls currently go to Supabase —
-    // migrate to ${API_BASE}/audit_logs.php in Layer 3
-    // Polling replaces Supabase realtime.
     this.getAllReviews().then(callback);
     
     const intervalId = setInterval(async () => {
@@ -341,7 +331,7 @@ export const reviewService = {
     try {
       const encodedDest = encodeURIComponent(destination);
       const res = await fetch(
-        `${API_BASE}/reviews.php?status=Approved` +
+        `${API_BASE}?status=Approved` +
         `&destination=${encodedDest}&limit=${limit}`
       );
       if (!res.ok) throw new Error('Failed to fetch reviews');
@@ -360,7 +350,7 @@ export const reviewService = {
   // Fetch reviews for a specific hotel
   async getReviewsByHotel(hotelId: string): Promise<GoogleReview[]> {
     try {
-      const res = await fetch(`${API_BASE}/reviews.php?status=Approved&hotel_id=${encodeURIComponent(hotelId)}`);
+      const res = await fetch(`${API_BASE}?status=Approved&hotel_id=${encodeURIComponent(hotelId)}`);
       if (!res.ok) throw new Error('Failed to fetch reviews by hotel');
       const data = await res.json();
       const reviews = data.reviews || [];

@@ -258,7 +258,7 @@ export default function ReviewForm() {
       formData.append('file', file);
       
       try {
-        const res = await fetch('/php-backend/upload_review_media.php', {
+        const res = await fetch('/api/reviews/upload', {
           method: 'POST',
           body: formData
         });
@@ -311,7 +311,7 @@ export default function ReviewForm() {
     formData.append('file', file);
     
     try {
-      const res = await fetch('/php-backend/upload_review_media.php', {
+      const res = await fetch('/api/reviews/upload', {
         method: 'POST',
         body: formData
       });

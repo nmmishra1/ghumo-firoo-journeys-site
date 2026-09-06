@@ -138,6 +138,10 @@ ErrorDocument 500 /index.html
   # Map Reports API — secured, routes to php-backend
   RewriteRule ^api/reports$ /php-backend/reports.php [L,QSA]
 
+  # Map Reviews API — secured, routes to php-backend
+  RewriteRule ^api/reviews$ /php-backend/reviews.php [L,QSA]
+  RewriteRule ^api/reviews/upload$ /php-backend/upload_review_media.php [L,QSA]
+
   # Map secondary MySQL tables to secured mysql-crud.php in php-backend
   RewriteRule ^api/destinations$ /php-backend/mysql-crud.php?table=destinations [L,QSA]
   RewriteRule ^api/destinations/([a-zA-Z0-9\-]+)$ /php-backend/mysql-crud.php?table=destinations&id=$1 [L,QSA]

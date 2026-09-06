@@ -53,7 +53,7 @@ export default function ReviewModeration() {
   const fetchReviews = async () => {
     try {
       setLoading(true);
-      const res = await fetch(`${API_BASE}/reviews.php`);
+      const res = await fetch('/api/reviews');
       if (!res.ok) throw new Error("Failed to fetch reviews");
       const data = await res.json();
       setReviews((data.reviews || []) as Review[]);
