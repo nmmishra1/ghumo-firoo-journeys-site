@@ -49,7 +49,7 @@ async function getAuthHeader(): Promise<Record<string, string>> {
 
 // ─── TEMPLATES & SCHEMAS DEFINITION ──────────────────────────────────────────
 
-type ModuleType = 'hotels' | 'cabs' | 'sightseeing' | 'activities' | 'leads';
+type ModuleType = 'hotels' | 'cabs' | 'sightseeing' | 'activities' | 'leads' | 'packages';
 
 interface ColumnDef {
   key: string;
@@ -323,7 +323,7 @@ const normalizeModuleKey = (modKey?: string): ModuleType => {
   const k = modKey.toLowerCase().trim();
   if (k.includes('hotel')) return 'hotels';
   if (k.includes('cab')) return 'cabs';
-  if (k.includes('sight')) return 'sightseeings';
+  if (k.includes('sight')) return 'sightseeing';
   if (k.includes('activit')) return 'activities';
   if (k.includes('package')) return 'packages';
   if (k.includes('lead')) return 'leads';
@@ -357,13 +357,13 @@ export const BulkUploadHub: React.FC<{ initialModule?: any }> = ({ initialModule
 
   // Handle Tab Switch with Real-Time URL Auto-Updating
   const handleTabChange = (val: string) => {
-    const mod = val as ModuleType;
+    const mod = normalizeModuleKey(val);
     setActiveModule(mod);
     resetUploadState();
 
     let routeSlug = 'hotel';
     if (mod === 'cabs') routeSlug = 'cab';
-    else if (mod === 'sightseeings') routeSlug = 'sightseeing';
+    else if (mod === 'sightseeing') routeSlug = 'sightseeing';
     else if (mod === 'activities') routeSlug = 'activity';
     else if (mod === 'packages') routeSlug = 'package';
     else if (mod === 'leads') routeSlug = 'leads';
@@ -682,10 +682,12 @@ export const BulkUploadHub: React.FC<{ initialModule?: any }> = ({ initialModule
       }
     } else if (mod === 'hotels') {
       endpoint = `${API_BASE}/api.php?table=hotels`;
+      const destCity = dataPayload.destination || dataPayload.city || '';
       payload = {
         hotel_name: dataPayload.hotel_name,
         hotel_code: dataPayload.hotel_code || `HOT-${Date.now().toString(36).toUpperCase()}`,
-        destination: dataPayload.destination,
+        destination: destCity,
+        city: destCity,
         star_rating: parseInt(dataPayload.star_rating) || 3,
         address: dataPayload.address || '',
         contact_number: dataPayload.contact_number || '',
@@ -711,14 +713,15 @@ export const BulkUploadHub: React.FC<{ initialModule?: any }> = ({ initialModule
             diagnosis: `Hotel "${dataPayload.hotel_name}" saved to MySQL.`
           };
         } else {
+          const failMsg = resData.error || resData.message || `HTTP ${res.status} Error`;
           return {
             ok: false,
             endpoint,
             payload,
             status: res.status,
             data: resData,
-            error: resData.error || `HTTP ${res.status}`,
-            diagnosis: resData.error || 'Hotel insert error'
+            error: failMsg,
+            diagnosis: failMsg
           };
         }
       } catch (err: any) {
@@ -1081,7 +1084,7 @@ export const BulkUploadHub: React.FC<{ initialModule?: any }> = ({ initialModule
                 <Car className="w-4 h-4" /> Cabs & Vehicles
               </TabsTrigger>
               <TabsTrigger 
-                value="sightseeings" 
+                value="sightseeing" 
                 className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-[#c5a059] data-[state=active]:to-[#d4af37] data-[state=active]:text-slate-950 text-slate-300 font-extrabold text-xs px-4 py-2.5 rounded-xl flex items-center gap-2 transition-all"
               >
                 <MapPin className="w-4 h-4" /> Sightseeing Stations

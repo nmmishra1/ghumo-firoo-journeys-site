@@ -421,8 +421,9 @@ try {
     // ===================================================================
     } elseif ($method === 'POST') {
         $input = json_decode(file_get_contents('php://input'), true) ?? [];
-        if (!empty($input['city'])) {
-            $resolvedId = resolveCityId($pdo, $input['city'], $input['state'] ?? null, $input['country'] ?? null);
+        $cityInput = $input['city'] ?? ($input['destination'] ?? null);
+        if (!empty($cityInput)) {
+            $resolvedId = resolveCityId($pdo, $cityInput, $input['state'] ?? null, $input['country'] ?? null);
             if ($resolvedId !== null) {
                 $input['city_id'] = $resolvedId;
             }

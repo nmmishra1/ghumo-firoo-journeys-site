@@ -363,6 +363,34 @@ try {
         exit;
     } elseif ($method === 'POST') {
         $p = json_decode(file_get_contents('php://input'), true) ?? [];
+        $pkgName = trim($p['name'] ?? ($p['package_name'] ?? ($p['title'] ?? '')));
+        $pkgSlug = trim($p['slug'] ?? '');
+
+        if (!empty($pkgSlug) || !empty($pkgName)) {
+            $dupSql = "SELECT id, name, slug FROM packages WHERE 1=0";
+            $dupParams = [];
+            if (!empty($pkgSlug)) {
+                $dupSql .= " OR LOWER(TRIM(slug)) = LOWER(TRIM(:slug))";
+                $dupParams[':slug'] = $pkgSlug;
+            }
+            if (!empty($pkgName)) {
+                $dupSql .= " OR LOWER(TRIM(name)) = LOWER(TRIM(:name))";
+                $dupParams[':name'] = $pkgName;
+            }
+            $dupStmt = $pdo->prepare($dupSql);
+            $dupStmt->execute($dupParams);
+            $dup = $dupStmt->fetch(PDO::FETCH_ASSOC);
+            if ($dup) {
+                http_response_code(409);
+                echo json_encode([
+                    'success' => false,
+                    'error' => "Duplicate Package: A tour package named '{$dup['name']}' (slug: '{$dup['slug']}') already exists in MySQL database.",
+                    'duplicate' => true
+                ]);
+                exit;
+            }
+        }
+
         $newId = $p['id'] ?? generateUuid();
 
         $stmt = $pdo->prepare("INSERT INTO packages (
