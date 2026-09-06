@@ -685,87 +685,83 @@ export const HotelContracting: React.FC = () => {
   ) => {
     setLoading(true);
     try {
-      const params = new URLSearchParams();
-      params.set('page', String(page));
-      params.set('limit', String(pageSize));
-      if (search.trim()) params.set('search', search.trim());
-      if (country !== 'all') params.set('country_id', country);
-      if (state !== 'all') params.set('state_id', state);
-      if (city !== 'all') params.set('city_id', city);
-      if (star !== 'all') params.set('star_rating', star);
-
-      let foundDb = false;
+      let dbHotels: any[] = [];
       try {
-        const res = await fetchCachedJson(`/php-backend/hotels.php?${params.toString()}`);
-        if (res && res.success && Array.isArray(res.data) && res.data.length > 0) {
-          foundDb = true;
-          const dbMapped = res.data.map((h: any) => ({
+        const res = await fetchCachedJson(`/php-backend/hotels.php?limit=1000`);
+        if (res && res.success && Array.isArray(res.data)) {
+          dbHotels = res.data.map((h: any) => ({
             ...h,
+            id: String(h.id),
+            city: h.city || h.cities?.city_name || '',
+            state: h.state || h.states?.state_name || '',
+            country: h.country || h.countries?.country_name || 'India',
             cities: h.city ? { city_name: h.city } : (h.cities || null),
             states: h.state ? { state_name: h.state } : (h.states || null),
             countries: h.country ? { country_name: h.country } : (h.countries || null)
           }));
-          setHotels(dbMapped);
-          if (res.pagination) {
-            setCurrentPage(res.pagination.page);
-            setTotalRecords(res.pagination.total_records);
-            setTotalPages(res.pagination.total_pages);
-          }
-          if (dbMapped.length > 0 && (!selectedHotelId || !dbMapped.some(h => h.id === selectedHotelId))) {
-            setSelectedHotelId(dbMapped[0].id);
-          }
         }
       } catch (e) {
-        console.warn('Backend hotels fetch failed, falling back to contracted master list:', e);
+        console.warn('Backend hotels fetch failed, relying on master contracted registry:', e);
       }
 
-      if (!foundDb) {
-        // High-fidelity fallback filtering over contracted master registry
-        const q = search.trim().toLowerCase();
-        const selC = country !== 'all' ? country.trim().toLowerCase() : null;
-        const selS = state !== 'all' ? state.trim().toLowerCase() : null;
-        const selCity = city !== 'all' ? city.trim().toLowerCase() : null;
+      // Merge live DB records with master contracted registry (DB records take priority)
+      const dbHotelNames = new Set(dbHotels.map(h => String(h.hotel_name || '').toLowerCase().trim()));
+      const combined = [
+        ...dbHotels,
+        ...masterHotelsList.filter(mh => !dbHotelNames.has(String(mh.hotel_name || '').toLowerCase().trim()))
+      ];
 
-        const filtered = masterHotelsList.filter(h => {
-          if (q) {
-            const match = (h.hotel_name || '').toLowerCase().includes(q) ||
-                          (h.city || '').toLowerCase().includes(q) ||
-                          (h.state || '').toLowerCase().includes(q) ||
-                          (h.hotel_code || '').toLowerCase().includes(q);
-            if (!match) return false;
-          }
-          if (selC) {
-            const hC = (h.country || '').toLowerCase();
-            if (hC !== selC && !hC.includes(selC) && !selC.includes(hC)) return false;
-          }
-          if (selS) {
-            const hS = (h.state || '').toLowerCase();
-            if (hS !== selS && !hS.includes(selS) && !selS.includes(hS)) return false;
-          }
-          if (selCity) {
-            const hCity = (h.city || '').toLowerCase();
-            if (hCity !== selCity && !hCity.includes(selCity) && !selCity.includes(hCity)) return false;
-          }
-          if (star !== 'all') {
-            if (Number(h.star_rating) !== Number(star)) return false;
-          }
-          return true;
-        });
+      // Filter merged dataset by search term, country, state, city, and star rating
+      const q = search.trim().toLowerCase();
+      const selC = country !== 'all' ? country.trim().toLowerCase() : null;
+      const selS = state !== 'all' ? state.trim().toLowerCase() : null;
+      const selCity = city !== 'all' ? city.trim().toLowerCase() : null;
 
-        const total = filtered.length;
-        const pages = Math.max(1, Math.ceil(total / pageSize));
-        const validPage = Math.min(page, pages);
-        const startIndex = (validPage - 1) * pageSize;
-        const paginated = filtered.slice(startIndex, startIndex + pageSize);
+      const filtered = combined.filter(h => {
+        const hName = String(h.hotel_name || '').toLowerCase();
+        const hCode = String(h.hotel_code || '').toLowerCase();
+        const hCity = String(h.city || h.cities?.city_name || '').toLowerCase();
+        const hState = String(h.state || h.states?.state_name || '').toLowerCase();
+        const hCountry = String(h.country || h.countries?.country_name || '').toLowerCase();
+        const hAddress = String(h.address || '').toLowerCase();
 
-        setHotels(paginated);
-        setCurrentPage(validPage);
-        setTotalRecords(total);
-        setTotalPages(pages);
-
-        if (paginated.length > 0 && (!selectedHotelId || !paginated.some(h => h.id === selectedHotelId))) {
-          setSelectedHotelId(paginated[0].id);
+        if (q) {
+          const match = hName.includes(q) || hCode.includes(q) || hCity.includes(q) || hState.includes(q) || hAddress.includes(q);
+          if (!match) return false;
         }
+
+        if (selC) {
+          if (hCountry !== selC && !hCountry.includes(selC) && !selC.includes(hCountry)) return false;
+        }
+
+        if (selS) {
+          if (hState !== selS && !hState.includes(selS) && !selS.includes(hState)) return false;
+        }
+
+        if (selCity) {
+          if (hCity !== selCity && !hCity.includes(selCity) && !selCity.includes(hCity)) return false;
+        }
+
+        if (star !== 'all') {
+          if (Number(h.star_rating) !== Number(star)) return false;
+        }
+
+        return true;
+      });
+
+      const total = filtered.length;
+      const pages = Math.max(1, Math.ceil(total / pageSize));
+      const validPage = Math.min(page, pages);
+      const startIndex = (validPage - 1) * pageSize;
+      const paginated = filtered.slice(startIndex, startIndex + pageSize);
+
+      setHotels(paginated);
+      setCurrentPage(validPage);
+      setTotalRecords(total);
+      setTotalPages(pages);
+
+      if (paginated.length > 0 && (!selectedHotelId || !paginated.some(h => String(h.id) === String(selectedHotelId)))) {
+        setSelectedHotelId(String(paginated[0].id));
       }
     } catch (err: any) {
       console.error('Error fetching hotels:', err);
@@ -776,166 +772,152 @@ export const HotelContracting: React.FC = () => {
 
   useEffect(() => {
     fetchHotels(currentPage, hotelSearch, hotelFilterCountry, hotelFilterState, hotelFilterCity, hotelFilterStar);
-  }, [currentPage, hotelSearch, hotelFilterCountry, hotelFilterState, hotelFilterCity, hotelFilterStar]);
+  }, [currentPage, hotelSearch, hotelFilterCountry, hotelFilterState, hotelFilterCity, hotelFilterStar, pageSize]);
 
   // Dynamic Country Options for Filter Bar
   const countryOptions = React.useMemo(() => {
     const list: { id: string; name: string }[] = [];
-    const seenIds = new Set<string>();
     const seenNames = new Set<string>();
 
-    const addOption = (rawId: any, rawName: any) => {
+    const addOption = (rawName: any) => {
       const name = String(rawName || '').trim();
-      const id = String(rawId || name).trim();
-      if (name && id && !/^\d+$/.test(name) && !seenIds.has(id.toLowerCase()) && !seenNames.has(name.toLowerCase())) {
-        seenIds.add(id.toLowerCase());
-        seenNames.add(name.toLowerCase());
-        list.push({ id, name });
-      }
+      if (!name || /^\d+$/.test(name) || seenNames.has(name.toLowerCase())) return;
+      seenNames.add(name.toLowerCase());
+      list.push({ id: name, name });
     };
 
     countries.forEach(c => {
-      addOption(c.id, c.country_name || (c as any).name || '');
+      addOption(c.country_name || (c as any).name || '');
     });
 
     masterHotelsList.forEach(h => {
-      if (h.country) addOption(h.country, h.country);
+      if (h.country) addOption(h.country);
     });
 
     hotels.forEach((h: any) => {
-      let name = String(h.country || h.countries?.country_name || '').trim();
-      if (name) addOption(name, name);
+      const name = String(h.country || h.countries?.country_name || '').trim();
+      if (name) addOption(name);
     });
 
-    if (list.length === 0) {
-      list.push({ id: 'India', name: 'India' });
+    if (list.length === 0 || !seenNames.has('india')) {
+      addOption('India');
     }
 
-    return list;
+    return list.sort((a, b) => a.name.localeCompare(b.name));
   }, [countries, hotels, masterHotelsList]);
 
   // Dynamic State Options for Filter Bar (Cascading from selected Country)
   const stateOptions = React.useMemo(() => {
     const list: { id: string; name: string }[] = [];
-    const seenIds = new Set<string>();
     const seenNames = new Set<string>();
 
-    const selCountryObj = countryOptions.find(c => c.id === hotelFilterCountry || String(c.name).toLowerCase() === String(hotelFilterCountry).toLowerCase());
-    const selCountryName = selCountryObj ? String(selCountryObj.name).toLowerCase() : (hotelFilterCountry !== 'all' ? String(hotelFilterCountry).toLowerCase() : null);
+    const selCountry = hotelFilterCountry !== 'all' ? hotelFilterCountry.trim().toLowerCase() : null;
 
-    const addState = (rawId: any, rawName: any, rawCountry?: any) => {
+    const addState = (rawName: any, rawCountry?: any) => {
       const name = String(rawName || '').trim();
-      const id = String(rawId || name).trim();
       const countryStr = String(rawCountry || '').trim();
-      if (!name || !id || /^\d+$/.test(name)) return;
+      if (!name || /^\d+$/.test(name) || seenNames.has(name.toLowerCase())) return;
 
-      if (selCountryName && countryStr) {
+      if (selCountry && countryStr) {
         const cLower = countryStr.toLowerCase();
-        if (!cLower.includes(selCountryName) && !selCountryName.includes(cLower) && selCountryName !== 'india') {
+        if (!cLower.includes(selCountry) && !selCountry.includes(cLower) && selCountry !== 'india') {
           return;
         }
       }
 
-      if (!seenIds.has(id.toLowerCase()) && !seenNames.has(name.toLowerCase())) {
-        seenIds.add(id.toLowerCase());
-        seenNames.add(name.toLowerCase());
-        list.push({ id, name });
-      }
+      seenNames.add(name.toLowerCase());
+      list.push({ id: name, name });
     };
 
     states.forEach(s => {
       const cObj = countries.find(c => String(c.id) === String(s.country_id));
-      const cName = cObj?.country_name || (cObj as any)?.name || s.country_id;
-      addState(s.id, s.state_name || (s as any).name || '', cName);
+      const cName = cObj?.country_name || (cObj as any)?.name || 'India';
+      addState(s.state_name || (s as any).name || '', cName);
     });
 
     masterHotelsList.forEach(h => {
-      if (h.state) addState(h.state, h.state, h.country);
+      if (h.state) addState(h.state, h.country || 'India');
     });
 
     hotels.forEach((h: any) => {
       const name = String(h.state || h.states?.state_name || '').trim();
       const hCountry = String(h.country || h.countries?.country_name || '').trim();
-      if (name) addState(name, name, hCountry);
+      if (name) addState(name, hCountry);
     });
 
-    return list;
-  }, [states, countries, hotels, hotelFilterCountry, countryOptions, masterHotelsList]);
+    return list.sort((a, b) => a.name.localeCompare(b.name));
+  }, [states, countries, hotels, hotelFilterCountry, masterHotelsList]);
 
   // Dynamic City Options for Filter Bar (Cascading from selected State / Country)
   const cityOptions = React.useMemo(() => {
     const list: { id: string; name: string }[] = [];
-    const seenIds = new Set<string>();
     const seenNames = new Set<string>();
 
-    const selStateObj = stateOptions.find(s => s.id === hotelFilterState || String(s.name).toLowerCase() === String(hotelFilterState).toLowerCase());
-    const selStateName = selStateObj ? String(selStateObj.name).toLowerCase() : (hotelFilterState !== 'all' ? String(hotelFilterState).toLowerCase() : null);
+    const selState = hotelFilterState !== 'all' ? hotelFilterState.trim().toLowerCase() : null;
+    const selCountry = hotelFilterCountry !== 'all' ? hotelFilterCountry.trim().toLowerCase() : null;
 
-    const selCountryObj = countryOptions.find(c => c.id === hotelFilterCountry || String(c.name).toLowerCase() === String(hotelFilterCountry).toLowerCase());
-    const selCountryName = selCountryObj ? String(selCountryObj.name).toLowerCase() : (hotelFilterCountry !== 'all' ? String(hotelFilterCountry).toLowerCase() : null);
-
-    const addCity = (rawId: any, rawName: any, rawState?: any, rawCountry?: any) => {
+    const addCity = (rawName: any, rawState?: any, rawCountry?: any) => {
       const name = String(rawName || '').trim();
-      const id = String(rawId || name).trim();
       const stateStr = String(rawState || '').trim();
       const countryStr = String(rawCountry || '').trim();
-      if (!name || !id || /^\d+$/.test(name)) return;
+      if (!name || /^\d+$/.test(name) || seenNames.has(name.toLowerCase())) return;
 
-      if (selStateName && stateStr) {
+      if (selState && stateStr) {
         const sLower = stateStr.toLowerCase();
-        if (!sLower.includes(selStateName) && !selStateName.includes(sLower)) return;
+        if (!sLower.includes(selState) && !selState.includes(sLower)) return;
       }
 
-      if (selCountryName && countryStr) {
+      if (selCountry && countryStr) {
         const cLower = countryStr.toLowerCase();
-        if (!cLower.includes(selCountryName) && !selCountryName.includes(cLower) && selCountryName !== 'india') return;
+        if (!cLower.includes(selCountry) && !selCountry.includes(cLower) && selCountry !== 'india') return;
       }
 
-      if (!seenIds.has(id.toLowerCase()) && !seenNames.has(name.toLowerCase())) {
-        seenIds.add(id.toLowerCase());
-        seenNames.add(name.toLowerCase());
-        list.push({ id, name });
-      }
+      seenNames.add(name.toLowerCase());
+      list.push({ id: name, name });
     };
 
     cities.forEach(c => {
       const sObj = states.find(s => String(s.id) === String(c.state_id));
-      const sName = sObj?.state_name || (sObj as any)?.name || (c as any).state || c.state_id;
-      addCity(c.id, c.city_name || (c as any).name || '', sName, (c as any).country);
+      const sName = sObj?.state_name || (sObj as any)?.name || (c as any).state || '';
+      addCity(c.city_name || (c as any).name || '', sName, (c as any).country || 'India');
     });
 
     masterHotelsList.forEach(h => {
-      if (h.city) addCity(h.city, h.city, h.state, h.country);
+      if (h.city) addCity(h.city, h.state, h.country);
     });
 
     hotels.forEach((h: any) => {
       const name = String(h.city || h.cities?.city_name || '').trim();
       const hState = String(h.state || h.states?.state_name || '').trim();
       const hCountry = String(h.country || h.countries?.country_name || '').trim();
-      if (name) addCity(name, name, hState, hCountry);
+      if (name) addCity(name, hState, hCountry);
     });
 
-    return list;
-  }, [cities, states, countries, hotels, hotelFilterState, hotelFilterCountry, stateOptions, countryOptions, masterHotelsList]);
+    return list.sort((a, b) => a.name.localeCompare(b.name));
+  }, [cities, states, countries, hotels, hotelFilterState, hotelFilterCountry, masterHotelsList]);
 
   // Handlers for filter state changes
   const handleCountryFilterChange = (val: string) => {
     setHotelFilterCountry(val);
     setHotelFilterState('all');
     setHotelFilterCity('all');
+    setCurrentPage(1);
   };
 
   const handleStateFilterChange = (val: string) => {
     setHotelFilterState(val);
     setHotelFilterCity('all');
+    setCurrentPage(1);
   };
 
   const handleCityFilterChange = (val: string) => {
     setHotelFilterCity(val);
+    setCurrentPage(1);
   };
 
   const handleStarFilterChange = (val: string) => {
     setHotelFilterStar(val);
+    setCurrentPage(1);
   };
 
   const handleResetFilters = () => {
@@ -944,6 +926,7 @@ export const HotelContracting: React.FC = () => {
     setHotelFilterState('all');
     setHotelFilterCity('all');
     setHotelFilterStar('all');
+    setCurrentPage(1);
   };
 
   // Filtered Hotels list for grid view (hotels is already fetched & filtered by fetchHotels)

@@ -235,8 +235,32 @@ try {
             // Optional filter by city_id, state_id, country_id, star_rating, active_status, search
             $where  = [];
             $params = [];
-            
-            foreach (['city_id', 'state_id', 'country_id', 'destination_group', 'active_status', 'star_rating'] as $f) {
+
+            if (isset($_GET['country_id']) && $_GET['country_id'] !== 'all' && $_GET['country_id'] !== '') {
+                $cVal = trim($_GET['country_id']);
+                $where[] = "(h.country_id = ? OR LOWER(co.country_name) LIKE LOWER(?) OR (h.country IS NOT NULL AND LOWER(h.country) LIKE LOWER(?)))";
+                $params[] = $cVal;
+                $params[] = "%$cVal%";
+                $params[] = "%$cVal%";
+            }
+
+            if (isset($_GET['state_id']) && $_GET['state_id'] !== 'all' && $_GET['state_id'] !== '') {
+                $sVal = trim($_GET['state_id']);
+                $where[] = "(h.state_id = ? OR LOWER(s.state_name) LIKE LOWER(?) OR (h.state IS NOT NULL AND LOWER(h.state) LIKE LOWER(?)))";
+                $params[] = $sVal;
+                $params[] = "%$sVal%";
+                $params[] = "%$sVal%";
+            }
+
+            if (isset($_GET['city_id']) && $_GET['city_id'] !== 'all' && $_GET['city_id'] !== '') {
+                $ctVal = trim($_GET['city_id']);
+                $where[] = "(h.city_id = ? OR LOWER(c.city_name) LIKE LOWER(?) OR (h.city IS NOT NULL AND LOWER(h.city) LIKE LOWER(?)))";
+                $params[] = $ctVal;
+                $params[] = "%$ctVal%";
+                $params[] = "%$ctVal%";
+            }
+
+            foreach (['destination_group', 'active_status', 'star_rating'] as $f) {
                 if (isset($_GET[$f]) && $_GET[$f] !== 'all' && $_GET[$f] !== '' && in_array($f, $columns, true)) {
                     $where[]  = "h.`$f` = ?";
                     $params[] = $_GET[$f];
@@ -265,7 +289,7 @@ try {
                 $offset = ($page - 1) * $limit;
 
                 // Count total matching records
-                $countSql = "SELECT COUNT(*) FROM hotels h LEFT JOIN cities c ON h.city_id = c.id LEFT JOIN states s ON h.state_id = s.id $whereSQL";
+                $countSql = "SELECT COUNT(*) FROM hotels h LEFT JOIN cities c ON h.city_id = c.id LEFT JOIN states s ON h.state_id = s.id LEFT JOIN countries co ON h.country_id = co.id $whereSQL";
                 $countStmt = $pdo->prepare($countSql);
                 $countStmt->execute($params);
                 $totalRecords = (int)$countStmt->fetchColumn();
