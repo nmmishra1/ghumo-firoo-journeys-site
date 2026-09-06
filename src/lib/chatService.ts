@@ -18,7 +18,7 @@ interface ChatContext {
 }
 
 const API_BASE = import.meta.env.VITE_PHP_BASE_URL || import.meta.env.VITE_API_BASE_URL || '/php-backend';
-const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY || 'AQ.Ab8RN6JfZ1MKggR2v9cGl1HX_5SCX-_AZdYQp8Ocv6LN4kHRJw';
+const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY || '';
 const CANDIDATE_GEMINI_MODELS = [
   'gemini-3.1-flash-lite-preview',
   'gemini-3-flash-preview',

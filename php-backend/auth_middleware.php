@@ -138,7 +138,7 @@ function authenticate(): array
     }
 
     $jwt = $matches[1];
-    $publicKey = getenv('SUPABASE_PUBLIC_KEY') ?: 'ghumofiroo_jwt_fallback_key';
+    $publicKey = getenv('SUPABASE_PUBLIC_KEY') ?: getenv('SUPABASE_JWT_SECRET') ?: '';
 
     if (!$publicKey) {
         http_response_code(500);

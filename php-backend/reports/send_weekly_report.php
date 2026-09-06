@@ -15,7 +15,7 @@ loadEnvFile();
 $input = json_decode(file_get_contents('php://input'), true) ?? [];
 $targetEmail = trim($input['email'] ?? 'agent@ghumofiroo.com');
 
-$resendKey = getenv('RESEND_API_KEY') ?: 're_V2udxcv8_G7Y7DLDj4yaUcVQMhn1AKMsE';
+$resendKey = getenv('RESEND_API_KEY') ?: '';
 
 $startDate = date('Y-m-01');
 $endDate = date('Y-m-t');

@@ -80,7 +80,7 @@ function sendEmailPHPMailer($to, $subject, $htmlBody) {
     $htmlBody = wrapLuxuryEmailTemplate($subject, $htmlBody);
 
     // 1. Primary High-Reliability Mailer: Resend REST API
-    $resendKey = getenv('RESEND_API_KEY') ?: 're_V2udxcv8_G7Y7DLDj4yaUcVQMhn1AKMsE';
+    $resendKey = getenv('RESEND_API_KEY') ?: '';
     if (!empty($resendKey)) {
         $resendPayload = json_encode([
             'from' => 'Ghumo Firoo Journeys <noreply@ghumofiroo.com>',
@@ -108,13 +108,18 @@ function sendEmailPHPMailer($to, $subject, $htmlBody) {
     }
 
     // 2. Secondary Mailer: PHPMailer SMTP
+    $smtpPass = getenv('SMTP_PASS') ?: '';
+    if (empty($smtpPass)) {
+        error_log("[Mailer] SMTP_PASS not set in environment");
+    }
+
     $mail = new PHPMailer(true);
     try {
         $mail->isSMTP();
         $mail->Host       = getenv('SMTP_HOST') ?: 'mail.ghumofiroo.com';
         $mail->SMTPAuth   = true;
         $mail->Username   = getenv('SMTP_USER') ?: 'noreply@ghumofiroo.com';
-        $mail->Password   = getenv('SMTP_PASS') ?: '^;I3ZkQ(ar@u';
+        $mail->Password   = $smtpPass;
         $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS; // SSL/TLS port 465
         $mail->Port       = intval(getenv('SMTP_PORT')) ?: 465;
         $mail->Timeout    = 8;

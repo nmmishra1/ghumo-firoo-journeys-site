@@ -45,15 +45,16 @@ function getDb(): PDO
         loadEnvFile();
 
         $host = getenv('MYSQL_HOST') ?: getenv('DB_HOST') ?: '127.0.0.1';
-        $name = getenv('MYSQL_DATABASE') ?: getenv('DB_NAME') ?: 'a17511nd_Ghumofiroo';
-        $user = getenv('MYSQL_USER') ?: getenv('DB_USER') ?: 'a17511nd_Ghumofiroo_live';
-        $pass = getenv('MYSQL_PASSWORD') ?: getenv('DB_PASS') ?: 'ltYU_UpEb)bG';
+        $name = getenv('MYSQL_DATABASE') ?: getenv('DB_NAME') ?: '';
+        $user = getenv('MYSQL_USER') ?: getenv('DB_USER') ?: '';
+        $pass = getenv('MYSQL_PASSWORD') ?: getenv('DB_PASS') ?: '';
 
         if (!$name || !$user) {
             header('Content-Type: application/json; charset=utf-8');
+            http_response_code(500);
             echo json_encode([
                 'status' => 'ERROR',
-                'error' => 'Database configuration missing in .env.'
+                'error' => 'Database configuration missing in environment.'
             ]);
             exit;
         }

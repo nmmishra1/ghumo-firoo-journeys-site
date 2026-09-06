@@ -49,7 +49,7 @@ if (!empty($livePackages)) {
 }
 
 $geminiApiUrl = getenv('GEMINI_WEB2API_URL') ?: getenv('VITE_GEMINI_WEB2API_URL') ?: 'https://gemini-web2api-sxti.onrender.com/v1';
-$geminiApiKey = getenv('GEMINI_API_KEY') ?: getenv('VITE_GEMINI_API_KEY') ?: 'AQ.Ab8RN6JfZ1MKggR2v9cGl1HX_5SCX-_AZdYQp8Ocv6LN4kHRJw';
+$geminiApiKey = getenv('GEMINI_API_KEY') ?: getenv('VITE_GEMINI_API_KEY') ?: '';
 
 $systemPrompt = "You are Sarah, Lead AI Travel Designer for Ghumo Firoo Journeys — India's premier luxury travel agency (Ministry of Tourism Registered Partner, Official Evoke Partner).
 

@@ -83,7 +83,7 @@ $htmlBody = '
 </div>';
 
 // Primary Email Provider: Resend REST API
-$resendKey = getenv('RESEND_API_KEY') ?: 're_V2udxcv8_G7Y7DLDj4yaUcVQMhn1AKMsE';
+$resendKey = getenv('RESEND_API_KEY') ?: '';
 
 $resendPayload = json_encode([
     'from' => 'Ghumo Firoo Travels <noreply@ghumofiroo.com>',
