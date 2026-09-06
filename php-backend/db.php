@@ -38,8 +38,31 @@ function loadEnvFile()
                     }
                 }
             }
+            break;
         }
     }
+
+    // Check if php-backend/db_config.php or db_config.php exists as an alternative for cPanel
+    $phpConfigPaths = [
+        __DIR__ . '/db_config.php',
+        dirname(__DIR__) . '/db_config.php',
+        $_SERVER['DOCUMENT_ROOT'] . '/php-backend/db_config.php',
+        $_SERVER['DOCUMENT_ROOT'] . '/db_config.php'
+    ];
+    foreach ($phpConfigPaths as $cfgPath) {
+        if ($cfgPath && file_exists($cfgPath)) {
+            $config = @include $cfgPath;
+            if (is_array($config)) {
+                foreach ($config as $k => $v) {
+                    @putenv("$k=$v");
+                    $_ENV[$k] = $v;
+                    $_SERVER[$k] = $v;
+                }
+            }
+            break;
+        }
+    }
+
     $loaded = true;
 }
 
