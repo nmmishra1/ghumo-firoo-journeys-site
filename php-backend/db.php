@@ -6,14 +6,20 @@ ini_set('log_errors', 1);
 
 function loadEnvFile()
 {
+    static $loaded = false;
+    if ($loaded) return;
+
     $paths = [
         __DIR__ . '/.env',
         __DIR__ . '/../.env',
-        __DIR__ . '/../../.env'
+        dirname(__DIR__) . '/.env',
+        dirname(__DIR__) . '/php-backend/.env',
+        $_SERVER['DOCUMENT_ROOT'] . '/php-backend/.env',
+        $_SERVER['DOCUMENT_ROOT'] . '/.env'
     ];
 
     foreach ($paths as $envPath) {
-        if (file_exists($envPath)) {
+        if ($envPath && file_exists($envPath)) {
             $lines = file($envPath, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
             if ($lines !== false) {
                 foreach ($lines as $line) {
@@ -26,15 +32,15 @@ function loadEnvFile()
                         $name = trim($parts[0]);
                         $value = trim($parts[1]);
                         $value = preg_replace('/^["\'](.*)["\']$/', '$1', $value);
-                        putenv("$name=$value");
+                        @putenv("$name=$value");
                         $_ENV[$name] = $value;
                         $_SERVER[$name] = $value;
                     }
                 }
-                break;
             }
         }
     }
+    $loaded = true;
 }
 
 function getDb(): PDO
@@ -44,10 +50,10 @@ function getDb(): PDO
     if ($pdo === null) {
         loadEnvFile();
 
-        $host = getenv('MYSQL_HOST') ?: getenv('DB_HOST') ?: '127.0.0.1';
-        $name = getenv('MYSQL_DATABASE') ?: getenv('DB_NAME') ?: '';
-        $user = getenv('MYSQL_USER') ?: getenv('DB_USER') ?: '';
-        $pass = getenv('MYSQL_PASSWORD') ?: getenv('DB_PASS') ?: '';
+        $host = getenv('MYSQL_HOST') ?: ($_ENV['MYSQL_HOST'] ?? ($_SERVER['MYSQL_HOST'] ?? (getenv('DB_HOST') ?: ($_ENV['DB_HOST'] ?? '127.0.0.1'))));
+        $name = getenv('MYSQL_DATABASE') ?: ($_ENV['MYSQL_DATABASE'] ?? ($_SERVER['MYSQL_DATABASE'] ?? (getenv('DB_NAME') ?: ($_ENV['DB_NAME'] ?? ''))));
+        $user = getenv('MYSQL_USER') ?: ($_ENV['MYSQL_USER'] ?? ($_SERVER['MYSQL_USER'] ?? (getenv('DB_USER') ?: ($_ENV['DB_USER'] ?? ''))));
+        $pass = getenv('MYSQL_PASSWORD') ?: ($_ENV['MYSQL_PASSWORD'] ?? ($_SERVER['MYSQL_PASSWORD'] ?? (getenv('DB_PASS') ?: ($_ENV['DB_PASS'] ?? ''))));
 
         if (!$name || !$user) {
             header('Content-Type: application/json; charset=utf-8');
