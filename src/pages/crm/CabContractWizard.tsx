@@ -16,6 +16,7 @@ import {
   ArrowRight, Landmark, Calendar, Trash2, Layers, RefreshCw, Clock, ArrowLeft, Save
 } from 'lucide-react';
 import { resolveGeography } from '@/data/geographyMaster';
+import { crmFetch } from '@/utils/crmApi';
 
 const API_BASE = import.meta.env.VITE_PHP_BASE_URL || import.meta.env.VITE_API_BASE_URL || '/php-backend';
 
@@ -549,27 +550,40 @@ export const CabContractWizard: React.FC<CabContractWizardProps> = ({
       };
 
       if (dialogMode === 'add') {
-        const res = await fetch(`${API_BASE}/api.php?table=cab_suppliers`, {
+        const res = await crmFetch(`${API_BASE}/api.php?table=cab_suppliers`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', ...authHeaders },
           body: JSON.stringify(supplierPayload)
+        }, {
+          action: 'create_cab_supplier',
+          module: 'Cabs',
+          itemName: supplierPayload.supplier_name
         });
         if (!res.ok) throw new Error('Failed to create supplier');
         const sData = await res.json();
         supplierId = sData.id;
       } else {
         // Find contract to update supplier
-        const cRes = await fetch(`${API_BASE}/api.php?table=cab_contracts&id=${selectedItemId}`, {
+        const cRes = await crmFetch(`${API_BASE}/api.php?table=cab_contracts&id=${selectedItemId}`, {
           headers: authHeaders
+        }, {
+          action: 'get_cab_contract_for_supplier',
+          module: 'Cabs',
+          recordId: selectedItemId || undefined
         });
         if (!cRes.ok) throw new Error('Failed to find contract');
         const oldContract = await cRes.json();
         if (oldContract?.supplier_id) {
           supplierId = oldContract.supplier_id;
-          const res = await fetch(`${API_BASE}/api.php?table=cab_suppliers&id=${supplierId}`, {
+          const res = await crmFetch(`${API_BASE}/api.php?table=cab_suppliers&id=${supplierId}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json', ...authHeaders },
             body: JSON.stringify(supplierPayload)
+          }, {
+            action: 'update_cab_supplier',
+            module: 'Cabs',
+            recordId: supplierId,
+            itemName: supplierPayload.supplier_name
           });
           if (!res.ok) throw new Error('Failed to update supplier');
         }
@@ -586,19 +600,28 @@ export const CabContractWizard: React.FC<CabContractWizardProps> = ({
       };
 
       if (dialogMode === 'add') {
-        const res = await fetch(`${API_BASE}/api.php?table=cab_contracts`, {
+        const res = await crmFetch(`${API_BASE}/api.php?table=cab_contracts`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', ...authHeaders },
           body: JSON.stringify(contractPayload)
+        }, {
+          action: 'create_cab_contract',
+          module: 'Cabs',
+          itemName: contractPayload.contract_name
         });
         if (!res.ok) throw new Error('Failed to create contract');
         const cData = await res.json();
         contractId = cData.id;
       } else {
-        const res = await fetch(`${API_BASE}/api.php?table=cab_contracts&id=${contractId}`, {
+        const res = await crmFetch(`${API_BASE}/api.php?table=cab_contracts&id=${contractId}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json', ...authHeaders },
           body: JSON.stringify(contractPayload)
+        }, {
+          action: 'update_cab_contract',
+          module: 'Cabs',
+          recordId: contractId,
+          itemName: contractPayload.contract_name
         });
         if (!res.ok) throw new Error('Failed to update contract');
       }
@@ -617,19 +640,28 @@ export const CabContractWizard: React.FC<CabContractWizardProps> = ({
         };
 
         if (veh.id.startsWith('temp-')) {
-          const res = await fetch(`${API_BASE}/api.php?table=cab_vehicles`, {
+          const res = await crmFetch(`${API_BASE}/api.php?table=cab_vehicles`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', ...authHeaders },
             body: JSON.stringify(vehPayload)
+          }, {
+            action: 'create_cab_vehicle',
+            module: 'Cabs',
+            itemName: veh.vehicle_type
           });
           if (!res.ok) throw new Error('Failed to create vehicle');
           const data = await res.json();
           savedVehicles.push({ oldId: veh.id, newId: data.id });
         } else {
-          const res = await fetch(`${API_BASE}/api.php?table=cab_vehicles&id=${veh.id}`, {
+          const res = await crmFetch(`${API_BASE}/api.php?table=cab_vehicles&id=${veh.id}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json', ...authHeaders },
             body: JSON.stringify(vehPayload)
+          }, {
+            action: 'update_cab_vehicle',
+            module: 'Cabs',
+            recordId: veh.id,
+            itemName: veh.vehicle_type
           });
           if (!res.ok) throw new Error('Failed to update vehicle');
           savedVehicles.push({ oldId: veh.id, newId: veh.id });
@@ -657,19 +689,28 @@ export const CabContractWizard: React.FC<CabContractWizardProps> = ({
         };
 
         if (rt.id.startsWith('temp-')) {
-          const res = await fetch(`${API_BASE}/api.php?table=cab_routes`, {
+          const res = await crmFetch(`${API_BASE}/api.php?table=cab_routes`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', ...authHeaders },
             body: JSON.stringify(rtPayload)
+          }, {
+            action: 'create_cab_route',
+            module: 'Cabs',
+            itemName: `${rt.source} -> ${rt.destination}`
           });
           if (!res.ok) throw new Error('Failed to create route');
           const data = await res.json();
           savedRoutes.push({ oldId: rt.id, newId: data.id });
         } else {
-          const res = await fetch(`${API_BASE}/api.php?table=cab_routes&id=${rt.id}`, {
+          const res = await crmFetch(`${API_BASE}/api.php?table=cab_routes&id=${rt.id}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json', ...authHeaders },
             body: JSON.stringify(rtPayload)
+          }, {
+            action: 'update_cab_route',
+            module: 'Cabs',
+            recordId: rt.id,
+            itemName: `${rt.source} -> ${rt.destination}`
           });
           if (!res.ok) throw new Error('Failed to update route');
           savedRoutes.push({ oldId: rt.id, newId: rt.id });
@@ -678,9 +719,13 @@ export const CabContractWizard: React.FC<CabContractWizardProps> = ({
 
       // 5. Delete old rates if editing to prevent duplicates
       if (dialogMode === 'edit') {
-        const delRes = await fetch(`${API_BASE}/api.php?table=cab_contract_rates&contract_id=${contractId}`, {
+        const delRes = await crmFetch(`${API_BASE}/api.php?table=cab_contract_rates&contract_id=${contractId}`, {
           method: 'DELETE',
           headers: authHeaders
+        }, {
+          action: 'delete_old_cab_rates',
+          module: 'Cabs',
+          recordId: contractId
         });
         if (!delRes.ok) throw new Error('Failed to delete old rates');
       }
@@ -750,10 +795,13 @@ export const CabContractWizard: React.FC<CabContractWizardProps> = ({
       });
 
       for (const ratePayload of ratesPayloads) {
-        const ratePostRes = await fetch(`${API_BASE}/api.php?table=cab_contract_rates`, {
+        const ratePostRes = await crmFetch(`${API_BASE}/api.php?table=cab_contract_rates`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', ...authHeaders },
           body: JSON.stringify(ratePayload)
+        }, {
+          action: 'create_cab_contract_rate',
+          module: 'Cabs'
         });
         if (!ratePostRes.ok) throw new Error('Failed to save rate payload');
       }

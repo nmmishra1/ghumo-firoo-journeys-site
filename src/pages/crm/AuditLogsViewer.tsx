@@ -68,6 +68,8 @@ export const AuditLogsViewer: React.FC = () => {
         return <Badge className="bg-violet-500/20 text-violet-700 dark:text-violet-300 border border-violet-500/30 text-[10px] font-black">Sightseeing</Badge>;
       case 'Activities':
         return <Badge className="bg-pink-500/20 text-pink-700 dark:text-pink-300 border border-pink-500/30 text-[10px] font-black">Activities</Badge>;
+      case 'Blogs':
+        return <Badge className="bg-orange-500/20 text-orange-700 dark:text-orange-300 border border-orange-500/30 text-[10px] font-black">Blogs</Badge>;
       case 'Leads':
         return <Badge className="bg-cyan-500/20 text-cyan-700 dark:text-cyan-300 border border-cyan-500/30 text-[10px] font-black">Leads</Badge>;
       default:
@@ -200,6 +202,7 @@ export const AuditLogsViewer: React.FC = () => {
                 <SelectItem value="Cabs">Cabs</SelectItem>
                 <SelectItem value="Sightseeing">Sightseeing</SelectItem>
                 <SelectItem value="Activities">Activities</SelectItem>
+                <SelectItem value="Blogs">Blogs</SelectItem>
                 <SelectItem value="Leads">Leads</SelectItem>
               </SelectContent>
             </Select>
@@ -209,10 +212,9 @@ export const AuditLogsViewer: React.FC = () => {
               <SelectTrigger className="h-9 text-xs font-semibold border-border/80"><SelectValue placeholder="All Actions" /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Actions</SelectItem>
-                <SelectItem value="UPDATE_PACKAGE_HOTEL">UPDATE_PACKAGE_HOTEL</SelectItem>
-                <SelectItem value="UPDATE_CAB_RATE">UPDATE_CAB_RATE</SelectItem>
-                <SelectItem value="BULK_IMPORT">BULK_IMPORT</SelectItem>
-                <SelectItem value="UPDATE_HOTEL_RATE">UPDATE_HOTEL_RATE</SelectItem>
+                {Array.from(new Set(logs.map(l => l.action).filter(Boolean))).map(act => (
+                  <SelectItem key={act} value={act}>{act}</SelectItem>
+                ))}
               </SelectContent>
             </Select>
 

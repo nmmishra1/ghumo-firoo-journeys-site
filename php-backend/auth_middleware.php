@@ -83,6 +83,49 @@ function checkRateLimit($maxRequests = 120, $secondsWindow = 60): bool {
 }
 
 // ============================================================
+// PERSISTENT DATABASE AUDIT LOGGING HELPER
+// ============================================================
+function writeAuditLog(PDO $pdo, string $recordType, string $recordId, string $action, ?string $oldValue = null, ?string $newValue = null, ?array $user = null): bool {
+    try {
+        static $ensured = false;
+        if (!$ensured) {
+            $pdo->exec("CREATE TABLE IF NOT EXISTS `audit_logs` (
+                `id` VARCHAR(100) PRIMARY KEY,
+                `lead_id` INT NULL,
+                `record_type` VARCHAR(100) NULL,
+                `record_id` VARCHAR(100) NULL,
+                `action` VARCHAR(100) NOT NULL,
+                `user_email` VARCHAR(255) NULL,
+                `user_name` VARCHAR(255) NULL,
+                `old_value` TEXT NULL,
+                `new_value` TEXT NULL,
+                `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )");
+            $ensured = true;
+        }
+
+        $id = sprintf('%04x%04x-%04x-%04x-%04x-%04x%04x%04x',
+            mt_rand(0, 0xffff), mt_rand(0, 0xffff),
+            mt_rand(0, 0xffff),
+            mt_rand(0, 0x0fff) | 0x4000,
+            mt_rand(0, 0x3fff) | 0x8000,
+            mt_rand(0, 0xffff), mt_rand(0, 0xffff), mt_rand(0, 0xffff)
+        );
+
+        $userEmail = $user['email'] ?? ($user['user_email'] ?? 'agent@ghumofiroo.com');
+        $userName = $user['full_name'] ?? ($user['name'] ?? ($user['user_name'] ?? 'Agent / Staff'));
+
+        $stmt = $pdo->prepare("INSERT INTO `audit_logs` 
+            (`id`, `record_type`, `record_id`, `action`, `user_email`, `user_name`, `old_value`, `new_value`)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+        return $stmt->execute([$id, $recordType, $recordId, $action, $userEmail, $userName, $oldValue, $newValue]);
+    } catch (Throwable $e) {
+        error_log("Audit log failed: " . $e->getMessage());
+        return false;
+    }
+}
+
+// ============================================================
 // DEV-ONLY CORS SETTINGS: Allow localhost / 127.0.0.1 origins
 // WARNING: Tighten Access-Control-Allow-Origin to only allow
 // https://ghumofiroo.com in production.

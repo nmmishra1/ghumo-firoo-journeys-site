@@ -21,6 +21,7 @@ import {
 } from 'lucide-react';
 
 import { resolveGeography, INDIAN_STATES, INTERNATIONAL_STATE_COUNTRY_MAP, CITY_TO_STATE_COUNTRY_MAP } from '@/data/geographyMaster';
+import { crmFetch } from '@/utils/crmApi';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -329,7 +330,11 @@ export default function SightseeingMaster() {
     setLoading(true);
     try {
       const authHeaders = await getAuthHeader();
-      const res = await fetch(`${API_BASE}/api.php?table=sightseeings`, { headers: authHeaders });
+      const res = await crmFetch(
+        `${API_BASE}/api.php?table=sightseeings`,
+        { headers: authHeaders },
+        { action: 'list_sightseeings', module: 'Sightseeing' }
+      );
       let list: Sightseeing[] = [];
       if (res.ok) {
         const data = await res.json();
@@ -411,10 +416,20 @@ export default function SightseeingMaster() {
     if (!confirm(`Are you sure you want to delete the sightseeing "${name}"?`)) return;
     try {
       const authHeaders = await getAuthHeader();
-      const res = await fetch(`${API_BASE}/api.php?table=sightseeings&id=${id}`, {
-        method: 'DELETE',
-        headers: authHeaders
-      });
+      const res = await crmFetch(
+        `${API_BASE}/api.php?table=sightseeings&id=${id}`,
+        {
+          method: 'DELETE',
+          headers: authHeaders
+        },
+        {
+          action: 'delete_sightseeing',
+          module: 'Sightseeing',
+          itemName: name,
+          recordId: id,
+          details: `Deleted sightseeing "${name}"`
+        }
+      );
       if (!res.ok) {
         const data = await res.json();
         throw new Error(data.error || 'Failed to delete sightseeing');
@@ -475,11 +490,21 @@ export default function SightseeingMaster() {
       };
       const authHeaders = await getAuthHeader();
         if (editingId) {
-          const res = await fetch(`${API_BASE}/api.php?table=sightseeings&id=${editingId}`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json', ...authHeaders },
-            body: JSON.stringify(payload)
-          });
+          const res = await crmFetch(
+            `${API_BASE}/api.php?table=sightseeings&id=${editingId}`,
+            {
+              method: 'PUT',
+              headers: { 'Content-Type': 'application/json', ...authHeaders },
+              body: JSON.stringify(payload)
+            },
+            {
+              action: 'update_sightseeing',
+              module: 'Sightseeing',
+              itemName: finalName,
+              recordId: editingId,
+              details: `Updated sightseeing "${finalName}"`
+            }
+          );
           const data = await res.json();
           if (!res.ok) throw new Error(data.error || 'Failed to update sightseeing');
           toast({ 
@@ -487,11 +512,20 @@ export default function SightseeingMaster() {
             description: data.message || `Sightseeing "${form.sightseeing_name}" updated successfully in database.` 
           });
         } else {
-          const res = await fetch(`${API_BASE}/api.php?table=sightseeings`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', ...authHeaders },
-            body: JSON.stringify({ ...payload, created_at: new Date().toISOString() })
-          });
+          const res = await crmFetch(
+            `${API_BASE}/api.php?table=sightseeings`,
+            {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json', ...authHeaders },
+              body: JSON.stringify({ ...payload, created_at: new Date().toISOString() })
+            },
+            {
+              action: 'create_sightseeing',
+              module: 'Sightseeing',
+              itemName: finalName,
+              details: `Created new sightseeing "${finalName}"`
+            }
+          );
           const data = await res.json();
           if (!res.ok) throw new Error(data.error || 'Failed to add sightseeing');
           toast({ 
@@ -511,11 +545,21 @@ export default function SightseeingMaster() {
       const item = sightseeings.find(s => s.id === id);
       if (!item) return;
       const authHeaders = await getAuthHeader();
-      const res = await fetch(`${API_BASE}/api.php?table=sightseeings&id=${id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json', ...authHeaders },
-        body: JSON.stringify({ ...item, active_status: !current })
-      });
+      const res = await crmFetch(
+        `${API_BASE}/api.php?table=sightseeings&id=${id}`,
+        {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json', ...authHeaders },
+          body: JSON.stringify({ ...item, active_status: !current })
+        },
+        {
+          action: 'toggle_sightseeing_status',
+          module: 'Sightseeing',
+          itemName: item.sightseeing_name,
+          recordId: id,
+          details: `Toggled status to ${!current ? 'Active' : 'Inactive'}`
+        }
+      );
       if (!res.ok) throw new Error('Failed to update status');
       toast({ title: !current ? '✅ Activated' : '⏸ Deactivated', description: 'Status updated.' });
       await loadSightseeings();

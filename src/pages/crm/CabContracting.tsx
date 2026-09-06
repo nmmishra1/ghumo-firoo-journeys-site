@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import { CabContractWizard } from './CabContractWizard';
 import { resolveGeography } from '@/data/geographyMaster';
+import { crmFetch } from '@/utils/crmApi';
 
 const API_BASE = import.meta.env.VITE_PHP_BASE_URL || import.meta.env.VITE_API_BASE_URL || '/php-backend';
 
@@ -194,10 +195,10 @@ export default function CabContracting() {
     setLoading(true);
     try {
       const [sRes, vRes, rRes, cRes] = await Promise.all([
-        fetch(`${API_BASE}/api.php?table=cab_suppliers`),
-        fetch(`${API_BASE}/api.php?table=cab_vehicles`),
-        fetch(`${API_BASE}/api.php?table=cab_routes`),
-        fetch(`${API_BASE}/api.php?table=cab_contracts`)
+        crmFetch(`${API_BASE}/api.php?table=cab_suppliers`, {}, { action: 'list_cab_suppliers', module: 'Cabs' }),
+        crmFetch(`${API_BASE}/api.php?table=cab_vehicles`, {}, { action: 'list_cab_vehicles', module: 'Cabs' }),
+        crmFetch(`${API_BASE}/api.php?table=cab_routes`, {}, { action: 'list_cab_routes', module: 'Cabs' }),
+        crmFetch(`${API_BASE}/api.php?table=cab_contracts`, {}, { action: 'list_cab_contracts', module: 'Cabs' })
       ]);
       if (!sRes.ok || !vRes.ok || !rRes.ok || !cRes.ok) throw new Error('Failed to load data');
       
@@ -279,10 +280,15 @@ export default function CabContracting() {
         : `${API_BASE}/api.php?table=cab_suppliers`;
       const method = dialogMode === 'edit' ? 'PUT' : 'POST';
       const authHeaders = await getAuthHeader();
-      const res = await fetch(url, {
+      const res = await crmFetch(url, {
         method,
         headers: { 'Content-Type': 'application/json', ...authHeaders },
         body: JSON.stringify(supplierForm)
+      }, {
+        action: dialogMode === 'edit' ? 'update_cab_supplier' : 'create_cab_supplier',
+        module: 'Cabs',
+        recordId: selectedItemId || undefined,
+        itemName: supplierForm.supplier_name
       });
       if (!res.ok) throw new Error('Failed to save supplier');
       toast({ title: `Supplier ${dialogMode === 'edit' ? 'Updated' : 'Added'} Successfully` });
@@ -303,10 +309,15 @@ export default function CabContracting() {
         : `${API_BASE}/api.php?table=cab_vehicles`;
       const method = dialogMode === 'edit' ? 'PUT' : 'POST';
       const authHeaders = await getAuthHeader();
-      const res = await fetch(url, {
+      const res = await crmFetch(url, {
         method,
         headers: { 'Content-Type': 'application/json', ...authHeaders },
         body: JSON.stringify(vehicleForm)
+      }, {
+        action: dialogMode === 'edit' ? 'update_cab_vehicle' : 'create_cab_vehicle',
+        module: 'Cabs',
+        recordId: selectedItemId || undefined,
+        itemName: `${vehicleForm.vehicle_type} (${vehicleForm.vehicle_category})`
       });
       if (!res.ok) throw new Error('Failed to save vehicle');
       toast({ title: `Vehicle ${dialogMode === 'edit' ? 'Updated' : 'Added'} Successfully` });
@@ -327,10 +338,15 @@ export default function CabContracting() {
         : `${API_BASE}/api.php?table=cab_routes`;
       const method = dialogMode === 'edit' ? 'PUT' : 'POST';
       const authHeaders = await getAuthHeader();
-      const res = await fetch(url, {
+      const res = await crmFetch(url, {
         method,
         headers: { 'Content-Type': 'application/json', ...authHeaders },
         body: JSON.stringify(routeForm)
+      }, {
+        action: dialogMode === 'edit' ? 'update_cab_route' : 'create_cab_route',
+        module: 'Cabs',
+        recordId: selectedItemId || undefined,
+        itemName: `${routeForm.source} -> ${routeForm.destination}`
       });
       if (!res.ok) throw new Error('Failed to save route');
       toast({ title: `Route ${dialogMode === 'edit' ? 'Updated' : 'Added'} Successfully` });
@@ -411,9 +427,14 @@ export default function CabContracting() {
       else if (type === 'contract') endpoint = `${API_BASE}/api.php?table=cab_contracts&id=${id}`;
 
       const authHeaders = await getAuthHeader();
-      const res = await fetch(endpoint, {
+      const res = await crmFetch(endpoint, {
         method: 'DELETE',
         headers: authHeaders
+      }, {
+        action: `delete_cab_${type}`,
+        module: 'Cabs',
+        recordId: id,
+        itemName: name
       });
 
       if (!res.ok) {

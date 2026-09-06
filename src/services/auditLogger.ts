@@ -5,7 +5,7 @@ export interface AuditLogEntry {
   user_email: string;
   user_name?: string;
   action: string;
-  module: 'Packages' | 'Hotels' | 'Cabs' | 'Sightseeing' | 'Activities' | 'Leads' | 'System';
+  module: 'Packages' | 'Hotels' | 'Cabs' | 'Sightseeing' | 'Activities' | 'Leads' | 'Blogs' | 'System';
   record_id?: string;
   target_name: string;
   old_value?: string | null;
@@ -59,8 +59,20 @@ const INITIAL_BASELINE_LOGS: AuditLogEntry[] = [
   }
 ];
 
+const mapDbRecordTypeToModule = (recordType?: string): AuditLogEntry['module'] => {
+  const lower = (recordType || '').toLowerCase();
+  if (lower.includes('hotel')) return 'Hotels';
+  if (lower.includes('cab')) return 'Cabs';
+  if (lower.includes('sightseeing')) return 'Sightseeing';
+  if (lower.includes('activit')) return 'Activities';
+  if (lower.includes('package')) return 'Packages';
+  if (lower.includes('lead')) return 'Leads';
+  if (lower.includes('blog')) return 'Blogs';
+  return 'System';
+};
+
 export const auditLogger = {
-  // Get all audit logs (from cached localStorage audit trail)
+  // Get all audit logs (from live MySQL database audit_logs table, merged with cached local trail)
   getLogs: async (): Promise<AuditLogEntry[]> => {
     let localLogs: AuditLogEntry[] = [];
     try {
@@ -69,10 +81,48 @@ export const auditLogger = {
         localLogs = JSON.parse(stored);
       } else {
         localLogs = INITIAL_BASELINE_LOGS;
-        localStorage.setItem(LOCAL_LOGS_KEY, JSON.stringify(INITIAL_BASELINE_LOGS));
       }
     } catch {
       localLogs = INITIAL_BASELINE_LOGS;
+    }
+
+    // Attempt to query real MySQL database audit logs
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const token = session?.access_token;
+      const headers: Record<string, string> = token ? { 'Authorization': `Bearer ${token}` } : {};
+
+      const res = await fetch('/php-backend/audit_logs.php?action=list_audit_logs&limit=200', { headers });
+      if (res.ok) {
+        const json = await res.json();
+        if (json && Array.isArray(json.audit_logs)) {
+          const dbLogs: AuditLogEntry[] = json.audit_logs.map((row: any) => ({
+            id: row.id || `db-${row.created_at}`,
+            timestamp: row.created_at || new Date().toISOString(),
+            user_email: row.user_email || 'staff@ghumofiroo.com',
+            user_name: row.user_name || 'Staff User',
+            action: row.action || 'DATABASE_OP',
+            module: mapDbRecordTypeToModule(row.record_type),
+            record_id: row.record_id || String(row.lead_id || ''),
+            target_name: row.new_value || row.record_type || 'Database Record',
+            old_value: row.old_value,
+            new_value: row.new_value,
+            details: `MySQL DB Audit [${row.action}] on ${row.record_type || 'record'} ${row.record_id || ''}`
+          }));
+
+          // Merge dbLogs and localLogs, deduplicating by ID
+          const seenIds = new Set<string>();
+          const merged: AuditLogEntry[] = [];
+          for (const item of [...dbLogs, ...localLogs]) {
+            if (item.id && seenIds.has(item.id)) continue;
+            if (item.id) seenIds.add(item.id);
+            merged.push(item);
+          }
+          return merged.sort((a, b) => new Date(b.timestamp || 0).getTime() - new Date(a.timestamp || 0).getTime());
+        }
+      }
+    } catch (err) {
+      console.warn('[auditLogger] Failed to fetch server database audit logs, using local fallback:', err);
     }
 
     return localLogs.sort((a, b) => new Date(b.timestamp || 0).getTime() - new Date(a.timestamp || 0).getTime());

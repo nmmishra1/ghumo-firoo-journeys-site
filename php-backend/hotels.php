@@ -16,7 +16,11 @@ if ($method !== 'GET') {
     $profile = requireRole($user, $pdo, ['admin', 'manager', 'agent']);
 }
 
+// Enforce rate limiting across all requests (120 req/min per IP)
+checkRateLimit(120, 60);
+
 $id     = $_GET['id'] ?? '';
+$action = $_GET['action'] ?? '';
 
 // -----------------------------------------------------------------------
 // JSON columns that must be decoded on read and encoded on write
@@ -540,7 +544,20 @@ try {
             $pdo->prepare($sql)->execute($params);
         }
 
-        echo json_encode(['success' => true]);
+        $realAction = $action ?: ($id ? 'update_hotel' : 'create_hotel');
+        $hotelName = $data['hotel_name'] ?? $id;
+        writeAuditLog($pdo, 'hotels', $id, strtoupper($realAction), null, "Saved hotel: {$hotelName}", $user ?? null);
+
+        echo json_encode([
+            'success' => true,
+            'action' => $realAction,
+            'table' => 'hotels',
+            'id' => $id,
+            'item_name' => $hotelName,
+            'status' => 'SAVED_INTO_DATABASE',
+            'audit_logged' => true,
+            'message' => "Hotel '{$hotelName}' (ID: {$id}) successfully saved in MySQL database."
+        ]);
 
     // ===================================================================
     // DELETE — remove a hotel
@@ -551,8 +568,33 @@ try {
             echo json_encode(['error' => 'Missing id parameter']);
             exit;
         }
-        $pdo->prepare("DELETE FROM hotels WHERE id = ?")->execute([$id]);
-        echo json_encode(['success' => true]);
+
+        $deletedHotelName = $id;
+        try {
+            $lookup = $pdo->prepare("SELECT hotel_name FROM hotels WHERE id = ?");
+            $lookup->execute([$id]);
+            $found = $lookup->fetchColumn();
+            if ($found) $deletedHotelName = $found;
+        } catch (Throwable $ignore) {}
+
+        $stmt = $pdo->prepare("DELETE FROM hotels WHERE id = ?");
+        $stmt->execute([$id]);
+        $affected = $stmt->rowCount();
+
+        $realAction = $action ?: 'delete_hotel';
+        writeAuditLog($pdo, 'hotels', $id, strtoupper($realAction), $deletedHotelName, "Deleted from database", $user ?? null);
+
+        echo json_encode([
+            'success' => true,
+            'action' => $realAction,
+            'table' => 'hotels',
+            'id' => $id,
+            'item_name' => $deletedHotelName,
+            'affected_rows' => $affected,
+            'status' => 'DELETED_FROM_DATABASE',
+            'audit_logged' => true,
+            'message' => "Successfully deleted hotel '{$deletedHotelName}' (ID: {$id}) from database."
+        ]);
 
     } else {
         http_response_code(405);

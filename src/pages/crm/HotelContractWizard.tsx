@@ -19,6 +19,7 @@ import { fetchHotelMetaFromGoogle } from '@/services/googlePlaces';
 import { MASTER_DESTINATIONS, MasterDestination } from '@/data/masterDestinations';
 
 import { resolveGeography } from '@/data/geographyMaster';
+import { crmFetch } from '@/utils/crmApi';
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || '';
 
@@ -1080,7 +1081,7 @@ export const HotelContractWizard: React.FC<HotelContractWizardProps> = ({
 
       // 1. Insert/Update Hotel
       if (dialogMode === 'add') {
-        const res = await fetch('/php-backend/hotels.php', {
+        const res = await crmFetch('/php-backend/hotels.php', {
           method: 'POST',
           headers: { 
             'Content-Type': 'application/json',
@@ -1090,6 +1091,10 @@ export const HotelContractWizard: React.FC<HotelContractWizardProps> = ({
             ...hotelPayload,
             created_at: new Date().toISOString()
           })
+        }, {
+          action: 'create_hotel',
+          module: 'Hotels',
+          itemName: hotelPayload.hotel_name
         });
         if (!res.ok) {
           const errData = await res.json().catch(() => ({}));
@@ -1098,13 +1103,18 @@ export const HotelContractWizard: React.FC<HotelContractWizardProps> = ({
         const newHotel = await res.json();
         hotelId = newHotel.id;
       } else {
-        const res = await fetch(`/php-backend/hotels.php?id=${selectedItemId}`, {
+        const res = await crmFetch(`/php-backend/hotels.php?id=${selectedItemId}`, {
           method: 'PUT',
           headers: { 
             'Content-Type': 'application/json',
             ...authHeaders
           },
           body: JSON.stringify(hotelPayload)
+        }, {
+          action: 'update_hotel',
+          module: 'Hotels',
+          recordId: selectedItemId || undefined,
+          itemName: hotelPayload.hotel_name
         });
         if (!res.ok) {
           const errData = await res.json().catch(() => ({}));
@@ -1115,9 +1125,13 @@ export const HotelContractWizard: React.FC<HotelContractWizardProps> = ({
       // 2. Persist Room Categories
       // Delete old room categories if in edit mode
       if (dialogMode === 'edit') {
-        await fetch(`/php-backend/api.php?table=room_categories&hotel_id=${hotelId}`, { 
+        await crmFetch(`/php-backend/api.php?table=room_categories&hotel_id=${hotelId}`, { 
           method: 'DELETE',
           headers: authHeaders
+        }, {
+          action: 'delete_old_hotel_rooms',
+          module: 'Hotels',
+          recordId: hotelId
         });
       }
 
@@ -1156,7 +1170,11 @@ export const HotelContractWizard: React.FC<HotelContractWizardProps> = ({
 
       // 3. Persist Seasons & Rates
       if (dialogMode === 'edit') {
-        await fetch(`${API_BASE}/api.php?table=seasons&hotel_id=${hotelId}`, { method: 'DELETE', headers: authHeaders });
+        await crmFetch(`${API_BASE}/api.php?table=seasons&hotel_id=${hotelId}`, { method: 'DELETE', headers: authHeaders }, {
+          action: 'delete_old_hotel_seasons',
+          module: 'Hotels',
+          recordId: hotelId
+        });
       }
 
       const seasonInsertions = seasons.map(s => ({
@@ -1169,10 +1187,14 @@ export const HotelContractWizard: React.FC<HotelContractWizardProps> = ({
 
       const savedSeasons = await Promise.all(
         seasonInsertions.map(season => 
-          fetch(`${API_BASE}/api.php?table=seasons`, {
+          crmFetch(`${API_BASE}/api.php?table=seasons`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', ...authHeaders },
             body: JSON.stringify(season)
+          }, {
+            action: 'create_hotel_season',
+            module: 'Hotels',
+            itemName: season.season_name
           }).then(async r => {
             if (!r.ok) throw new Error('Failed to insert season');
             const resData = await r.json();
@@ -1186,7 +1208,11 @@ export const HotelContractWizard: React.FC<HotelContractWizardProps> = ({
 
       // 4. Create Contract
       if (dialogMode === 'edit') {
-        await fetch(`${API_BASE}/api.php?table=hotel_contracts&hotel_id=${hotelId}`, { method: 'DELETE', headers: authHeaders });
+        await crmFetch(`${API_BASE}/api.php?table=hotel_contracts&hotel_id=${hotelId}`, { method: 'DELETE', headers: authHeaders }, {
+          action: 'delete_old_hotel_contracts',
+          module: 'Hotels',
+          recordId: hotelId
+        });
       }
 
       const contractPayload = {
@@ -1203,10 +1229,14 @@ export const HotelContractWizard: React.FC<HotelContractWizardProps> = ({
         created_at: new Date().toISOString()
       };
 
-      const contractRes = await fetch(`${API_BASE}/api.php?table=hotel_contracts`, {
+      const contractRes = await crmFetch(`${API_BASE}/api.php?table=hotel_contracts`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', ...authHeaders },
         body: JSON.stringify(contractPayload)
+      }, {
+        action: 'create_hotel_contract',
+        module: 'Hotels',
+        itemName: contractPayload.contract_name
       });
       if (!contractRes.ok) throw new Error('Failed to save contract');
       const savedContract = await contractRes.json();
@@ -1303,10 +1333,13 @@ export const HotelContractWizard: React.FC<HotelContractWizardProps> = ({
         if (rateInsertions.length > 0) {
           await Promise.all(
             rateInsertions.map(rate => 
-              fetch(`${API_BASE}/api.php?table=hotel_contract_rates`, {
+              crmFetch(`${API_BASE}/api.php?table=hotel_contract_rates`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', ...authHeaders },
                 body: JSON.stringify(rate)
+              }, {
+                action: 'create_hotel_contract_rate',
+                module: 'Hotels'
               }).then(r => {
                 if (!r.ok) throw new Error('Failed to insert contract rate');
               })
@@ -1319,9 +1352,13 @@ export const HotelContractWizard: React.FC<HotelContractWizardProps> = ({
 
       // 6. Save Facility Mappings (MySQL via api.php)
       try {
-        await fetch(`${API_BASE}/api.php?table=hotel_facility_mapping&hotel_id=${hotelId}`, { 
+        await crmFetch(`${API_BASE}/api.php?table=hotel_facility_mapping&hotel_id=${hotelId}`, { 
           method: 'DELETE',
           headers: authHeaders 
+        }, {
+          action: 'delete_old_hotel_facilities',
+          module: 'Hotels',
+          recordId: hotelId
         });
         if (selectedFacilities.length > 0) {
           const facilityMappings = selectedFacilities.map(facId => ({
@@ -1329,13 +1366,16 @@ export const HotelContractWizard: React.FC<HotelContractWizardProps> = ({
             facility_id: facId
           }));
           await Promise.all(facilityMappings.map(mapping => 
-            fetch(`${API_BASE}/api.php?table=hotel_facility_mapping`, {
+            crmFetch(`${API_BASE}/api.php?table=hotel_facility_mapping`, {
               method: 'POST',
               headers: { 
                 'Content-Type': 'application/json',
                 ...authHeaders
               },
               body: JSON.stringify(mapping)
+            }, {
+              action: 'create_hotel_facility_mapping',
+              module: 'Hotels'
             }).then(r => {
               if (!r.ok) throw new Error('Failed to insert facility mapping');
             })

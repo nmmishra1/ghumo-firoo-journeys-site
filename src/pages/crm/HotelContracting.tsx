@@ -32,6 +32,7 @@ import { reviewService, type GoogleReview } from '@/services/reviewService';
 import { getContractedHotelsMasterList } from '@/data/contractedHotelsDataLoader';
 import { resolveGeography, INDIAN_STATES, INTERNATIONAL_STATE_COUNTRY_MAP, CITY_TO_STATE_COUNTRY_MAP } from '@/data/geographyMaster';
 import { fetchCachedJson } from '@/utils/crmCache';
+import { crmFetch } from '@/utils/crmApi';
 
 // Types matching database schema
 type Country = { id: string; country_name: string };
@@ -1167,23 +1168,32 @@ export const HotelContracting: React.FC = () => {
         };
 
         if (dialogMode === 'add') {
-          const res = await fetch('/php-backend/hotels.php', {
+          const res = await crmFetch('/php-backend/hotels.php', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               ...hotelPayload,
               created_at: new Date().toISOString()
             })
+          }, {
+            action: 'create_hotel',
+            module: 'Hotels',
+            itemName: hotelPayload.hotel_name
           });
           if (!res.ok) throw new Error('Failed to create hotel');
           const resData = await res.json();
           toast({ title: 'Success', description: 'Hotel created successfully' });
           if (resData && resData.id) setSelectedHotelId(resData.id);
         } else {
-          const res = await fetch(`/php-backend/hotels.php?id=${selectedItemId}`, {
+          const res = await crmFetch(`/php-backend/hotels.php?id=${selectedItemId}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(hotelPayload)
+          }, {
+            action: 'update_hotel',
+            module: 'Hotels',
+            recordId: selectedItemId || undefined,
+            itemName: hotelPayload.hotel_name
           });
           if (!res.ok) throw new Error('Failed to update hotel');
           toast({ title: 'Success', description: 'Hotel updated successfully' });
@@ -1192,18 +1202,27 @@ export const HotelContracting: React.FC = () => {
       } else if (dialogType === 'supplier') {
         const payload = { ...supplierForm };
         if (dialogMode === 'add') {
-          const res = await fetch('/php-backend/api.php?table=hotel_suppliers', {
+          const res = await crmFetch('/php-backend/api.php?table=hotel_suppliers', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
+          }, {
+            action: 'create_hotel_supplier',
+            module: 'Hotels',
+            itemName: payload.supplier_name
           });
           if (!res.ok) throw new Error('Failed to add supplier');
           toast({ title: 'Success', description: 'Supplier added successfully' });
         } else {
-          const res = await fetch(`/php-backend/api.php?table=hotel_suppliers&id=${selectedItemId}`, {
+          const res = await crmFetch(`/php-backend/api.php?table=hotel_suppliers&id=${selectedItemId}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
+          }, {
+            action: 'update_hotel_supplier',
+            module: 'Hotels',
+            recordId: selectedItemId || undefined,
+            itemName: payload.supplier_name
           });
           if (!res.ok) throw new Error('Failed to update supplier');
           toast({ title: 'Success', description: 'Supplier updated successfully' });
@@ -1442,34 +1461,61 @@ export const HotelContracting: React.FC = () => {
         if (seasonsDelErr) throw seasonsDelErr;
 
         const authHeaders = await getAuthHeader();
+        const hotelToDelete = hotels.find(h => String(h.id) === String(id));
+        const hotelName = hotelToDelete?.hotel_name || id;
         
-        await fetch(`${API_BASE}/api.php?table=room_categories&hotel_id=${id}`, { 
+        await crmFetch(`${API_BASE}/api.php?table=room_categories&hotel_id=${id}`, { 
           method: 'DELETE',
           headers: authHeaders 
+        }, {
+          action: 'delete_hotel_rooms',
+          module: 'Hotels',
+          recordId: id,
+          itemName: `Rooms for ${hotelName}`
         });
 
-        await fetch(`${API_BASE}/api.php?table=hotel_images&hotel_id=${id}`, { 
+        await crmFetch(`${API_BASE}/api.php?table=hotel_images&hotel_id=${id}`, { 
           method: 'DELETE',
           headers: authHeaders 
+        }, {
+          action: 'delete_hotel_images',
+          module: 'Hotels',
+          recordId: id,
+          itemName: `Images for ${hotelName}`
         });
 
-        await fetch(`${API_BASE}/api.php?table=hotel_facility_mapping&hotel_id=${id}`, { 
+        await crmFetch(`${API_BASE}/api.php?table=hotel_facility_mapping&hotel_id=${id}`, { 
           method: 'DELETE',
           headers: authHeaders 
+        }, {
+          action: 'delete_hotel_facilities',
+          module: 'Hotels',
+          recordId: id,
+          itemName: `Facilities for ${hotelName}`
         });
 
         try {
-          await fetch(`${API_BASE}/api.php?table=hotel_rates&hotel_id=${id}`, {
+          await crmFetch(`${API_BASE}/api.php?table=hotel_rates&hotel_id=${id}`, {
             method: 'DELETE',
             headers: authHeaders
+          }, {
+            action: 'delete_hotel_rates',
+            module: 'Hotels',
+            recordId: id,
+            itemName: `Rates for ${hotelName}`
           });
         } catch (supDelErr) {
           console.warn('MySQL hotel rates deletion failed (non-blocking):', supDelErr);
         }
 
-        const hotelDelRes = await fetch(`${API_BASE}/hotels.php?id=${id}`, { 
+        const hotelDelRes = await crmFetch(`${API_BASE}/hotels.php?id=${id}`, { 
           method: 'DELETE',
           headers: authHeaders 
+        }, {
+          action: 'delete_hotel',
+          module: 'Hotels',
+          recordId: id,
+          itemName: hotelName
         });
         if (!hotelDelRes.ok) throw new Error('Failed to delete hotel');
 
@@ -1481,9 +1527,13 @@ export const HotelContracting: React.FC = () => {
 
       if (type === 'supplier') {
         const authHeaders = await getAuthHeader();
-        const res = await fetch(`/php-backend/api.php?table=hotel_suppliers&id=${id}`, {
+        const res = await crmFetch(`/php-backend/api.php?table=hotel_suppliers&id=${id}`, {
           method: 'DELETE',
           headers: authHeaders
+        }, {
+          action: 'delete_hotel_supplier',
+          module: 'Hotels',
+          recordId: id
         });
         if (!res.ok) throw new Error('Failed to delete supplier');
         toast({ title: 'Deleted', description: 'Item deleted successfully' });
@@ -1500,9 +1550,13 @@ export const HotelContracting: React.FC = () => {
         else if (type === 'rate') table = 'hotel_contract_rates';
 
         const authHeaders = await getAuthHeader();
-        const res = await fetch(`${API_BASE}/api.php?table=${table}&id=${id}`, {
+        const res = await crmFetch(`${API_BASE}/api.php?table=${table}&id=${id}`, {
           method: 'DELETE',
           headers: authHeaders
+        }, {
+          action: `delete_${table}`,
+          module: 'Hotels',
+          recordId: id
         });
         if (!res.ok) throw new Error('Failed to delete item');
         toast({ title: 'Deleted', description: 'Item deleted successfully' });

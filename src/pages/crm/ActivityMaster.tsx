@@ -22,6 +22,7 @@ import {
 } from 'lucide-react';
 
 import { resolveGeography, INDIAN_STATES, INTERNATIONAL_STATE_COUNTRY_MAP, CITY_TO_STATE_COUNTRY_MAP } from '@/data/geographyMaster';
+import { crmFetch } from '@/utils/crmApi';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -338,9 +339,11 @@ export default function ActivityMaster() {
     setLoading(true);
     try {
       const authHeaders = await getAuthHeader();
-      const res = await fetch(`${API_BASE}/activities.php`, {
-        headers: authHeaders
-      });
+      const res = await crmFetch(
+        `${API_BASE}/activities.php`,
+        { headers: authHeaders },
+        { action: 'list_activities', module: 'Activities' }
+      );
       let list: ActivityItem[] = [];
       if (res.ok) {
         const data = await res.json();
@@ -417,10 +420,20 @@ export default function ActivityMaster() {
     if (!confirm(`Are you sure you want to delete the activity "${name}"?`)) return;
     try {
       const authHeaders = await getAuthHeader();
-      const res = await fetch(`${API_BASE}/activities.php?id=${id}`, {
-        method: 'DELETE',
-        headers: authHeaders
-      });
+      const res = await crmFetch(
+        `${API_BASE}/activities.php?id=${id}`,
+        {
+          method: 'DELETE',
+          headers: authHeaders
+        },
+        {
+          action: 'delete_activity',
+          module: 'Activities',
+          itemName: name,
+          recordId: id,
+          details: `Deleted activity "${name}"`
+        }
+      );
       if (!res.ok) {
         const data = await res.json();
         throw new Error(data.error || 'Failed to delete activity');
@@ -481,11 +494,21 @@ export default function ActivityMaster() {
 
       const authHeaders = await getAuthHeader();
       if (editingId) {
-        const res = await fetch(`${API_BASE}/activities.php?id=${editingId}`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json', ...authHeaders },
-          body: JSON.stringify(payload)
-        });
+        const res = await crmFetch(
+          `${API_BASE}/activities.php?id=${editingId}`,
+          {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json', ...authHeaders },
+            body: JSON.stringify(payload)
+          },
+          {
+            action: 'update_activity',
+            module: 'Activities',
+            itemName: finalName,
+            recordId: editingId,
+            details: `Updated activity "${finalName}"`
+          }
+        );
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || 'Failed to update activity');
         toast({ 
@@ -493,11 +516,20 @@ export default function ActivityMaster() {
           description: data.message || `Activity "${form.activity_name}" updated successfully in database.` 
         });
       } else {
-        const res = await fetch(`${API_BASE}/activities.php`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', ...authHeaders },
-          body: JSON.stringify({ ...payload, created_at: new Date().toISOString() })
-        });
+        const res = await crmFetch(
+          `${API_BASE}/activities.php`,
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', ...authHeaders },
+            body: JSON.stringify({ ...payload, created_at: new Date().toISOString() })
+          },
+          {
+            action: 'create_activity',
+            module: 'Activities',
+            itemName: finalName,
+            details: `Created new activity "${finalName}"`
+          }
+        );
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || 'Failed to add activity');
         toast({ 
@@ -518,11 +550,21 @@ export default function ActivityMaster() {
       if (!act) return;
 
       const authHeaders = await getAuthHeader();
-      const res = await fetch(`${API_BASE}/activities.php?id=${id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json', ...authHeaders },
-        body: JSON.stringify({ ...act, active_status: !current })
-      });
+      const res = await crmFetch(
+        `${API_BASE}/activities.php?id=${id}`,
+        {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json', ...authHeaders },
+          body: JSON.stringify({ ...act, active_status: !current })
+        },
+        {
+          action: 'toggle_activity_status',
+          module: 'Activities',
+          itemName: act.activity_name,
+          recordId: id,
+          details: `Toggled activity status to ${!current ? 'Active' : 'Inactive'}`
+        }
+      );
       if (!res.ok) throw new Error('Failed to update status');
 
       toast({ title: !current ? '✅ Activated' : '⏸ Deactivated', description: 'Status updated.' });

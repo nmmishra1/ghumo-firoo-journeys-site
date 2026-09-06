@@ -22,6 +22,7 @@ import {
   Heading1, Heading2, Bold, Italic, ListOrdered, Quote, Link as LinkIcon, Image as ImageIcon,
   Code, SlidersHorizontal, CheckSquare, Sparkle, RefreshCw, FileCheck, Code2
 } from 'lucide-react';
+import { crmFetch } from '@/utils/crmApi';
 
 async function getAuthHeader(): Promise<Record<string, string>> {
   const { data: { session } } = await supabase.auth.getSession();
@@ -322,7 +323,10 @@ export default function BlogMaster() {
   const loadBlogs = async () => {
     setLoading(true);
     try {
-      const res = await fetch('/php-backend/blogs.php?all=true');
+      const res = await crmFetch('/php-backend/blogs.php?all=true', {}, {
+        action: 'list_blogs',
+        module: 'Blogs'
+      });
       if (!res.ok) throw new Error('Failed to fetch blogs');
       const dbData = await res.json();
 
@@ -403,10 +407,16 @@ export default function BlogMaster() {
   const handleDelete = async (id: string | number) => {
     if (!confirm('Are you sure you want to delete this blog post?')) return;
     try {
+      const blogToDelete = blogs.find(b => String(b.id) === String(id));
       const authHeaders = await getAuthHeader();
-      const res = await fetch(`/php-backend/blogs.php?id=${id}`, {
+      const res = await crmFetch(`/php-backend/blogs.php?id=${id}`, {
         method: 'DELETE',
         headers: authHeaders
+      }, {
+        action: 'delete_blog',
+        module: 'Blogs',
+        recordId: String(id),
+        itemName: blogToDelete?.title || `Blog ID ${id}`
       });
       if (!res.ok) throw new Error('Failed to delete blog post');
       toast({ title: 'Blog post deleted' });
@@ -435,10 +445,14 @@ export default function BlogMaster() {
       };
 
       const authHeaders = await getAuthHeader();
-      const res = await fetch('/php-backend/blogs.php', {
+      const res = await crmFetch('/php-backend/blogs.php', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', ...authHeaders },
         body: JSON.stringify(payload)
+      }, {
+        action: 'duplicate_blog',
+        module: 'Blogs',
+        itemName: payload.title
       });
       if (!res.ok) throw new Error('Failed to duplicate post');
       toast({ title: 'Blog post duplicated as draft' });
@@ -472,10 +486,15 @@ export default function BlogMaster() {
       const url = editingId ? `/php-backend/blogs.php?id=${editingId}` : '/php-backend/blogs.php';
 
       const authHeaders = await getAuthHeader();
-      const res = await fetch(url, {
+      const res = await crmFetch(url, {
         method,
         headers: { 'Content-Type': 'application/json', ...authHeaders },
         body: JSON.stringify(payload)
+      }, {
+        action: editingId ? 'update_blog' : 'create_blog',
+        module: 'Blogs',
+        recordId: editingId ? String(editingId) : undefined,
+        itemName: payload.title
       });
 
       if (!res.ok) {

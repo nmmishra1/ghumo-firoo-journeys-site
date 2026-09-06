@@ -12,11 +12,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 }
 
 require_once __DIR__ . '/db.php';
+require_once __DIR__ . '/auth_middleware.php';
+
+// Enforce rate limiting across all requests (120 req/min per IP)
+checkRateLimit(120, 60);
 
 $method = $_SERVER['REQUEST_METHOD'];
+$action = $_GET['action'] ?? '';
 
 if ($method !== 'GET') {
-    require_once __DIR__ . '/auth_middleware.php';
     $user = authenticate();
     $pdo = getDb();
     $profile = requireRole($user, $pdo, ['admin', 'manager', 'agent']);
@@ -162,7 +166,22 @@ try {
         }
 
         $pdo->commit();
-        echo json_encode(['success' => true, 'id' => $blogId]);
+        $realAction = $action ?: 'create_blog';
+        $blogTitle = $p['title'] ?? $blogId;
+        writeAuditLog($pdo, 'blogs', $blogId, strtoupper($realAction), null, "Created blog: {$blogTitle}", $user ?? null);
+
+        echo json_encode([
+            'success' => true,
+            'inserted' => true,
+            'action' => $realAction,
+            'table' => 'blogs',
+            'id' => $blogId,
+            'item_name' => $blogTitle,
+            'status' => 'INSERTED_INTO_DATABASE',
+            'affected_rows' => 1,
+            'audit_logged' => true,
+            'message' => "Successfully created blog '{$blogTitle}' (ID: {$blogId}) in database."
+        ]);
         exit;
     } elseif ($method === 'PUT') {
         $id = $_GET['id'] ?? '';
@@ -207,7 +226,22 @@ try {
         }
 
         $pdo->commit();
-        echo json_encode(['success' => true]);
+        $realAction = $action ?: 'update_blog';
+        $blogTitle = $p['title'] ?? $id;
+        writeAuditLog($pdo, 'blogs', $id, strtoupper($realAction), null, "Updated blog: {$blogTitle}", $user ?? null);
+
+        echo json_encode([
+            'success' => true,
+            'updated' => true,
+            'action' => $realAction,
+            'table' => 'blogs',
+            'id' => $id,
+            'item_name' => $blogTitle,
+            'status' => 'UPDATED_IN_DATABASE',
+            'affected_rows' => $stmt->rowCount(),
+            'audit_logged' => true,
+            'message' => "Successfully updated blog '{$blogTitle}' (ID: {$id}) in database."
+        ]);
         exit;
     } elseif ($method === 'DELETE') {
         $id = $_GET['id'] ?? '';
@@ -217,9 +251,32 @@ try {
             exit;
         }
 
+        $deletedTitle = $id;
+        try {
+            $lookup = $pdo->prepare("SELECT title FROM blogs WHERE id = ?");
+            $lookup->execute([$id]);
+            $found = $lookup->fetchColumn();
+            if ($found) $deletedTitle = $found;
+        } catch (Throwable $ignore) {}
+
         $stmt = $pdo->prepare("DELETE FROM blogs WHERE id = ?");
         $stmt->execute([$id]);
-        echo json_encode(['success' => true]);
+        $affected = $stmt->rowCount();
+
+        $realAction = $action ?: 'delete_blog';
+        writeAuditLog($pdo, 'blogs', $id, strtoupper($realAction), $deletedTitle, "Deleted from database", $user ?? null);
+
+        echo json_encode([
+            'success' => true,
+            'action' => $realAction,
+            'table' => 'blogs',
+            'id' => $id,
+            'item_name' => $deletedTitle,
+            'affected_rows' => $affected,
+            'status' => 'DELETED_FROM_DATABASE',
+            'audit_logged' => true,
+            'message' => "Successfully deleted blog '{$deletedTitle}' (ID: {$id}) from database."
+        ]);
         exit;
     }
 } catch (Exception $e) {

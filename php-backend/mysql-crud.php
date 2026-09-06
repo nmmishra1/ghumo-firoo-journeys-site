@@ -14,8 +14,12 @@ require_once __DIR__ . '/auth_middleware.php';
 require_once __DIR__ . '/db.php';
 require_once __DIR__ . '/api_response_helper.php';
 
+// Enforce uniform rate limiting across all CRUD requests (120 req/min per IP)
+checkRateLimit(120, 60);
+
 $pdo = getDb();
 $method = $_SERVER['REQUEST_METHOD'];
+$action = $_GET['action'] ?? '';
 
 // GET requests are public; write/delete operations require auth
 if ($method !== 'GET') {
@@ -393,11 +397,19 @@ try {
         $locationDetail = !empty($destName) ? " in {$destName}" : '';
         $msg = "Creation successful! Added new `{$table}` item \"{$itemName}\"{$locationDetail} (ID: {$newId}) to database.";
 
+        $realAction = $action ?: "create_{$table}";
+        writeAuditLog($pdo, $table, $newId, strtoupper($realAction), null, "Created {$table}: {$itemName}", $user ?? null);
+
         echo json_encode([
             'success' => true, 
             'inserted' => true, 
+            'action' => $realAction,
+            'table' => $table,
             'id' => $newId,
             'item_name' => $itemName,
+            'status' => 'INSERTED_INTO_DATABASE',
+            'affected_rows' => 1,
+            'audit_logged' => true,
             'message' => $msg
         ]);
     } elseif ($method === 'PUT') {
@@ -449,32 +461,83 @@ try {
         $locationDetail = !empty($destName) ? " in {$destName}" : '';
         $msg = "Edit successful! Updated `{$table}` item \"{$itemName}\"{$locationDetail} (ID: {$id}) in database.";
         
+        $realAction = $action ?: "update_{$table}";
+        writeAuditLog($pdo, $table, $id, strtoupper($realAction), null, "Updated {$table}: {$itemName}", $user ?? null);
+
         echo json_encode([
             'success' => true,
             'updated' => true,
-            'affected_rows' => $affected,
+            'action' => $realAction,
+            'table' => $table,
+            'id' => $id,
             'item_name' => $itemName,
+            'status' => 'UPDATED_IN_DATABASE',
+            'affected_rows' => $affected,
+            'audit_logged' => true,
             'message' => $msg
         ]);
     } elseif ($method === 'DELETE') {
         $hotel_id = $_GET['hotel_id'] ?? '';
         $contract_id = $_GET['contract_id'] ?? '';
+        $deletedItemName = $id;
+
+        // Try to fetch item name before deleting
+        $nameCol = null;
+        if (in_array('sightseeing_name', $columns)) $nameCol = 'sightseeing_name';
+        elseif (in_array('hotel_name', $columns)) $nameCol = 'hotel_name';
+        elseif (in_array('activity_name', $columns)) $nameCol = 'activity_name';
+        elseif (in_array('name', $columns)) $nameCol = 'name';
+        elseif (in_array('city_name', $columns)) $nameCol = 'city_name';
+        elseif (in_array('supplier_name', $columns)) $nameCol = 'supplier_name';
+        elseif (in_array('title', $columns)) $nameCol = 'title';
+
+        $affected = 0;
+        $targetId = $id;
 
         if (!empty($id)) {
+            if ($nameCol) {
+                try {
+                    $lookup = $pdo->prepare("SELECT `$nameCol` FROM `$table` WHERE id = ?");
+                    $lookup->execute([$id]);
+                    $found = $lookup->fetchColumn();
+                    if ($found) $deletedItemName = $found;
+                } catch (Throwable $ignore) {}
+            }
             $stmt = $pdo->prepare("DELETE FROM `$table` WHERE id = ?");
             $stmt->execute([$id]);
+            $affected = $stmt->rowCount();
         } elseif (!empty($hotel_id) && in_array('hotel_id', $columns)) {
             $stmt = $pdo->prepare("DELETE FROM `$table` WHERE hotel_id = ?");
             $stmt->execute([$hotel_id]);
+            $affected = $stmt->rowCount();
+            $targetId = $hotel_id;
+            $deletedItemName = "Hotel ID #$hotel_id associated records";
         } elseif (!empty($contract_id) && in_array('contract_id', $columns)) {
             $stmt = $pdo->prepare("DELETE FROM `$table` WHERE contract_id = ?");
             $stmt->execute([$contract_id]);
+            $affected = $stmt->rowCount();
+            $targetId = $contract_id;
+            $deletedItemName = "Contract ID #$contract_id associated records";
         } else {
             header('HTTP/1.1 400 Bad Request');
             echo json_encode(['error' => 'Missing deletion identifier']);
             exit;
         }
-        echo json_encode(['success' => true]);
+
+        $realAction = $action ?: "delete_{$table}";
+        writeAuditLog($pdo, $table, $targetId, strtoupper($realAction), $deletedItemName, "Deleted from database", $user ?? null);
+
+        echo json_encode([
+            'success' => true,
+            'action' => $realAction,
+            'table' => $table,
+            'id' => $targetId,
+            'item_name' => $deletedItemName,
+            'affected_rows' => $affected,
+            'status' => 'DELETED_FROM_DATABASE',
+            'audit_logged' => true,
+            'message' => "Successfully deleted `{$table}` item \"{$deletedItemName}\" from database."
+        ]);
     }
 } catch (Throwable $e) {
     if ($method === 'GET') {

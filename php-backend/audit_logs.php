@@ -14,25 +14,22 @@ $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
 try {
     if ($method === 'GET') {
         $leadIdRaw = $_GET['lead_id'] ?? '';
-        
-        if ($leadIdRaw === '') {
-            http_response_code(400);
-            echo json_encode(['error' => 'lead_id query parameter is required']);
-            exit;
+        $module = $_GET['record_type'] ?? $_GET['module'] ?? '';
+        $limit = isset($_GET['limit']) ? min((int)$_GET['limit'], 500) : 200;
+
+        if (!empty($leadIdRaw) && is_numeric($leadIdRaw)) {
+            $stmt = $pdo->prepare('SELECT * FROM audit_logs WHERE lead_id = ? ORDER BY created_at DESC LIMIT ' . (int)$limit);
+            $stmt->execute([(int)$leadIdRaw]);
+        } elseif (!empty($module)) {
+            $stmt = $pdo->prepare('SELECT * FROM audit_logs WHERE record_type = ? ORDER BY created_at DESC LIMIT ' . (int)$limit);
+            $stmt->execute([$module]);
+        } else {
+            $stmt = $pdo->query('SELECT * FROM audit_logs ORDER BY created_at DESC LIMIT ' . (int)$limit);
         }
 
-        if (!is_numeric($leadIdRaw) || (int)$leadIdRaw <= 0) {
-            echo json_encode(['success' => true, 'audit_logs' => []]);
-            exit;
-        }
-
-        $leadId = (int)$leadIdRaw;
-
-        $stmt = $pdo->prepare('SELECT * FROM audit_logs WHERE lead_id = ? ORDER BY created_at DESC');
-        $stmt->execute([$leadId]);
-        $logs = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
+        $logs = $stmt ? $stmt->fetchAll(PDO::FETCH_ASSOC) : [];
         echo json_encode(['success' => true, 'audit_logs' => $logs]);
+        exit;
 
     } elseif ($method === 'POST') {
         $input = json_decode(file_get_contents('php://input'), true);

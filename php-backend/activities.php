@@ -21,6 +21,7 @@ $profile = requireRole($user, $pdo, ['admin', 'manager', 'agent']);
 
 $method = $_SERVER['REQUEST_METHOD'];
 $id = $_GET['id'] ?? '';
+$action = $_GET['action'] ?? '';
 
 // Helper to decode JSON columns
 function parseActivityRow($row) {
@@ -175,7 +176,22 @@ try {
         // Sync to activity_rates table
         syncActivityRate($pdo, $newId, $adultCost, $isActive);
         
-        echo json_encode(['success' => true, 'id' => $newId]);
+        $actName = $input['activity_name'] ?? $newId;
+        $realAction = $action ?: 'create_activity';
+        writeAuditLog($pdo, 'activities', $newId, strtoupper($realAction), null, "Created activity: {$actName}", $user ?? null);
+
+        echo json_encode([
+            'success' => true,
+            'inserted' => true,
+            'action' => $realAction,
+            'table' => 'activities',
+            'id' => $newId,
+            'item_name' => $actName,
+            'status' => 'INSERTED_INTO_DATABASE',
+            'affected_rows' => 1,
+            'audit_logged' => true,
+            'message' => "Creation successful! Added new activity \"{$actName}\" (ID: {$newId}) to database."
+        ]);
     } elseif ($method === 'PUT') {
         $input = json_decode(file_get_contents('php://input'), true);
         
@@ -285,10 +301,19 @@ try {
         $actName = $input['activity_name'] ?? $id;
         $destName = $input['destination'] ?? $input['city'] ?? '';
         $locStr = !empty($destName) ? " in {$destName}" : '';
+        $realAction = $action ?: 'update_activity';
+        writeAuditLog($pdo, 'activities', $id, strtoupper($realAction), null, "Updated activity: {$actName}", $user ?? null);
+
         echo json_encode([
             'success' => true,
             'updated' => true,
+            'action' => $realAction,
+            'table' => 'activities',
             'id' => $id,
+            'item_name' => $actName,
+            'status' => 'UPDATED_IN_DATABASE',
+            'affected_rows' => $stmt->rowCount(),
+            'audit_logged' => true,
             'message' => "Edit successful! Updated activity \"{$actName}\"{$locStr} (ID: {$id}) in database."
         ]);
     } elseif ($method === 'DELETE') {
@@ -298,13 +323,36 @@ try {
             exit;
         }
         
+        $deletedName = $id;
+        try {
+            $lookup = $pdo->prepare("SELECT activity_name FROM activities WHERE id = ?");
+            $lookup->execute([$id]);
+            $found = $lookup->fetchColumn();
+            if ($found) $deletedName = $found;
+        } catch (Throwable $ignore) {}
+
         // Delete matching rates first
         $delRate = $pdo->prepare("DELETE FROM activity_rates WHERE activity_id = ?");
         $delRate->execute([$id]);
         
         $stmt = $pdo->prepare("DELETE FROM activities WHERE id = ?");
         $stmt->execute([$id]);
-        echo json_encode(['success' => true]);
+        $affected = $stmt->rowCount();
+
+        $realAction = $action ?: 'delete_activity';
+        writeAuditLog($pdo, 'activities', $id, strtoupper($realAction), $deletedName, "Deleted from database", $user ?? null);
+
+        echo json_encode([
+            'success' => true,
+            'action' => $realAction,
+            'table' => 'activities',
+            'id' => $id,
+            'item_name' => $deletedName,
+            'affected_rows' => $affected,
+            'status' => 'DELETED_FROM_DATABASE',
+            'audit_logged' => true,
+            'message' => "Successfully deleted activity \"{$deletedName}\" (ID: {$id}) from database."
+        ]);
     }
 } catch (Exception $e) {
     header('HTTP/1.1 500 Internal Server Error');
