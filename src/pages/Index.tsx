@@ -210,27 +210,70 @@ const Index: React.FC = () => {
 
   const structuredData = buildTravelAgencyJsonLd({
     name: "Ghumo Firoo Travels",
+    legalName: "Ghumo Firoo Travels",
+    foundingDate: "2017",
     description: "Ultra-luxury travel design offering bespoke tours to Char Dham, Rann Utsav, Singapore, and Europe with a 24/7 dedicated travel concierge.",
     url: config.baseUrl + "/",
     logo: config.baseUrl + "/ghumo-firoo-logo.png",
     telephone: "+91-9910987264",
     email: "info@ghumofiroo.com",
     address: {
-      streetAddress: "Shop No. 210, Second Floor, Pratap Complex, Munirka",
-      addressLocality: "New Delhi",
+      streetAddress: "Shop No. 210, 2nd Floor, Pratap Complex, Metro Gate Number 3, near Munirka, Baba Gangnath Market",
+      addressLocality: "Munirka",
       addressRegion: "Delhi",
       postalCode: "110067",
       addressCountry: "IN"
     },
     openingHours: "Mo-Sa 09:00-18:00, Su 10:00-16:00",
-    geo: { latitude: '28.549333982444654', longitude: '77.16911131508083' },
+    geo: { latitude: '28.5562', longitude: '77.1877' },
     priceRange: "₹₹ - ₹₹₹",
-    image: config.baseUrl + "/Ghumo_Firoo.png",
+    image: config.baseUrl + "/ghumo-firoo-logo.png",
+    hasMap: "https://maps.google.com/?cid=13837651037593674526",
     sameAs: [
-      "https://www.facebook.com/GhumoFirooTravels",
-      "https://www.instagram.com/ghumofirootravels",
-      "https://maps.google.com/?cid=13837651037593674526"
-    ]
+      "https://maps.google.com/?cid=13837651037593674526",
+      "https://www.tripadvisor.com/Search?q=Ghumo%20Firoo%20Travels",
+      "https://www.facebook.com/ghumofirootravels",
+      "https://www.instagram.com/ghumofirootravels/",
+      "https://x.com/GhumoFiroo",
+      "https://www.youtube.com/@ghumofirootravels"
+    ],
+    hasCredential: [
+      {
+        "@type": "EducationalOccupationalCredential",
+        "credentialCategory": "Government Registration",
+        "name": "MSME Registered Enterprise",
+        "recognizedBy": {
+          "@type": "GovernmentOrganization",
+          "name": "Ministry of Micro, Small and Medium Enterprises, Government of India"
+        }
+      },
+      {
+        "@type": "EducationalOccupationalCredential",
+        "credentialCategory": "National Integrated Database of Hospitality Industry",
+        "name": "NIDHI Verified Travel Operator",
+        "recognizedBy": {
+          "@type": "GovernmentOrganization",
+          "name": "Ministry of Tourism, Government of India"
+        }
+      }
+    ],
+    award: [
+      "Best Agency for Rann Utsav",
+      "Official Evoke Experiences Partner",
+      "MSME Verified Travel Operator"
+    ],
+    knowsAbout: [
+      "Char Dham Yatra",
+      "Kedarnath Helicopter Packages",
+      "Evoke Tent City Dhordo Booking",
+      "Europe Tour Packages",
+      "Kashmir Holidays",
+      "Best Agency for Rann Utsav"
+    ],
+    aggregateRating: {
+      ratingValue: 4.7,
+      reviewCount: 50
+    }
   });
 
   return (

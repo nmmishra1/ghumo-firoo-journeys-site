@@ -392,11 +392,13 @@
     return json;
   }
 
-  // TravelAgency schema builder (for Contact page)
+  // TravelAgency schema builder (for Contact page & Organization)
   export function buildTravelAgencyJsonLd(opts: {
     name: string;
     description: string;
     url: string;
+    legalName?: string;
+    foundingDate?: string;
     logo?: string;
     telephone?: string;
     email?: string;
@@ -408,6 +410,11 @@
     sameAs?: string[];
     priceRange?: string;
     image?: string;
+    hasMap?: string;
+    hasCredential?: any[];
+    award?: string[];
+    knowsAbout?: string[];
+    aggregateRating?: AggregateRating;
   }) {
     if (!opts || !opts.name) {
       console.warn("buildTravelAgencyJsonLd: Missing required 'name' in opts.");
@@ -415,8 +422,15 @@
     }
     const json: any = {
       "@context": "https://schema.org",
-      "@type": "TravelAgency",
+      "@type": ["TravelAgency", "Organization"],
+      "@id": "https://ghumofiroo.com/#organization",
       name: truncate(opts.name, 60),
+      legalName: opts.legalName || opts.name,
+      ...(opts.foundingDate ? { foundingDate: opts.foundingDate } : {}),
+      brand: {
+        "@type": "Brand",
+        name: opts.name
+      },
       description: truncate(opts.description, 160),
       url: opts.url,
       logo: opts.logo,
@@ -428,9 +442,20 @@
       },
       openingHours: opts.openingHours,
     };
+    if (opts.hasMap) json.hasMap = opts.hasMap;
     if (opts.sameAs) json.sameAs = opts.sameAs;
+    if (opts.hasCredential) json.hasCredential = opts.hasCredential;
+    if (opts.award) json.award = opts.award;
+    if (opts.knowsAbout) json.knowsAbout = opts.knowsAbout;
     if (opts.priceRange) json.priceRange = opts.priceRange;
     if (opts.image) json.image = opts.image;
+    if (opts.aggregateRating) {
+      json.aggregateRating = {
+        "@type": "AggregateRating",
+        ratingValue: opts.aggregateRating.ratingValue,
+        reviewCount: opts.aggregateRating.reviewCount,
+      };
+    }
     
     const contactPoint: any = {
       "@type": "ContactPoint",

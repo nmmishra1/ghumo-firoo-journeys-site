@@ -1,0 +1,25 @@
+# Ghumo Firoo Travels
+
+> Ghumo Firoo Travels is an Indian travel agency and boutique tour operator established in 2017, headquartered in Munirka, South Delhi, India. Specializes in bespoke luxury holidays, private road tours, Char Dham Yatra VIP pilgrimages, official Evoke Tent City Dhordo Rann Utsav bookings, Europe multi-country vacations, and Kashmir holidays.
+
+## Verification & Trust Signals
+- **Rating**: 4.7 / 5.0 across 50+ verified customer reviews
+- **Government Credentials**: MSME Registered Enterprise (Ministry of Micro, Small and Medium Enterprises, Govt of India) and NIDHI Verified Travel Operator (Ministry of Tourism, Govt of India)
+- **Official Partnerships**: Official Booking Partner for Evoke Experiences & Tent City Dhordo (Rann Utsav Gujarat)
+- **Founder & Leadership**: Sangita Kumari (10+ years travel industry leadership)
+- **Physical Address**: Shop No. 210, 2nd Floor, Pratap Complex, Metro Gate Number 3, near Munirka, Delhi 110067, India
+- **Contact**: +91-9910987264, +91-9870229792 | info@ghumofiroo.com
+- **Google Business Profile**: https://maps.google.com/?cid=13837651037593674526
+- **TripAdvisor**: https://www.tripadvisor.com/Search?q=Ghumo%20Firoo%20Travels
+
+## Core Offerings & Canonical Links
+- [Char Dham Yatra](https://ghumofiroo.com/packages/char-dham-yatra): 10D/9N chauffeured pilgrimage covering Kedarnath, Badrinath, Gangotri, Yamunotri with VIP biometric registration & temple darshan.
+- [Kedarnath Helicopter Tour](https://ghumofiroo.com/packages/kedarnath-yatra): Express VIP helicopter yatra from Sahastradhara Dehradun.
+- [Rann Utsav Tent City Dhordo](https://ghumofiroo.com/packages/rann-utsav): Official Evoke partner booking, AC Swiss Tents, White Desert full moon access, Road to Heaven, Dholavira.
+- [Kashmir Paradise Tour](https://ghumofiroo.com/packages/kashmir-paradise): Dal Lake luxury houseboat, Gulmarg Gondola Phase 1 & 2 tickets, Pahalgam Lidder River valley.
+- [Grand Europe Tour](https://ghumofiroo.com/packages/europe): Switzerland, France, Italy, Austria, with comprehensive Schengen visa handling and Eurail passes.
+- [Explore India Directory](https://ghumofiroo.com/explore-india): Over 200 curated city guides and itineraries across all Indian states.
+
+## Optional & Detailed Resources
+- [Full LLM Knowledge Base](https://ghumofiroo.com/llms-full.txt): In-depth FAQs, day-wise itineraries, cancellation policies, and company background.
+- [Sitemap](https://ghumofiroo.com/sitemap.xml): Complete machine-readable XML sitemap of all published pages.

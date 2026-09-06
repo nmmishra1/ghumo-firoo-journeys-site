@@ -56,7 +56,7 @@ const staticRoutesMeta: Record<string, { title: string; description: string; h1:
 
       <section>
         <h2>Why Discerning Travelers Choose Ghumo Firoo</h2>
-        <p>Over 10,000 delighted guests and 500+ five-star verified reviews trust Ghumo Firoo Travels for seamless, hassle-free holiday experiences. Here is what sets us apart:</p>
+        <p>Over 10,000 delighted guests and 50+ verified customer reviews (4.7/5 rating) trust Ghumo Firoo Travels for seamless, hassle-free holiday experiences. Here is what sets us apart:</p>
         <ul>
           <li><strong>100% Customized Itineraries:</strong> Every single tour is crafted around your personal travel dates, family preferences, hotel budget, and pace.</li>
           <li><strong>Dedicated 24x7 Trip Concierge:</strong> A dedicated holiday manager is assigned to your booking from the moment you enquire until you safely return home.</li>
@@ -1233,6 +1233,130 @@ async function main() {
   console.log(`📦 Found bundle entry assets: JS=${entryJs}, CSS=${entryCss}`);
   console.log(`📦 Rendering ${routesToGenerate.length} static SEO routes into dist/ ...`);
 
+  function buildRouteSchema(item: RouteMeta): string {
+    if (item.route === '/') {
+      return '';
+    }
+
+    const schemas: any[] = [];
+
+    // BreadcrumbList for all subroutes
+    const pathParts = item.route.split('/').filter(Boolean);
+    const breadcrumbItems: any[] = [
+      {
+        "@type": "ListItem",
+        "position": 1,
+        "name": "Home",
+        "item": `${siteUrl}/`
+      }
+    ];
+
+    if (pathParts.length === 1) {
+      breadcrumbItems.push({
+        "@type": "ListItem",
+        "position": 2,
+        "name": item.h1 || item.title,
+        "item": item.canonical
+      });
+    } else if (pathParts.length >= 2) {
+      const sectionName = pathParts[0].charAt(0).toUpperCase() + pathParts[0].slice(1).replace(/-/g, ' ');
+      breadcrumbItems.push({
+        "@type": "ListItem",
+        "position": 2,
+        "name": sectionName,
+        "item": `${siteUrl}/${pathParts[0]}/`
+      });
+      breadcrumbItems.push({
+        "@type": "ListItem",
+        "position": 3,
+        "name": item.h1 || item.title,
+        "item": item.canonical
+      });
+    }
+
+    schemas.push({
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      "itemListElement": breadcrumbItems
+    });
+
+    if (item.route.startsWith('/packages/')) {
+      const fullImg = item.ogImage
+        ? (item.ogImage.startsWith('http') ? item.ogImage : `${siteUrl}${item.ogImage.startsWith('/') ? '' : '/'}${item.ogImage}`)
+        : `${siteUrl}/ghumo-firoo-logo.png`;
+
+      schemas.push({
+        "@context": "https://schema.org",
+        "@type": ["TouristTrip", "Product"],
+        "name": item.h1 || item.title,
+        "description": item.description,
+        "url": item.canonical,
+        "image": fullImg,
+        "offers": {
+          "@type": "Offer",
+          "priceCurrency": "INR",
+          "availability": "https://schema.org/InStock",
+          "url": item.canonical
+        },
+        "provider": {
+          "@type": "TravelAgency",
+          "@id": `${siteUrl}/#organization`,
+          "name": "Ghumo Firoo Travels",
+          "url": siteUrl
+        },
+        "aggregateRating": {
+          "@type": "AggregateRating",
+          "ratingValue": "4.7",
+          "reviewCount": "50",
+          "bestRating": "5",
+          "worstRating": "1"
+        }
+      });
+    } else if (item.route.startsWith('/destinations/') || item.route.startsWith('/explore-india/')) {
+      schemas.push({
+        "@context": "https://schema.org",
+        "@type": "TouristDestination",
+        "name": item.h1 || item.title,
+        "description": item.description,
+        "url": item.canonical,
+        "provider": {
+          "@type": "TravelAgency",
+          "@id": `${siteUrl}/#organization`,
+          "name": "Ghumo Firoo Travels"
+        }
+      });
+    } else if (item.route.startsWith('/blog/')) {
+      const fullImg = item.ogImage
+        ? (item.ogImage.startsWith('http') ? item.ogImage : `${siteUrl}${item.ogImage.startsWith('/') ? '' : '/'}${item.ogImage}`)
+        : `${siteUrl}/ghumo-firoo-logo.png`;
+
+      schemas.push({
+        "@context": "https://schema.org",
+        "@type": "BlogPosting",
+        "headline": item.title,
+        "description": item.description,
+        "url": item.canonical,
+        "image": fullImg,
+        "datePublished": item.publishedTime || "2024-01-01",
+        "author": {
+          "@type": "Person",
+          "name": item.author || "Sangita Kumari"
+        },
+        "publisher": {
+          "@type": "Organization",
+          "@id": `${siteUrl}/#organization`,
+          "name": "Ghumo Firoo Travels",
+          "logo": {
+            "@type": "ImageObject",
+            "url": `${siteUrl}/ghumo-firoo-logo.png`
+          }
+        }
+      });
+    }
+
+    return schemas.map(s => `    <script type="application/ld+json">\n    ${JSON.stringify(s, null, 2).replace(/\n/g, '\n    ')}\n    </script>`).join('\n');
+  }
+
   let count = 0;
 
   for (const item of routesToGenerate) {
@@ -1305,7 +1429,6 @@ async function main() {
     // Replace OG Image & Twitter Image if custom
     if (item.ogImage) {
       const fullImg = item.ogImage.startsWith('http') ? item.ogImage : `${siteUrl}${item.ogImage.startsWith('/') ? '' : '/'}${item.ogImage}`;
-      const imgPath = item.ogImage.startsWith('http') ? item.ogImage : (item.ogImage.startsWith('/') ? item.ogImage : `/${item.ogImage}`);
       pageHtml = pageHtml.replace(
         /<meta\s+property=["']og:image["']\s+content=["'].*?["']\s*\/?>|<meta\s+content=["'].*?["']\s+property=["']og:image["']\s*\/?>/is,
         `<meta property="og:image" content="${fullImg}" />`
@@ -1316,7 +1439,13 @@ async function main() {
       );
     }
 
-    // Build rich, crawlable, semantic markup inside <div id="root">
+    // Inject route-specific JSON-LD schemas into head
+    const routeSchemaHtml = buildRouteSchema(item);
+    if (routeSchemaHtml) {
+      pageHtml = pageHtml.replace('</head>', `${routeSchemaHtml}\n  </head>`);
+    }
+
+    // Build rich, crawlable, semantic markup inside <div id="root"> (without cloaking wrapper)
     const crawlableMarkup = `
       <header>
         <img src="/ghumo-firoo-logo.png" alt="Ghumo Firoo Travels Logo" width="180" height="60" />
@@ -1355,7 +1484,7 @@ async function main() {
 
     pageHtml = pageHtml.replace(
       /<div id="root">[\s\S]*?(?=\s*<!-- Private Route Pre-Hydration Shell)/,
-      `<div id="root">\n      <div style="position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border-width: 0;">\n${crawlableMarkup}\n      </div>\n    </div>\n\n    `
+      `<div id="root">\n${crawlableMarkup}\n    </div>\n\n    `
     );
 
     // Determine target directory and write index.html

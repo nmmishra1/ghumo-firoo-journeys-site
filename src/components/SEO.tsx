@@ -149,10 +149,20 @@ const SEO: React.FC<SEOProps> = ({
       <script type="application/ld+json">
         {JSON.stringify({
           "@context": "https://schema.org",
-          "@type": "TravelAgency",
+          "@type": ["TravelAgency", "Organization"],
+          "@id": "https://ghumofiroo.com/#organization",
           "name": "Ghumo Firoo Travels",
+          "legalName": "Ghumo Firoo Travels",
+          "foundingDate": "2017",
+          "brand": {
+            "@type": "Brand",
+            "name": "Ghumo Firoo Travels"
+          },
           "url": "https://ghumofiroo.com",
           "logo": "https://ghumofiroo.com/ghumo-firoo-logo.png",
+          "image": "https://ghumofiroo.com/ghumo-firoo-logo.png",
+          "telephone": ["+91-9910987264", "+91-9870229792"],
+          "email": "info@ghumofiroo.com",
           "contactPoint": {
             "@type": "ContactPoint",
             "telephone": "+91-9910987264",
@@ -161,24 +171,67 @@ const SEO: React.FC<SEOProps> = ({
             "availableLanguage": "en"
           },
           "sameAs": [
+            "https://maps.google.com/?cid=13837651037593674526",
+            "https://www.tripadvisor.com/Search?q=Ghumo%20Firoo%20Travels",
             "https://www.facebook.com/ghumofirootravels",
-            "https://www.instagram.com/ghumofirootravels",
-            "https://twitter.com/ghumofirootravels"
+            "https://www.instagram.com/ghumofirootravels/",
+            "https://x.com/GhumoFiroo",
+            "https://www.youtube.com/@ghumofirootravels"
+          ],
+          "hasCredential": [
+            {
+              "@type": "EducationalOccupationalCredential",
+              "credentialCategory": "Government Registration",
+              "name": "MSME Registered Enterprise",
+              "recognizedBy": {
+                "@type": "GovernmentOrganization",
+                "name": "Ministry of Micro, Small and Medium Enterprises, Government of India"
+              }
+            },
+            {
+              "@type": "EducationalOccupationalCredential",
+              "credentialCategory": "National Integrated Database of Hospitality Industry",
+              "name": "NIDHI Verified Travel Operator",
+              "recognizedBy": {
+                "@type": "GovernmentOrganization",
+                "name": "Ministry of Tourism, Government of India"
+              }
+            }
+          ],
+          "award": [
+            "Best Agency for Rann Utsav",
+            "Official Evoke Experiences Partner",
+            "MSME Verified Travel Operator"
+          ],
+          "knowsAbout": [
+            "Char Dham Yatra",
+            "Kedarnath Helicopter Packages",
+            "Evoke Tent City Dhordo Booking",
+            "Europe Tour Packages",
+            "Kashmir Holidays",
+            "Best Agency for Rann Utsav"
           ],
           "address": {
             "@type": "PostalAddress",
-            "streetAddress": "Shop No. 210, Second Floor, Pratap Complex, Munirka",
-            "addressLocality": "New Delhi",
+            "streetAddress": "Shop No. 210, 2nd Floor, Pratap Complex, Metro Gate Number 3, near Munirka, Baba Gangnath Market",
+            "addressLocality": "Munirka",
             "addressRegion": "Delhi",
             "postalCode": "110067",
             "addressCountry": "IN"
           },
           "geo": {
             "@type": "GeoCoordinates",
-            "latitude": "28.549333982444654",
-            "longitude": "77.16911131508083"
+            "latitude": "28.5562",
+            "longitude": "77.1877"
           },
-          "hasMap": "https://www.google.com/maps/place/Munirka+Metro+Station+Gate+No.+3"
+          "hasMap": "https://maps.google.com/?cid=13837651037593674526",
+          "aggregateRating": {
+            "@type": "AggregateRating",
+            "ratingValue": "4.7",
+            "reviewCount": "50",
+            "bestRating": "5",
+            "worstRating": "1"
+          }
         }).replace(/</g, '\\u003c')}
       </script>
 
