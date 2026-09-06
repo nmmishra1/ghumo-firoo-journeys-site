@@ -4031,7 +4031,7 @@ const DynamicPackageDetail: React.FC<DynamicPackageDetailProps> = ({ slug: propS
 
   useEffect(() => {
     if (passengerCount >= 1 && passengerCount <= 4) {
-      if (selectedCabId === 'tempo' || selectedCabId === 'suv_ertiga') {
+      if (selectedCabId === 'tempo') {
         setSelectedCabId('sedan');
       }
     } else if (passengerCount >= 5 && passengerCount <= 6) {
@@ -4942,13 +4942,13 @@ const DynamicPackageDetail: React.FC<DynamicPackageDetailProps> = ({ slug: propS
                   )}
                 </div>
 
-                {/* Luggage Alert Banner for 4 Adults in Sedan */}
+                {/* Luggage Alert Banner for 4 Adults when Sedan is selected */}
                 {passengerCount === 4 && selectedCabId === 'sedan' && (
-                  <div className="mb-6 p-4 bg-[#C9A25A]/10 border border-[#C9A25A]/40 rounded-xl flex items-start gap-3 text-xs text-[#E5C378]">
-                    <span className="text-base flex-shrink-0">🧳</span>
+                  <div className="mb-6 p-4 bg-[#C9A25A]/10 border border-[#C9A25A]/40 rounded-xl flex items-start gap-3 text-xs text-[#E5C378] animate-fade-in shadow-md">
+                    <span className="text-xl flex-shrink-0">🧳</span>
                     <div>
-                      <strong className="font-bold text-white block mb-0.5">Luggage Capacity Notice:</strong>
-                      4 adults travelling with heavy suitcases might find Sedan boot space tight. We recommend upgrading to <strong>AC SUV Innova Crysta (+₹{Math.round(3200/4)}/pax)</strong> for maximum comfort on the highway!
+                      <strong className="font-bold text-white block mb-0.5 text-xs">Luggage Capacity Notice:</strong>
+                      4 adults travelling with heavy suitcases might find Sedan boot space tight. We recommend upgrading to <strong>AC SUV (Maruti Ertiga / Triber)</strong> or <strong>AC Premium SUV (Toyota Innova Crysta)</strong> for additional comfort and luggage space.
                     </div>
                   </div>
                 )}
@@ -4957,80 +4957,100 @@ const DynamicPackageDetail: React.FC<DynamicPackageDetailProps> = ({ slug: propS
                 {passengerCount >= 5 && (
                   <div className="mb-6 p-3 bg-blue-500/10 border border-blue-500/30 rounded-xl flex items-center gap-3 text-xs text-blue-300">
                     <span className="text-base">ℹ️</span>
-                    <span>For <strong>{passengerCount} travelers</strong>, 4-seater sedans are automatically disabled to guarantee seating capacity.</span>
+                    <span>For <strong>{passengerCount} travelers</strong>, 4-seater sedans are excluded to guarantee passenger and luggage capacity.</span>
                   </div>
                 )}
 
-                {/* Cab Options Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {CAB_OPTIONS.map((cab) => {
-                    const isDisabled = passengerCount > cab.maxPax;
-                    const isSelected = selectedCabId === cab.id;
-                    const perPersonExtra = Math.round(cab.priceTotal / Math.max(1, passengerCount));
+                {/* Cab Options Grid Filtered Dynamically by Passenger Count */}
+                {(() => {
+                  let visibleCabs = CAB_OPTIONS;
 
-                    return (
-                      <div
-                        key={cab.id}
-                        onClick={() => !isDisabled && setSelectedCabId(cab.id)}
-                        className={`p-4 rounded-xl border transition-all duration-200 relative ${
-                          isDisabled 
-                            ? 'opacity-40 bg-white/5 border-white/5 cursor-not-allowed'
-                            : isSelected
-                            ? 'bg-[#C9A25A]/15 border-[#C9A25A] shadow-[0_0_20px_rgba(201,162,90,0.15)] cursor-pointer'
-                            : 'bg-white/5 border-white/10 hover:border-[#C9A25A]/40 hover:bg-white/10 cursor-pointer'
-                        }`}
-                      >
-                        <div className="flex items-start justify-between gap-3 mb-2">
-                          <div className="flex items-center gap-2">
-                            <span className="text-2xl">{cab.icon}</span>
-                            <div>
-                              <h3 className="text-sm font-bold text-white leading-tight">{cab.name}</h3>
-                              <span className="text-[10px] text-slate-400 font-medium">Max {cab.maxPax} Pax • Private Vehicle</span>
+                  if (passengerCount >= 1 && passengerCount <= 4) {
+                    // For 1–4 adults: Sedan, AC SUV (Ertiga), AC Premium SUV (Innova)
+                    visibleCabs = CAB_OPTIONS.filter(c => c.id !== 'tempo');
+                  } else if (passengerCount === 5) {
+                    // For 5 adults: Exclude Sedan. Show AC SUV (Ertiga) & AC Premium SUV (Innova)
+                    visibleCabs = CAB_OPTIONS.filter(c => c.id === 'suv_ertiga' || c.id === 'suv_innova');
+                  } else if (passengerCount === 6) {
+                    // For 6 adults: 6-seater SUVs (Ertiga & Innova) + Tempo Traveller
+                    visibleCabs = CAB_OPTIONS.filter(c => c.id !== 'sedan');
+                  } else if (passengerCount >= 7) {
+                    // For 7+ adults: Luxury Tempo Traveller
+                    visibleCabs = CAB_OPTIONS.filter(c => c.id === 'tempo');
+                  }
+
+                  return (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {visibleCabs.map((cab) => {
+                        const isDisabled = passengerCount > cab.maxPax;
+                        const isSelected = selectedCabId === cab.id;
+                        const perPersonExtra = Math.round(cab.priceTotal / Math.max(1, passengerCount));
+
+                        return (
+                          <div
+                            key={cab.id}
+                            onClick={() => !isDisabled && setSelectedCabId(cab.id)}
+                            className={`p-4 rounded-xl border transition-all duration-200 relative ${
+                              isDisabled 
+                                ? 'opacity-40 bg-white/5 border-white/5 cursor-not-allowed'
+                                : isSelected
+                                ? 'bg-[#C9A25A]/15 border-[#C9A25A] shadow-[0_0_20px_rgba(201,162,90,0.15)] cursor-pointer'
+                                : 'bg-white/5 border-white/10 hover:border-[#C9A25A]/40 hover:bg-white/10 cursor-pointer'
+                            }`}
+                          >
+                            <div className="flex items-start justify-between gap-3 mb-2">
+                              <div className="flex items-center gap-2">
+                                <span className="text-2xl">{cab.icon}</span>
+                                <div>
+                                  <h3 className="text-sm font-bold text-white leading-tight">{cab.name}</h3>
+                                  <span className="text-[10px] text-slate-400 font-medium">Max {cab.maxPax} Pax • Private Vehicle</span>
+                                </div>
+                              </div>
+                              
+                              {/* Clean Feature Badge */}
+                              <div className="text-right flex-shrink-0">
+                                {cab.id === 'sedan' ? (
+                                  <span className="inline-block text-[10px] font-extrabold px-2.5 py-1 rounded bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 uppercase tracking-wider">
+                                    INCLUDED
+                                  </span>
+                                ) : cab.id === 'suv_ertiga' ? (
+                                  <span className="inline-block text-[10px] font-extrabold px-2.5 py-1 rounded bg-sky-500/20 border border-sky-500/40 text-sky-300 uppercase tracking-wider">
+                                    SPACIOUS 6-SEATER
+                                  </span>
+                                ) : cab.id === 'suv_innova' ? (
+                                  <span className="inline-block text-[10px] font-extrabold px-2.5 py-1 rounded bg-amber-500/20 border border-amber-500/40 text-amber-300 uppercase tracking-wider">
+                                    RECOMMENDED ⭐
+                                  </span>
+                                ) : (
+                                  <span className="inline-block text-[10px] font-extrabold px-2.5 py-1 rounded bg-purple-500/20 border border-purple-500/40 text-purple-300 uppercase tracking-wider">
+                                    GROUP SPECIAL
+                                  </span>
+                                )}
+                              </div>
                             </div>
-                          </div>
-                          
-                          {/* Clean Feature Badge */}
-                          <div className="text-right flex-shrink-0">
-                            {cab.id === 'sedan' ? (
-                              <span className="inline-block text-[10px] font-extrabold px-2.5 py-1 rounded bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 uppercase tracking-wider">
-                                INCLUDED
+
+                            <p className="text-[11px] text-slate-300 font-light leading-relaxed mb-2">{cab.description}</p>
+
+                            {/* Status Label */}
+                            {isDisabled ? (
+                              <span className="text-[10px] font-bold text-rose-400 flex items-center gap-1">
+                                ✕ Exceeds vehicle capacity (Max {cab.maxPax} Pax)
                               </span>
-                            ) : cab.id === 'suv_ertiga' ? (
-                              <span className="inline-block text-[10px] font-extrabold px-2.5 py-1 rounded bg-sky-500/20 border border-sky-500/40 text-sky-300 uppercase tracking-wider">
-                                SPACIOUS 6-SEATER
-                              </span>
-                            ) : cab.id === 'suv_innova' ? (
-                              <span className="inline-block text-[10px] font-extrabold px-2.5 py-1 rounded bg-amber-500/20 border border-amber-500/40 text-amber-300 uppercase tracking-wider">
-                                RECOMMENDED ⭐
+                            ) : isSelected ? (
+                              <span className="text-[10px] font-bold text-[#C9A25A] flex items-center gap-1">
+                                ✓ Selected Vehicle for {passengerCount} Travelers
                               </span>
                             ) : (
-                              <span className="inline-block text-[10px] font-extrabold px-2.5 py-1 rounded bg-purple-500/20 border border-purple-500/40 text-purple-300 uppercase tracking-wider">
-                                GROUP SPECIAL
+                              <span className="text-[10px] text-slate-400 flex items-center gap-1">
+                                Click to select vehicle
                               </span>
                             )}
                           </div>
-                        </div>
-
-                        <p className="text-[11px] text-slate-300 font-light leading-relaxed mb-2">{cab.description}</p>
-
-                        {/* Status Label */}
-                        {isDisabled ? (
-                          <span className="text-[10px] font-bold text-rose-400 flex items-center gap-1">
-                            ✕ Exceeds vehicle capacity (Max {cab.maxPax} Pax)
-                          </span>
-                        ) : isSelected ? (
-                          <span className="text-[10px] font-bold text-[#C9A25A] flex items-center gap-1">
-                            ✓ Selected Vehicle for {passengerCount} Travelers
-                          </span>
-                        ) : (
-                          <span className="text-[10px] text-slate-400 flex items-center gap-1">
-                            Click to select vehicle
-                          </span>
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
+                        );
+                      })}
+                    </div>
+                  );
+                })()}
 
                 {/* Dynamic Cost & Room Occupancy Breakdown Summary Box */}
                 <div className="mt-6 pt-5 border-t border-white/10 grid grid-cols-1 sm:grid-cols-3 gap-4">
