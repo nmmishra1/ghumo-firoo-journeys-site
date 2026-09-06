@@ -16,6 +16,7 @@ import { Label } from '@/components/ui/label';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 import { MASTER_DESTINATIONS } from '@/data/masterDestinations';
+import { resolveGeography } from '@/data/geographyMaster';
 
 export default function IndiaExplorer() {
   const navigate = useNavigate();
@@ -348,7 +349,10 @@ export default function IndiaExplorer() {
     if (city.state_id !== undefined && state.id !== undefined && String(city.state_id) === String(state.id)) {
       return true;
     }
+    const cName = city.name || city.city_name;
+    const geo = resolveGeography(cName, city.state_name || city.state);
     const sName = String(state.name || state.state_name || '').toLowerCase().trim();
+    if (geo.state.toLowerCase().trim() === sName) return true;
     const cStateName = String(city.state_name || city.state || '').toLowerCase().trim();
     return Boolean(sName && cStateName && (sName === cStateName || cStateName.includes(sName) || sName.includes(cStateName)));
   };

@@ -16,6 +16,7 @@ import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { validatePhone, validateEmail } from '@/lib/validation';
+import { resolveGeography, INDIAN_STATES } from '@/data/geographyMaster';
 
 export type StayStop = {
   id: string;
@@ -706,7 +707,18 @@ export const LeadForm: React.FC<LeadFormProps> = ({
       );
       const data = await res.json();
       const raw = Array.isArray(data) ? data : [];
-      const filtered = raw.filter((s: any) => String(s.country_id) === String(countryId));
+      let filtered = raw.filter((s: any) => String(s.country_id) === String(countryId));
+
+      const matchedCountry = countries.find((c: any) => String(c.id) === String(countryId));
+      const isIndia = matchedCountry && matchedCountry.country_name?.toLowerCase().includes('india');
+
+      if (isIndia) {
+        filtered = filtered.filter((s: any) => {
+          const sName = s.state_name || s.name || '';
+          return INDIAN_STATES.some(is => is.toLowerCase() === sName.toLowerCase());
+        });
+      }
+
       setStates(filtered);
     } catch (e) {
       console.error("Failed to fetch states:", e);

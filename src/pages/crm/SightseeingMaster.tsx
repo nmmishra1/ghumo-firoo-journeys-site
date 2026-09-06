@@ -20,6 +20,8 @@ import {
   LayoutGrid, List, Globe, Tag, Compass, Landmark, Info
 } from 'lucide-react';
 
+import { resolveGeography, INDIAN_STATES, INTERNATIONAL_STATE_COUNTRY_MAP, CITY_TO_STATE_COUNTRY_MAP } from '@/data/geographyMaster';
+
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 type Country = { id: string | number; country_name: string };
@@ -536,18 +538,34 @@ export default function SightseeingMaster() {
     return (a.country_name || '').localeCompare(b.country_name || '');
   });
 
-  const listStatesForFilter = filterCountry === 'all'
+  const selectedCountryObj = countries.find(c => String(c.id) === String(filterCountry));
+  const isIndiaFilter = filterCountry !== 'all' && selectedCountryObj && selectedCountryObj.country_name.toLowerCase().includes('india');
+
+  const listStatesForFilter = (filterCountry === 'all'
     ? states
-    : states.filter(s => String(s.country_id) === String(filterCountry));
+    : isIndiaFilter
+      ? states.filter(s => {
+          const sName = s.state_name || (s as any).name || '';
+          return INDIAN_STATES.some(is => is.toLowerCase() === sName.toLowerCase()) || String(s.country_id) === String(filterCountry);
+        })
+      : states.filter(s => String(s.country_id) === String(filterCountry))
+  ).sort((a, b) => (a.state_name || '').localeCompare(b.state_name || ''));
 
   const listCitiesForFilter = (filterState === 'all'
     ? (filterCountry === 'all' ? cities : cities.filter(c => {
-        if (c.country_id && String(c.country_id) === String(filterCountry)) return true;
-        const stateOfCity = states.find(s => String(s.id) === String(c.state_id));
-        return stateOfCity && String(stateOfCity.country_id) === String(filterCountry);
+        const geo = resolveGeography(c.city_name || (c as any).name, (c as any).state, (c as any).country);
+        if (selectedCountryObj) {
+          return geo.country.toLowerCase() === selectedCountryObj.country_name.toLowerCase();
+        }
+        return true;
       }))
-    : cities.filter(c => String(c.state_id) === String(filterState))
-  ).sort((a, b) => (a.city_name || a.name || '').localeCompare(b.city_name || b.name || ''));
+    : cities.filter(c => {
+        const selectedStateObj = states.find(s => String(s.id) === String(filterState));
+        const stateName = selectedStateObj?.state_name || '';
+        const geo = resolveGeography(c.city_name || (c as any).name, (c as any).state, (c as any).country);
+        return String(c.state_id) === String(filterState) || geo.state.toLowerCase() === stateName.toLowerCase();
+      })
+  ).sort((a, b) => (a.city_name || (a as any).name || '').localeCompare(b.city_name || (b as any).name || ''));
 
   const filtered = sightseeings.filter(s => {
     const hasRates = Number(s.supplier_cost) > 0 || Number(s.selling_cost) > 0 || Number((s as any).adult_cost) > 0;
@@ -561,14 +579,35 @@ export default function SightseeingMaster() {
       const matchDest = (s.destination || '').toLowerCase().includes(q);
       if (!matchName && !matchCode && !matchDest) return false;
     }
-    if (filterCountry !== 'all' && String(s.country_id) !== String(filterCountry)) return false;
-    if (filterState !== 'all' && String(s.state_id) !== String(filterState)) return false;
+
+    const rawCountry = getCountryName(s.country_id);
+    const rawState = getStateName(s.state_id);
+    const rawCity = s.destination || '';
+    const geo = resolveGeography(rawCity, rawState, rawCountry);
+
+    if (filterCountry !== 'all') {
+      const selCountryName = selectedCountryObj?.country_name || '';
+      if (selCountryName && geo.country.toLowerCase() !== selCountryName.toLowerCase() && String(s.country_id) !== String(filterCountry)) {
+        return false;
+      }
+    }
+
+    if (filterState !== 'all') {
+      const selectedStateObj = states.find(st => String(st.id) === String(filterState));
+      const selStateName = selectedStateObj?.state_name || '';
+      if (selStateName && geo.state.toLowerCase() !== selStateName.toLowerCase() && String(s.state_id) !== String(filterState)) {
+        return false;
+      }
+    }
+
     if (filterCity !== 'all') {
       const selectedCityObj = cities.find(c => String(c.id) === String(filterCity));
+      const selCityName = selectedCityObj?.city_name || (selectedCityObj as any)?.name || '';
       const cityMatchesId = String((s as any).city_id) === String(filterCity);
-      const cityMatchesName = selectedCityObj && (s.destination || '').toLowerCase().includes((selectedCityObj.city_name || selectedCityObj.name || '').toLowerCase());
+      const cityMatchesName = selCityName && geo.city.toLowerCase() === selCityName.toLowerCase();
       if (!cityMatchesId && !cityMatchesName) return false;
     }
+
     if (filterType === 'half' && !s.is_half_day) return false;
     if (filterType === 'full' && !s.is_full_day) return false;
     if (filterStatus === 'active' && !s.active_status) return false;

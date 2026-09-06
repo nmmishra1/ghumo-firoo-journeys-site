@@ -18,6 +18,8 @@ import {
 import { fetchHotelMetaFromGoogle } from '@/services/googlePlaces';
 import { MASTER_DESTINATIONS, MasterDestination } from '@/data/masterDestinations';
 
+import { resolveGeography } from '@/data/geographyMaster';
+
 const API_BASE = import.meta.env.VITE_API_BASE_URL || '';
 
 async function getAuthHeader(): Promise<Record<string, string>> {
@@ -515,26 +517,20 @@ export const HotelContractWizard: React.FC<HotelContractWizardProps> = ({
         }
         if (!stateName && c.state) stateName = String(c.state).trim();
 
-        let countryName = 'India';
+        let countryName = '';
         if (c.country_id && Array.isArray(countries)) {
           const matchedC = countries.find((co: any) => String(co.id) === String(c.country_id));
           if (matchedC) countryName = (matchedC.country_name || matchedC.name || '').trim();
         }
-        if (countryName === 'India' && stateName && Array.isArray(states)) {
-          const matchedS = states.find((s: any) => (s.state_name || s.name)?.toLowerCase().trim() === stateName.toLowerCase().trim());
-          if (matchedS && matchedS.country_id && Array.isArray(countries)) {
-            const matchedC = countries.find((co: any) => String(co.id) === String(matchedS.country_id));
-            if (matchedC) countryName = (matchedC.country_name || matchedC.name || '').trim();
-          }
-        }
 
-        const key = `${cityName.toLowerCase()}_${stateName.toLowerCase()}`;
+        const geo = resolveGeography(cityName, stateName, countryName);
+        const key = `${geo.city.toLowerCase()}_${geo.state.toLowerCase()}`;
         if (!seen.has(key)) {
           seen.add(key);
           list.push({
-            city: cityName,
-            state: stateName || 'Madhya Pradesh',
-            country: countryName || 'India',
+            city: geo.city,
+            state: geo.state,
+            country: geo.country,
             destination_group: c.city_type || c.destination_group || 'Leisure',
             nearest_airport: c.nearest_airport || '',
             nearest_railway: c.nearest_railway || '',
@@ -551,14 +547,15 @@ export const HotelContractWizard: React.FC<HotelContractWizardProps> = ({
         const destName = (d.destination_name || d.name || '').trim();
         if (!destName) return;
         const stateName = (d.state || '').trim();
-        const countryName = (d.country || 'India').trim();
-        const key = `${destName.toLowerCase()}_${stateName.toLowerCase()}`;
+        const countryName = (d.country || '').trim();
+        const geo = resolveGeography(destName, stateName, countryName);
+        const key = `${geo.city.toLowerCase()}_${geo.state.toLowerCase()}`;
         if (!seen.has(key)) {
           seen.add(key);
           list.push({
-            city: destName,
-            state: stateName || 'Destination',
-            country: countryName || 'India',
+            city: geo.city,
+            state: geo.state,
+            country: geo.country,
             destination_group: d.category || d.destination_group || 'Leisure',
             nearest_airport: d.nearest_airport || '',
             nearest_railway: d.nearest_railway || '',
