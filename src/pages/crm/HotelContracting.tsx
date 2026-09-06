@@ -30,6 +30,7 @@ import {
 } from 'lucide-react';
 import { reviewService, type GoogleReview } from '@/services/reviewService';
 import { getContractedHotelsMasterList } from '@/data/contractedHotelsDataLoader';
+import { resolveGeography, INDIAN_STATES, INTERNATIONAL_STATE_COUNTRY_MAP, CITY_TO_STATE_COUNTRY_MAP } from '@/data/geographyMaster';
 import { fetchCachedJson } from '@/utils/crmCache';
 
 // Types matching database schema
@@ -689,16 +690,22 @@ export const HotelContracting: React.FC = () => {
       try {
         const res = await fetchCachedJson(`/php-backend/hotels.php?limit=1000`);
         if (res && res.success && Array.isArray(res.data)) {
-          dbHotels = res.data.map((h: any) => ({
-            ...h,
-            id: String(h.id),
-            city: h.city || h.cities?.city_name || '',
-            state: h.state || h.states?.state_name || '',
-            country: h.country || h.countries?.country_name || 'India',
-            cities: h.city ? { city_name: h.city } : (h.cities || null),
-            states: h.state ? { state_name: h.state } : (h.states || null),
-            countries: h.country ? { country_name: h.country } : (h.countries || null)
-          }));
+          dbHotels = res.data.map((h: any) => {
+            const rawCity = h.city || h.cities?.city_name;
+            const rawState = h.state || h.states?.state_name;
+            const rawCountry = h.country || h.countries?.country_name;
+            const geo = resolveGeography(rawCity, rawState, rawCountry);
+            return {
+              ...h,
+              id: String(h.id),
+              city: geo.city,
+              state: geo.state,
+              country: geo.country,
+              cities: { city_name: geo.city },
+              states: { state_name: geo.state },
+              countries: { country_name: geo.country }
+            };
+          });
         }
       } catch (e) {
         console.warn('Backend hotels fetch failed, relying on master contracted registry:', e);
@@ -708,7 +715,18 @@ export const HotelContracting: React.FC = () => {
       const dbHotelNames = new Set(dbHotels.map(h => String(h.hotel_name || '').toLowerCase().trim()));
       const combined = [
         ...dbHotels,
-        ...masterHotelsList.filter(mh => !dbHotelNames.has(String(mh.hotel_name || '').toLowerCase().trim()))
+        ...masterHotelsList.map(mh => {
+          const geo = resolveGeography(mh.city, mh.state, mh.country);
+          return {
+            ...mh,
+            city: geo.city,
+            state: geo.state,
+            country: geo.country,
+            cities: { city_name: geo.city },
+            states: { state_name: geo.state },
+            countries: { country_name: geo.country }
+          };
+        }).filter(mh => !dbHotelNames.has(String(mh.hotel_name || '').toLowerCase().trim()))
       ];
 
       // Filter merged dataset by search term, country, state, city, and star rating
@@ -720,9 +738,9 @@ export const HotelContracting: React.FC = () => {
       const filtered = combined.filter(h => {
         const hName = String(h.hotel_name || '').toLowerCase();
         const hCode = String(h.hotel_code || '').toLowerCase();
-        const hCity = String(h.city || h.cities?.city_name || '').toLowerCase();
-        const hState = String(h.state || h.states?.state_name || '').toLowerCase();
-        const hCountry = String(h.country || h.countries?.country_name || '').toLowerCase();
+        const hCity = String(h.city || '').toLowerCase().trim();
+        const hState = String(h.state || '').toLowerCase().trim();
+        const hCountry = String(h.country || '').toLowerCase().trim();
         const hAddress = String(h.address || '').toLowerCase();
 
         if (q) {
@@ -731,15 +749,21 @@ export const HotelContracting: React.FC = () => {
         }
 
         if (selC) {
-          if (hCountry !== selC && !hCountry.includes(selC) && !selC.includes(hCountry)) return false;
+          if (!hCountry || (hCountry !== selC && !hCountry.includes(selC) && !selC.includes(hCountry))) {
+            return false;
+          }
         }
 
         if (selS) {
-          if (hState !== selS && !hState.includes(selS) && !selS.includes(hState)) return false;
+          if (!hState || (hState !== selS && !hState.includes(selS) && !selS.includes(hState))) {
+            return false;
+          }
         }
 
         if (selCity) {
-          if (hCity !== selCity && !hCity.includes(selCity) && !selCity.includes(hCity)) return false;
+          if (!hCity || (hCity !== selCity && !hCity.includes(selCity) && !selCity.includes(hCity))) {
+            return false;
+          }
         }
 
         if (star !== 'all') {
@@ -786,6 +810,9 @@ export const HotelContracting: React.FC = () => {
       list.push({ id: name, name });
     };
 
+    // Default major destinations
+    ['India', 'Indonesia', 'Malaysia', 'Maldives', 'Singapore', 'Switzerland', 'Thailand', 'United Arab Emirates', 'Vietnam', 'France'].forEach(addOption);
+
     countries.forEach(c => {
       addOption(c.country_name || (c as any).name || '');
     });
@@ -799,10 +826,6 @@ export const HotelContracting: React.FC = () => {
       if (name) addOption(name);
     });
 
-    if (list.length === 0 || !seenNames.has('india')) {
-      addOption('India');
-    }
-
     return list.sort((a, b) => a.name.localeCompare(b.name));
   }, [countries, hotels, masterHotelsList]);
 
@@ -813,40 +836,62 @@ export const HotelContracting: React.FC = () => {
 
     const selCountry = hotelFilterCountry !== 'all' ? hotelFilterCountry.trim().toLowerCase() : null;
 
-    const addState = (rawName: any, rawCountry?: any) => {
-      const name = String(rawName || '').trim();
-      const countryStr = String(rawCountry || '').trim();
-      if (!name || /^\d+$/.test(name) || seenNames.has(name.toLowerCase())) return;
+    const addState = (rawStateName: any, rawCountry?: any) => {
+      const geo = resolveGeography(null, rawStateName, rawCountry);
+      const stateName = geo.state;
+      const stateCountry = geo.country;
 
-      if (selCountry && countryStr) {
-        const cLower = countryStr.toLowerCase();
-        if (!cLower.includes(selCountry) && !selCountry.includes(cLower) && selCountry !== 'india') {
+      if (!stateName || /^\d+$/.test(stateName) || seenNames.has(stateName.toLowerCase())) return;
+
+      if (selCountry) {
+        if (stateCountry.toLowerCase() !== selCountry && !stateCountry.toLowerCase().includes(selCountry) && !selCountry.includes(stateCountry.toLowerCase())) {
           return;
         }
       }
 
-      seenNames.add(name.toLowerCase());
-      list.push({ id: name, name });
+      seenNames.add(stateName.toLowerCase());
+      list.push({ id: stateName, name: stateName });
     };
 
-    states.forEach(s => {
-      const cObj = countries.find(c => String(c.id) === String(s.country_id));
-      const cName = cObj?.country_name || (cObj as any)?.name || 'India';
-      addState(s.state_name || (s as any).name || '', cName);
+    // If country is India (or all), ensure all major Indian states with hotels are included
+    if (!selCountry || selCountry === 'india') {
+      const ACTIVE_INDIAN_STATES = [
+        'Kerala',
+        'Gujarat',
+        'Uttarakhand',
+        'Himachal Pradesh',
+        'Rajasthan',
+        'Goa',
+        'Jammu and Kashmir',
+        'Ladakh',
+        'Karnataka',
+        'Tamil Nadu',
+        'Maharashtra',
+        'West Bengal',
+        'Sikkim',
+        'Uttar Pradesh',
+        'Andaman and Nicobar Islands'
+      ];
+      ACTIVE_INDIAN_STATES.forEach(st => addState(st, 'India'));
+    }
+
+    // Add international states for selected country (or all)
+    Object.entries(INTERNATIONAL_STATE_COUNTRY_MAP).forEach(([stName, cName]) => {
+      addState(stName, cName);
     });
 
     masterHotelsList.forEach(h => {
-      if (h.state) addState(h.state, h.country || 'India');
+      const geo = resolveGeography(h.city, h.state, h.country);
+      addState(geo.state, geo.country);
     });
 
     hotels.forEach((h: any) => {
-      const name = String(h.state || h.states?.state_name || '').trim();
-      const hCountry = String(h.country || h.countries?.country_name || '').trim();
-      if (name) addState(name, hCountry);
+      const geo = resolveGeography(h.city || h.cities?.city_name, h.state || h.states?.state_name, h.country || h.countries?.country_name);
+      addState(geo.state, geo.country);
     });
 
     return list.sort((a, b) => a.name.localeCompare(b.name));
-  }, [states, countries, hotels, hotelFilterCountry, masterHotelsList]);
+  }, [hotels, hotelFilterCountry, masterHotelsList]);
 
   // Dynamic City Options for Filter Bar (Cascading from selected State / Country)
   const cityOptions = React.useMemo(() => {
@@ -856,45 +901,47 @@ export const HotelContracting: React.FC = () => {
     const selState = hotelFilterState !== 'all' ? hotelFilterState.trim().toLowerCase() : null;
     const selCountry = hotelFilterCountry !== 'all' ? hotelFilterCountry.trim().toLowerCase() : null;
 
-    const addCity = (rawName: any, rawState?: any, rawCountry?: any) => {
-      const name = String(rawName || '').trim();
-      const stateStr = String(rawState || '').trim();
-      const countryStr = String(rawCountry || '').trim();
-      if (!name || /^\d+$/.test(name) || seenNames.has(name.toLowerCase())) return;
+    const addCity = (rawCityName: any, rawState?: any, rawCountry?: any) => {
+      const geo = resolveGeography(rawCityName, rawState, rawCountry);
+      const cityName = geo.city;
+      const stateName = geo.state;
+      const countryName = geo.country;
 
-      if (selState && stateStr) {
-        const sLower = stateStr.toLowerCase();
-        if (!sLower.includes(selState) && !selState.includes(sLower)) return;
+      if (!cityName || /^\d+$/.test(cityName) || seenNames.has(cityName.toLowerCase())) return;
+
+      if (selState) {
+        if (stateName.toLowerCase() !== selState && !stateName.toLowerCase().includes(selState) && !selState.includes(stateName.toLowerCase())) {
+          return;
+        }
       }
 
-      if (selCountry && countryStr) {
-        const cLower = countryStr.toLowerCase();
-        if (!cLower.includes(selCountry) && !selCountry.includes(cLower) && selCountry !== 'india') return;
+      if (selCountry) {
+        if (countryName.toLowerCase() !== selCountry && !countryName.toLowerCase().includes(selCountry) && !selCountry.includes(countryName.toLowerCase())) {
+          return;
+        }
       }
 
-      seenNames.add(name.toLowerCase());
-      list.push({ id: name, name });
+      seenNames.add(cityName.toLowerCase());
+      list.push({ id: cityName, name: cityName });
     };
 
-    cities.forEach(c => {
-      const sObj = states.find(s => String(s.id) === String(c.state_id));
-      const sName = sObj?.state_name || (sObj as any)?.name || (c as any).state || '';
-      addCity(c.city_name || (c as any).name || '', sName, (c as any).country || 'India');
+    // Add predefined cities from dictionary
+    Object.entries(CITY_TO_STATE_COUNTRY_MAP).forEach(([cityName, meta]) => {
+      addCity(cityName, meta.state, meta.country);
     });
 
     masterHotelsList.forEach(h => {
-      if (h.city) addCity(h.city, h.state, h.country);
+      const geo = resolveGeography(h.city, h.state, h.country);
+      addCity(geo.city, geo.state, geo.country);
     });
 
     hotels.forEach((h: any) => {
-      const name = String(h.city || h.cities?.city_name || '').trim();
-      const hState = String(h.state || h.states?.state_name || '').trim();
-      const hCountry = String(h.country || h.countries?.country_name || '').trim();
-      if (name) addCity(name, hState, hCountry);
+      const geo = resolveGeography(h.city || h.cities?.city_name, h.state || h.states?.state_name, h.country || h.countries?.country_name);
+      addCity(geo.city, geo.state, geo.country);
     });
 
     return list.sort((a, b) => a.name.localeCompare(b.name));
-  }, [cities, states, countries, hotels, hotelFilterState, hotelFilterCountry, masterHotelsList]);
+  }, [hotels, hotelFilterState, hotelFilterCountry, masterHotelsList]);
 
   // Handlers for filter state changes
   const handleCountryFilterChange = (val: string) => {
