@@ -1,13 +1,12 @@
 /**
- * ARCHITECTURE NOTE — Updated July 2026
+ * ARCHITECTURE NOTE
  * 
  * Supabase is used ONLY for:
  * 1. Authentication: supabase.auth (sessions, tokens)
- * 2. File Storage: supabase.storage (trip-reviews bucket)
- * 3. Edge Functions: supabase.functions (email scanner)
+ * 2. Edge Functions: supabase.functions (Meta Conversions, Reviews, Payments)
  * 
- * ALL business data (leads, payments, reviews, expenses,
- * audit_logs, etc.) is now stored in MySQL via PHP backend.
+ * ALL business data and media uploads (leads, hotels, reviews, photos, contracts)
+ * are stored in MySQL and the self-hosted PHP backend (/uploads/).
  * 
  * Do NOT add supabase.from() calls for business data.
  * Use leadService, reviewService, or PHP endpoints instead.

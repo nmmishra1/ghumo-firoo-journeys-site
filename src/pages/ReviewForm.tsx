@@ -254,26 +254,24 @@ export default function ReviewForm() {
     
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${booking?.id || 'review'}_photo_${Date.now()}_${Math.random().toString(36).substr(2, 5)}.${fileExt}`;
-      const filePath = `photos/${fileName}`;
+      const formData = new FormData();
+      formData.append('file', file);
       
       try {
-        // Supabase Storage — stays on Supabase permanently
-        // MySQL does not store binary files
-        const { error: uploadError } = await supabase.storage
-          .from('trip-reviews')
-          .upload(filePath, file);
-          
-        if (uploadError) throw uploadError;
+        const res = await fetch('/php-backend/upload_review_media.php', {
+          method: 'POST',
+          body: formData
+        });
         
-        // Supabase Storage — stays on Supabase permanently
-        // MySQL does not store binary files
-        const { data } = supabase.storage
-          .from('trip-reviews')
-          .getPublicUrl(filePath);
-          
-        uploadedUrls.push(data.publicUrl);
+        if (!res.ok) {
+          const errData = await res.json().catch(() => ({}));
+          throw new Error(errData.error || `Server responded with status ${res.status}`);
+        }
+        
+        const data = await res.json();
+        if (data.url) {
+          uploadedUrls.push(data.url);
+        }
       } catch (err: any) {
         console.error("Photo upload error:", err);
         toast({
@@ -286,51 +284,51 @@ export default function ReviewForm() {
     
     setPhotoUrls(uploadedUrls);
     setUploadingPhotos(false);
-    toast({
-      title: "Images Uploaded",
-      description: `Successfully uploaded ${files.length} photos.`
-    });
+    if (uploadedUrls.length > photoUrls.length) {
+      toast({
+        title: "Images Uploaded",
+        description: `Successfully uploaded ${uploadedUrls.length - photoUrls.length} photos.`
+      });
+    }
   };
   
   const handleVideoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
     
-    // Check file size (limit to 40MB for safety)
-    if (file.size > 40 * 1024 * 1024) {
+    // Check file size (limit to 25MB for safety)
+    if (file.size > 25 * 1024 * 1024) {
       toast({
         title: "Video file too large",
-        description: "Please upload a video file under 40 MB.",
+        description: "Please upload a video file under 25 MB.",
         variant: "destructive"
       });
       return;
     }
     
     setUploadingVideo(true);
-    const fileExt = file.name.split('.').pop();
-    const fileName = `${booking?.id || 'review'}_video_${Date.now()}.${fileExt}`;
-    const filePath = `videos/${fileName}`;
+    const formData = new FormData();
+    formData.append('file', file);
     
     try {
-      // Supabase Storage — stays on Supabase permanently
-      // MySQL does not store binary files
-      const { error: uploadError } = await supabase.storage
-        .from('trip-reviews')
-        .upload(filePath, file);
-        
-      if (uploadError) throw uploadError;
-      
-      // Supabase Storage — stays on Supabase permanently
-      // MySQL does not store binary files
-      const { data } = supabase.storage
-        .from('trip-reviews')
-        .getPublicUrl(filePath);
-        
-      setVideoUrl(data.publicUrl);
-      toast({
-        title: "Video Uploaded",
-        description: "Your trip video was uploaded successfully."
+      const res = await fetch('/php-backend/upload_review_media.php', {
+        method: 'POST',
+        body: formData
       });
+      
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData.error || `Server responded with status ${res.status}`);
+      }
+      
+      const data = await res.json();
+      if (data.url) {
+        setVideoUrl(data.url);
+        toast({
+          title: "Video Uploaded",
+          description: "Your trip video was uploaded successfully."
+        });
+      }
     } catch (err: any) {
       console.error("Video upload error:", err);
       toast({

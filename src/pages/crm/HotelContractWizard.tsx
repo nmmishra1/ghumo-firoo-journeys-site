@@ -1363,47 +1363,23 @@ export const HotelContractWizard: React.FC<HotelContractWizardProps> = ({
 
   const handleImageUploadHelper = async (file: File, folderName: string): Promise<string | null> => {
     try {
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${Date.now()}-${Math.floor(1000 + Math.random() * 9000)}.${fileExt}`;
-      const filePath = `${folderName}/${fileName}`;
-
-      const { data, error: uploadError } = await supabase.storage
-        .from('hotel-images')
-        .upload(filePath, file, {
-          cacheControl: '3600',
-          upsert: true
-        });
-
-      if (uploadError) {
-        console.warn('Supabase storage upload failed, attempting local upload endpoint:', uploadError.message);
-        try {
-          const authHeaders = await getAuthHeader();
-          const formData = new FormData();
-          formData.append('file', file);
-          const phpRes = await fetch('/php-backend/upload.php', {
-            method: 'POST',
-            headers: authHeaders,
-            body: formData
-          });
-          if (phpRes.ok) {
-            const resData = await phpRes.json();
-            if (resData.url || resData.path) return resData.url || resData.path;
-          }
-        } catch (phpErr) {
-          console.warn('Backend upload failed as well, falling back to base64 DataURL');
-        }
-        return new Promise((resolve) => {
-          const reader = new FileReader();
-          reader.onloadend = () => resolve(reader.result as string);
-          reader.readAsDataURL(file);
-        });
+      const authHeaders = await getAuthHeader();
+      const formData = new FormData();
+      formData.append('file', file);
+      const phpRes = await fetch('/php-backend/upload.php', {
+        method: 'POST',
+        headers: authHeaders,
+        body: formData
+      });
+      if (phpRes.ok) {
+        const resData = await phpRes.json();
+        if (resData.url || resData.path) return resData.url || resData.path;
       }
-
-      const { data: { publicUrl } } = supabase.storage
-        .from('hotel-images')
-        .getPublicUrl(filePath);
-
-      return publicUrl;
+      return new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.onloadend = () => resolve(reader.result as string);
+        reader.readAsDataURL(file);
+      });
     } catch (err: any) {
       console.error('Upload helper error:', err);
       return new Promise((resolve) => {
