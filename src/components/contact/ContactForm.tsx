@@ -287,7 +287,7 @@ const ContactForm = () => {
                 value={formData.message}
                 onChange={handleChange}
                 rows={5}
-                className={`w-full pl-10 pt-4 pb-4 pr-4 bg-white/50 border-2 rounded-xl transition-all duration-300 focus:bg-white/80 focus:border-indigo-500 focus:shadow-lg resize-none ${
+                className={`w-full pl-10 pt-4 pb-4 pr-4 bg-white text-slate-900 border-2 rounded-xl transition-all duration-300 focus:bg-white focus:border-indigo-500 focus:shadow-lg resize-none placeholder:text-gray-400 ${
                   errors.message ? 'border-red-400 bg-red-50/50' : 'border-gray-200 hover:border-indigo-300'
                 }`}
                 placeholder="Tell us about your dream destination, travel dates, group size, and any special requirements..."

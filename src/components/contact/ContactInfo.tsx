@@ -99,14 +99,14 @@ const ContactInfo = () => {
       {/* Detailed Contact Information */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* Office Address */}
-        <div className="group backdrop-blur-xl bg-white/10 border border-white/20 p-4 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:bg-white/20">
+        <div className="bg-white border border-slate-200 p-5 rounded-2xl shadow-md hover:shadow-lg transition-all duration-300">
           <div className="flex items-start space-x-3">
-            <div className="bg-gradient-to-br from-blue-500 to-blue-600 p-3 rounded-xl group-hover:scale-110 transition-transform duration-300">
+            <div className="bg-gradient-to-br from-blue-500 to-blue-600 p-3 rounded-xl group-hover:scale-110 transition-transform duration-300 shrink-0">
               <MapPin className="h-5 w-5 text-white" />
             </div>
             <div className="flex-1">
-              <h3 className="font-bold text-gray-800 mb-2 text-base">Visit Our Office</h3>
-              <p className="text-gray-600 text-sm leading-relaxed mb-3">
+              <h3 className="font-bold text-slate-900 mb-2 text-base">Visit Our Office</h3>
+              <p className="text-slate-700 text-sm leading-relaxed mb-3">
                 Shop No. 210, 2nd Floor, Pratap Complex<br />
                 Metro Gate Number 3, near Munirka<br />
                 Baba Gangnath Market, Munirka<br />
@@ -114,9 +114,9 @@ const ContactInfo = () => {
               </p>
               <button
                 onClick={() => copyToClipboard('Shop No. 210, 2nd Floor, Pratap Complex, Metro Gate Number 3, near Munirka, Baba Gangnath Market, Munirka, New Delhi, Delhi 110067', 'Address')}
-                className="flex items-center gap-2 text-blue-600 hover:text-blue-700 font-medium transition-colors text-sm"
+                className="flex items-center gap-2 text-blue-600 hover:text-blue-800 font-semibold transition-colors text-sm"
               >
-                <Copy className="w-3 h-3" />
+                <Copy className="w-3.5 h-3.5" />
                 Copy Address
               </button>
             </div>
@@ -124,64 +124,68 @@ const ContactInfo = () => {
         </div>
 
         {/* Phone Numbers */}
-        <div className="group backdrop-blur-xl bg-white/10 border border-white/20 p-4 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:bg-white/20">
+        <div className="bg-white border border-slate-200 p-5 rounded-2xl shadow-md hover:shadow-lg transition-all duration-300">
           <div className="flex items-start space-x-3">
-            <div className="bg-gradient-to-br from-green-500 to-green-600 p-3 rounded-xl group-hover:scale-110 transition-transform duration-300">
+            <div className="bg-gradient-to-br from-green-500 to-green-600 p-3 rounded-xl group-hover:scale-110 transition-transform duration-300 shrink-0">
               <Phone className="h-5 w-5 text-white" />
             </div>
             <div className="flex-1">
-              <h3 className="font-bold text-gray-800 mb-2 text-base">Call Us Anytime</h3>
+              <h3 className="font-bold text-slate-900 mb-2 text-base">Call Us Anytime</h3>
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <span className="text-gray-600 text-sm">+91 9910987264</span>
+                  <span className="text-slate-800 font-medium text-sm">+91 9910987264</span>
                   <div className="flex gap-1">
                     <button
                       onClick={() => handlePhoneCall('+919910987264')}
-                      className="p-1.5 bg-green-100 text-green-600 rounded-md hover:bg-green-200 transition-colors"
+                      className="p-1.5 bg-green-100 text-green-700 rounded-md hover:bg-green-200 transition-colors"
+                      title="Call"
                     >
-                      <Phone className="w-3 h-3" />
+                      <Phone className="w-3.5 h-3.5" />
                     </button>
                     <button
                       onClick={() => copyToClipboard('+919910987264', 'Phone number')}
-                      className="p-1.5 bg-blue-100 text-blue-600 rounded-md hover:bg-blue-200 transition-colors"
+                      className="p-1.5 bg-blue-100 text-blue-700 rounded-md hover:bg-blue-200 transition-colors"
+                      title="Copy"
                     >
-                      <Copy className="w-3 h-3" />
+                      <Copy className="w-3.5 h-3.5" />
                     </button>
                   </div>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-gray-600 text-sm">+91 9870229792</span>
+                  <span className="text-slate-800 font-medium text-sm">+91 9870229792</span>
                   <div className="flex gap-1">
                     <button
                       onClick={() => handlePhoneCall('+919870229792')}
-                      className="p-1.5 bg-green-100 text-green-600 rounded-md hover:bg-green-200 transition-colors"
+                      className="p-1.5 bg-green-100 text-green-700 rounded-md hover:bg-green-200 transition-colors"
+                      title="Call"
                     >
-                      <Phone className="w-3 h-3" />
+                      <Phone className="w-3.5 h-3.5" />
                     </button>
                     <button
                       onClick={() => copyToClipboard('+919870229792', 'Phone number')}
-                      className="p-1.5 bg-blue-100 text-blue-600 rounded-md hover:bg-blue-200 transition-colors"
+                      className="p-1.5 bg-blue-100 text-blue-700 rounded-md hover:bg-blue-200 transition-colors"
+                      title="Copy"
                     >
-                      <Copy className="w-3 h-3" />
+                      <Copy className="w-3.5 h-3.5" />
                     </button>
                   </div>
                 </div>
-                <p className="text-xs text-green-600 font-medium flex items-center gap-2">
-                  <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></span>
+                <p className="text-xs text-green-700 font-semibold flex items-center gap-2 pt-1">
+                  <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
                   24/7 Emergency Support
                 </p>
-                <div className="flex items-center gap-2 mt-3">
-                  <Clock className="h-4 w-4 text-accent" />
-                  <span className="font-semibold text-gray-800 text-sm">Business Hours</span>
+                <div className="flex items-center gap-2 mt-3 pt-2 border-t border-slate-100">
+                  <Clock className="h-4 w-4 text-amber-600" />
+                  <span className="font-bold text-slate-900 text-sm">Business Hours</span>
                 </div>
-                <div className="mt-3 space-y-1 text-gray-600 text-sm">
+                <div className="mt-2 space-y-1 text-slate-700 text-sm">
                   <div className="flex justify-between items-center">
                     <span>Monday - Saturday</span>
-                    <span className="font-medium">9:00 AM - 6:00 PM</span>
+                    <span className="font-semibold text-slate-900">9:00 AM - 6:00 PM</span>
                   </div>
                   <div className="flex justify-between items-center">
                     <span>Sunday</span>
-                    <span className="font-medium">10:00 AM - 4:00 PM</span>
+                    <span className="font-semibold text-slate-900">10:00 AM - 4:00 PM</span>
                   </div>
                 </div>
               </div>
@@ -194,8 +198,8 @@ const ContactInfo = () => {
       </div>
 
       {/* Social Media & Additional Contact */}
-      <div className="backdrop-blur-xl bg-gradient-to-r from-blue-50/50 to-purple-50/50 border border-white/20 p-6 rounded-xl">
-        <h3 className="font-bold text-gray-800 mb-4 text-center text-lg">Follow Our Adventures</h3>
+      <div className="bg-white border border-slate-200 p-6 rounded-2xl shadow-md">
+        <h3 className="font-bold text-slate-900 mb-4 text-center text-lg">Follow Our Adventures</h3>
         <div className="flex justify-center space-x-4 mb-4">
           <a 
             href="https://www.facebook.com/ghumofirootravels" 
@@ -239,18 +243,18 @@ const ContactInfo = () => {
           </a>
         </div>
         <div className="text-center">
-          <p className="text-gray-600 mb-3 text-sm">Stay updated with our latest travel stories, tips, and exclusive offers!</p>
-          <div className="flex justify-center gap-3 text-xs">
-            <span className="flex items-center gap-1 text-blue-600">
-              <div className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-pulse"></div>
+          <p className="text-slate-700 mb-3 text-sm font-medium">Stay updated with our latest travel stories, tips, and exclusive offers!</p>
+          <div className="flex justify-center gap-4 text-xs font-semibold">
+            <span className="flex items-center gap-1 text-blue-700">
+              <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
               Daily Travel Tips
             </span>
-            <span className="flex items-center gap-1 text-purple-600">
-              <div className="w-1.5 h-1.5 bg-purple-500 rounded-full animate-pulse"></div>
+            <span className="flex items-center gap-1 text-purple-700">
+              <div className="w-2 h-2 bg-purple-500 rounded-full animate-pulse"></div>
               Exclusive Deals
             </span>
-            <span className="flex items-center gap-1 text-green-600">
-              <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></div>
+            <span className="flex items-center gap-1 text-green-700">
+              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
               Travel Stories
             </span>
           </div>

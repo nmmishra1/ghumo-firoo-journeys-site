@@ -548,29 +548,66 @@ class LeadService {
       };
 
       let ok = false;
-      try {
-        const res = await fetch(`${API_BASE}/leads_create.php`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            ...authHeaders
-          },
-          body: JSON.stringify(dbObj)
-        });
-        if (res.ok) {
-          const data = await res.json();
-          if (data.lead_id) {
-            lead.id = data.lead_id.toString();
-            (lead as any).isRepeatCustomer = Boolean(data.is_repeat_customer);
-            (lead as any).previousTripsCount = data.previous_trips_count || 0;
-            ok = true;
+      // 1. Try authenticated backend endpoint if token present
+      if (authHeaders.Authorization) {
+        try {
+          const res = await fetch(`${API_BASE}/leads_create.php`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              ...authHeaders
+            },
+            body: JSON.stringify(dbObj)
+          });
+          if (res.ok) {
+            const data = await res.json();
+            if (data.lead_id) {
+              lead.id = data.lead_id.toString();
+              (lead as any).isRepeatCustomer = Boolean(data.is_repeat_customer);
+              (lead as any).previousTripsCount = data.previous_trips_count || 0;
+              ok = true;
+            }
           }
+        } catch (err) {
+          console.warn('PHP backend leads_create fetch error:', err);
         }
-      } catch (err) {
-        console.warn('PHP backend leads_create fetch error:', err);
       }
 
-      // Fallback to Supabase public lead insert if PHP endpoint requires auth or fails
+      // 2. If unauthenticated public visitor, save directly to MySQL database via leads_create_public.php
+      if (!ok) {
+        try {
+          const publicRes = await fetch(`${API_BASE}/leads_create_public.php`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              customer_name: dbObj.customer_name,
+              customer_phone: dbObj.customer_phone,
+              customer_email: dbObj.customer_email,
+              package_name: dbObj.destinations || 'Website Enquiry',
+              package_price: (lead as any).packagePrice || 0,
+              adult_count: (lead as any).adultCount || (lead as any).numberOfTravelers || 2,
+              child_count: (lead as any).childCount || 0,
+              travel_date: dbObj.trip_start_date || (lead as any).travelMonth || '',
+              source: dbObj.source || 'Website',
+              touchpoint: dbObj.source || 'Website Form',
+              page_url: typeof window !== 'undefined' ? window.location.href : '/',
+              notes: (lead as any).notes || (lead as any).specialRequests || ''
+            })
+          });
+
+          if (publicRes.ok) {
+            const pubData = await publicRes.json();
+            if (pubData.lead_id) {
+              lead.id = pubData.lead_id.toString();
+              ok = true;
+            }
+          }
+        } catch (pubErr) {
+          console.warn('PHP backend leads_create_public error:', pubErr);
+        }
+      }
+
+      // Fallback to Supabase public lead insert if PHP endpoints fail
       if (!ok) {
         try {
           const sbPayload = { ...dbObj };
