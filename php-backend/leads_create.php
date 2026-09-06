@@ -129,40 +129,67 @@ try {
         } catch (Exception $e) {}
     }
 
-    $stmt = $pdo->prepare(
-        'INSERT INTO leads
-            (customer_name, customer_phone, customer_email, customer_home_city, whatsapp_number,
-             source, source_detail, destination_city_id, destinations,
-             trip_start_date, trip_end_date, adult_count, child_count, infant_count,
-             budget, duration, number_of_nights, hotel_category, notes, discussion_notes, follow_up_date, status, assigned_to, created_by)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, "New", ?, ?)'
-    );
+    // Inspect available columns in leads table to adapt dynamically to live MySQL schema
+    $existingCols = [];
+    try {
+        $existingCols = $pdo->query("SHOW COLUMNS FROM `leads`")->fetchAll(PDO::FETCH_COLUMN);
+    } catch (Throwable $eCols) {}
 
-    $stmt->execute([
-        $customerName,
-        !empty($phone) ? $phone : null,
-        !empty($email) ? $email : null,
-        $input['customer_home_city'] ?? $input['city'] ?? null,
-        !empty($phone) ? $phone : null,
-        $source,
-        $input['source_detail'] ?? "Source: {$source}",
-        $input['destination_city_id'] ?? null,
-        $destinations ?: null,
-        $input['trip_start_date'] ?? $input['travelMonth'] ?? null,
-        $input['trip_end_date'] ?? null,
-        (int)($input['adult_count'] ?? $input['adultCount'] ?? $input['adults'] ?? 2),
-        (int)($input['child_count'] ?? $input['childCount'] ?? $input['children'] ?? 0),
-        (int)($input['infant_count'] ?? $input['infantCount'] ?? $input['infants'] ?? 0),
-        $input['budget'] ?? $input['package_price'] ?? $input['packagePrice'] ?? $input['expected_booking_value'] ?? null,
-        $duration,
-        $numberOfNights,
-        $input['hotel_category'] ?? $input['hotelCategory'] ?? null,
-        !empty($notes) ? $notes : null,
-        !empty($notes) ? $notes : null,
-        $followUpDate,
-        $assignedTo,
-        $createdBy
-    ]);
+    // If follow_up_date is missing, attempt to provision it
+    if (!empty($existingCols) && !in_array('follow_up_date', $existingCols)) {
+        try {
+            $pdo->exec("ALTER TABLE `leads` ADD COLUMN `follow_up_date` TIMESTAMP NULL AFTER `notes`");
+            $existingCols[] = 'follow_up_date';
+        } catch (Throwable $eFup) {}
+    }
+
+    // Build fields map for insertion
+    $fields = [
+        'customer_name'       => $customerName,
+        'customer_phone'      => !empty($phone) ? $phone : null,
+        'customer_email'      => !empty($email) ? $email : null,
+        'customer_home_city'  => $input['customer_home_city'] ?? $input['city'] ?? null,
+        'whatsapp_number'     => !empty($phone) ? $phone : null,
+        'source'              => $source,
+        'source_detail'       => $input['source_detail'] ?? "Source: {$source}",
+        'destination_city_id' => $input['destination_city_id'] ?? null,
+        'destinations'        => $destinations ?: null,
+        'trip_start_date'     => $input['trip_start_date'] ?? $input['travelMonth'] ?? null,
+        'trip_end_date'       => $input['trip_end_date'] ?? null,
+        'adult_count'         => (int)($input['adult_count'] ?? $input['adultCount'] ?? $input['adults'] ?? 2),
+        'child_count'         => (int)($input['child_count'] ?? $input['childCount'] ?? $input['children'] ?? 0),
+        'infant_count'        => (int)($input['infant_count'] ?? $input['infantCount'] ?? $input['infants'] ?? 0),
+        'budget'              => $input['budget'] ?? $input['package_price'] ?? $input['packagePrice'] ?? $input['expected_booking_value'] ?? null,
+        'duration'            => $duration,
+        'number_of_nights'    => $numberOfNights,
+        'hotel_category'      => $input['hotel_category'] ?? $input['hotelCategory'] ?? null,
+        'notes'               => !empty($notes) ? $notes : null,
+        'status'              => 'New',
+        'assigned_to'         => $assignedTo,
+        'created_by'          => $createdBy
+    ];
+
+    if (!empty($existingCols) && in_array('follow_up_date', $existingCols)) {
+        $fields['follow_up_date'] = $followUpDate;
+    }
+    if (!empty($existingCols) && in_array('discussion_notes', $existingCols)) {
+        $fields['discussion_notes'] = !empty($notes) ? $notes : null;
+    }
+
+    // Filter to only columns that actually exist in the table to prevent unknown column errors
+    if (!empty($existingCols)) {
+        $fields = array_filter($fields, function($colName) use ($existingCols) {
+            return in_array($colName, $existingCols);
+        }, ARRAY_FILTER_USE_KEY);
+    }
+
+    $colNames = array_keys($fields);
+    $placeholders = array_fill(0, count($fields), '?');
+    $colSql = '`' . implode('`, `', $colNames) . '`';
+    $valSql = implode(', ', $placeholders);
+
+    $stmt = $pdo->prepare("INSERT INTO `leads` ({$colSql}) VALUES ({$valSql})");
+    $stmt->execute(array_values($fields));
 
     $newLeadId = (int)$pdo->lastInsertId();
 

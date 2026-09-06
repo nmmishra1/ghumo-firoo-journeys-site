@@ -158,44 +158,55 @@ try {
         exit;
     }
 
-    // 8. Insert Lead into MySQL
-    $stmt = $pdo->prepare("
-        INSERT INTO leads (
-            customer_name, customer_email, customer_phone,
-            package_name, package_price, package_cost, source, status,
-            adult_count, child_count, infant_count,
-            trip_start_date, notes, discussion_notes, destinations, created_at, updated_at
-        ) VALUES (
-            :customer_name, :customer_email, :customer_phone,
-            :package_name, :package_price, :package_cost, :source, 'New',
-            :adult_count, :child_count, 0,
-            :trip_start_date, :notes, :discussion_notes, :destinations, NOW(), NOW()
-        )
-    ");
-
+    // 8. Insert Lead into MySQL with Dynamic Schema Adaptation
     $packageName = $input['package_name'] ?? 'Custom Travel Request';
     $packagePrice = (float)($input['package_price'] ?? 0);
     $adultCount = max(1, (int)($input['adult_count'] ?? 2));
     $childCount = (int)($input['child_count'] ?? 0);
     $travelDate = !empty($input['travel_date']) ? $input['travel_date'] : null;
     $notes = $input['notes'] ?? $input['message'] ?? '';
-    $discussionNotes = "[$sourceLabel] Captured from {$pageUrl}. " . ($notes ? "Client Note: {$notes}" : "");
+    $combinedNotes = "[$sourceLabel] Captured from {$pageUrl}. " . ($notes ? "Client Note: {$notes}" : "");
 
-    $stmt->execute([
-        ':customer_name' => $customerName,
-        ':customer_email' => $customerEmail,
-        ':customer_phone' => $customerPhone,
-        ':package_name' => $packageName,
-        ':package_price' => $packagePrice,
-        ':package_cost' => $packagePrice,
-        ':source' => $sourceLabel,
-        ':adult_count' => $adultCount,
-        ':child_count' => $childCount,
-        ':trip_start_date' => $travelDate,
-        ':notes' => $notes,
-        ':discussion_notes' => $discussionNotes,
-        ':destinations' => $packageName
-    ]);
+    // Inspect columns dynamically from live MySQL table
+    $existingCols = [];
+    try {
+        $existingCols = $pdo->query("SHOW COLUMNS FROM `leads`")->fetchAll(PDO::FETCH_COLUMN);
+    } catch (Throwable $eCols) {}
+
+    $fields = [
+        'customer_name'  => $customerName,
+        'customer_email' => $customerEmail,
+        'customer_phone' => $customerPhone,
+        'package_name'   => $packageName,
+        'package_price'  => $packagePrice,
+        'package_cost'   => $packagePrice,
+        'source'         => $sourceLabel,
+        'status'         => 'New',
+        'adult_count'    => $adultCount,
+        'child_count'    => $childCount,
+        'infant_count'   => 0,
+        'trip_start_date'=> $travelDate,
+        'notes'          => $combinedNotes,
+        'destinations'   => $packageName
+    ];
+
+    if (!empty($existingCols) && in_array('discussion_notes', $existingCols)) {
+        $fields['discussion_notes'] = $combinedNotes;
+    }
+
+    if (!empty($existingCols)) {
+        $fields = array_filter($fields, function($colName) use ($existingCols) {
+            return in_array($colName, $existingCols);
+        }, ARRAY_FILTER_USE_KEY);
+    }
+
+    $colNames = array_keys($fields);
+    $placeholders = array_fill(0, count($fields), '?');
+    $colSql = '`' . implode('`, `', $colNames) . '`';
+    $valSql = implode(', ', $placeholders);
+
+    $stmt = $pdo->prepare("INSERT INTO `leads` ({$colSql}) VALUES ({$valSql})");
+    $stmt->execute(array_values($fields));
 
     $leadId = (int)$pdo->lastInsertId();
 
