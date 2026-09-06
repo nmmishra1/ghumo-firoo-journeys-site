@@ -4251,12 +4251,22 @@ const CRM = () => {
                           <SelectTrigger className="h-8 text-xs font-medium"><SelectValue placeholder="All" /></SelectTrigger>
                           <SelectContent>
                             <SelectItem value="all">All Sources</SelectItem>
-                            <SelectItem value="Direct Customer">Direct Customer</SelectItem>
-                            <SelectItem value="Phone">Phone Call</SelectItem>
-                            <SelectItem value="Facebook">Facebook Ads</SelectItem>
-                            <SelectItem value="Insta">Instagram</SelectItem>
                             <SelectItem value="Trip Clap">Trip Clap</SelectItem>
+                            <SelectItem value="Travecode">Travecode</SelectItem>
                             <SelectItem value="Hello_Visit">Hello Visit</SelectItem>
+                            <SelectItem value="Referral">Referral</SelectItem>
+                            <SelectItem value="Google Ads">Google Ads</SelectItem>
+                            <SelectItem value="Facebook Ads">Facebook Ads</SelectItem>
+                            <SelectItem value="Instagram">Instagram</SelectItem>
+                            <SelectItem value="Travel Lead">Travel Lead</SelectItem>
+                            <SelectItem value="Partner">Partner</SelectItem>
+                            <SelectItem value="B2B">B2B</SelectItem>
+                            <SelectItem value="WhatsApp">WhatsApp</SelectItem>
+                            <SelectItem value="LinkedIn">LinkedIn</SelectItem>
+                            <SelectItem value="Website - Download Brochure">Brochure Download</SelectItem>
+                            <SelectItem value="Direct Customer">Direct Customer</SelectItem>
+                            <SelectItem value="Phone Call">Phone Call</SelectItem>
+                            <SelectItem value="Walk-in">Walk-in</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>

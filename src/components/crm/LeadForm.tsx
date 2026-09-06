@@ -378,10 +378,11 @@ export const LeadForm: React.FC<LeadFormProps> = ({
 
   // Dynamic Lead Sources state
   const [dbLeadSources, setDbLeadSources] = useState<string[]>([
-    'Website', 'Website - Enquire Now Modal', 'Website - Download Brochure',
-    'Website - Contact Form', 'Website - Floating WhatsApp', 'WhatsApp',
-    'Phone Call', 'Google Ads', 'Meta Ads (Facebook/IG)', 'Walk-in',
-    'Agent Referral', 'Partner Portal'
+    'Trip Clap', 'Travecode', 'Hello_Visit', 'Referral', 'Google Ads',
+    'Facebook Ads', 'Instagram', 'Travel Lead', 'Partner', 'B2B',
+    'WhatsApp', 'LinkedIn', 'Website', 'Website - Download Brochure',
+    'Website - Enquire Now Modal', 'Website - Contact Form',
+    'Website - Floating WhatsApp', 'Direct Customer', 'Phone Call', 'Walk-in'
   ]);
 
   useEffect(() => {

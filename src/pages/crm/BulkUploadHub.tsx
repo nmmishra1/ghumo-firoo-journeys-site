@@ -11,9 +11,31 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Progress } from '@/components/ui/progress';
 import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter
+} from '@/components/ui/dialog';
+import {
   UploadCloud, Download, FileSpreadsheet, CheckCircle2, AlertTriangle, XCircle,
-  Landmark, Car, MapPin, Activity, Users, RefreshCw, FileText, ArrowRight, Sparkles, Check, Trash2, Edit3, Globe
+  Landmark, Car, MapPin, Activity, Users, RefreshCw, FileText, ArrowRight, Sparkles, Check, Trash2, Edit3, Globe,
+  Zap, Eye
 } from 'lucide-react';
+
+export interface RowInspection {
+  rowIndex: number;
+  recordName: string;
+  module: string;
+  endpoint: string;
+  payload: any;
+  status: number;
+  ok: boolean;
+  response: any;
+  diagnosis: string;
+  timestamp: string;
+}
 
 const API_BASE = import.meta.env.VITE_PHP_BASE_URL || import.meta.env.VITE_API_BASE_URL || '/php-backend';
 
@@ -184,7 +206,7 @@ Ganga River Rafting 16KM,ACT-UK-03,Rishikesh,Water Sports,Rafting,3 Hours,Outdoo
   leads: {
     id: 'leads',
     title: 'Leads & Enquiries',
-    description: 'Bulk upload customer enquiries, travel interests, follow-up dates, and contact records.',
+    description: 'Bulk upload customer enquiries from Trip Clap, Travecode, Google Ads, Facebook Ads, Instagram, Referral, WhatsApp, etc.',
     icon: Users,
     endpointTable: 'leads',
     requiredFields: ['customer_name', 'contact_number', 'customer_type'],
@@ -192,16 +214,20 @@ Ganga River Rafting 16KM,ACT-UK-03,Rishikesh,Water Sports,Rafting,3 Hours,Outdoo
       { key: 'customer_name', label: 'Customer Name', required: true },
       { key: 'contact_number', label: 'Contact Phone', required: true },
       { key: 'email', label: 'Email' },
-      { key: 'customer_type', label: 'Source / Type', required: true },
-      { key: 'tour_description', label: 'Tour Interest' },
-      { key: 'call_summary', label: 'Call Notes' },
+      { key: 'customer_type', label: 'Source / Type (Trip Clap, Google Ads, etc.)', required: true },
+      { key: 'tour_description', label: 'Tour Interest / Destination' },
+      { key: 'call_summary', label: 'Call Notes / Remarks' },
       { key: 'assigned_to', label: 'Assigned Agent' },
-      { key: 'follow_up_date', label: 'Follow Up Date' }
+      { key: 'follow_up_date', label: 'Follow Up Date (DD-MM-YYYY)' }
     ],
     sampleCsv: `customer_name,contact_number,email,customer_type,tour_description,call_summary,assigned_to,follow_up_date
-Rajesh Sharma,9811223344,rajesh@gmail.com,Direct Customer,Rann Utsav 2D/1N package for 4 adults,Inquired about White Rann tent city rates,Admin,2026-08-15
-Priya Menon,9844556677,priya@menon.com,Phone,Kerala 5N/6D luxury honeymoon,Wants Innova cab and 5-star resort in Munnar,Admin,2026-08-14
-Amitabh Joshi,9877889900,ajoshi@yahoo.com,Facebook,Char Dham 10D yatra for 6 family members,Requires Tempo Traveller with VIP darshan,Admin,2026-08-16`
+Prachi,8433703515,pp@gmail.com,Trip Clap,Singapore,Inquired about 4N/5D family package,Admin,08-09-2026
+Danish,7718032684,danishzrgr@gmail.com,Trip Clap,Singapore,Wants 4-star Sentosa resort with transfers,Admin,08-09-2026
+Abdul Rehman,6361093599,abdulrehaman@gmail.com,Trip Clap,Vietnam,Hanoi & Halong Bay cruise quote requested,Admin,08-09-2026
+Raji,6305209014,raji.cutey@gmail.com,Trip Clap,Singapore,Universal Studios + Marina Bay Sands package,Admin,08-09-2026
+Arunsinh Rajput,8155992579,arunsinhbanna@gmail.com,Trip Clap,Rajasthan Tour,Udaipur Jaipur Jodhpur 6N package,Admin,08-09-2026
+Rajesh Sharma,9811223344,rajesh@gmail.com,Google Ads,Rann Utsav Kutch,White Rann Premium AC Tent booking,Admin,15-09-2026
+Meera Patel,9825112233,meera@yahoo.com,WhatsApp,Char Dham Yatra,VIP helicopter package from Dehradun,Admin,20-09-2026`
   },
 
   packages: {
@@ -321,8 +347,11 @@ export const BulkUploadHub: React.FC<{ initialModule?: any }> = ({ initialModule
   const [fileHeaders, setFileHeaders] = useState<string[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
-  const [logs, setLogs] = useState<{ type: 'info' | 'success' | 'error'; message: string }[]>([]);
+  const [logs, setLogs] = useState<{ type: 'info' | 'success' | 'error'; message: string; inspection?: RowInspection }[]>([]);
   const [importResult, setImportResult] = useState<{ success: number; failed: number } | null>(null);
+  const [selectedInspection, setSelectedInspection] = useState<RowInspection | null>(null);
+  const [inspections, setInspections] = useState<Record<string, RowInspection>>({});
+  const [singleRowLoading, setSingleRowLoading] = useState<string | null>(null);
 
   const currentConfig = MODULE_CONFIGS[activeModule] || MODULE_CONFIGS['hotels'];
 
@@ -442,6 +471,453 @@ export const BulkUploadHub: React.FC<{ initialModule?: any }> = ({ initialModule
     setParsedRows(prev => prev.filter(r => r._id !== rowId));
   };
 
+  // Core Single Record Uploader: Works for both One-by-One and Bulk Processing
+  const uploadSingleRecord = async (
+    mod: ModuleType,
+    dataPayload: Record<string, any>,
+    headers: Record<string, string>
+  ): Promise<{
+    ok: boolean;
+    endpoint: string;
+    payload: any;
+    status: number;
+    data: any;
+    error?: string;
+    diagnosis: string;
+  }> => {
+    let endpoint = '';
+    let payload: any = null;
+
+    if (mod === 'leads') {
+      endpoint = `${API_BASE}/leads_create.php`;
+
+      // Parse follow_up_date (e.g., DD-MM-YYYY, DD/MM/YYYY, or YYYY-MM-DD)
+      let followUpFormatted: string | null = null;
+      if (dataPayload.follow_up_date) {
+        const rawDate = String(dataPayload.follow_up_date).trim();
+        if (/^(\d{1,2})[-\/](\d{1,2})[-\/](\d{4})$/.test(rawDate)) {
+          const parts = rawDate.split(/[-\/]/);
+          followUpFormatted = `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')} 10:00:00`;
+        } else {
+          followUpFormatted = rawDate;
+        }
+      }
+
+      payload = {
+        customer_name: dataPayload.customer_name,
+        contact_number: dataPayload.contact_number,
+        customer_phone: dataPayload.contact_number,
+        email: dataPayload.email || null,
+        customer_email: dataPayload.email || null,
+        source: dataPayload.customer_type || 'Direct Customer',
+        customer_type: dataPayload.customer_type || 'Direct Customer',
+        destinations: dataPayload.tour_description || null,
+        tour_description: dataPayload.tour_description || null,
+        notes: dataPayload.call_summary || 'Bulk imported enquiry',
+        call_summary: dataPayload.call_summary || 'Bulk imported enquiry',
+        follow_up_date: followUpFormatted,
+        status: 'New',
+        assigned_to: dataPayload.assigned_to || 'Admin'
+      };
+
+      try {
+        const res = await fetch(endpoint, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', ...headers },
+          body: JSON.stringify(payload)
+        });
+
+        const resData = await res.json().catch(() => ({}));
+        if (res.ok && (resData.success || resData.lead_id)) {
+          return {
+            ok: true,
+            endpoint,
+            payload,
+            status: res.status,
+            data: resData,
+            diagnosis: resData.message || `Lead #${resData.lead_id} successfully created in MySQL database.`
+          };
+        } else {
+          const failMsg = resData.details || resData.error || `HTTP ${res.status} Error from server.`;
+          return {
+            ok: false,
+            endpoint,
+            payload,
+            status: res.status,
+            data: resData,
+            error: failMsg,
+            diagnosis: `Rejected: ${failMsg}`
+          };
+        }
+      } catch (err: any) {
+        return {
+          ok: false,
+          endpoint,
+          payload,
+          status: 0,
+          data: null,
+          error: err.message,
+          diagnosis: `Network or Connection Error: ${err.message}. Backend did not respond.`
+        };
+      }
+    } else if (mod === 'sightseeing') {
+      endpoint = `${API_BASE}/api.php?table=sightseeings`;
+      payload = {
+        sightseeing_name: dataPayload.sightseeing_name,
+        sightseeing_code: dataPayload.sightseeing_code || `SIGHT-${Date.now().toString(36).toUpperCase()}`,
+        destination: dataPayload.destination,
+        category: dataPayload.category || 'City Tour',
+        sub_category: dataPayload.sub_category || '',
+        duration: dataPayload.duration || 'Half Day',
+        is_half_day: dataPayload.is_half_day === 'true' || dataPayload.is_half_day === '1',
+        is_full_day: dataPayload.is_full_day === 'true' || dataPayload.is_full_day === '1',
+        vehicle_required: dataPayload.vehicle_required === 'true' || dataPayload.vehicle_required === '1',
+        supplier_name: dataPayload.supplier_name || '',
+        supplier_cost: parseFloat(dataPayload.supplier_cost) || 0,
+        selling_cost: parseFloat(dataPayload.selling_cost) || 0,
+        adult_cost: parseFloat(dataPayload.adult_cost) || parseFloat(dataPayload.selling_cost) || 0,
+        child_cost: parseFloat(dataPayload.child_cost) || 0,
+        gst_included: dataPayload.gst_included === 'true' || dataPayload.gst_included === '1',
+        gst_percentage: parseFloat(dataPayload.gst_percentage) || 5,
+        description: dataPayload.description || '',
+        active_status: true
+      };
+
+      try {
+        const res = await fetch(endpoint, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', ...headers },
+          body: JSON.stringify(payload)
+        });
+        const resData = await res.json().catch(() => ({}));
+        if (res.ok) {
+          return {
+            ok: true,
+            endpoint,
+            payload,
+            status: res.status,
+            data: resData,
+            diagnosis: `Sightseeing "${dataPayload.sightseeing_name}" saved to MySQL.`
+          };
+        } else {
+          return {
+            ok: false,
+            endpoint,
+            payload,
+            status: res.status,
+            data: resData,
+            error: resData.error || `HTTP ${res.status}`,
+            diagnosis: resData.error || 'Server rejected sightseeing entry'
+          };
+        }
+      } catch (err: any) {
+        return {
+          ok: false,
+          endpoint,
+          payload,
+          status: 0,
+          data: null,
+          error: err.message,
+          diagnosis: `Network Error: ${err.message}`
+        };
+      }
+    } else if (mod === 'activities') {
+      endpoint = `${API_BASE}/api.php?table=activities`;
+      payload = {
+        activity_name: dataPayload.activity_name,
+        activity_code: dataPayload.activity_code || `ACT-${Date.now().toString(36).toUpperCase()}`,
+        destination: dataPayload.destination,
+        activity_category: dataPayload.activity_category || 'Adventure',
+        sub_category: dataPayload.sub_category || '',
+        duration: dataPayload.duration || '1 Hour',
+        activity_type: dataPayload.activity_type || 'Outdoor',
+        supplier_name: dataPayload.supplier_name || '',
+        supplier_cost: parseFloat(dataPayload.supplier_cost) || 0,
+        selling_cost: parseFloat(dataPayload.selling_cost) || 0,
+        adult_cost: parseFloat(dataPayload.adult_cost) || parseFloat(dataPayload.selling_cost) || 0,
+        child_cost: parseFloat(dataPayload.child_cost) || 0,
+        gst_included: dataPayload.gst_included === 'true' || dataPayload.gst_included === '1',
+        gst_percentage: parseFloat(dataPayload.gst_percentage) || 5,
+        description: dataPayload.description || '',
+        active_status: true
+      };
+
+      try {
+        const res = await fetch(endpoint, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', ...headers },
+          body: JSON.stringify(payload)
+        });
+        const resData = await res.json().catch(() => ({}));
+        if (res.ok) {
+          return {
+            ok: true,
+            endpoint,
+            payload,
+            status: res.status,
+            data: resData,
+            diagnosis: `Activity "${dataPayload.activity_name}" saved to MySQL.`
+          };
+        } else {
+          return {
+            ok: false,
+            endpoint,
+            payload,
+            status: res.status,
+            data: resData,
+            error: resData.error || `HTTP ${res.status}`,
+            diagnosis: resData.error || 'Server rejected activity entry'
+          };
+        }
+      } catch (err: any) {
+        return {
+          ok: false,
+          endpoint,
+          payload,
+          status: 0,
+          data: null,
+          error: err.message,
+          diagnosis: `Network Error: ${err.message}`
+        };
+      }
+    } else if (mod === 'hotels') {
+      endpoint = `${API_BASE}/api.php?table=hotels`;
+      payload = {
+        hotel_name: dataPayload.hotel_name,
+        hotel_code: dataPayload.hotel_code || `HOT-${Date.now().toString(36).toUpperCase()}`,
+        destination: dataPayload.destination,
+        star_rating: parseInt(dataPayload.star_rating) || 3,
+        address: dataPayload.address || '',
+        contact_number: dataPayload.contact_number || '',
+        email: dataPayload.email || '',
+        supplier_name: dataPayload.supplier_name || '',
+        active_status: true
+      };
+
+      try {
+        const res = await fetch(endpoint, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', ...headers },
+          body: JSON.stringify(payload)
+        });
+        const resData = await res.json().catch(() => ({}));
+        if (res.ok) {
+          return {
+            ok: true,
+            endpoint,
+            payload,
+            status: res.status,
+            data: resData,
+            diagnosis: `Hotel "${dataPayload.hotel_name}" saved to MySQL.`
+          };
+        } else {
+          return {
+            ok: false,
+            endpoint,
+            payload,
+            status: res.status,
+            data: resData,
+            error: resData.error || `HTTP ${res.status}`,
+            diagnosis: resData.error || 'Hotel insert error'
+          };
+        }
+      } catch (err: any) {
+        return {
+          ok: false,
+          endpoint,
+          payload,
+          status: 0,
+          data: null,
+          error: err.message,
+          diagnosis: `Network Error: ${err.message}`
+        };
+      }
+    } else if (mod === 'cabs') {
+      endpoint = `${API_BASE}/api.php?table=cab_contract_rates`;
+      payload = {
+        supplier_name: dataPayload.supplier_name,
+        vehicle_type: dataPayload.vehicle_type,
+        source_city: dataPayload.source_city,
+        destination_city: dataPayload.destination_city,
+        rate_model: dataPayload.rate_model || 'Per KM',
+        rate_per_km: parseFloat(dataPayload.rate_per_km) || 0,
+        min_km_per_day: parseFloat(dataPayload.min_km_per_day) || 300,
+        daily_rate: parseFloat(dataPayload.daily_rate) || 0,
+        block_circuit_cost: parseFloat(dataPayload.block_circuit_cost) || 0,
+        block_circuit_km: parseFloat(dataPayload.block_circuit_km) || 0,
+        block_circuit_nights: dataPayload.block_circuit_nights || '',
+        transfer_cost: parseFloat(dataPayload.transfer_cost) || 0,
+        driver_allowance: parseFloat(dataPayload.driver_allowance) || 300,
+        gst_included: dataPayload.gst_included === 'true' || dataPayload.gst_included === '1',
+        gst_percentage: parseFloat(dataPayload.gst_percentage) || 5,
+        markup_percentage: parseFloat(dataPayload.markup_percentage) || 10
+      };
+
+      try {
+        const res = await fetch(endpoint, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', ...headers },
+          body: JSON.stringify(payload)
+        });
+        const resData = await res.json().catch(() => ({}));
+        if (res.ok) {
+          return {
+            ok: true,
+            endpoint,
+            payload,
+            status: res.status,
+            data: resData,
+            diagnosis: `Cab rate for "${dataPayload.vehicle_type}" saved to MySQL.`
+          };
+        } else {
+          return {
+            ok: false,
+            endpoint,
+            payload,
+            status: res.status,
+            data: resData,
+            error: resData.error || `HTTP ${res.status}`,
+            diagnosis: resData.error || 'Cab rate insert error'
+          };
+        }
+      } catch (err: any) {
+        return {
+          ok: false,
+          endpoint,
+          payload,
+          status: 0,
+          data: null,
+          error: err.message,
+          diagnosis: `Network Error: ${err.message}`
+        };
+      }
+    } else {
+      // packages
+      endpoint = `${API_BASE}/api.php?table=packages`;
+      const pkgName = dataPayload.name || dataPayload.title || dataPayload.package_name || 'Imported Package';
+      payload = {
+        name: pkgName,
+        package_name: pkgName,
+        title: pkgName,
+        slug: dataPayload.slug || pkgName.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
+        price: parseFloat(dataPayload.price) || 0,
+        duration: dataPayload.duration || '3 Days / 2 Nights',
+        category: dataPayload.category || 'Domestic',
+        destinations: dataPayload.destinations || '',
+        highlights: dataPayload.highlights || '',
+        inclusions: dataPayload.inclusions || '',
+        exclusions: dataPayload.exclusions || '',
+        tagline: dataPayload.tagline || '',
+        is_active: 1
+      };
+
+      try {
+        const res = await fetch(endpoint, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', ...headers },
+          body: JSON.stringify(payload)
+        });
+        const resData = await res.json().catch(() => ({}));
+        if (res.ok) {
+          return {
+            ok: true,
+            endpoint,
+            payload,
+            status: res.status,
+            data: resData,
+            diagnosis: `Package "${pkgName}" saved to MySQL.`
+          };
+        } else {
+          return {
+            ok: false,
+            endpoint,
+            payload,
+            status: res.status,
+            data: resData,
+            error: resData.error || `HTTP ${res.status}`,
+            diagnosis: resData.error || 'Package insert error'
+          };
+        }
+      } catch (err: any) {
+        return {
+          ok: false,
+          endpoint,
+          payload,
+          status: 0,
+          data: null,
+          error: err.message,
+          diagnosis: `Network Error: ${err.message}`
+        };
+      }
+    }
+  };
+
+  // Upload a Single Row One-by-One to Test or Validate
+  const handleUploadSingleRow = async (row: Record<string, any>, idx: number) => {
+    setSingleRowLoading(row._id);
+    const authHeaders = await getAuthHeader();
+    const { _id, _status, _errors, ...dataPayload } = row;
+    const result = await uploadSingleRecord(activeModule, dataPayload, authHeaders);
+
+    const recordName = row.customer_name || row.hotel_name || row.sightseeing_name || row.activity_name || row.vehicle_type || row.name || `Record #${idx + 1}`;
+    const inspection: RowInspection = {
+      rowIndex: idx + 1,
+      recordName,
+      module: activeModule,
+      endpoint: result.endpoint,
+      payload: result.payload,
+      status: result.status,
+      ok: result.ok,
+      response: result.data,
+      diagnosis: result.diagnosis,
+      timestamp: new Date().toLocaleTimeString()
+    };
+
+    setInspections(prev => ({ ...prev, [row._id]: inspection }));
+
+    setParsedRows(prev => prev.map(r => {
+      if (r._id === row._id) {
+        return {
+          ...r,
+          _uploadStatus: result.ok ? 'success' : 'failed',
+          _uploadMsg: result.diagnosis
+        };
+      }
+      return r;
+    }));
+
+    if (result.ok) {
+      setLogs(prev => [
+        ...prev,
+        {
+          type: 'success',
+          message: `Row ${idx + 1} [${recordName}]: ✅ Passed (HTTP ${result.status}) — ${result.diagnosis}`,
+          inspection
+        }
+      ]);
+      toast({
+        title: 'Uploaded Successfully',
+        description: result.diagnosis
+      });
+    } else {
+      setLogs(prev => [
+        ...prev,
+        {
+          type: 'error',
+          message: `Row ${idx + 1} [${recordName}]: ❌ Failed (HTTP ${result.status}) — ${result.error || result.diagnosis}`,
+          inspection
+        }
+      ]);
+      toast({
+        title: 'Upload Failed',
+        description: result.error || result.diagnosis,
+        variant: 'destructive'
+      });
+    }
+
+    setSingleRowLoading(null);
+  };
+
   // Run Bulk Import Engine
   const handleExecuteImport = async () => {
     if (parsedRows.length === 0) return;
@@ -469,183 +945,65 @@ export const BulkUploadHub: React.FC<{ initialModule?: any }> = ({ initialModule
       const { _id, _status, _errors, ...dataPayload } = rawRow;
 
       try {
-        let ok = false;
-        let errMsg = '';
+        const result = await uploadSingleRecord(activeModule, dataPayload, authHeaders);
+        const recordName = dataPayload.customer_name || dataPayload.hotel_name || dataPayload.sightseeing_name || dataPayload.activity_name || dataPayload.vehicle_type || dataPayload.name || `Row ${i + 1}`;
 
-        if (activeModule === 'sightseeing') {
-          const payload = {
-            sightseeing_name: dataPayload.sightseeing_name,
-            sightseeing_code: dataPayload.sightseeing_code || `SIGHT-${Date.now().toString(36).toUpperCase()}`,
-            destination: dataPayload.destination,
-            category: dataPayload.category || 'City Tour',
-            sub_category: dataPayload.sub_category || '',
-            is_half_day: dataPayload.is_half_day === 'true' || dataPayload.is_half_day === '1',
-            is_full_day: dataPayload.is_full_day === 'true' || dataPayload.is_full_day === '1',
-            vehicle_required: dataPayload.vehicle_required === 'true' || dataPayload.vehicle_required === '1',
-            duration: dataPayload.duration || 'Half Day',
-            description: dataPayload.description || '',
-            supplier_name: dataPayload.supplier_name || '',
-            supplier_cost: parseFloat(dataPayload.supplier_cost) || 0,
-            selling_cost: parseFloat(dataPayload.selling_cost) || 0,
-            adult_cost: parseFloat(dataPayload.adult_cost) || parseFloat(dataPayload.selling_cost) || 0,
-            child_cost: parseFloat(dataPayload.child_cost) || 0,
-            gst_included: dataPayload.gst_included === 'true' || dataPayload.gst_included === '1',
-            gst_percentage: parseFloat(dataPayload.gst_percentage) || 5,
-            active_status: true
-          };
+        const inspection: RowInspection = {
+          rowIndex: i + 1,
+          recordName,
+          module: activeModule,
+          endpoint: result.endpoint,
+          payload: result.payload,
+          status: result.status,
+          ok: result.ok,
+          response: result.data,
+          diagnosis: result.diagnosis,
+          timestamp: new Date().toLocaleTimeString()
+        };
 
-          const res = await fetch(`${API_BASE}/api.php?table=sightseeings`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', ...authHeaders },
-            body: JSON.stringify(payload)
-          });
-          if (res.ok) ok = true;
-          else {
-            const errJson = await res.json().catch(() => ({}));
-            errMsg = errJson.error || 'Server insert error';
+        setInspections(prev => ({ ...prev, [rawRow._id]: inspection }));
+
+        setParsedRows(prev => prev.map(r => {
+          if (r._id === rawRow._id) {
+            return {
+              ...r,
+              _uploadStatus: result.ok ? 'success' : 'failed',
+              _uploadMsg: result.diagnosis
+            };
           }
-        } else if (activeModule === 'activities') {
-          const payload = {
-            activity_name: dataPayload.activity_name,
-            activity_code: dataPayload.activity_code || `ACT-${Date.now().toString(36).toUpperCase()}`,
-            destination: dataPayload.destination,
-            activity_category: dataPayload.activity_category || 'Adventure',
-            sub_category: dataPayload.sub_category || '',
-            duration: dataPayload.duration || '1 Hour',
-            activity_type: dataPayload.activity_type || 'Outdoor',
-            supplier_name: dataPayload.supplier_name || '',
-            supplier_cost: parseFloat(dataPayload.supplier_cost) || 0,
-            selling_cost: parseFloat(dataPayload.selling_cost) || 0,
-            adult_cost: parseFloat(dataPayload.adult_cost) || parseFloat(dataPayload.selling_cost) || 0,
-            child_cost: parseFloat(dataPayload.child_cost) || 0,
-            gst_included: dataPayload.gst_included === 'true' || dataPayload.gst_included === '1',
-            gst_percentage: parseFloat(dataPayload.gst_percentage) || 5,
-            description: dataPayload.description || '',
-            active_status: true
-          };
+          return r;
+        }));
 
-          const res = await fetch(`${API_BASE}/api.php?table=activities`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', ...authHeaders },
-            body: JSON.stringify(payload)
-          });
-          if (res.ok) ok = true;
-          else {
-            const errJson = await res.json().catch(() => ({}));
-            errMsg = errJson.error || 'Server insert error';
-          }
-        } else if (activeModule === 'hotels') {
-          const hotelPayload = {
-            hotel_name: dataPayload.hotel_name,
-            hotel_code: dataPayload.hotel_code || `HOT-${Date.now().toString(36).toUpperCase()}`,
-            destination: dataPayload.destination,
-            star_rating: parseInt(dataPayload.star_rating) || 3,
-            address: dataPayload.address || '',
-            contact_number: dataPayload.contact_number || '',
-            email: dataPayload.email || '',
-            supplier_name: dataPayload.supplier_name || '',
-            active_status: true
-          };
-
-          const res = await fetch(`${API_BASE}/api.php?table=hotels`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', ...authHeaders },
-            body: JSON.stringify(hotelPayload)
-          });
-
-          if (res.ok) {
-            ok = true;
-          } else {
-            const { error: sbErr } = await supabase.from('hotels' as any).insert([hotelPayload] as any);
-            if (!sbErr) ok = true;
-            else errMsg = sbErr.message;
-          }
-        } else if (activeModule === 'cabs') {
-          const cabPayload = {
-            supplier_name: dataPayload.supplier_name,
-            vehicle_type: dataPayload.vehicle_type,
-            source_city: dataPayload.source_city,
-            destination_city: dataPayload.destination_city,
-            rate_model: dataPayload.rate_model || 'Per KM',
-            rate_per_km: parseFloat(dataPayload.rate_per_km) || 0,
-            min_km_per_day: parseFloat(dataPayload.min_km_per_day) || 300,
-            daily_rate: parseFloat(dataPayload.daily_rate) || 0,
-            block_circuit_cost: parseFloat(dataPayload.block_circuit_cost) || 0,
-            block_circuit_km: parseFloat(dataPayload.block_circuit_km) || 0,
-            block_circuit_nights: dataPayload.block_circuit_nights || '',
-            transfer_cost: parseFloat(dataPayload.transfer_cost) || 0,
-            driver_allowance: parseFloat(dataPayload.driver_allowance) || 300,
-            gst_included: dataPayload.gst_included === 'true' || dataPayload.gst_included === '1',
-            gst_percentage: parseFloat(dataPayload.gst_percentage) || 5,
-            markup_percentage: parseFloat(dataPayload.markup_percentage) || 10
-          };
-
-          const res = await fetch(`${API_BASE}/api.php?table=cab_contract_rates`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', ...authHeaders },
-            body: JSON.stringify(cabPayload)
-          });
-          if (res.ok) ok = true;
-          else {
-            const errJson = await res.json().catch(() => ({}));
-            errMsg = errJson.error || 'Cab rate insert error';
-          }
-        } else if (activeModule === 'packages') {
-          const pkgName = dataPayload.name || dataPayload.title || dataPayload.package_name || 'Imported Package';
-          const pkgPayload = {
-            name: pkgName,
-            package_name: pkgName,
-            title: pkgName,
-            slug: dataPayload.slug || pkgName.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
-            price: parseFloat(dataPayload.price) || 0,
-            duration: dataPayload.duration || '3 Days / 2 Nights',
-            category: dataPayload.category || 'Domestic',
-            destinations: dataPayload.destinations || '',
-            highlights: dataPayload.highlights || '',
-            inclusions: dataPayload.inclusions || '',
-            exclusions: dataPayload.exclusions || '',
-            tagline: dataPayload.tagline || '',
-            is_active: 1
-          };
-
-          const res = await fetch(`${API_BASE}/api.php?table=packages`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', ...authHeaders },
-            body: JSON.stringify(pkgPayload)
-          });
-          if (res.ok) ok = true;
-          else {
-            const { error: sbErr } = await supabase.from('packages' as any).insert([pkgPayload] as any);
-            if (!sbErr) ok = true;
-            else errMsg = sbErr.message || 'Package insert failed';
-          }
-        } else if (activeModule === 'leads') {
-          const leadPayload = {
-            customer_name: dataPayload.customer_name,
-            contact_number: dataPayload.contact_number,
-            email: dataPayload.email || null,
-            customer_type: dataPayload.customer_type || 'Direct Customer',
-            tour_description: dataPayload.tour_description || null,
-            call_summary: dataPayload.call_summary || 'Bulk imported enquiry',
-            status: 'New',
-            assigned_to: dataPayload.assigned_to || 'Admin'
-          };
-
-          const { error: sbErr } = await supabase.from('leads').insert([leadPayload] as any);
-          if (!sbErr) ok = true;
-          else errMsg = sbErr.message;
-        }
-
-        if (ok) {
+        if (result.ok) {
           successCount++;
-          setLogs(prev => [...prev, { type: 'success', message: `Row ${i + 1}: Imported ${dataPayload.hotel_name || dataPayload.sightseeing_name || dataPayload.activity_name || dataPayload.vehicle_type || dataPayload.customer_name || 'Record'}` }]);
+          setLogs(prev => [
+            ...prev,
+            {
+              type: 'success',
+              message: `Row ${i + 1} [${recordName}]: ✅ Passed (HTTP ${result.status}) — ${result.diagnosis}`,
+              inspection
+            }
+          ]);
         } else {
           failCount++;
-          setLogs(prev => [...prev, { type: 'error', message: `Row ${i + 1} Failed: ${errMsg}` }]);
+          setLogs(prev => [
+            ...prev,
+            {
+              type: 'error',
+              message: `Row ${i + 1} [${recordName}]: ❌ Failed (HTTP ${result.status}) — ${result.error || result.diagnosis}`,
+              inspection
+            }
+          ]);
         }
       } catch (err: any) {
         failCount++;
-        setLogs(prev => [...prev, { type: 'error', message: `Row ${i + 1} Error: ${err.message}` }]);
+        setLogs(prev => [
+          ...prev,
+          {
+            type: 'error',
+            message: `Row ${i + 1} Error: ${err.message}`
+          }
+        ]);
       }
 
       setUploadProgress(Math.round(((i + 1) / rowsToImport.length) * 100));
@@ -872,15 +1230,23 @@ export const BulkUploadHub: React.FC<{ initialModule?: any }> = ({ initialModule
                               {col.label} {col.required && <span className="text-amber-400">*</span>}
                             </th>
                           ))}
-                          <th className="p-2.5 w-10 text-center">Action</th>
+                          <th className="p-2.5 w-28 text-center">Actions</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-slate-800 bg-[#161d2f] text-slate-100">
                         {parsedRows.map((row, idx) => (
                           <tr key={row._id} className={row._status === 'error' ? 'bg-rose-500/10' : 'hover:bg-slate-800/50'}>
                             <td className="p-2 text-center text-slate-400 font-mono text-[11px]">{idx + 1}</td>
-                            <td className="p-2 text-center">
-                              {row._status === 'valid' ? (
+                            <td className="p-2 text-center whitespace-nowrap">
+                              {row._uploadStatus === 'success' ? (
+                                <Badge variant="outline" className="bg-emerald-500/20 text-emerald-300 border-emerald-500/30 text-[9px] font-black">
+                                  Passed
+                                </Badge>
+                              ) : row._uploadStatus === 'failed' ? (
+                                <Badge variant="outline" className="bg-rose-500/20 text-rose-300 border-rose-500/30 text-[9px] font-black" title={row._uploadMsg || 'Failed'}>
+                                  Failed
+                                </Badge>
+                              ) : row._status === 'valid' ? (
                                 <Badge variant="outline" className="bg-emerald-500/20 text-emerald-300 border-emerald-500/30 text-[9px] font-black">
                                   Valid
                                 </Badge>
@@ -909,15 +1275,67 @@ export const BulkUploadHub: React.FC<{ initialModule?: any }> = ({ initialModule
                                 </td>
                               );
                             })}
-                            <td className="p-1 text-center">
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => handleDeleteRow(row._id)}
-                                className="h-7 w-7 p-0 text-slate-400 hover:text-rose-500"
-                              >
-                                <XCircle className="w-4 h-4" />
-                              </Button>
+                            <td className="p-1 text-center whitespace-nowrap">
+                              <div className="flex items-center justify-center gap-1">
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  disabled={isProcessing || singleRowLoading === row._id}
+                                  onClick={() => handleUploadSingleRow(row, idx)}
+                                  className={`h-7 w-7 p-0 ${
+                                    row._uploadStatus === 'success'
+                                      ? 'text-emerald-400 hover:text-emerald-300 hover:bg-emerald-500/10'
+                                      : row._uploadStatus === 'failed'
+                                      ? 'text-rose-400 hover:text-rose-300 hover:bg-rose-500/10'
+                                      : 'text-amber-400 hover:text-amber-300 hover:bg-amber-500/10'
+                                  }`}
+                                  title="Upload this row one-by-one to test"
+                                >
+                                  {singleRowLoading === row._id ? (
+                                    <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                                  ) : (
+                                    <Zap className="w-3.5 h-3.5" />
+                                  )}
+                                </Button>
+
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => {
+                                    if (inspections[row._id]) {
+                                      setSelectedInspection(inspections[row._id]);
+                                    } else {
+                                      const { _id, _status, _errors, _uploadStatus, _uploadMsg, ...dataPayload } = row;
+                                      setSelectedInspection({
+                                        rowIndex: idx + 1,
+                                        recordName: row.customer_name || row.hotel_name || row.sightseeing_name || row.activity_name || row.vehicle_type || `Record #${idx + 1}`,
+                                        module: activeModule,
+                                        endpoint: activeModule === 'leads' ? `${API_BASE}/leads_create.php` : `${API_BASE}/api.php?table=${currentConfig.endpointTable}`,
+                                        payload: dataPayload,
+                                        status: 0,
+                                        ok: false,
+                                        response: null,
+                                        diagnosis: 'Pending transmission. Click the ⚡ button on this row or "Start Bulk Import" to execute.',
+                                        timestamp: 'Not Transmitted Yet'
+                                      });
+                                    }
+                                  }}
+                                  className="h-7 w-7 p-0 text-cyan-400 hover:text-cyan-300 hover:bg-cyan-500/10"
+                                  title="Inspect Outbound Payload & Server Response"
+                                >
+                                  <Eye className="w-3.5 h-3.5" />
+                                </Button>
+
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => handleDeleteRow(row._id)}
+                                  className="h-7 w-7 p-0 text-slate-400 hover:text-rose-500 hover:bg-rose-500/10"
+                                  title="Remove row"
+                                >
+                                  <Trash2 className="w-3.5 h-3.5" />
+                                </Button>
+                              </div>
                             </td>
                           </tr>
                         ))}
@@ -947,19 +1365,31 @@ export const BulkUploadHub: React.FC<{ initialModule?: any }> = ({ initialModule
                         <span>Server Response Audit Console</span>
                         <span>{logs.filter(l => l.type === 'success').length} Passed · {logs.filter(l => l.type === 'error').length} Failed</span>
                       </div>
-                      <div className="bg-slate-950 p-3 rounded-xl border border-slate-800 max-h-44 overflow-y-auto space-y-1 font-mono text-[11px] shadow-inner">
+                      <div className="bg-slate-950 p-3 rounded-xl border border-slate-800 max-h-52 overflow-y-auto space-y-1.5 font-mono text-[11px] shadow-inner">
                         {logs.map((log, lIdx) => (
                           <div
                             key={lIdx}
-                            className={
-                              log.type === 'success' ? 'text-emerald-400 font-bold flex items-center gap-1.5' :
-                              log.type === 'error' ? 'text-rose-400 font-bold flex items-center gap-1.5' :
-                              'text-slate-400'
-                            }
+                            className="flex items-center justify-between py-1 border-b border-slate-900/60 last:border-b-0 gap-2"
                           >
-                            {log.type === 'success' && <CheckCircle2 className="w-3 h-3 text-emerald-400 shrink-0" />}
-                            {log.type === 'error' && <XCircle className="w-3 h-3 text-rose-400 shrink-0" />}
-                            <span>{log.message}</span>
+                            <div className={
+                              log.type === 'success' ? 'text-emerald-400 font-semibold flex items-center gap-1.5 truncate' :
+                              log.type === 'error' ? 'text-rose-400 font-semibold flex items-center gap-1.5 truncate' :
+                              'text-slate-400 truncate'
+                            }>
+                              {log.type === 'success' && <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />}
+                              {log.type === 'error' && <XCircle className="w-3.5 h-3.5 text-rose-400 shrink-0" />}
+                              <span className="truncate">{log.message}</span>
+                            </div>
+                            {log.inspection && (
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => setSelectedInspection(log.inspection!)}
+                                className="h-6 px-2 text-[10px] font-bold text-amber-400 hover:text-amber-300 hover:bg-amber-500/10 shrink-0"
+                              >
+                                <Eye className="w-3 h-3 mr-1" /> Inspect
+                              </Button>
+                            )}
                           </div>
                         ))}
                       </div>
@@ -993,6 +1423,90 @@ export const BulkUploadHub: React.FC<{ initialModule?: any }> = ({ initialModule
           </Tabs>
         </CardContent>
       </Card>
+
+      {/* 🔍 PAYLOAD & RESPONSE INSPECTOR MODAL */}
+      <Dialog open={!!selectedInspection} onOpenChange={open => !open && setSelectedInspection(null)}>
+        <DialogContent className="max-w-2xl bg-[#0f1420] border-slate-800 text-slate-100 p-6 rounded-2xl max-h-[85vh] overflow-y-auto">
+          <DialogHeader>
+            <div className="flex items-center justify-between pr-6">
+              <DialogTitle className="text-base font-extrabold text-white flex items-center gap-2">
+                <span>Row #{selectedInspection?.rowIndex}</span>
+                <span className="text-amber-400">[{selectedInspection?.recordName}]</span>
+              </DialogTitle>
+              <Badge
+                variant="outline"
+                className={
+                  selectedInspection?.ok
+                    ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30 text-xs font-bold'
+                    : 'bg-rose-500/20 text-rose-300 border-rose-500/30 text-xs font-bold'
+                }
+              >
+                {selectedInspection?.status ? `HTTP ${selectedInspection?.status}` : 'Connection Issue'} · {selectedInspection?.ok ? 'SUCCESS' : 'FAILED'}
+              </Badge>
+            </div>
+            <DialogDescription className="text-xs text-slate-400 font-mono pt-1">
+              Target: <span className="text-cyan-400 font-bold">{selectedInspection?.endpoint}</span> · Time: {selectedInspection?.timestamp}
+            </DialogDescription>
+          </DialogHeader>
+
+          {/* Real-world Diagnosis Card */}
+          <div className={`p-3.5 rounded-xl border text-xs font-medium flex items-start gap-2.5 ${
+            selectedInspection?.ok
+              ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-200'
+              : 'bg-rose-500/10 border-rose-500/30 text-rose-200'
+          }`}>
+            {selectedInspection?.ok ? (
+              <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+            ) : (
+              <AlertTriangle className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" />
+            )}
+            <div>
+              <div className="font-bold text-[11px] uppercase tracking-wider mb-0.5">
+                {selectedInspection?.ok ? 'Real-World Outcome' : 'Reason for Failure / Rejection'}
+              </div>
+              <div>{selectedInspection?.diagnosis}</div>
+            </div>
+          </div>
+
+          {/* Request vs Response Tabs */}
+          <Tabs defaultValue="payload" className="w-full pt-2">
+            <TabsList className="grid w-full grid-cols-2 bg-slate-900 border border-slate-800">
+              <TabsTrigger value="payload" className="text-xs font-bold data-[state=active]:bg-amber-500 data-[state=active]:text-slate-950">
+                1. Outbound JSON (Sent by UI)
+              </TabsTrigger>
+              <TabsTrigger value="response" className="text-xs font-bold data-[state=active]:bg-amber-500 data-[state=active]:text-slate-950">
+                2. Inbound Server Response
+              </TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="payload" className="mt-3">
+              <div className="bg-slate-950 p-3.5 rounded-xl border border-slate-800 text-xs font-mono text-emerald-300 overflow-x-auto max-h-60 relative">
+                <pre>{JSON.stringify(selectedInspection?.payload, null, 2)}</pre>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="response" className="mt-3">
+              <div className="bg-slate-950 p-3.5 rounded-xl border border-slate-800 text-xs font-mono text-cyan-300 overflow-x-auto max-h-60 relative">
+                <pre>{JSON.stringify(selectedInspection?.response, null, 2)}</pre>
+              </div>
+            </TabsContent>
+          </Tabs>
+
+          <DialogFooter className="sm:justify-between pt-2">
+            <div className="text-[11px] text-slate-500">
+              Directly processed via MySQL backend engine.
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setSelectedInspection(null)}
+              className="border-slate-700 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs"
+            >
+              Close
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

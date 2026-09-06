@@ -7,6 +7,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Upload, AlertTriangle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { leadService } from '@/services/leadService';
 
 interface CSVImportProps {
   isOpen: boolean;
@@ -87,70 +88,39 @@ export const CSVImport: React.FC<CSVImportProps> = ({ isOpen, onClose, onImportC
         throw new Error('User not authenticated');
       }
       
-      // Get existing lead ids to avoid conflicts and generate consecutive sequence numbers
-      const date = new Date();
-      const year = date.getFullYear();
-      const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-      const monthAbbr = monthNames[date.getMonth()];
-      const monthNum = String(date.getMonth() + 1).padStart(2, '0');
-      const prefix1 = `LD${year}-${monthAbbr}-`;
-      const prefix2 = `LD${year}-${monthNum}-`;
+      // Insert leads via PHP MySQL backend (avoids Supabase RLS and syncs with CRM)
+      let successCount = 0;
+      const failedRecords: string[] = [];
 
-      const { data: existingDbLeads } = await supabase
-        .from('leads')
-        .select('lead_id')
-        .like('lead_id', `LD${year}-%`);
-
-      let maxSeq = 0;
-      (existingDbLeads || []).forEach(l => {
-        const lId = l.lead_id;
-        if (lId) {
-          if (lId.startsWith(prefix1)) {
-            const seqStr = lId.substring(prefix1.length);
-            const seq = parseInt(seqStr, 10);
-            if (!isNaN(seq) && seq > maxSeq) {
-              maxSeq = seq;
-            }
-          } else if (lId.startsWith(prefix2)) {
-            const seqStr = lId.substring(prefix2.length);
-            const seq = parseInt(seqStr, 10);
-            if (!isNaN(seq) && seq > maxSeq) {
-              maxSeq = seq;
-            }
-          }
+      for (let i = 0; i < records.length; i++) {
+        const record = records[i];
+        try {
+          await leadService.createLead({
+            customerName: record.customer_name || record.name || 'Imported Lead',
+            customerPhone: record.customer_phone || record.phone || record.contact_number || '',
+            customerEmail: record.customer_email || record.email || '',
+            source: record.source || record.customer_type || 'CSV Import',
+            destinations: record.destinations || record.destination || record.packageName || '',
+            status: record.status || 'New',
+            notes: record.notes || record.remarks || '',
+            packagePrice: parseFloat(record.package_price) || 0,
+            packageCost: parseFloat(record.package_cost) || 0,
+            duration: record.duration || '',
+            packageName: record.package_name || record.destinations || 'Imported Package'
+          } as any);
+          successCount++;
+        } catch (err: any) {
+          failedRecords.push(`Row ${i + 1}: ${err.message || 'Failed to save'}`);
         }
-      });
-      
-      // Prepare records for insertion
-      const baseTime = Date.now();
-      const leadsToInsert = records.map((record, index) => {
-        const nextSeq = String(maxSeq + 1 + index).padStart(5, '0');
-        const generatedLeadId = `${prefix1}${nextSeq}`;
-        const newId = `lead_${baseTime}_${index}_${Math.random().toString(36).substring(2, 9)}`;
+      }
 
-        return {
-          ...record,
-          id: newId,
-          lead_id: generatedLeadId,
-          lead_created_date: new Date().toISOString(),
-          lead_purchased_date: new Date().toISOString().split('T')[0],
-          user_id: user.id,
-          created_by: user.id,
-          status: 'New',
-          next_call_time: new Date().toISOString() // Default to current time
-        };
-      });
-      
-      // Insert leads
-      const { error } = await supabase
-        .from('leads')
-        .insert(leadsToInsert);
-      
-      if (error) throw error;
-      
+      if (failedRecords.length > 0 && successCount === 0) {
+        throw new Error(failedRecords.join('; '));
+      }
+
       toast({
         title: 'Success',
-        description: `Successfully imported ${records.length} leads`
+        description: `Successfully imported ${successCount} leads to CRM${failedRecords.length > 0 ? ` (${failedRecords.length} failed)` : ''}`
       });
       
       onImportComplete();

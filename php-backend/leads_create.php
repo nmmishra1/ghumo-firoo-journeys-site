@@ -35,12 +35,44 @@ $input = json_decode(file_get_contents('php://input'), true) ?? $_POST ?? [];
 $customerName = trim($input['customer_name'] ?? $input['name'] ?? $input['full_name'] ?? '');
 $phone = trim($input['customer_phone'] ?? $input['phone'] ?? $input['whatsapp_number'] ?? $input['contact_number'] ?? '');
 $email = trim($input['customer_email'] ?? $input['email'] ?? '');
-$destinations = trim($input['destinations'] ?? $input['destination'] ?? $input['packageName'] ?? '');
+$destinations = trim($input['destinations'] ?? $input['destination'] ?? $input['tour_description'] ?? $input['packageName'] ?? '');
+$source = trim($input['source'] ?? $input['customer_type'] ?? $input['customerType'] ?? 'Direct Customer');
+$notes = trim($input['notes'] ?? $input['remarks'] ?? $input['call_summary'] ?? $input['discussion_notes'] ?? $input['discussionNotes'] ?? '');
 
+// 1. Strict Validation with Logical Real-World Feedback
 if ($customerName === '') {
     http_response_code(400);
-    echo json_encode(['error' => 'Customer name is required']);
+    echo json_encode([
+        'success' => false,
+        'error'   => 'Validation Error',
+        'details' => 'Customer name is required and cannot be blank.'
+    ]);
     exit;
+}
+
+$cleanDigits = preg_replace('/[^0-9]/', '', $phone);
+if (empty($phone) || strlen($cleanDigits) < 8) {
+    http_response_code(400);
+    echo json_encode([
+        'success' => false,
+        'error'   => 'Validation Error',
+        'details' => "Invalid contact number '{$phone}'. A valid mobile number with at least 8–10 digits is required."
+    ]);
+    exit;
+}
+
+// 2. Parse Follow-up Date (DD-MM-YYYY, DD/MM/YYYY, or YYYY-MM-DD)
+$followUpDate = null;
+$rawFup = trim($input['follow_up_date'] ?? $input['followUpDate'] ?? '');
+if (!empty($rawFup)) {
+    if (preg_match('/^(\d{1,2})[-\/](\d{1,2})[-\/](\d{4})$/', $rawFup, $mDate)) {
+        $followUpDate = sprintf('%04d-%02d-%02d 10:00:00', (int)$mDate[3], (int)$mDate[2], (int)$mDate[1]);
+    } else {
+        $ts = strtotime($rawFup);
+        if ($ts !== false && $ts > 0) {
+            $followUpDate = date('Y-m-d H:i:s', $ts);
+        }
+    }
 }
 
 // Compute duration & number_of_nights automatically if missing
@@ -68,11 +100,10 @@ try {
     }
 
     if ($assignedTo) {
-        $chk2 = $pdo->prepare("SELECT id FROM profiles WHERE id = ? LIMIT 1");
-        $chk2->execute([$assignedTo]);
-        if (!$chk2->fetchColumn()) {
-            $assignedTo = null;
-        }
+        $chk2 = $pdo->prepare("SELECT id FROM profiles WHERE id = ? OR full_name = ? OR email = ? OR role = ? LIMIT 1");
+        $chk2->execute([$assignedTo, $assignedTo, $assignedTo, strtolower($assignedTo)]);
+        $matched = $chk2->fetchColumn();
+        $assignedTo = $matched ?: null;
     }
 } catch (Throwable $pe) {
     $createdBy = null;
@@ -98,15 +129,13 @@ try {
         } catch (Exception $e) {}
     }
 
-    $notes = trim($input['notes'] ?? $input['remarks'] ?? $input['discussion_notes'] ?? $input['discussionNotes'] ?? '');
-
     $stmt = $pdo->prepare(
         'INSERT INTO leads
             (customer_name, customer_phone, customer_email, customer_home_city, whatsapp_number,
              source, source_detail, destination_city_id, destinations,
              trip_start_date, trip_end_date, adult_count, child_count, infant_count,
-             budget, duration, number_of_nights, hotel_category, notes, discussion_notes, status, assigned_to, created_by)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, "New", ?, ?)'
+             budget, duration, number_of_nights, hotel_category, notes, discussion_notes, follow_up_date, status, assigned_to, created_by)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, "New", ?, ?)'
     );
 
     $stmt->execute([
@@ -115,8 +144,8 @@ try {
         !empty($email) ? $email : null,
         $input['customer_home_city'] ?? $input['city'] ?? null,
         !empty($phone) ? $phone : null,
-        $input['source'] ?? 'manual',
-        $input['source_detail'] ?? null,
+        $source,
+        $input['source_detail'] ?? "Source: {$source}",
         $input['destination_city_id'] ?? null,
         $destinations ?: null,
         $input['trip_start_date'] ?? $input['travelMonth'] ?? null,
@@ -130,6 +159,7 @@ try {
         $input['hotel_category'] ?? $input['hotelCategory'] ?? null,
         !empty($notes) ? $notes : null,
         !empty($notes) ? $notes : null,
+        $followUpDate,
         $assignedTo,
         $createdBy
     ]);
@@ -153,14 +183,23 @@ try {
     echo json_encode([
         'success'              => true,
         'lead_id'              => $newLeadId,
+        'customer_name'        => $customerName,
+        'source'               => $source,
+        'destinations'         => $destinations ?: 'General Enquiry',
+        'follow_up_date'       => $followUpDate,
+        'assigned_to'          => $assignedTo,
         'is_repeat_customer'   => $isRepeatCustomer,
         'previous_trips_count' => $previousTripCount,
         'message'              => $isRepeatCustomer 
-            ? "Repeat Customer Inquiry linked! Found {$previousTripCount} previous trip inquiry." 
-            : "Lead created successfully"
+            ? "Repeat Customer Linked! Lead #{$newLeadId} created for {$customerName} ({$previousTripCount} previous trips found)."
+            : "Lead #{$newLeadId} registered successfully in CRM for {$customerName} (Source: {$source})."
     ]);
 
 } catch (PDOException $e) {
     http_response_code(500);
-    echo json_encode(['error' => 'Failed to create lead in database: ' . $e->getMessage()]);
+    echo json_encode([
+        'success' => false,
+        'error'   => 'Database Error',
+        'details' => 'Failed to create lead in MySQL: ' . $e->getMessage()
+    ]);
 }

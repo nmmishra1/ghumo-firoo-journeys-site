@@ -89,13 +89,21 @@ $customerPhone = preg_replace('/[^0-9+]/', '', trim($input['customer_phone'] ?? 
 
 if (empty($customerName)) {
     http_response_code(400);
-    echo json_encode(['error' => 'Customer Name is required']);
+    echo json_encode([
+        'success' => false,
+        'error'   => 'Validation Error',
+        'details' => 'Customer Name is required'
+    ]);
     exit;
 }
 
 if (empty($customerPhone) || strlen(preg_replace('/[^0-9]/', '', $customerPhone)) < 8) {
     http_response_code(400);
-    echo json_encode(['error' => 'Valid Phone Number with at least 8 digits is required']);
+    echo json_encode([
+        'success' => false,
+        'error'   => 'Validation Error',
+        'details' => 'Valid Phone Number with at least 8 to 10 digits is required'
+    ]);
     exit;
 }
 
