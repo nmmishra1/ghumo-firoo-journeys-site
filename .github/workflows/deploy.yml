@@ -33,6 +33,19 @@ jobs:
           npm run build
           node scripts/copy-backend.mjs
 
+      - name: 🔐 Generate Production Database Config
+        run: |
+          cat << 'EOF' > dist/php-backend/db_config.php
+          <?php
+          return [
+              'MYSQL_HOST'     => 'localhost',
+              'MYSQL_DATABASE' => 'a17511nd_Ghumofiroo',
+              'MYSQL_USER'     => 'a17511nd_Ghumofiroo_live',
+              'MYSQL_PASSWORD' => '${{ secrets.MYSQL_PASSWORD }}',
+          ];
+          EOF
+          cp dist/php-backend/db_config.php dist/public_html/php-backend/db_config.php || true
+
       - name: 📂 Deploy Everything to cPanel
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
