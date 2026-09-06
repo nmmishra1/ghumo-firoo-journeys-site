@@ -90,15 +90,29 @@ try {
         }
     }
 
-    // 2. Fetch Payments
+    // 2. Fetch Payments & Calculate Totals
     $payments = [];
+    $totalPaid = 0.0;
     if (tableExists($pdo, 'payments')) {
         try {
             $payStmt = $pdo->prepare('SELECT * FROM payments WHERE lead_id = ? ORDER BY payment_date DESC, id DESC');
             $payStmt->execute([$leadId]);
             $payments = $payStmt->fetchAll(PDO::FETCH_ASSOC);
+            foreach ($payments as $p) {
+                $st = strtolower(trim($p['status'] ?? ''));
+                if (in_array($st, ['success', 'completed', 'verified', 'paid']) || empty($st)) {
+                    $totalPaid += (float)($p['amount_received'] ?? 0);
+                }
+            }
         } catch (Exception $e) {}
     }
+
+    $packagePrice = (float)($lead['package_price'] ?? $lead['expected_booking_value'] ?? 0);
+    $isBookingConfirmed = strtolower(trim($lead['status'] ?? '')) === 'booking confirmed';
+    $advancePaidVerified = $isBookingConfirmed || ($packagePrice > 0 && $totalPaid >= (0.5 * $packagePrice)) || ($totalPaid > 0 && $packagePrice <= 0);
+
+    $lead['total_paid_amount'] = $totalPaid;
+    $lead['advance_paid_verified'] = $advancePaidVerified;
 
     // 3. Fetch Documents
     $documents = [];
@@ -120,12 +134,40 @@ try {
         } catch (Exception $e) {}
     }
 
+    // 5. Fetch Multi-Option Proposals
+    $proposals = [];
+    if (tableExists($pdo, 'proposals')) {
+        try {
+            $propStmt = $pdo->prepare('SELECT * FROM proposals WHERE lead_id = ? ORDER BY option_number ASC, id ASC');
+            $propStmt->execute([$leadId]);
+            $rawProposals = $propStmt->fetchAll(PDO::FETCH_ASSOC);
+            foreach ($rawProposals as $rp) {
+                if (!empty($rp['itinerary_data']) && is_string($rp['itinerary_data'])) {
+                    $decoded = json_decode($rp['itinerary_data'], true);
+                    if (json_last_error() === JSON_ERROR_NONE) {
+                        $rp['itinerary_data'] = $decoded;
+                    }
+                }
+                if (!empty($rp['payment_schedule']) && is_string($rp['payment_schedule'])) {
+                    $decodedSched = json_decode($rp['payment_schedule'], true);
+                    if (json_last_error() === JSON_ERROR_NONE) {
+                        $rp['payment_schedule'] = $decodedSched;
+                    }
+                }
+                $proposals[] = $rp;
+            }
+        } catch (Exception $e) {}
+    }
+
     echo json_encode([
-        'success'        => true,
-        'lead'           => $lead,
-        'payments'       => $payments ?: [],
-        'documents'      => $documents ?: [],
-        'followups'      => $followups ?: []
+        'success'               => true,
+        'lead'                  => $lead,
+        'total_paid_amount'     => $totalPaid,
+        'advance_paid_verified' => $advancePaidVerified,
+        'proposals'             => $proposals,
+        'payments'              => $payments ?: [],
+        'documents'             => $documents ?: [],
+        'followups'             => $followups ?: []
     ]);
 
 } catch (Throwable $e) {

@@ -1,4 +1,5 @@
 import { auditLogger } from '@/services/auditLogger';
+import { supabase } from '@/integrations/supabase/client';
 
 export interface CrmApiMeta {
   action: string;
@@ -11,6 +12,7 @@ export interface CrmApiMeta {
 /**
  * Standardized CRM API Fetcher
  * - Appends descriptive & verifiable `action` query parameter for DevTools Network tracking
+ * - Automatically injects Supabase Bearer Auth token when available
  * - Emits clear, styled DevTools Console logs
  * - Catches HTTP 429 Rate Limiting
  * - Syncs with persistent CRM Audit Log trail
@@ -33,7 +35,24 @@ export async function crmFetch(
   const startTime = performance.now();
 
   try {
-    const response = await fetch(finalUrl, options);
+    const headers = new Headers(options.headers || {});
+    if (!headers.has('Authorization')) {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session?.access_token) {
+          headers.set('Authorization', `Bearer ${session.access_token}`);
+        }
+      } catch (e) {
+        // Ignore session retrieval error in offline / local environments
+      }
+    }
+
+    const finalOptions: RequestInit = {
+      ...options,
+      headers
+    };
+
+    const response = await fetch(finalUrl, finalOptions);
     const duration = Math.round(performance.now() - startTime);
 
     // Rate limiting check

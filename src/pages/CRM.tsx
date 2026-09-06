@@ -566,6 +566,16 @@ const CRM = () => {
             setTripHistory(data.trip_history || []);
             setIsRepeatCustomer(Boolean(data.is_repeat_customer));
 
+            if (data.lead) {
+              setActiveLead((prev: any) => ({
+                ...(prev || {}),
+                ...data.lead,
+                total_paid_amount: data.total_paid_amount ?? data.lead.total_paid_amount,
+                advance_paid_verified: data.advance_paid_verified ?? data.lead.advance_paid_verified,
+                proposals: data.proposals || []
+              }));
+            }
+
             if (data.recommendations) {
               setRecommendedHotels(data.recommendations.hotels || []);
               setRecommendedActivities(data.recommendations.activities || []);
@@ -5151,11 +5161,12 @@ Ghumo Firoo Travels`
           )}
 
           {/* TOUR ITINERARY BUILDER LIVE */}
-          {currentSection === 'itinerary' && activeLead && (
+          {['itinerary', 'brochure', 'voucher', 'invoice'].includes(currentSection) && activeLead && (
             <Suspense fallback={<NavyGoldLoader />}>
               <ItineraryBuilder 
                 leadId={leadId || ''}
                 activeLead={activeLead}
+                initialDocView={currentSection !== 'itinerary' ? (currentSection as any) : undefined}
                 onBack={() => navigate(`/crm/leads/${activeLead.id}`)}
                 userProfile={userProfile}
                 onOpenCsvImport={() => setCsvImportOpen(true)}
@@ -5169,7 +5180,7 @@ Ghumo Firoo Travels`
             <Suspense fallback={<NavyGoldLoader />}>
               <LeadProposalsWorkspace 
                 activeLead={activeLead || { id: leadId || 19, customer_name: 'Navin Mishra', destination: 'Haridwar' }}
-                onOpenBuilderForProposal={(propId) => navigate(`/crm/leads/${leadId || 19}/itinerary`)}
+                onOpenBuilderForProposal={(propId) => navigate(`/crm/leads/${leadId || 19}/itinerary?proposalId=${propId}`)}
                 onBackToLeads={() => navigate('/crm/leads')}
               />
             </Suspense>

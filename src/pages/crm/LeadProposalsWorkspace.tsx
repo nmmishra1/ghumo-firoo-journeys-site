@@ -8,6 +8,8 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 
+import { crmFetch } from '@/utils/crmApi';
+
 interface ProposalOption {
   id: number | string;
   option_number: number;
@@ -110,7 +112,11 @@ export default function LeadProposalsWorkspace({ activeLead, onOpenBuilderForPro
         return;
       }
 
-      const res = await fetch(`${apiBase}/proposals.php?lead_id=${activeLead.id}`);
+      const res = await crmFetch(
+        `${apiBase}/proposals.php?lead_id=${activeLead.id}`,
+        { method: 'GET' },
+        { action: 'list_proposals', module: 'Leads', itemName: `Lead #${activeLead.id}` }
+      );
       if (res.ok) {
         const data = await res.json();
         if (data.status === 'success' && data.data && data.data.length > 0) {
@@ -137,34 +143,98 @@ export default function LeadProposalsWorkspace({ activeLead, onOpenBuilderForPro
 
   const handleCreateNewOption = async () => {
     const nextNum = proposals.length + 1;
-    const newOpt: ProposalOption = {
-      id: `opt_${Date.now()}`,
+    const estimatedPrice = 75000 + (nextNum - 1) * 12000;
+    const pax = Number(activeLead?.number_of_pax) || 2;
+    const perPerson = Math.round(estimatedPrice / (pax > 0 ? pax : 1));
+    const tokenAmount = Math.round(estimatedPrice * 0.2);
+    const advanceAmount = Math.round(estimatedPrice * 0.3);
+    const balanceAmount = estimatedPrice - tokenAmount - advanceAmount;
+
+    const newOptData: any = {
+      lead_id: activeLead?.id || 1,
       option_number: nextNum,
       option_name: `Option ${nextNum}`,
       title: `${activeLead?.destination || 'Trip'} - Customized Option ${nextNum}`,
-      total_price: 75520,
-      price_per_person: 37760,
+      total_price: estimatedPrice,
+      price_per_person: perPerson,
       currency: 'INR',
       status: 'Draft',
-      expiry_date: '2026-08-30',
+      expiry_date: new Date(Date.now() + 7 * 86400000).toISOString().split('T')[0],
       star_category: 4,
       cover_image: 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=800&q=80',
       payment_schedule: [
-        { label: 'Booking Amount (Token)', amount: 15104, due_date: '2026-08-16' },
-        { label: '1st Installment (50% Advance)', amount: 22656, due_date: '2026-08-20' },
-        { label: 'Final Balance', amount: 37760, due_date: '2026-09-01' }
-      ]
+        { label: 'Booking Amount (Token)', amount: tokenAmount, due_date: new Date(Date.now() + 2 * 86400000).toISOString().split('T')[0] },
+        { label: '1st Installment (50% Advance)', amount: advanceAmount, due_date: new Date(Date.now() + 5 * 86400000).toISOString().split('T')[0] },
+        { label: 'Final Balance', amount: balanceAmount, due_date: new Date(Date.now() + 15 * 86400000).toISOString().split('T')[0] }
+      ],
+      itinerary_data: {
+        destination: activeLead?.destination || 'Destination',
+        duration: activeLead?.duration || '4 Nights / 5 Days',
+        days: []
+      }
     };
 
-    setProposals(prev => [newOpt, ...prev]);
-    setSelectedProposalId(newOpt.id);
+    if (activeLead?.id) {
+      try {
+        const res = await crmFetch(`${apiBase}/proposals.php`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(newOptData)
+        }, { action: 'create_proposal_option', module: 'Leads', itemName: `Option ${nextNum}` });
+
+        if (res.ok) {
+          const resData = await res.json();
+          if (resData.status === 'success' && resData.data) {
+            setProposals(prev => [resData.data, ...prev]);
+            setSelectedProposalId(resData.data.id);
+            toast({
+              title: `Proposal Option ${nextNum} Created!`,
+              description: `Saved to MySQL database for ${activeLead?.customer_name}.`,
+            });
+            return;
+          }
+        }
+      } catch (err) {
+        console.error('Failed to save proposal to backend:', err);
+      }
+    }
+
+    const fallbackOpt: ProposalOption = {
+      id: `opt_${Date.now()}`,
+      ...newOptData
+    };
+    setProposals(prev => [fallbackOpt, ...prev]);
+    setSelectedProposalId(fallbackOpt.id);
     toast({
       title: `Proposal Option ${nextNum} Created!`,
-      description: `New option added to ${activeLead?.customer_name}'s proposal grid.`,
+      description: `New option added to ${activeLead?.customer_name || 'guest'}'s proposal grid.`,
     });
   };
 
   const handleAcceptProposal = async (proposalId: number | string) => {
+    try {
+      const res = await crmFetch(`${apiBase}/proposals.php?id=${proposalId}&action=accept`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'accept', lead_id: activeLead?.id })
+      }, { action: 'accept_proposal', module: 'Leads', recordId: String(proposalId) });
+
+      if (res.ok) {
+        setProposals(prev => prev.map(p => {
+          if (p.id === proposalId) return { ...p, status: 'Accepted' };
+          if (p.status !== 'Expired') return { ...p, status: 'Archived' };
+          return p;
+        }));
+        toast({
+          title: '🎉 Proposal Accepted & Lead Confirmed!',
+          description: `Option marked as accepted in MySQL. Lead status updated to Booking Confirmed!`,
+        });
+        return;
+      }
+    } catch (err) {
+      console.error('Failed to accept proposal via API:', err);
+    }
+
     setProposals(prev => prev.map(p => {
       if (p.id === proposalId) return { ...p, status: 'Accepted' };
       if (p.status !== 'Expired') return { ...p, status: 'Archived' };

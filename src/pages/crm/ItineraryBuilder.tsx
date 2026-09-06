@@ -18,8 +18,10 @@ import {
   Trash2, Edit, Plus, ChevronUp, ChevronDown, Copy, Check, Eye, EyeOff, 
   FileText, Send, Share2, Phone, Mail, MessageCircle, RefreshCw, 
   Sparkle, Download, Upload, Loader2, ArrowLeft, ArrowRight, MoreVertical, Layout, 
-  Settings, Printer, HelpCircle, Search, MapPin, Calendar, IndianRupee, BarChart3, X, UserPlus
+  Settings, Printer, HelpCircle, Search, MapPin, Calendar, IndianRupee, BarChart3, X, UserPlus, ShieldAlert
 } from 'lucide-react';
+import { VoucherInvoiceModal } from '@/components/crm/VoucherInvoiceModal';
+import { crmFetch } from '@/utils/crmApi';
 
 interface ItineraryBuilderProps {
   leadId: string;
@@ -1961,11 +1963,66 @@ export default function ItineraryBuilder({
   const [proposalOpen, setProposalOpen] = useState(false);
   const [voucherOpen, setVoucherOpen] = useState(false);
   const [invoiceOpen, setInvoiceOpen] = useState(false);
+  const [docModalOpen, setDocModalOpen] = useState(false);
+  const [docModalTab, setDocModalTab] = useState<'invoice' | 'hotel' | 'cab'>('invoice');
+  const [isVoucherGatedOpen, setIsVoucherGatedOpen] = useState(false);
+
+  // Multi-Option Proposals State
+  const [proposalsList, setProposalsList] = useState<any[]>([]);
+  const [selectedProposalId, setSelectedProposalId] = useState<string | number | null>(() => {
+    if (typeof window !== 'undefined') {
+      const urlParam = new URLSearchParams(window.location.search).get('proposalId');
+      return urlParam || null;
+    }
+    return null;
+  });
+
+  // Fetch Proposals for this lead
+  useEffect(() => {
+    const fetchLeadProposals = async () => {
+      const currentLeadId = leadId || activeLead?.id;
+      if (!currentLeadId) return;
+      try {
+        const res = await crmFetch(`${apiBase}/proposals.php?lead_id=${currentLeadId}`, {}, {
+          action: 'list_proposals',
+          module: 'Leads',
+          itemName: `Lead #${currentLeadId}`
+        });
+        if (res.ok) {
+          const pData = await res.json();
+          if (pData.status === 'success' && Array.isArray(pData.data)) {
+            setProposalsList(pData.data);
+            const urlPropId = new URLSearchParams(window.location.search).get('proposalId');
+            if (urlPropId) {
+              const match = pData.data.find((p: any) => String(p.id) === String(urlPropId));
+              if (match) {
+                setSelectedProposalId(match.id);
+                if (match.itinerary_data?.days && Array.isArray(match.itinerary_data.days) && match.itinerary_data.days.length > 0) {
+                  setDays(match.itinerary_data.days);
+                }
+              }
+            }
+          }
+        }
+      } catch (err) {
+        console.warn('Failed to load proposals for lead in builder:', err);
+      }
+    };
+    fetchLeadProposals();
+  }, [leadId, activeLead?.id]);
 
   useEffect(() => {
-    if (initialDocView === 'brochure') setProposalOpen(true);
-    if (initialDocView === 'voucher') setVoucherOpen(true);
-    if (initialDocView === 'invoice') setInvoiceOpen(true);
+    if (initialDocView === 'brochure') {
+      window.open(`/crm/leads/${leadId || activeLead?.id}/brochure`, '_blank');
+    }
+    if (initialDocView === 'voucher') {
+      setDocModalTab('hotel');
+      setDocModalOpen(true);
+    }
+    if (initialDocView === 'invoice') {
+      setDocModalTab('invoice');
+      setDocModalOpen(true);
+    }
   }, [initialDocView]);
 
   // Normalize lead destination cities
@@ -2164,46 +2221,7 @@ export default function ItineraryBuilder({
   const [lastSavedDaysStr, setLastSavedDaysStr] = useState<string>('');
   const isDirty = lastSavedDaysStr !== '' && lastSavedDaysStr !== JSON.stringify(days);
 
-  const handleOpenVoucher = () => {
-    if (isDirty) {
-      toast({
-        title: 'Unsaved Changes Detected',
-        description: 'Please click "Save & Sync" in the header to save your changes before generating operational service vouchers.',
-        variant: 'destructive'
-      });
-      return;
-    }
-
-    if (!isFinancialConfirmed && activeLead?.status !== 'Booking Confirmed') {
-      toast({
-        title: '💳 Stage 2 Alert: Advance Deposit Required',
-        description: 'Customer has not yet paid the 50% advance deposit. Generate & Share the GST Proforma Invoice (Stage 2) first, or mark lead as Booking Confirmed.',
-        variant: 'default'
-      });
-    }
-
-    if (!isInventoryConfirmed) {
-      toast({
-        title: '🛌 Stage 3 Alert: Supplier Confirmation Ref Missing',
-        description: 'Please enter Hotel Confirmation Ref # or Driver details in day cards for complete operational voucher validation.',
-        variant: 'default'
-      });
-    }
-
-    window.open(`/crm/leads/${leadId || activeLead?.id}/voucher`, '_blank');
-  };
-
-  const handleOpenInvoice = () => {
-    if (isDirty) {
-      toast({
-        title: 'Unsaved Changes Detected',
-        description: 'Please click "Save & Sync" in the header to save your changes before generating proforma invoices.',
-        variant: 'destructive'
-      });
-      return;
-    }
-    window.open(`/crm/leads/${leadId || activeLead?.id}/invoice`, '_blank');
-  };
+  // Document generation handlers are defined below after finalPackagePrice calculation
 
   // Visual Hotel Picker States
   const [hotelPickerOpen, setHotelPickerOpen] = useState(false);
@@ -3752,6 +3770,28 @@ export default function ItineraryBuilder({
       const data = await saveItineraryDraft({ payload });
       if (!data.success) throw new Error(data.error || 'Failed to save itinerary');
 
+      // Sync active proposal option if one is selected
+      if (selectedProposalId) {
+        try {
+          await crmFetch(`${apiBase}/proposals.php?id=${selectedProposalId}&action=update`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              action: 'update',
+              total_price: payload.final_cost,
+              price_per_person: payload.cost_per_person,
+              itinerary_data: {
+                destination: activeLead?.destination || itinerary?.destination,
+                duration: `${days.length - 1} Nights / ${days.length} Days`,
+                days: days
+              }
+            })
+          }, { action: 'update_proposal_option', module: 'Leads', recordId: String(selectedProposalId) });
+        } catch (pErr) {
+          console.warn('Failed to sync proposal option in backend:', pErr);
+        }
+      }
+
       setLastSavedDaysStr(JSON.stringify(days));
       toast({
         title: 'Success',
@@ -4309,7 +4349,13 @@ export default function ItineraryBuilder({
   const profitMarginTotal = finalPackagePrice - totalSupplierCost;
 
   // --- 4-Tier Dual-Key Confirmation Lock Computation ---
-  const isFinancialConfirmed = (activeLead?.paid_amount || activeLead?.advance_paid || 0) >= (finalPackagePrice * 0.5) || activeLead?.status === 'Booking Confirmed';
+  const totalPaidRecorded = Number(activeLead?.total_paid_amount || activeLead?.paid_amount || activeLead?.advance_paid || 0);
+  const advanceDepositRequired = Math.round(finalPackagePrice * 0.5);
+  const isFinancialConfirmed = Boolean(
+    activeLead?.advance_paid_verified ||
+    activeLead?.status === 'Booking Confirmed' ||
+    (advanceDepositRequired > 0 && totalPaidRecorded >= advanceDepositRequired)
+  );
   
   const allHotelBlocks: any[] = [];
   const allTransportBlocks: any[] = [];
@@ -4333,6 +4379,115 @@ export default function ItineraryBuilder({
     : isFinancialConfirmed
     ? 'Stage 3: Operations Lock (Awaiting Hotel Ref #s) 🔵'
     : 'Stage 2: Advance Invoice Pending (50% Deposit) 🟡';
+
+  const handleOpenVoucher = () => {
+    if (isDirty) {
+      toast({
+        title: 'Unsaved Changes Detected',
+        description: 'Please click "Save & Sync" in the header to save your changes before generating operational service vouchers.',
+        variant: 'destructive'
+      });
+      return;
+    }
+
+    if (!isFinancialConfirmed) {
+      setIsVoucherGatedOpen(true);
+      return;
+    }
+
+    setDocModalTab('hotel');
+    setDocModalOpen(true);
+  };
+
+  const handleOpenInvoice = () => {
+    if (isDirty) {
+      toast({
+        title: 'Unsaved Changes Detected',
+        description: 'Please click "Save & Sync" in the header to save your changes before generating proforma invoices.',
+        variant: 'destructive'
+      });
+      return;
+    }
+    setDocModalTab('invoice');
+    setDocModalOpen(true);
+  };
+
+  const handleSwitchProposalOption = (propId: string) => {
+    if (!propId) {
+      setSelectedProposalId(null);
+      syncItineraryStateOnly();
+      toast({ title: 'Default Itinerary Loaded', description: 'Switched to primary itinerary.' });
+      return;
+    }
+    const match = proposalsList.find(p => String(p.id) === String(propId));
+    if (match) {
+      setSelectedProposalId(match.id);
+      if (match.itinerary_data?.days && Array.isArray(match.itinerary_data.days) && match.itinerary_data.days.length > 0) {
+        setDays(match.itinerary_data.days);
+        setLastSavedDaysStr(JSON.stringify(match.itinerary_data.days));
+      }
+      toast({
+        title: `${match.option_name || 'Option'} Loaded`,
+        description: `Loaded ${match.title || match.option_name} (₹${Number(match.total_price || 0).toLocaleString('en-IN')}) into Visual Builder.`
+      });
+    }
+  };
+
+  const handleSaveAsNewOption = async () => {
+    const currentLeadId = leadId || activeLead?.id;
+    if (!currentLeadId) {
+      toast({ title: 'Lead ID missing', description: 'Cannot save option without a lead.', variant: 'destructive' });
+      return;
+    }
+    const nextNum = proposalsList.length + 1;
+    const optionName = prompt(`Enter Option Name:`, `Option ${nextNum}`);
+    if (!optionName) return;
+
+    const newOptData = {
+      lead_id: currentLeadId,
+      option_number: nextNum,
+      option_name: optionName,
+      title: `${activeLead?.destination || itinerary?.destination || 'Trip'} - ${optionName}`,
+      total_price: finalPackagePrice,
+      price_per_person: Math.round(finalPackagePrice / (Number(itinerary?.adult_count || activeLead?.number_of_pax) || 2)),
+      currency: 'INR',
+      status: 'Draft',
+      expiry_date: new Date(Date.now() + 7 * 86400000).toISOString().split('T')[0],
+      star_category: 4,
+      itinerary_data: {
+        destination: activeLead?.destination || itinerary?.destination,
+        duration: `${days.length - 1} Nights / ${days.length} Days`,
+        days: days
+      },
+      payment_schedule: [
+        { label: 'Booking Amount (Token)', amount: Math.round(finalPackagePrice * 0.2), due_date: new Date(Date.now() + 2 * 86400000).toISOString().split('T')[0] },
+        { label: '1st Installment (50% Advance)', amount: Math.round(finalPackagePrice * 0.3), due_date: new Date(Date.now() + 5 * 86400000).toISOString().split('T')[0] },
+        { label: 'Final Balance', amount: Math.round(finalPackagePrice * 0.5), due_date: new Date(Date.now() + 15 * 86400000).toISOString().split('T')[0] }
+      ]
+    };
+
+    try {
+      const res = await crmFetch(`${apiBase}/proposals.php`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newOptData)
+      }, { action: 'create_proposal_option', module: 'Leads', itemName: optionName });
+
+      if (res.ok) {
+        const resData = await res.json();
+        if (resData.status === 'success' && resData.data) {
+          setProposalsList(prev => [...prev, resData.data]);
+          setSelectedProposalId(resData.data.id);
+          toast({
+            title: `🎉 ${optionName} Saved!`,
+            description: `Saved as Proposal Option #${nextNum} in MySQL.`
+          });
+        }
+      }
+    } catch (err) {
+      console.error('Failed to create proposal option:', err);
+    }
+  };
 
   // Visual Card Picker Action handlers
   const handleAddExcursionToDay = (item: any) => {
@@ -4648,6 +4803,33 @@ export default function ItineraryBuilder({
               }`} title="Key 2: Inventory Lock (Manual Hotel Confirmation Ref # & Driver Details)">
                 🛌 Supplier Lock: {isInventoryConfirmed ? 'Confirmed' : 'Ref # Needed'}
               </span>
+            </div>
+
+            {/* Multi-Option Proposal Dropdown & Actions */}
+            <div className="hidden sm:flex items-center gap-1.5 border-l border-[#C9A25A]/20 pl-3">
+              <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Option:</span>
+              <select
+                value={selectedProposalId ? String(selectedProposalId) : ''}
+                onChange={(e) => handleSwitchProposalOption(e.target.value)}
+                className="bg-slate-900 border border-[#C9A25A]/40 text-amber-300 font-bold text-xs rounded-lg px-2 py-1 outline-none max-w-[180px] truncate"
+                title="Select proposal quote option for this pax"
+              >
+                <option value="">Default Itinerary</option>
+                {proposalsList.map(p => (
+                  <option key={p.id} value={p.id}>
+                    {p.option_name || `Option ${p.option_number}`}: ₹{Number(p.total_price || 0).toLocaleString('en-IN')} {p.status === 'Accepted' ? '⭐' : ''}
+                  </option>
+                ))}
+              </select>
+
+              <button
+                type="button"
+                onClick={handleSaveAsNewOption}
+                className="bg-[#C9A25A]/15 hover:bg-[#C9A25A]/25 text-[#C9A25A] border border-[#C9A25A]/30 text-[10px] font-black uppercase tracking-wider rounded-lg px-2 py-1 flex items-center gap-1 shrink-0 cursor-pointer"
+                title="Save this itinerary snapshot as a new proposal option"
+              >
+                <Plus className="w-3 h-3 stroke-[3]" /> + Option
+              </button>
             </div>
           </div>
 
@@ -6759,6 +6941,84 @@ export default function ItineraryBuilder({
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Advance Payment Gating Alert Dialog */}
+      <Dialog open={isVoucherGatedOpen} onOpenChange={setIsVoucherGatedOpen}>
+        <DialogContent className="max-w-md bg-slate-900 border border-slate-800 text-white shadow-2xl text-left">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-base font-bold text-amber-400 font-montserrat">
+              <Shield className="w-5 h-5 text-amber-400" />
+              Advance Deposit Verification Required (50%)
+            </DialogTitle>
+            <DialogDescription className="text-slate-400 text-xs mt-1">
+              Operational service vouchers (Hotel vouchers & Cab driver passes) cannot be released until the 50% advance deposit is recorded or authorized.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-2 text-xs">
+            <div className="flex justify-between text-slate-400">
+              <span>Total Package Cost:</span>
+              <strong className="text-white font-mono">₹{finalPackagePrice.toLocaleString('en-IN')}</strong>
+            </div>
+            <div className="flex justify-between text-[#C9A25A]">
+              <span>Required Advance (50%):</span>
+              <strong className="font-mono">₹{Math.round(finalPackagePrice * 0.5).toLocaleString('en-IN')}</strong>
+            </div>
+            <div className="flex justify-between text-emerald-400">
+              <span>Recorded Paid Amount:</span>
+              <strong className="font-mono">₹{Number(activeLead?.total_paid_amount || activeLead?.paid_amount || 0).toLocaleString('en-IN')}</strong>
+            </div>
+            <div className="flex justify-between text-rose-400 border-t border-slate-800 pt-1.5 font-bold">
+              <span>Advance Balance Pending:</span>
+              <span className="font-mono">
+                ₹{Math.max(0, Math.round(finalPackagePrice * 0.5) - Number(activeLead?.total_paid_amount || activeLead?.paid_amount || 0)).toLocaleString('en-IN')}
+              </span>
+            </div>
+          </div>
+
+          <DialogFooter className="flex flex-col sm:flex-row gap-2 mt-2">
+            <Button
+              type="button"
+              onClick={() => {
+                setIsVoucherGatedOpen(false);
+                setDocModalTab('invoice');
+                setDocModalOpen(true);
+              }}
+              className="bg-gradient-to-r from-[#C9A25A] to-[#D4AF37] text-[#0B1026] font-bold text-xs h-9 px-4 rounded-xl flex items-center gap-1.5 cursor-pointer"
+            >
+              <FileText className="w-4 h-4" /> Share Proforma Invoice
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => {
+                setIsVoucherGatedOpen(false);
+                setDocModalTab('hotel');
+                setDocModalOpen(true);
+              }}
+              className="border-slate-700 hover:bg-slate-800 text-slate-300 text-xs h-9 rounded-xl cursor-pointer"
+            >
+              Authorize Staff Override
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Travel Document Suite Modal */}
+      {docModalOpen && (
+        <VoucherInvoiceModal
+          isOpen={docModalOpen}
+          onClose={() => setDocModalOpen(false)}
+          lead={activeLead}
+          itinerary={{
+            ...itinerary,
+            days: days,
+            total_price: finalPackagePrice,
+            title: itinerary?.title || activeLead?.destination
+          }}
+          initialTab={docModalTab}
+        />
+      )}
     </div>
     </div>
   );
