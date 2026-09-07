@@ -173,7 +173,7 @@ const EnhancedBrochureDownload: React.FC<EnhancedBrochureDownloadProps> = ({
   };
 
   const getCacheKey = () => {
-    const schemaVersion = 'v11';
+    const schemaVersion = 'v12';
     const s = JSON.stringify({ 
       v: schemaVersion, 
       packageDetails, 
@@ -324,7 +324,7 @@ const EnhancedBrochureDownload: React.FC<EnhancedBrochureDownloadProps> = ({
     return null;
   };
 
-  const generatePdfBase64 = async (): Promise<string> => {
+  const generatePdfBase64 = async (leadInfo?: { name?: string; phone?: string }): Promise<string> => {
     const officialPdf = getOfficialBrochureUrl();
     if (officialPdf) {
       try {
@@ -345,8 +345,11 @@ const EnhancedBrochureDownload: React.FC<EnhancedBrochureDownloadProps> = ({
       }
     }
 
+    const guestName = leadInfo?.name || watchedName || '';
+    const guestPhone = leadInfo?.phone || watchedPhone || '';
+
     const container = document.createElement('div');
-    container.innerHTML = generatePagedBrochureContent();
+    container.innerHTML = generatePagedBrochureContent(guestName, guestPhone);
     container.style.position = 'fixed';
     container.style.left = '-9999px';
     container.style.top = '0';
@@ -421,7 +424,7 @@ const EnhancedBrochureDownload: React.FC<EnhancedBrochureDownloadProps> = ({
       });
 
       // 1. Silent PDF Generation or Official Brochure Attachment
-      const base64Pdf = await generatePdfBase64();
+      const base64Pdf = await generatePdfBase64({ name: data.name, phone: data.phone });
       if (abortRef.current) return;
 
       const officialPdf = getOfficialBrochureUrl();
@@ -571,7 +574,7 @@ const EnhancedBrochureDownload: React.FC<EnhancedBrochureDownloadProps> = ({
     return String(v ?? '');
   };
 
-  const generatePagedBrochureContent = () => {
+  const generatePagedBrochureContent = (guestName?: string, guestPhone?: string) => {
     const a4w = 794; 
     const a4h = 1123; 
     
@@ -625,10 +628,25 @@ const EnhancedBrochureDownload: React.FC<EnhancedBrochureDownloadProps> = ({
       coverBg = `${origin}/brochure-assets/cover_kutch.jpg`;
     }
 
-    const rawTitle = packageDetails.title || 'RANN UTSAV & WHITE DESERT FLAGSHIP';
-    let coverMainTitle = rawTitle.replace(/\s*\([^)]*\)/g, '').trim().toUpperCase();
-    if (coverMainTitle.includes('RANN UTSAV') && !coverMainTitle.includes('FLAGSHIP')) {
-      coverMainTitle = 'RANN UTSAV & WHITE DESERT FLAGSHIP';
+    const displayGuestName = guestName?.trim() || watchedName?.trim() || 'Valued Guest';
+    const displayGuestPhone = guestPhone?.trim() || watchedPhone?.trim() || '';
+
+    // Title formatting strictly replicating Image 1 (CULTURE KUTCH benchmark - 2 clean lines, large font, zero parentheses)
+    const titleLower = (packageDetails.title || '').toLowerCase();
+    let coverMainTitle = 'CULTURE<br/>KUTCH';
+    if (titleLower.includes('culture') && titleLower.includes('kutch')) {
+      coverMainTitle = 'CULTURE<br/>KUTCH';
+    } else if (titleLower.includes('rann') || titleLower.includes('kutch') || titleLower.includes('dhordo')) {
+      coverMainTitle = 'CULTURE<br/>KUTCH';
+    } else {
+      const cleaned = (packageDetails.title || '').replace(/\s*\([^)]*\)/g, '').trim().toUpperCase();
+      const words = cleaned.split(' ');
+      if (words.length > 2) {
+        const mid = Math.ceil(words.length / 2);
+        coverMainTitle = `${words.slice(0, mid).join(' ')}<br/>${words.slice(mid).join(' ')}`;
+      } else {
+        coverMainTitle = cleaned;
+      }
     }
 
     const durLower = (packageDetails.duration || '').toLowerCase();
@@ -849,15 +867,53 @@ const EnhancedBrochureDownload: React.FC<EnhancedBrochureDownloadProps> = ({
         }
         .cover-main-title {
           font-family: 'Cinzel', serif;
-          font-size: 42px;
+          font-size: 56px;
           font-weight: 900;
           color: #ffffff;
           text-shadow: 0 4px 20px rgba(11, 29, 58, 0.85), 0 2px 6px rgba(0,0,0,0.7);
-          letter-spacing: 3.5px;
-          line-height: 1.1;
+          letter-spacing: 5px;
+          line-height: 1.05;
           margin-bottom: 16px;
           text-align: center;
-          max-width: 680px;
+          max-width: 720px;
+        }
+        .cover-guest-plaque {
+          position: absolute;
+          bottom: 58px;
+          left: 36px;
+          background: rgba(11, 29, 58, 0.90);
+          backdrop-filter: blur(12px);
+          border: 1.5px solid #c9a25a;
+          border-radius: 10px;
+          padding: 10px 18px;
+          box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+          z-index: 10;
+          max-width: 320px;
+          text-align: left;
+        }
+        .guest-plaque-label {
+          font-size: 8px;
+          font-weight: 800;
+          color: #d4af37;
+          text-transform: uppercase;
+          letter-spacing: 1.5px;
+          margin-bottom: 3px;
+        }
+        .guest-plaque-name {
+          font-family: 'Cinzel', serif;
+          font-size: 14px;
+          font-weight: 800;
+          color: #ffffff;
+          letter-spacing: 0.8px;
+          line-height: 1.25;
+          text-shadow: 0 1px 4px rgba(0,0,0,0.5);
+        }
+        .guest-plaque-phone {
+          font-size: 9.5px;
+          font-weight: 700;
+          color: #cbd5e1;
+          margin-top: 3px;
+          letter-spacing: 0.5px;
         }
         .cover-duration-badge {
           display: inline-block;
@@ -1208,6 +1264,13 @@ const EnhancedBrochureDownload: React.FC<EnhancedBrochureDownloadProps> = ({
           </div>
         </div>
 
+        <!-- Bespoke Client Personalization Plaque (Bottom-Left Corner) -->
+        <div class="cover-guest-plaque">
+          <div class="guest-plaque-label">✨ PREPARED EXCLUSIVELY FOR</div>
+          <div class="guest-plaque-name">${displayGuestName}</div>
+          ${displayGuestPhone ? `<div class="guest-plaque-phone">📞 ${displayGuestPhone}</div>` : ''}
+        </div>
+
         <div class="cover-bottom-bar">
           <div>📞 +91 9910987264 / 9870229792</div>
           <div>✉️ booking@ghumofiroo.com</div>
@@ -1243,7 +1306,7 @@ const EnhancedBrochureDownload: React.FC<EnhancedBrochureDownloadProps> = ({
             <div class="quote-spec-header">
               <div>
                 <div class="quote-ref-badge">🏛️ CONFIRMED TRAVEL SPECIFICATIONS</div>
-                <div style="font-size: 9px; color: #cbd5e1; margin-top: 2px;">Proposal Ref: GFQ-${quoteRef} • Valid For 15 Days • Private Tour</div>
+                <div style="font-size: 9px; color: #cbd5e1; margin-top: 2px;">Proposal Ref: GFQ-${quoteRef} • Valid For 15 Days • Personalized for ${displayGuestName}</div>
               </div>
               <div style="text-align: right;">
                 <div style="font-size: 8.5px; text-transform: uppercase; letter-spacing: 1px; color: #cbd5e1; font-weight: 700;">Total Package Cost</div>
