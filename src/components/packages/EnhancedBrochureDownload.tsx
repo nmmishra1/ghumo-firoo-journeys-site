@@ -37,12 +37,9 @@ const leadSchema = z.object({
   phone: z.string().refine((val) => validateIndianPhone(val), { message: PHONE_ERROR_MSG }),
   email: z.string().email({ message: "Please enter a valid email address." }).min(1, { message: "Email is required." }),
   city: z.string().min(2, { message: "City must be at least 2 characters." }),
-  travelMonth: z.string().min(1, { message: "Please select your travel month." }),
-  numberOfTravelers: z.string().refine((val) => {
-    const num = Number(val);
-    return !isNaN(num) && num >= 1 && num <= 99;
-  }, { message: "Number of travelers must be at least 1." }),
-  budget: z.string().min(1, { message: "Please select your budget range." })
+  travelMonth: z.string().optional(),
+  numberOfTravelers: z.string().optional(),
+  budget: z.string().optional()
 });
 
 type LeadFormData = z.infer<typeof leadSchema>;
@@ -127,11 +124,21 @@ const EnhancedBrochureDownload: React.FC<EnhancedBrochureDownloadProps> = ({
     return () => { abortRef.current = true; };
   }, []);
 
+  const defaultTravelMonth = travelDate 
+    ? new Date(travelDate).toLocaleString('en-US', { month: 'long', year: 'numeric' }) 
+    : getNext12Months()[0];
+  const defaultBudget = totalPrice 
+    ? `₹${Number(String(totalPrice).replace(/[^\d]/g, '')).toLocaleString('en-IN')}` 
+    : '₹25,000–50,000';
+
   const { register, handleSubmit, formState: { errors }, reset, watch, setValue } = useForm<LeadFormData>({
     resolver: zodResolver(leadSchema),
     mode: 'onChange',
     defaultValues: {
-      numberOfTravelers: String(passengersCount || 2)
+      numberOfTravelers: String(passengersCount || 2),
+      travelMonth: defaultTravelMonth,
+      budget: defaultBudget,
+      city: ''
     }
   });
 
@@ -139,7 +146,18 @@ const EnhancedBrochureDownload: React.FC<EnhancedBrochureDownloadProps> = ({
     if (passengersCount) {
       setValue('numberOfTravelers', String(passengersCount));
     }
-  }, [passengersCount, setValue]);
+    if (totalPrice) {
+      setValue('budget', `₹${Number(String(totalPrice).replace(/[^\d]/g, '')).toLocaleString('en-IN')}`);
+    }
+    if (travelDate) {
+      try {
+        const d = new Date(travelDate);
+        if (!isNaN(d.getTime())) {
+          setValue('travelMonth', d.toLocaleString('en-US', { month: 'long', year: 'numeric' }));
+        }
+      } catch {}
+    }
+  }, [passengersCount, totalPrice, travelDate, setValue]);
 
   const watchedName = watch("name");
   const watchedPhone = watch("phone");
@@ -155,7 +173,7 @@ const EnhancedBrochureDownload: React.FC<EnhancedBrochureDownloadProps> = ({
   };
 
   const getCacheKey = () => {
-    const schemaVersion = 'v8';
+    const schemaVersion = 'v9';
     const s = JSON.stringify({ 
       v: schemaVersion, 
       packageDetails, 
@@ -552,25 +570,20 @@ const EnhancedBrochureDownload: React.FC<EnhancedBrochureDownloadProps> = ({
     }
     return String(v ?? '');
   };
-
   const generatePagedBrochureContent = () => {
     const a4w = 794; 
     const a4h = 1123; 
     
-    // Chunk itinerary for pagination
-    const daysPerPage = 3; // Fewer days per page for better layout
+    // Chunk itinerary for pagination (2 days per page for readability and elegance)
+    const daysPerPage = 2;
     const itineraryChunks = [];
     for (let i = 0; i < packageDetails.itinerary.length; i += daysPerPage) {
       itineraryChunks.push(packageDetails.itinerary.slice(i, i + daysPerPage));
     }
     
-    const primaryColor = '#ea580c'; // Vibrant Orange
-    const secondaryColor = '#0f172a'; // Luxury Navy
-    const accentColor = '#D4AF37'; // Luminous Gold
-    const white = '#ffffff';
-
-    const bgImage = selectBrochureHeroImage();
-    const brandLogo = '/Ghumo_Firoo.png';
+    const origin = typeof window !== 'undefined' ? window.location.origin : '';
+    const logoImg = `${origin}/ghumo-firoo-logo.png`;
+    const iconImg = `${origin}/ghumo-firoo-icon.png`;
 
     const effectivePax = passengersCount || Number(watchedNumberOfTravelers) || 2;
     const effectiveAdults = adultsCount || effectivePax;
@@ -613,461 +626,776 @@ const EnhancedBrochureDownload: React.FC<EnhancedBrochureDownloadProps> = ({
     const quoteRef = Math.floor(100000 + Math.random() * 900000);
     const quoteDate = new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
 
+    let coverBg = selectBrochureHeroImage();
+    const destLower = (destination || packageDetails.title || '').toLowerCase();
+    if (destLower.includes('rann') || destLower.includes('kutch') || destLower.includes('gujarat') || destLower.includes('dhordo')) {
+      coverBg = `${origin}/brochure-assets/cover_kutch.jpg`;
+    }
+
+    const totalPages = 2 + itineraryChunks.length + 1;
+
+    const getItineraryDayImage = (day: any, idx: number) => {
+      if (day.image && day.image.startsWith('http')) return day.image;
+      if (day.image && day.image.startsWith('/')) return `${origin}${day.image}`;
+      if (destLower.includes('rann') || destLower.includes('kutch')) {
+        const kutchImages = [
+          `${origin}/brochure-assets/cover_kutch.jpg`,
+          `${origin}/rann_utsav_road_to_heaven.jpg`,
+          `${origin}/brochure-assets/smritivan.jpg`,
+          `${origin}/brochure-assets/dholavira.jpg`,
+          `${origin}/kalodungar.jpg`,
+          `${origin}/brochure-assets/gala_dinner.jpg`
+        ];
+        return kutchImages[idx % kutchImages.length];
+      }
+      return coverBg;
+    };
+
     return `
       <style>
-        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=Inter:wght@400;500;600;700;800&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800;900&family=Montserrat:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap');
 
-        :root { 
-          --serif: 'Playfair Display', serif; 
-          --sans: 'Inter', sans-serif; 
+        * {
+          box-sizing: border-box;
+          margin: 0;
+          padding: 0;
+          -webkit-print-color-adjust: exact !important;
+          print-color-adjust: exact !important;
         }
-        
-        * { box-sizing: border-box; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-        body { margin: 0; padding: 0; background: #e2e8f0; }
-        
+
         .pdf-page {
           width: ${a4w}px;
           height: ${a4h}px;
           position: relative;
           overflow: hidden;
-          background: ${white};
-          font-family: var(--sans);
-          color: #334155;
+          background: #ffffff;
+          font-family: 'Montserrat', sans-serif;
+          color: #1e293b;
           page-break-after: always;
+          display: flex;
+          flex-direction: column;
+          justify-content: space-between;
         }
 
-        /* --- DECORATIVE ELEMENTS --- */
-        .gold-line { height: 1px; background: linear-gradient(to right, transparent, ${accentColor}, transparent); width: 100%; margin: 20px 0; }
-        .corner-accent { position: absolute; width: 150px; height: 150px; border: 1px solid ${accentColor}30; z-index: 10; }
-        .corner-tl { top: 30px; left: 30px; border-right: 0; border-bottom: 0; }
-        .corner-br { bottom: 30px; right: 30px; border-left: 0; border-top: 0; }
+        /* Common Header */
+        .brand-header {
+          padding: 14px 32px 10px 32px;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          border-bottom: 2px solid rgba(201, 162, 90, 0.4);
+          background: #ffffff;
+          z-index: 10;
+        }
+        .brand-logo-wrap {
+          display: flex;
+          align-items: center;
+          gap: 14px;
+        }
+        .brand-logo-img {
+          height: 48px;
+          width: auto;
+          object-fit: contain;
+        }
+        .brand-text {
+          display: flex;
+          flex-direction: column;
+        }
+        .brand-name {
+          font-family: 'Cinzel', serif;
+          font-size: 24px;
+          font-weight: 800;
+          color: #0b1d3a;
+          letter-spacing: 0.5px;
+          line-height: 1.1;
+        }
+        .brand-tagline {
+          font-size: 9.5px;
+          font-weight: 700;
+          color: #b8860b;
+          letter-spacing: 1.2px;
+          text-transform: uppercase;
+          margin-top: 2px;
+        }
+        .brand-badge {
+          font-size: 10px;
+          font-weight: 700;
+          color: #0b1d3a;
+          background: rgba(201, 162, 90, 0.15);
+          border: 1.5px solid #c9a25a;
+          padding: 5px 14px;
+          border-radius: 20px;
+          letter-spacing: 0.8px;
+          text-transform: uppercase;
+        }
 
-        /* --- COVER PAGE: ULTRA LUXURY --- */
-        .cover-container { height: 100%; display: flex; flex-direction: column; background: ${secondaryColor}; }
-        .cover-top { height: 70%; position: relative; overflow: hidden; }
-        .cover-main-img { width: 100%; height: 100%; object-fit: cover; }
-        .cover-overlay { position: absolute; inset: 0; background: linear-gradient(to top, ${secondaryColor} 0%, rgba(15,23,42,0.2) 50%, rgba(15,23,42,0.6) 100%); }
-        
-        .brand-header { position: absolute; top: 60px; left: 60px; right: 60px; display: flex; justify-content: space-between; align-items: center; z-index: 20; }
-        .brand-logo-main { height: 60px; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3)); }
-        .brand-tag-luxe { color: ${accentColor}; font-weight: 800; letter-spacing: 4px; text-transform: uppercase; font-size: 10px; border-bottom: 1px solid ${accentColor}; padding-bottom: 5px; }
+        /* Common Footer */
+        .brand-footer {
+          padding: 9px 32px;
+          background: #081326;
+          color: #ffffff;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          font-size: 9.5px;
+          font-weight: 600;
+          letter-spacing: 0.3px;
+          border-top: 2px solid #c9a25a;
+          z-index: 10;
+        }
+        .footer-left {
+          display: flex;
+          align-items: center;
+          gap: 18px;
+        }
+        .footer-item {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+        }
+        .footer-right {
+          display: flex;
+          align-items: center;
+          gap: 14px;
+          color: #e2e8f0;
+        }
 
-        .cover-info { position: absolute; bottom: 0; left: 60px; right: 60px; padding-bottom: 40px; color: white; z-index: 20; }
-        .exclusive-badge { display: inline-block; background: ${accentColor}; color: white; padding: 6px 15px; font-size: 10px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase; border-radius: 4px; margin-bottom: 20px; }
-        .cover-main-title { font-family: var(--serif); font-size: 64px; font-weight: 900; line-height: 1; margin: 0; text-shadow: 0 10px 20px rgba(0,0,0,0.4); }
-        
-        .cover-bottom { height: 30%; background: ${secondaryColor}; padding: 0 60px 60px; display: flex; justify-content: space-between; align-items: flex-end; }
-        .meta-group { display: flex; gap: 40px; }
-        .meta-cell { }
-        .meta-label { font-size: 10px; text-transform: uppercase; letter-spacing: 2px; color: ${accentColor}; margin-bottom: 8px; font-weight: 700; }
-        .meta-val { font-family: var(--serif); font-size: 32px; color: white; font-weight: 700; font-style: italic; }
-
-        /* --- PAGE HEADER & FOOTER --- */
-        .page-header-luxe { height: 110px; padding: 30px 60px 0; position: relative; }
-        .page-header-title { 
-          font-family: var(--serif); 
-          font-size: 42px; 
-          color: ${secondaryColor}; 
-          font-weight: 900; 
-          position: relative; 
-          z-index: 2;
+        /* PAGE 1: COVER */
+        .page-cover {
+          background-size: cover;
+          background-position: center bottom;
+          background-repeat: no-repeat;
+          padding: 0;
+          justify-content: space-between;
+        }
+        .cover-top-overlay {
+          padding: 34px 36px 18px 36px;
+          background: linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(255, 255, 255, 0.92) 45%, rgba(255, 255, 255, 0.45) 75%, rgba(255, 255, 255, 0) 100%);
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          text-align: center;
+          z-index: 5;
+        }
+        .cover-brand-header-inline {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 14px;
+          margin-bottom: 16px;
+        }
+        .cover-airplane-img {
+          height: 56px;
+          width: 56px;
+          object-fit: contain;
+          filter: drop-shadow(0 3px 8px rgba(0,0,0,0.14));
+        }
+        .cover-brand-text {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          text-align: center;
+        }
+        .cover-brand-title {
+          font-family: 'Cinzel', serif;
+          font-size: 34px;
+          font-weight: 900;
+          color: #1877f2;
+          letter-spacing: 1.5px;
+          line-height: 1.05;
+          text-transform: uppercase;
+        }
+        .cover-brand-tag {
+          font-size: 11px;
+          font-weight: 800;
+          color: #65a30d;
+          letter-spacing: 1.8px;
+          text-transform: uppercase;
+          margin-top: 2px;
+        }
+        .cover-brand-partner-badge {
+          display: inline-flex;
+          align-items: center;
+          gap: 5px;
+          margin-top: 4px;
+          padding: 2.5px 12px;
+          background: rgba(11, 29, 58, 0.06);
+          border: 1px solid rgba(201, 162, 90, 0.6);
+          border-radius: 15px;
+          font-size: 8.5px;
+          font-weight: 700;
+          color: #0b1d3a;
+          letter-spacing: 0.8px;
+          text-transform: uppercase;
+        }
+        .cover-tagline-pill {
           display: inline-block;
-          border-bottom: 6px solid ${primaryColor};
-          padding-bottom: 10px;
+          background: rgba(255, 255, 255, 0.96);
+          border: 1.5px solid rgba(201, 162, 90, 0.85);
+          color: #0b1d3a;
+          font-size: 10px;
+          font-weight: 800;
+          letter-spacing: 1.8px;
+          text-transform: uppercase;
+          padding: 7px 24px;
+          border-radius: 30px;
+          box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+          margin-bottom: 16px;
+        }
+        .cover-main-title {
+          font-family: 'Cinzel', serif;
+          font-size: 44px;
+          font-weight: 900;
+          color: #ffffff;
+          text-shadow: 0 4px 20px rgba(11, 29, 58, 0.85), 0 2px 6px rgba(0,0,0,0.7);
+          letter-spacing: 4px;
+          line-height: 1.08;
+          margin-bottom: 16px;
+          text-align: center;
+        }
+        .cover-duration-badge {
+          display: inline-block;
+          background: linear-gradient(135deg, #d4af37 0%, #aa7c11 100%);
+          color: #0b1d3a;
+          font-size: 13px;
+          font-weight: 900;
+          letter-spacing: 2px;
+          text-transform: uppercase;
+          padding: 8px 30px;
+          border-radius: 25px;
+          box-shadow: 0 6px 20px rgba(170, 124, 17, 0.45);
+        }
+        .cover-bottom-bar {
+          padding: 13px 36px;
+          background: rgba(8, 19, 38, 0.94);
+          backdrop-filter: blur(8px);
+          color: #ffffff;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          font-size: 10.5px;
+          font-weight: 700;
+          letter-spacing: 0.8px;
+          border-top: 2px solid #c9a25a;
+          z-index: 10;
+        }
+
+        /* PAGE 2: TRIP ESSENTIALS & PARAMETERS */
+        .page-pricing-content {
+          padding: 14px 30px 10px 30px;
+          flex: 1;
+          display: flex;
+          flex-direction: column;
+          justify-content: space-between;
+          gap: 8px;
+          font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+        .section-heading {
+          text-align: center;
+          margin-bottom: 6px;
+        }
+        .section-title {
+          font-family: 'Cinzel', serif;
+          font-size: 20px;
+          font-weight: 800;
+          color: #0b1d3a;
+          letter-spacing: 1.2px;
+        }
+        .section-subtitle {
+          font-size: 9.5px;
+          font-weight: 600;
+          color: #475569;
+          margin-top: 2px;
+          letter-spacing: 0.3px;
+        }
+
+        /* QUOTATION SPECIFICATIONS CARD */
+        .quote-spec-card {
+          background: linear-gradient(135deg, #0b1d3a 0%, #162a4d 100%);
+          border: 1.8px solid #c9a25a;
+          border-radius: 12px;
+          padding: 14px 18px;
+          color: #ffffff;
+          box-shadow: 0 6px 16px rgba(0,0,0,0.12);
+        }
+        .quote-spec-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          border-bottom: 1px solid rgba(201,162,90,0.35);
+          padding-bottom: 8px;
+          margin-bottom: 10px;
+        }
+        .quote-ref-badge {
+          font-size: 11px;
+          font-weight: 900;
+          color: #d4af37;
+          text-transform: uppercase;
+          letter-spacing: 1.5px;
+        }
+        .quote-total-price {
+          font-size: 22px;
+          font-weight: 900;
+          color: #f59e0b;
+        }
+        .quote-grid-4 {
+          display: grid;
+          grid-template-columns: repeat(4, 1fr);
+          gap: 8px;
+        }
+        .quote-cell {
+          background: rgba(255,255,255,0.06);
+          border: 1px solid rgba(255,255,255,0.12);
+          border-radius: 8px;
+          padding: 7px 9px;
+        }
+        .quote-cell-label {
+          color: #f59e0b;
+          font-size: 8px;
+          font-weight: 800;
+          text-transform: uppercase;
+          margin-bottom: 2px;
+        }
+        .quote-cell-val {
+          color: #ffffff;
+          font-size: 10px;
+          font-weight: 800;
+          line-height: 1.25;
+        }
+        .quote-cell-sub {
+          color: #94a3b8;
+          font-size: 8px;
+          margin-top: 2px;
+        }
+
+        /* VERTICAL SECTION BOXES */
+        .v-section-box {
+          border: 1.2px solid rgba(201, 162, 90, 0.6);
+          border-radius: 8px;
+          padding: 8px 16px;
+          background: #ffffff;
+          box-shadow: 0 1px 4px rgba(0,0,0,0.03);
+        }
+        .v-section-title {
+          font-family: 'Cinzel', serif;
+          font-size: 11.5px;
+          font-weight: 800;
+          color: #0b1d3a;
+          letter-spacing: 0.8px;
+          margin-bottom: 4px;
+          text-transform: uppercase;
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          border-bottom: 1px solid rgba(201, 162, 90, 0.25);
+          padding-bottom: 2.5px;
+        }
+        .v-section-title span.gold-icon {
+          color: #b8860b;
+          font-size: 11px;
+        }
+        .v-list-vertical {
+          list-style: none;
+          display: flex;
+          flex-direction: column;
+          gap: 3px;
+        }
+        .v-list-vertical li {
+          font-size: 10px;
+          color: #1e293b;
+          line-height: 1.45;
+          font-weight: 550;
+          font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+        .v-list-vertical li strong {
+          color: #0b1d3a;
+          font-weight: 800;
+        }
+
+        /* PAGE 3: ITINERARY */
+        .page-itinerary-content {
+          padding: 12px 28px;
+          flex: 1;
+          display: flex;
+          flex-direction: column;
+          gap: 8px;
+        }
+        .itinerary-card {
+          display: flex;
+          border-radius: 11px;
+          overflow: hidden;
+          background: #ffffff;
+          border: 1.5px solid rgba(201, 162, 90, 0.35);
+          box-shadow: 0 3px 10px rgba(0, 0, 0, 0.06);
+          flex: 1;
+        }
+        .itinerary-day-col {
+          width: 95px;
+          background: linear-gradient(180deg, #0b1d3a 0%, #162a4d 100%);
+          color: #ffffff;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          padding: 8px;
+          text-align: center;
+          border-right: 2px solid #c9a25a;
+        }
+        .itinerary-day-num {
+          font-family: 'Cinzel', serif;
+          font-size: 15px;
+          font-weight: 900;
+          color: #d4af37;
+          letter-spacing: 1px;
+        }
+        .itinerary-day-tag {
+          font-size: 7.5px;
+          font-weight: 700;
+          color: #e2e8f0;
+          letter-spacing: 0.8px;
+          text-transform: uppercase;
+          margin-top: 4px;
           line-height: 1.2;
         }
-        .page-number-giant { position: absolute; top: 30px; right: 60px; font-family: var(--serif); font-size: 120px; font-weight: 900; color: ${secondaryColor}08; line-height: 1; pointer-events: none; }
-        
-        /* --- CONTENT BLOCKS --- */
-        .content-wrap { padding: 20px 60px 10px; }
-        
-        .highlights-masonry { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 22px; }
-        .masonry-card { border-left: 4px solid ${primaryColor}; padding: 14px 16px; background: #f8fafc; border-radius: 0 15px 15px 0; position: relative; }
-        .card-icon { position: absolute; right: 12px; top: 12px; font-size: 18px; color: ${secondaryColor}10; }
-        .card-text { font-size: 13px; font-weight: 700; color: ${secondaryColor}; line-height: 1.4; }
-
-        .experience-banner { background: ${secondaryColor}; color: white; padding: 20px 24px; border-radius: 16px; display: flex; gap: 20px; margin-bottom: 22px; box-shadow: 0 12px 24px rgba(15,23,42,0.2); }
-        .banner-item { flex: 1; border-right: 1px solid rgba(255,255,255,0.1); padding-right: 16px; }
-        .banner-item:last-child { border: 0; }
-        .banner-icon { color: ${accentColor}; font-size: 22px; margin-bottom: 6px; }
-        .banner-title { font-weight: 800; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; }
-        .banner-desc { font-size: 10px; opacity: 0.7; line-height: 1.4; }
-
-        .inclusion-elegant { background: white; border: 1px solid #e2e8f0; border-radius: 20px; padding: 24px 28px 20px; position: relative; box-shadow: 0 6px 18px rgba(0,0,0,0.03); }
-        .inc-header-badge { position: absolute; top: -13px; left: 50%; transform: translateX(-50%); background: ${secondaryColor}; color: white; padding: 6px 20px; border-radius: 30px; font-size: 10px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase; }
-        .inc-grid-luxe { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: start; }
-        .inc-item-luxe { display: flex; align-items: flex-start; gap: 8px; font-size: 11px; font-weight: 600; color: #334155; line-height: 1.4; margin-bottom: 8px; }
-        .inc-check { width: 16px; height: 16px; min-width: 16px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 900; flex-shrink: 0; margin-top: 2px; }
-
-        /* --- TIMELINE: PREMIUM --- */
-        .timeline-container { position: relative; padding-left: 100px; }
-        .timeline-main-line { position: absolute; left: 49px; top: 0; bottom: 0; width: 2px; background: linear-gradient(to bottom, ${primaryColor}, ${secondaryColor}20); }
-        
-        .timeline-page-item { position: relative; margin-bottom: 32px; }
-        .timeline-day-box { position: absolute; left: -100px; top: 0; width: 100px; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 6px; }
-        .day-label-giant { font-family: var(--serif); font-size: 11px; color: ${accentColor}; text-transform: uppercase; font-weight: 900; letter-spacing: 3px; line-height: 1; }
-        .day-num-giant { font-family: var(--serif); font-size: 42px; color: ${secondaryColor}; font-weight: 900; line-height: 1; }
-        
-        .timeline-dot-outer { position: absolute; left: -59px; top: 26px; width: 16px; height: 16px; background: white; border: 3px solid ${primaryColor}; border-radius: 50%; z-index: 5; }
-        .timeline-content-luxe { background: #f8fafc; padding: 20px 24px; border-radius: 16px; border: 1px solid #e2e8f0; }
-        .timeline-title-luxe { font-family: var(--serif); font-size: 19px; font-weight: 800; color: ${secondaryColor}; margin-bottom: 8px; }
-        .timeline-desc-luxe { font-size: 13px; line-height: 1.6; color: #64748b; text-align: justify; }
-
-        /* --- FOOTER: MINIMAL --- */
-        .footer-luxe { position: absolute; bottom: 0; left: 0; right: 0; height: 80px; padding: 0 60px; display: flex; align-items: center; justify-content: space-between; font-size: 10px; font-weight: 800; letter-spacing: 2px; color: #94a3b8; text-transform: uppercase; }
-        
-        /* --- CONTACT: THE FINALE --- */
-        .final-page { height: 100%; background: ${secondaryColor}; display: flex; align-items: center; justify-content: center; position: relative; }
-        .final-bg-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0.15; filter: contrast(1.2) brightness(0.8); }
-        .final-card { width: 680px; padding: 60px; background: rgba(255,255,255,0.03); backdrop-filter: blur(30px); border: 1px solid rgba(255,255,255,0.1); border-radius: 40px; text-align: center; z-index: 10; display: flex; flex-direction: column; align-items: center; }
-        .final-title { font-family: var(--serif); font-size: 52px; color: white; margin-bottom: 10px; font-weight: 900; }
-        .final-subtitle { font-size: 18px; color: ${accentColor}; font-weight: 600; letter-spacing: 1px; margin-bottom: 40px; }
-        
-        .contact-grid-luxe { display: grid; grid-template-columns: 1fr; gap: 20px; width: 100%; max-width: 450px; }
-        .contact-pill { background: rgba(255,255,255,0.05); padding: 25px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; gap: 25px; width: 100%; }
-        .contact-icon-luxe { width: 60px; height: 60px; background: ${primaryColor}; border-radius: 15px; display: flex; align-items: center; justify-content: center; font-size: 28px; flex-shrink: 0; }
-        .contact-label-luxe { font-size: 12px; text-transform: uppercase; color: rgba(255,255,255,0.5); font-weight: 800; letter-spacing: 2px; margin-bottom: 5px; }
-        .contact-val-luxe { font-size: 20px; color: white; font-weight: 700; white-space: nowrap; }
+        .itinerary-details-col {
+          flex: 1;
+          padding: 8px 14px;
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+        }
+        .itinerary-day-title {
+          font-family: 'Cinzel', serif;
+          font-size: 11px;
+          font-weight: 800;
+          color: #0b1d3a;
+          letter-spacing: 0.5px;
+          margin-bottom: 4px;
+          text-transform: uppercase;
+        }
+        .itinerary-bullets {
+          list-style: none;
+          display: flex;
+          flex-direction: column;
+          gap: 2px;
+        }
+        .itinerary-bullets li {
+          font-size: 8.5px;
+          color: #334155;
+          line-height: 1.35;
+          display: flex;
+          align-items: flex-start;
+          gap: 5px;
+          font-weight: 500;
+        }
+        .itinerary-bullets li::before {
+          content: "✦";
+          color: #b8860b;
+          font-size: 8.5px;
+          font-weight: 900;
+          line-height: 1.35;
+        }
+        .itinerary-img-col {
+          width: 140px;
+          height: 100%;
+        }
+        .itinerary-img-col img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          display: block;
+        }
       </style>
 
-      <!-- PAGE 1: THE MASTER COVER -->
-      <div class="pdf-page">
-        <div class="cover-container">
-          <div class="cover-top">
-            <img src="${bgImage}" class="cover-main-img" crossorigin="anonymous" />
-            <div class="cover-overlay"></div>
-            <div class="brand-header">
-              <img src="${brandLogo}" class="brand-logo-main" crossorigin="anonymous" />
-              <div class="brand-tag-luxe">${isQuoteMode ? 'Official Travel Quotation' : 'Elite Curations'}</div>
-            </div>
-            <div class="cover-info">
-              <div class="exclusive-badge">${isQuoteMode ? `Quote Ref: GFQ-${quoteRef}` : 'Private Experience'}</div>
-              <h1 class="cover-main-title">${packageDetails.title}</h1>
-              <div class="gold-line" style="margin-top: 30px;"></div>
+      <!-- PAGE 1: FULL BLEED LUXURY COVER -->
+      <div class="pdf-page page-cover" style="background-image: url('${coverBg}');">
+        <div class="cover-top-overlay">
+          <div class="cover-brand-header-inline">
+            <img src="${iconImg}" class="cover-airplane-img" alt="Ghumo Firoo Emblem" crossorigin="anonymous" />
+            <div class="cover-brand-text">
+              <div class="cover-brand-title">GHUMO FIROO</div>
+              <div class="cover-brand-tag">YOUR JOURNEY, OUR EXPERTISE!</div>
+              <div class="cover-brand-partner-badge">${isQuoteMode ? 'OFFICIAL TRAVEL QUOTATION' : 'OFFICIAL CLIENT BROCHURE'}</div>
             </div>
           </div>
-          <div class="cover-bottom">
-            <div class="meta-group">
-              <div class="meta-cell">
-                <div class="meta-label">Journey Length</div>
-                <div class="meta-val">${packageDetails.duration}</div>
-              </div>
-              <div class="meta-cell">
-                <div class="meta-label">${isQuoteMode ? 'Total Quotation' : 'Package Charges'}</div>
-                <div class="meta-val" style="font-size: 22px; font-style: normal; color: #E5C378;">
-                  ${isQuoteMode ? `₹${formattedTotalCost} <span style="font-size: 11px; font-weight: 600; color: #cbd5e1;">(₹${displayPerPaxPrice}/pax)</span>` : 'Post Executive Discussion'}
-                </div>
-              </div>
-            </div>
-            <div style="text-align: right;">
-              <div class="meta-label">${isQuoteMode ? 'Quotation Date' : 'Curated For You'}</div>
-              <div style="font-family: var(--serif); font-size: 16px; color: white; font-weight: 700;">
-                ${isQuoteMode ? quoteDate : 'Ghumo Firoo Travels'}
-              </div>
-            </div>
+
+          <div class="cover-tagline-pill">
+            Discover the Timeless Beauty, Heritage &amp; Heart of ${destination || 'India'}
           </div>
+
+          <div class="cover-main-title">
+            ${(packageDetails.title || '').toUpperCase().replace(/&/g, '&amp;')}
+          </div>
+
+          <div class="cover-duration-badge">
+            ${(packageDetails.duration || '').toUpperCase()}
+          </div>
+        </div>
+
+        <div class="cover-bottom-bar">
+          <div>🌐 ghumofiroo.com</div>
+          <div>Quote Ref: GFQ-${quoteRef} • Confirmed Proposal</div>
         </div>
       </div>
 
-      <!-- PAGE 2: TRIP ESSENTIALS & HIGHLIGHTS -->
+      <!-- PAGE 2: TRIP ESSENTIALS & PARAMETERS -->
       <div class="pdf-page">
-        <div class="corner-accent corner-tl"></div>
-        <div class="page-header-luxe">
-          <div class="page-number-giant">02</div>
-          <h2 class="page-header-title">${isQuoteMode ? 'Quotation & Masterplan' : 'The Masterplan'}</h2>
+        <div class="brand-header">
+          <div class="brand-logo-wrap">
+            <img src="${logoImg}" class="brand-logo-img" alt="Ghumo Firoo Logo" crossorigin="anonymous" />
+            <div class="brand-text">
+              <div class="brand-name">Ghumo Firoo</div>
+              <div class="brand-tagline">Your Journey, Our Expertise!</div>
+            </div>
+          </div>
+          <div class="brand-badge">Quote Ref: GFQ-${quoteRef}</div>
         </div>
-        <div class="content-wrap">
-          <!-- OFFICIAL QUOTATION & VEHICLE DETAILS -->
-          <div style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); border: 1.5px solid #D4AF37; border-radius: 14px; padding: 13px 18px; margin-bottom: 15px; color: white; box-shadow: 0 8px 20px rgba(0,0,0,0.12);">
-            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(212,175,55,0.3); padding-bottom: 8px; margin-bottom: 10px;">
-              <div style="display: flex; align-items: center; gap: 8px;">
-                <span style="font-size: 20px;">📜</span>
-                <div>
-                  <div style="font-size: 11px; font-weight: 900; color: #D4AF37; text-transform: uppercase; letter-spacing: 1.5px;">Official Travel Quotation</div>
-                  <div style="font-size: 9px; color: #cbd5e1;">Quote Ref: GFQ-${quoteRef} • Date: ${quoteDate} • Status: Confirmed Proposal</div>
-                </div>
+
+        <div class="page-pricing-content">
+          <div class="section-heading">
+            <div class="section-title">${isQuoteMode ? 'OFFICIAL TRAVEL QUOTATION &amp; TRIP PARAMETERS' : 'PACKAGE OVERVIEW &amp; TRIP HIGHLIGHTS'}</div>
+            <div class="section-subtitle">${isQuoteMode ? `Personalized travel quote prepared on ${quoteDate}` : 'Comprehensive travel overview &amp; verified boutique inclusions'}</div>
+          </div>
+
+          <!-- Quotation Parameters Master Card -->
+          <div class="quote-spec-card">
+            <div class="quote-spec-header">
+              <div>
+                <div class="quote-ref-badge">📜 OFFICIAL QUOTATION SPECIFICATIONS</div>
+                <div style="font-size: 9px; color: #cbd5e1; margin-top: 2px;">Quote Ref: GFQ-${quoteRef} • Issue Date: ${quoteDate} • Status: Confirmed Proposal</div>
               </div>
               <div style="text-align: right;">
-                <div style="font-size: 8.5px; text-transform: uppercase; letter-spacing: 1px; color: #94a3b8; font-weight: 700;">Total Package Cost</div>
-                <div style="font-size: 20px; font-weight: 900; color: #fbbf24;">₹${formattedTotalCost}</div>
+                <div style="font-size: 8.5px; text-transform: uppercase; letter-spacing: 1px; color: #cbd5e1; font-weight: 700;">Total Package Cost</div>
+                <div class="quote-total-price">₹${formattedTotalCost}</div>
                 <div style="font-size: 8.5px; color: #cbd5e1;">(₹${displayPerPaxPrice} per adult pax)</div>
               </div>
             </div>
 
-            <!-- Parameters 4-Column Grid -->
-            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; font-size: 9.5px;">
-              <div style="background: rgba(255,255,255,0.06); padding: 8px 10px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1);">
-                <div style="color: #F59E0B; font-weight: 800; text-transform: uppercase; font-size: 8px; margin-bottom: 2px;">🚗 Vehicle / Cab Type</div>
-                <div style="font-weight: 800; color: #ffffff; font-size: 10.5px; line-height: 1.25;">${effectiveCabName}</div>
+            <div class="quote-grid-4">
+              <div class="quote-cell">
+                <div class="quote-cell-label">🚗 Vehicle / Cab Type</div>
+                <div class="quote-cell-val">${effectiveCabName}</div>
                 <div style="color: #34d399; font-size: 8px; font-weight: 700; margin-top: 2px;">✓ Private Dedicated AC</div>
               </div>
 
-              <div style="background: rgba(255,255,255,0.06); padding: 8px 10px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1);">
-                <div style="color: #F59E0B; font-weight: 800; text-transform: uppercase; font-size: 8px; margin-bottom: 2px;">📅 Travel Schedule</div>
-                <div style="font-weight: 800; color: #ffffff; font-size: 10.5px; line-height: 1.25;">${effectiveTravelDate}</div>
-                <div style="color: #94a3b8; font-size: 8px; margin-top: 2px;">Return: ${effectiveReturnDate}</div>
+              <div class="quote-cell">
+                <div class="quote-cell-label">📅 Travel Schedule</div>
+                <div class="quote-cell-val">${effectiveTravelDate}</div>
+                <div class="quote-cell-sub">Return: ${effectiveReturnDate}</div>
               </div>
 
-              <div style="background: rgba(255,255,255,0.06); padding: 8px 10px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1);">
-                <div style="color: #F59E0B; font-weight: 800; text-transform: uppercase; font-size: 8px; margin-bottom: 2px;">👥 Guest Count</div>
-                <div style="font-weight: 800; color: #ffffff; font-size: 10.5px; line-height: 1.25;">${effectiveAdults} Adult${effectiveAdults > 1 ? 's' : ''}${effectiveChildren > 0 ? ` + ${effectiveChildren} Child` : ''}</div>
-                <div style="color: #94a3b8; font-size: 8px; margin-top: 2px;">Total: ${effectivePax} Guests</div>
+              <div class="quote-cell">
+                <div class="quote-cell-label">👥 Guest Breakdown</div>
+                <div class="quote-cell-val">${effectiveAdults} Adult${effectiveAdults > 1 ? 's' : ''}${effectiveChildren > 0 ? ` + ${effectiveChildren} Child` : ''}</div>
+                <div class="quote-cell-sub">Total: ${effectivePax} Guests</div>
               </div>
 
-              <div style="background: rgba(255,255,255,0.06); padding: 8px 10px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1);">
-                <div style="color: #F59E0B; font-weight: 800; text-transform: uppercase; font-size: 8px; margin-bottom: 2px;">📍 Transfer Route</div>
-                <div style="font-weight: 700; color: #ffffff; font-size: 9.5px; line-height: 1.2;">Pickup: ${effectivePickup}</div>
-                <div style="color: #cbd5e1; font-size: 9px; line-height: 1.2; margin-top: 2px;">Drop: ${effectiveDrop}</div>
-              </div>
-            </div>
-          </div>
-
-          <div class="highlights-masonry">
-            ${packageDetails.highlights.slice(0, 6).map(h => `
-              <div class="masonry-card">
-                <div class="card-icon">✦</div>
-                <div class="card-text">${h}</div>
-              </div>
-            `).join('')}
-          </div>
-
-          <div class="experience-banner">
-            <div class="banner-item">
-              <div class="banner-icon">🛡️</div>
-              <div class="banner-title">Elite Safety</div>
-              <div class="banner-desc">Hand-picked properties with premium security protocols.</div>
-            </div>
-            <div class="banner-item">
-              <div class="banner-icon">💎</div>
-              <div class="banner-title">Concierge</div>
-              <div class="banner-desc">24/7 dedicated travel expert for on-ground assistance.</div>
-            </div>
-            <div class="banner-item">
-              <div class="banner-icon">🥂</div>
-              <div class="banner-title">Luxe Stay</div>
-              <div class="banner-desc">Pre-vetted 4 & 5-star accommodations guaranteed.</div>
-            </div>
-          </div>
-
-          <div class="inclusion-elegant" style="margin-top: 15px;">
-            <div class="inc-header-badge">Inclusions & Exclusions</div>
-            <div class="inc-grid-luxe" style="grid-template-columns: 1fr 1fr; gap: 15px;">
-              <div>
-                <div style="font-weight: 800; font-size: 11px; text-transform: uppercase; color: ${primaryColor}; margin-bottom: 8px;">✓ Included in Package</div>
-                ${(packageDetails.inclusions || []).slice(0, 6).map(inc => `
-                  <div class="inc-item-luxe" style="margin-bottom: 6px;">
-                    <div class="inc-check">✓</div>
-                    <div style="font-size: 11px;">${inc}</div>
-                  </div>
-                `).join('')}
-              </div>
-              <div>
-                <div style="font-weight: 800; font-size: 11px; text-transform: uppercase; color: #ef4444; margin-bottom: 8px;">✕ Excluded</div>
-                ${((packageDetails.exclusions && packageDetails.exclusions.length > 0)
-                  ? packageDetails.exclusions
-                  : ['Personal expenses & laundry', 'GST / TCS extra as applicable', 'Flights / Train fare to destination']
-                ).slice(0, 5).map(exc => `
-                  <div class="inc-item-luxe" style="margin-bottom: 6px;">
-                    <div class="inc-check" style="background: #fef2f2; color: #ef4444;">✕</div>
-                    <div style="font-size: 11px; color: #64748b;">${exc}</div>
-                  </div>
-                `).join('')}
+              <div class="quote-cell">
+                <div class="quote-cell-label">📍 Transfer Route</div>
+                <div class="quote-cell-val" style="font-size: 9px;">Pickup: ${effectivePickup}</div>
+                <div class="quote-cell-sub">Drop: ${effectiveDrop}</div>
               </div>
             </div>
           </div>
-        </div>
-        <div class="footer-luxe">
-          <span style="color: ${secondaryColor};">Ghumo Firoo Travels</span>
-          <span>Boutique Itinerary 2026</span>
-        </div>
-      </div>
 
-      <!-- PAGE 3: HOTELS & SIGHTSEEING ATTRACTIONS -->
-      <div class="pdf-page">
-        <div class="page-header-luxe">
-          <div class="page-number-giant">03</div>
-          <h2 class="page-header-title">Hotels & Sightseeing</h2>
-        </div>
-        <div class="content-wrap">
-          <!-- HOTELS SECTION -->
-          <div style="font-family: var(--serif); font-size: 18px; font-weight: 800; color: ${secondaryColor}; margin-bottom: 10px; display: flex; align-items: center; gap: 8px;">
-            <span>🏨</span> Luxury Accommodations
-          </div>
-
-          <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px;">
-            ${((packageDetails.hotels && packageDetails.hotels.length > 0)
-              ? packageDetails.hotels
-              : [
-                  { name: `${destination} Luxury Resort & Spa`, location: destination, stars: 4, room_type: "Deluxe Suite Room", meal_plan: "MAP (Breakfast & Dinner)" },
-                  { name: `Grand ${destination} Heritage Hotel`, location: destination, stars: 4, room_type: "Premium Mountain View", meal_plan: "CP (Breakfast Included)" }
-                ]
-            ).map((h: any) => `
-              <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 14px; padding: 14px 18px; display: flex; items-center; justify-content: space-between;">
-                <div style="display: flex; items-center; gap: 14px;">
-                  <div style="width: 38px; height: 38px; background: ${secondaryColor}; color: white; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: 800;">
-                    🏨
-                  </div>
+          <!-- Accommodations Box -->
+          <div class="v-section-box">
+            <div class="v-section-title"><span class="gold-icon">🏨</span> Selected Hotels &amp; Luxury Stays</div>
+            <div style="display: flex; flex-direction: column; gap: 6px;">
+              ${((packageDetails.hotels && packageDetails.hotels.length > 0)
+                ? packageDetails.hotels
+                : [
+                    { name: `${destination} Luxury Resort & Spa`, location: destination, stars: 4, room_type: "Deluxe Suite Room", meal_plan: "MAP (Breakfast & Dinner)" },
+                    { name: `Grand ${destination} Heritage Hotel`, location: destination, stars: 4, room_type: "Premium AC Cottage", meal_plan: "CP (Breakfast Included)" }
+                  ]
+              ).map((h: any) => `
+                <div style="display: flex; align-items: center; justify-content: space-between; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 6px 10px;">
                   <div>
-                    <div style="font-family: var(--serif); font-size: 15px; font-weight: 800; color: ${secondaryColor}; margin-bottom: 2px;">
-                      ${h.name}
-                    </div>
-                    <div style="font-size: 10px; color: #64748b; font-weight: 600; display: flex; items-center; gap: 8px;">
-                      <span>📍 ${h.location || destination}</span>
-                      <span>•</span>
-                      <span>🛏️ ${h.room_type || 'Deluxe Room'}</span>
-                    </div>
+                    <div style="font-weight: 800; font-size: 10.5px; color: #0b1d3a;">${h.name}</div>
+                    <div style="font-size: 8.5px; color: #64748b; font-weight: 600;">📍 ${h.location || destination} • 🛏️ ${h.room_type || 'Deluxe Room'}</div>
+                  </div>
+                  <div style="text-align: right;">
+                    <div style="color: #d4af37; font-size: 9.5px; font-weight: 700;">${'★'.repeat(h.stars || 4)}</div>
+                    <div style="background: rgba(201,162,90,0.15); color: #b8860b; border: 1px solid rgba(201,162,90,0.4); font-size: 8px; font-weight: 800; padding: 1.5px 6px; border-radius: 4px; text-transform: uppercase;">${h.meal_plan || 'MAP Plan'}</div>
                   </div>
                 </div>
-
-                <div style="text-align: right;">
-                  <div style="color: ${accentColor}; font-size: 12px; margin-bottom: 2px;">
-                    ${'★'.repeat(h.stars || 4)}
-                  </div>
-                  <div style="background: ${primaryColor}15; color: ${primaryColor}; padding: 3px 8px; border-radius: 6px; font-size: 9px; font-weight: 800; text-transform: uppercase; display: inline-block;">
-                    ${h.meal_plan || 'MAP Plan'}
-                  </div>
-                </div>
-              </div>
-            `).join('')}
+              `).join('')}
+            </div>
           </div>
 
-          <!-- SIGHTSEEING ATTRACTIONS SECTION -->
-          <div style="font-family: var(--serif); font-size: 18px; font-weight: 800; color: ${secondaryColor}; margin-bottom: 10px; display: flex; align-items: center; gap: 8px;">
-            <span>🏞️</span> Included Sightseeing & Attractions
-          </div>
-
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-            ${((packageDetails.attractions && packageDetails.attractions.length > 0)
-              ? packageDetails.attractions
-              : getDestinationFallbackAttractions(destination)
-            ).slice(0, 4).map((att: any) => `
-              <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 12px 14px; display: flex; flex-direction: column; justify-content: space-between;">
-                <div>
-                  <div style="font-weight: 800; font-size: 11px; color: ${secondaryColor}; margin-bottom: 4px; display: flex; justify-content: space-between; align-items: flex-start; gap: 6px;">
-                    <span style="line-height: 1.35; font-weight: 800; word-break: break-word;">📍 ${att.name}</span>
-                    <span style="font-size: 8px; background: ${primaryColor}15; color: ${primaryColor}; padding: 2px 6px; border-radius: 8px; text-transform: uppercase; font-weight: 800; flex-shrink: 0; white-space: nowrap; margin-top: 1px;">Sightseeing</span>
-                  </div>
-                  <div style="font-size: 10px; color: #64748b; line-height: 1.35;">${att.description || 'Guided sightseeing excursion included in itinerary.'}</div>
+          <!-- Sightseeing Highlights Box -->
+          <div class="v-section-box">
+            <div class="v-section-title"><span class="gold-icon">🏞️</span> Top Attractions &amp; Sightseeing Highlights</div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px;">
+              ${((packageDetails.attractions && packageDetails.attractions.length > 0)
+                ? packageDetails.attractions
+                : getDestinationFallbackAttractions(destination)
+              ).slice(0, 4).map((att: any) => `
+                <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 6px 8px;">
+                  <div style="font-weight: 800; font-size: 9.5px; color: #0b1d3a; margin-bottom: 2px;">📍 ${att.name}</div>
+                  <div style="font-size: 8px; color: #64748b; line-height: 1.3;">${att.description || 'Included sightseeing excursion.'}</div>
                 </div>
-              </div>
-            `).join('')}
+              `).join('')}
+            </div>
           </div>
         </div>
-        <div class="footer-luxe">
-          <span style="color: ${secondaryColor};">Ghumo Firoo Travels</span>
-          <span>Hotels & Sightseeing</span>
+
+        <div class="brand-footer">
+          <div class="footer-left">
+            <div class="footer-item">📞 +91 9910987264 / 9870229792</div>
+            <div class="footer-item">✉️ booking@ghumofiroo.com</div>
+          </div>
+          <div class="footer-right">
+            <div>🌐 ghumofiroo.com</div>
+            <div>Page 2 of ${totalPages}</div>
+          </div>
         </div>
       </div>
 
       <!-- ITINERARY PAGES -->
       ${itineraryChunks.map((chunk, idx) => `
         <div class="pdf-page">
-          <div class="page-header-luxe">
-            <div class="page-number-giant">${String(idx + 4).padStart(2, '0')}</div>
-            <h2 class="page-header-title">Detailed Journey</h2>
+          <div class="brand-header">
+            <div class="brand-logo-wrap">
+              <img src="${logoImg}" class="brand-logo-img" alt="Ghumo Firoo Logo" crossorigin="anonymous" />
+              <div class="brand-text">
+                <div class="brand-name">Ghumo Firoo</div>
+                <div class="brand-tagline">Your Journey, Our Expertise!</div>
+              </div>
+            </div>
+            <div class="brand-badge">${(packageDetails.duration || '').toUpperCase()} ITINERARY</div>
           </div>
-          <div class="content-wrap">
-            <div class="timeline-container">
-              <div class="timeline-main-line"></div>
-              ${chunk.map(day => `
-                <div class="timeline-page-item">
-                  <div class="timeline-day-box">
-                    <div class="day-label-giant">Day</div>
-                    <div class="day-num-giant">${String(day.day).padStart(2, '0')}</div>
+
+          <div class="page-itinerary-content">
+            <div class="section-heading">
+              <div class="section-title">COMPLETE DAY-WISE ITINERARY</div>
+              <div class="section-subtitle">Chauffeured private transfers, guided excursions, and curated experiences</div>
+            </div>
+
+            ${chunk.map((day: any, dIdx: number) => {
+              const dayImg = getItineraryDayImage(day, idx * daysPerPage + dIdx);
+              const dayTag = day.title.split('→')[0].trim() || 'SIGHTSEEING';
+              return `
+                <div class="itinerary-card">
+                  <div class="itinerary-day-col">
+                    <div class="itinerary-day-num">DAY ${day.day}</div>
+                    <div class="itinerary-day-tag">${dayTag.slice(0, 18)}</div>
                   </div>
-                  <div class="timeline-dot-outer"></div>
-                  <div class="timeline-content-luxe">
-                    <h3 class="timeline-title-luxe">${day.title}</h3>
-                    <p class="timeline-desc-luxe">${day.description}</p>
-                    ${(day as any).activities && (day as any).activities.length > 0 ? `
-                      <div style="margin-top: 10px; display: flex; flex-wrap: wrap; gap: 6px;">
-                        ${(day as any).activities.map((act: string) => `
-                          <span style="background: #ea580c12; color: #ea580c; border: 1px solid #ea580c35; padding: 3px 10px; border-radius: 20px; font-size: 10px; font-weight: 800; display: inline-flex; align-items: center; gap: 4px;">
-                            ✦ ${act}
-                          </span>
-                        `).join('')}
-                      </div>
-                    ` : ''}
+                  <div class="itinerary-details-col">
+                    <div class="itinerary-day-title">${day.title}</div>
+                    <ul class="itinerary-bullets">
+                      <li>${day.description}</li>
+                      ${(day.activities && day.activities.length > 0)
+                        ? day.activities.slice(0, 4).map((act: string) => `<li>${act}</li>`).join('')
+                        : ''}
+                    </ul>
+                  </div>
+                  <div class="itinerary-img-col">
+                    <img src="${dayImg}" alt="${day.title}" crossorigin="anonymous" />
                   </div>
                 </div>
-              `).join('')}
-            </div>
+              `;
+            }).join('')}
           </div>
-          <div class="footer-luxe">
-            <span style="color: ${secondaryColor};">Ghumo Firoo Travels</span>
-            <span>Day-By-Day Experience</span>
+
+          <div class="brand-footer">
+            <div class="footer-left">
+              <div class="footer-item">📞 +91 9910987264 / 9870229792</div>
+              <div class="footer-item">✉️ booking@ghumofiroo.com</div>
+            </div>
+            <div class="footer-right">
+              <div>🌐 ghumofiroo.com</div>
+              <div>Page ${3 + idx} of ${totalPages}</div>
+            </div>
           </div>
         </div>
       `).join('')}
 
-      <!-- FINAL PAGE: THE CALL TO ADVENTURE & POLICY -->
+      <!-- FINAL PAGE: INCLUSIONS, EXCLUSIONS & POLICIES -->
       <div class="pdf-page">
-        <div class="final-page">
-          <img src="${bgImage}" class="final-bg-img" crossorigin="anonymous" />
-          <div class="final-card">
-            <div style="background: rgba(255,255,255,0.95); padding: 12px 28px; border-radius: 20px; margin-bottom: 25px; box-shadow: 0 10px 25px rgba(0,0,0,0.5);">
-              <img src="${brandLogo}" style="height: 48px;" crossorigin="anonymous" />
+        <div class="brand-header">
+          <div class="brand-logo-wrap">
+            <img src="${logoImg}" class="brand-logo-img" alt="Ghumo Firoo Logo" crossorigin="anonymous" />
+            <div class="brand-text">
+              <div class="brand-name">Ghumo Firoo</div>
+              <div class="brand-tagline">Your Journey, Our Expertise!</div>
             </div>
-            <h2 class="final-title" style="font-size: 44px; color: #ffffff; text-shadow: 0 4px 12px rgba(0,0,0,0.6);">Begin Your Journey</h2>
-            <p class="final-subtitle" style="color: #F59E0B; font-weight: 800; font-size: 16px; letter-spacing: 1px; margin-top: 5px;">Crafted with passion, executed with precision.</p>
-            
-            <div class="contact-grid-luxe" style="margin-top: 30px;">
-              <div class="contact-pill" style="background: rgba(15,23,42,0.85); border: 1px solid rgba(245,158,11,0.4); padding: 18px 24px; border-radius: 20px; display: flex; align-items: center; gap: 20px; width: 100%;">
-                <div class="contact-icon-luxe" style="width: 48px; height: 48px; background: rgba(212,175,55,0.15); border: 1px solid rgba(212,175,55,0.4); border-radius: 14px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#D4AF37" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
-                  </svg>
-                </div>
-                <div style="text-align: left;">
-                  <div class="contact-label-luxe" style="color: #F59E0B; font-weight: 800; font-size: 11px; letter-spacing: 2px;">Direct Concierge</div>
-                  <div class="contact-val-luxe" style="color: #ffffff; font-weight: 800; font-size: 20px;">+91 99109 87264</div>
-                </div>
-              </div>
-              <div class="contact-pill" style="background: rgba(15,23,42,0.85); border: 1px solid rgba(245,158,11,0.4); padding: 18px 24px; border-radius: 20px; display: flex; align-items: center; gap: 20px; width: 100%;">
-                <div class="contact-icon-luxe" style="width: 48px; height: 48px; background: rgba(212,175,55,0.15); border: 1px solid rgba(212,175,55,0.4); border-radius: 14px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#D4AF37" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
-                    <polyline points="22,6 12,13 2,6"></polyline>
-                  </svg>
-                </div>
-                <div style="text-align: left;">
-                  <div class="contact-label-luxe" style="color: #F59E0B; font-weight: 800; font-size: 11px; letter-spacing: 2px;">Official Email</div>
-                  <div class="contact-val-luxe" style="color: #ffffff; font-weight: 800; font-size: 20px;">booking@ghumofiroo.com</div>
-                </div>
-              </div>
-            </div>
-            
-            <div style="margin-top: 22px; background: rgba(15,23,42,0.9); padding: 16px 22px; border-radius: 18px; border: 1.5px solid rgba(212,175,55,0.4); width: 100%; text-align: left;">
-              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
-                <div>
-                  <div style="font-size: 10px; color: #F59E0B; font-weight: 800; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 5px; display: flex; align-items: center; gap: 4px;">
-                    <span>💳</span> Booking Advance Terms
-                  </div>
-                  <div style="font-size: 10px; color: #ffffff; line-height: 1.5;">
-                    • <strong>25% Advance:</strong> Upon booking confirmation<br/>
-                    • <strong>50% Payment:</strong> 30 days prior to departure<br/>
-                    • <strong>100% Balance:</strong> 15 days prior to travel date
-                  </div>
-                </div>
+          </div>
+          <div class="brand-badge">Tariff &amp; Policies</div>
+        </div>
 
-                <div>
-                  <div style="font-size: 10px; color: #ef4444; font-weight: 800; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 5px; display: flex; align-items: center; gap: 4px;">
-                    <span>🛡️</span> Cancellation Policy
-                  </div>
-                  <div style="font-size: 10px; color: #ffffff; line-height: 1.5;">
-                    • <strong>30+ Days Prior:</strong> 10% administrative retention<br/>
-                    • <strong>15–29 Days Prior:</strong> 25% cancellation charge<br/>
-                    • <strong>7–14 Days Prior:</strong> 50% cancellation charge<br/>
-                    • <strong>Within 7 Days / No Show:</strong> 100% non-refundable
-                  </div>
-                </div>
-              </div>
-            </div>
+        <div class="page-pricing-content">
+          <div class="section-heading">
+            <div class="section-title">PACKAGE INCLUSIONS &amp; POLICIES</div>
+            <div class="section-subtitle">Transparent terms with verified luxury stays &amp; dedicated chauffeured transport</div>
+          </div>
 
-            <div style="margin-top: 35px;">
-              <div style="font-size: 14px; letter-spacing: 5px; color: #F59E0B; font-weight: 900; text-transform: uppercase;">www.ghumofiroo.com</div>
-              <div style="margin-top: 10px; font-size: 10px; color: rgba(255,255,255,0.6); letter-spacing: 2px;">© ${new Date().getFullYear()} GHUMO FIROO TRAVELS • ALL RIGHTS RESERVED</div>
+          <!-- 1. PACKAGE INCLUSIONS -->
+          <div class="v-section-box">
+            <div class="v-section-title"><span class="gold-icon">✦</span> Package Inclusions</div>
+            <ul class="v-list-vertical">
+              <li>• <strong>Accommodations:</strong> Verified stays as detailed in itinerary (${accommodation || '4-Star Hotels'}).</li>
+              <li>• <strong>Meal Plan:</strong> Daily hygienic buffet breakfast and dinner as per selected plan.</li>
+              <li>• <strong>Private Vehicle:</strong> Dedicated ${effectiveCabName} with expert chauffeur for all transfers &amp; sightseeing.</li>
+              <li>• <strong>Tolls &amp; Parking:</strong> All toll taxes, fuel charges, state road taxes &amp; driver allowance included.</li>
+              <li>• <strong>Sightseeing &amp; Permits:</strong> Inner-line permits, government border passes &amp; assistance.</li>
+              <li>• <strong>Transfers:</strong> Chauffeured pickup from ${effectivePickup} &amp; drop-off at ${effectiveDrop}.</li>
+            </ul>
+          </div>
+
+          <!-- 2. PACKAGE EXCLUSIONS -->
+          <div class="v-section-box">
+            <div class="v-section-title"><span class="gold-icon">✕</span> Package Exclusions</div>
+            <ul class="v-list-vertical">
+              <li>• Airfare or train tickets to/from destination.</li>
+              <li>• Personal expenses such as room service, laundry, telephone calls, and gratuities/tips.</li>
+              <li>• Optional adventure activities (ATV, paramotoring, camel safari) unless specified.</li>
+              <li>• Monument entry tickets, camera fees, or professional guide charges.</li>
+            </ul>
+          </div>
+
+          <!-- 3. BOOKING ADVANCE TERMS -->
+          <div class="v-section-box">
+            <div class="v-section-title"><span class="gold-icon">💳</span> Booking &amp; Payment Terms</div>
+            <ul class="v-list-vertical">
+              <li>• <strong>25% Advance Payment:</strong> Upon confirmation to block hotel rooms and secure vehicle.</li>
+              <li>• <strong>50% Payment:</strong> Due 30 days prior to scheduled departure date.</li>
+              <li>• <strong>100% Full Payment:</strong> Due 15 days prior to arrival.</li>
+              <li>• <strong>Payment Methods:</strong> UPI, Bank NEFT/RTGS, Net Banking, and Credit/Debit Cards via PayU.</li>
+            </ul>
+          </div>
+
+          <!-- 4. CANCELLATION & REFUND POLICY -->
+          <div class="v-section-box">
+            <div class="v-section-title"><span class="gold-icon">🛡️</span> Cancellation &amp; Refund Policy</div>
+            <ul class="v-list-vertical">
+              <li>• <strong>Cancellation &gt; 30 Days Prior:</strong> 90% Refund (10% standard administrative charge).</li>
+              <li>• <strong>Cancellation 15–30 Days Prior:</strong> 60% Refund of the total tour package cost.</li>
+              <li>• <strong>Cancellation 7–14 Days Prior:</strong> 25% Refund of the total tour package cost.</li>
+              <li>• <strong>Cancellation &lt; 7 Days / No-Show:</strong> 100% non-refundable.</li>
+            </ul>
+          </div>
+
+          <!-- Direct Concierge Help -->
+          <div style="background: linear-gradient(135deg, #0b1d3a 0%, #162a4d 100%); border: 1.5px solid #c9a25a; border-radius: 8px; padding: 8px 14px; color: #ffffff; display: flex; align-items: center; justify-content: space-between;">
+            <div>
+              <div style="font-size: 10px; font-weight: 800; color: #d4af37; text-transform: uppercase; letter-spacing: 1px;">24/7 On-Trip Concierge Support</div>
+              <div style="font-size: 8.5px; color: #cbd5e1;">Continuous helpline &amp; dedicated ground support throughout your vacation.</div>
             </div>
+            <div style="text-align: right; font-weight: 800; font-size: 11px; color: #f59e0b;">
+              📞 +91 9910987264
+            </div>
+          </div>
+        </div>
+
+        <div class="brand-footer">
+          <div class="footer-left">
+            <div class="footer-item">📞 +91 9910987264 / 9870229792</div>
+            <div class="footer-item">✉️ booking@ghumofiroo.com</div>
+          </div>
+          <div class="footer-right">
+            <div>🌐 ghumofiroo.com</div>
+            <div>Page ${totalPages} of ${totalPages}</div>
           </div>
         </div>
       </div>
@@ -1581,125 +1909,187 @@ const EnhancedBrochureDownload: React.FC<EnhancedBrochureDownloadProps> = ({
                       </div>
                     </div>
 
-                    {/* Row 3: City & Travel Month */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
-                      {/* City */}
-                      <div className="relative">
-                        <div className="absolute left-3 top-3.5 text-white/40 pointer-events-none">
-                          <MapPin className="w-4 h-4" />
+                    {isQuoteMode ? (
+                      <>
+                        {/* City Input (Clean full width for Quote Mode) */}
+                        <div className="relative">
+                          <div className="absolute left-3 top-3.5 text-white/40 pointer-events-none">
+                            <MapPin className="w-4 h-4" />
+                          </div>
+                          <input
+                            id="city"
+                            placeholder=" "
+                            className={`peer block w-full pl-9 pr-3 pt-5 pb-1.5 text-xs text-white bg-white/5 border rounded-xl focus:border-[#D4AF37] focus:outline-none transition-all placeholder:opacity-0 ${
+                              errors.city ? "border-red-500/80 focus:border-red-500" : "border-white/10"
+                            }`}
+                            {...register("city")}
+                          />
+                          <label
+                            htmlFor="city"
+                            className={`absolute left-9 transition-all duration-200 pointer-events-none origin-[0] peer-focus:top-1 peer-focus:text-[9px] peer-focus:text-[#D4AF37] ${
+                              watchedCity ? "top-1 text-[9px] text-[#D4AF37]" : "top-3.5 text-xs text-white/40"
+                            }`}
+                          >
+                            City
+                          </label>
+                          {errors.city && <p className="text-[9px] text-red-400 mt-0.5 pl-2">{errors.city.message}</p>}
                         </div>
-                        <input
-                          id="city"
-                          placeholder=" "
-                          className={`peer block w-full pl-9 pr-3 pt-5 pb-1.5 text-xs text-white bg-white/5 border rounded-xl focus:border-[#D4AF37] focus:outline-none transition-all placeholder:opacity-0 ${
-                            errors.city ? "border-red-500/80 focus:border-red-500" : "border-white/10"
-                          }`}
-                          {...register("city")}
-                        />
-                        <label
-                          htmlFor="city"
-                          className={`absolute left-9 transition-all duration-200 pointer-events-none origin-[0] peer-focus:top-1 peer-focus:text-[9px] peer-focus:text-[#D4AF37] ${
-                            watchedCity ? "top-1 text-[9px] text-[#D4AF37]" : "top-3.5 text-xs text-white/40"
-                          }`}
-                        >
-                          City
-                        </label>
-                        {errors.city && <p className="text-[9px] text-red-400 mt-0.5 pl-2">{errors.city.message}</p>}
-                      </div>
 
-                      {/* Travel Month */}
-                      <div className="relative">
-                        <div className="absolute left-3 top-3.5 text-white/40 pointer-events-none">
-                          <Calendar className="w-4 h-4" />
+                        {/* Confirmed Quote Specifications Badge */}
+                        <div className="p-3.5 bg-[#D4AF37]/10 border border-[#D4AF37]/35 rounded-xl space-y-2 text-xs">
+                          <div className="flex items-center justify-between text-[11px] font-bold text-[#E5C378] border-b border-white/10 pb-1.5">
+                            <span className="flex items-center gap-1.5">
+                              <span>📋</span> Confirmed Quote Specifications
+                            </span>
+                            <span className="text-emerald-400 font-extrabold text-[10px] uppercase tracking-wider bg-emerald-500/15 border border-emerald-500/30 px-2 py-0.5 rounded-full">
+                              Pre-Configured
+                            </span>
+                          </div>
+                          <div className="grid grid-cols-2 gap-2 text-[11px]">
+                            <div className="flex items-center gap-1.5 text-slate-200">
+                              <span className="text-[#D4AF37]">👥</span>
+                              <span><strong>Travelers:</strong> {passengersCount || 2} Pax</span>
+                            </div>
+                            <div className="flex items-center gap-1.5 text-slate-200 min-w-0">
+                              <span className="text-[#D4AF37]">🚗</span>
+                              <span className="truncate" title={selectedCabName || transport || 'Private Vehicle'}>
+                                <strong>Vehicle:</strong> {selectedCabName || transport || 'Private Vehicle'}
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-1.5 text-slate-200">
+                              <span className="text-[#D4AF37]">📅</span>
+                              <span><strong>Dates:</strong> {travelDate ? new Date(travelDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' }) : 'Confirmed Schedule'}</span>
+                            </div>
+                            <div className="flex items-center gap-1.5 text-slate-200">
+                              <span className="text-[#D4AF37]">💰</span>
+                              <span><strong>Total:</strong> ₹{Number(String(totalPrice || formatPrice()).replace(/[^\d]/g, '')).toLocaleString('en-IN')}</span>
+                            </div>
+                          </div>
                         </div>
-                        <select
-                          id="travelMonth"
-                          className={`peer block w-full pl-9 pr-8 pt-5 pb-1.5 text-xs text-white bg-[#0a1128] border rounded-xl focus:border-[#D4AF37] focus:outline-none transition-all appearance-none cursor-pointer ${
-                            errors.travelMonth ? "border-red-500/80 focus:border-red-500" : "border-white/10"
-                          }`}
-                          {...register("travelMonth")}
-                        >
-                          <option value="" disabled hidden></option>
-                          {getNext12Months().map((m, idx) => (
-                            <option key={idx} value={m} className="bg-[#0a1128] text-white">{m}</option>
-                          ))}
-                        </select>
-                        <label
-                          htmlFor="travelMonth"
-                          className={`absolute left-9 transition-all duration-200 pointer-events-none origin-[0] peer-focus:top-1 peer-focus:text-[9px] peer-focus:text-[#D4AF37] ${
-                            watchedTravelMonth ? "top-1 text-[9px] text-[#D4AF37]" : "top-3.5 text-xs text-white/40"
-                          }`}
-                        >
-                          Travel Month
-                        </label>
-                        <div className="absolute right-3 top-3.5 text-white/40 pointer-events-none">
-                          <span className="text-[8px]">▼</span>
-                        </div>
-                        {errors.travelMonth && <p className="text-[9px] text-red-400 mt-0.5 pl-2">{errors.travelMonth.message}</p>}
-                      </div>
-                    </div>
+                      </>
+                    ) : (
+                      <>
+                        {/* Row 3: City & Travel Month for standard brochure mode */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+                          {/* City */}
+                          <div className="relative">
+                            <div className="absolute left-3 top-3.5 text-white/40 pointer-events-none">
+                              <MapPin className="w-4 h-4" />
+                            </div>
+                            <input
+                              id="city"
+                              placeholder=" "
+                              className={`peer block w-full pl-9 pr-3 pt-5 pb-1.5 text-xs text-white bg-white/5 border rounded-xl focus:border-[#D4AF37] focus:outline-none transition-all placeholder:opacity-0 ${
+                                errors.city ? "border-red-500/80 focus:border-red-500" : "border-white/10"
+                              }`}
+                              {...register("city")}
+                            />
+                            <label
+                              htmlFor="city"
+                              className={`absolute left-9 transition-all duration-200 pointer-events-none origin-[0] peer-focus:top-1 peer-focus:text-[9px] peer-focus:text-[#D4AF37] ${
+                                watchedCity ? "top-1 text-[9px] text-[#D4AF37]" : "top-3.5 text-xs text-white/40"
+                              }`}
+                            >
+                              City
+                            </label>
+                            {errors.city && <p className="text-[9px] text-red-400 mt-0.5 pl-2">{errors.city.message}</p>}
+                          </div>
 
-                    {/* Row 4: Number of Travelers & Budget */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
-                      {/* Number of Travelers */}
-                      <div className="relative">
-                        <div className="absolute left-3 top-3.5 text-white/40 pointer-events-none">
-                          <Users className="w-4 h-4" />
+                          {/* Travel Month */}
+                          <div className="relative">
+                            <div className="absolute left-3 top-3.5 text-white/40 pointer-events-none">
+                              <Calendar className="w-4 h-4" />
+                            </div>
+                            <select
+                              id="travelMonth"
+                              className={`peer block w-full pl-9 pr-8 pt-5 pb-1.5 text-xs text-white bg-[#0a1128] border rounded-xl focus:border-[#D4AF37] focus:outline-none transition-all appearance-none cursor-pointer ${
+                                errors.travelMonth ? "border-red-500/80 focus:border-red-500" : "border-white/10"
+                              }`}
+                              {...register("travelMonth")}
+                            >
+                              <option value="" disabled hidden></option>
+                              {getNext12Months().map((m, idx) => (
+                                <option key={idx} value={m} className="bg-[#0a1128] text-white">{m}</option>
+                              ))}
+                            </select>
+                            <label
+                              htmlFor="travelMonth"
+                              className={`absolute left-9 transition-all duration-200 pointer-events-none origin-[0] peer-focus:top-1 peer-focus:text-[9px] peer-focus:text-[#D4AF37] ${
+                                watchedTravelMonth ? "top-1 text-[9px] text-[#D4AF37]" : "top-3.5 text-xs text-white/40"
+                              }`}
+                            >
+                              Travel Month
+                            </label>
+                            <div className="absolute right-3 top-3.5 text-white/40 pointer-events-none">
+                              <span className="text-[8px]">▼</span>
+                            </div>
+                            {errors.travelMonth && <p className="text-[9px] text-red-400 mt-0.5 pl-2">{errors.travelMonth.message}</p>}
+                          </div>
                         </div>
-                        <input
-                          id="numberOfTravelers"
-                          type="number"
-                          min={1}
-                          max={99}
-                          placeholder=" "
-                          className={`peer block w-full pl-9 pr-3 pt-5 pb-1.5 text-xs text-white bg-white/5 border rounded-xl focus:border-[#D4AF37] focus:outline-none transition-all placeholder:opacity-0 ${
-                            errors.numberOfTravelers ? "border-red-500/80 focus:border-red-500" : "border-white/10"
-                          }`}
-                          {...register("numberOfTravelers")}
-                        />
-                        <label
-                          htmlFor="numberOfTravelers"
-                          className={`absolute left-9 transition-all duration-200 pointer-events-none origin-[0] peer-focus:top-1 peer-focus:text-[9px] peer-focus:text-[#D4AF37] ${
-                            watchedNumberOfTravelers ? "top-1 text-[9px] text-[#D4AF37]" : "top-3.5 text-xs text-white/40"
-                          }`}
-                        >
-                          Number of Travelers
-                        </label>
-                        {errors.numberOfTravelers && <p className="text-[9px] text-red-400 mt-0.5 pl-2">{errors.numberOfTravelers.message}</p>}
-                      </div>
 
-                      {/* Budget Range */}
-                      <div className="relative">
-                        <div className="absolute left-3.5 top-3.5 text-white/40 font-bold text-xs pointer-events-none">
-                          ₹
+                        {/* Row 4: Number of Travelers & Budget for standard brochure mode */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+                          {/* Number of Travelers */}
+                          <div className="relative">
+                            <div className="absolute left-3 top-3.5 text-white/40 pointer-events-none">
+                              <Users className="w-4 h-4" />
+                            </div>
+                            <input
+                              id="numberOfTravelers"
+                              type="number"
+                              min={1}
+                              max={99}
+                              placeholder=" "
+                              className={`peer block w-full pl-9 pr-3 pt-5 pb-1.5 text-xs text-white bg-white/5 border rounded-xl focus:border-[#D4AF37] focus:outline-none transition-all placeholder:opacity-0 ${
+                                errors.numberOfTravelers ? "border-red-500/80 focus:border-red-500" : "border-white/10"
+                              }`}
+                              {...register("numberOfTravelers")}
+                            />
+                            <label
+                              htmlFor="numberOfTravelers"
+                              className={`absolute left-9 transition-all duration-200 pointer-events-none origin-[0] peer-focus:top-1 peer-focus:text-[9px] peer-focus:text-[#D4AF37] ${
+                                watchedNumberOfTravelers ? "top-1 text-[9px] text-[#D4AF37]" : "top-3.5 text-xs text-white/40"
+                              }`}
+                            >
+                              Number of Travelers
+                            </label>
+                            {errors.numberOfTravelers && <p className="text-[9px] text-red-400 mt-0.5 pl-2">{errors.numberOfTravelers.message}</p>}
+                          </div>
+
+                          {/* Budget Range */}
+                          <div className="relative">
+                            <div className="absolute left-3.5 top-3.5 text-white/40 font-bold text-xs pointer-events-none">
+                              ₹
+                            </div>
+                            <select
+                              id="budget"
+                              className={`peer block w-full pl-9 pr-8 pt-5 pb-1.5 text-xs text-white bg-[#0a1128] border rounded-xl focus:border-[#D4AF37] focus:outline-none transition-all appearance-none cursor-pointer ${
+                                errors.budget ? "border-red-500/80 focus:border-red-500" : "border-white/10"
+                              }`}
+                              {...register("budget")}
+                            >
+                              <option value="" disabled hidden></option>
+                              <option value="₹25,000–50,000" className="bg-[#0a1128] text-white">₹25,000–50,000</option>
+                              <option value="₹50,000–1 Lakh" className="bg-[#0a1128] text-white">₹50,000–1 Lakh</option>
+                              <option value="₹1–2 Lakh" className="bg-[#0a1128] text-white">₹1–2 Lakh</option>
+                              <option value="₹2 Lakh+" className="bg-[#0a1128] text-white">₹2 Lakh+</option>
+                            </select>
+                            <label
+                              htmlFor="budget"
+                              className={`absolute left-9 transition-all duration-200 pointer-events-none origin-[0] peer-focus:top-1 peer-focus:text-[9px] peer-focus:text-[#D4AF37] ${
+                                watchedBudget ? "top-1 text-[9px] text-[#D4AF37]" : "top-3.5 text-xs text-white/40"
+                              }`}
+                            >
+                              Budget Range
+                            </label>
+                            <div className="absolute right-3 top-3.5 text-white/40 pointer-events-none">
+                              <span className="text-[8px]">▼</span>
+                            </div>
+                            {errors.budget && <p className="text-[9px] text-red-400 mt-0.5 pl-2">{errors.budget.message}</p>}
+                          </div>
                         </div>
-                        <select
-                          id="budget"
-                          className={`peer block w-full pl-9 pr-8 pt-5 pb-1.5 text-xs text-white bg-[#0a1128] border rounded-xl focus:border-[#D4AF37] focus:outline-none transition-all appearance-none cursor-pointer ${
-                            errors.budget ? "border-red-500/80 focus:border-red-500" : "border-white/10"
-                          }`}
-                          {...register("budget")}
-                        >
-                          <option value="" disabled hidden></option>
-                          <option value="₹25,000–50,000" className="bg-[#0a1128] text-white">₹25,000–50,000</option>
-                          <option value="₹50,000–1 Lakh" className="bg-[#0a1128] text-white">₹50,000–1 Lakh</option>
-                          <option value="₹1–2 Lakh" className="bg-[#0a1128] text-white">₹1–2 Lakh</option>
-                          <option value="₹2 Lakh+" className="bg-[#0a1128] text-white">₹2 Lakh+</option>
-                        </select>
-                        <label
-                          htmlFor="budget"
-                          className={`absolute left-9 transition-all duration-200 pointer-events-none origin-[0] peer-focus:top-1 peer-focus:text-[9px] peer-focus:text-[#D4AF37] ${
-                            watchedBudget ? "top-1 text-[9px] text-[#D4AF37]" : "top-3.5 text-xs text-white/40"
-                          }`}
-                        >
-                          Budget Range
-                        </label>
-                        <div className="absolute right-3 top-3.5 text-white/40 pointer-events-none">
-                          <span className="text-[8px]">▼</span>
-                        </div>
-                        {errors.budget && <p className="text-[9px] text-red-400 mt-0.5 pl-2">{errors.budget.message}</p>}
-                      </div>
-                    </div>
+                      </>
+                    )}
 
                     {/* Progress Bar for generating PDF */}
                     {isDownloading && (
