@@ -173,7 +173,7 @@ const EnhancedBrochureDownload: React.FC<EnhancedBrochureDownloadProps> = ({
   };
 
   const getCacheKey = () => {
-    const schemaVersion = 'v12';
+    const schemaVersion = 'v13';
     const s = JSON.stringify({ 
       v: schemaVersion, 
       packageDetails, 
@@ -631,22 +631,62 @@ const EnhancedBrochureDownload: React.FC<EnhancedBrochureDownloadProps> = ({
     const displayGuestName = guestName?.trim() || watchedName?.trim() || 'Valued Guest';
     const displayGuestPhone = guestPhone?.trim() || watchedPhone?.trim() || '';
 
-    // Title formatting strictly replicating Image 1 (CULTURE KUTCH benchmark - 2 clean lines, large font, zero parentheses)
-    const titleLower = (packageDetails.title || '').toLowerCase();
-    let coverMainTitle = 'CULTURE<br/>KUTCH';
-    if (titleLower.includes('culture') && titleLower.includes('kutch')) {
-      coverMainTitle = 'CULTURE<br/>KUTCH';
-    } else if (titleLower.includes('rann') || titleLower.includes('kutch') || titleLower.includes('dhordo')) {
-      coverMainTitle = 'CULTURE<br/>KUTCH';
+    // Dynamic Title Engine: extracts title dynamically, removes parenthetical tags, and balances across lines
+    const rawTitle = (packageDetails.title || '').trim();
+    const cleanedTitle = rawTitle.replace(/\s*\([^)]*\)/g, '').trim().toUpperCase();
+    const titleWords = cleanedTitle.split(/\s+/).filter(Boolean);
+
+    let titleLine1 = '';
+    let titleLine2 = '';
+
+    if (titleWords.length <= 2) {
+      titleLine1 = titleWords[0] || '';
+      titleLine2 = titleWords[1] || '';
     } else {
-      const cleaned = (packageDetails.title || '').replace(/\s*\([^)]*\)/g, '').trim().toUpperCase();
-      const words = cleaned.split(' ');
-      if (words.length > 2) {
-        const mid = Math.ceil(words.length / 2);
-        coverMainTitle = `${words.slice(0, mid).join(' ')}<br/>${words.slice(mid).join(' ')}`;
-      } else {
-        coverMainTitle = cleaned;
+      // Find optimal split point for balanced character distribution across 2 lines
+      let bestSplit = Math.ceil(titleWords.length / 2);
+      let minDiff = Infinity;
+      for (let i = 1; i < titleWords.length; i++) {
+        const l1 = titleWords.slice(0, i).join(' ');
+        const l2 = titleWords.slice(i).join(' ');
+        const diff = Math.abs(l1.length - l2.length);
+        if (diff < minDiff) {
+          minDiff = diff;
+          bestSplit = i;
+        }
       }
+      titleLine1 = titleWords.slice(0, bestSplit).join(' ');
+      titleLine2 = titleWords.slice(bestSplit).join(' ');
+    }
+
+    const coverMainTitle = titleLine2 ? `${titleLine1}<br/>${titleLine2}` : titleLine1;
+    const maxLineLength = Math.max(titleLine1.length, titleLine2.length);
+
+    // Dynamically calculate font-size, letter-spacing, and line-height based on title length
+    let dynamicTitleSize = 64;
+    let dynamicLetterSpacing = 5.5;
+    let dynamicLineHeight = 1.06;
+
+    if (maxLineLength <= 7) {
+      dynamicTitleSize = 64;
+      dynamicLetterSpacing = 5.5;
+      dynamicLineHeight = 1.05;
+    } else if (maxLineLength <= 11) {
+      dynamicTitleSize = 58;
+      dynamicLetterSpacing = 4.5;
+      dynamicLineHeight = 1.07;
+    } else if (maxLineLength <= 15) {
+      dynamicTitleSize = 50;
+      dynamicLetterSpacing = 3.5;
+      dynamicLineHeight = 1.09;
+    } else if (maxLineLength <= 20) {
+      dynamicTitleSize = 42;
+      dynamicLetterSpacing = 2.5;
+      dynamicLineHeight = 1.12;
+    } else {
+      dynamicTitleSize = 36;
+      dynamicLetterSpacing = 1.8;
+      dynamicLineHeight = 1.15;
     }
 
     const durLower = (packageDetails.duration || '').toLowerCase();
@@ -695,8 +735,10 @@ const EnhancedBrochureDownload: React.FC<EnhancedBrochureDownloadProps> = ({
         }
 
         .pdf-page {
-          width: ${a4w}px;
-          height: ${a4h}px;
+          width: ${a4w}px !important;
+          height: ${a4h}px !important;
+          min-height: ${a4h}px !important;
+          max-height: ${a4h}px !important;
           position: relative;
           overflow: hidden;
           background: #ffffff;
@@ -706,6 +748,7 @@ const EnhancedBrochureDownload: React.FC<EnhancedBrochureDownloadProps> = ({
           display: flex;
           flex-direction: column;
           justify-content: space-between;
+          box-sizing: border-box !important;
         }
 
         .brand-header {
@@ -789,16 +832,22 @@ const EnhancedBrochureDownload: React.FC<EnhancedBrochureDownloadProps> = ({
           color: #e2e8f0;
         }
 
+        /* PAGE 1: FULL BLEED LUXURY COVER */
         .page-cover {
+          width: ${a4w}px !important;
+          height: ${a4h}px !important;
+          min-height: ${a4h}px !important;
+          max-height: ${a4h}px !important;
           background-size: cover;
           background-position: center bottom;
           background-repeat: no-repeat;
           padding: 0;
           justify-content: space-between;
+          box-sizing: border-box !important;
         }
         .cover-top-overlay {
-          padding: 34px 36px 18px 36px;
-          background: linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(255, 255, 255, 0.92) 45%, rgba(255, 255, 255, 0.45) 75%, rgba(255, 255, 255, 0) 100%);
+          padding: 44px 36px 20px 36px;
+          background: linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(255, 255, 255, 0.92) 48%, rgba(255, 255, 255, 0.40) 78%, rgba(255, 255, 255, 0) 100%);
           display: flex;
           flex-direction: column;
           align-items: center;
@@ -810,11 +859,11 @@ const EnhancedBrochureDownload: React.FC<EnhancedBrochureDownloadProps> = ({
           align-items: center;
           justify-content: center;
           gap: 14px;
-          margin-bottom: 16px;
+          margin-bottom: 20px;
         }
         .cover-airplane-img {
-          height: 60px;
-          width: 60px;
+          height: 62px;
+          width: 62px;
           object-fit: contain;
           filter: drop-shadow(0 3px 8px rgba(0,0,0,0.14));
         }
@@ -826,10 +875,10 @@ const EnhancedBrochureDownload: React.FC<EnhancedBrochureDownloadProps> = ({
         }
         .cover-brand-title {
           font-family: 'Cinzel', serif;
-          font-size: 36px;
+          font-size: 38px;
           font-weight: 900;
           color: #1877f2;
-          letter-spacing: 1.5px;
+          letter-spacing: 1.6px;
           line-height: 1.05;
           text-transform: uppercase;
           text-shadow: 0 1px 2px rgba(24, 119, 242, 0.15);
@@ -847,9 +896,9 @@ const EnhancedBrochureDownload: React.FC<EnhancedBrochureDownloadProps> = ({
           align-items: center;
           gap: 5px;
           margin-top: 4px;
-          padding: 2.5px 12px;
+          padding: 2.5px 14px;
           background: rgba(11, 29, 58, 0.06);
-          border: 1px solid rgba(201, 162, 90, 0.6);
+          border: 1px solid rgba(201, 162, 90, 0.65);
           border-radius: 15px;
           font-size: 8.5px;
           font-weight: 700;
@@ -866,20 +915,19 @@ const EnhancedBrochureDownload: React.FC<EnhancedBrochureDownloadProps> = ({
           font-weight: 800;
           letter-spacing: 1.8px;
           text-transform: uppercase;
-          padding: 7px 24px;
+          padding: 7px 26px;
           border-radius: 30px;
           box-shadow: 0 4px 15px rgba(0,0,0,0.08);
-          margin-bottom: 16px;
+          margin-bottom: 22px;
         }
         .cover-main-title {
           font-family: 'Cinzel', serif;
-          font-size: 56px;
           font-weight: 900;
           color: #ffffff;
-          text-shadow: 0 4px 20px rgba(11, 29, 58, 0.75), 0 2px 6px rgba(0,0,0,0.6);
-          letter-spacing: 6px;
-          line-height: 1.05;
-          margin-bottom: 16px;
+          text-shadow: 0 4px 22px rgba(11, 29, 58, 0.85), 0 2px 8px rgba(0,0,0,0.65);
+          margin-bottom: 18px;
+          text-align: center;
+          max-width: 720px;
         }
         .cover-guest-plaque {
           position: absolute;
@@ -1258,7 +1306,7 @@ const EnhancedBrochureDownload: React.FC<EnhancedBrochureDownloadProps> = ({
             Discover the Timeless Beauty, Heritage & Heart of Kutch
           </div>
 
-          <div class="cover-main-title">
+          <div class="cover-main-title" style="font-size: ${dynamicTitleSize}px; letter-spacing: ${dynamicLetterSpacing}px; line-height: ${dynamicLineHeight};">
             ${coverMainTitle}
           </div>
 
