@@ -173,9 +173,9 @@ const EnhancedBrochureDownload: React.FC<EnhancedBrochureDownloadProps> = ({
   };
 
   const getCacheKey = () => {
-    const schemaVersion = 'v14';
+    const BROCHURE_SCHEMA_VERSION = 'v15';
     const s = JSON.stringify({ 
-      v: schemaVersion, 
+      v: BROCHURE_SCHEMA_VERSION, 
       packageDetails, 
       packageType, 
       destination,
@@ -844,6 +844,8 @@ const EnhancedBrochureDownload: React.FC<EnhancedBrochureDownloadProps> = ({
         ];
       }
     }
+    // Limit to actual nights stayed so 2N package displays exactly 2 cards side-by-side
+    const displayHotels = resolvedHotels.slice(0, Math.min(Math.max(1, nightsCount), 4));
 
     // Context-Aware Day Images with Keyword Matching
     const getItineraryDayImage = (day: any, idx: number) => {
@@ -1051,9 +1053,10 @@ const EnhancedBrochureDownload: React.FC<EnhancedBrochureDownloadProps> = ({
           font-weight: 900;
           color: #1877f2;
           letter-spacing: 1.6px;
-          line-height: 1.05;
+          line-height: 1.08;
           text-transform: uppercase;
           text-shadow: 0 1px 2px rgba(24, 119, 242, 0.15);
+          margin-bottom: 2.5px;
         }
         .cover-brand-tag {
           font-size: 11px;
@@ -1061,25 +1064,25 @@ const EnhancedBrochureDownload: React.FC<EnhancedBrochureDownloadProps> = ({
           color: #65a30d;
           letter-spacing: 1.8px;
           text-transform: uppercase;
-          margin-top: 1.5px;
           line-height: 1.2;
+          margin-bottom: 6px;
         }
         .cover-brand-partner-badge {
-          display: inline-flex;
-          align-items: center;
-          justify-content: center;
-          text-align: center;
-          margin-top: 6px;
-          padding: 3px 18px;
-          background: rgba(11, 29, 58, 0.06);
-          border: 1px solid rgba(201, 162, 90, 0.65);
-          border-radius: 15px;
+          display: inline-block;
+          height: 19px;
+          line-height: 19px;
+          padding: 0 16px;
+          background: rgba(11, 29, 58, 0.05);
+          border: 1px solid rgba(201, 162, 90, 0.7);
+          border-radius: 12px;
           font-size: 8.5px;
           font-weight: 700;
           color: #0b1d3a;
           letter-spacing: 0.8px;
           text-transform: uppercase;
-          line-height: 1.2;
+          text-align: center;
+          vertical-align: middle;
+          box-sizing: border-box;
         }
         .cover-tagline-pill {
           display: inline-flex;
@@ -1322,27 +1325,28 @@ const EnhancedBrochureDownload: React.FC<EnhancedBrochureDownloadProps> = ({
         .hotel-visual-card {
           display: flex;
           align-items: center;
-          gap: 9px;
-          padding: ${resolvedHotels.length > 2 ? '4px 8px' : '6px 10px'};
+          gap: 10px;
+          padding: 6px 10px;
           background: #f8fafc;
           border: 1px solid #e2e8f0;
           border-radius: 8px;
           overflow: hidden;
+          font-family: 'Plus Jakarta Sans', Arial, sans-serif;
         }
         .hvc-thumb {
-          width: ${resolvedHotels.length > 2 ? '50px' : '58px'};
-          height: ${resolvedHotels.length > 2 ? '44px' : '52px'};
+          width: ${displayHotels.length > 2 ? '54px' : '62px'};
+          height: ${displayHotels.length > 2 ? '46px' : '52px'};
           border-radius: 6px;
           object-fit: cover;
           flex-shrink: 0;
-          border: 1px solid rgba(201, 162, 90, 0.4);
+          border: 1px solid rgba(201, 162, 90, 0.45);
         }
         .hvc-body {
           flex: 1;
           min-width: 0;
           display: flex;
           flex-direction: column;
-          gap: 1.5px;
+          gap: 2px;
         }
         .hvc-title-row {
           display: flex;
@@ -1352,31 +1356,24 @@ const EnhancedBrochureDownload: React.FC<EnhancedBrochureDownloadProps> = ({
         }
         .hvc-name {
           font-weight: 800;
-          font-size: ${resolvedHotels.length > 2 ? '8.8px' : '9.8px'};
+          font-size: ${displayHotels.length > 2 ? '9.5px' : '10.5px'};
           color: #0b1d3a;
-          white-space: nowrap;
-          overflow: hidden;
-          text-overflow: ellipsis;
+          line-height: 1.25;
         }
         .hvc-stars {
           color: #f59e0b;
-          font-size: 7.5px;
+          font-size: 8px;
           letter-spacing: 0.5px;
           flex-shrink: 0;
         }
         .hvc-meta {
-          font-size: 7.5px;
-          color: #64748b;
-          white-space: nowrap;
-          overflow: hidden;
-          text-overflow: ellipsis;
+          font-size: 8px;
+          color: #475569;
+          line-height: 1.2;
         }
         .hvc-desc {
-          font-size: 7px;
-          color: #475569;
-          white-space: nowrap;
-          overflow: hidden;
-          text-overflow: ellipsis;
+          font-size: 7.5px;
+          color: #64748b;
           line-height: 1.2;
         }
         .hvc-footer {
@@ -1384,15 +1381,15 @@ const EnhancedBrochureDownload: React.FC<EnhancedBrochureDownloadProps> = ({
           align-items: center;
           justify-content: space-between;
           gap: 4px;
-          margin-top: 1px;
+          margin-top: 2px;
         }
         .gold-meal-badge {
           background: rgba(201,162,90,0.15);
           border: 1px solid #c9a25a;
           color: #92400e;
-          font-size: 7.5px;
+          font-size: 7.6px;
           font-weight: 800;
-          padding: 1.5px 6px;
+          padding: 1.5px 7px;
           border-radius: 10px;
           white-space: nowrap;
         }
@@ -1402,11 +1399,42 @@ const EnhancedBrochureDownload: React.FC<EnhancedBrochureDownloadProps> = ({
           grid-template-columns: 1fr 1fr;
           gap: 6px;
         }
-        .highlight-item {
+        .highlight-item-visual {
+          display: flex;
+          align-items: center;
+          gap: 8px;
           background: #f8fafc;
           border: 1px solid #e2e8f0;
-          border-radius: 6px;
-          padding: 6px 8px;
+          border-radius: 7px;
+          padding: 5px 8px;
+          overflow: hidden;
+          font-family: 'Plus Jakarta Sans', Arial, sans-serif;
+        }
+        .highlight-thumb {
+          width: 50px;
+          height: 44px;
+          border-radius: 5px;
+          object-fit: cover;
+          flex-shrink: 0;
+          border: 1px solid rgba(201, 162, 90, 0.35);
+        }
+        .highlight-info {
+          flex: 1;
+          min-width: 0;
+          display: flex;
+          flex-direction: column;
+          gap: 1.5px;
+        }
+        .highlight-title {
+          font-weight: 800;
+          font-size: 8.8px;
+          color: #0b1d3a;
+          line-height: 1.25;
+        }
+        .highlight-desc {
+          font-size: 7.5px;
+          color: #64748b;
+          line-height: 1.25;
         }
         .assurance-strip {
           background: rgba(11,29,58,0.04);
@@ -1705,8 +1733,8 @@ const EnhancedBrochureDownload: React.FC<EnhancedBrochureDownloadProps> = ({
               <span>🏨</span> SELECTED HOTELS &amp; LUXURY STAYS
               <span style="font-size: 8.5px; font-weight: 600; color: #64748b; margin-left: auto;">Verified hospitality with premium amenities</span>
             </div>
-            <div class="hotels-visual-grid ${resolvedHotels.length === 1 ? 'cols-1' : 'cols-2'}">
-              ${resolvedHotels.map((hotel: any) => `
+            <div class="hotels-visual-grid ${displayHotels.length === 1 ? 'cols-1' : 'cols-2'}">
+              ${displayHotels.map((hotel: any) => `
                 <div class="hotel-visual-card">
                   <img src="${hotel.image}" alt="${hotel.name}" class="hvc-thumb" crossorigin="anonymous" />
                   <div class="hvc-body">
@@ -1732,21 +1760,33 @@ const EnhancedBrochureDownload: React.FC<EnhancedBrochureDownloadProps> = ({
               <span style="font-size: 8.5px; font-weight: 600; color: #64748b; margin-left: auto;">Curated iconic destinations</span>
             </div>
             <div class="highlights-grid">
-              <div class="highlight-item">
-                <div style="font-weight: 800; font-size: 9px; color: #0b1d3a; margin-bottom: 2px;">🌅 White Rann Salt Desert Sunset</div>
-                <div style="font-size: 7.5px; color: #64748b; line-height: 1.3;">Glittering vast white salt marshes with spectacular sunset walk &amp; cultural gala.</div>
+              <div class="highlight-item-visual">
+                <img src="${origin}/rann_utsav_white_desert.jpg" class="highlight-thumb" alt="White Rann" crossorigin="anonymous" />
+                <div class="highlight-info">
+                  <div class="highlight-title">🌅 White Rann Salt Desert Sunset</div>
+                  <div class="highlight-desc">Glittering vast white salt marshes with spectacular sunset walk &amp; cultural gala.</div>
+                </div>
               </div>
-              <div class="highlight-item">
-                <div style="font-weight: 800; font-size: 9px; color: #0b1d3a; margin-bottom: 2px;">🛣️ Road to Heaven Highway</div>
-                <div style="font-size: 7.5px; color: #64748b; line-height: 1.3;">Iconic straight highway cutting through turquoise salt waters of the Great Rann.</div>
+              <div class="highlight-item-visual">
+                <img src="${origin}/rann_utsav_road_to_heaven.jpg" class="highlight-thumb" alt="Road to Heaven" crossorigin="anonymous" />
+                <div class="highlight-info">
+                  <div class="highlight-title">🛣️ Road to Heaven Highway</div>
+                  <div class="highlight-desc">Iconic straight highway cutting through turquoise salt waters of the Great Rann.</div>
+                </div>
               </div>
-              <div class="highlight-item">
-                <div style="font-weight: 800; font-size: 9px; color: #0b1d3a; margin-bottom: 2px;">🏔️ Kalo Dungar Black Hill (1,525 ft)</div>
-                <div style="font-size: 7.5px; color: #64748b; line-height: 1.3;">Highest summit in Kutch offering panoramic 360° views overlooking the desert.</div>
+              <div class="highlight-item-visual">
+                <img src="${origin}/kalodungar.jpg" class="highlight-thumb" alt="Kalo Dungar" crossorigin="anonymous" />
+                <div class="highlight-info">
+                  <div class="highlight-title">🏔️ Kalo Dungar Black Hill (1,525 ft)</div>
+                  <div class="highlight-desc">Highest summit in Kutch offering panoramic 360° views overlooking the desert.</div>
+                </div>
               </div>
-              <div class="highlight-item">
-                <div style="font-weight: 800; font-size: 9px; color: #0b1d3a; margin-bottom: 2px;">🏰 Royal Heritage Palaces &amp; Smritivan</div>
-                <div style="font-size: 7.5px; color: #64748b; line-height: 1.3;">Historic Prag Mahal, Aina Mahal &amp; India's largest memorial park in Bhuj.</div>
+              <div class="highlight-item-visual">
+                <img src="${origin}/brochure-assets/palace_legacy.jpg" class="highlight-thumb" alt="Royal Heritage Palaces" crossorigin="anonymous" />
+                <div class="highlight-info">
+                  <div class="highlight-title">🏰 Royal Heritage Palaces &amp; Smritivan</div>
+                  <div class="highlight-desc">Historic Prag Mahal, Aina Mahal &amp; India's largest memorial park in Bhuj.</div>
+                </div>
               </div>
             </div>
           </div>
@@ -2058,13 +2098,16 @@ const EnhancedBrochureDownload: React.FC<EnhancedBrochureDownloadProps> = ({
         container.style.zIndex = '-1';
         document.body.appendChild(container);
   
-        await waitForImages(container, 8000);
+        await Promise.all([
+          document.fonts ? document.fonts.ready : Promise.resolve(),
+          waitForImages(container, 8000)
+        ]);
   
         const pages = Array.from(container.querySelectorAll('.pdf-page')) as HTMLElement[];
         pagesCount = pages.length;
         const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4', compress: true });
   
-        const scale = 1.5; // Optimized scale for quality vs performance
+        const scale = 2.0; // Crystal clear text and graphics at high zoom
         scaleUsed = scale;
         for (let i = 0; i < pages.length; i++) {
           if (abortRef.current) break;
@@ -2078,12 +2121,12 @@ const EnhancedBrochureDownload: React.FC<EnhancedBrochureDownloadProps> = ({
             useCORS: true,
             allowTaint: false,
             backgroundColor: '#ffffff',
-            imageTimeout: 3000, // Reduced timeout
+            imageTimeout: 5000,
             logging: false,
             removeContainer: true
           });
           
-          const imgData = canvas.toDataURL('image/jpeg', 0.85); // Reduced quality slightly for much smaller size
+          const imgData = canvas.toDataURL('image/jpeg', 0.95); // High quality eliminates JPEG artifacting
           const imgWidth = 210; 
           const imgHeight = 297; 
           if (i > 0) pdf.addPage();
