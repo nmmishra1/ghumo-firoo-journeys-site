@@ -810,12 +810,19 @@ const EnhancedBrochureDownload: React.FC<EnhancedBrochureDownloadProps> = ({
           align-items: center;
           justify-content: center;
           gap: 14px;
-          margin-bottom: 12px;
+          margin-bottom: 16px;
         }
         .cover-airplane-img {
-          height: 56px;
-          width: 56px;
+          height: 60px;
+          width: 60px;
           object-fit: contain;
+          filter: drop-shadow(0 3px 8px rgba(0,0,0,0.14));
+        }
+        .cover-brand-text {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          text-align: center;
         }
         .cover-brand-title {
           font-family: 'Cinzel', serif;
@@ -825,29 +832,29 @@ const EnhancedBrochureDownload: React.FC<EnhancedBrochureDownloadProps> = ({
           letter-spacing: 1.5px;
           line-height: 1.05;
           text-transform: uppercase;
+          text-shadow: 0 1px 2px rgba(24, 119, 242, 0.15);
         }
         .cover-brand-tag {
-          font-family: 'Montserrat', sans-serif;
           font-size: 11px;
           font-weight: 800;
           color: #65a30d;
-          letter-spacing: 2px;
+          letter-spacing: 1.8px;
           text-transform: uppercase;
           margin-top: 2px;
         }
         .cover-brand-partner-badge {
           display: inline-flex;
           align-items: center;
-          justify-content: center;
+          gap: 5px;
           margin-top: 4px;
-          padding: 3px 14px;
-          background: rgba(255, 255, 255, 0.8);
-          border: 1px solid rgba(201, 162, 90, 0.7);
-          border-radius: 20px;
+          padding: 2.5px 12px;
+          background: rgba(11, 29, 58, 0.06);
+          border: 1px solid rgba(201, 162, 90, 0.6);
+          border-radius: 15px;
           font-size: 8.5px;
-          font-weight: 800;
+          font-weight: 700;
           color: #0b1d3a;
-          letter-spacing: 1px;
+          letter-spacing: 0.8px;
           text-transform: uppercase;
         }
         .cover-tagline-pill {
@@ -857,25 +864,22 @@ const EnhancedBrochureDownload: React.FC<EnhancedBrochureDownloadProps> = ({
           color: #0b1d3a;
           font-size: 10px;
           font-weight: 800;
-          letter-spacing: 2.2px;
+          letter-spacing: 1.8px;
           text-transform: uppercase;
-          padding: 7px 28px;
+          padding: 7px 24px;
           border-radius: 30px;
-          box-shadow: 0 4px 15px rgba(0,0,0,0.06);
-          margin-top: 14px;
-          margin-bottom: 22px;
+          box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+          margin-bottom: 16px;
         }
         .cover-main-title {
           font-family: 'Cinzel', serif;
           font-size: 56px;
           font-weight: 900;
           color: #ffffff;
-          text-shadow: 0 4px 20px rgba(11, 29, 58, 0.85), 0 2px 6px rgba(0,0,0,0.7);
-          letter-spacing: 5px;
+          text-shadow: 0 4px 20px rgba(11, 29, 58, 0.75), 0 2px 6px rgba(0,0,0,0.6);
+          letter-spacing: 6px;
           line-height: 1.05;
           margin-bottom: 16px;
-          text-align: center;
-          max-width: 720px;
         }
         .cover-guest-plaque {
           position: absolute;
@@ -917,26 +921,25 @@ const EnhancedBrochureDownload: React.FC<EnhancedBrochureDownloadProps> = ({
         }
         .cover-duration-badge {
           display: inline-block;
-          background: linear-gradient(135deg, #d4a024 0%, #b8860b 100%);
+          background: linear-gradient(135deg, #d4af37 0%, #aa7c11 100%);
           color: #0b1d3a;
-          font-family: 'Montserrat', sans-serif;
-          font-size: 13px;
+          font-size: 13.5px;
           font-weight: 900;
-          letter-spacing: 2.8px;
+          letter-spacing: 2.5px;
           text-transform: uppercase;
-          padding: 9px 38px;
+          padding: 8px 32px;
           border-radius: 25px;
-          box-shadow: 0 6px 20px rgba(184, 134, 11, 0.45);
+          box-shadow: 0 6px 20px rgba(170, 124, 17, 0.45);
         }
         .cover-bottom-bar {
           padding: 13px 36px;
-          background: rgba(8, 19, 38, 0.94);
+          background: rgba(8, 19, 38, 0.92);
           backdrop-filter: blur(8px);
           color: #ffffff;
           display: flex;
           align-items: center;
           justify-content: space-between;
-          font-size: 10px;
+          font-size: 11px;
           font-weight: 700;
           letter-spacing: 0.8px;
           border-top: 2px solid #c9a25a;
@@ -1246,13 +1249,13 @@ const EnhancedBrochureDownload: React.FC<EnhancedBrochureDownloadProps> = ({
             <img src="${iconImg}" class="cover-airplane-img" alt="Ghumo Firoo Airplane Emblem" crossorigin="anonymous" />
             <div class="cover-brand-text">
               <div class="cover-brand-title">GHUMO FIROO</div>
-              <div class="cover-brand-tag">Y O U R &nbsp; J O U R N E Y , &nbsp; O U R &nbsp; E X P E R T I S E !</div>
-              <div class="cover-brand-partner-badge">OFFICIAL PARTNER: EVOKE TENT CITY DHORDO</div>
+              <div class="cover-brand-tag">YOUR JOURNEY, OUR EXPERTISE!</div>
+              <div class="cover-brand-partner-badge">Official Partner: Evoke Tent City Dhordo</div>
             </div>
           </div>
 
           <div class="cover-tagline-pill">
-            D I S C O V E R &nbsp; T H E &nbsp; T I M E L E S S &nbsp; B E A U T Y , &nbsp; H E R I T A G E &nbsp; &amp; &nbsp; H E A R T &nbsp; O F &nbsp; K U T C H
+            Discover the Timeless Beauty, Heritage & Heart of Kutch
           </div>
 
           <div class="cover-main-title">
@@ -1272,10 +1275,8 @@ const EnhancedBrochureDownload: React.FC<EnhancedBrochureDownloadProps> = ({
         </div>
 
         <div class="cover-bottom-bar">
-          <div>📞 +91 9910987264 / 9870229792</div>
-          <div>✉️ booking@ghumofiroo.com</div>
           <div>🌐 ghumofiroo.com</div>
-          <div style="color: #d4af37;">✓ OFFICIAL VERIFIED QUOTATION</div>
+          <div>Official Partner: Evoke Tent City Dhordo</div>
         </div>
       </div>
 
