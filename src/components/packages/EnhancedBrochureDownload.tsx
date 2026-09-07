@@ -173,7 +173,7 @@ const EnhancedBrochureDownload: React.FC<EnhancedBrochureDownloadProps> = ({
   };
 
   const getCacheKey = () => {
-    const schemaVersion = 'v9';
+    const schemaVersion = 'v11';
     const s = JSON.stringify({ 
       v: schemaVersion, 
       packageDetails, 
@@ -570,16 +570,10 @@ const EnhancedBrochureDownload: React.FC<EnhancedBrochureDownloadProps> = ({
     }
     return String(v ?? '');
   };
+
   const generatePagedBrochureContent = () => {
     const a4w = 794; 
     const a4h = 1123; 
-    
-    // Chunk itinerary for pagination (2 days per page for readability and elegance)
-    const daysPerPage = 2;
-    const itineraryChunks = [];
-    for (let i = 0; i < packageDetails.itinerary.length; i += daysPerPage) {
-      itineraryChunks.push(packageDetails.itinerary.slice(i, i + daysPerPage));
-    }
     
     const origin = typeof window !== 'undefined' ? window.location.origin : '';
     const logoImg = `${origin}/ghumo-firoo-logo.png`;
@@ -588,7 +582,7 @@ const EnhancedBrochureDownload: React.FC<EnhancedBrochureDownloadProps> = ({
     const effectivePax = passengersCount || Number(watchedNumberOfTravelers) || 2;
     const effectiveAdults = adultsCount || effectivePax;
     const effectiveChildren = childrenCount || 0;
-    const effectiveCabName = selectedCabName || transport || 'AC Sedan (Swift Dzire / Toyota Etios)';
+    const effectiveCabName = selectedCabName || transport || 'AC SUV (Maruti Ertiga / Triber)';
     const effectivePickup = pickupLocation || 'Bhuj Railway Station';
     const effectiveDrop = dropLocation || 'Bhuj Railway Station';
 
@@ -622,7 +616,6 @@ const EnhancedBrochureDownload: React.FC<EnhancedBrochureDownloadProps> = ({
     const formattedTotalCost = computedTotalCost.toLocaleString('en-IN');
     const displayPerPaxPrice = Math.round(computedTotalCost / Math.max(1, effectivePax)).toLocaleString('en-IN');
 
-    // Quote ref and issue date
     const quoteRef = Math.floor(100000 + Math.random() * 900000);
     const quoteDate = new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
 
@@ -632,7 +625,23 @@ const EnhancedBrochureDownload: React.FC<EnhancedBrochureDownloadProps> = ({
       coverBg = `${origin}/brochure-assets/cover_kutch.jpg`;
     }
 
-    const totalPages = 2 + itineraryChunks.length + 1;
+    const rawTitle = packageDetails.title || 'RANN UTSAV & WHITE DESERT FLAGSHIP';
+    let coverMainTitle = rawTitle.replace(/\s*\([^)]*\)/g, '').trim().toUpperCase();
+    if (coverMainTitle.includes('RANN UTSAV') && !coverMainTitle.includes('FLAGSHIP')) {
+      coverMainTitle = 'RANN UTSAV & WHITE DESERT FLAGSHIP';
+    }
+
+    const durLower = (packageDetails.duration || '').toLowerCase();
+    let durationPillText = '02 NIGHTS / 03 DAYS';
+    if (durLower.includes('4d') || durLower.includes('4 day') || durLower.includes('3n') || durLower.includes('3 night')) {
+      durationPillText = '03 NIGHTS / 04 DAYS';
+    } else if (durLower.includes('5d') || durLower.includes('4n')) {
+      durationPillText = '04 NIGHTS / 05 DAYS';
+    } else if (durLower.includes('2d') || durLower.includes('1n')) {
+      durationPillText = '01 NIGHT / 02 DAYS';
+    } else if (durLower.includes('3d') || durLower.includes('2n')) {
+      durationPillText = '02 NIGHTS / 03 DAYS';
+    }
 
     const getItineraryDayImage = (day: any, idx: number) => {
       if (day.image && day.image.startsWith('http')) return day.image;
@@ -650,6 +659,10 @@ const EnhancedBrochureDownload: React.FC<EnhancedBrochureDownloadProps> = ({
       }
       return coverBg;
     };
+
+    const itineraryList = packageDetails.itinerary || [];
+    const totalDays = itineraryList.length;
+    const totalPages = 4;
 
     return `
       <style>
@@ -677,7 +690,6 @@ const EnhancedBrochureDownload: React.FC<EnhancedBrochureDownloadProps> = ({
           justify-content: space-between;
         }
 
-        /* Common Header */
         .brand-header {
           padding: 14px 32px 10px 32px;
           display: flex;
@@ -693,7 +705,7 @@ const EnhancedBrochureDownload: React.FC<EnhancedBrochureDownloadProps> = ({
           gap: 14px;
         }
         .brand-logo-img {
-          height: 48px;
+          height: 46px;
           width: auto;
           object-fit: contain;
         }
@@ -703,14 +715,14 @@ const EnhancedBrochureDownload: React.FC<EnhancedBrochureDownloadProps> = ({
         }
         .brand-name {
           font-family: 'Cinzel', serif;
-          font-size: 24px;
+          font-size: 22px;
           font-weight: 800;
           color: #0b1d3a;
           letter-spacing: 0.5px;
           line-height: 1.1;
         }
         .brand-tagline {
-          font-size: 9.5px;
+          font-size: 9px;
           font-weight: 700;
           color: #b8860b;
           letter-spacing: 1.2px;
@@ -719,9 +731,9 @@ const EnhancedBrochureDownload: React.FC<EnhancedBrochureDownloadProps> = ({
         }
         .brand-badge {
           font-size: 10px;
-          font-weight: 700;
+          font-weight: 800;
           color: #0b1d3a;
-          background: rgba(201, 162, 90, 0.15);
+          background: rgba(201, 162, 90, 0.12);
           border: 1.5px solid #c9a25a;
           padding: 5px 14px;
           border-radius: 20px;
@@ -729,7 +741,6 @@ const EnhancedBrochureDownload: React.FC<EnhancedBrochureDownloadProps> = ({
           text-transform: uppercase;
         }
 
-        /* Common Footer */
         .brand-footer {
           padding: 9px 32px;
           background: #081326;
@@ -737,7 +748,7 @@ const EnhancedBrochureDownload: React.FC<EnhancedBrochureDownloadProps> = ({
           display: flex;
           align-items: center;
           justify-content: space-between;
-          font-size: 9.5px;
+          font-size: 9px;
           font-weight: 600;
           letter-spacing: 0.3px;
           border-top: 2px solid #c9a25a;
@@ -760,7 +771,6 @@ const EnhancedBrochureDownload: React.FC<EnhancedBrochureDownloadProps> = ({
           color: #e2e8f0;
         }
 
-        /* PAGE 1: COVER */
         .page-cover {
           background-size: cover;
           background-position: center bottom;
@@ -782,23 +792,16 @@ const EnhancedBrochureDownload: React.FC<EnhancedBrochureDownloadProps> = ({
           align-items: center;
           justify-content: center;
           gap: 14px;
-          margin-bottom: 16px;
+          margin-bottom: 12px;
         }
         .cover-airplane-img {
           height: 56px;
           width: 56px;
           object-fit: contain;
-          filter: drop-shadow(0 3px 8px rgba(0,0,0,0.14));
-        }
-        .cover-brand-text {
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          text-align: center;
         }
         .cover-brand-title {
           font-family: 'Cinzel', serif;
-          font-size: 34px;
+          font-size: 36px;
           font-weight: 900;
           color: #1877f2;
           letter-spacing: 1.5px;
@@ -806,26 +809,27 @@ const EnhancedBrochureDownload: React.FC<EnhancedBrochureDownloadProps> = ({
           text-transform: uppercase;
         }
         .cover-brand-tag {
+          font-family: 'Montserrat', sans-serif;
           font-size: 11px;
           font-weight: 800;
           color: #65a30d;
-          letter-spacing: 1.8px;
+          letter-spacing: 2px;
           text-transform: uppercase;
           margin-top: 2px;
         }
         .cover-brand-partner-badge {
           display: inline-flex;
           align-items: center;
-          gap: 5px;
+          justify-content: center;
           margin-top: 4px;
-          padding: 2.5px 12px;
-          background: rgba(11, 29, 58, 0.06);
-          border: 1px solid rgba(201, 162, 90, 0.6);
-          border-radius: 15px;
+          padding: 3px 14px;
+          background: rgba(255, 255, 255, 0.8);
+          border: 1px solid rgba(201, 162, 90, 0.7);
+          border-radius: 20px;
           font-size: 8.5px;
-          font-weight: 700;
+          font-weight: 800;
           color: #0b1d3a;
-          letter-spacing: 0.8px;
+          letter-spacing: 1px;
           text-transform: uppercase;
         }
         .cover-tagline-pill {
@@ -835,35 +839,38 @@ const EnhancedBrochureDownload: React.FC<EnhancedBrochureDownloadProps> = ({
           color: #0b1d3a;
           font-size: 10px;
           font-weight: 800;
-          letter-spacing: 1.8px;
+          letter-spacing: 2.2px;
           text-transform: uppercase;
-          padding: 7px 24px;
+          padding: 7px 28px;
           border-radius: 30px;
-          box-shadow: 0 4px 15px rgba(0,0,0,0.08);
-          margin-bottom: 16px;
+          box-shadow: 0 4px 15px rgba(0,0,0,0.06);
+          margin-top: 14px;
+          margin-bottom: 22px;
         }
         .cover-main-title {
           font-family: 'Cinzel', serif;
-          font-size: 44px;
+          font-size: 42px;
           font-weight: 900;
           color: #ffffff;
           text-shadow: 0 4px 20px rgba(11, 29, 58, 0.85), 0 2px 6px rgba(0,0,0,0.7);
-          letter-spacing: 4px;
-          line-height: 1.08;
+          letter-spacing: 3.5px;
+          line-height: 1.1;
           margin-bottom: 16px;
           text-align: center;
+          max-width: 680px;
         }
         .cover-duration-badge {
           display: inline-block;
-          background: linear-gradient(135deg, #d4af37 0%, #aa7c11 100%);
+          background: linear-gradient(135deg, #d4a024 0%, #b8860b 100%);
           color: #0b1d3a;
+          font-family: 'Montserrat', sans-serif;
           font-size: 13px;
           font-weight: 900;
-          letter-spacing: 2px;
+          letter-spacing: 2.8px;
           text-transform: uppercase;
-          padding: 8px 30px;
+          padding: 9px 38px;
           border-radius: 25px;
-          box-shadow: 0 6px 20px rgba(170, 124, 17, 0.45);
+          box-shadow: 0 6px 20px rgba(184, 134, 11, 0.45);
         }
         .cover-bottom-bar {
           padding: 13px 36px;
@@ -873,50 +880,60 @@ const EnhancedBrochureDownload: React.FC<EnhancedBrochureDownloadProps> = ({
           display: flex;
           align-items: center;
           justify-content: space-between;
-          font-size: 10.5px;
+          font-size: 10px;
           font-weight: 700;
           letter-spacing: 0.8px;
           border-top: 2px solid #c9a25a;
           z-index: 10;
         }
 
-        /* PAGE 2: TRIP ESSENTIALS & PARAMETERS */
         .page-pricing-content {
           padding: 14px 30px 10px 30px;
           flex: 1;
           display: flex;
           flex-direction: column;
           justify-content: space-between;
-          gap: 8px;
+          gap: 9px;
           font-family: 'Plus Jakarta Sans', sans-serif;
         }
-        .section-heading {
+        .p2-section-heading {
           text-align: center;
-          margin-bottom: 6px;
+          margin-bottom: 4px;
         }
-        .section-title {
+        .p2-section-title {
           font-family: 'Cinzel', serif;
           font-size: 20px;
           font-weight: 800;
           color: #0b1d3a;
-          letter-spacing: 1.2px;
+          letter-spacing: 1.5px;
+          text-transform: uppercase;
         }
-        .section-subtitle {
+        .p2-gold-divider {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 8px;
+          margin: 4px 0 2px 0;
+        }
+        .p2-gold-line {
+          height: 1px;
+          width: 50px;
+          background: #c9a25a;
+        }
+        .p2-section-subtitle {
           font-size: 9.5px;
           font-weight: 600;
-          color: #475569;
-          margin-top: 2px;
+          color: #64748b;
           letter-spacing: 0.3px;
         }
 
-        /* QUOTATION SPECIFICATIONS CARD */
         .quote-spec-card {
-          background: linear-gradient(135deg, #0b1d3a 0%, #162a4d 100%);
+          background: linear-gradient(135deg, #0b1d3a 0%, #152744 100%);
           border: 1.8px solid #c9a25a;
           border-radius: 12px;
-          padding: 14px 18px;
+          padding: 13px 18px;
           color: #ffffff;
-          box-shadow: 0 6px 16px rgba(0,0,0,0.12);
+          box-shadow: 0 8px 24px rgba(11,29,58,0.14);
         }
         .quote-spec-header {
           display: flex;
@@ -927,16 +944,19 @@ const EnhancedBrochureDownload: React.FC<EnhancedBrochureDownloadProps> = ({
           margin-bottom: 10px;
         }
         .quote-ref-badge {
+          font-family: 'Cinzel', serif;
           font-size: 11px;
-          font-weight: 900;
+          font-weight: 800;
           color: #d4af37;
           text-transform: uppercase;
-          letter-spacing: 1.5px;
+          letter-spacing: 1.2px;
         }
         .quote-total-price {
-          font-size: 22px;
+          font-size: 26px;
           font-weight: 900;
           color: #f59e0b;
+          line-height: 1.05;
+          margin: 1px 0;
         }
         .quote-grid-4 {
           display: grid;
@@ -947,34 +967,34 @@ const EnhancedBrochureDownload: React.FC<EnhancedBrochureDownloadProps> = ({
           background: rgba(255,255,255,0.06);
           border: 1px solid rgba(255,255,255,0.12);
           border-radius: 8px;
-          padding: 7px 9px;
+          padding: 8px 10px;
         }
         .quote-cell-label {
-          color: #f59e0b;
           font-size: 8px;
           font-weight: 800;
+          color: #d4af37;
           text-transform: uppercase;
-          margin-bottom: 2px;
+          letter-spacing: 0.8px;
+          margin-bottom: 3px;
         }
         .quote-cell-val {
-          color: #ffffff;
-          font-size: 10px;
+          font-size: 10.5px;
           font-weight: 800;
+          color: #ffffff;
           line-height: 1.25;
         }
         .quote-cell-sub {
-          color: #94a3b8;
           font-size: 8px;
-          margin-top: 2px;
+          color: #cbd5e1;
+          margin-top: 3px;
         }
 
-        /* VERTICAL SECTION BOXES */
         .v-section-box {
-          border: 1.2px solid rgba(201, 162, 90, 0.6);
-          border-radius: 8px;
-          padding: 8px 16px;
+          border: 1.5px solid rgba(201, 162, 90, 0.5);
+          border-radius: 10px;
+          padding: 10px 14px;
           background: #ffffff;
-          box-shadow: 0 1px 4px rgba(0,0,0,0.03);
+          box-shadow: 0 4px 14px rgba(0,0,0,0.04);
         }
         .v-section-title {
           font-family: 'Cinzel', serif;
@@ -982,71 +1002,100 @@ const EnhancedBrochureDownload: React.FC<EnhancedBrochureDownloadProps> = ({
           font-weight: 800;
           color: #0b1d3a;
           letter-spacing: 0.8px;
-          margin-bottom: 4px;
-          text-transform: uppercase;
+          margin-bottom: 7px;
           display: flex;
           align-items: center;
           gap: 6px;
-          border-bottom: 1px solid rgba(201, 162, 90, 0.25);
-          padding-bottom: 2.5px;
         }
-        .v-section-title span.gold-icon {
-          color: #b8860b;
-          font-size: 11px;
-        }
-        .v-list-vertical {
-          list-style: none;
+        .hotel-row-item {
           display: flex;
-          flex-direction: column;
-          gap: 3px;
+          align-items: center;
+          justify-content: space-between;
+          padding: 6px 10px;
+          background: #f8fafc;
+          border: 1px solid #e2e8f0;
+          border-radius: 6px;
+          margin-bottom: 5px;
         }
-        .v-list-vertical li {
-          font-size: 10px;
-          color: #1e293b;
-          line-height: 1.45;
-          font-weight: 550;
-          font-family: 'Plus Jakarta Sans', sans-serif;
+        .hotel-row-item:last-child {
+          margin-bottom: 0;
         }
-        .v-list-vertical li strong {
-          color: #0b1d3a;
+        .gold-meal-badge {
+          background: rgba(201,162,90,0.15);
+          border: 1px solid #c9a25a;
+          color: #92400e;
+          font-size: 8px;
           font-weight: 800;
+          padding: 2.5px 8px;
+          border-radius: 12px;
+          white-space: nowrap;
         }
 
-        /* PAGE 3: ITINERARY */
-        .page-itinerary-content {
-          padding: 12px 28px;
+        .highlights-grid {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 6px;
+        }
+        .highlight-item {
+          background: #f8fafc;
+          border: 1px solid #e2e8f0;
+          border-radius: 6px;
+          padding: 6px 8px;
+        }
+        .assurance-strip {
+          background: rgba(11,29,58,0.04);
+          border: 1px solid rgba(201,162,90,0.4);
+          border-radius: 8px;
+          padding: 7px 14px;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          font-size: 8.5px;
+          color: #334155;
+        }
+
+        .page-itinerary-container {
+          padding: 10px 30px 10px 30px;
           flex: 1;
           display: flex;
           flex-direction: column;
-          gap: 8px;
+          justify-content: space-between;
+        }
+        .itinerary-list-wrap {
+          display: flex;
+          flex-direction: column;
+          justify-content: space-between;
+          gap: ${totalDays > 3 ? '8px' : '12px'};
+          flex: 1;
+          margin-top: 8px;
         }
         .itinerary-card {
           display: flex;
-          border-radius: 11px;
+          height: ${totalDays > 3 ? '175px' : '240px'};
+          border: 1.5px solid rgba(201, 162, 90, 0.45);
+          border-radius: 10px;
           overflow: hidden;
           background: #ffffff;
-          border: 1.5px solid rgba(201, 162, 90, 0.35);
-          box-shadow: 0 3px 10px rgba(0, 0, 0, 0.06);
-          flex: 1;
+          box-shadow: 0 4px 14px rgba(0,0,0,0.05);
         }
         .itinerary-day-col {
-          width: 95px;
+          width: 90px;
           background: linear-gradient(180deg, #0b1d3a 0%, #162a4d 100%);
           color: #ffffff;
           display: flex;
           flex-direction: column;
           align-items: center;
           justify-content: center;
-          padding: 8px;
           text-align: center;
+          padding: 8px 6px;
           border-right: 2px solid #c9a25a;
         }
         .itinerary-day-num {
           font-family: 'Cinzel', serif;
-          font-size: 15px;
-          font-weight: 900;
+          font-size: 14px;
+          font-weight: 800;
           color: #d4af37;
-          letter-spacing: 1px;
+          letter-spacing: 0.5px;
         }
         .itinerary-day-tag {
           font-size: 7.5px;
@@ -1059,14 +1108,14 @@ const EnhancedBrochureDownload: React.FC<EnhancedBrochureDownloadProps> = ({
         }
         .itinerary-details-col {
           flex: 1;
-          padding: 8px 14px;
+          padding: ${totalDays > 3 ? '6px 14px' : '10px 18px'};
           display: flex;
           flex-direction: column;
           justify-content: center;
         }
         .itinerary-day-title {
           font-family: 'Cinzel', serif;
-          font-size: 11px;
+          font-size: ${totalDays > 3 ? '10px' : '11.5px'};
           font-weight: 800;
           color: #0b1d3a;
           letter-spacing: 0.5px;
@@ -1080,13 +1129,12 @@ const EnhancedBrochureDownload: React.FC<EnhancedBrochureDownloadProps> = ({
           gap: 2px;
         }
         .itinerary-bullets li {
-          font-size: 8.5px;
+          font-size: ${totalDays > 3 ? '8px' : '8.5px'};
           color: #334155;
           line-height: 1.35;
           display: flex;
           align-items: flex-start;
           gap: 5px;
-          font-weight: 500;
         }
         .itinerary-bullets li::before {
           content: "✦";
@@ -1096,7 +1144,7 @@ const EnhancedBrochureDownload: React.FC<EnhancedBrochureDownloadProps> = ({
           line-height: 1.35;
         }
         .itinerary-img-col {
-          width: 140px;
+          width: ${totalDays > 3 ? '150px' : '175px'};
           height: 100%;
         }
         .itinerary-img-col img {
@@ -1105,40 +1153,69 @@ const EnhancedBrochureDownload: React.FC<EnhancedBrochureDownloadProps> = ({
           object-fit: cover;
           display: block;
         }
+
+        .page-policy-content {
+          padding: 14px 30px 10px 30px;
+          flex: 1;
+          display: flex;
+          flex-direction: column;
+          justify-content: space-between;
+          gap: 8px;
+          font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+        .inc-exc-grid {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 10px;
+        }
+        .v-list-vertical {
+          list-style: none;
+          display: flex;
+          flex-direction: column;
+          gap: 3px;
+        }
+        .v-list-vertical li {
+          font-size: 8px;
+          color: #334155;
+          line-height: 1.35;
+          display: flex;
+          align-items: flex-start;
+          gap: 5px;
+        }
       </style>
 
-      <!-- PAGE 1: FULL BLEED LUXURY COVER -->
       <div class="pdf-page page-cover" style="background-image: url('${coverBg}');">
         <div class="cover-top-overlay">
           <div class="cover-brand-header-inline">
-            <img src="${iconImg}" class="cover-airplane-img" alt="Ghumo Firoo Emblem" crossorigin="anonymous" />
+            <img src="${iconImg}" class="cover-airplane-img" alt="Ghumo Firoo Airplane Emblem" crossorigin="anonymous" />
             <div class="cover-brand-text">
               <div class="cover-brand-title">GHUMO FIROO</div>
-              <div class="cover-brand-tag">YOUR JOURNEY, OUR EXPERTISE!</div>
-              <div class="cover-brand-partner-badge">${isQuoteMode ? 'OFFICIAL TRAVEL QUOTATION' : 'OFFICIAL CLIENT BROCHURE'}</div>
+              <div class="cover-brand-tag">Y O U R &nbsp; J O U R N E Y , &nbsp; O U R &nbsp; E X P E R T I S E !</div>
+              <div class="cover-brand-partner-badge">OFFICIAL PARTNER: EVOKE TENT CITY DHORDO</div>
             </div>
           </div>
 
           <div class="cover-tagline-pill">
-            Discover the Timeless Beauty, Heritage &amp; Heart of ${destination || 'India'}
+            D I S C O V E R &nbsp; T H E &nbsp; T I M E L E S S &nbsp; B E A U T Y , &nbsp; H E R I T A G E &nbsp; &amp; &nbsp; H E A R T &nbsp; O F &nbsp; K U T C H
           </div>
 
           <div class="cover-main-title">
-            ${(packageDetails.title || '').toUpperCase().replace(/&/g, '&amp;')}
+            ${coverMainTitle}
           </div>
 
           <div class="cover-duration-badge">
-            ${(packageDetails.duration || '').toUpperCase()}
+            ${durationPillText}
           </div>
         </div>
 
         <div class="cover-bottom-bar">
+          <div>📞 +91 9910987264 / 9870229792</div>
+          <div>✉️ booking@ghumofiroo.com</div>
           <div>🌐 ghumofiroo.com</div>
-          <div>Quote Ref: GFQ-${quoteRef} • Confirmed Proposal</div>
+          <div style="color: #d4af37;">✓ OFFICIAL VERIFIED QUOTATION</div>
         </div>
       </div>
 
-      <!-- PAGE 2: TRIP ESSENTIALS & PARAMETERS -->
       <div class="pdf-page">
         <div class="brand-header">
           <div class="brand-logo-wrap">
@@ -1148,38 +1225,42 @@ const EnhancedBrochureDownload: React.FC<EnhancedBrochureDownloadProps> = ({
               <div class="brand-tagline">Your Journey, Our Expertise!</div>
             </div>
           </div>
-          <div class="brand-badge">Quote Ref: GFQ-${quoteRef}</div>
+          <div class="brand-badge">QUOTE REF: GFQ-${quoteRef}</div>
         </div>
 
         <div class="page-pricing-content">
-          <div class="section-heading">
-            <div class="section-title">${isQuoteMode ? 'OFFICIAL TRAVEL QUOTATION &amp; TRIP PARAMETERS' : 'PACKAGE OVERVIEW &amp; TRIP HIGHLIGHTS'}</div>
-            <div class="section-subtitle">${isQuoteMode ? `Personalized travel quote prepared on ${quoteDate}` : 'Comprehensive travel overview &amp; verified boutique inclusions'}</div>
+          <div class="p2-section-heading">
+            <div class="p2-section-title">OFFICIAL TRAVEL QUOTATION &amp; TRIP PARAMETERS</div>
+            <div class="p2-gold-divider">
+              <div class="p2-gold-line"></div>
+              <span style="color: #c9a25a; font-size: 8px;">✦</span>
+              <div class="p2-gold-line"></div>
+            </div>
+            <div class="p2-section-subtitle">Personalized Travel Proposal Prepared on ${quoteDate} • All-Inclusive Confirmed Pricing</div>
           </div>
 
-          <!-- Quotation Parameters Master Card -->
           <div class="quote-spec-card">
             <div class="quote-spec-header">
               <div>
-                <div class="quote-ref-badge">📜 OFFICIAL QUOTATION SPECIFICATIONS</div>
-                <div style="font-size: 9px; color: #cbd5e1; margin-top: 2px;">Quote Ref: GFQ-${quoteRef} • Issue Date: ${quoteDate} • Status: Confirmed Proposal</div>
+                <div class="quote-ref-badge">🏛️ CONFIRMED TRAVEL SPECIFICATIONS</div>
+                <div style="font-size: 9px; color: #cbd5e1; margin-top: 2px;">Proposal Ref: GFQ-${quoteRef} • Valid For 15 Days • Private Tour</div>
               </div>
               <div style="text-align: right;">
                 <div style="font-size: 8.5px; text-transform: uppercase; letter-spacing: 1px; color: #cbd5e1; font-weight: 700;">Total Package Cost</div>
                 <div class="quote-total-price">₹${formattedTotalCost}</div>
-                <div style="font-size: 8.5px; color: #cbd5e1;">(₹${displayPerPaxPrice} per adult pax)</div>
+                <div style="font-size: 8px; color: #cbd5e1;">(₹${displayPerPaxPrice} per adult pax • All Taxes Included)</div>
               </div>
             </div>
 
             <div class="quote-grid-4">
               <div class="quote-cell">
-                <div class="quote-cell-label">🚗 Vehicle / Cab Type</div>
+                <div class="quote-cell-label">🚗 Vehicle</div>
                 <div class="quote-cell-val">${effectiveCabName}</div>
-                <div style="color: #34d399; font-size: 8px; font-weight: 700; margin-top: 2px;">✓ Private Dedicated AC</div>
+                <div class="quote-cell-sub">Private Dedicated AC</div>
               </div>
 
               <div class="quote-cell">
-                <div class="quote-cell-label">📅 Travel Schedule</div>
+                <div class="quote-cell-label">📅 Schedule</div>
                 <div class="quote-cell-val">${effectiveTravelDate}</div>
                 <div class="quote-cell-sub">Return: ${effectiveReturnDate}</div>
               </div>
@@ -1187,56 +1268,86 @@ const EnhancedBrochureDownload: React.FC<EnhancedBrochureDownloadProps> = ({
               <div class="quote-cell">
                 <div class="quote-cell-label">👥 Guest Breakdown</div>
                 <div class="quote-cell-val">${effectiveAdults} Adult${effectiveAdults > 1 ? 's' : ''}${effectiveChildren > 0 ? ` + ${effectiveChildren} Child` : ''}</div>
-                <div class="quote-cell-sub">Total: ${effectivePax} Guests</div>
+                <div class="quote-cell-sub">Total: ${effectivePax} Confirmed Guests</div>
               </div>
 
               <div class="quote-cell">
                 <div class="quote-cell-label">📍 Transfer Route</div>
-                <div class="quote-cell-val" style="font-size: 9px;">Pickup: ${effectivePickup}</div>
+                <div class="quote-cell-val" style="font-size: 9.5px;">Pickup: ${effectivePickup}</div>
                 <div class="quote-cell-sub">Drop: ${effectiveDrop}</div>
               </div>
             </div>
           </div>
 
-          <!-- Accommodations Box -->
           <div class="v-section-box">
-            <div class="v-section-title"><span class="gold-icon">🏨</span> Selected Hotels &amp; Luxury Stays</div>
-            <div style="display: flex; flex-direction: column; gap: 6px;">
-              ${((packageDetails.hotels && packageDetails.hotels.length > 0)
-                ? packageDetails.hotels
-                : [
-                    { name: `${destination} Luxury Resort & Spa`, location: destination, stars: 4, room_type: "Deluxe Suite Room", meal_plan: "MAP (Breakfast & Dinner)" },
-                    { name: `Grand ${destination} Heritage Hotel`, location: destination, stars: 4, room_type: "Premium AC Cottage", meal_plan: "CP (Breakfast Included)" }
-                  ]
-              ).map((h: any) => `
-                <div style="display: flex; align-items: center; justify-content: space-between; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 6px 10px;">
-                  <div>
-                    <div style="font-weight: 800; font-size: 10.5px; color: #0b1d3a;">${h.name}</div>
-                    <div style="font-size: 8.5px; color: #64748b; font-weight: 600;">📍 ${h.location || destination} • 🛏️ ${h.room_type || 'Deluxe Room'}</div>
-                  </div>
-                  <div style="text-align: right;">
-                    <div style="color: #d4af37; font-size: 9.5px; font-weight: 700;">${'★'.repeat(h.stars || 4)}</div>
-                    <div style="background: rgba(201,162,90,0.15); color: #b8860b; border: 1px solid rgba(201,162,90,0.4); font-size: 8px; font-weight: 800; padding: 1.5px 6px; border-radius: 4px; text-transform: uppercase;">${h.meal_plan || 'MAP Plan'}</div>
-                  </div>
+            <div class="v-section-title">
+              <span>🏨</span> SELECTED HOTELS &amp; LUXURY STAYS
+              <span style="font-size: 8.5px; font-weight: 600; color: #64748b; margin-left: auto;">Verified hospitality with premium amenities</span>
+            </div>
+            <div>
+              <div class="hotel-row-item">
+                <div>
+                  <div style="font-weight: 800; font-size: 10px; color: #0b1d3a;">Praveg Tent City Dhordo</div>
+                  <div style="font-size: 8px; color: #64748b;">📍 Dhordo, Kutch • ⛺ A/C Premium Royal Swiss Tent</div>
                 </div>
-              `).join('')}
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <span style="color: #f59e0b; font-size: 9.5px; letter-spacing: 1px;">★★★★★</span>
+                  <span class="gold-meal-badge">ALL MEALS INCLUDED (BUFFET)</span>
+                </div>
+              </div>
+
+              <div class="hotel-row-item">
+                <div>
+                  <div style="font-weight: 800; font-size: 10px; color: #0b1d3a;">Evoke Resort &amp; Swiss Tents</div>
+                  <div style="font-size: 8px; color: #64748b;">📍 Dhordo, Kutch • 🏕️ Deluxe A/C Swiss Cottage Tent</div>
+                </div>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <span style="color: #f59e0b; font-size: 9.5px; letter-spacing: 1px;">★★★★☆</span>
+                  <span class="gold-meal-badge">ALL MEALS INCLUDED (BUFFET)</span>
+                </div>
+              </div>
+
+              <div class="hotel-row-item">
+                <div>
+                  <div style="font-weight: 800; font-size: 10px; color: #0b1d3a;">Regenta Resort Bhuj</div>
+                  <div style="font-size: 8px; color: #64748b;">📍 Bhuj Heritage City • 🛏️ Royal Heritage Room</div>
+                </div>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <span style="color: #f59e0b; font-size: 9.5px; letter-spacing: 1px;">★★★★☆</span>
+                  <span class="gold-meal-badge">BUFFET BREAKFAST &amp; DINNER</span>
+                </div>
+              </div>
             </div>
           </div>
 
-          <!-- Sightseeing Highlights Box -->
           <div class="v-section-box">
-            <div class="v-section-title"><span class="gold-icon">🏞️</span> Top Attractions &amp; Sightseeing Highlights</div>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px;">
-              ${((packageDetails.attractions && packageDetails.attractions.length > 0)
-                ? packageDetails.attractions
-                : getDestinationFallbackAttractions(destination)
-              ).slice(0, 4).map((att: any) => `
-                <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 6px 8px;">
-                  <div style="font-weight: 800; font-size: 9.5px; color: #0b1d3a; margin-bottom: 2px;">📍 ${att.name}</div>
-                  <div style="font-size: 8px; color: #64748b; line-height: 1.3;">${att.description || 'Included sightseeing excursion.'}</div>
-                </div>
-              `).join('')}
+            <div class="v-section-title">
+              <span>🏞️</span> TOP JOURNEY HIGHLIGHTS INCLUDED
+              <span style="font-size: 8.5px; font-weight: 600; color: #64748b; margin-left: auto;">Curated iconic destinations</span>
             </div>
+            <div class="highlights-grid">
+              <div class="highlight-item">
+                <div style="font-weight: 800; font-size: 9px; color: #0b1d3a; margin-bottom: 2px;">🌅 White Rann Salt Desert Sunset</div>
+                <div style="font-size: 7.5px; color: #64748b; line-height: 1.3;">Glittering vast white salt marshes with spectacular sunset walk &amp; cultural gala.</div>
+              </div>
+              <div class="highlight-item">
+                <div style="font-weight: 800; font-size: 9px; color: #0b1d3a; margin-bottom: 2px;">🛣️ Road to Heaven Highway</div>
+                <div style="font-size: 7.5px; color: #64748b; line-height: 1.3;">Iconic straight highway cutting through turquoise salt waters of the Great Rann.</div>
+              </div>
+              <div class="highlight-item">
+                <div style="font-weight: 800; font-size: 9px; color: #0b1d3a; margin-bottom: 2px;">🏔️ Kalo Dungar Black Hill (1,525 ft)</div>
+                <div style="font-size: 7.5px; color: #64748b; line-height: 1.3;">Highest summit in Kutch offering panoramic 360° views overlooking the desert.</div>
+              </div>
+              <div class="highlight-item">
+                <div style="font-weight: 800; font-size: 9px; color: #0b1d3a; margin-bottom: 2px;">🏰 Royal Heritage Palaces &amp; Smritivan</div>
+                <div style="font-size: 7.5px; color: #64748b; line-height: 1.3;">Historic Prag Mahal, Aina Mahal &amp; India's largest memorial park in Bhuj.</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="assurance-strip">
+            <span>🛡️ <strong>Ghumo Firoo Assurance:</strong> 100% Dedicated Private Cab • No Hidden Driver Bata/Tolls • Guaranteed Rooms</span>
+            <span style="color: #b8860b; font-weight: 800;">✓ VERIFIED OFFICIAL QUOTE</span>
           </div>
         </div>
 
@@ -1252,28 +1363,32 @@ const EnhancedBrochureDownload: React.FC<EnhancedBrochureDownloadProps> = ({
         </div>
       </div>
 
-      <!-- ITINERARY PAGES -->
-      ${itineraryChunks.map((chunk, idx) => `
-        <div class="pdf-page">
-          <div class="brand-header">
-            <div class="brand-logo-wrap">
-              <img src="${logoImg}" class="brand-logo-img" alt="Ghumo Firoo Logo" crossorigin="anonymous" />
-              <div class="brand-text">
-                <div class="brand-name">Ghumo Firoo</div>
-                <div class="brand-tagline">Your Journey, Our Expertise!</div>
-              </div>
+      <div class="pdf-page">
+        <div class="brand-header">
+          <div class="brand-logo-wrap">
+            <img src="${logoImg}" class="brand-logo-img" alt="Ghumo Firoo Logo" crossorigin="anonymous" />
+            <div class="brand-text">
+              <div class="brand-name">Ghumo Firoo</div>
+              <div class="brand-tagline">Your Journey, Our Expertise!</div>
             </div>
-            <div class="brand-badge">${(packageDetails.duration || '').toUpperCase()} ITINERARY</div>
+          </div>
+          <div class="brand-badge">QUOTE REF: GFQ-${quoteRef}</div>
+        </div>
+
+        <div class="page-itinerary-container">
+          <div class="p2-section-heading">
+            <div class="p2-section-title">COMPLETE DAY-WISE ITINERARY</div>
+            <div class="p2-gold-divider">
+              <div class="p2-gold-line"></div>
+              <span style="color: #c9a25a; font-size: 8px;">✦</span>
+              <div class="p2-gold-line"></div>
+            </div>
+            <div class="p2-section-subtitle">Chauffeured private transfers, guided excursions, and curated experiences</div>
           </div>
 
-          <div class="page-itinerary-content">
-            <div class="section-heading">
-              <div class="section-title">COMPLETE DAY-WISE ITINERARY</div>
-              <div class="section-subtitle">Chauffeured private transfers, guided excursions, and curated experiences</div>
-            </div>
-
-            ${chunk.map((day: any, dIdx: number) => {
-              const dayImg = getItineraryDayImage(day, idx * daysPerPage + dIdx);
+          <div class="itinerary-list-wrap">
+            ${itineraryList.map((day: any, idx: number) => {
+              const dayImg = getItineraryDayImage(day, idx);
               const dayTag = day.title.split('→')[0].trim() || 'SIGHTSEEING';
               return `
                 <div class="itinerary-card">
@@ -1286,7 +1401,7 @@ const EnhancedBrochureDownload: React.FC<EnhancedBrochureDownloadProps> = ({
                     <ul class="itinerary-bullets">
                       <li>${day.description}</li>
                       ${(day.activities && day.activities.length > 0)
-                        ? day.activities.slice(0, 4).map((act: string) => `<li>${act}</li>`).join('')
+                        ? day.activities.slice(0, totalDays > 3 ? 2 : 3).map((act: string) => `<li>${act}</li>`).join('')
                         : ''}
                     </ul>
                   </div>
@@ -1297,21 +1412,20 @@ const EnhancedBrochureDownload: React.FC<EnhancedBrochureDownloadProps> = ({
               `;
             }).join('')}
           </div>
+        </div>
 
-          <div class="brand-footer">
-            <div class="footer-left">
-              <div class="footer-item">📞 +91 9910987264 / 9870229792</div>
-              <div class="footer-item">✉️ booking@ghumofiroo.com</div>
-            </div>
-            <div class="footer-right">
-              <div>🌐 ghumofiroo.com</div>
-              <div>Page ${3 + idx} of ${totalPages}</div>
-            </div>
+        <div class="brand-footer">
+          <div class="footer-left">
+            <div class="footer-item">📞 +91 9910987264 / 9870229792</div>
+            <div class="footer-item">✉️ booking@ghumofiroo.com</div>
+          </div>
+          <div class="footer-right">
+            <div>🌐 ghumofiroo.com</div>
+            <div>Page 3 of ${totalPages}</div>
           </div>
         </div>
-      `).join('')}
+      </div>
 
-      <!-- FINAL PAGE: INCLUSIONS, EXCLUSIONS & POLICIES -->
       <div class="pdf-page">
         <div class="brand-header">
           <div class="brand-logo-wrap">
@@ -1321,51 +1435,56 @@ const EnhancedBrochureDownload: React.FC<EnhancedBrochureDownloadProps> = ({
               <div class="brand-tagline">Your Journey, Our Expertise!</div>
             </div>
           </div>
-          <div class="brand-badge">Tariff &amp; Policies</div>
+          <div class="brand-badge">QUOTE REF: GFQ-${quoteRef}</div>
         </div>
 
-        <div class="page-pricing-content">
-          <div class="section-heading">
-            <div class="section-title">PACKAGE INCLUSIONS &amp; POLICIES</div>
-            <div class="section-subtitle">Transparent terms with verified luxury stays &amp; dedicated chauffeured transport</div>
+        <div class="page-policy-content">
+          <div class="p2-section-heading">
+            <div class="p2-section-title">PACKAGE INCLUSIONS &amp; POLICIES</div>
+            <div class="p2-gold-divider">
+              <div class="p2-gold-line"></div>
+              <span style="color: #c9a25a; font-size: 8px;">✦</span>
+              <div class="p2-gold-line"></div>
+            </div>
+            <div class="p2-section-subtitle">Verified Inclusions, Standard Exclusions &amp; Important Booking Terms</div>
           </div>
 
-          <!-- 1. PACKAGE INCLUSIONS -->
-          <div class="v-section-box">
-            <div class="v-section-title"><span class="gold-icon">✦</span> Package Inclusions</div>
-            <ul class="v-list-vertical">
-              <li>• <strong>Accommodations:</strong> Verified stays as detailed in itinerary (${accommodation || '4-Star Hotels'}).</li>
-              <li>• <strong>Meal Plan:</strong> Daily hygienic buffet breakfast and dinner as per selected plan.</li>
-              <li>• <strong>Private Vehicle:</strong> Dedicated ${effectiveCabName} with expert chauffeur for all transfers &amp; sightseeing.</li>
-              <li>• <strong>Tolls &amp; Parking:</strong> All toll taxes, fuel charges, state road taxes &amp; driver allowance included.</li>
-              <li>• <strong>Sightseeing &amp; Permits:</strong> Inner-line permits, government border passes &amp; assistance.</li>
-              <li>• <strong>Transfers:</strong> Chauffeured pickup from ${effectivePickup} &amp; drop-off at ${effectiveDrop}.</li>
-            </ul>
+          <div class="inc-exc-grid">
+            <div class="v-section-box" style="border-color: rgba(34, 197, 94, 0.4); background: #fcfdfd;">
+              <div class="v-section-title" style="color: #166534;"><span class="gold-icon">✓</span> What's Included in Your Quotation</div>
+              <ul class="v-list-vertical">
+                <li><strong style="color: #166534;">✓</strong> All transfers &amp; sightseeing by private dedicated AC vehicle (${effectiveCabName}).</li>
+                <li><strong style="color: #166534;">✓</strong> All driver allowances, fuel charges, state permits, toll taxes &amp; parking fees.</li>
+                <li><strong style="color: #166534;">✓</strong> Luxury tent/resort accommodation on double/triple sharing basis.</li>
+                <li><strong style="color: #166534;">✓</strong> Buffet meals as specified (Breakfast &amp; Dinner / All Meals at Dhordo Tent City).</li>
+                <li><strong style="color: #166534;">✓</strong> Complete assistance for White Rann entry permit documentation.</li>
+                <li><strong style="color: #166534;">✓</strong> 24/7 dedicated on-trip concierge assistance throughout your tour.</li>
+              </ul>
+            </div>
+
+            <div class="v-section-box" style="border-color: rgba(239, 68, 68, 0.35); background: #fdfcfc;">
+              <div class="v-section-title" style="color: #991b1b;"><span class="gold-icon">✗</span> What's Excluded</div>
+              <ul class="v-list-vertical">
+                <li><strong style="color: #991b1b;">✗</strong> Airfare or train tickets to / from Bhuj.</li>
+                <li><strong style="color: #991b1b;">✗</strong> Monument entry fees, camera permits &amp; local guide fees.</li>
+                <li><strong style="color: #991b1b;">✗</strong> Personal expenses (laundry, room service, telephone calls, tips).</li>
+                <li><strong style="color: #991b1b;">✗</strong> Optional activities (ATV rides, Paramotoring, Camel safari charges).</li>
+                <li><strong style="color: #991b1b;">✗</strong> Any items or services not explicitly mentioned in inclusions.</li>
+                <li><strong style="color: #991b1b;">✗</strong> GST 5% (Applicable as per Government regulations).</li>
+              </ul>
+            </div>
           </div>
 
-          <!-- 2. PACKAGE EXCLUSIONS -->
           <div class="v-section-box">
-            <div class="v-section-title"><span class="gold-icon">✕</span> Package Exclusions</div>
+            <div class="v-section-title"><span class="gold-icon">💳</span> Payment Schedule &amp; Booking Terms</div>
             <ul class="v-list-vertical">
-              <li>• Airfare or train tickets to/from destination.</li>
-              <li>• Personal expenses such as room service, laundry, telephone calls, and gratuities/tips.</li>
-              <li>• Optional adventure activities (ATV, paramotoring, camel safari) unless specified.</li>
-              <li>• Monument entry tickets, camera fees, or professional guide charges.</li>
-            </ul>
-          </div>
-
-          <!-- 3. BOOKING ADVANCE TERMS -->
-          <div class="v-section-box">
-            <div class="v-section-title"><span class="gold-icon">💳</span> Booking &amp; Payment Terms</div>
-            <ul class="v-list-vertical">
-              <li>• <strong>25% Advance Payment:</strong> Upon confirmation to block hotel rooms and secure vehicle.</li>
+              <li>• <strong>25% Advance Payment:</strong> Upon confirmation to block hotel rooms and secure dedicated vehicle.</li>
               <li>• <strong>50% Payment:</strong> Due 30 days prior to scheduled departure date.</li>
               <li>• <strong>100% Full Payment:</strong> Due 15 days prior to arrival.</li>
               <li>• <strong>Payment Methods:</strong> UPI, Bank NEFT/RTGS, Net Banking, and Credit/Debit Cards via PayU.</li>
             </ul>
           </div>
 
-          <!-- 4. CANCELLATION & REFUND POLICY -->
           <div class="v-section-box">
             <div class="v-section-title"><span class="gold-icon">🛡️</span> Cancellation &amp; Refund Policy</div>
             <ul class="v-list-vertical">
@@ -1376,14 +1495,10 @@ const EnhancedBrochureDownload: React.FC<EnhancedBrochureDownloadProps> = ({
             </ul>
           </div>
 
-          <!-- Direct Concierge Help -->
           <div style="background: linear-gradient(135deg, #0b1d3a 0%, #162a4d 100%); border: 1.5px solid #c9a25a; border-radius: 8px; padding: 8px 14px; color: #ffffff; display: flex; align-items: center; justify-content: space-between;">
             <div>
               <div style="font-size: 10px; font-weight: 800; color: #d4af37; text-transform: uppercase; letter-spacing: 1px;">24/7 On-Trip Concierge Support</div>
               <div style="font-size: 8.5px; color: #cbd5e1;">Continuous helpline &amp; dedicated ground support throughout your vacation.</div>
-            </div>
-            <div style="text-align: right; font-weight: 800; font-size: 11px; color: #f59e0b;">
-              📞 +91 9910987264
             </div>
           </div>
         </div>
@@ -1395,7 +1510,7 @@ const EnhancedBrochureDownload: React.FC<EnhancedBrochureDownloadProps> = ({
           </div>
           <div class="footer-right">
             <div>🌐 ghumofiroo.com</div>
-            <div>Page ${totalPages} of ${totalPages}</div>
+            <div>Page 4 of ${totalPages}</div>
           </div>
         </div>
       </div>
