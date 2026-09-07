@@ -4957,11 +4957,17 @@ const DynamicPackageDetail: React.FC<DynamicPackageDetailProps> = ({ slug: propS
                   </div>
                 )}
 
-                {/* Group Size Notice for 5+ Pax */}
-                {passengerCount >= 5 && (
+                {/* Group Size Notice for 5 & 6 Pax */}
+                {(passengerCount === 5 || passengerCount === 6) && (
                   <div className="mb-6 p-3 bg-blue-500/10 border border-blue-500/30 rounded-xl flex items-center gap-3 text-xs text-blue-300">
                     <span className="text-base">ℹ️</span>
-                    <span>For <strong>{passengerCount} travelers</strong>, 4-seater sedans are excluded to guarantee passenger and luggage capacity.</span>
+                    <span>For <strong>{passengerCount} travelers</strong>, 4-seater sedans and tempo travellers are excluded. We recommend spacious 6-seater AC SUVs (Maruti Ertiga or Toyota Innova Crysta) for passenger and luggage capacity.</span>
+                  </div>
+                )}
+                {passengerCount > 6 && (
+                  <div className="mb-6 p-3 bg-blue-500/10 border border-blue-500/30 rounded-xl flex items-center gap-3 text-xs text-blue-300">
+                    <span className="text-base">ℹ️</span>
+                    <span>For groups of <strong>{passengerCount} travelers</strong>, AC Luxury Tempo Traveller is provided for maximum group comfort.</span>
                   </div>
                 )}
 
@@ -4975,14 +4981,11 @@ const DynamicPackageDetail: React.FC<DynamicPackageDetailProps> = ({ slug: propS
                   } else if (passengerCount === 4) {
                     // For 4 adults: Sedan, AC SUV (Ertiga), AC Premium SUV (Innova)
                     visibleCabs = CAB_OPTIONS.filter(c => c.id !== 'tempo');
-                  } else if (passengerCount === 5) {
-                    // For 5 adults: Exclude Sedan. Show AC SUV (Ertiga) & AC Premium SUV (Innova)
+                  } else if (passengerCount === 5 || passengerCount === 6) {
+                    // For 5 & 6 adults: Exclude Sedan and Tempo. Show only AC SUV (Ertiga) & AC Premium SUV (Innova)
                     visibleCabs = CAB_OPTIONS.filter(c => c.id === 'suv_ertiga' || c.id === 'suv_innova');
-                  } else if (passengerCount === 6) {
-                    // For 6 adults: 6-seater SUVs (Ertiga & Innova) + Tempo Traveller
-                    visibleCabs = CAB_OPTIONS.filter(c => c.id !== 'sedan');
-                  } else if (passengerCount >= 7) {
-                    // For 7+ adults: Luxury Tempo Traveller
+                  } else if (passengerCount > 6) {
+                    // For more than 6 adults (7+): Luxury Tempo Traveller only
                     visibleCabs = CAB_OPTIONS.filter(c => c.id === 'tempo');
                   }
 
@@ -5375,8 +5378,10 @@ const DynamicPackageDetail: React.FC<DynamicPackageDetailProps> = ({ slug: propS
                     inclusions: (activeVariant?.inclusions && activeVariant.inclusions.length > 0) ? activeVariant.inclusions : packageDetails.inclusions,
                     exclusions: (activeVariant?.exclusions && activeVariant.exclusions.length > 0) ? activeVariant.exclusions : packageDetails.exclusions,
                     hotels: (activeVariant?.hotels && activeVariant.hotels.length > 0) ? activeVariant.hotels : (effectivePkg.hotels || []),
+                    slug: effectivePkg.slug || currentSlug,
                     attractions: effectivePkg.attractions || []
                   } as any}
+                  slug={effectivePkg.slug || currentSlug}
                   packageType={packageType}
                   destination={packageDetails.destinations[0] || ""}
                   quickFacts={quickFacts}

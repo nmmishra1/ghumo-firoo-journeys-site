@@ -37,9 +37,11 @@ interface PackageSidebarProps {
   packageDetails: PackageDetails;
   packageType: 'domestic' | 'international';
   destination: string;
+  slug?: string;
   ctaLabel?: string;
   enquireLabel?: string;
   selectedCabName?: string;
+  selectedCabId?: string;
   passengerCount?: number;
   totalPayablePrice?: number;
   adultsCount?: number;
@@ -58,6 +60,7 @@ const PackageSidebar: React.FC<PackageSidebarProps> = ({
   packageDetails, 
   packageType, 
   destination, 
+  slug,
   ctaLabel,
   enquireLabel,
   selectedCabName,
@@ -77,7 +80,9 @@ const PackageSidebar: React.FC<PackageSidebarProps> = ({
     transport = "Flights & Transfers"
   } = quickFacts;
 
-  const contextStr = `${destination || ''} ${packageDetails?.title || ''} ${(packageDetails as any)?.slug || ''}`.toLowerCase();
+  const pagePath = typeof window !== 'undefined' ? (window.location.pathname || '') : '';
+  const allDestinations = ((packageDetails as any)?.destinations || []).join(' ');
+  const contextStr = `${slug || ''} ${(packageDetails as any)?.slug || ''} ${destination || ''} ${packageDetails?.title || ''} ${allDestinations} ${pagePath}`.toLowerCase();
   
   let pickupOptions: string[] = [];
   let dropOptions: string[] = [];
@@ -98,7 +103,18 @@ const PackageSidebar: React.FC<PackageSidebarProps> = ({
       'Rishikesh Railway Station',
       'Dehradun Railway Station'
     ];
-  } else if (contextStr.includes('rann') || contextStr.includes('gujarat') || contextStr.includes('bhuj') || contextStr.includes('utsav') || contextStr.includes('kutch')) {
+  } else if (
+    contextStr.includes('rann') || 
+    contextStr.includes('gujarat') || 
+    contextStr.includes('bhuj') || 
+    contextStr.includes('utsav') || 
+    contextStr.includes('kutch') ||
+    contextStr.includes('dholavira') ||
+    contextStr.includes('dhordo') ||
+    contextStr.includes('road to heaven') ||
+    contextStr.includes('white desert') ||
+    contextStr.includes('mandvi')
+  ) {
     pickupOptions = [
       'Bhuj Railway Station',
       'Bhuj Airport (BHJ)',
@@ -341,7 +357,7 @@ const PackageSidebar: React.FC<PackageSidebarProps> = ({
 
             <div className="p-2.5 bg-slate-950/80 rounded-xl border border-slate-800 text-[11px] text-slate-300 font-semibold flex items-center justify-between">
               <span>Vehicle & Route:</span>
-              <span className="text-amber-400 font-extrabold">{activeCab.name.split(' ')[0]} ({pickupStation.split(' ')[0]} → {dropStation.split(' ')[0]})</span>
+              <span className="text-amber-400 font-extrabold">{selectedCabName || activeCab.name} ({pickupStation.split(' ')[0]} → {dropStation.split(' ')[0]})</span>
             </div>
           </div>
           
