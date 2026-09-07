@@ -173,7 +173,7 @@ const EnhancedBrochureDownload: React.FC<EnhancedBrochureDownloadProps> = ({
   };
 
   const getCacheKey = () => {
-    const schemaVersion = 'v13';
+    const schemaVersion = 'v14';
     const s = JSON.stringify({ 
       v: schemaVersion, 
       packageDetails, 
@@ -701,17 +701,188 @@ const EnhancedBrochureDownload: React.FC<EnhancedBrochureDownloadProps> = ({
       durationPillText = '02 NIGHTS / 03 DAYS';
     }
 
+    let nightsCount = 2;
+    if (durLower.includes('1n') || durLower.includes('2d/1n') || durLower.includes('1 night') || durLower.includes('2 days / 1 night')) {
+      nightsCount = 1;
+    } else if (durLower.includes('2n') || durLower.includes('3d/2n') || durLower.includes('2 night') || durLower.includes('3 days / 2 night')) {
+      nightsCount = 2;
+    } else if (durLower.includes('3n') || durLower.includes('4d/3n') || durLower.includes('3 night') || durLower.includes('4 days / 3 night')) {
+      nightsCount = 3;
+    } else if (durLower.includes('4n') || durLower.includes('5d/4n') || durLower.includes('4 night') || durLower.includes('5 days / 4 night')) {
+      nightsCount = 4;
+    }
+
+    // Dynamic Hotel Resolution:
+    let resolvedHotels: Array<{ name: string; location: string; stars?: number; room_type?: string; meal_plan?: string; image?: string; description?: string }> = [];
+    if (packageDetails.hotels && packageDetails.hotels.length > 0) {
+      resolvedHotels = packageDetails.hotels.map((h: any, idx: number) => {
+        let hImg = `${origin}/brochure-assets/gala_dinner.jpg`;
+        const hNameLower = (h.name || '').toLowerCase();
+        if (hNameLower.includes('tent city') || hNameLower.includes('evoke') || hNameLower.includes('praveg')) {
+          hImg = `${origin}/rann_utsav_tent_city.jpg`;
+        } else if (hNameLower.includes('dholavira') || hNameLower.includes('heaven')) {
+          hImg = `${origin}/brochure-assets/dholavira.jpg`;
+        } else if (hNameLower.includes('mandvi') || hNameLower.includes('beach') || hNameLower.includes('serena')) {
+          hImg = `${origin}/Mandvi Beach_Kutch.png`;
+        } else if (hNameLower.includes('bhuj') || hNameLower.includes('regenta') || hNameLower.includes('mangalam') || hNameLower.includes('fern')) {
+          hImg = `${origin}/brochure-assets/palace_legacy.jpg`;
+        } else {
+          const fallbackImgs = [
+            `${origin}/rann_utsav_tent_city.jpg`,
+            `${origin}/brochure-assets/gala_dinner.jpg`,
+            `${origin}/Mandvi Beach_Kutch.png`,
+            `${origin}/brochure-assets/palace_legacy.jpg`
+          ];
+          hImg = fallbackImgs[idx % fallbackImgs.length];
+        }
+        return {
+          name: h.name,
+          location: h.location || 'Kutch, Gujarat',
+          stars: h.stars || 4,
+          room_type: h.room_type || 'Deluxe A/C Swiss Cottage Tent',
+          meal_plan: h.meal_plan || 'ALL MEALS INCLUDED (BUFFET)',
+          image: h.image || hImg,
+          description: h.highlight || h.description || `${h.room_type || 'Luxury Stay'} with 24/7 concierge service`
+        };
+      });
+    }
+
+    // Default hotel fallback curated strictly by nights stayed
+    if (resolvedHotels.length === 0) {
+      if (nightsCount === 1) {
+        resolvedHotels = [
+          {
+            name: "Evoke Tent City Dhordo",
+            location: "Dhordo, Kutch",
+            stars: 5,
+            room_type: "A/C Premium Royal Swiss Tent",
+            meal_plan: "ALL MEALS INCLUDED (BUFFET)",
+            image: `${origin}/rann_utsav_tent_city.jpg`,
+            description: "Official partner luxury Swiss Tent with White Rann proximity and all gourmet meals"
+          }
+        ];
+      } else if (nightsCount === 2) {
+        resolvedHotels = [
+          {
+            name: "Praveg Tent City Dhordo",
+            location: "Dhordo, Kutch",
+            stars: 5,
+            room_type: "Night 1: A/C Royal Swiss Tent",
+            meal_plan: "ALL MEALS INCLUDED (BUFFET)",
+            image: `${origin}/rann_utsav_tent_city.jpg`,
+            description: "Iconic White Desert resort with cultural folk stage shows and stargazing"
+          },
+          {
+            name: "Evoke Resort & Swiss Tents",
+            location: "Dhordo, Kutch",
+            stars: 4,
+            room_type: "Night 2: Deluxe A/C Swiss Cottage",
+            meal_plan: "ALL MEALS INCLUDED (BUFFET)",
+            image: `${origin}/brochure-assets/gala_dinner.jpg`,
+            description: "Authentic Kutchi Bhunga & Swiss cottages with authentic Kutchi dining"
+          }
+        ];
+      } else if (nightsCount === 3) {
+        resolvedHotels = [
+          {
+            name: "Praveg Tent City Dhordo",
+            location: "Dhordo, Kutch",
+            stars: 5,
+            room_type: "Nights 1 & 2: Royal Swiss Tent",
+            meal_plan: "ALL MEALS INCLUDED (BUFFET)",
+            image: `${origin}/rann_utsav_tent_city.jpg`,
+            description: "Direct access to White Desert sunset walks and cultural amphitheater"
+          },
+          {
+            name: "Regenta Resort / Palace Heritage",
+            location: "Bhuj Heritage City",
+            stars: 4,
+            room_type: "Night 3: Royal Heritage Room",
+            meal_plan: "BUFFET BREAKFAST & DINNER",
+            image: `${origin}/brochure-assets/palace_legacy.jpg`,
+            description: "Heritage luxury stay near Prag Mahal, Aina Mahal and Bhuj markets"
+          }
+        ];
+      } else {
+        resolvedHotels = [
+          {
+            name: "Praveg Tent City Dhordo",
+            location: "Dhordo, Kutch",
+            stars: 5,
+            room_type: "Night 1: A/C Swiss Tent",
+            meal_plan: "ALL MEALS INCLUDED",
+            image: `${origin}/rann_utsav_tent_city.jpg`,
+            description: "White Desert sunset and bonfire base"
+          },
+          {
+            name: "StayGuru Dholavira Resort",
+            location: "Dholavira UNESCO Site",
+            stars: 4,
+            room_type: "Night 2: Deluxe Cottage",
+            meal_plan: "MAP (BREAKFAST & DINNER)",
+            image: `${origin}/brochure-assets/dholavira.jpg`,
+            description: "Road to Heaven highway & Harappan ruins base"
+          },
+          {
+            name: "Serena Beach Resort",
+            location: "Mandvi Beach",
+            stars: 4,
+            room_type: "Night 3: Coastal Sea Villa",
+            meal_plan: "MAP (BREAKFAST & DINNER)",
+            image: `${origin}/Mandvi Beach_Kutch.png`,
+            description: "Private beach access and Vijay Vilas Palace retreat"
+          },
+          {
+            name: "Regenta Resort Bhuj",
+            location: "Bhuj Heritage City",
+            stars: 4,
+            room_type: "Night 4: Heritage Room",
+            meal_plan: "MAP (BREAKFAST & DINNER)",
+            image: `${origin}/brochure-assets/palace_legacy.jpg`,
+            description: "Palaces, Smritivan museum and handicraft shopping base"
+          }
+        ];
+      }
+    }
+
+    // Context-Aware Day Images with Keyword Matching
     const getItineraryDayImage = (day: any, idx: number) => {
       if (day.image && day.image.startsWith('http')) return day.image;
       if (day.image && day.image.startsWith('/')) return `${origin}${day.image}`;
-      if (destLower.includes('rann') || destLower.includes('kutch')) {
+      
+      const dayText = `${day.title || ''} ${day.description || ''} ${(day.activities || []).join(' ')}`.toLowerCase();
+      
+      if (destLower.includes('rann') || destLower.includes('kutch') || destLower.includes('dhordo')) {
+        if (dayText.includes('heaven') || dayText.includes('dholavira') || dayText.includes('highway')) {
+          return `${origin}/rann_utsav_road_to_heaven.jpg`;
+        }
+        if (dayText.includes('mandvi') || dayText.includes('beach') || dayText.includes('vijay vilas') || dayText.includes('coast')) {
+          return `${origin}/Mandvi Beach_Kutch.png`;
+        }
+        if (dayText.includes('kalo dungar') || dayText.includes('black hill') || dayText.includes('dattatreya') || dayText.includes('magnetic')) {
+          return `${origin}/kalodungar.jpg`;
+        }
+        if (dayText.includes('smritivan') || dayText.includes('museum') || dayText.includes('earthquake')) {
+          return `${origin}/brochure-assets/smritivan.jpg`;
+        }
+        if (dayText.includes('prag mahal') || dayText.includes('aina mahal') || dayText.includes('palace') || dayText.includes('bhuj city')) {
+          return `${origin}/brochure-assets/palace_legacy.jpg`;
+        }
+        if (dayText.includes('gala') || dayText.includes('folk') || dayText.includes('garba') || dayText.includes('craft') || dayText.includes('bazaar')) {
+          return `${origin}/brochure-assets/gala_dinner.jpg`;
+        }
+        if (dayText.includes('white rann') || dayText.includes('sunset') || dayText.includes('sunrise') || dayText.includes('tent city')) {
+          return `${origin}/rann_utsav_white_desert.jpg`;
+        }
+
+        // Ordered fallbacks if no specific keyword matched
         const kutchImages = [
-          `${origin}/brochure-assets/cover_kutch.jpg`,
+          `${origin}/rann_utsav_white_desert.jpg`,
           `${origin}/rann_utsav_road_to_heaven.jpg`,
-          `${origin}/brochure-assets/smritivan.jpg`,
-          `${origin}/brochure-assets/dholavira.jpg`,
+          `${origin}/Mandvi Beach_Kutch.png`,
           `${origin}/kalodungar.jpg`,
-          `${origin}/brochure-assets/gala_dinner.jpg`
+          `${origin}/brochure-assets/smritivan.jpg`,
+          `${origin}/brochure-assets/palace_legacy.jpg`
         ];
         return kutchImages[idx % kutchImages.length];
       }
@@ -721,6 +892,7 @@ const EnhancedBrochureDownload: React.FC<EnhancedBrochureDownloadProps> = ({
     const itineraryList = packageDetails.itinerary || [];
     const totalDays = itineraryList.length;
     const totalPages = 4;
+    const isRannUtsavPackage = destLower.includes('rann') || destLower.includes('kutch') || destLower.includes('dhordo');
 
     return `
       <style>
@@ -889,14 +1061,16 @@ const EnhancedBrochureDownload: React.FC<EnhancedBrochureDownloadProps> = ({
           color: #65a30d;
           letter-spacing: 1.8px;
           text-transform: uppercase;
-          margin-top: 2px;
+          margin-top: 1.5px;
+          line-height: 1.2;
         }
         .cover-brand-partner-badge {
           display: inline-flex;
           align-items: center;
-          gap: 5px;
-          margin-top: 4px;
-          padding: 2.5px 14px;
+          justify-content: center;
+          text-align: center;
+          margin-top: 6px;
+          padding: 3px 18px;
           background: rgba(11, 29, 58, 0.06);
           border: 1px solid rgba(201, 162, 90, 0.65);
           border-radius: 15px;
@@ -905,9 +1079,13 @@ const EnhancedBrochureDownload: React.FC<EnhancedBrochureDownloadProps> = ({
           color: #0b1d3a;
           letter-spacing: 0.8px;
           text-transform: uppercase;
+          line-height: 1.2;
         }
         .cover-tagline-pill {
-          display: inline-block;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          text-align: center;
           background: rgba(255, 255, 255, 0.96);
           border: 1.5px solid rgba(201, 162, 90, 0.85);
           color: #0b1d3a;
@@ -919,15 +1097,20 @@ const EnhancedBrochureDownload: React.FC<EnhancedBrochureDownloadProps> = ({
           border-radius: 30px;
           box-shadow: 0 4px 15px rgba(0,0,0,0.08);
           margin-bottom: 22px;
+          line-height: 1.2;
         }
         .cover-main-title {
           font-family: 'Cinzel', serif;
           font-weight: 900;
           color: #ffffff;
           text-shadow: 0 4px 22px rgba(11, 29, 58, 0.85), 0 2px 8px rgba(0,0,0,0.65);
-          margin-bottom: 18px;
+          margin-bottom: 22px;
           text-align: center;
           max-width: 720px;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
         }
         .cover-guest-plaque {
           position: absolute;
@@ -968,7 +1151,10 @@ const EnhancedBrochureDownload: React.FC<EnhancedBrochureDownloadProps> = ({
           letter-spacing: 0.5px;
         }
         .cover-duration-badge {
-          display: inline-block;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          text-align: center;
           background: linear-gradient(135deg, #d4af37 0%, #aa7c11 100%);
           color: #0b1d3a;
           font-size: 13.5px;
@@ -978,6 +1164,7 @@ const EnhancedBrochureDownload: React.FC<EnhancedBrochureDownloadProps> = ({
           padding: 8px 32px;
           border-radius: 25px;
           box-shadow: 0 6px 20px rgba(170, 124, 17, 0.45);
+          line-height: 1.2;
         }
         .cover-bottom-bar {
           padding: 13px 36px;
@@ -1058,12 +1245,20 @@ const EnhancedBrochureDownload: React.FC<EnhancedBrochureDownloadProps> = ({
           text-transform: uppercase;
           letter-spacing: 1.2px;
         }
+        .quote-price-col {
+          display: flex;
+          flex-direction: column;
+          align-items: flex-end;
+          text-align: right;
+          min-width: 210px;
+        }
         .quote-total-price {
           font-size: 26px;
           font-weight: 900;
           color: #f59e0b;
-          line-height: 1.05;
-          margin: 1px 0;
+          line-height: 1.18;
+          margin: 2px 0;
+          white-space: nowrap;
         }
         .quote-grid-4 {
           display: grid;
@@ -1114,27 +1309,91 @@ const EnhancedBrochureDownload: React.FC<EnhancedBrochureDownloadProps> = ({
           align-items: center;
           gap: 6px;
         }
-        .hotel-row-item {
+        .hotels-visual-grid {
+          display: grid;
+          gap: 6px;
+        }
+        .hotels-visual-grid.cols-1 {
+          grid-template-columns: 1fr;
+        }
+        .hotels-visual-grid.cols-2 {
+          grid-template-columns: 1fr 1fr;
+        }
+        .hotel-visual-card {
+          display: flex;
+          align-items: center;
+          gap: 9px;
+          padding: ${resolvedHotels.length > 2 ? '4px 8px' : '6px 10px'};
+          background: #f8fafc;
+          border: 1px solid #e2e8f0;
+          border-radius: 8px;
+          overflow: hidden;
+        }
+        .hvc-thumb {
+          width: ${resolvedHotels.length > 2 ? '50px' : '58px'};
+          height: ${resolvedHotels.length > 2 ? '44px' : '52px'};
+          border-radius: 6px;
+          object-fit: cover;
+          flex-shrink: 0;
+          border: 1px solid rgba(201, 162, 90, 0.4);
+        }
+        .hvc-body {
+          flex: 1;
+          min-width: 0;
+          display: flex;
+          flex-direction: column;
+          gap: 1.5px;
+        }
+        .hvc-title-row {
           display: flex;
           align-items: center;
           justify-content: space-between;
-          padding: 6px 10px;
-          background: #f8fafc;
-          border: 1px solid #e2e8f0;
-          border-radius: 6px;
-          margin-bottom: 5px;
+          gap: 6px;
         }
-        .hotel-row-item:last-child {
-          margin-bottom: 0;
+        .hvc-name {
+          font-weight: 800;
+          font-size: ${resolvedHotels.length > 2 ? '8.8px' : '9.8px'};
+          color: #0b1d3a;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+        .hvc-stars {
+          color: #f59e0b;
+          font-size: 7.5px;
+          letter-spacing: 0.5px;
+          flex-shrink: 0;
+        }
+        .hvc-meta {
+          font-size: 7.5px;
+          color: #64748b;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+        .hvc-desc {
+          font-size: 7px;
+          color: #475569;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          line-height: 1.2;
+        }
+        .hvc-footer {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 4px;
+          margin-top: 1px;
         }
         .gold-meal-badge {
           background: rgba(201,162,90,0.15);
           border: 1px solid #c9a25a;
           color: #92400e;
-          font-size: 8px;
+          font-size: 7.5px;
           font-weight: 800;
-          padding: 2.5px 8px;
-          border-radius: 12px;
+          padding: 1.5px 6px;
+          border-radius: 10px;
           white-space: nowrap;
         }
 
@@ -1289,6 +1548,56 @@ const EnhancedBrochureDownload: React.FC<EnhancedBrochureDownloadProps> = ({
           align-items: flex-start;
           gap: 5px;
         }
+
+        .rann-tips-box {
+          border: 1.5px solid rgba(201, 162, 90, 0.55);
+          background: #fffdf9;
+          border-radius: 9px;
+          padding: 7px 12px;
+          box-shadow: 0 3px 10px rgba(0,0,0,0.03);
+        }
+        .rann-tips-header {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          margin-bottom: 5px;
+        }
+        .rann-tips-title {
+          font-family: 'Cinzel', serif;
+          font-size: 9.8px;
+          font-weight: 800;
+          color: #0b1d3a;
+          letter-spacing: 0.8px;
+        }
+        .rann-tips-pill {
+          margin-left: auto;
+          font-size: 7px;
+          font-weight: 800;
+          color: #b8860b;
+          background: rgba(201,162,90,0.12);
+          border: 1px solid #c9a25a;
+          padding: 1.5px 7px;
+          border-radius: 10px;
+          letter-spacing: 0.5px;
+        }
+        .rann-tips-grid {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 4px 10px;
+        }
+        .rann-tip-card {
+          display: flex;
+          align-items: flex-start;
+          gap: 5px;
+          font-size: 7.2px;
+          color: #334155;
+          line-height: 1.35;
+        }
+        .rann-tip-icon {
+          font-size: 9px;
+          flex-shrink: 0;
+          line-height: 1.3;
+        }
       </style>
 
       <div class="pdf-page page-cover" style="background-image: url('${coverBg}');">
@@ -1357,10 +1666,10 @@ const EnhancedBrochureDownload: React.FC<EnhancedBrochureDownloadProps> = ({
                 <div class="quote-ref-badge">🏛️ CONFIRMED TRAVEL SPECIFICATIONS</div>
                 <div style="font-size: 9px; color: #cbd5e1; margin-top: 2px;">Proposal Ref: GFQ-${quoteRef} • Valid For 15 Days • Personalized for ${displayGuestName}</div>
               </div>
-              <div style="text-align: right;">
+              <div class="quote-price-col">
                 <div style="font-size: 8.5px; text-transform: uppercase; letter-spacing: 1px; color: #cbd5e1; font-weight: 700;">Total Package Cost</div>
                 <div class="quote-total-price">₹${formattedTotalCost}</div>
-                <div style="font-size: 8px; color: #cbd5e1;">(₹${displayPerPaxPrice} per adult pax • All Taxes Included)</div>
+                <div style="font-size: 8px; color: #cbd5e1; line-height: 1.25; margin-top: 2px;">(₹${displayPerPaxPrice} per adult pax • All Taxes Included)</div>
               </div>
             </div>
 
@@ -1396,39 +1705,24 @@ const EnhancedBrochureDownload: React.FC<EnhancedBrochureDownloadProps> = ({
               <span>🏨</span> SELECTED HOTELS &amp; LUXURY STAYS
               <span style="font-size: 8.5px; font-weight: 600; color: #64748b; margin-left: auto;">Verified hospitality with premium amenities</span>
             </div>
-            <div>
-              <div class="hotel-row-item">
-                <div>
-                  <div style="font-weight: 800; font-size: 10px; color: #0b1d3a;">Praveg Tent City Dhordo</div>
-                  <div style="font-size: 8px; color: #64748b;">📍 Dhordo, Kutch • ⛺ A/C Premium Royal Swiss Tent</div>
+            <div class="hotels-visual-grid ${resolvedHotels.length === 1 ? 'cols-1' : 'cols-2'}">
+              ${resolvedHotels.map((hotel: any) => `
+                <div class="hotel-visual-card">
+                  <img src="${hotel.image}" alt="${hotel.name}" class="hvc-thumb" crossorigin="anonymous" />
+                  <div class="hvc-body">
+                    <div class="hvc-title-row">
+                      <div class="hvc-name" title="${hotel.name}">${hotel.name}</div>
+                      <div class="hvc-stars">${'★'.repeat(hotel.stars || 4)}${'☆'.repeat(Math.max(0, 5 - (hotel.stars || 4)))}</div>
+                    </div>
+                    <div class="hvc-meta">📍 ${hotel.location} • 🛏️ ${hotel.room_type}</div>
+                    <div class="hvc-desc">${hotel.description}</div>
+                    <div class="hvc-footer">
+                      <span class="gold-meal-badge">${hotel.meal_plan}</span>
+                      <span style="font-size: 7.2px; font-weight: 700; color: #166534;">✓ Instant Confirmation</span>
+                    </div>
+                  </div>
                 </div>
-                <div style="display: flex; align-items: center; gap: 8px;">
-                  <span style="color: #f59e0b; font-size: 9.5px; letter-spacing: 1px;">★★★★★</span>
-                  <span class="gold-meal-badge">ALL MEALS INCLUDED (BUFFET)</span>
-                </div>
-              </div>
-
-              <div class="hotel-row-item">
-                <div>
-                  <div style="font-weight: 800; font-size: 10px; color: #0b1d3a;">Evoke Resort &amp; Swiss Tents</div>
-                  <div style="font-size: 8px; color: #64748b;">📍 Dhordo, Kutch • 🏕️ Deluxe A/C Swiss Cottage Tent</div>
-                </div>
-                <div style="display: flex; align-items: center; gap: 8px;">
-                  <span style="color: #f59e0b; font-size: 9.5px; letter-spacing: 1px;">★★★★☆</span>
-                  <span class="gold-meal-badge">ALL MEALS INCLUDED (BUFFET)</span>
-                </div>
-              </div>
-
-              <div class="hotel-row-item">
-                <div>
-                  <div style="font-weight: 800; font-size: 10px; color: #0b1d3a;">Regenta Resort Bhuj</div>
-                  <div style="font-size: 8px; color: #64748b;">📍 Bhuj Heritage City • 🛏️ Royal Heritage Room</div>
-                </div>
-                <div style="display: flex; align-items: center; gap: 8px;">
-                  <span style="color: #f59e0b; font-size: 9.5px; letter-spacing: 1px;">★★★★☆</span>
-                  <span class="gold-meal-badge">BUFFET BREAKFAST &amp; DINNER</span>
-                </div>
-              </div>
+              `).join('')}
             </div>
           </div>
 
@@ -1606,6 +1900,34 @@ const EnhancedBrochureDownload: React.FC<EnhancedBrochureDownloadProps> = ({
               <li>• <strong>Cancellation &lt; 7 Days / No-Show:</strong> 100% non-refundable.</li>
             </ul>
           </div>
+
+          ${isRannUtsavPackage ? `
+          <div class="rann-tips-box">
+            <div class="rann-tips-header">
+              <span style="font-size: 11px;">🌟</span>
+              <span class="rann-tips-title">GHUMO FIROO TRAVEL &amp; GOURMET TIPS FOR RANN UTSAV</span>
+              <span class="rann-tips-pill">CURATED LOCAL INSIDER GUIDE</span>
+            </div>
+            <div class="rann-tips-grid">
+              <div class="rann-tip-card">
+                <span class="rann-tip-icon">🌅</span>
+                <div><strong>Sunset &amp; Twilight:</strong> Reach White Rann by 5:15 PM for golden hour &amp; full moon glow across the salt flats.</div>
+              </div>
+              <div class="rann-tip-card">
+                <span class="rann-tip-icon">🧥</span>
+                <div><strong>Desert Climate:</strong> Nights drop to 11°C–14°C; carry light woolens/shawl for evening gala &amp; stargazing.</div>
+              </div>
+              <div class="rann-tip-card">
+                <span class="rann-tip-icon">🍲</span>
+                <div><strong>Kutchi Gourmet:</strong> Don't miss authentic Kutchi Kadhi-Khichdi, Gulab Pak &amp; piping hot Bhujia Dabeli.</div>
+              </div>
+              <div class="rann-tip-card">
+                <span class="rann-tip-icon">🪪</span>
+                <div><strong>Permit &amp; ID:</strong> Keep original Government photo IDs handy for Dhordo checkpoint permit verification.</div>
+              </div>
+            </div>
+          </div>
+          ` : ''}
 
           <div style="background: linear-gradient(135deg, #0b1d3a 0%, #162a4d 100%); border: 1.5px solid #c9a25a; border-radius: 8px; padding: 8px 14px; color: #ffffff; display: flex; align-items: center; justify-content: space-between;">
             <div>
