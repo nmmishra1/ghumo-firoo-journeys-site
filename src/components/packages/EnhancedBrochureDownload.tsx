@@ -635,6 +635,32 @@ const EnhancedBrochureDownload: React.FC<EnhancedBrochureDownloadProps> = ({
       coverBg = `${origin}/brochure-assets/cover_kutch.jpg`;
     }
 
+    let coverPartnerText = 'Official Partner: Evoke Tent City Dhordo';
+    let coverTaglineText = 'Discover the Timeless Beauty, Heritage & Heart of Kutch';
+
+    if (destLower.includes('kerala') || destLower.includes('munnar') || destLower.includes('alleppey') || destLower.includes('kochi')) {
+      coverPartnerText = 'Premium Partner: Kerala Luxury Resorts & Houseboats';
+      coverTaglineText = "Discover God's Own Country • Emerald Backwaters & Hills";
+    } else if (destLower.includes('kashmir') || destLower.includes('srinagar') || destLower.includes('gulmarg') || destLower.includes('pahalgam')) {
+      coverPartnerText = 'Exclusive Partner: Paradise Valley Luxury Retreats';
+      coverTaglineText = 'Paradise on Earth • Snowy Peaks, Dal Lake & Valleys';
+    } else if (destLower.includes('rajasthan') || destLower.includes('jaipur') || destLower.includes('udaipur') || destLower.includes('jodhpur')) {
+      coverPartnerText = 'Heritage Partner: Royal Palaces & Desert Resorts';
+      coverTaglineText = 'Land of Kings • Royal Forts, Palaces & Regal Hospitality';
+    } else if (destLower.includes('himachal') || destLower.includes('manali') || destLower.includes('shimla') || destLower.includes('dharamshala')) {
+      coverPartnerText = 'Mountain Retreat Partner: Luxury Himalayan Resorts';
+      coverTaglineText = 'Valley of Gods • Serene Peaks, Cedar Forests & Rivers';
+    } else if (destLower.includes('singapore') || destLower.includes('dubai') || destLower.includes('bali') || destLower.includes('thailand')) {
+      coverPartnerText = 'Global Luxury Partner: Verified 4★ & 5★ Resorts';
+      coverTaglineText = 'Curated International Escapes • Luxury & Adventure';
+    } else if (destLower.includes('kutch') || destLower.includes('rann') || destLower.includes('dhordo')) {
+      coverPartnerText = 'Official Partner: Evoke Tent City Dhordo';
+      coverTaglineText = 'Discover the Timeless Beauty, Heritage & Heart of Kutch';
+    } else {
+      coverPartnerText = 'Verified Partner: Luxury Handpicked Resorts & Retreats';
+      coverTaglineText = 'Your Journey, Our Expertise • Curated Bespoke Travel';
+    }
+
     const displayGuestName = guestName?.trim() || watchedName?.trim() || 'Valued Guest';
     const displayGuestPhone = guestPhone?.trim() || watchedPhone?.trim() || '';
 
@@ -719,140 +745,395 @@ const EnhancedBrochureDownload: React.FC<EnhancedBrochureDownloadProps> = ({
       nightsCount = 4;
     }
 
-    // Dynamic Hotel Resolution:
-    let resolvedHotels: Array<{ name: string; location: string; stars?: number; room_type?: string; meal_plan?: string; image?: string; description?: string }> = [];
+    // Destination-Aware Hotel Image Resolver:
+    const resolveHotelImage = (hName: string, hLoc: string, idx: number): string => {
+      const text = `${hName} ${hLoc} ${destination || ''} ${packageDetails.title || ''}`.toLowerCase();
+      
+      // Kerala
+      if (text.includes('houseboat') || text.includes('alleppey') || text.includes('alappuzha') || text.includes('vembanad') || text.includes('backwater')) {
+        return `${origin}/kerala/alleppey_backwaters_houseboat.jpg`;
+      }
+      if (text.includes('munnar') || text.includes('tea')) {
+        return `${origin}/kerala/munnar_tea_estates.jpg`;
+      }
+      if (text.includes('thekkady') || text.includes('periyar') || text.includes('wildlife')) {
+        return `${origin}/kerala/thekkady_periyar_sanctuary.jpg`;
+      }
+      if (text.includes('kochi') || text.includes('cochin') || text.includes('ernakulam')) {
+        return `${origin}/kerala/fort_kochi_chinese_nets.jpg`;
+      }
+      if (text.includes('kovalam') || text.includes('trivandrum')) {
+        return `${origin}/kerala/kovalam_lighthouse_beach.jpg`;
+      }
+      if (text.includes('kerala')) {
+        const kImgs = [
+          `${origin}/kerala/munnar_tea_estates.jpg`,
+          `${origin}/kerala/alleppey_backwaters_houseboat.jpg`,
+          `${origin}/kerala/thekkady_periyar_sanctuary.jpg`,
+          `${origin}/kerala/fort_kochi_chinese_nets.jpg`
+        ];
+        return kImgs[idx % kImgs.length];
+      }
+
+      // Kashmir
+      if (text.includes('dal lake') || text.includes('shikara') || text.includes('houseboat kashmir') || text.includes('srinagar')) {
+        return `${origin}/kashmir/dal_lake_shikara.jpg`;
+      }
+      if (text.includes('gulmarg') || text.includes('gondola')) {
+        return `${origin}/kashmir/gulmarg_gondola.jpg`;
+      }
+      if (text.includes('pahalgam') || text.includes('betaab') || text.includes('baisaran')) {
+        return `${origin}/kashmir/pahalgam_betaab_valley.jpg`;
+      }
+      if (text.includes('sonamarg') || text.includes('glacier')) {
+        return `${origin}/kashmir/sonamarg_thajiwas_glacier.jpg`;
+      }
+      if (text.includes('kashmir')) {
+        const kmImgs = [
+          `${origin}/kashmir/dal_lake_shikara.jpg`,
+          `${origin}/kashmir/gulmarg_gondola.jpg`,
+          `${origin}/kashmir/pahalgam_betaab_valley.jpg`,
+          `${origin}/kashmir/srinagar_mughal_gardens.jpg`
+        ];
+        return kmImgs[idx % kmImgs.length];
+      }
+
+      // Singapore
+      if (text.includes('singapore') || text.includes('marina bay') || text.includes('sentosa') || text.includes('novena')) {
+        const sgImgs = [
+          `${origin}/singapore/marina_bay_sands.jpg`,
+          `${origin}/singapore/gardens_by_the_bay.jpg`,
+          `${origin}/singapore/jewel_changi.jpg`,
+          `${origin}/singapore/universal_studios.jpg`
+        ];
+        return sgImgs[idx % sgImgs.length];
+      }
+
+      // Europe
+      if (text.includes('paris') || text.includes('france')) return `${origin}/europe/paris_eiffel_tower.jpg`;
+      if (text.includes('switzerland') || text.includes('zurich') || text.includes('interlaken') || text.includes('lucerne')) return `${origin}/europe/switzerland.jpg`;
+      if (text.includes('rome') || text.includes('italy') || text.includes('venice')) return `${origin}/europe/rome_colosseum.jpg`;
+      if (text.includes('amsterdam') || text.includes('netherlands')) return `${origin}/europe/amsterdam_canals.jpg`;
+      if (text.includes('europe')) {
+        const euImgs = [`${origin}/europe/switzerland.jpg`, `${origin}/europe/paris_eiffel_tower.jpg`, `${origin}/europe/rome_colosseum.jpg`, `${origin}/europe/amsterdam_canals.jpg`];
+        return euImgs[idx % euImgs.length];
+      }
+
+      // Kutch / Gujarat
+      if (text.includes('tent city') || text.includes('evoke') || text.includes('praveg') || text.includes('dhordo')) {
+        return `${origin}/rann_utsav_tent_city.jpg`;
+      }
+      if (text.includes('dholavira') || text.includes('heaven')) {
+        return `${origin}/brochure-assets/dholavira.jpg`;
+      }
+      if (text.includes('mandvi') || text.includes('beach') || text.includes('serena')) {
+        return `${origin}/Mandvi Beach_Kutch.png`;
+      }
+      if (text.includes('bhuj') || text.includes('regenta') || text.includes('mangalam') || text.includes('fern') || text.includes('palace')) {
+        return `${origin}/brochure-assets/palace_legacy.jpg`;
+      }
+
+      // Fallbacks
+      const fallbacks = [
+        `${origin}/brochure-assets/gala_dinner.jpg`,
+        `${origin}/brochure-assets/palace_legacy.jpg`,
+        `${origin}/brochure-assets/dholavira.jpg`
+      ];
+      return fallbacks[idx % fallbacks.length];
+    };
+
+    // Dynamic Hotel Resolution with Multi-Stay Splitting:
+    let rawHotelsList: any[] = [];
     if (packageDetails.hotels && packageDetails.hotels.length > 0) {
-      resolvedHotels = packageDetails.hotels.map((h: any, idx: number) => {
-        let hImg = `${origin}/brochure-assets/gala_dinner.jpg`;
-        const hNameLower = (h.name || '').toLowerCase();
-        if (hNameLower.includes('tent city') || hNameLower.includes('evoke') || hNameLower.includes('praveg')) {
-          hImg = `${origin}/rann_utsav_tent_city.jpg`;
-        } else if (hNameLower.includes('dholavira') || hNameLower.includes('heaven')) {
-          hImg = `${origin}/brochure-assets/dholavira.jpg`;
-        } else if (hNameLower.includes('mandvi') || hNameLower.includes('beach') || hNameLower.includes('serena')) {
-          hImg = `${origin}/Mandvi Beach_Kutch.png`;
-        } else if (hNameLower.includes('bhuj') || hNameLower.includes('regenta') || hNameLower.includes('mangalam') || hNameLower.includes('fern')) {
-          hImg = `${origin}/brochure-assets/palace_legacy.jpg`;
-        } else {
-          const fallbackImgs = [
-            `${origin}/rann_utsav_tent_city.jpg`,
-            `${origin}/brochure-assets/gala_dinner.jpg`,
-            `${origin}/Mandvi Beach_Kutch.png`,
-            `${origin}/brochure-assets/palace_legacy.jpg`
-          ];
-          hImg = fallbackImgs[idx % fallbackImgs.length];
-        }
-        return {
-          name: h.name,
-          location: h.location || 'Kutch, Gujarat',
-          stars: h.stars || 4,
-          room_type: h.room_type || 'Deluxe A/C Swiss Cottage Tent',
-          meal_plan: h.meal_plan || 'ALL MEALS INCLUDED (BUFFET)',
-          image: h.image || hImg,
-          description: h.highlight || h.description || `${h.room_type || 'Luxury Stay'} with 24/7 concierge service`
-        };
-      });
+      rawHotelsList = packageDetails.hotels;
+    } else if (accommodation && typeof accommodation === 'string' && accommodation.trim()) {
+      rawHotelsList = [{ name: accommodation.trim(), location: destination || 'Handpicked Destination' }];
     }
 
-    // Default hotel fallback curated strictly by nights stayed
+    const resolvedHotels: Array<{
+      name: string;
+      location: string;
+      stars?: number;
+      room_type?: string;
+      meal_plan?: string;
+      image?: string;
+      description?: string;
+    }> = [];
+
+    rawHotelsList.forEach((h: any, baseIdx: number) => {
+      const hName = (h.name || '').trim();
+      if (hName.includes(' + ')) {
+        const subNames = hName.split(/\s*\+\s*/).filter(Boolean);
+        subNames.forEach((subName: string, subIdx: number) => {
+          const cleanSubName = subName.trim();
+          const subLower = cleanSubName.toLowerCase();
+          
+          let loc = h.location || destination || 'India';
+          let rType = h.room_type || 'Deluxe Room';
+          let mPlan = h.meal_plan || 'MAP (Breakfast & Dinner)';
+          let desc = h.highlight || h.description || 'Premium handpicked verified stay';
+
+          if (subLower.includes('munnar')) {
+            loc = 'Munnar Hills, Kerala';
+            rType = 'Deluxe Mountain View Room';
+            mPlan = 'MAP (Buffet Breakfast & Dinner)';
+            desc = 'Serene misty tea valley resort with private balcony & valley views';
+          } else if (subLower.includes('alleppey') || subLower.includes('houseboat')) {
+            loc = 'Alleppey Backwaters, Kerala';
+            rType = 'Private AC Deluxe Houseboat Suite';
+            mPlan = 'ALL MEALS INCLUDED (Sadya Lunch & Dinner)';
+            desc = 'Traditional cruise through palm canals with dedicated onboard chef';
+          } else if (subLower.includes('thekkady')) {
+            loc = 'Thekkady Periyar, Kerala';
+            rType = 'Forest View Deluxe Room';
+            mPlan = 'MAP (Buffet Breakfast & Dinner)';
+            desc = 'Spice plantation retreat located close to Periyar Wildlife Sanctuary';
+          } else if (subLower.includes('srinagar') || subLower.includes('dal lake')) {
+            loc = 'Srinagar / Dal Lake, Kashmir';
+            rType = subLower.includes('houseboat') ? 'Super Deluxe Dal Lake Houseboat' : 'Deluxe Heritage Room';
+            mPlan = 'MAP (Buffet Breakfast & Dinner)';
+            desc = 'Scenic water & mountain views with warm Kashmiri walnut wood interiors';
+          } else if (subLower.includes('gulmarg')) {
+            loc = 'Gulmarg, Kashmir';
+            rType = 'Snow View Alpine Room';
+            mPlan = 'MAP (Buffet Breakfast & Dinner)';
+            desc = 'Luxury alpine stay situated near the Gulmarg Gondola base station';
+          } else if (subLower.includes('pahalgam')) {
+            loc = 'Pahalgam, Kashmir';
+            rType = 'Lidder Riverview Cottage';
+            mPlan = 'MAP (Buffet Breakfast & Dinner)';
+            desc = 'Peaceful mountain retreat on the banks of the Lidder river valley';
+          } else if (subLower.includes('tent city') || subLower.includes('dhordo')) {
+            loc = 'Dhordo, White Rann, Kutch';
+            rType = 'Premium AC Swiss Cottage Tent';
+            mPlan = 'ALL MEALS INCLUDED (Gourmet Buffet)';
+            desc = 'Official partner luxury Swiss tent with direct White Desert sunset access';
+          } else if (subLower.includes('dholavira')) {
+            loc = 'Dholavira UNESCO Site, Kutch';
+            rType = 'Deluxe Air-Conditioned Cottage';
+            mPlan = 'MAP (Buffet Breakfast & Dinner)';
+            desc = 'Authentic Kutch hospitality right along the Road to Heaven highway';
+          } else if (subLower.includes('bhuj')) {
+            loc = 'Bhuj Heritage City, Kutch';
+            rType = 'Executive Heritage Room';
+            mPlan = 'MAP (Buffet Breakfast & Dinner)';
+            desc = 'Luxury city resort located near Prag Mahal and traditional craft bazaars';
+          }
+
+          const img = resolveHotelImage(cleanSubName, loc, resolvedHotels.length);
+
+          resolvedHotels.push({
+            name: cleanSubName,
+            location: loc,
+            stars: h.stars || 4,
+            room_type: rType,
+            meal_plan: mPlan,
+            image: img,
+            description: desc
+          });
+        });
+      } else {
+        let loc = h.location || destination || 'India';
+        let rType = h.room_type || 'Deluxe Premium Room';
+        let mPlan = h.meal_plan || 'Buffet Breakfast & Dinner (MAP)';
+        let desc = h.highlight || h.description || `${rType} with 24/7 travel concierge`;
+        let img = h.image && (h.image.startsWith('http') || h.image.startsWith('/'))
+          ? (h.image.startsWith('/') ? `${origin}${h.image}` : h.image)
+          : resolveHotelImage(hName, loc, baseIdx);
+
+        resolvedHotels.push({
+          name: hName || 'Premium Luxury Stay',
+          location: loc,
+          stars: h.stars || 4,
+          room_type: rType,
+          meal_plan: mPlan,
+          image: img,
+          description: desc
+        });
+      }
+    });
+
+    // Default hotel fallback curated strictly by destination & nights stayed
     if (resolvedHotels.length === 0) {
-      if (nightsCount === 1) {
+      if (destLower.includes('kerala') || destLower.includes('munnar') || destLower.includes('alleppey')) {
         resolvedHotels = [
           {
-            name: "Evoke Tent City Dhordo",
-            location: "Dhordo, Kutch",
-            stars: 5,
-            room_type: "A/C Premium Royal Swiss Tent",
-            meal_plan: "ALL MEALS INCLUDED (BUFFET)",
-            image: `${origin}/rann_utsav_tent_city.jpg`,
-            description: "Official partner luxury Swiss Tent with White Rann proximity and all gourmet meals"
-          }
-        ];
-      } else if (nightsCount === 2) {
-        resolvedHotels = [
-          {
-            name: "Praveg Tent City Dhordo",
-            location: "Dhordo, Kutch",
-            stars: 5,
-            room_type: "Night 1: A/C Royal Swiss Tent",
-            meal_plan: "ALL MEALS INCLUDED (BUFFET)",
-            image: `${origin}/rann_utsav_tent_city.jpg`,
-            description: "Iconic White Desert resort with cultural folk stage shows and stargazing"
+            name: "Munnar Tea Valley Resort (2N)",
+            location: "Munnar Hills, Kerala",
+            stars: 4,
+            room_type: "Deluxe Mountain View Room",
+            meal_plan: "MAP (Buffet Breakfast & Dinner)",
+            image: `${origin}/kerala/munnar_tea_estates.jpg`,
+            description: "Serene misty tea valley resort with private balcony & tea garden views"
           },
           {
-            name: "Evoke Resort & Swiss Tents",
-            location: "Dhordo, Kutch",
-            stars: 4,
-            room_type: "Night 2: Deluxe A/C Swiss Cottage",
-            meal_plan: "ALL MEALS INCLUDED (BUFFET)",
-            image: `${origin}/brochure-assets/gala_dinner.jpg`,
-            description: "Authentic Kutchi Bhunga & Swiss cottages with authentic Kutchi dining"
+            name: "Alleppey Luxury Houseboat (1N)",
+            location: "Alleppey Backwaters, Kerala",
+            stars: 5,
+            room_type: "Private AC Houseboat Suite",
+            meal_plan: "ALL MEALS INCLUDED (Sadya Lunch & Dinner)",
+            image: `${origin}/kerala/alleppey_backwaters_houseboat.jpg`,
+            description: "Traditional cruise through palm canals with dedicated onboard chef"
           }
         ];
-      } else if (nightsCount === 3) {
+      } else if (destLower.includes('kashmir')) {
         resolvedHotels = [
           {
-            name: "Praveg Tent City Dhordo",
-            location: "Dhordo, Kutch",
+            name: "Royal Dal Lake Houseboat",
+            location: "Dal Lake, Srinagar",
             stars: 5,
-            room_type: "Nights 1 & 2: Royal Swiss Tent",
-            meal_plan: "ALL MEALS INCLUDED (BUFFET)",
-            image: `${origin}/rann_utsav_tent_city.jpg`,
-            description: "Direct access to White Desert sunset walks and cultural amphitheater"
+            room_type: "Royal Cedar Wood Suite",
+            meal_plan: "MAP (Buffet Breakfast & Dinner)",
+            image: `${origin}/kashmir/dal_lake_shikara.jpg`,
+            description: "Handcrafted walnut-wood houseboat with private front deck on Dal Lake"
           },
           {
-            name: "Regenta Resort / Palace Heritage",
-            location: "Bhuj Heritage City",
+            name: "Pahalgam Valley Pine Resort",
+            location: "Pahalgam Valley, Kashmir",
             stars: 4,
-            room_type: "Night 3: Royal Heritage Room",
-            meal_plan: "BUFFET BREAKFAST & DINNER",
-            image: `${origin}/brochure-assets/palace_legacy.jpg`,
-            description: "Heritage luxury stay near Prag Mahal, Aina Mahal and Bhuj markets"
+            room_type: "Lidder Riverview Cottage",
+            meal_plan: "MAP (Buffet Breakfast & Dinner)",
+            image: `${origin}/kashmir/pahalgam_betaab_valley.jpg`,
+            description: "Riverside luxury surrounded by pine forests and snow-capped peaks"
           }
         ];
       } else {
-        resolvedHotels = [
-          {
-            name: "Praveg Tent City Dhordo",
-            location: "Dhordo, Kutch",
-            stars: 5,
-            room_type: "Night 1: A/C Swiss Tent",
-            meal_plan: "ALL MEALS INCLUDED",
-            image: `${origin}/rann_utsav_tent_city.jpg`,
-            description: "White Desert sunset and bonfire base"
-          },
-          {
-            name: "StayGuru Dholavira Resort",
-            location: "Dholavira UNESCO Site",
-            stars: 4,
-            room_type: "Night 2: Deluxe Cottage",
-            meal_plan: "MAP (BREAKFAST & DINNER)",
-            image: `${origin}/brochure-assets/dholavira.jpg`,
-            description: "Road to Heaven highway & Harappan ruins base"
-          },
-          {
-            name: "Serena Beach Resort",
-            location: "Mandvi Beach",
-            stars: 4,
-            room_type: "Night 3: Coastal Sea Villa",
-            meal_plan: "MAP (BREAKFAST & DINNER)",
-            image: `${origin}/Mandvi Beach_Kutch.png`,
-            description: "Private beach access and Vijay Vilas Palace retreat"
-          },
-          {
-            name: "Regenta Resort Bhuj",
-            location: "Bhuj Heritage City",
-            stars: 4,
-            room_type: "Night 4: Heritage Room",
-            meal_plan: "MAP (BREAKFAST & DINNER)",
-            image: `${origin}/brochure-assets/palace_legacy.jpg`,
-            description: "Palaces, Smritivan museum and handicraft shopping base"
-          }
-        ];
+        // Kutch default
+        if (nightsCount === 1) {
+          resolvedHotels = [
+            {
+              name: "Evoke Tent City Dhordo",
+              location: "Dhordo, Kutch",
+              stars: 5,
+              room_type: "A/C Premium Royal Swiss Tent",
+              meal_plan: "ALL MEALS INCLUDED (BUFFET)",
+              image: `${origin}/rann_utsav_tent_city.jpg`,
+              description: "Official partner luxury Swiss Tent with White Rann proximity and gourmet meals"
+            }
+          ];
+        } else if (nightsCount === 2) {
+          resolvedHotels = [
+            {
+              name: "Praveg Tent City Dhordo",
+              location: "Dhordo, Kutch",
+              stars: 5,
+              room_type: "Night 1: A/C Royal Swiss Tent",
+              meal_plan: "ALL MEALS INCLUDED (BUFFET)",
+              image: `${origin}/rann_utsav_tent_city.jpg`,
+              description: "Iconic White Desert resort with cultural folk stage shows and stargazing"
+            },
+            {
+              name: "Evoke Resort & Swiss Tents",
+              location: "Dhordo, Kutch",
+              stars: 4,
+              room_type: "Night 2: Deluxe A/C Swiss Cottage",
+              meal_plan: "ALL MEALS INCLUDED (BUFFET)",
+              image: `${origin}/brochure-assets/gala_dinner.jpg`,
+              description: "Authentic Kutchi Bhunga & Swiss cottages with authentic Kutchi dining"
+            }
+          ];
+        } else if (nightsCount === 3) {
+          resolvedHotels = [
+            {
+              name: "Praveg Tent City Dhordo",
+              location: "Dhordo, Kutch",
+              stars: 5,
+              room_type: "Nights 1 & 2: Royal Swiss Tent",
+              meal_plan: "ALL MEALS INCLUDED (BUFFET)",
+              image: `${origin}/rann_utsav_tent_city.jpg`,
+              description: "Direct access to White Desert sunset walks and cultural amphitheater"
+            },
+            {
+              name: "Regenta Resort / Palace Heritage",
+              location: "Bhuj Heritage City",
+              stars: 4,
+              room_type: "Night 3: Royal Heritage Room",
+              meal_plan: "BUFFET BREAKFAST & DINNER",
+              image: `${origin}/brochure-assets/palace_legacy.jpg`,
+              description: "Heritage luxury stay near Prag Mahal, Aina Mahal and Bhuj markets"
+            }
+          ];
+        } else {
+          resolvedHotels = [
+            {
+              name: "Praveg Tent City Dhordo",
+              location: "Dhordo, Kutch",
+              stars: 5,
+              room_type: "Night 1: A/C Swiss Tent",
+              meal_plan: "ALL MEALS INCLUDED",
+              image: `${origin}/rann_utsav_tent_city.jpg`,
+              description: "White Desert sunset and bonfire base"
+            },
+            {
+              name: "StayGuru Dholavira Resort",
+              location: "Dholavira UNESCO Site",
+              stars: 4,
+              room_type: "Night 2: Deluxe Cottage",
+              meal_plan: "MAP (BREAKFAST & DINNER)",
+              image: `${origin}/brochure-assets/dholavira.jpg`,
+              description: "Road to Heaven highway & Harappan ruins base"
+            }
+          ];
+        }
       }
     }
     // Limit to actual nights stayed so 2N package displays exactly 2 cards side-by-side
     const displayHotels = resolvedHotels.slice(0, Math.min(Math.max(1, nightsCount), 4));
+
+    // Destination-Aware Journey Highlights
+    let displayHighlights: Array<{ title: string; desc: string; image: string }> = [];
+    if (packageDetails.attractions && packageDetails.attractions.length > 0) {
+      displayHighlights = packageDetails.attractions.slice(0, 4).map((att: any, aIdx: number) => {
+        let attImg = att.image ? (att.image.startsWith('/') ? `${origin}${att.image}` : att.image) : '';
+        if (!attImg) {
+          attImg = resolveHotelImage(att.name || '', att.location || destination || '', aIdx);
+        }
+        return {
+          title: att.name,
+          desc: att.description || 'Iconic sightseeing destination included in your private circuit.',
+          image: attImg
+        };
+      });
+    }
+
+    if (displayHighlights.length < 4) {
+      if (destLower.includes('kerala') || destLower.includes('munnar') || destLower.includes('alleppey') || destLower.includes('kochi')) {
+        displayHighlights = [
+          { title: '🌴 Alleppey Backwaters Cruise', desc: 'Private luxury houseboat cruise through serene palm canals & Vembanad Lake.', image: `${origin}/kerala/alleppey_backwaters_houseboat.jpg` },
+          { title: '🍃 Munnar Tea Plantations', desc: 'Misty green tea rolling gardens, Tata Tea Museum & Mattupetty lake dam.', image: `${origin}/kerala/munnar_tea_estates.jpg` },
+          { title: '🐐 Eravikulam National Park', desc: 'Habitat of the endangered Nilgiri Tahr mountain goats and Anamudi peak views.', image: `${origin}/kerala/eravikulam_nilgiri_tahr.jpg` },
+          { title: '🎣 Fort Kochi Heritage & Nets', desc: 'Historic 14th-century Chinese fishing nets, colonial spice streets & Jew Town.', image: `${origin}/kerala/fort_kochi_chinese_nets.jpg` }
+        ];
+      } else if (destLower.includes('kashmir') || destLower.includes('srinagar') || destLower.includes('gulmarg') || destLower.includes('pahalgam')) {
+        displayHighlights = [
+          { title: '⛵ Dal Lake Shikara Cruise', desc: 'Iconic wooden Shikara boat ride past floating gardens and majestic Pir Panjal peaks.', image: `${origin}/kashmir/dal_lake_shikara.jpg` },
+          { title: '🚠 Gulmarg Gondola Cable Car', desc: 'Asia’s highest cable car ride to Kongdoori & Apharwat Peak snow station.', image: `${origin}/kashmir/gulmarg_gondola.jpg` },
+          { title: '🌲 Betaab & Baisaran Valleys', desc: 'Known as Mini Switzerland with pine forests, Lidder river and snow peaks.', image: `${origin}/kashmir/pahalgam_betaab_valley.jpg` },
+          { title: '🌸 Srinagar Mughal Gardens', desc: 'Terraced Persian-style Nishat Bagh, Shalimar Bagh & Chashme Shahi gardens.', image: `${origin}/kashmir/srinagar_mughal_gardens.jpg` }
+        ];
+      } else if (destLower.includes('singapore')) {
+        displayHighlights = [
+          { title: '🏙️ Marina Bay Sands & SkyPark', desc: 'Panoramic 360° observation deck overlooking Singapore’s iconic skyline.', image: `${origin}/singapore/marina_bay_sands.jpg` },
+          { title: '🌺 Gardens by the Bay', desc: 'Futuristic Supertree Grove, Flower Dome & Cloud Forest waterfalls.', image: `${origin}/singapore/gardens_by_the_bay.jpg` },
+          { title: '🌊 Jewel Changi Rain Vortex', desc: 'World’s tallest 40m indoor waterfall surrounded by lush canopy park.', image: `${origin}/singapore/jewel_changi.jpg` },
+          { title: '🚠 Sentosa Island Cable Car', desc: 'Scenic ropeway cruise over the harbor connecting Mount Faber to Sentosa.', image: `${origin}/singapore/cable_car_sentosa.jpg` }
+        ];
+      } else if (destLower.includes('europe') || destLower.includes('swiss') || destLower.includes('paris')) {
+        displayHighlights = [
+          { title: '🗼 Eiffel Tower & Seine Cruise', desc: 'Iconic Parisian landmark panoramic ascent and romantic river cruise.', image: `${origin}/europe/paris_eiffel_tower.jpg` },
+          { title: '🏔️ Swiss Alps & Jungfraujoch', desc: 'Top of Europe snow summit, glacier palace & alpine train wonderland.', image: `${origin}/europe/switzerland.jpg` },
+          { title: '🏛️ Rome Colosseum & Forum', desc: 'Ancient Roman gladiatorial amphitheater and historic imperial ruins.', image: `${origin}/europe/rome_colosseum.jpg` },
+          { title: '🚤 Amsterdam Canal Cruise', desc: 'UNESCO heritage canal waterways, historic gabled houses and bridges.', image: `${origin}/europe/amsterdam_canals.jpg` }
+        ];
+      } else {
+        displayHighlights = [
+          { title: '🌅 White Rann Salt Desert Sunset', desc: 'Glittering vast white salt marshes with spectacular sunset walk & cultural gala.', image: `${origin}/rann_utsav_white_desert.jpg` },
+          { title: '🛣️ Road to Heaven Highway', desc: 'Iconic straight highway cutting through turquoise salt waters of the Great Rann.', image: `${origin}/rann_utsav_road_to_heaven.jpg` },
+          { title: '🏔️ Kalo Dungar Black Hill', desc: 'Highest summit in Kutch offering panoramic 360° views overlooking the desert.', image: `${origin}/kalodungar.jpg` },
+          { title: '🏰 Royal Heritage Palaces', desc: 'Historic Prag Mahal, Aina Mahal & India’s largest memorial park in Bhuj.', image: `${origin}/brochure-assets/palace_legacy.jpg` }
+        ];
+      }
+    }
 
     // Context-Aware Day Images with Keyword Matching
     const getItineraryDayImage = (day: any, idx: number) => {
@@ -861,6 +1142,42 @@ const EnhancedBrochureDownload: React.FC<EnhancedBrochureDownloadProps> = ({
       
       const dayText = `${day.title || ''} ${day.description || ''} ${(day.activities || []).join(' ')}`.toLowerCase();
       
+      if (destLower.includes('kerala') || destLower.includes('munnar') || destLower.includes('alleppey')) {
+        if (dayText.includes('houseboat') || dayText.includes('alleppey') || dayText.includes('backwater') || dayText.includes('vembanad')) {
+          return `${origin}/kerala/alleppey_backwaters_houseboat.jpg`;
+        }
+        if (dayText.includes('eravikulam') || dayText.includes('safari') || dayText.includes('tahr') || dayText.includes('wildlife')) {
+          return `${origin}/kerala/eravikulam_nilgiri_tahr.jpg`;
+        }
+        if (dayText.includes('thekkady') || dayText.includes('periyar') || dayText.includes('spice')) {
+          return `${origin}/kerala/thekkady_periyar_sanctuary.jpg`;
+        }
+        if (dayText.includes('kochi') || dayText.includes('cochin') || dayText.includes('airport') || dayText.includes('fort kochi')) {
+          return `${origin}/kerala/fort_kochi_chinese_nets.jpg`;
+        }
+        const klImgs = [
+          `${origin}/kerala/munnar_tea_estates.jpg`,
+          `${origin}/kerala/alleppey_backwaters_houseboat.jpg`,
+          `${origin}/kerala/thekkady_periyar_sanctuary.jpg`,
+          `${origin}/kerala/fort_kochi_chinese_nets.jpg`
+        ];
+        return klImgs[idx % klImgs.length];
+      }
+
+      if (destLower.includes('kashmir')) {
+        if (dayText.includes('gulmarg') || dayText.includes('gondola')) return `${origin}/kashmir/gulmarg_gondola.jpg`;
+        if (dayText.includes('pahalgam') || dayText.includes('betaab') || dayText.includes('baisaran')) return `${origin}/kashmir/pahalgam_betaab_valley.jpg`;
+        if (dayText.includes('sonamarg') || dayText.includes('glacier')) return `${origin}/kashmir/sonamarg_thajiwas_glacier.jpg`;
+        if (dayText.includes('shikara') || dayText.includes('dal lake') || dayText.includes('srinagar')) return `${origin}/kashmir/dal_lake_shikara.jpg`;
+        const kmImgs = [
+          `${origin}/kashmir/dal_lake_shikara.jpg`,
+          `${origin}/kashmir/gulmarg_gondola.jpg`,
+          `${origin}/kashmir/pahalgam_betaab_valley.jpg`,
+          `${origin}/kashmir/srinagar_mughal_gardens.jpg`
+        ];
+        return kmImgs[idx % kmImgs.length];
+      }
+
       if (destLower.includes('rann') || destLower.includes('kutch') || destLower.includes('dhordo')) {
         if (dayText.includes('heaven') || dayText.includes('dholavira') || dayText.includes('highway')) {
           return `${origin}/rann_utsav_road_to_heaven.jpg`;
@@ -1075,9 +1392,10 @@ const EnhancedBrochureDownload: React.FC<EnhancedBrochureDownloadProps> = ({
           margin-bottom: 6px;
         }
         .cover-brand-partner-badge {
-          display: inline-block;
-          height: 19px;
-          line-height: 19px;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          height: 22px;
           padding: 0 16px;
           background: rgba(11, 29, 58, 0.05);
           border: 1px solid rgba(201, 162, 90, 0.7);
@@ -1088,14 +1406,21 @@ const EnhancedBrochureDownload: React.FC<EnhancedBrochureDownloadProps> = ({
           letter-spacing: 0.8px;
           text-transform: uppercase;
           text-align: center;
-          vertical-align: middle;
           box-sizing: border-box;
+        }
+        .cover-brand-partner-badge span {
+          position: relative;
+          top: -2px;
+          display: block;
+          line-height: 1;
         }
         .cover-tagline-pill {
           display: inline-flex;
           align-items: center;
           justify-content: center;
           text-align: center;
+          height: 32px;
+          padding: 0 24px;
           background: rgba(255, 255, 255, 0.96);
           border: 1.5px solid rgba(201, 162, 90, 0.85);
           color: #0b1d3a;
@@ -1103,11 +1428,16 @@ const EnhancedBrochureDownload: React.FC<EnhancedBrochureDownloadProps> = ({
           font-weight: 800;
           letter-spacing: 1.8px;
           text-transform: uppercase;
-          padding: 7px 26px;
           border-radius: 30px;
           box-shadow: 0 4px 15px rgba(0,0,0,0.08);
           margin-bottom: 22px;
-          line-height: 1.2;
+          box-sizing: border-box;
+        }
+        .cover-tagline-pill span {
+          position: relative;
+          top: -2px;
+          display: block;
+          line-height: 1;
         }
         .cover-main-title {
           font-family: 'Cinzel', serif;
@@ -1165,16 +1495,23 @@ const EnhancedBrochureDownload: React.FC<EnhancedBrochureDownloadProps> = ({
           align-items: center;
           justify-content: center;
           text-align: center;
+          height: 38px;
+          padding: 0 32px;
           background: linear-gradient(135deg, #d4af37 0%, #aa7c11 100%);
           color: #0b1d3a;
           font-size: 13.5px;
           font-weight: 900;
           letter-spacing: 2.5px;
           text-transform: uppercase;
-          padding: 8px 32px;
           border-radius: 25px;
           box-shadow: 0 6px 20px rgba(170, 124, 17, 0.45);
-          line-height: 1.2;
+          box-sizing: border-box;
+        }
+        .cover-duration-badge span {
+          position: relative;
+          top: -2px;
+          display: block;
+          line-height: 1;
         }
         .cover-bottom-bar {
           padding: 13px 36px;
@@ -1321,7 +1658,7 @@ const EnhancedBrochureDownload: React.FC<EnhancedBrochureDownloadProps> = ({
         }
         .hotels-visual-grid {
           display: grid;
-          gap: 6px;
+          gap: 8px;
         }
         .hotels-visual-grid.cols-1 {
           grid-template-columns: 1fr;
@@ -1331,57 +1668,97 @@ const EnhancedBrochureDownload: React.FC<EnhancedBrochureDownloadProps> = ({
         }
         .hotel-visual-card {
           display: flex;
-          align-items: center;
-          gap: 10px;
-          padding: 6px 10px;
-          background: #f8fafc;
+          flex-direction: column;
+          background: #ffffff;
           border: 1px solid #e2e8f0;
           border-radius: 8px;
           overflow: hidden;
+          box-shadow: 0 2px 6px rgba(0,0,0,0.04);
           font-family: 'Plus Jakarta Sans', Arial, sans-serif;
         }
+        .hvc-image-wrap {
+          width: 100%;
+          height: ${displayHotels.length === 1 ? '76px' : '62px'};
+          position: relative;
+          background: #0b1d3a;
+          overflow: hidden;
+        }
         .hvc-thumb {
-          width: ${displayHotels.length > 2 ? '54px' : '62px'};
-          height: ${displayHotels.length > 2 ? '46px' : '52px'};
-          border-radius: 6px;
+          width: 100%;
+          height: 100%;
           object-fit: cover;
-          flex-shrink: 0;
-          border: 1px solid rgba(201, 162, 90, 0.45);
+          display: block;
+        }
+        .hvc-stay-pill {
+          position: absolute;
+          top: 5px;
+          left: 6px;
+          background: rgba(11, 29, 58, 0.85);
+          backdrop-filter: blur(4px);
+          color: #d4af37;
+          border: 1px solid rgba(212, 175, 55, 0.5);
+          font-size: 7.2px;
+          font-weight: 800;
+          padding: 1.5px 6px;
+          border-radius: 10px;
+          letter-spacing: 0.5px;
+          text-transform: uppercase;
+        }
+        .hvc-verified-badge {
+          position: absolute;
+          top: 5px;
+          right: 6px;
+          background: rgba(22, 101, 52, 0.9);
+          color: #ffffff;
+          font-size: 7px;
+          font-weight: 800;
+          padding: 1.5px 6px;
+          border-radius: 10px;
+          letter-spacing: 0.4px;
         }
         .hvc-body {
-          flex: 1;
-          min-width: 0;
+          padding: 5px 8px 6px 8px;
           display: flex;
           flex-direction: column;
           gap: 2px;
+          flex: 1;
         }
         .hvc-title-row {
           display: flex;
           align-items: center;
           justify-content: space-between;
-          gap: 6px;
+          gap: 4px;
         }
         .hvc-name {
           font-weight: 800;
-          font-size: ${displayHotels.length > 2 ? '9.5px' : '10.5px'};
+          font-size: 9.2px;
           color: #0b1d3a;
           line-height: 1.25;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
         }
         .hvc-stars {
           color: #f59e0b;
-          font-size: 8px;
+          font-size: 7.5px;
           letter-spacing: 0.5px;
           flex-shrink: 0;
         }
         .hvc-meta {
-          font-size: 8px;
+          font-size: 7.8px;
           color: #475569;
           line-height: 1.2;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
         }
         .hvc-desc {
-          font-size: 7.5px;
+          font-size: 7.2px;
           color: #64748b;
-          line-height: 1.2;
+          line-height: 1.25;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
         }
         .hvc-footer {
           display: flex;
@@ -1394,10 +1771,10 @@ const EnhancedBrochureDownload: React.FC<EnhancedBrochureDownloadProps> = ({
           background: rgba(201,162,90,0.15);
           border: 1px solid #c9a25a;
           color: #92400e;
-          font-size: 7.6px;
+          font-size: 7.2px;
           font-weight: 800;
-          padding: 1.5px 7px;
-          border-radius: 10px;
+          padding: 1px 6px;
+          border-radius: 8px;
           white-space: nowrap;
         }
 
@@ -1642,12 +2019,12 @@ const EnhancedBrochureDownload: React.FC<EnhancedBrochureDownloadProps> = ({
             <div class="cover-brand-text">
               <div class="cover-brand-title">GHUMO FIROO</div>
               <div class="cover-brand-tag">YOUR JOURNEY, OUR EXPERTISE!</div>
-              <div class="cover-brand-partner-badge">Official Partner: Evoke Tent City Dhordo</div>
+              <div class="cover-brand-partner-badge"><span>${coverPartnerText}</span></div>
             </div>
           </div>
 
           <div class="cover-tagline-pill">
-            Discover the Timeless Beauty, Heritage & Heart of Kutch
+            <span>${coverTaglineText}</span>
           </div>
 
           <div class="cover-main-title" style="font-size: ${dynamicTitleSize}px; letter-spacing: ${dynamicLetterSpacing}px; line-height: ${dynamicLineHeight};">
@@ -1655,7 +2032,7 @@ const EnhancedBrochureDownload: React.FC<EnhancedBrochureDownloadProps> = ({
           </div>
 
           <div class="cover-duration-badge">
-            ${durationPillText}
+            <span>${durationPillText}</span>
           </div>
         </div>
 
@@ -1668,7 +2045,7 @@ const EnhancedBrochureDownload: React.FC<EnhancedBrochureDownloadProps> = ({
 
         <div class="cover-bottom-bar">
           <div>🌐 ghumofiroo.com</div>
-          <div>Official Partner: Evoke Tent City Dhordo</div>
+          <div>${coverPartnerText}</div>
         </div>
       </div>
 
@@ -1741,9 +2118,13 @@ const EnhancedBrochureDownload: React.FC<EnhancedBrochureDownloadProps> = ({
               <span style="font-size: 8.5px; font-weight: 600; color: #64748b; margin-left: auto;">Verified hospitality with premium amenities</span>
             </div>
             <div class="hotels-visual-grid ${displayHotels.length === 1 ? 'cols-1' : 'cols-2'}">
-              ${displayHotels.map((hotel: any) => `
+              ${displayHotels.map((hotel: any, idx: number) => `
                 <div class="hotel-visual-card">
-                  <img src="${hotel.image}" alt="${hotel.name}" class="hvc-thumb" crossorigin="anonymous" />
+                  <div class="hvc-image-wrap">
+                    <img src="${hotel.image}" alt="${hotel.name}" class="hvc-thumb" crossorigin="anonymous" />
+                    <span class="hvc-stay-pill">Stay Option ${idx + 1}</span>
+                    <span class="hvc-verified-badge">✓ Verified Stay</span>
+                  </div>
                   <div class="hvc-body">
                     <div class="hvc-title-row">
                       <div class="hvc-name" title="${hotel.name}">${hotel.name}</div>
@@ -1753,7 +2134,7 @@ const EnhancedBrochureDownload: React.FC<EnhancedBrochureDownloadProps> = ({
                     <div class="hvc-desc">${hotel.description}</div>
                     <div class="hvc-footer">
                       <span class="gold-meal-badge">${hotel.meal_plan}</span>
-                      <span style="font-size: 7.2px; font-weight: 700; color: #166534;">✓ Instant Confirmation</span>
+                      <span style="font-size: 7.2px; font-weight: 700; color: #166534;">✓ Instant Allotment</span>
                     </div>
                   </div>
                 </div>
@@ -1767,34 +2148,15 @@ const EnhancedBrochureDownload: React.FC<EnhancedBrochureDownloadProps> = ({
               <span style="font-size: 8.5px; font-weight: 600; color: #64748b; margin-left: auto;">Curated iconic destinations</span>
             </div>
             <div class="highlights-grid">
-              <div class="highlight-item-visual">
-                <img src="${origin}/rann_utsav_white_desert.jpg" class="highlight-thumb" alt="White Rann" crossorigin="anonymous" />
-                <div class="highlight-info">
-                  <div class="highlight-title">🌅 White Rann Salt Desert Sunset</div>
-                  <div class="highlight-desc">Glittering vast white salt marshes with spectacular sunset walk &amp; cultural gala.</div>
+              ${displayHighlights.map((hl: any) => `
+                <div class="highlight-item-visual">
+                  <img src="${hl.image}" class="highlight-thumb" alt="${hl.title}" crossorigin="anonymous" />
+                  <div class="highlight-info">
+                    <div class="highlight-title">${hl.title}</div>
+                    <div class="highlight-desc">${hl.desc}</div>
+                  </div>
                 </div>
-              </div>
-              <div class="highlight-item-visual">
-                <img src="${origin}/rann_utsav_road_to_heaven.jpg" class="highlight-thumb" alt="Road to Heaven" crossorigin="anonymous" />
-                <div class="highlight-info">
-                  <div class="highlight-title">🛣️ Road to Heaven Highway</div>
-                  <div class="highlight-desc">Iconic straight highway cutting through turquoise salt waters of the Great Rann.</div>
-                </div>
-              </div>
-              <div class="highlight-item-visual">
-                <img src="${origin}/kalodungar.jpg" class="highlight-thumb" alt="Kalo Dungar" crossorigin="anonymous" />
-                <div class="highlight-info">
-                  <div class="highlight-title">🏔️ Kalo Dungar Black Hill (1,525 ft)</div>
-                  <div class="highlight-desc">Highest summit in Kutch offering panoramic 360° views overlooking the desert.</div>
-                </div>
-              </div>
-              <div class="highlight-item-visual">
-                <img src="${origin}/brochure-assets/palace_legacy.jpg" class="highlight-thumb" alt="Royal Heritage Palaces" crossorigin="anonymous" />
-                <div class="highlight-info">
-                  <div class="highlight-title">🏰 Royal Heritage Palaces &amp; Smritivan</div>
-                  <div class="highlight-desc">Historic Prag Mahal, Aina Mahal &amp; India's largest memorial park in Bhuj.</div>
-                </div>
-              </div>
+              `).join('')}
             </div>
           </div>
 
