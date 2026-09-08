@@ -29,13 +29,20 @@ try {
     $dbError = $e->getMessage();
 }
 
+$skipExternal = isset($_GET['fast']) || isset($_GET['skip_external']) || isset($_GET['quick']);
 $web2ApiUrl = getenv('GEMINI_WEB2API_URL') ?: getenv('VITE_GEMINI_WEB2API_URL') ?: 'https://gemini-web2api-sxti.onrender.com/v1';
-$web2ApiStatus = 'OFFLINE';
+$web2ApiStatus = 'UNCHECKED';
+$geminiApiKey = getenv('GEMINI_API_KEY') ?: getenv('VITE_GEMINI_API_KEY') ?: '';
+$hasDirectKey = !empty($geminiApiKey);
 
-if (function_exists('curl_init')) {
+if ($skipExternal) {
+    $web2ApiStatus = 'SKIPPED_FAST_MODE';
+} elseif (function_exists('curl_init')) {
+    $web2ApiStatus = 'OFFLINE';
     $chPing = curl_init($web2ApiUrl);
     curl_setopt($chPing, CURLOPT_NOBODY, true);
-    curl_setopt($chPing, CURLOPT_TIMEOUT, 3);
+    curl_setopt($chPing, CURLOPT_TIMEOUT, 1);
+    curl_setopt($chPing, CURLOPT_CONNECTTIMEOUT, 1);
     curl_setopt($chPing, CURLOPT_SSL_VERIFYPEER, false);
     curl_exec($chPing);
     $pingCode = curl_getinfo($chPing, CURLINFO_HTTP_CODE);
@@ -43,6 +50,19 @@ if (function_exists('curl_init')) {
     if ($pingCode >= 200 && $pingCode < 500) {
         $web2ApiStatus = 'ACTIVE';
     }
+}
+
+$aiEngineMode = 'DATABASE_RAG_FALLBACK';
+$aiStatus = 'READY';
+if ($hasDirectKey) {
+    $aiEngineMode = 'OFFICIAL_GOOGLE_GEMINI_DIRECT';
+    $aiStatus = 'READY';
+} elseif ($web2ApiStatus === 'ACTIVE') {
+    $aiEngineMode = 'RENDER_WEB2API_PROXY';
+    $aiStatus = 'READY';
+} else {
+    $aiEngineMode = 'INTELLIGENT_DB_RAG_FALLBACK';
+    $aiStatus = 'READY (FALLBACK_ACTIVE)';
 }
 
 $opcacheEnabled = function_exists('opcache_get_status') && !empty(opcache_get_status(false)['opcache_enabled']);
@@ -68,12 +88,13 @@ $response = [
             'register_shutdown_function' => function_exists('register_shutdown_function')
         ],
         'ai_concierge_engine' => [
-            'status' => 'READY',
+            'status' => $aiStatus,
+            'active_engine_mode' => $aiEngineMode,
             'curl_supported' => function_exists('curl_init'),
+            'gemini_api_key_set' => $hasDirectKey,
             'web_gemini_service' => $web2ApiStatus,
             'web_gemini_url' => $web2ApiUrl,
-            'active_model' => getenv('GEMINI_MODEL') ?: 'gemini-3.6-flash',
-            'gemini_api_key_set' => !empty(getenv('GEMINI_API_KEY') ?: getenv('VITE_GEMINI_API_KEY')),
+            'active_model' => getenv('GEMINI_MODEL') ?: ($hasDirectKey ? 'gemini-2.5-flash' : 'gemini-3.6-flash'),
             'rag_db_query_enabled' => true
         ]
     ],

@@ -64,14 +64,15 @@ YOUR PERSONALITY & RULES:
 
 // 1. TRY OFFICIAL GOOGLE GEMINI API (MULTI-MODEL RESILIENT FALLBACK)
 if (!empty($geminiApiKey)) {
-    $modelsToTry = [
-        'gemini-3.1-flash-lite-preview',
-        'gemini-3-flash-preview',
-        'gemini-3.1-flash-lite',
-        'gemini-3.5-flash',
-        'gemini-3.6-flash',
-        'gemini-flash-latest'
-    ];
+    $modelsToTry = array_filter([
+        getenv('GEMINI_MODEL'),
+        'gemini-2.5-flash',
+        'gemini-2.0-flash',
+        'gemini-1.5-flash',
+        'gemini-flash-latest',
+        'gemini-2.5-pro',
+        'gemini-1.5-pro'
+    ]);
 
     $contents = [
         [
