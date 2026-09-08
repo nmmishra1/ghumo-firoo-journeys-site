@@ -96,12 +96,12 @@ export function generateInvoicePDF(data: InvoiceData): jsPDF {
   doc.setTextColor(255, 255, 255);
   doc.setFontSize(22);
   doc.setFont('helvetica', 'bold');
-  doc.text('GHUMO FIROO JOURNEYS', 14, 20);
+  doc.text('GHUMO FIROO TRAVELS', 14, 20);
   
   doc.setFontSize(10);
   doc.setFont('helvetica', 'normal');
   doc.text('Premium Tour Packages & Customized Travels', 14, 28);
-  doc.text('GSTIN: 05AAAAA0000A1Z5 | Support: +91-9876543210', 14, 34);
+  doc.text('GSTIN: 05AAAAA0000A1Z5 | Support: +91 99109 87264 / +91 98702 29792', 14, 34);
 
   // Document Title
   doc.setFontSize(16);
@@ -213,7 +213,7 @@ export function generateInvoicePDF(data: InvoiceData): jsPDF {
   doc.setFontSize(8);
   doc.setTextColor(100, 116, 139);
   doc.text('Terms: All payments are subject to cancellation terms. E & O.E.', 14, 280);
-  doc.text('Authorized Signatory — Ghumo Firoo Journeys', 140, 280);
+  doc.text('Authorized Signatory — Ghumo Firoo Travels', 140, 280);
 
   return doc;
 }
@@ -236,7 +236,7 @@ export function generateHotelVoucherPDF(data: HotelVoucherData): jsPDF {
 
   doc.setFontSize(9);
   doc.setFont('helvetica', 'normal');
-  doc.text('Ghumo Firoo Journeys | Support: +91-9876543210', 14, 27);
+  doc.text('Ghumo Firoo Travels | Support: +91 99109 87264 / +91 98702 29792', 14, 27);
 
   doc.text(`Voucher #: ${data.voucherNumber}`, 145, 18);
   doc.text(`Date: ${data.bookingDate}`, 145, 25);
@@ -317,7 +317,7 @@ export function generateCabVoucherPDF(data: CabVoucherData): jsPDF {
 
   doc.setFontSize(9);
   doc.setFont('helvetica', 'normal');
-  doc.text('Ghumo Firoo Journeys | Transport Desk: +91-9876543210', 14, 27);
+  doc.text('Ghumo Firoo Travels | Transport Desk: +91 99109 87264 / +91 98702 29792', 14, 27);
 
   doc.text(`Voucher #: ${data.voucherNumber}`, 145, 18);
   doc.text(`Date: ${data.bookingDate}`, 145, 25);

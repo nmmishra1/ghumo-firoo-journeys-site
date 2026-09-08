@@ -253,7 +253,7 @@ const CookiePolicy: React.FC = () => {
                 If you have questions about our use of cookies or privacy practices, our team is always here to assist:
               </p>
               <div className="mt-3 p-5 rounded-2xl bg-slate-50 border border-slate-200 text-xs space-y-1.5 text-slate-700">
-                <p className="font-bold text-slate-900 text-sm">Ghumo Firoo Travels & Journeys</p>
+                <p className="font-bold text-slate-900 text-sm">Ghumo Firoo Travels</p>
                 <p>
                   <strong>Email:</strong>{' '}
                   <a href="mailto:booking@ghumofiroo.com" className="text-[#A67C2E] hover:underline font-semibold">booking@ghumofiroo.com</a> &bull;{' '}
