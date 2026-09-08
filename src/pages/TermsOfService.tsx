@@ -99,8 +99,10 @@ const TermsOfService = () => {
             <h2 className="text-2xl font-semibold text-gray-900 mb-4">10. Contact Information</h2>
             <p className="text-gray-700">
               If you have any questions about these Terms of Service, please contact us at:
-              <br />Email: info@ghumofiroo.com
-              <br />Phone: +91 12345 67890
+              <br /><strong>Ghumo Firoo Travels</strong>
+              <br /><strong>Address:</strong> Shop No. 210, 2nd Floor, Pratap Complex, Metro Gate Number 3, near Munirka, Baba Gangnath Market, Munirka, New Delhi, Delhi 110067
+              <br /><strong>Phone:</strong> +91 99109 87264 | +91 98702 29792
+              <br /><strong>Email:</strong> booking@ghumofiroo.com &bull; info@ghumofiroo.com
             </p>
           </section>
 

@@ -252,11 +252,21 @@ const CookiePolicy: React.FC = () => {
               <p>
                 If you have questions about our use of cookies or privacy practices, our team is always here to assist:
               </p>
-              <div className="mt-3 p-5 rounded-2xl bg-slate-50 border border-slate-200 text-xs space-y-1 text-slate-700">
-                <p><strong>Ghumo Firoo Travels & Journeys</strong></p>
-                <p>Email: <a href="mailto:booking@ghumofiroo.com" className="text-[#A67C2E] hover:underline font-semibold">booking@ghumofiroo.com</a> &bull; <a href="mailto:info@ghumofiroo.com" className="text-[#A67C2E] hover:underline font-semibold">info@ghumofiroo.com</a></p>
-                <p>Helpline: +91 98765 43210 (Mon &ndash; Sat, 9:30 AM &ndash; 7:30 PM IST)</p>
-                <p>Registered Office: Delhi NCR, India</p>
+              <div className="mt-3 p-5 rounded-2xl bg-slate-50 border border-slate-200 text-xs space-y-1.5 text-slate-700">
+                <p className="font-bold text-slate-900 text-sm">Ghumo Firoo Travels & Journeys</p>
+                <p>
+                  <strong>Email:</strong>{' '}
+                  <a href="mailto:booking@ghumofiroo.com" className="text-[#A67C2E] hover:underline font-semibold">booking@ghumofiroo.com</a> &bull;{' '}
+                  <a href="mailto:info@ghumofiroo.com" className="text-[#A67C2E] hover:underline font-semibold">info@ghumofiroo.com</a>
+                </p>
+                <p>
+                  <strong>Helpline:</strong>{' '}
+                  <a href="tel:+919910987264" className="text-slate-900 font-semibold hover:text-[#A67C2E]">+91 99109 87264</a> &bull;{' '}
+                  <a href="tel:+919870229792" className="text-slate-900 font-semibold hover:text-[#A67C2E]">+91 98702 29792</a> (Mon &ndash; Sat, 9:30 AM &ndash; 7:30 PM IST)
+                </p>
+                <p>
+                  <strong>Registered Office:</strong> Shop No. 210, 2nd Floor, Pratap Complex, Metro Gate Number 3, near Munirka, Baba Gangnath Market, Munirka, New Delhi, Delhi 110067, India
+                </p>
               </div>
             </section>
 

@@ -6301,7 +6301,7 @@ export default function ItineraryBuilder({
                 </div>
               </div>
               <div className="text-right text-xs font-bold text-slate-300 space-y-0.5">
-                <p>📞 24x7 Concierge: <span className="font-mono text-amber-400 font-extrabold">+91 98765 43210</span></p>
+                <p>📞 24x7 Concierge: <span className="font-mono text-amber-400 font-extrabold">+91 99109 87264 / +91 98702 29792</span></p>
                 <p>📧 Email: <span className="text-white">luxury@ghumofiroo.com</span></p>
                 <p>🌐 Web: <span className="text-amber-400 font-mono">www.ghumofiroo.com</span></p>
               </div>
