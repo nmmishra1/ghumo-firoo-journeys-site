@@ -52,6 +52,23 @@ function enrichLeads(PDO $pdo, array $leads): array {
                 $lead['agent_name'] = 'Navin Mishra';
             }
         }
+
+        // Sanitize zero/invalid MySQL dates
+        if (isset($lead['trip_start_date']) && ($lead['trip_start_date'] === '0000-00-00' || strpos($lead['trip_start_date'], '0000-00-00') === 0)) {
+            $lead['trip_start_date'] = null;
+        }
+        if (isset($lead['trip_end_date']) && ($lead['trip_end_date'] === '0000-00-00' || strpos($lead['trip_end_date'], '0000-00-00') === 0)) {
+            $lead['trip_end_date'] = null;
+        }
+
+        // Provide standard field aliases for all UI components
+        if (empty($lead['email']) && !empty($lead['customer_email'])) {
+            $lead['email'] = $lead['customer_email'];
+        }
+        if (empty($lead['contact_number']) && !empty($lead['customer_phone'])) {
+            $lead['contact_number'] = $lead['customer_phone'];
+        }
+
         return $lead;
     }, $leads);
 }

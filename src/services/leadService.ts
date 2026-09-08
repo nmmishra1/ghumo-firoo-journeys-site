@@ -260,10 +260,23 @@ function mapLeadToDb(lead: Partial<Lead> | any): any {
   return db;
 }
 
-function mapLeadFromDb(db: any): Lead {
+export function mapLeadFromDb(db: any): Lead {
   // Spread the raw DB row first so that CRM.tsx and LeadForm.tsx can read
   // snake_case fields directly (e.g. customer_name, trip_start_date, assigned_to).
   // The explicit camelCase aliases below are kept for any code that uses them.
+  const email = db.customer_email || db.email || db.customerEmail || '';
+  const phone = db.customer_phone || db.contact_number || db.customerPhone || db.phone || db.whatsapp_number || '';
+
+  // Sanitize zero/invalid dates from MySQL
+  let tripStart = db.trip_start_date || db.tripStartDate || '';
+  if (tripStart === '0000-00-00' || (typeof tripStart === 'string' && tripStart.startsWith('0000-00-00')) || tripStart === 'null') {
+    tripStart = '';
+  }
+  let tripEnd = db.trip_end_date || db.tripEndDate || '';
+  if (tripEnd === '0000-00-00' || (typeof tripEnd === 'string' && tripEnd.startsWith('0000-00-00')) || tripEnd === 'null') {
+    tripEnd = '';
+  }
+
   return {
     ...db, // Preserve ALL raw snake_case DB columns (customer_name, customer_email, etc.)
     id: db.id != null ? String(db.id) : undefined,
@@ -272,8 +285,13 @@ function mapLeadFromDb(db: any): Lead {
     duration: db.duration || '',
     destinations: db.destinations || '',
     customerName: db.customer_name,
-    customerEmail: db.customer_email || '',
-    customerPhone: db.customer_phone,
+    customerEmail: email,
+    customerPhone: phone,
+    email: email,
+    customer_email: email,
+    contact_number: phone,
+    customer_phone: phone,
+    phone: phone,
     source: db.source || '',
     status: db.status,
     createdAt: db.created_at,
@@ -290,8 +308,10 @@ function mapLeadFromDb(db: any): Lead {
     customerCategory: db.customer_category || '',
     leadDestination: db.destinations ? [db.destinations] : [],
     packageCost: Number(db.package_cost) || 0,
-    tripStartDate: db.trip_start_date || '',
-    tripEndDate: db.trip_end_date || '',
+    tripStartDate: tripStart,
+    trip_start_date: tripStart,
+    tripEndDate: tripEnd,
+    trip_end_date: tripEnd,
     numberOfNights: db.number_of_nights,
     adultCount: db.adult_count || 1,
     childCount: db.child_count || 0,

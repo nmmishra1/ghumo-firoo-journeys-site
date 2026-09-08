@@ -109,7 +109,22 @@ try {
             $pdo->exec("DELETE FROM leads WHERE customer_name LIKE 'Subscriber (%' OR source_detail = 'Newsletter Footer Subscriber'");
             
             $stmt = $pdo->query("SELECT * FROM leads WHERE customer_name NOT LIKE 'Subscriber (%' AND (source_detail IS NULL OR source_detail != 'Newsletter Footer Subscriber') ORDER BY id DESC LIMIT 25");
-            $leads = $stmt ? $stmt->fetchAll(PDO::FETCH_ASSOC) : [];
+            $rawLeads = $stmt ? $stmt->fetchAll(PDO::FETCH_ASSOC) : [];
+            $leads = array_map(function($l) {
+                if (isset($l['trip_start_date']) && ($l['trip_start_date'] === '0000-00-00' || strpos($l['trip_start_date'], '0000-00-00') === 0)) {
+                    $l['trip_start_date'] = null;
+                }
+                if (isset($l['trip_end_date']) && ($l['trip_end_date'] === '0000-00-00' || strpos($l['trip_end_date'], '0000-00-00') === 0)) {
+                    $l['trip_end_date'] = null;
+                }
+                if (empty($l['email']) && !empty($l['customer_email'])) {
+                    $l['email'] = $l['customer_email'];
+                }
+                if (empty($l['contact_number']) && !empty($l['customer_phone'])) {
+                    $l['contact_number'] = $l['customer_phone'];
+                }
+                return $l;
+            }, $rawLeads);
         } catch (Exception $e) {}
     }
 

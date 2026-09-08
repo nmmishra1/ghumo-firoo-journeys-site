@@ -60,6 +60,38 @@ try {
         $itinerary['version_history'] = json_decode($itinerary['version_history'], true) ?: [];
     }
 
+    // Fetch associated lead info to guarantee customer name, email, phone availability
+    $linkedLead = null;
+    $targetLeadId = !empty($itinerary['lead_id']) ? $itinerary['lead_id'] : $leadId;
+    if (!empty($targetLeadId)) {
+        try {
+            $leadStmt = $pdo->prepare("SELECT id, customer_name, customer_email, customer_phone, email, contact_number, destination, destinations, trip_start_date, trip_end_date, adult_count, child_count, infant_count, status, enquiry_number FROM leads WHERE id = ? LIMIT 1");
+            $leadStmt->execute([$targetLeadId]);
+            $linkedLead = $leadStmt->fetch(PDO::FETCH_ASSOC);
+            if ($linkedLead) {
+                if (empty($itinerary['customer_name']) || strcasecmp(trim($itinerary['customer_name']), 'Valued Client') === 0) {
+                    $itinerary['customer_name'] = $linkedLead['customer_name'] ?: '';
+                }
+                if (empty($itinerary['customer_email']) || strcasecmp(trim($itinerary['customer_email']), 'No email registered') === 0) {
+                    $itinerary['customer_email'] = $linkedLead['customer_email'] ?: ($linkedLead['email'] ?: '');
+                }
+                if (empty($itinerary['customer_phone'])) {
+                    $itinerary['customer_phone'] = $linkedLead['customer_phone'] ?: ($linkedLead['contact_number'] ?: '');
+                }
+            }
+        } catch (Exception $le) {}
+    }
+
+    // Fallback name extraction from itinerary_name if still empty or 'Valued Client'
+    if (empty($itinerary['customer_name']) || strcasecmp(trim($itinerary['customer_name']), 'Valued Client') === 0 || strcasecmp(trim($itinerary['customer_name']), 'Guest') === 0) {
+        if (!empty($itinerary['itinerary_name']) && preg_match('/^Itinerary for\s+([^–—\-|]+)/i', $itinerary['itinerary_name'], $m)) {
+            $extracted = trim($m[1]);
+            if ($extracted && strcasecmp($extracted, 'Valued Client') !== 0 && strcasecmp($extracted, 'Guest') !== 0) {
+                $itinerary['customer_name'] = $extracted;
+            }
+        }
+    }
+
     // 2. Fetch days
     $stmt = $pdo->prepare("SELECT * FROM itinerary_days WHERE itinerary_id = ? ORDER BY day_number ASC");
     $stmt->execute([$itineraryId]);
@@ -159,7 +191,7 @@ try {
 
     $itinerary['days'] = $days;
 
-    echo json_encode(['success' => true, 'itinerary' => $itinerary]);
+    echo json_encode(['success' => true, 'itinerary' => $itinerary, 'lead' => $linkedLead]);
 } catch (Exception $e) {
     http_response_code(500);
     echo json_encode(['error' => 'Failed to load itinerary: ' . $e->getMessage()]);

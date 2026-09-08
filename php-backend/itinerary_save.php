@@ -321,6 +321,34 @@ $days = $data['days'] ?? [];
 // Extract optional override reason
 $overrideReason = trim($data['override_reason'] ?? '');
 
+$customerName = trim($data['customer_name'] ?? '');
+$customerEmail = trim($data['customer_email'] ?? '');
+$customerPhone = trim($data['customer_phone'] ?? '');
+
+// If customer info is missing in input, look up from lead
+if ($leadId && (empty($customerName) || empty($customerEmail))) {
+    try {
+        $lStmt = $pdo->prepare("SELECT customer_name, customer_email, customer_phone, email, contact_number FROM leads WHERE id = ? LIMIT 1");
+        $lStmt->execute([$leadId]);
+        $lRow = $lStmt->fetch(PDO::FETCH_ASSOC);
+        if ($lRow) {
+            if (empty($customerName)) $customerName = $lRow['customer_name'] ?: '';
+            if (empty($customerEmail)) $customerEmail = $lRow['customer_email'] ?: ($lRow['email'] ?: '');
+            if (empty($customerPhone)) $customerPhone = $lRow['customer_phone'] ?: ($lRow['contact_number'] ?: '');
+        }
+    } catch (Exception $le) {}
+}
+
+// Fallback name extraction from itinerary_name
+if (empty($customerName) || strcasecmp($customerName, 'Valued Client') === 0 || strcasecmp($customerName, 'Guest') === 0) {
+    if (!empty($itineraryName) && preg_match('/^Itinerary for\s+([^–—\-|]+)/i', $itineraryName, $m)) {
+        $extracted = trim($m[1]);
+        if ($extracted && strcasecmp($extracted, 'Valued Client') !== 0 && strcasecmp($extracted, 'Guest') !== 0) {
+            $customerName = $extracted;
+        }
+    }
+}
+
 // Run the pricing second-opinion before anything is written.
 $pricingCheck = validateAndAnnotatePricing($pdo, $days);
 if ($pricingCheck['flagged']) {
@@ -336,6 +364,32 @@ if ($pricingCheck['flagged']) {
     }
 }
 $hasPricingColumns = itinerariesHasPricingColumns($pdo);
+$hasCustName = getExistingColumn($pdo, 'itineraries', ['customer_name']);
+$hasCustEmail = getExistingColumn($pdo, 'itineraries', ['customer_email']);
+$hasCustPhone = getExistingColumn($pdo, 'itineraries', ['customer_phone']);
+
+$extraCols = [];
+$extraVals = [];
+$extraUpdates = [];
+if ($hasCustName) {
+    $extraCols[] = 'customer_name';
+    $extraVals[] = ':customer_name';
+    $extraUpdates[] = 'customer_name = VALUES(customer_name)';
+}
+if ($hasCustEmail) {
+    $extraCols[] = 'customer_email';
+    $extraVals[] = ':customer_email';
+    $extraUpdates[] = 'customer_email = VALUES(customer_email)';
+}
+if ($hasCustPhone) {
+    $extraCols[] = 'customer_phone';
+    $extraVals[] = ':customer_phone';
+    $extraUpdates[] = 'customer_phone = VALUES(customer_phone)';
+}
+
+$custColSql = !empty($extraCols) ? ', ' . implode(', ', $extraCols) : '';
+$custValSql = !empty($extraVals) ? ', ' . implode(', ', $extraVals) : '';
+$custUpdateSql = !empty($extraUpdates) ? ', ' . implode(', ', $extraUpdates) : '';
 
 try {
     $pdo->beginTransaction();
@@ -351,11 +405,13 @@ try {
             total_nights, travel_start_date, travel_end_date, hotel_cost, transport_cost,
             excursion_cost, total_cost, visa_cost, markup_percentage, final_cost, cost_per_person, notes, status
             $pricingCols
+            $custColSql
         ) VALUES (
             :id, :lead_id, :itinerary_name, :destinations, :adult_count, :child_count, :infant_count,
             :total_nights, :travel_start_date, :travel_end_date, :hotel_cost, :transport_cost,
             :excursion_cost, :total_cost, :visa_cost, :markup_percentage, :final_cost, :cost_per_person, :notes, :status
             $pricingVals
+            $custValSql
         ) ON DUPLICATE KEY UPDATE
             lead_id = VALUES(lead_id),
             itinerary_name = VALUES(itinerary_name),
@@ -377,6 +433,7 @@ try {
             notes = VALUES(notes),
             status = VALUES(status)
             $pricingUpdate
+            $custUpdateSql
     ");
 
     $itinParams = [
@@ -401,6 +458,10 @@ try {
         ':notes' => $notes,
         ':status' => $status
     ];
+    if ($hasCustName) $itinParams[':customer_name'] = $customerName;
+    if ($hasCustEmail) $itinParams[':customer_email'] = $customerEmail;
+    if ($hasCustPhone) $itinParams[':customer_phone'] = $customerPhone;
+
     if ($hasPricingColumns) {
         $varianceData = [
             'variances' => $pricingCheck['variances']

@@ -2515,13 +2515,21 @@ export default function ItineraryBuilder({
       // 1. Fetch itinerary from MySQL
       const loadDataJson = await getItineraryByLeadId({ leadId, signal });
       let itin = loadDataJson.itinerary;
+      const effectiveLead = activeLead || loadDataJson.lead;
 
-      let start_date = getLeadStartDate(activeLead, itin);
-      let end_date = activeLead?.trip_end_date || new Date(new Date(start_date).getTime() + 3 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+      let start_date = getLeadStartDate(effectiveLead, itin);
+      const parsedStops = parseDestinations(itin?.destinations || effectiveLead?.lead_destination || effectiveLead?.destinations || effectiveLead?.destination);
+      const initialTotalNights = parsedStops.length > 0 
+        ? parsedStops.reduce((sum, s) => sum + (Number(s.nights) || 0), 0)
+        : (itin?.days?.length || Number(itin?.total_nights) || 2);
+
+      let end_date = (effectiveLead?.trip_end_date && effectiveLead.trip_end_date !== '0000-00-00' && !effectiveLead.trip_end_date.startsWith('0000'))
+        ? effectiveLead.trip_end_date 
+        : new Date(new Date(start_date).getTime() + initialTotalNights * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
       const diffTime = Math.abs(new Date(end_date).getTime() - new Date(start_date).getTime());
-      const nightsCount = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) || 3;
+      const nightsCount = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) || initialTotalNights;
 
-      const guestCounts = getLeadGuestCounts(activeLead, itin);
+      const guestCounts = getLeadGuestCounts(effectiveLead, itin);
 
       // 2. Load cities, states, and countries master lists from consolidated cached bootstrap
       try {
@@ -2534,8 +2542,6 @@ export default function ItineraryBuilder({
       } catch (e) {
         console.warn('Error reading bootstrap cache:', e);
       }
-
-      const parsedStops = parseDestinations(itin?.destinations || activeLead?.lead_destination || activeLead?.destinations || activeLead?.destination);
 
       if (!itin) {
         // Create default itinerary and days
@@ -2630,14 +2636,14 @@ export default function ItineraryBuilder({
         const defaultPayload = {
           id: null,
           lead_id: Number(leadId),
-          itinerary_name: `Itinerary for ${activeLead?.customer_name || 'Guest'} - ${getLeadCityNames().join(', ') || 'Tour'}`,
+          itinerary_name: `Itinerary for ${effectiveLead?.customer_name || 'Guest'} - ${getLeadCityNames().join(', ') || 'Tour'}`,
           destinations: defaultStops,
           adult_count: guestCounts.adults,
           child_count: guestCounts.children,
-          infant_count: activeLead?.infant_count || 0,
+          infant_count: effectiveLead?.infant_count || 0,
           total_nights: totalNightsCalc,
           travel_start_date: start_date,
-          travel_end_date: end_date,
+          travel_end_date: new Date(new Date(start_date).getTime() + totalNightsCalc * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
           hotel_cost: 0,
           transport_cost: 0,
           excursion_cost: 0,
@@ -2656,15 +2662,38 @@ export default function ItineraryBuilder({
         itin = reloadData.itinerary;
       }
 
+      const activeStops = parseDestinations(effectiveLead?.lead_destination || effectiveLead?.destinations || effectiveLead?.destination || itin?.destinations);
+      const stopsToUse = activeStops.length > 0 ? activeStops : parsedStops;
+
       if (itin) {
-        if (!itin.travel_start_date || (activeLead && (activeLead.trip_start_date || activeLead.travel_date || activeLead.travel_dates || activeLead.tripStartDate))) {
+        if (!itin.customer_name || itin.customer_name === 'Valued Client' || itin.customer_name === 'Guest') {
+          if (effectiveLead?.customer_name) {
+            itin.customer_name = effectiveLead.customer_name;
+          } else if (itin.itinerary_name) {
+            const m = itin.itinerary_name.match(/^Itinerary for\s+([^–—\-|]+)/i);
+            if (m && m[1]) itin.customer_name = m[1].trim();
+          }
+        }
+        if (!itin.customer_email || itin.customer_email === 'No email registered') {
+          itin.customer_email = effectiveLead?.customer_email || effectiveLead?.email || '';
+        }
+        if (!itin.customer_phone) {
+          itin.customer_phone = effectiveLead?.customer_phone || effectiveLead?.contact_number || '';
+        }
+
+        if (!itin.travel_start_date || (effectiveLead && (effectiveLead.trip_start_date || effectiveLead.travel_date || effectiveLead.travel_dates || effectiveLead.tripStartDate))) {
           itin.travel_start_date = start_date;
+        }
+
+        // Accurately align travel_end_date with start_date + total nights
+        const totalNightsExisting = stopsToUse.reduce((sum, s) => sum + (Number(s.nights) || 0), 0);
+        if (totalNightsExisting > 0 && itin.travel_start_date) {
+          itin.travel_end_date = new Date(new Date(itin.travel_start_date).getTime() + totalNightsExisting * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
         }
       }
 
       setItinerary(itin);
-      const activeStops = parseDestinations(activeLead?.lead_destination || activeLead?.destinations || activeLead?.destination || itin?.destinations);
-      setStayStops(activeStops.length > 0 ? activeStops : parsedStops);
+      setStayStops(stopsToUse);
 
       setComposerAdults(guestCounts.adults);
       setComposerChildren(guestCounts.children);
@@ -2674,7 +2703,6 @@ export default function ItineraryBuilder({
       }
       setVisaCost(Number(itin?.visa_cost) || 0);
 
-      const stopsToUse = activeStops.length > 0 ? activeStops : parsedStops;
       const fullCitySequence: string[] = [];
       stopsToUse.forEach(stop => {
         for (let n = 0; n < (stop.nights || 1); n++) {
@@ -3739,17 +3767,30 @@ export default function ItineraryBuilder({
       };
     });
 
+    const computedEndDate = (() => {
+      const sDate = itinerary?.travel_start_date;
+      const totalN = stayStops.length > 0 ? stayStops.reduce((sum, s) => sum + s.nights, 0) : (itinerary?.total_nights || daysList.length);
+      if (!sDate) return itinerary?.travel_end_date || null;
+      const p = new Date(sDate);
+      if (isNaN(p.getTime())) return itinerary?.travel_end_date || null;
+      p.setDate(p.getDate() + totalN);
+      return p.toISOString().split('T')[0];
+    })();
+
     return {
       id: itinerary?.id || null,
       lead_id: Number(leadId),
       itinerary_name: itinerary?.itinerary_name || `Itinerary for ${activeLead?.customer_name || 'Guest'}`,
-      destinations: itinerary?.destinations || [],
+      customer_name: itinerary?.customer_name || activeLead?.customer_name || '',
+      customer_email: itinerary?.customer_email || activeLead?.customer_email || activeLead?.email || '',
+      customer_phone: itinerary?.customer_phone || activeLead?.customer_phone || activeLead?.contact_number || '',
+      destinations: itinerary?.destinations || stayStops || [],
       adult_count: composerAdults,
       child_count: composerChildren,
       infant_count: itinerary?.infant_count || 0,
-      total_nights: itinerary?.total_nights || daysList.length,
+      total_nights: stayStops.length > 0 ? stayStops.reduce((sum, s) => sum + s.nights, 0) : (itinerary?.total_nights || daysList.length),
       travel_start_date: itinerary?.travel_start_date || null,
-      travel_end_date: itinerary?.travel_end_date || null,
+      travel_end_date: computedEndDate,
       hotel_cost: totalHotelCost,
       transport_cost: totalTransportCost,
       excursion_cost: totalExcursionCost + totalFlightCost,
@@ -4959,6 +5000,36 @@ export default function ItineraryBuilder({
               )}
             </div>
 
+            {/* Proposal Status Selector */}
+            <div className="flex items-center gap-1.5 bg-[#0B1026]/90 border border-[#C9A25A]/30 rounded-lg px-2.5 h-7 shrink-0">
+              <span className="text-[10px] text-[#C9A25A] font-extrabold uppercase tracking-wider">Status:</span>
+              <select
+                value={itinerary?.status || 'Draft'}
+                onChange={(e) => {
+                  const newStatus = e.target.value;
+                  setItinerary((prev: any) => prev ? { ...prev, status: newStatus } : prev);
+                }}
+                className={`text-xs font-black uppercase bg-transparent cursor-pointer outline-none border-none pr-1 ${
+                  itinerary?.status === 'Booking Confirmed'
+                    ? 'text-emerald-400'
+                    : itinerary?.status === 'Quote Sent'
+                    ? 'text-amber-400'
+                    : itinerary?.status === 'Saved'
+                    ? 'text-blue-400'
+                    : itinerary?.status === 'Cancelled'
+                    ? 'text-rose-400'
+                    : 'text-slate-300'
+                }`}
+                title="Change proposal status"
+              >
+                <option value="Draft" className="bg-slate-900 text-white">Draft</option>
+                <option value="Saved" className="bg-slate-900 text-white">Saved</option>
+                <option value="Quote Sent" className="bg-slate-900 text-white">Quote Sent</option>
+                <option value="Booking Confirmed" className="bg-slate-900 text-white">Booking Confirmed</option>
+                <option value="Cancelled" className="bg-slate-900 text-white">Cancelled</option>
+              </select>
+            </div>
+
             {/* Manual Refresh Button */}
             <button
               type="button"
@@ -4981,16 +5052,31 @@ export default function ItineraryBuilder({
         </div>
 
         {/* Context strip */}
-        <div className="h-10 bg-white/[0.03] border-b border-[#C9A25A]/10 px-4 flex items-center gap-4 text-xs shrink-0 select-text text-left">
-          {/* Client Name */}
+        <div className="min-h-11 py-1.5 bg-white/[0.03] border-b border-[#C9A25A]/10 px-4 flex flex-wrap items-center gap-4 text-xs shrink-0 select-text text-left">
+          {/* Client Info */}
           <div className="flex flex-col justify-center">
-            <span className="text-[9px] text-white/40 uppercase tracking-wider">Client</span>
-            <span className="font-semibold text-white text-[12px] truncate max-w-[150px]">
-              {itinerary?.customer_name || activeLead?.customer_name || 'Guest'}
-            </span>
+            <span className="text-[9px] text-[#C9A25A]/80 uppercase font-black tracking-wider">Client & Lead</span>
+            <div className="flex items-center gap-2">
+              <span className="font-extrabold text-white text-[13px] truncate max-w-[200px]">
+                {itinerary?.customer_name || activeLead?.customer_name || 'Valued Client'}
+              </span>
+              <span className="text-[10px] font-mono px-1.5 py-0.2 bg-white/10 text-amber-300 rounded">
+                #{activeLead?.enquiry_number || activeLead?.id || leadId || '---'}
+              </span>
+            </div>
+            {(itinerary?.customer_email || activeLead?.customer_email || activeLead?.email || itinerary?.customer_phone || activeLead?.customer_phone || activeLead?.contact_number) && (
+              <span className="text-[10px] text-slate-300 font-mono flex items-center gap-2 mt-0.5">
+                {(itinerary?.customer_email || activeLead?.customer_email || activeLead?.email) && (
+                  <span>{itinerary?.customer_email || activeLead?.customer_email || activeLead?.email}</span>
+                )}
+                {(itinerary?.customer_phone || activeLead?.customer_phone || activeLead?.contact_number) && (
+                  <span>• {itinerary?.customer_phone || activeLead?.customer_phone || activeLead?.contact_number}</span>
+                )}
+              </span>
+            )}
           </div>
 
-          <div className="h-6 w-[0.5px] bg-white/10 shrink-0" />
+          <div className="h-7 w-[0.5px] bg-white/10 shrink-0 hidden sm:block" />
 
           {/* Destination badges */}
           <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar flex-grow">
@@ -5004,24 +5090,35 @@ export default function ItineraryBuilder({
             ))}
           </div>
 
-          <div className="h-6 w-[0.5px] bg-white/10 shrink-0" />
+          <div className="h-7 w-[0.5px] bg-white/10 shrink-0 hidden sm:block" />
 
           {/* Guests */}
           <div className="text-gray-400 font-medium shrink-0 flex flex-col justify-center">
-            <span className="text-[9px] text-white/40 uppercase tracking-wider">Guests</span>
+            <span className="text-[9px] text-[#C9A25A]/80 uppercase font-black tracking-wider">Guests</span>
             <span className="text-white text-[12px] font-semibold">
               {getLeadGuestCounts(activeLead, itinerary).adults} Adults, {getLeadGuestCounts(activeLead, itinerary).children} Children
             </span>
           </div>
 
-          <div className="h-6 w-[0.5px] bg-white/10 shrink-0" />
+          <div className="h-7 w-[0.5px] bg-white/10 shrink-0 hidden sm:block" />
 
           {/* Duration */}
           <div className="text-gray-400 font-medium shrink-0 flex flex-col justify-center">
-            <span className="text-[9px] text-white/40 uppercase tracking-wider">Duration</span>
-            <span className="text-white text-[12px] font-semibold">
-              {stayStops.reduce((sum, s) => sum + s.nights, 0)}N
-              {(itinerary?.travel_start_date || getLeadStartDate(activeLead, itinerary)) ? ` · ${new Date(itinerary?.travel_start_date || getLeadStartDate(activeLead, itinerary)).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}` : ''}
+            <span className="text-[9px] text-[#C9A25A]/80 uppercase font-black tracking-wider">Duration</span>
+            <span className="text-white text-[12px] font-semibold font-mono">
+              {stayStops.reduce((sum, s) => sum + s.nights, 0)} Nights
+              {(() => {
+                const sDate = itinerary?.travel_start_date;
+                const totalN = stayStops.reduce((sum, s) => sum + s.nights, 0);
+                if (!sDate) return '';
+                const pStart = new Date(sDate);
+                if (isNaN(pStart.getTime())) return '';
+                const pEnd = new Date(pStart);
+                pEnd.setDate(pEnd.getDate() + totalN);
+                const sFmt = pStart.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' });
+                const eFmt = pEnd.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+                return ` · ${sFmt} – ${eFmt}`;
+              })()}
             </span>
           </div>
         </div>
@@ -5066,8 +5163,16 @@ export default function ItineraryBuilder({
             <label className="text-[10px] uppercase font-display font-extrabold text-[#C9A25A] tracking-wider block">
               Auto-Calculated End Date
             </label>
-            <div className="flex items-center bg-[#0B1026]/40 border border-[#C9A25A]/10 rounded-xl px-3 h-10 text-white/70 font-mono text-sm font-semibold select-all">
-              {itinerary?.travel_end_date ? new Date(itinerary.travel_end_date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : '---'}
+            <div className="flex items-center bg-[#0B1026]/40 border border-[#C9A25A]/10 rounded-xl px-3 h-10 text-white/90 font-mono text-sm font-bold select-all">
+              {(() => {
+                const sDate = itinerary?.travel_start_date;
+                const totalN = stayStops.reduce((sum, s) => sum + s.nights, 0);
+                if (!sDate) return '---';
+                const parsed = new Date(sDate);
+                if (isNaN(parsed.getTime())) return '---';
+                parsed.setDate(parsed.getDate() + totalN);
+                return parsed.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+              })()}
             </div>
           </div>
         </div>

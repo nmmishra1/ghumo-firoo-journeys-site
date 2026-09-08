@@ -23,7 +23,7 @@ import {
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
-import { leadService } from '@/services/leadService';
+import { leadService, mapLeadFromDb } from '@/services/leadService';
 import { reviewService } from '@/services/reviewService';
 import { quoteService } from '@/services/quoteService';
 import { CommentsDialog } from '@/components/crm/CommentsDialog';
@@ -159,6 +159,22 @@ const getSuggestedTaxRate = (countryName: string | undefined, rate: number, isIn
     return 6;
   }
   return 18; // Default fallback
+};
+
+const formatCrmTravelDate = (dateVal: any, fallback = 'TBD'): string => {
+  if (!dateVal) return fallback;
+  const clean = String(dateVal).trim();
+  if (!clean || clean === '0000-00-00' || clean.startsWith('0000-00-00') || clean === 'null' || clean.toLowerCase() === 'invalid date') {
+    return fallback;
+  }
+  const d = new Date(clean);
+  if (!isNaN(d.getTime())) {
+    return d.toLocaleDateString([], { day: 'numeric', month: 'short', year: 'numeric' });
+  }
+  if (!clean.includes('0000') && !clean.toLowerCase().includes('invalid')) {
+    return clean;
+  }
+  return fallback;
 };
 
 const CRM = () => {
@@ -430,7 +446,8 @@ const CRM = () => {
           });
         }
         if (Array.isArray(data.recent_leads) && data.recent_leads.length > 0) {
-          setLeads(prev => prev.length === 0 ? data.recent_leads : prev);
+          const mappedRecent = data.recent_leads.map(mapLeadFromDb);
+          setLeads(prev => prev.length === 0 ? mappedRecent : prev);
         }
         if (Array.isArray(data.users) && data.users.length > 0) {
           const mappedProfiles: Profile[] = data.users.map((p: any) => ({
@@ -922,7 +939,7 @@ const CRM = () => {
     currentSection = 'profile';
   }
 
-  const activeLead = leadId ? leads.find(l => l.id === leadId) : null;
+  const activeLead = leadId ? leads.find(l => String(l.id) === String(leadId)) : null;
 
   const [userPermissions, setUserPermissions] = useState<Record<string, boolean>>({});
 
@@ -1188,7 +1205,7 @@ const CRM = () => {
   const handleRestoreLead = async (leadId: string) => {
     if (!user) return;
     try {
-      const leadName = leads.find(l => l.id === leadId)?.customer_name || 'Lead';
+      const leadName = leads.find(l => String(l.id) === String(leadId))?.customer_name || 'Lead';
 
       // 1. Restore the lead via MySQL backend
       await leadService.updateLead(leadId, { isDeleted: 0 });
@@ -4335,7 +4352,7 @@ const CRM = () => {
                           }
                         }}
                         onAddComment={(leadId) => {
-                          const targetLead = leads.find(l => l.id === leadId);
+                          const targetLead = leads.find(l => String(l.id) === String(leadId));
                           if (targetLead) {
                             setSelectedLeadForComments({ id: targetLead.id, name: targetLead.customer_name });
                             setCommentsDialogOpen(true);
@@ -4503,7 +4520,7 @@ const CRM = () => {
                                     })()}
                                   </div>
                                   <div className="text-xs text-slate-600 dark:text-slate-400 font-semibold">
-                                    {l.adult_count || 1} adults · {l.child_count || 0} children · Dep {l.trip_start_date ? new Date(l.trip_start_date).toLocaleDateString([], {day: 'numeric', month: 'short', year: 'numeric'}) : 'TBD'}
+                                    {l.adult_count || 1} adults · {l.child_count || 0} children · Dep {formatCrmTravelDate(l.trip_start_date || l.tripStartDate || l.travel_dates || l.travel_date || l.travelMonth)}
                                   </div>
                                 </td>
                                 <td className="py-3 px-3 align-top text-left">
@@ -4745,8 +4762,8 @@ Ghumo Firoo Travels`
                       </div>
                     </div>
                     <div className="text-slate-500 font-medium text-[11px]">
-                      {activeLead.trip_start_date ? new Date(activeLead.trip_start_date).toLocaleDateString([], {day:'numeric', month:'short'}) : 'TBD'}
-                      {activeLead.trip_end_date ? ` - ${new Date(activeLead.trip_end_date).toLocaleDateString([], {day:'numeric', month:'short'})}` : ''}
+                      {formatCrmTravelDate(activeLead.trip_start_date || activeLead.tripStartDate, 'TBD')}
+                      {activeLead.trip_end_date && formatCrmTravelDate(activeLead.trip_end_date, '') ? ` - ${formatCrmTravelDate(activeLead.trip_end_date, '')}` : ''}
                       {` · ${activeLead.number_of_nights || activeLead.total_nights || 5}N`}
                     </div>
                     <div className="text-slate-600 font-semibold text-[11px]">
@@ -4767,8 +4784,10 @@ Ghumo Firoo Travels`
                     const isConfirmed = (rawStatus === 'booking confirmed' || rawStatus === 'confirmed' || rawStatus === 'converted') || (leadTotalPaid > 0 && rawStatus !== 'new');
                     const isQuoted = rawStatus === 'quote sent' || rawStatus === 'proposal sent';
 
-                    const dueDateStr = activeLead.trip_start_date 
-                      ? new Date(new Date(activeLead.trip_start_date).getTime() - 7 * 24 * 60 * 60 * 1000).toLocaleDateString([], { month: 'short', day: 'numeric', year: 'numeric' })
+                    const rawTripStart = activeLead.trip_start_date || activeLead.tripStartDate;
+                    const parsedTripStart = rawTripStart && rawTripStart !== '0000-00-00' ? new Date(rawTripStart) : null;
+                    const dueDateStr = parsedTripStart && !isNaN(parsedTripStart.getTime())
+                      ? new Date(parsedTripStart.getTime() - 7 * 24 * 60 * 60 * 1000).toLocaleDateString([], { month: 'short', day: 'numeric', year: 'numeric' })
                       : 'Before Travel';
 
                     return (

@@ -8,8 +8,9 @@ import { Badge } from '@/components/ui/badge';
 import { 
   Map, FileText, Send, CheckCircle2, AlertTriangle, Plus, Search, 
   Eye, Edit, Copy, ExternalLink, Calendar, Users, IndianRupee, ShieldAlert,
-  Loader2, RefreshCw, X, Sparkles, ArrowRight, Trash2
+  Loader2, RefreshCw, X, Sparkles, ArrowRight, Trash2, ChevronDown
 } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 
 const API_BASE = import.meta.env.VITE_PHP_BASE_URL || import.meta.env.VITE_API_BASE_URL || '/php-backend';
 
@@ -19,6 +20,55 @@ async function getAuthHeader(): Promise<Record<string, string>> {
   return token ? { 'Authorization': `Bearer ${token}` } : {};
 }
 
+const formatTravelDate = (dateVal: any, endDateVal?: any): string => {
+  if (!dateVal) return 'Dates TBD';
+  const cleanVal = String(dateVal).trim();
+  if (
+    !cleanVal ||
+    cleanVal === '0000-00-00' ||
+    cleanVal.startsWith('0000-00-00') ||
+    cleanVal === 'null' ||
+    cleanVal === 'undefined' ||
+    cleanVal.toLowerCase() === 'invalid date'
+  ) {
+    return 'Dates TBD';
+  }
+
+  // Handle range strings like "2026-10-15 to 2026-10-20"
+  if (cleanVal.includes(' to ')) {
+    const [start, end] = cleanVal.split(' to ');
+    const sFormatted = formatTravelDate(start);
+    const eFormatted = formatTravelDate(end);
+    if (sFormatted !== 'Dates TBD' && eFormatted !== 'Dates TBD') {
+      return `${sFormatted} - ${eFormatted}`;
+    }
+  }
+
+  // Attempt standard Date parsing
+  const parsed = new Date(cleanVal);
+  if (!isNaN(parsed.getTime())) {
+    const formattedStart = parsed.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    if (endDateVal && typeof endDateVal === 'string') {
+      const endClean = endDateVal.trim();
+      if (endClean && endClean !== '0000-00-00' && !endClean.startsWith('0000-00-00')) {
+        const parsedEnd = new Date(endClean);
+        if (!isNaN(parsedEnd.getTime())) {
+          const formattedEnd = parsedEnd.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+          return `${formattedStart} - ${formattedEnd}`;
+        }
+      }
+    }
+    return formattedStart;
+  }
+
+  // Fallback: If it's a readable text description (e.g. "October 2026"), show it directly
+  if (cleanVal.length > 0 && !cleanVal.includes('0000') && !cleanVal.toLowerCase().includes('invalid')) {
+    return cleanVal;
+  }
+
+  return 'Dates TBD';
+};
+
 interface ItineraryWorkspaceProps {
   leads: any[];
   onNavigateLead: (leadId: string, pathSuffix?: string) => void;
@@ -26,6 +76,7 @@ interface ItineraryWorkspaceProps {
 
 export const ItineraryWorkspace: React.FC<ItineraryWorkspaceProps> = ({ leads, onNavigateLead }) => {
   const navigate = useNavigate();
+  const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [savedItineraries, setSavedItineraries] = useState<any[]>([]);
   const [activeTab, setActiveTab] = useState<'saved' | 'leads'>('saved');
@@ -64,28 +115,114 @@ export const ItineraryWorkspace: React.FC<ItineraryWorkspaceProps> = ({ leads, o
     }
   };
 
+  const resolveCustomerInfo = (item: any) => {
+    const linkedLead = leads.find(l => String(l.id) === String(item.lead_id));
+    
+    let name = item.customer_name;
+    if (!name || name.trim() === '' || name.toLowerCase() === 'valued client' || name.toLowerCase() === 'guest') {
+      if (linkedLead?.customer_name) {
+        name = linkedLead.customer_name;
+      } else if (linkedLead?.customerName) {
+        name = linkedLead.customerName;
+      } else if (item.package_name) {
+        const match = item.package_name.match(/^Itinerary for\s+([^–—\-|]+)/i);
+        if (match && match[1]) {
+          name = match[1].trim();
+        }
+      }
+    }
+
+    let email = item.customer_email;
+    if (!email || email.trim() === '' || email.toLowerCase() === 'no email registered') {
+      if (linkedLead?.customer_email || linkedLead?.email || linkedLead?.customerEmail) {
+        email = linkedLead.customer_email || linkedLead.email || linkedLead.customerEmail;
+      }
+    }
+
+    let phone = item.customer_phone;
+    if (!phone || phone.trim() === '') {
+      if (linkedLead?.customer_phone || linkedLead?.contact_number || linkedLead?.phone) {
+        phone = linkedLead.customer_phone || linkedLead.contact_number || linkedLead.phone;
+      }
+    }
+
+    return {
+      name: name || 'Valued Client',
+      email: email || '',
+      phone: phone || '',
+      linkedLead
+    };
+  };
+
+  const handleStatusChange = async (itineraryId: number | string, newStatus: string) => {
+    const previous = savedItineraries.find(i => String(i.id) === String(itineraryId))?.status;
+    
+    // Optimistically update
+    setSavedItineraries(prev => prev.map(item => 
+      String(item.id) === String(itineraryId) ? { ...item, status: newStatus } : item
+    ));
+
+    try {
+      const authHeaders = await getAuthHeader();
+      const res = await fetch(`${API_BASE}/itinerary_update_status.php`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...authHeaders
+        },
+        body: JSON.stringify({
+          id: Number(itineraryId),
+          status: newStatus
+        })
+      });
+      if (!res.ok) {
+        throw new Error('Failed to update status on server');
+      }
+      toast({
+        title: "Status Updated",
+        description: `Proposal status changed to "${newStatus}".`
+      });
+    } catch (err: any) {
+      console.error('Error updating status:', err);
+      // Revert on error
+      if (previous) {
+        setSavedItineraries(prev => prev.map(item => 
+          String(item.id) === String(itineraryId) ? { ...item, status: previous } : item
+        ));
+      }
+      toast({
+        title: "Update Failed",
+        description: err?.message || "Failed to update status. Please try again.",
+        variant: "destructive"
+      });
+    }
+  };
+
   // Compute Active Filtered Lists
-  const activeLeads = leads.filter(l => !l.deleted_at);
+  const activeLeads = leads.filter(l => !l.deleted_at && !l.is_deleted && !l.isDeleted);
 
   const filteredSavedItineraries = savedItineraries.filter(item => {
+    const clientInfo = resolveCustomerInfo(item);
     const q = search.trim().toLowerCase();
-    const name = (item.customer_name || '').toLowerCase();
+    const name = clientInfo.name.toLowerCase();
+    const email = clientInfo.email.toLowerCase();
     const dest = (item.destinations || '').toLowerCase();
     const code = (item.itinerary_code || item.package_name || '').toLowerCase();
-    const matchesSearch = name.includes(q) || dest.includes(q) || code.includes(q);
+    const matchesSearch = name.includes(q) || dest.includes(q) || code.includes(q) || email.includes(q);
 
     if (statusFilter === 'flagged') return matchesSearch && Boolean(item.pricing_flagged == 1);
-    if (statusFilter === 'confirmed') return matchesSearch && item.status === 'Booking Confirmed';
-    if (statusFilter === 'sent') return matchesSearch && item.status === 'Quote Sent';
+    if (statusFilter === 'confirmed') return matchesSearch && (item.status === 'Booking Confirmed' || item.status === 'confirmed');
+    if (statusFilter === 'sent') return matchesSearch && (item.status === 'Quote Sent' || item.status === 'sent');
     return matchesSearch;
   });
 
   const filteredLeads = activeLeads.filter(l => {
     const q = search.trim().toLowerCase();
-    const name = (l.customer_name || '').toLowerCase();
-    const dest = (l.destinations || '').toLowerCase();
-    const email = (l.email || '').toLowerCase();
-    const matchesSearch = name.includes(q) || dest.includes(q) || email.includes(q);
+    const name = (l.customer_name || l.customerName || '').toLowerCase();
+    const dest = (l.destinations || l.packageName || '').toLowerCase();
+    const email = (l.customer_email || l.email || l.customerEmail || '').toLowerCase();
+    const phone = (l.customer_phone || l.contact_number || l.customerPhone || l.phone || l.whatsapp_number || '').toLowerCase();
+    const matchesSearch = name.includes(q) || dest.includes(q) || email.includes(q) || phone.includes(q);
 
     if (statusFilter === 'confirmed') return matchesSearch && l.status === 'Booking Confirmed';
     if (statusFilter === 'sent') return matchesSearch && l.status === 'Quote Sent';
@@ -353,6 +490,7 @@ export const ItineraryWorkspace: React.FC<ItineraryWorkspaceProps> = ({ leads, o
                 {/* Proposal Items */}
                 {filteredSavedItineraries.map((item) => {
                   const isFlagged = Boolean(item.pricing_flagged == 1);
+                  const clientInfo = resolveCustomerInfo(item);
                   return (
                     <div key={item.id} className="grid grid-cols-12 gap-3 p-4 items-center hover:bg-slate-50/80 dark:hover:bg-slate-900/50 transition-all text-xs border-b border-border/10">
                       {/* Code & Client */}
@@ -363,10 +501,10 @@ export const ItineraryWorkspace: React.FC<ItineraryWorkspaceProps> = ({ leads, o
                           </span>
                         </div>
                         <p className="font-extrabold text-slate-950 dark:text-white text-xs uppercase tracking-wide truncate">
-                          {item.customer_name || 'Valued Client'}
+                          {clientInfo.name}
                         </p>
                         <p className="text-xs text-slate-600 dark:text-slate-400 font-mono truncate">
-                          {item.customer_email || 'No email registered'}
+                          {clientInfo.email ? clientInfo.email : (clientInfo.phone ? clientInfo.phone : 'No contact registered')}
                         </p>
                       </div>
 
@@ -377,7 +515,7 @@ export const ItineraryWorkspace: React.FC<ItineraryWorkspaceProps> = ({ leads, o
                         </p>
                         <p className="text-xs text-slate-600 dark:text-slate-300 font-semibold flex items-center gap-1">
                           <Calendar className="w-3.5 h-3.5 text-amber-500 shrink-0" />
-                          {item.travel_start_date ? new Date(item.travel_start_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'Dates TBD'}
+                          {formatTravelDate(item.travel_start_date, item.travel_end_date)}
                         </p>
                       </div>
 
@@ -392,16 +530,31 @@ export const ItineraryWorkspace: React.FC<ItineraryWorkspaceProps> = ({ leads, o
 
                       {/* Audit & Status */}
                       <div className="col-span-2 space-y-1">
-                        <Badge
-                          className={`text-xs font-extrabold uppercase px-2.5 py-0.5 rounded-full ${
-                            item.status === 'Booking Confirmed' ? 'bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border-emerald-500/40' :
-                            item.status === 'Quote Sent' ? 'bg-amber-500/20 text-amber-800 dark:text-amber-300 border-amber-500/40' :
-                            'bg-slate-200 dark:bg-slate-800 text-slate-800 dark:text-slate-200 border-slate-400'
-                          }`}
-                          variant="outline"
-                        >
-                          {item.status || 'Proposal Draft'}
-                        </Badge>
+                        <div className="relative inline-flex items-center">
+                          <select
+                            value={item.status || 'Draft'}
+                            onChange={(e) => handleStatusChange(item.id, e.target.value)}
+                            className={`text-xs font-black uppercase px-2.5 py-1 rounded-lg border appearance-none pr-6 cursor-pointer outline-none transition-colors ${
+                              item.status === 'Booking Confirmed'
+                                ? 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border-emerald-500/40 hover:bg-emerald-500/25'
+                                : item.status === 'Quote Sent'
+                                ? 'bg-amber-500/15 text-amber-800 dark:text-amber-300 border-amber-500/40 hover:bg-amber-500/25'
+                                : item.status === 'Saved'
+                                ? 'bg-blue-500/15 text-blue-700 dark:text-blue-300 border-blue-500/40 hover:bg-blue-500/25'
+                                : item.status === 'Cancelled'
+                                ? 'bg-rose-500/15 text-rose-700 dark:text-rose-300 border-rose-500/40 hover:bg-rose-500/25'
+                                : 'bg-slate-200 dark:bg-slate-800 text-slate-800 dark:text-slate-200 border-slate-300 dark:border-slate-700 hover:bg-slate-300 dark:hover:bg-slate-700'
+                            }`}
+                            title="Click to change proposal status"
+                          >
+                            <option value="Draft" className="bg-slate-900 text-white">Draft</option>
+                            <option value="Saved" className="bg-slate-900 text-white">Saved</option>
+                            <option value="Quote Sent" className="bg-slate-900 text-white">Quote Sent</option>
+                            <option value="Booking Confirmed" className="bg-slate-900 text-white">Booking Confirmed</option>
+                            <option value="Cancelled" className="bg-slate-900 text-white">Cancelled</option>
+                          </select>
+                          <ChevronDown className="w-3 h-3 absolute right-1.5 pointer-events-none opacity-60 text-current" />
+                        </div>
 
                         {isFlagged && (
                           <Badge variant="outline" className="text-[11px] bg-amber-500/20 text-amber-800 dark:text-amber-300 border-amber-500/40 font-bold block w-fit">
@@ -448,25 +601,32 @@ export const ItineraryWorkspace: React.FC<ItineraryWorkspaceProps> = ({ leads, o
                 </div>
 
                 {/* Lead Items */}
-                {filteredLeads.map((l) => (
-                  <div key={l.id} className="grid grid-cols-12 gap-3 p-4 items-center hover:bg-slate-50/80 dark:hover:bg-slate-900/50 transition-all text-xs border-b border-border/10">
-                    <div className="col-span-4 flex items-center gap-3">
-                      <div className="w-9 h-9 bg-amber-500/15 text-amber-600 dark:text-amber-400 rounded-xl flex items-center justify-center font-black text-xs uppercase shrink-0 border border-amber-500/30">
-                        {l.customer_name?.charAt(0) || 'L'}
-                      </div>
-                      <div className="min-w-0">
-                        <p className="font-extrabold text-slate-950 dark:text-white uppercase tracking-wide truncate text-xs">{l.customer_name}</p>
-                        <p className="text-xs text-slate-600 dark:text-slate-400 font-mono truncate">{l.email || 'No email'} • {l.contact_number || 'No phone'}</p>
-                      </div>
-                    </div>
+                {filteredLeads.map((l) => {
+                  const custName = l.customer_name || l.customerName || 'Unnamed Lead';
+                  const custEmail = l.customer_email || l.email || l.customerEmail || '';
+                  const custPhone = l.customer_phone || l.contact_number || l.customerPhone || l.phone || l.whatsapp_number || '';
+                  const dateStr = l.trip_start_date || l.tripStartDate || l.travel_dates || l.travel_date || l.travelMonth;
+                  const endDateStr = l.trip_end_date || l.tripEndDate;
 
-                    <div className="col-span-3 font-extrabold text-slate-900 dark:text-slate-100 uppercase truncate text-xs">
-                      {l.destinations || 'Custom Package'}
-                    </div>
+                  return (
+                    <div key={l.id} className="grid grid-cols-12 gap-3 p-4 items-center hover:bg-slate-50/80 dark:hover:bg-slate-900/50 transition-all text-xs border-b border-border/10">
+                      <div className="col-span-4 flex items-center gap-3">
+                        <div className="w-9 h-9 bg-amber-500/15 text-amber-600 dark:text-amber-400 rounded-xl flex items-center justify-center font-black text-xs uppercase shrink-0 border border-amber-500/30">
+                          {custName.charAt(0) || 'L'}
+                        </div>
+                        <div className="min-w-0">
+                          <p className="font-extrabold text-slate-950 dark:text-white uppercase tracking-wide truncate text-xs">{custName}</p>
+                          <p className="text-xs text-slate-600 dark:text-slate-400 font-mono truncate">{custEmail || 'No email'} • {custPhone || 'No phone'}</p>
+                        </div>
+                      </div>
 
-                    <div className="col-span-2 font-semibold text-slate-700 dark:text-slate-300 text-xs">
-                      {l.trip_start_date ? new Date(l.trip_start_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'Dates TBD'}
-                    </div>
+                      <div className="col-span-3 font-extrabold text-slate-900 dark:text-slate-100 uppercase truncate text-xs">
+                        {l.destinations || l.packageName || 'Custom Package'}
+                      </div>
+
+                      <div className="col-span-2 font-semibold text-slate-700 dark:text-slate-300 text-xs">
+                        {formatTravelDate(dateStr, endDateStr)}
+                      </div>
 
                     <div className="col-span-1">
                       <Badge
@@ -492,7 +652,8 @@ export const ItineraryWorkspace: React.FC<ItineraryWorkspaceProps> = ({ leads, o
                       </Button>
                     </div>
                   </div>
-                ))}
+                );
+              })}
               </div>
             )
           )}
