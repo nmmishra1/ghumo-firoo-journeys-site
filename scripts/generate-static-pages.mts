@@ -402,6 +402,33 @@ const staticRoutesMeta: Record<string, { title: string; description: string; h1:
       </section>
     `
   },
+  '/cookie-policy': {
+    title: 'Cookie Policy | Ghumo Firoo Travels',
+    description: 'Learn about the cookies and tracking technologies used by Ghumo Firoo Travels, their purpose, and how you can manage your preferences.',
+    h1: 'Cookie Policy & Consent Management',
+    h2: 'How Ghumo Firoo Travels Uses Cookies to Enhance Your Journey Experience',
+    bodyHtml: `
+      <section>
+        <h2>Transparency & Cookie Consent</h2>
+        <p>This Cookie Policy explains how Ghumo Firoo Travels uses cookies and similar tracking technologies when you visit ghumofiroo.com. It details the categories of cookies we use, their purpose, and how you can control your preferences.</p>
+      </section>
+
+      <section>
+        <h2>Categories of Cookies We Use</h2>
+        <ul>
+          <li><strong>Strictly Necessary Cookies:</strong> Required for secure session authentication, CSRF validation, and platform operation.</li>
+          <li><strong>Performance & Analytics Cookies:</strong> Help us anonymously analyze site traffic, page speed, and luxury itinerary interactions.</li>
+          <li><strong>Functionality Cookies:</strong> Remember your preferred departure cities, currency, and holiday circuit preferences.</li>
+          <li><strong>Marketing Cookies:</strong> Used strictly with your consent to ensure relevant travel promotions and seasonal offers.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2>Managing Your Preferences</h2>
+        <p>You can accept all cookies, customize your settings, or choose essential cookies only through our interactive on-site consent tool or your browser preferences.</p>
+      </section>
+    `
+  },
   '/profile': {
     title: 'Traveler Profile | Ghumo Firoo Travels',
     description: 'Access your Ghumo Firoo traveler profile, manage booked holiday packages, check itinerary vouchers, and update your personal travel preferences.',
@@ -1474,6 +1501,7 @@ async function main() {
               <li><a href="/terms-of-service">Terms of Service</a></li>
               <li><a href="/terms-conditions">Terms & Conditions</a></li>
               <li><a href="/privacy-policy">Privacy Policy</a></li>
+              <li><a href="/cookie-policy">Cookie Policy</a></li>
               <li><a href="/refund-policy">Refund Policy</a></li>
               <li><a href="/blog">Travel Blog</a></li>
             </ul>

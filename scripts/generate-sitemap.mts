@@ -20,6 +20,7 @@ const staticRoutes = [
   '/profile',
   '/booking',
   '/privacy-policy',
+  '/cookie-policy',
   '/terms-conditions',
   '/terms-of-service',
   '/refund-policy',

@@ -213,6 +213,7 @@ export function FooterShell({ logoText = "GhumoFiroo", className, ...props }: Fo
             </h4>
             <ul className="flex flex-col space-y-2.5 text-xs text-slate-300 font-light">
               <li><Link to="/privacy-policy" className="hover:text-white transition-colors">Privacy Policy</Link></li>
+              <li><Link to="/cookie-policy" className="hover:text-white transition-colors">Cookie Policy</Link></li>
               <li><Link to="/terms-of-service" className="hover:text-white transition-colors">Terms of Service</Link></li>
               <li><Link to="/terms-conditions" className="hover:text-white transition-colors">Terms & Conditions</Link></li>
               <li><Link to="/refund-policy" className="hover:text-white transition-colors">Refund & Cancellation Policy</Link></li>

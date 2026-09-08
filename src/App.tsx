@@ -8,6 +8,7 @@ import ScrollToTop from '@/components/ScrollToTop';
 import { PerformanceProvider } from '@/contexts/PerformanceContext';
 import WhatsAppFloat from '@/components/common/WhatsAppFloat';
 import { LiveChatWidget } from '@/components/LiveChatWidget';
+import CookieConsentBanner from '@/components/common/CookieConsentBanner';
 
 // Luxury branded loading component with zero flash
 const PageLoader = memo(() => (
@@ -133,6 +134,7 @@ const PrivacyPolicy = lazyRetry(() => import('@/pages/PrivacyPolicy'));
 const TermsConditions = lazyRetry(() => import('@/pages/TermsConditions'));
 const TermsOfService = lazyRetry(() => import('@/pages/TermsOfService'));
 const RefundPolicy = lazyRetry(() => import('@/pages/RefundPolicy'));
+const CookiePolicy = lazyRetry(() => import('@/pages/CookiePolicy'));
 
 // Lazy load service pages
 const CustomTourPackages = lazyRetry(() => import('@/pages/CustomTourPackages'));
@@ -322,6 +324,8 @@ function App() {
                <Route path="/terms-conditions" element={<TermsConditions />} />
                <Route path="/terms-of-service" element={<TermsOfService />} />
                <Route path="/refund-policy" element={<RefundPolicy />} />
+               <Route path="/cookie-policy" element={<CookiePolicy />} />
+               <Route path="/cookies" element={<CookiePolicy />} />
                
                {/* Service pages */}
                 <Route path="/custom-tour-packages" element={<CustomTourPackages />} />
@@ -475,6 +479,7 @@ function App() {
           <Toaster />
           <WhatsAppFloat />
           <LiveChatWidget />
+          <CookieConsentBanner />
         </Router>
     </PerformanceProvider>
   );
