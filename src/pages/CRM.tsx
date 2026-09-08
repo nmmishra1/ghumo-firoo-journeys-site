@@ -35,6 +35,7 @@ import { FollowUpModal } from '@/components/crm/FollowUpModal';
 import { DeleteLeadModal } from '@/components/crm/DeleteLeadModal';
 import { KanbanBoard } from '@/components/crm/KanbanBoard';
 import { ItineraryWorkspace } from '@/components/crm/ItineraryWorkspace';
+import { CustomerProfileModal, CustomerData } from '@/components/crm/CustomerProfileModal';
 import LazyImage from '@/components/ui/LazyImage';
 import { 
   ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip as ChartTooltip, 
@@ -420,6 +421,7 @@ const CRM = () => {
   const [followUpModalOpen, setFollowUpModalOpen] = useState(false);
   const [selectedLeadForFollowUp, setSelectedLeadForFollowUp] = useState<{ id: string; name: string } | null>(null);
   const [proposalDialogOpen, setProposalDialogOpen] = useState(false);
+  const [selectedCustomerModal, setSelectedCustomerModal] = useState<CustomerData | null>(null);
   
   // Lead logs / inline timeline state inside profile page
   const [timelineNote, setTimelineNote] = useState('');
@@ -3855,20 +3857,33 @@ const CRM = () => {
             const leadMap: Record<string, any> = {};
             leads.forEach(l => {
               if (!l.deleted_at && l.customer_name) {
-                const key = (l.email || l.contact_number || l.customer_name).toLowerCase();
+                const key = (l.email || l.customer_email || l.contact_number || l.customer_phone || l.customer_name).trim().toLowerCase();
+                const cityVal = l.city || l.customer_home_city || l.departure_city || '';
+                const isConfirmed = (l.status || '').toLowerCase().includes('confirmed');
                 if (!leadMap[key]) {
                   leadMap[key] = {
                     id: l.id,
                     name: l.customer_name,
                     mobile: l.contact_number || l.customer_phone || '---',
                     email: l.email || l.customer_email || '---',
-                    home_city: l.city || l.customer_home_city || l.departure_city || '---',
+                    home_city: cityVal || '---',
                     total_leads: 1,
-                    total_bookings: l.status === 'Booking Confirmed' ? 1 : 0
+                    total_bookings: isConfirmed ? 1 : 0,
+                    all_leads: [l]
                   };
                 } else {
                   leadMap[key].total_leads += 1;
-                  if (l.status === 'Booking Confirmed') leadMap[key].total_bookings += 1;
+                  if (isConfirmed) leadMap[key].total_bookings += 1;
+                  leadMap[key].all_leads.push(l);
+                  if ((!leadMap[key].home_city || leadMap[key].home_city === '---') && cityVal) {
+                    leadMap[key].home_city = cityVal;
+                  }
+                  if (leadMap[key].mobile === '---' && (l.contact_number || l.customer_phone)) {
+                    leadMap[key].mobile = l.contact_number || l.customer_phone;
+                  }
+                  if (leadMap[key].email === '---' && (l.email || l.customer_email)) {
+                    leadMap[key].email = l.email || l.customer_email;
+                  }
                 }
               }
             });
@@ -3876,9 +3891,12 @@ const CRM = () => {
             // Combine aggregated leads with seeded customers list
             const allCustomers = [...Object.values(leadMap)];
             customers.forEach(mc => {
-              const key = (mc.email || mc.mobile || mc.name).toLowerCase();
+              const key = (mc.email || mc.mobile || mc.name).trim().toLowerCase();
               if (!leadMap[key]) {
-                allCustomers.push(mc);
+                allCustomers.push({
+                  ...mc,
+                  all_leads: []
+                });
               }
             });
 
@@ -4030,7 +4048,7 @@ const CRM = () => {
                                   <p className="font-mono text-xs text-slate-600 dark:text-slate-400">{c.email}</p>
                                 </td>
                                 <td className="py-3 px-4 text-left font-extrabold text-xs text-slate-900 dark:text-slate-100 uppercase">
-                                  {c.home_city || 'Delhi'}
+                                  {c.home_city && c.home_city !== '---' ? c.home_city : '---'}
                                 </td>
                                 <td className="py-3 px-4 text-center font-black text-xs text-slate-900 dark:text-slate-100">
                                   {c.total_leads || 1} Enquiries
@@ -4077,9 +4095,9 @@ const CRM = () => {
                                     </Button>
                                     <Button
                                       size="sm"
-                                      onClick={() => navigate(`/crm/leads/${c.id}`)}
+                                      onClick={() => setSelectedCustomerModal(c)}
                                       className="bg-amber-500 hover:bg-amber-600 text-slate-950 font-extrabold text-xs h-8 rounded-lg px-2.5 shadow-xs"
-                                      title="View Customer Profile"
+                                      title="View Full Passenger Profile & History"
                                     >
                                       <User className="w-3.5 h-3.5 mr-1" /> Profile
                                     </Button>
@@ -6374,6 +6392,25 @@ Ghumo Firoo Travels`
       <UserManagementDialog 
         isOpen={userManagementOpen}
         onClose={() => setUserManagementOpen(false)}
+      />
+
+      {/* CUSTOMER 360 PASSENGER PROFILE & HISTORY MODAL */}
+      <CustomerProfileModal
+        isOpen={Boolean(selectedCustomerModal)}
+        onClose={() => setSelectedCustomerModal(null)}
+        customer={selectedCustomerModal}
+        onCityUpdated={(customerId, newCity) => {
+          setSelectedCustomerModal(prev => prev ? { ...prev, home_city: newCity } : null);
+          fetchLeads(true);
+        }}
+        onSelectLead={(leadId) => {
+          setSelectedCustomerModal(null);
+          navigate(`/crm/leads/${leadId}`);
+        }}
+        onCreateItinerary={(lead) => {
+          setSelectedCustomerModal(null);
+          navigate(`/crm/leads/${lead.id}/itinerary`);
+        }}
       />
 
       {/* EMAIL PROPOSAL BUILDER DIALOG */}

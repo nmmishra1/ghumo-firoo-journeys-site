@@ -173,21 +173,37 @@ try {
         $existingCols = $pdo->query("SHOW COLUMNS FROM `leads`")->fetchAll(PDO::FETCH_COLUMN);
     } catch (Throwable $eCols) {}
 
+    // Dynamic Home / Departure City extraction & Auto-Inheritance for returning clients
+    $cityVal = !empty($input['customer_home_city']) ? trim($input['customer_home_city']) : (!empty($input['city']) ? trim($input['city']) : (!empty($input['departure_city']) ? trim($input['departure_city']) : null));
+    if (empty($cityVal) && (!empty($customerPhone) || !empty($customerEmail))) {
+        try {
+            $cityStmt = $pdo->prepare("SELECT customer_home_city FROM leads WHERE (customer_phone = ? OR (customer_email = ? AND customer_email != '')) AND customer_home_city IS NOT NULL AND customer_home_city != '' LIMIT 1");
+            $cityStmt->execute([$customerPhone, $customerEmail]);
+            $knownCity = $cityStmt->fetchColumn();
+            if ($knownCity) {
+                $cityVal = $knownCity;
+            }
+        } catch (Throwable $eCity) {}
+    }
+
     $fields = [
-        'customer_name'  => $customerName,
-        'customer_email' => $customerEmail,
-        'customer_phone' => $customerPhone,
-        'package_name'   => $packageName,
-        'package_price'  => $packagePrice,
-        'package_cost'   => $packagePrice,
-        'source'         => $sourceLabel,
-        'status'         => 'New',
-        'adult_count'    => $adultCount,
-        'child_count'    => $childCount,
-        'infant_count'   => 0,
-        'trip_start_date'=> $travelDate,
-        'notes'          => $combinedNotes,
-        'destinations'   => $packageName
+        'customer_name'       => $customerName,
+        'customer_email'      => $customerEmail,
+        'customer_phone'      => $customerPhone,
+        'customer_home_city'  => $cityVal,
+        'departure_city'      => $cityVal,
+        'city'                => $cityVal,
+        'package_name'        => $packageName,
+        'package_price'       => $packagePrice,
+        'package_cost'        => $packagePrice,
+        'source'              => $sourceLabel,
+        'status'              => 'New',
+        'adult_count'         => $adultCount,
+        'child_count'         => $childCount,
+        'infant_count'        => 0,
+        'trip_start_date'     => $travelDate,
+        'notes'               => $combinedNotes,
+        'destinations'        => $packageName
     ];
 
     if (!empty($existingCols) && in_array('discussion_notes', $existingCols)) {
