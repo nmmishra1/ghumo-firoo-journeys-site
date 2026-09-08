@@ -15,6 +15,7 @@ import {
   generateHotelVoucherPDF,
   generateCabVoucherPDF,
   generateActivityVoucherPDF,
+  formatVoucherRef,
 } from '@/lib/voucherService';
 
 const API_BASE = import.meta.env.VITE_PHP_BASE_URL || import.meta.env.VITE_API_BASE_URL || '/php-backend';
@@ -381,8 +382,9 @@ export const BookingConfirmationPanel: React.FC<BookingConfirmationPanelProps> =
       const leadInfo = json.lead || {};
 
       // 1. Tax Invoice
+      const invoiceNum = formatVoucherRef('INVOICE', proposal.title, leadId);
       const invoiceDoc = generateInvoicePDF({
-        invoiceNumber: `INV-${proposal.id}`,
+        invoiceNumber: invoiceNum,
         invoiceDate: new Date().toISOString().split('T')[0],
         customerName: customerName || leadInfo.customer_name || 'Valued Customer',
         customerPhone: customerPhone || leadInfo.customer_phone,
@@ -399,15 +401,16 @@ export const BookingConfirmationPanel: React.FC<BookingConfirmationPanelProps> =
         amountPaid: Number(json.advance_received || 0),
         balanceDue: Math.max(0, (Number(json.total_price || 0) * 1.05) - Number(json.advance_received || 0)),
       });
-      const invoiceFileName = `INV-${proposal.id}_Tax_Invoice.pdf`;
+      const invoiceFileName = `${invoiceNum}_Tax_Invoice.pdf`;
       invoiceDoc.save(invoiceFileName);
       const invRes = await uploadPdf(invoiceDoc, leadId, invoiceFileName, 'invoice');
       generated.push({ name: invoiceFileName, url: invRes.file_url, type: 'Tax Invoice' });
 
       // 2. Hotel Vouchers
       for (const hotel of (data.hotels || [])) {
+        const hotelVchNum = formatVoucherRef('HOTEL', hotel.city || proposal.title, leadId, hotel.id);
         const doc = generateHotelVoucherPDF({
-          voucherNumber: `HTL-${proposal.id}-${hotel.id}`,
+          voucherNumber: hotelVchNum,
           bookingDate: new Date().toISOString().split('T')[0],
           guestName: customerName || leadInfo.customer_name || 'Valued Guest',
           guestPhone: customerPhone || leadInfo.customer_phone || '',
@@ -422,7 +425,7 @@ export const BookingConfirmationPanel: React.FC<BookingConfirmationPanelProps> =
           roomsCount: hotel.rooms || 1,
           confirmationNumber: hotel.confirmation_number || undefined,
         });
-        const htlFileName = `HTL-${proposal.id}-${hotel.id}_Hotel_Voucher.pdf`;
+        const htlFileName = `${hotelVchNum}_Hotel_Voucher.pdf`;
         doc.save(htlFileName);
         const htlRes = await uploadPdf(doc, leadId, htlFileName, 'hotel_voucher');
         generated.push({ name: htlFileName, url: htlRes.file_url, type: 'Hotel Voucher' });
@@ -430,8 +433,9 @@ export const BookingConfirmationPanel: React.FC<BookingConfirmationPanelProps> =
 
       // 3. Cab / Transport Vouchers
       for (const leg of (data.transport || [])) {
+        const cabVchNum = formatVoucherRef('CAB', leg.drop_location || proposal.title, leadId, leg.id);
         const doc = generateCabVoucherPDF({
-          voucherNumber: `CAB-${proposal.id}-${leg.id}`,
+          voucherNumber: cabVchNum,
           bookingDate: new Date().toISOString().split('T')[0],
           guestName: customerName || leadInfo.customer_name || 'Valued Guest',
           guestPhone: customerPhone || leadInfo.customer_phone || '',
@@ -446,7 +450,7 @@ export const BookingConfirmationPanel: React.FC<BookingConfirmationPanelProps> =
           vehicleNumber: leg.vehicle_number,
           inclusions: leg.inclusions || ['Tolls', 'Parking', 'Fuel', 'Driver Allowance'],
         });
-        const cabFileName = `CAB-${proposal.id}-${leg.id}_Cab_Voucher.pdf`;
+        const cabFileName = `${cabVchNum}_Cab_Voucher.pdf`;
         doc.save(cabFileName);
         const cabRes = await uploadPdf(doc, leadId, cabFileName, 'cab_voucher');
         generated.push({ name: cabFileName, url: cabRes.file_url, type: 'Cab Voucher' });
@@ -454,8 +458,9 @@ export const BookingConfirmationPanel: React.FC<BookingConfirmationPanelProps> =
 
       // 4. Activity & Sightseeing Vouchers
       for (const act of (data.activities || [])) {
+        const actVchNum = formatVoucherRef('ACTIVITY', act.city || proposal.title, leadId, act.id);
         const doc = generateActivityVoucherPDF({
-          voucherNumber: `ACT-${proposal.id}-${act.id}`,
+          voucherNumber: actVchNum,
           bookingDate: new Date().toISOString().split('T')[0],
           guestName: customerName || leadInfo.customer_name || 'Valued Guest',
           guestPhone: customerPhone || leadInfo.customer_phone || '',
@@ -469,7 +474,7 @@ export const BookingConfirmationPanel: React.FC<BookingConfirmationPanelProps> =
           supplierContact: act.operator_name ? `${act.operator_name} (${act.guide_contact || ''})` : act.guide_contact,
           confirmationNumber: act.confirmation_number,
         } as any);
-        const actFileName = `ACT-${proposal.id}-${act.id}_Activity_Voucher.pdf`;
+        const actFileName = `${actVchNum}_Activity_Voucher.pdf`;
         doc.save(actFileName);
         const actRes = await uploadPdf(doc, leadId, actFileName, 'activity_voucher');
         generated.push({ name: actFileName, url: actRes.file_url, type: 'Activity Voucher' });

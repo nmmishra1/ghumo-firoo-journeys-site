@@ -321,6 +321,7 @@ export function mapLeadFromDb(db: any): Lead {
     lastContactDate: db.last_contact_date ? db.last_contact_date.split('T')[0] : undefined,
     daysSinceLastContact: 0, // Computed dynamically during post-fetch loop
     lostReason: db.lost_reason || '',
+    lost_reason: db.lost_reason || db.lostReason || '',
     agentName: db.agent_name || '',
     emailStatus: db.email_status || 'Not Sent',
     emailSentDate: db.email_sent_date || undefined,

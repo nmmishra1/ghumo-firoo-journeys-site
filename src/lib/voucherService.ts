@@ -434,3 +434,57 @@ export function generateActivityVoucherPDF(data: ActivityVoucherData): jsPDF {
   return doc;
 }
 
+/**
+ * Standard Destination Code resolver across Ghumo Firoo Journeys
+ */
+export function getDestinationCode(dest?: string, title?: string): string {
+  const text = `${dest || ''} ${title || ''}`.toLowerCase();
+  if (text.includes('rann') || text.includes('kutch') || text.includes('dhordo') || text.includes('bhuj')) return 'KT';
+  if (text.includes('dholavira') || text.includes('road to heaven')) return 'DH';
+  if (text.includes('somnath') || text.includes('dwarka') || text.includes('gir') || text.includes('gujarat') || text.includes('statue of unity') || text.includes('ahmedabad')) return 'GJ';
+  if (text.includes('kashmir') || text.includes('srinagar') || text.includes('gulmarg') || text.includes('pahalgam')) return 'KS';
+  if (text.includes('kerala') || text.includes('munnar') || text.includes('alleppey') || text.includes('kochi')) return 'KL';
+  if (text.includes('himachal') || text.includes('manali') || text.includes('shimla') || text.includes('dharamshala')) return 'HP';
+  if (text.includes('uttarakhand') || text.includes('chardham') || text.includes('haridwar') || text.includes('rishikesh')) return 'UK';
+  if (text.includes('rajasthan') || text.includes('jaipur') || text.includes('udaipur') || text.includes('jaisalmer') || text.includes('jodhpur')) return 'RJ';
+  if (text.includes('goa')) return 'GOA';
+  if (text.includes('dubai') || text.includes('uae')) return 'DXB';
+  if (text.includes('singapore')) return 'SG';
+  if (text.includes('thailand') || text.includes('bangkok') || text.includes('phuket')) return 'TH';
+  if (text.includes('bali') || text.includes('indonesia')) return 'BALI';
+  if (text.includes('vietnam')) return 'VN';
+  if (text.includes('georgia')) return 'GE';
+  return 'GEN';
+}
+
+/**
+ * Format standard Quote Reference: GFQ-[DEST]-[LEAD_ID][-V#]
+ */
+export function formatQuoteRef(dest?: string, leadId?: string | number, version = 1): string {
+  const code = getDestinationCode(dest);
+  const idStr = leadId ? String(leadId).padStart(4, '0') : String(Math.floor(1000 + Math.random() * 9000));
+  return `GFQ-${code}-${idStr}${version > 1 ? `-V${version}` : ''}`;
+}
+
+/**
+ * Format standard Voucher / Document References
+ */
+export function formatVoucherRef(
+  type: 'HOTEL' | 'CAB' | 'ACTIVITY' | 'INVOICE' | 'RECEIPT',
+  dest?: string,
+  leadId?: string | number,
+  suffix?: string | number
+): string {
+  const code = getDestinationCode(dest);
+  const idStr = leadId ? String(leadId).padStart(4, '0') : '0001';
+  const prefixMap: Record<string, string> = {
+    HOTEL: 'VCH',
+    CAB: 'CAB',
+    ACTIVITY: 'ACT',
+    INVOICE: 'INV',
+    RECEIPT: 'REC'
+  };
+  const prefix = prefixMap[type] || 'VCH';
+  return suffix !== undefined ? `${prefix}-${code}-${idStr}-${suffix}` : `${prefix}-${code}-${idStr}`;
+}
+

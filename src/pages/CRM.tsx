@@ -33,6 +33,7 @@ import LeadForm from '@/components/crm/LeadForm';
 import { CSVImport } from '@/components/crm/CSVImport';
 import { FollowUpModal } from '@/components/crm/FollowUpModal';
 import { DeleteLeadModal } from '@/components/crm/DeleteLeadModal';
+import { getDestinationCode, formatQuoteRef, formatVoucherRef } from '@/lib/voucherService';
 import { KanbanBoard } from '@/components/crm/KanbanBoard';
 import { ItineraryWorkspace } from '@/components/crm/ItineraryWorkspace';
 import { CustomerProfileModal, CustomerData } from '@/components/crm/CustomerProfileModal';
@@ -93,10 +94,17 @@ type Lead = {
   travel_interest: string | null;
   discussion_notes: string | null;
   follow_up_date: string | null;
-  status: 'New' | 'Assigned' | 'Follow-up Due' | 'Quote Sent' | 'Booking Confirmed' | 'Closed Lost';
+  status: 'New' | 'Assigned' | 'Follow-up Due' | 'Quote Sent' | 'Booked (Advance Pending)' | 'Booking Confirmed' | 'Voucher Issued' | 'Closed Lost';
   created_by: string;
   created_at: string;
   updated_at: string;
+  
+  lost_reason?: string | null;
+  lost_notes?: string | null;
+  quote_ref?: string | null;
+  advance_payment_amount?: number | null;
+  advance_payment_status?: string | null;
+  voucher_issued_at?: string | null;
   
   whatsapp_number?: string | null;
   company_name?: string | null;
@@ -422,6 +430,21 @@ const CRM = () => {
   const [selectedLeadForFollowUp, setSelectedLeadForFollowUp] = useState<{ id: string; name: string } | null>(null);
   const [proposalDialogOpen, setProposalDialogOpen] = useState(false);
   const [selectedCustomerModal, setSelectedCustomerModal] = useState<CustomerData | null>(null);
+
+  // Closed Lost Modal states
+  const [closedLostModalOpen, setClosedLostModalOpen] = useState(false);
+  const [leadForClosedLost, setLeadForClosedLost] = useState<{ id: string; name: string; currentStatus?: string } | null>(null);
+  const [selectedLostReason, setSelectedLostReason] = useState('📵 Not Reachable / Call Not Picked (3+ attempts)');
+  const [lostReasonNotes, setLostReasonNotes] = useState('');
+  const [savingLostReason, setSavingLostReason] = useState(false);
+
+  // Advance Payment Modal states
+  const [advanceModalOpen, setAdvanceModalOpen] = useState(false);
+  const [leadForAdvance, setLeadForAdvance] = useState<{ id: string; name: string; price: number; destination?: string; packageName?: string } | null>(null);
+  const [advanceAmountInput, setAdvanceAmountInput] = useState('');
+  const [advancePaymentMode, setAdvancePaymentMode] = useState('UPI / QR Code');
+  const [advancePaymentRef, setAdvancePaymentRef] = useState('');
+  const [savingAdvancePayment, setSavingAdvancePayment] = useState(false);
   
   // Lead logs / inline timeline state inside profile page
   const [timelineNote, setTimelineNote] = useState('');
@@ -1446,21 +1469,121 @@ const CRM = () => {
     }
   };
 
-  const handleStatusChange = async (newStatus: Lead['status']) => {
-    if (!activeLead) return;
+  const handleStatusChange = async (newStatus: Lead['status'], targetLead?: Lead) => {
+    const lead = targetLead || activeLead;
+    if (!lead) return;
+
+    if (newStatus === 'Closed Lost') {
+      setLeadForClosedLost({ id: lead.id, name: lead.customer_name, currentStatus: lead.status });
+      setSelectedLostReason('📵 Not Reachable / Call Not Picked (3+ attempts)');
+      setLostReasonNotes('');
+      setClosedLostModalOpen(true);
+      return;
+    }
+
+    if (newStatus === 'Booking Confirmed') {
+      const pkgPrice = Number(lead.budget || lead.package_price || lead.packagePrice || lead.expected_booking_value || 0);
+      setLeadForAdvance({
+        id: lead.id,
+        name: lead.customer_name,
+        price: pkgPrice,
+        destination: typeof lead.destinations === 'string' ? lead.destinations : (lead.destinations as any)?.[0] || 'Tour',
+        packageName: lead.package_name || undefined
+      });
+      setAdvanceAmountInput(String(Math.round(pkgPrice * 0.25) || 5000));
+      setAdvancePaymentMode('UPI / QR Code');
+      setAdvancePaymentRef('');
+      setAdvanceModalOpen(true);
+      return;
+    }
+
     try {
-      await leadService.updateLead(activeLead.id, { status: newStatus });
+      await leadService.updateLead(lead.id, { status: newStatus });
       
       toast({ title: "Status Updated", description: `Lead status changed to ${newStatus}` });
-      await logActivity(activeLead.id, {
+      await logActivity(lead.id, {
         type: 'status_change',
         content: `Status changed to "${newStatus}"`,
-        metadata: { fromStatus: activeLead.status, toStatus: newStatus }
+        metadata: { fromStatus: lead.status, toStatus: newStatus }
       });
       fetchLeads(true);
     } catch (err) {
       console.error(err);
       toast({ title: "Error", description: "Failed to update status", variant: "destructive" });
+    }
+  };
+
+  const handleConfirmClosedLost = async () => {
+    if (!leadForClosedLost) return;
+    setSavingLostReason(true);
+    try {
+      const fullReason = lostReasonNotes.trim() ? `${selectedLostReason} — ${lostReasonNotes.trim()}` : selectedLostReason;
+      await leadService.updateLead(leadForClosedLost.id, {
+        status: 'Closed Lost',
+        lost_reason: fullReason,
+        lostReason: fullReason
+      });
+      await logActivity(leadForClosedLost.id, {
+        type: 'status_change',
+        content: `Lead marked as Closed Lost. Reason: ${fullReason}`,
+        metadata: { fromStatus: leadForClosedLost.currentStatus, toStatus: 'Closed Lost', lostReason: fullReason }
+      });
+      toast({ title: "Lead Closed Lost", description: `Recorded reason: ${fullReason}` });
+      setClosedLostModalOpen(false);
+      setLeadForClosedLost(null);
+      fetchLeads(true);
+    } catch (err) {
+      console.error(err);
+      toast({ title: "Error", description: "Failed to update status to Closed Lost", variant: "destructive" });
+    } finally {
+      setSavingLostReason(false);
+    }
+  };
+
+  const handleConfirmAdvancePayment = async () => {
+    if (!leadForAdvance) return;
+    const amount = Number(advanceAmountInput);
+    if (!amount || amount <= 0) {
+      toast({ title: "Invalid Amount", description: "Please enter a valid advance token amount", variant: "destructive" });
+      return;
+    }
+    setSavingAdvancePayment(true);
+    try {
+      const destCode = getDestinationCode(leadForAdvance.destination, leadForAdvance.packageName);
+      const receiptRef = `REC-${destCode}-${String(leadForAdvance.id).padStart(4, '0')}-01`;
+      const noteEntry = `Advance Token Payment: ₹${amount.toLocaleString('en-IN')} received via ${advancePaymentMode}${advancePaymentRef ? ` (UTR/Ref: ${advancePaymentRef})` : ''}. Receipt Ref: ${receiptRef}. Booking is officially confirmed!`;
+      
+      await leadService.updateLead(leadForAdvance.id, {
+        status: 'Booking Confirmed',
+        advance_payment_amount: amount,
+        advance_payment_status: 'Received',
+        notes: noteEntry
+      });
+
+      await logActivity(leadForAdvance.id, {
+        type: 'payment',
+        content: noteEntry,
+        metadata: { 
+          fromStatus: 'Quote Sent', 
+          toStatus: 'Booking Confirmed', 
+          advanceAmount: amount, 
+          paymentMode: advancePaymentMode,
+          receiptRef 
+        }
+      });
+
+      toast({ 
+        title: "Booking Confirmed! 🎉", 
+        description: `Advance ₹${amount.toLocaleString('en-IN')} logged (${receiptRef}). Vouchers unlocked!` 
+      });
+      setAdvanceModalOpen(false);
+      setLeadForAdvance(null);
+      fetchLeads(true);
+    } catch (err) {
+      console.error(err);
+      toast({ title: "Error", description: "Failed to record advance payment", variant: "destructive" });
+    } finally {
+      setSavingAdvancePayment(false);
     }
   };
 
@@ -2655,7 +2778,9 @@ const CRM = () => {
       case 'Assigned': return 'outline';
       case 'Follow-up Due': return 'outline';
       case 'Quote Sent': return 'default';
+      case 'Booked (Advance Pending)': return 'outline';
       case 'Booking Confirmed': return 'secondary';
+      case 'Voucher Issued': return 'default';
       case 'Closed Lost': return 'destructive';
       default: return 'outline';
     }
@@ -2719,7 +2844,7 @@ const CRM = () => {
     );
   };
 
-  const getRedesignedStatusBadge = (status: Lead['status']) => {
+  const getRedesignedStatusBadge = (status: Lead['status'], lostReason?: string | null) => {
     let styles = "bg-gray-100 text-slate-700";
     switch (status) {
       case 'New':
@@ -2734,17 +2859,30 @@ const CRM = () => {
       case 'Quote Sent':
         styles = "bg-[#E3F2FD] text-[#1565C0]";
         break;
+      case 'Booked (Advance Pending)':
+        styles = "bg-amber-100 text-amber-900 border border-amber-300";
+        break;
       case 'Booking Confirmed':
         styles = "bg-[#E8F5E9] text-[#2E7D32]";
+        break;
+      case 'Voucher Issued':
+        styles = "bg-purple-100 text-purple-900 border border-purple-300";
         break;
       case 'Closed Lost':
         styles = "bg-[#FFEBEE] text-[#C62828]";
         break;
     }
     return (
-      <span className={`text-[11px] font-semibold px-2 py-1 rounded-[4px] border-none inline-block text-center whitespace-nowrap ${styles}`}>
-        {status}
-      </span>
+      <div className="flex flex-col items-start gap-1">
+        <span className={`text-[11px] font-semibold px-2 py-1 rounded-[4px] border-none inline-block text-center whitespace-nowrap ${styles}`}>
+          {status}
+        </span>
+        {status === 'Closed Lost' && lostReason && (
+          <span className="text-[10px] text-rose-600 dark:text-rose-400 font-medium max-w-[150px] truncate" title={lostReason}>
+            ⚠️ {lostReason}
+          </span>
+        )}
+      </div>
     );
   };
 
@@ -4492,9 +4630,26 @@ const CRM = () => {
                                     aria-label={`Select lead ${l.enquiry_number || l.lead_id}`}
                                   />
                                 </td>
-                                <td className="py-3 px-3 align-top text-left font-mono font-extrabold text-amber-600 dark:text-amber-400 text-xs cursor-pointer hover:underline" onClick={() => navigate(`/crm/leads/${l.id}`)}>
-                                  {formatLeadId(l)}
-                                </td>
+                                 <td className="py-3 px-3 align-top text-left space-y-1">
+                                   <div 
+                                     className="font-mono font-extrabold text-amber-600 dark:text-amber-400 text-xs cursor-pointer hover:underline" 
+                                     onClick={() => navigate(`/crm/leads/${l.id}`)}
+                                   >
+                                     {formatLeadId(l)}
+                                   </div>
+                                   {(() => {
+                                     const destCode = getDestinationCode(typeof l.destinations === 'string' ? l.destinations : (l.destinations as any)?.[0] || '', l.package_name || undefined);
+                                     const quoteRef = `GFQ-${destCode}-${String(l.id).padStart(4, '0')}`;
+                                     return (
+                                       <span 
+                                         className="inline-block text-[9.5px] font-mono font-bold px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-800 dark:text-amber-300 border border-amber-500/20"
+                                         title="Official Quote Reference"
+                                       >
+                                         {quoteRef}
+                                       </span>
+                                     );
+                                   })()}
+                                 </td>
                                 <td className="py-3 px-3 align-top text-left space-y-1">
                                   <div className="font-extrabold text-xs text-slate-950 dark:text-white uppercase tracking-wide">{l.customer_name}</div>
                                   <div className="text-xs text-slate-600 dark:text-slate-400 font-mono font-medium">{l.contact_number || l.customer_phone || '---'}</div>
@@ -4520,6 +4675,42 @@ const CRM = () => {
                                       title="WhatsApp Client"
                                     >
                                       <MessageCircle className="w-3.5 h-3.5" />
+                                    </button>
+                                    <button 
+                                      type="button" 
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        const destStr = typeof l.destinations === 'string' ? l.destinations : (l.destinations as any)?.[0] || 'Exclusive Tour';
+                                        const dCode = getDestinationCode(destStr, l.package_name || undefined);
+                                        const qRef = `GFQ-${dCode}-${String(l.id).padStart(4, '0')}`;
+                                        const priceStr = l.package_price || l.expected_booking_value || l.budget ? `₹${Number(l.package_price || l.expected_booking_value || l.budget).toLocaleString('en-IN')}` : 'Best Available Rates';
+                                        const guestName = l.customer_name || 'Valued Guest';
+                                        const nights = l.number_of_nights || 2;
+                                        const pax = l.adult_count || 2;
+                                        const msg = encodeURIComponent(
+`Namaste ${guestName}! 🙏
+Thank you for connecting with Ghumo Firoo Journeys.
+
+Here is your official travel proposal & quotation:
+📄 *Quote Ref:* ${qRef}
+📍 *Destination:* ${destStr} (${nights} Nights / ${Number(nights)+1} Days)
+👥 *Travelers:* ${pax} Adults
+💰 *Total Cost:* ${priceStr} (All inclusive private package)
+
+✨ View / Download Itinerary & Inclusions:
+https://ghumofiroo.com/quote/${qRef}
+
+Please let us know if you need any customizations. Looking forward to hosting your journey! 🌟`
+                                        );
+                                        window.open(`https://wa.me/${l.whatsapp_number || l.contact_number || l.customer_phone || ''}?text=${msg}`);
+                                        if (l.status === 'New' || l.status === 'Assigned') {
+                                          leadService.updateLead(l.id, { status: 'Quote Sent' }).then(() => fetchLeads(true)).catch(() => {});
+                                        }
+                                      }}
+                                      className="w-7 h-7 rounded-lg border-none cursor-pointer flex items-center justify-center bg-blue-500/15 text-blue-600 dark:text-blue-400 hover:bg-blue-500/25 transition-colors"
+                                      title="1-Click Share Quote on WhatsApp"
+                                    >
+                                      <Share2 className="w-3.5 h-3.5" />
                                     </button>
                                     <button 
                                       type="button" 
@@ -4596,7 +4787,7 @@ const CRM = () => {
                                   {l.created_at ? new Date(l.created_at).toLocaleDateString([], {day: 'numeric', month: 'short', year: 'numeric'}) : '---'}
                                 </td>
                                 <td className="py-3 px-3 align-top text-left">
-                                  {getRedesignedStatusBadge(l.status)}
+                                  {getRedesignedStatusBadge(l.status, l.lost_reason || l.lostReason)}
                                 </td>
                                 <td className="py-3 px-3 align-top text-left font-semibold text-xs text-slate-900 dark:text-slate-100">
                                   {renderAssignedExecutive(l.assigned_to)}
@@ -5033,12 +5224,86 @@ Ghumo Firoo Travels`
                     </>
                   ) : (
                     <>
-                      {/* Breadcrumbs */}
-                      <div className="text-[11px] font-medium text-slate-500">
-                        Home &rsaquo; My Leads &rsaquo; <span className="text-[#C9A25A] font-bold font-mono">{formatLeadId(activeLead)}</span>
+                      {/* Breadcrumbs & Quote Ref */}
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <div className="text-[11px] font-medium text-slate-500">
+                          Home &rsaquo; My Leads &rsaquo; <span className="text-[#C9A25A] font-bold font-mono">{formatLeadId(activeLead)}</span>
+                        </div>
+                        {(() => {
+                          const destCode = getDestinationCode(typeof activeLead.destinations === 'string' ? activeLead.destinations : (activeLead.destinations as any)?.[0] || '', activeLead.package_name || undefined);
+                          const quoteRef = `GFQ-${destCode}-${String(activeLead.id).padStart(4, '0')}`;
+                          return (
+                            <span 
+                              className="text-[10.5px] font-mono font-bold px-2 py-0.5 rounded bg-amber-500/15 text-amber-800 dark:text-amber-300 border border-amber-500/30"
+                              title="Official Quotation Reference"
+                            >
+                              📄 {quoteRef}
+                            </span>
+                          );
+                        })()}
                       </div>
                       {/* Right actions */}
-                      <div className="flex gap-2 items-center">
+                      <div className="flex gap-2 items-center flex-wrap">
+                        {/* 1-Click WhatsApp Quote Button */}
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          onClick={() => {
+                            const destStr = typeof activeLead.destinations === 'string' ? activeLead.destinations : (activeLead.destinations as any)?.[0] || 'Exclusive Tour';
+                            const dCode = getDestinationCode(destStr, activeLead.package_name || undefined);
+                            const qRef = `GFQ-${dCode}-${String(activeLead.id).padStart(4, '0')}`;
+                            const priceStr = activeLead.package_price || activeLead.expected_booking_value || activeLead.budget ? `₹${Number(activeLead.package_price || activeLead.expected_booking_value || activeLead.budget).toLocaleString('en-IN')}` : 'Best Available Rates';
+                            const guestName = activeLead.customer_name || 'Valued Guest';
+                            const nights = activeLead.number_of_nights || 2;
+                            const pax = activeLead.adult_count || 2;
+                            const msg = encodeURIComponent(
+`Namaste ${guestName}! 🙏
+Thank you for connecting with Ghumo Firoo Journeys.
+
+Here is your official travel proposal & quotation:
+📄 *Quote Ref:* ${qRef}
+📍 *Destination:* ${destStr} (${nights} Nights / ${Number(nights)+1} Days)
+👥 *Travelers:* ${pax} Adults
+💰 *Total Cost:* ${priceStr} (All inclusive private package)
+
+✨ View / Download Itinerary & Inclusions:
+https://ghumofiroo.com/quote/${qRef}
+
+Please let us know if you need any customizations. Looking forward to hosting your journey! 🌟`
+                            );
+                            window.open(`https://wa.me/${activeLead.whatsapp_number || activeLead.contact_number || activeLead.customer_phone || ''}?text=${msg}`);
+                            if (activeLead.status === 'New' || activeLead.status === 'Assigned') {
+                              handleStatusChange('Quote Sent');
+                            }
+                          }}
+                          className="h-8 text-xs font-bold border-emerald-500/40 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/10"
+                        >
+                          <Share2 className="w-3.5 h-3.5 mr-1" /> WhatsApp Quote
+                        </Button>
+
+                        {/* Record Advance Button */}
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          onClick={() => {
+                            const pkgPrice = Number(activeLead.budget || activeLead.package_price || activeLead.packagePrice || activeLead.expected_booking_value || 0);
+                            setLeadForAdvance({
+                              id: activeLead.id,
+                              name: activeLead.customer_name,
+                              price: pkgPrice,
+                              destination: typeof activeLead.destinations === 'string' ? activeLead.destinations : (activeLead.destinations as any)?.[0] || 'Tour',
+                              packageName: activeLead.package_name || undefined
+                            });
+                            setAdvanceAmountInput(String(Math.round(pkgPrice * 0.25) || 5000));
+                            setAdvancePaymentMode('UPI / QR Code');
+                            setAdvancePaymentRef('');
+                            setAdvanceModalOpen(true);
+                          }}
+                          className="h-8 text-xs font-bold border-amber-500/40 text-amber-600 dark:text-amber-400 hover:bg-amber-500/10"
+                        >
+                          <IndianRupee className="w-3.5 h-3.5 mr-1" /> Record Advance
+                        </Button>
+
                         <Button 
                           variant="outline" 
                           size="sm" 
@@ -5069,7 +5334,7 @@ Ghumo Firoo Travels`
                           onChange={(e) => handleStatusChange(e.target.value as Lead['status'])}
                           className="border border-slate-200 rounded px-2 py-1 text-[12px] bg-background font-semibold text-slate-700 focus:outline-none focus:ring-1 focus:ring-[#C9A25A] cursor-pointer"
                         >
-                          {['New', 'Assigned', 'Follow-up Due', 'Quote Sent', 'Booking Confirmed', 'Closed Lost'].map(st => (
+                          {['New', 'Assigned', 'Follow-up Due', 'Quote Sent', 'Booked (Advance Pending)', 'Booking Confirmed', 'Voucher Issued', 'Closed Lost'].map(st => (
                             <option key={st} value={st}>{st}</option>
                           ))}
                         </select>
@@ -6643,6 +6908,176 @@ Ghumo Firoo Travels`
               <Button type="submit" size="sm" className="bg-gradient-warm text-[#0B1026] font-bold text-xs h-10 px-5 rounded-xl border-0 shadow-lg cursor-pointer">Save Payment Entry</Button>
             </DialogFooter>
           </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* STRUCTURED CLOSED LOST MODAL */}
+      <Dialog open={closedLostModalOpen} onOpenChange={(open) => {
+        if (!open) {
+          setClosedLostModalOpen(false);
+          setLeadForClosedLost(null);
+        }
+      }}>
+        <DialogContent className="max-w-md bg-[#0B1026] border border-rose-500/30 text-white shadow-2xl rounded-2xl p-6">
+          <DialogHeader>
+            <DialogTitle className="text-base font-black text-rose-400 flex items-center gap-2">
+              <span className="p-1.5 rounded-lg bg-rose-500/20 text-rose-400">🚫</span>
+              Mark Lead as Closed Lost
+            </DialogTitle>
+            <DialogDescription className="text-xs text-slate-300">
+              {leadForClosedLost ? `Lead #${leadForClosedLost.id} • ${leadForClosedLost.name}` : 'Select the primary reason this travel opportunity was lost.'}
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 py-2">
+            <div className="space-y-1.5">
+              <Label className="text-xs font-bold text-slate-200 block uppercase tracking-wider">Primary Lost Reason *</Label>
+              <Select value={selectedLostReason} onValueChange={setSelectedLostReason}>
+                <SelectTrigger className="text-xs bg-white/5 border-white/15 text-white h-10 rounded-xl font-semibold">
+                  <SelectValue placeholder="Select Reason" />
+                </SelectTrigger>
+                <SelectContent className="bg-slate-900 border-slate-700 text-white text-xs">
+                  <SelectItem value="📵 Not Reachable / Call Not Picked (3+ attempts)">📵 Not Reachable / Call Not Picked (3+ attempts)</SelectItem>
+                  <SelectItem value="🚫 Plan Cancelled / Postponed to Next Season">🚫 Plan Cancelled / Postponed to Next Season</SelectItem>
+                  <SelectItem value="💸 Budget Constraint / Price Higher than Expectation">💸 Budget Constraint / Price Higher than Expectation</SelectItem>
+                  <SelectItem value="🏢 Booked with Competitor / Alternate Agency">🏢 Booked with Competitor / Alternate Agency</SelectItem>
+                  <SelectItem value="📅 Sold Out / Dates or Tent City Unavailable">📅 Sold Out / Dates or Tent City Unavailable</SelectItem>
+                  <SelectItem value="✍️ Other Specific Reason">✍️ Other Specific Reason</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-1.5">
+              <Label className="text-xs font-bold text-slate-200 block uppercase tracking-wider">Additional Context &amp; Notes</Label>
+              <Textarea 
+                placeholder="e.g. Guest chose a local agent at Bhuj offering lower cab rates, or called 4 times with no response."
+                value={lostReasonNotes}
+                onChange={(e) => setLostReasonNotes(e.target.value)}
+                rows={3}
+                className="text-xs bg-white/5 border-white/15 text-white rounded-xl resize-none focus-visible:ring-rose-400"
+              />
+            </div>
+          </div>
+
+          <DialogFooter className="gap-2 pt-2 sm:justify-end">
+            <Button 
+              type="button" 
+              variant="outline" 
+              size="sm" 
+              onClick={() => {
+                setClosedLostModalOpen(false);
+                setLeadForClosedLost(null);
+              }}
+              disabled={savingLostReason}
+              className="text-xs font-bold bg-white/5 border-white/15 text-slate-300 hover:bg-white/10 rounded-xl"
+            >
+              Cancel
+            </Button>
+            <Button 
+              type="button" 
+              size="sm" 
+              onClick={handleConfirmClosedLost}
+              disabled={savingLostReason}
+              className="bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs h-10 px-5 rounded-xl shadow-lg cursor-pointer"
+            >
+              {savingLostReason ? 'Saving...' : 'Confirm Closed Lost'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* RECORD ADVANCE TOKEN / CONFIRM BOOKING MODAL */}
+      <Dialog open={advanceModalOpen} onOpenChange={(open) => {
+        if (!open) {
+          setAdvanceModalOpen(false);
+          setLeadForAdvance(null);
+        }
+      }}>
+        <DialogContent className="max-w-md bg-[#0B1026] border border-emerald-500/30 text-white shadow-2xl rounded-2xl p-6">
+          <DialogHeader>
+            <DialogTitle className="text-base font-black text-emerald-400 flex items-center gap-2">
+              <span className="p-1.5 rounded-lg bg-emerald-500/20 text-emerald-400">💰</span>
+              Record Advance &amp; Confirm Booking
+            </DialogTitle>
+            <DialogDescription className="text-xs text-slate-300">
+              {leadForAdvance ? `Booking for ${leadForAdvance.name} • Total: ₹${leadForAdvance.price.toLocaleString('en-IN')}` : 'Record advance payment token to confirm booking.'}
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 py-2">
+            <div className="p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-xl text-xs space-y-1">
+              <div className="flex justify-between text-slate-300">
+                <span>Total Package Price:</span>
+                <span className="font-bold text-white">₹{(leadForAdvance?.price || 0).toLocaleString('en-IN')}</span>
+              </div>
+              <div className="flex justify-between text-emerald-400 font-semibold">
+                <span>Suggested 25% Token:</span>
+                <span>₹{Math.round((leadForAdvance?.price || 0) * 0.25).toLocaleString('en-IN')}</span>
+              </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <Label className="text-xs font-bold text-slate-200 block uppercase tracking-wider">Advance Amount Received (INR) *</Label>
+              <Input 
+                type="number"
+                value={advanceAmountInput}
+                onChange={(e) => setAdvanceAmountInput(e.target.value)}
+                placeholder="e.g. 15000"
+                required
+                className="text-xs bg-white/5 border-white/15 text-white h-10 rounded-xl font-bold focus-visible:ring-emerald-400"
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <Label className="text-xs font-bold text-slate-200 block uppercase tracking-wider">Payment Mode</Label>
+              <Select value={advancePaymentMode} onValueChange={setAdvancePaymentMode}>
+                <SelectTrigger className="text-xs bg-white/5 border-white/15 text-white h-10 rounded-xl font-semibold">
+                  <SelectValue placeholder="Select Payment Mode" />
+                </SelectTrigger>
+                <SelectContent className="bg-slate-900 border-slate-700 text-white text-xs">
+                  <SelectItem value="UPI / QR Code">⚡ UPI / QR Code / GPay / PhonePe</SelectItem>
+                  <SelectItem value="Bank Transfer (NEFT/RTGS/IMPS)">🏦 Bank Transfer (NEFT/RTGS/IMPS)</SelectItem>
+                  <SelectItem value="Credit / Debit Card">💳 Credit / Debit Card Gateway</SelectItem>
+                  <SelectItem value="Cash Receipt">💵 Cash at Office</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-1.5">
+              <Label className="text-xs font-bold text-slate-200 block uppercase tracking-wider">Transaction UTR / Bank Reference No.</Label>
+              <Input 
+                value={advancePaymentRef}
+                onChange={(e) => setAdvancePaymentRef(e.target.value)}
+                placeholder="e.g. 423891023847 or AXISN98102"
+                className="text-xs bg-white/5 border-white/15 text-white h-10 rounded-xl font-mono focus-visible:ring-emerald-400"
+              />
+            </div>
+          </div>
+
+          <DialogFooter className="gap-2 pt-2 sm:justify-end">
+            <Button 
+              type="button" 
+              variant="outline" 
+              size="sm" 
+              onClick={() => {
+                setAdvanceModalOpen(false);
+                setLeadForAdvance(null);
+              }}
+              disabled={savingAdvancePayment}
+              className="text-xs font-bold bg-white/5 border-white/15 text-slate-300 hover:bg-white/10 rounded-xl"
+            >
+              Cancel
+            </Button>
+            <Button 
+              type="button" 
+              size="sm" 
+              onClick={handleConfirmAdvancePayment}
+              disabled={savingAdvancePayment}
+              className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs h-10 px-5 rounded-xl shadow-lg cursor-pointer"
+            >
+              {savingAdvancePayment ? 'Saving...' : 'Confirm Advance & Unlock Vouchers'}
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>

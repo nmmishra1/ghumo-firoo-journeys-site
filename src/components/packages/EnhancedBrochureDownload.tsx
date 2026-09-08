@@ -15,6 +15,7 @@ import { pushEvent } from '@/lib/analytics';
 import { Link, useNavigate } from 'react-router-dom';
 import { validateIndianPhone, sanitizePhone, PHONE_ERROR_MSG } from '@/lib/validation';
 import { leadService } from '@/services/leadService';
+import { getDestinationCode, formatQuoteRef } from '@/lib/voucherService';
 
 const pdfCache = new Map<string, Uint8Array>();
 
@@ -81,6 +82,8 @@ interface EnhancedBrochureDownloadProps {
   childrenCount?: number;
   infantsCount?: number;
   totalPrice?: number | string;
+  leadId?: string | number;
+  customQuoteRef?: string;
 }
 
 const EnhancedBrochureDownload: React.FC<EnhancedBrochureDownloadProps> = ({
@@ -106,7 +109,9 @@ const EnhancedBrochureDownload: React.FC<EnhancedBrochureDownloadProps> = ({
   adultsCount,
   childrenCount,
   infantsCount,
-  totalPrice
+  totalPrice,
+  leadId,
+  customQuoteRef
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
@@ -619,7 +624,9 @@ const EnhancedBrochureDownload: React.FC<EnhancedBrochureDownloadProps> = ({
     const formattedTotalCost = computedTotalCost.toLocaleString('en-IN');
     const displayPerPaxPrice = Math.round(computedTotalCost / Math.max(1, effectivePax)).toLocaleString('en-IN');
 
-    const quoteRef = Math.floor(100000 + Math.random() * 900000);
+    const destCode = getDestinationCode(destination, packageDetails.title);
+    const quoteNumber = leadId ? String(leadId).padStart(4, '0') : String(Math.floor(1000 + Math.random() * 9000));
+    const formattedQuoteRef = customQuoteRef || `GFQ-${destCode}-${quoteNumber}`;
     const quoteDate = new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
 
     let coverBg = selectBrochureHeroImage();
@@ -1674,7 +1681,7 @@ const EnhancedBrochureDownload: React.FC<EnhancedBrochureDownloadProps> = ({
               <div class="brand-tagline">Your Journey, Our Expertise!</div>
             </div>
           </div>
-          <div class="brand-badge">QUOTE REF: GFQ-${quoteRef}</div>
+          <div class="brand-badge">QUOTE REF: ${formattedQuoteRef}</div>
         </div>
 
         <div class="page-pricing-content">
@@ -1692,7 +1699,7 @@ const EnhancedBrochureDownload: React.FC<EnhancedBrochureDownloadProps> = ({
             <div class="quote-spec-header">
               <div>
                 <div class="quote-ref-badge">🏛️ CONFIRMED TRAVEL SPECIFICATIONS</div>
-                <div style="font-size: 9px; color: #cbd5e1; margin-top: 2px;">Proposal Ref: GFQ-${quoteRef} • Valid For 15 Days • Personalized for ${displayGuestName}</div>
+                <div style="font-size: 9px; color: #cbd5e1; margin-top: 2px;">Proposal Ref: ${formattedQuoteRef} • Valid For 15 Days • Personalized for ${displayGuestName}</div>
               </div>
               <div class="quote-price-col">
                 <div style="font-size: 8.5px; text-transform: uppercase; letter-spacing: 1px; color: #cbd5e1; font-weight: 700;">Total Package Cost</div>
@@ -1818,7 +1825,7 @@ const EnhancedBrochureDownload: React.FC<EnhancedBrochureDownloadProps> = ({
               <div class="brand-tagline">Your Journey, Our Expertise!</div>
             </div>
           </div>
-          <div class="brand-badge">QUOTE REF: GFQ-${quoteRef}</div>
+          <div class="brand-badge">QUOTE REF: ${formattedQuoteRef}</div>
         </div>
 
         <div class="page-itinerary-container">
@@ -1881,7 +1888,7 @@ const EnhancedBrochureDownload: React.FC<EnhancedBrochureDownloadProps> = ({
               <div class="brand-tagline">Your Journey, Our Expertise!</div>
             </div>
           </div>
-          <div class="brand-badge">QUOTE REF: GFQ-${quoteRef}</div>
+          <div class="brand-badge">QUOTE REF: ${formattedQuoteRef}</div>
         </div>
 
         <div class="page-policy-content">
