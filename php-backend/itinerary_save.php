@@ -647,20 +647,42 @@ try {
         }
     }
 
-    // 5. Update lead pricing details in MySQL
-    $stmtLead = $pdo->prepare("
-        UPDATE leads SET
-          package_name = :itinerary_name,
-          package_cost = :package_cost,
-          package_price = :final_cost
-        WHERE id = :lead_id
-    ");
-    $stmtLead->execute([
+    // 5. Update lead pricing details and travel dates in MySQL
+    $leadUpdates = [
+        'package_name = :itinerary_name',
+        'package_cost = :package_cost',
+        'package_price = :final_cost'
+    ];
+    $leadParams = [
         ':itinerary_name' => $itineraryName,
         ':package_cost' => $totalCost,
         ':final_cost' => $finalCost,
         ':lead_id' => $leadId
-    ]);
+    ];
+
+    if (!empty($travelStartDate)) {
+        $leadUpdates[] = 'trip_start_date = :travel_start_date';
+        $leadParams[':travel_start_date'] = $travelStartDate;
+    }
+    if (!empty($travelEndDate)) {
+        $leadUpdates[] = 'trip_end_date = :travel_end_date';
+        $leadParams[':travel_end_date'] = $travelEndDate;
+    }
+    if (!empty($customerName) && strcasecmp($customerName, 'Valued Client') !== 0 && strcasecmp($customerName, 'Guest') !== 0) {
+        $leadUpdates[] = "customer_name = COALESCE(NULLIF(customer_name, ''), NULLIF(customer_name, 'Valued Client'), :cust_name)";
+        $leadParams[':cust_name'] = $customerName;
+    }
+    if (!empty($customerEmail)) {
+        $leadUpdates[] = "customer_email = COALESCE(NULLIF(customer_email, ''), :cust_email)";
+        $leadParams[':cust_email'] = $customerEmail;
+    }
+    if (!empty($customerPhone)) {
+        $leadUpdates[] = "customer_phone = COALESCE(NULLIF(customer_phone, ''), :cust_phone)";
+        $leadParams[':cust_phone'] = $customerPhone;
+    }
+
+    $stmtLead = $pdo->prepare("UPDATE leads SET " . implode(', ', $leadUpdates) . " WHERE id = :lead_id");
+    $stmtLead->execute($leadParams);
 
     $pdo->commit();
     echo json_encode([

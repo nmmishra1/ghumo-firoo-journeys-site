@@ -13,21 +13,14 @@ $profile = requireRole($user, $pdo, ['admin', 'manager', 'agent']);
 
 try {
     $stmt = $pdo->query("SELECT 
-        i.id, 
-        i.itinerary_code, 
-        i.itinerary_name AS package_name, 
-        COALESCE(NULLIF(i.status, ''), 'Draft') AS status, 
-        COALESCE(NULLIF(i.customer_name, ''), NULLIF(l.customer_name, '')) AS customer_name, 
-        COALESCE(NULLIF(i.customer_email, ''), NULLIF(l.customer_email, ''), NULLIF(l.email, '')) AS customer_email, 
-        COALESCE(NULLIF(l.customer_phone, ''), NULLIF(l.contact_number, '')) AS customer_phone, 
-        COALESCE(NULLIF(i.destinations, ''), NULLIF(l.destinations, ''), NULLIF(l.destination, '')) AS destinations, 
-        COALESCE(NULLIF(i.travel_start_date, '0000-00-00'), NULLIF(l.trip_start_date, '0000-00-00')) AS travel_start_date, 
-        COALESCE(NULLIF(i.travel_end_date, '0000-00-00'), NULLIF(l.trip_end_date, '0000-00-00')) AS travel_end_date, 
-        i.final_cost, 
-        i.pricing_flagged, 
-        i.lead_id, 
-        i.created_at,
-        i.updated_at
+        i.*,
+        l.customer_name AS lead_customer_name,
+        l.customer_email AS lead_customer_email,
+        l.customer_phone AS lead_customer_phone,
+        l.destinations AS lead_destinations,
+        l.trip_start_date AS lead_trip_start_date,
+        l.trip_end_date AS lead_trip_end_date,
+        l.travel_month AS lead_travel_month
     FROM itineraries i
     LEFT JOIN leads l ON i.lead_id = l.id
     ORDER BY i.created_at DESC");
@@ -35,17 +28,66 @@ try {
     $itineraries = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
     foreach ($itineraries as &$itin) {
-        // Fallback: If customer_name is still empty or 'Valued Client', extract from package_name (e.g. "Itinerary for Nilesh Gupta - ...")
-        if (empty($itin['customer_name']) || strcasecmp(trim($itin['customer_name']), 'Valued Client') === 0) {
-            if (!empty($itin['package_name']) && preg_match('/^Itinerary for\s+([^–—\-|]+)/i', $itin['package_name'], $m)) {
+        // Resolve package name
+        $packageName = !empty($itin['itinerary_name']) ? $itin['itinerary_name'] : ($itin['package_name'] ?? 'Custom Tour Package');
+        $itin['package_name'] = $packageName;
+
+        // Resolve customer name
+        $custName = !empty($itin['customer_name']) ? trim($itin['customer_name']) : '';
+        if (empty($custName) || strcasecmp($custName, 'Valued Client') === 0 || strcasecmp($custName, 'Guest') === 0) {
+            if (!empty($itin['lead_customer_name']) && strcasecmp(trim($itin['lead_customer_name']), 'Valued Client') !== 0) {
+                $custName = trim($itin['lead_customer_name']);
+            } elseif (!empty($packageName) && preg_match('/^Itinerary for\s+([^–—\-|]+)/i', $packageName, $m)) {
                 $extracted = trim($m[1]);
                 if ($extracted && strcasecmp($extracted, 'Valued Client') !== 0 && strcasecmp($extracted, 'Guest') !== 0) {
-                    $itin['customer_name'] = $extracted;
+                    $custName = $extracted;
                 }
             }
         }
-        if (empty($itin['customer_name'])) {
-            $itin['customer_name'] = 'Valued Client';
+        $itin['customer_name'] = !empty($custName) ? $custName : 'Valued Client';
+
+        // Resolve customer email
+        $custEmail = !empty($itin['customer_email']) ? trim($itin['customer_email']) : '';
+        if (empty($custEmail) && !empty($itin['lead_customer_email'])) {
+            $custEmail = trim($itin['lead_customer_email']);
+        }
+        $itin['customer_email'] = $custEmail;
+
+        // Resolve customer phone
+        $custPhone = !empty($itin['customer_phone']) ? trim($itin['customer_phone']) : '';
+        if (empty($custPhone) && !empty($itin['lead_customer_phone'])) {
+            $custPhone = trim($itin['lead_customer_phone']);
+        }
+        $itin['customer_phone'] = $custPhone;
+
+        // Resolve destinations
+        $dests = !empty($itin['destinations']) ? $itin['destinations'] : (!empty($itin['lead_destinations']) ? $itin['lead_destinations'] : '');
+        $itin['destinations'] = $dests;
+
+        // Resolve travel dates
+        $start = (!empty($itin['travel_start_date']) && $itin['travel_start_date'] !== '0000-00-00' && strpos($itin['travel_start_date'], '0000-00-00') !== 0)
+            ? $itin['travel_start_date']
+            : ((!empty($itin['lead_trip_start_date']) && $itin['lead_trip_start_date'] !== '0000-00-00' && strpos($itin['lead_trip_start_date'], '0000-00-00') !== 0)
+                ? $itin['lead_trip_start_date']
+                : (!empty($itin['lead_travel_month']) ? $itin['lead_travel_month'] : null));
+
+        $end = (!empty($itin['travel_end_date']) && $itin['travel_end_date'] !== '0000-00-00' && strpos($itin['travel_end_date'], '0000-00-00') !== 0)
+            ? $itin['travel_end_date']
+            : ((!empty($itin['lead_trip_end_date']) && $itin['lead_trip_end_date'] !== '0000-00-00' && strpos($itin['lead_trip_end_date'], '0000-00-00') !== 0)
+                ? $itin['lead_trip_end_date']
+                : null);
+
+        $itin['travel_start_date'] = $start;
+        $itin['travel_end_date'] = $end;
+
+        // Ensure status defaults to Draft
+        if (empty($itin['status'])) {
+            $itin['status'] = 'Draft';
+        }
+
+        // Ensure itinerary code is present
+        if (empty($itin['itinerary_code'])) {
+            $itin['itinerary_code'] = 'GFJ-ITN-' . strtoupper(substr(preg_replace('/[^a-zA-Z0-9]/', '', $itin['id'] ?? ''), 0, 6));
         }
     }
 

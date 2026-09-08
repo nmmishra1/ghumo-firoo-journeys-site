@@ -161,11 +161,37 @@ const getSuggestedTaxRate = (countryName: string | undefined, rate: number, isIn
   return 18; // Default fallback
 };
 
+const getValidDateCandidate = (...dates: any[]): string | undefined => {
+  for (const d of dates) {
+    if (!d) continue;
+    const s = String(d).trim();
+    if (
+      s &&
+      s !== '0000-00-00' &&
+      !s.startsWith('0000-00-00') &&
+      s !== 'null' &&
+      s !== 'undefined' &&
+      s.toLowerCase() !== 'invalid date'
+    ) {
+      return s;
+    }
+  }
+  return undefined;
+};
+
 const formatCrmTravelDate = (dateVal: any, fallback = 'TBD'): string => {
   if (!dateVal) return fallback;
   const clean = String(dateVal).trim();
   if (!clean || clean === '0000-00-00' || clean.startsWith('0000-00-00') || clean === 'null' || clean.toLowerCase() === 'invalid date') {
     return fallback;
+  }
+  const dateOnly = clean.split('T')[0];
+  const ymd = dateOnly.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
+  if (ymd) {
+    const d = new Date(parseInt(ymd[1], 10), parseInt(ymd[2], 10) - 1, parseInt(ymd[3], 10));
+    if (!isNaN(d.getTime())) {
+      return d.toLocaleDateString([], { day: 'numeric', month: 'short', year: 'numeric' });
+    }
   }
   const d = new Date(clean);
   if (!isNaN(d.getTime())) {
@@ -4540,7 +4566,7 @@ const CRM = () => {
                                     })()}
                                   </div>
                                   <div className="text-xs text-slate-600 dark:text-slate-400 font-semibold">
-                                    {l.adult_count || 1} adults · {l.child_count || 0} children · Dep {formatCrmTravelDate(l.trip_start_date || l.tripStartDate || l.travel_dates || l.travel_date || l.travelMonth)}
+                                    {l.adult_count || 1} adults · {l.child_count || 0} children · Dep {formatCrmTravelDate(getValidDateCandidate(l.trip_start_date, l.tripStartDate, l.travel_dates, l.travel_date, l.travel_month, l.travelMonth))}
                                   </div>
                                 </td>
                                 <td className="py-3 px-3 align-top text-left">
@@ -4782,7 +4808,7 @@ Ghumo Firoo Travels`
                       </div>
                     </div>
                     <div className="text-slate-500 font-medium text-[11px]">
-                      {formatCrmTravelDate(activeLead.trip_start_date || activeLead.tripStartDate, 'TBD')}
+                      {formatCrmTravelDate(getValidDateCandidate(activeLead.trip_start_date, activeLead.tripStartDate, activeLead.travel_dates, activeLead.travel_date, activeLead.travel_month, activeLead.travelMonth), 'TBD')}
                       {activeLead.trip_end_date && formatCrmTravelDate(activeLead.trip_end_date, '') ? ` - ${formatCrmTravelDate(activeLead.trip_end_date, '')}` : ''}
                       {` · ${activeLead.number_of_nights || activeLead.total_nights || 5}N`}
                     </div>
@@ -4804,7 +4830,7 @@ Ghumo Firoo Travels`
                     const isConfirmed = (rawStatus === 'booking confirmed' || rawStatus === 'confirmed' || rawStatus === 'converted') || (leadTotalPaid > 0 && rawStatus !== 'new');
                     const isQuoted = rawStatus === 'quote sent' || rawStatus === 'proposal sent';
 
-                    const rawTripStart = activeLead.trip_start_date || activeLead.tripStartDate;
+                    const rawTripStart = getValidDateCandidate(activeLead.trip_start_date, activeLead.tripStartDate, activeLead.travel_dates, activeLead.travel_date, activeLead.travel_month, activeLead.travelMonth);
                     const parsedTripStart = rawTripStart && rawTripStart !== '0000-00-00' ? new Date(rawTripStart) : null;
                     const dueDateStr = parsedTripStart && !isNaN(parsedTripStart.getTime())
                       ? new Date(parsedTripStart.getTime() - 7 * 24 * 60 * 60 * 1000).toLocaleDateString([], { month: 'short', day: 'numeric', year: 'numeric' })

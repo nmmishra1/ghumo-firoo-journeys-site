@@ -209,6 +209,7 @@ function getLeadStartDate(activeLead: any, itinerary?: any): string {
     activeLead?.travelDate,
     activeLead?.start_date,
     activeLead?.travelMonth,
+    activeLead?.travel_month,
     itinerary?.travel_start_date
   ];
   for (const cand of candidates) {

@@ -20,6 +20,24 @@ async function getAuthHeader(): Promise<Record<string, string>> {
   return token ? { 'Authorization': `Bearer ${token}` } : {};
 }
 
+export const getValidDateCandidate = (...dates: any[]): string | undefined => {
+  for (const d of dates) {
+    if (!d) continue;
+    const s = String(d).trim();
+    if (
+      s &&
+      s !== '0000-00-00' &&
+      !s.startsWith('0000-00-00') &&
+      s !== 'null' &&
+      s !== 'undefined' &&
+      s.toLowerCase() !== 'invalid date'
+    ) {
+      return s;
+    }
+  }
+  return undefined;
+};
+
 const formatTravelDate = (dateVal: any, endDateVal?: any): string => {
   if (!dateVal) return 'Dates TBD';
   const cleanVal = String(dateVal).trim();
@@ -41,6 +59,33 @@ const formatTravelDate = (dateVal: any, endDateVal?: any): string => {
     const eFormatted = formatTravelDate(end);
     if (sFormatted !== 'Dates TBD' && eFormatted !== 'Dates TBD') {
       return `${sFormatted} - ${eFormatted}`;
+    }
+  }
+
+  const dateOnly = cleanVal.split('T')[0];
+
+  // Attempt timezone-safe YYYY-MM-DD parsing
+  const ymdMatch = dateOnly.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
+  if (ymdMatch) {
+    const year = parseInt(ymdMatch[1], 10);
+    const month = parseInt(ymdMatch[2], 10) - 1;
+    const day = parseInt(ymdMatch[3], 10);
+    const d = new Date(year, month, day);
+    if (!isNaN(d.getTime())) {
+      const formattedStart = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+      if (endDateVal) {
+        const endClean = String(endDateVal).trim().split('T')[0];
+        if (endClean && endClean !== '0000-00-00' && !endClean.startsWith('0000-00-00')) {
+          const endYmd = endClean.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
+          if (endYmd) {
+            const endD = new Date(parseInt(endYmd[1], 10), parseInt(endYmd[2], 10) - 1, parseInt(endYmd[3], 10));
+            if (!isNaN(endD.getTime())) {
+              return `${formattedStart} - ${endD.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`;
+            }
+          }
+        }
+      }
+      return formattedStart;
     }
   }
 
@@ -494,6 +539,20 @@ export const ItineraryWorkspace: React.FC<ItineraryWorkspaceProps> = ({ leads, o
                 {filteredSavedItineraries.map((item) => {
                   const isFlagged = Boolean(item.pricing_flagged == 1);
                   const clientInfo = resolveCustomerInfo(item);
+                  const itemStartDate = getValidDateCandidate(
+                    item.travel_start_date,
+                    clientInfo.linkedLead?.trip_start_date,
+                    clientInfo.linkedLead?.tripStartDate,
+                    clientInfo.linkedLead?.travel_dates,
+                    clientInfo.linkedLead?.travel_date,
+                    clientInfo.linkedLead?.travel_month,
+                    clientInfo.linkedLead?.travelMonth
+                  );
+                  const itemEndDate = getValidDateCandidate(
+                    item.travel_end_date,
+                    clientInfo.linkedLead?.trip_end_date,
+                    clientInfo.linkedLead?.tripEndDate
+                  );
                   return (
                     <div key={item.id} className="grid grid-cols-12 gap-3 p-4 items-center hover:bg-slate-50/80 dark:hover:bg-slate-900/50 transition-all text-xs border-b border-border/10">
                       {/* Code & Client */}
@@ -518,7 +577,7 @@ export const ItineraryWorkspace: React.FC<ItineraryWorkspaceProps> = ({ leads, o
                         </p>
                         <p className="text-xs text-slate-600 dark:text-slate-300 font-semibold flex items-center gap-1">
                           <Calendar className="w-3.5 h-3.5 text-amber-500 shrink-0" />
-                          {formatTravelDate(item.travel_start_date, item.travel_end_date)}
+                          {formatTravelDate(itemStartDate, itemEndDate)}
                         </p>
                       </div>
 
@@ -605,11 +664,24 @@ export const ItineraryWorkspace: React.FC<ItineraryWorkspaceProps> = ({ leads, o
 
                 {/* Lead Items */}
                 {filteredLeads.map((l) => {
-                  const custName = l.customer_name || l.customerName || 'Unnamed Lead';
-                  const custEmail = l.customer_email || l.email || l.customerEmail || '';
-                  const custPhone = l.customer_phone || l.contact_number || l.customerPhone || l.phone || l.whatsapp_number || '';
-                  const dateStr = l.trip_start_date || l.tripStartDate || l.travel_dates || l.travel_date || l.travelMonth;
-                  const endDateStr = l.trip_end_date || l.tripEndDate;
+                  const linkedItin = savedItineraries.find(it => String(it.lead_id) === String(l.id));
+                  const custName = l.customer_name || l.customerName || linkedItin?.customer_name || 'Unnamed Lead';
+                  const custEmail = l.customer_email || l.email || l.customerEmail || linkedItin?.customer_email || '';
+                  const custPhone = l.customer_phone || l.contact_number || l.customerPhone || l.phone || l.whatsapp_number || linkedItin?.customer_phone || '';
+                  const dateStr = getValidDateCandidate(
+                    linkedItin?.travel_start_date,
+                    l.trip_start_date,
+                    l.tripStartDate,
+                    l.travel_dates,
+                    l.travel_date,
+                    l.travel_month,
+                    l.travelMonth
+                  );
+                  const endDateStr = getValidDateCandidate(
+                    linkedItin?.travel_end_date,
+                    l.trip_end_date,
+                    l.tripEndDate
+                  );
 
                   return (
                     <div key={l.id} className="grid grid-cols-12 gap-3 p-4 items-center hover:bg-slate-50/80 dark:hover:bg-slate-900/50 transition-all text-xs border-b border-border/10">
@@ -624,7 +696,7 @@ export const ItineraryWorkspace: React.FC<ItineraryWorkspaceProps> = ({ leads, o
                       </div>
 
                       <div className="col-span-3 font-extrabold text-slate-900 dark:text-slate-100 uppercase truncate text-xs">
-                        {l.destinations || l.packageName || 'Custom Package'}
+                        {l.destinations || l.packageName || linkedItin?.package_name || 'Custom Package'}
                       </div>
 
                       <div className="col-span-2 font-semibold text-slate-700 dark:text-slate-300 text-xs">
