@@ -3496,7 +3496,7 @@ const CRM = () => {
                               </Badge>
                               <div>
                                 <p className="text-xs font-extrabold text-slate-950 dark:text-white truncate w-24 sm:w-36 uppercase">{l.customer_name}</p>
-                                <p className="text-[9px] text-slate-600 dark:text-slate-400 font-bold uppercase">{l.destinations || 'Custom tour'}</p>
+                                <p className="text-[9px] text-slate-600 dark:text-slate-400 font-bold uppercase truncate max-w-[160px]">{formatLeadRoute(l)}</p>
                               </div>
                             </div>
                             <span className="text-[10px] font-mono font-black text-slate-900 dark:text-slate-100">{dateStr}</span>
@@ -6569,7 +6569,7 @@ Ghumo Firoo Travels`
 
                     return sortedLeads.map(l => {
                       const leadRef = formatLeadId(l);
-                      const dest = l.destinations || l.travel_interest || 'General Tour';
+                      const dest = formatLeadRoute(l);
                       const statusIcon = l.status === 'Booking Confirmed' ? '🟢' : l.status === 'Quote Sent' ? '🟡' : '⚪';
                       const val = Number(l.packagePrice || l.expected_booking_value || 0);
 
