@@ -4,6 +4,10 @@ import { createRoot } from 'react-dom/client'
 import { HelmetProvider } from 'react-helmet-async';
 import App from './App.tsx'
 import './index.css'
+import { installApiCacheInterceptor } from '@/utils/crmCache';
+
+// Activate universal in-memory API caching, request deduplication, and auto-invalidation
+installApiCacheInterceptor();
 
 // Ultra-robust error boundary with better error isolation
 class ErrorBoundary extends React.Component<{children: React.ReactNode}, {hasError: boolean, error?: Error}> {

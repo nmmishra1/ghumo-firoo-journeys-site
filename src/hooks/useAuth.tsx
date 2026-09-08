@@ -2,6 +2,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
+import { invalidateApiCache } from '@/utils/crmCache';
 
 // Module-level persistent cache across route changes
 let cachedSession: Session | null = null;
@@ -25,7 +26,10 @@ if (typeof window !== 'undefined') {
     notifySubscribers();
   });
 
-  supabase.auth.onAuthStateChange((_event, session) => {
+  supabase.auth.onAuthStateChange((event, session) => {
+    if (event === 'SIGNED_OUT') {
+      invalidateApiCache();
+    }
     cachedSession = session;
     cachedUser = session?.user ?? null;
     isInitialized = true;
@@ -76,6 +80,7 @@ export const useAuth = () => {
     cachedUser = null;
     isInitialized = true;
     notifySubscribers();
+    invalidateApiCache();
     
     // Clear auth keys
     localStorage.removeItem('sb-auth-token');

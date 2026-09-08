@@ -41,7 +41,7 @@ import {
   PieChart, Pie, Cell, Legend
 } from 'recharts';
 import Breadcrumb from '@/components/Breadcrumb';
-import { fetchCachedJson } from '@/utils/crmCache';
+import { fetchCachedJson, invalidateApiCache } from '@/utils/crmCache';
 import { INDIAN_STATES, CANONICAL_COUNTRIES, isStateInIndia } from '@/data/geographyMaster';
 
 const API_BASE = import.meta.env.VITE_PHP_BASE_URL || import.meta.env.VITE_API_BASE_URL || '/php-backend';
@@ -1130,6 +1130,7 @@ const CRM = () => {
   const handleRefreshSystemData = async () => {
     setIsRefreshingData(true);
     try {
+      invalidateApiCache();
       leadService.clearLeadsCache();
       await Promise.all([
         fetchLeads(true),

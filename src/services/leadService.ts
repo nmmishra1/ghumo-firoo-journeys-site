@@ -1,6 +1,7 @@
 import { toast } from '@/hooks/use-toast';
 import { submitToGoogleSheets } from '@/lib/googleSheets';
 import { supabase } from '@/integrations/supabase/client';
+import { invalidateApiCache } from '@/utils/crmCache';
 
 export interface BookingPayment {
   paymentId: string;
@@ -456,6 +457,7 @@ class LeadService {
   public clearLeadsCache(): void {
     this.leadsMemoryCache = null;
     this.leadsInFlightPromise = null;
+    invalidateApiCache('lead');
     try {
       localStorage.removeItem('crm_leads_cache');
     } catch (e) {}

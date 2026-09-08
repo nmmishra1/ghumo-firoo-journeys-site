@@ -97,12 +97,15 @@ export const ItineraryWorkspace: React.FC<ItineraryWorkspaceProps> = ({ leads, o
     fetchSavedItineraries();
   }, []);
 
-  const fetchSavedItineraries = async () => {
+  const fetchSavedItineraries = async (forceRefresh = false) => {
     setLoading(true);
     try {
       const authHeaders = await getAuthHeader();
-      const res = await fetch(`${API_BASE}/itineraries_list.php`, {
-        headers: authHeaders
+      const res = await fetch(`${API_BASE}/itineraries_list.php${forceRefresh ? '?force_refresh=true' : ''}`, {
+        headers: {
+          ...authHeaders,
+          ...(forceRefresh ? { 'x-force-refresh': 'true' } : {})
+        }
       });
       if (res.ok) {
         const data = await res.json();
@@ -256,7 +259,7 @@ export const ItineraryWorkspace: React.FC<ItineraryWorkspaceProps> = ({ leads, o
 
         <div className="flex items-center gap-2 z-10">
           <Button 
-            onClick={fetchSavedItineraries} 
+            onClick={() => fetchSavedItineraries(true)} 
             className="bg-amber-500 hover:bg-amber-600 text-slate-950 border border-amber-400 text-xs gap-1.5 rounded-xl font-extrabold shadow-md"
             style={{ backgroundColor: '#f59e0b', color: '#090d16' }}
           >
