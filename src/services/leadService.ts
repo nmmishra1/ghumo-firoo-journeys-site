@@ -450,6 +450,16 @@ async function getAuthHeader(): Promise<Record<string, string>> {
 
 class LeadService {
   private apiUrl = '/api/leads';
+  private leadsMemoryCache: Lead[] | null = null;
+  private leadsInFlightPromise: Promise<Lead[]> | null = null;
+
+  public clearLeadsCache(): void {
+    this.leadsMemoryCache = null;
+    this.leadsInFlightPromise = null;
+    try {
+      localStorage.removeItem('crm_leads_cache');
+    } catch (e) {}
+  }
 
   // Create a new lead
   async createLead(leadData: Omit<Lead, 'id' | 'createdAt' | 'updatedAt'>): Promise<Lead> {
@@ -645,59 +655,82 @@ class LeadService {
       // Submit to Google Sheets (Backup) in background
       submitToGoogleSheets(lead).catch(() => {});
 
+      this.clearLeadsCache();
       return lead;
     } catch (error) {
       console.warn('Lead capture completed with fallback:', error);
+      this.clearLeadsCache();
       return leadData as any;
     }
   }
 
-  // Get all leads
-  async getLeads(): Promise<Lead[]> {
-    try {
-      const authHeaders = await getAuthHeader();
-      const res = await fetch(`${API_BASE}/leads_list.php`, {
-        headers: { ...authHeaders }
-      });
-      if (res.ok) {
-        const data = await res.json();
-        const dbLeads = data.leads || [];
-
-        if (Array.isArray(dbLeads)) {
-          const mapped = dbLeads.map(mapLeadFromDb);
-          const today = new Date();
-          today.setHours(0, 0, 0, 0);
-
-          const result = mapped.map(lead => {
-            if (lead.lastContactDate) {
-              const lastDate = new Date(lead.lastContactDate);
-              lastDate.setHours(0, 0, 0, 0);
-              const diffTime = today.getTime() - lastDate.getTime();
-              const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-              lead.daysSinceLastContact = diffDays >= 0 ? diffDays : 0;
-            } else {
-              lead.daysSinceLastContact = 0;
-            }
-            return lead;
-          });
-
-          localStorage.setItem('crm_leads_cache', JSON.stringify(result));
-          return result;
-        }
-      }
-    } catch (error) {
-      console.warn('Backend leads endpoint unavailable or offline:', error);
+  // Get all leads (with memory cache & in-flight deduplication)
+  async getLeads(forceRefresh = false): Promise<Lead[]> {
+    // 1. Return in-memory cache if available and refresh is not requested
+    if (!forceRefresh && this.leadsMemoryCache && this.leadsMemoryCache.length > 0) {
+      return this.leadsMemoryCache;
     }
 
-    // Fallback to cached leads or local fallback state
-    try {
-      const cached = localStorage.getItem('crm_leads_cache');
-      if (cached) {
-        return JSON.parse(cached);
-      }
-    } catch (e) {}
+    // 2. Return in-flight request if one is already pending
+    if (this.leadsInFlightPromise) {
+      return this.leadsInFlightPromise;
+    }
 
-    return [];
+    this.leadsInFlightPromise = (async () => {
+      try {
+        const authHeaders = await getAuthHeader();
+        const res = await fetch(`${API_BASE}/leads_list.php`, {
+          headers: { ...authHeaders }
+        });
+        if (res.ok) {
+          const data = await res.json();
+          const dbLeads = data.leads || [];
+
+          if (Array.isArray(dbLeads)) {
+            const mapped = dbLeads.map(mapLeadFromDb);
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            const result = mapped.map(lead => {
+              if (lead.lastContactDate) {
+                const lastDate = new Date(lead.lastContactDate);
+                lastDate.setHours(0, 0, 0, 0);
+                const diffTime = today.getTime() - lastDate.getTime();
+                const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+                lead.daysSinceLastContact = diffDays >= 0 ? diffDays : 0;
+              } else {
+                lead.daysSinceLastContact = 0;
+              }
+              return lead;
+            });
+
+            this.leadsMemoryCache = result;
+            try {
+              localStorage.setItem('crm_leads_cache', JSON.stringify(result));
+            } catch (e) {}
+            return result;
+          }
+        }
+      } catch (error) {
+        console.warn('Backend leads endpoint unavailable or offline:', error);
+      } finally {
+        this.leadsInFlightPromise = null;
+      }
+
+      // Fallback to cached leads or local fallback state
+      try {
+        const cached = localStorage.getItem('crm_leads_cache');
+        if (cached) {
+          const parsed = JSON.parse(cached);
+          this.leadsMemoryCache = parsed;
+          return parsed;
+        }
+      } catch (e) {}
+
+      return [];
+    })();
+
+    return this.leadsInFlightPromise;
   }
 
   async updateLead(leadId: string, updates: Partial<Lead>): Promise<Lead> {
@@ -788,6 +821,7 @@ class LeadService {
         isUpdate: true
       }).catch(() => {});
 
+      this.clearLeadsCache();
       return updatedLead;
     } catch (error) {
       console.error('Error updating lead:', error);
@@ -811,6 +845,7 @@ class LeadService {
         const err = await res.json().catch(() => ({}));
         throw new Error(err.error || 'Failed to delete lead');
       }
+      this.clearLeadsCache();
     } catch (error) {
       console.error('Error deleting lead:', error);
       throw error;

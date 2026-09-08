@@ -326,6 +326,8 @@ const CRM = () => {
   const [leadToDelete, setLeadToDelete] = useState<{ id: string; name: string } | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [showDeletedLeads, setShowDeletedLeads] = useState(false);
+  const leadsLoadedRef = useRef(false);
+  const lastUserIdRef = useRef<string | null>(null);
 
   // Search & Filter state
   const [searchTerm, setSearchTerm] = useState('');
@@ -977,8 +979,24 @@ const CRM = () => {
   }, [user, profiles.length]);
 
   useEffect(() => {
-    fetchLeads();
-  }, [user, showDeletedLeads]);
+    if (!user) return;
+    if (lastUserIdRef.current && lastUserIdRef.current !== user.id) {
+      leadsLoadedRef.current = false;
+      leadService.clearLeadsCache();
+    }
+    lastUserIdRef.current = user.id;
+
+    if (!leadsLoadedRef.current) {
+      leadsLoadedRef.current = true;
+      fetchLeads(false);
+    }
+  }, [user]);
+
+  useEffect(() => {
+    if (leadsLoadedRef.current) {
+      fetchLeads(true);
+    }
+  }, [showDeletedLeads]);
 
   useEffect(() => {
     if (userProfile) {
@@ -1095,10 +1113,10 @@ const CRM = () => {
     }
   };
 
-  const fetchLeads = async () => {
+  const fetchLeads = async (forceRefresh = false) => {
     setLoading(true);
     try {
-      const data = await leadService.getLeads();
+      const data = await leadService.getLeads(forceRefresh);
       setLeads(data || []);
     } catch (error) {
       console.warn('Network issue fetching leads, using cached state:', error);
@@ -1112,8 +1130,9 @@ const CRM = () => {
   const handleRefreshSystemData = async () => {
     setIsRefreshingData(true);
     try {
+      leadService.clearLeadsCache();
       await Promise.all([
-        fetchLeads(),
+        fetchLeads(true),
         fetchQuotes(),
         fetchProfiles(),
         fetchDashboardInventory(),
@@ -1188,7 +1207,7 @@ const CRM = () => {
 
       setDeleteModalOpen(false);
       setLeadToDelete(null);
-      fetchLeads();
+      fetchLeads(true);
       navigate('/crm/leads');
     } catch (error: any) {
       console.error('Error deleting lead:', error);
@@ -1215,7 +1234,7 @@ const CRM = () => {
         description: `Successfully restored lead for ${leadName}.`
       });
 
-      fetchLeads();
+      fetchLeads(true);
       navigate(`/crm/leads/${leadId}`);
     } catch (error: any) {
       console.error('Error restoring lead:', error);
@@ -1373,7 +1392,7 @@ const CRM = () => {
         leadIdToRedirect = created.id;
       }
 
-      fetchLeads();
+      fetchLeads(true);
       
       if (leadIdToRedirect) {
         if (currentSection !== 'edit-lead') {
@@ -1409,7 +1428,7 @@ const CRM = () => {
         content: `Status changed to "${newStatus}"`,
         metadata: { fromStatus: activeLead.status, toStatus: newStatus }
       });
-      fetchLeads();
+      fetchLeads(true);
     } catch (err) {
       console.error(err);
       toast({ title: "Error", description: "Failed to update status", variant: "destructive" });
@@ -1473,7 +1492,7 @@ const CRM = () => {
         title: "Lead Converted!",
         description: `Successfully converted ${activeLead.customer_name} to a won booking.`
       });
-      fetchLeads();
+      fetchLeads(true);
     } catch (err) {
       console.error(err);
       toast({ title: "Error", description: "Failed to convert lead", variant: "destructive" });
@@ -1497,7 +1516,7 @@ const CRM = () => {
         metadata: { prospect: followUpData.leadProspect, nextCall: followUpData.nextCallTime }
       });
       
-      fetchLeads();
+      fetchLeads(true);
       setFollowUpModalOpen(false);
       setSelectedLeadForFollowUp(null);
     } catch (error) {
@@ -3171,7 +3190,7 @@ const CRM = () => {
                   
                   <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 shrink-0 w-full sm:w-auto">
                     <Button 
-                      onClick={fetchLeads} 
+                      onClick={() => fetchLeads(true)} 
                       variant="outline"
                       className="bg-slate-900/80 hover:bg-slate-800 text-slate-200 font-bold border border-slate-700 h-10 px-4 rounded-xl text-xs transition-all flex items-center justify-center gap-2"
                     >
@@ -3784,7 +3803,7 @@ const CRM = () => {
                         });
                         
                         fetchQuotes();
-                        fetchLeads();
+                        fetchLeads(true);
                       } catch (err: any) {
                         toast({
                           title: "Accept Failed",
@@ -4345,7 +4364,7 @@ const CRM = () => {
                               type: 'status_change',
                               content: `Status changed to "${newStatus}"`
                             });
-                            fetchLeads();
+                            fetchLeads(true);
                           } catch (err) {
                             console.error(err);
                             toast({ title: "Error", description: "Failed to update status", variant: "destructive" });
@@ -5094,7 +5113,7 @@ Ghumo Firoo Travels`
                                         type: 'whatsapp',
                                         content: `Shared package: "${pkg.name}" (₹${pkg.price?.toLocaleString() || '0'}/person) via link.`
                                       });
-                                      fetchLeads();
+                                      fetchLeads(true);
                                     }}
                                     className="bg-[#C9A25A]/15 border border-[#C9A25A]/30 text-[#C9A25A] text-[11px] font-semibold px-2 py-0.5 rounded hover:opacity-90 transition-opacity cursor-pointer"
                                   >
@@ -6293,7 +6312,7 @@ Ghumo Firoo Travels`
       <CSVImport
         isOpen={csvImportOpen}
         onClose={() => setCsvImportOpen(false)}
-        onImportComplete={fetchLeads}
+        onImportComplete={() => fetchLeads(true)}
       />
 
       {/* COMMENTS / DISCUSSIONS DIALOG */}
