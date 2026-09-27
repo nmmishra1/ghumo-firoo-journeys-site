@@ -1,6 +1,8 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
+import { useIdleTimeout } from '@/hooks/useIdleTimeout';
+import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { AlertTriangle, User } from 'lucide-react';
@@ -18,6 +20,15 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
 }) => {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
+  const { toast } = useToast();
+
+  // Stable toast callback for idle timeout warning
+  const idleToast = useCallback((opts: { title: string; description: string; variant?: string; duration?: number }) => {
+    toast(opts as any);
+  }, [toast]);
+
+  // Strict 30-minute idle auto-logout (only active when user is authenticated)
+  useIdleTimeout(user ? idleToast : undefined);
 
   useEffect(() => {
     if (!loading && requireAuth && !user) {
