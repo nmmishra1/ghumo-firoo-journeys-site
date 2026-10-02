@@ -547,6 +547,7 @@ const CRM = () => {
   const [editPaymentRef, setEditPaymentRef] = useState('');
   const [editPaymentRemarks, setEditPaymentRemarks] = useState('');
   const [editPaymentDate, setEditPaymentDate] = useState('');
+  const [editPaymentLeadId, setEditPaymentLeadId] = useState('');
   const [isUpdatingPayment, setIsUpdatingPayment] = useState(false);
   const [paymentToDelete, setPaymentToDelete] = useState<any | null>(null);
   const [isDeletingPayment, setIsDeletingPayment] = useState(false);
@@ -796,6 +797,7 @@ const CRM = () => {
 
   const handleOpenEditPayment = (pay: any) => {
     setEditingPayment(pay);
+    setEditPaymentLeadId(String(pay.lead_id || ''));
     setEditPaymentAmount(String(pay.amount_received || ''));
     setEditPaymentMode(pay.payment_mode || 'UPI');
     setEditPaymentRef(pay.reference_number != null ? String(pay.reference_number) : '');
@@ -847,6 +849,7 @@ const CRM = () => {
           ...authHeaders
         },
         body: JSON.stringify({
+          lead_id: editPaymentLeadId || editingPayment.lead_id,
           amount_received: amt,
           payment_date: editPaymentDate || editingPayment.payment_date,
           payment_mode: editPaymentMode,
@@ -1225,7 +1228,7 @@ const CRM = () => {
       const needsQuotesOrProfiles = ['quotes', 'opportunities', 'reports', 'payments'].some(s => currentSection.includes(s));
       if (needsQuotesOrProfiles && quotes.length === 0) fetchQuotes();
       if (currentSection !== 'dashboard' && profiles.length === 0) fetchProfiles();
-      if (currentSection === 'payments-mocked' || currentSection === 'reports-mocked') {
+      if (allPayments.length === 0 || currentSection === 'payments' || currentSection === 'payments-mocked' || currentSection === 'reports-mocked') {
         fetchAllPayments();
       }
       if (currentSection === 'reports-mocked') {
@@ -1377,22 +1380,12 @@ const CRM = () => {
     // Find the full lead object to check its status
     const leadObj = leads.find(l => l.id === leadToDelete.id);
     
-    if (leadObj) {
+    const isUserAdmin = isAdminRole(userProfile?.role);
+    if (leadObj && !isUserAdmin) {
       if (leadObj.status === 'Booking Confirmed') {
         toast({
-          title: "Deletion Blocked",
-          description: "Lead cannot be deleted because booking records exist.",
-          variant: "destructive"
-        });
-        setDeleteModalOpen(false);
-        setLeadToDelete(null);
-        return;
-      }
-      
-      if (leadObj.status === 'Quote Sent') {
-        toast({
-          title: "Deletion Blocked",
-          description: "Lead cannot be deleted because an active quotation exists.",
+          title: "Deletion Restricted",
+          description: "Confirmed booking leads can only be deleted or archived by an Administrator.",
           variant: "destructive"
         });
         setDeleteModalOpen(false);
@@ -1719,6 +1712,33 @@ const CRM = () => {
         notes: noteEntry
       });
 
+      // Insert official payment ledger entry
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        const token = session?.access_token;
+        const authHeaders = token ? { 'Authorization': `Bearer ${token}` } : {};
+
+        await fetch('/php-backend/api.php?table=payments', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            ...authHeaders
+          },
+          body: JSON.stringify({
+            lead_id: leadForAdvance.id,
+            amount_received: amount,
+            payment_date: new Date().toISOString().split('T')[0],
+            payment_mode: advancePaymentMode || 'UPI',
+            reference_number: advancePaymentRef || receiptRef,
+            remarks: `Advance Booking Deposit (${receiptRef})`,
+            status: 'Success',
+            received_by: userProfile?.full_name || 'Agent'
+          })
+        });
+      } catch (payErr) {
+        console.warn('Could not record row in payments table:', payErr);
+      }
+
       await logActivity(leadForAdvance.id, {
         type: 'payment',
         content: noteEntry,
@@ -1736,8 +1756,11 @@ const CRM = () => {
         description: `Advance ₹${amount.toLocaleString('en-IN')} logged (${receiptRef}). Vouchers unlocked!` 
       });
       setAdvanceModalOpen(false);
+      const advLeadId = leadForAdvance.id;
       setLeadForAdvance(null);
       fetchLeads(true);
+      fetchAllPayments();
+      fetchLeadPaymentsAndDocuments(advLeadId);
     } catch (err) {
       console.error(err);
       toast({ title: "Error", description: "Failed to record advance payment", variant: "destructive" });
@@ -4899,6 +4922,18 @@ Please let us know if you need any customizations. Looking forward to hosting yo
                                     >
                                       <Clock className="w-3.5 h-3.5" />
                                     </button>
+                                    <button 
+                                      type="button" 
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        setLeadToDelete({ id: l.id, name: l.customer_name });
+                                        setDeleteModalOpen(true);
+                                      }}
+                                      className="w-7 h-7 rounded-lg border-none cursor-pointer flex items-center justify-center bg-rose-500/10 text-rose-600 dark:text-rose-400 hover:bg-rose-500/25 transition-colors"
+                                      title="Delete Lead"
+                                    >
+                                      <Trash2 className="w-3.5 h-3.5" />
+                                    </button>
                                   </div>
                                   {/* Initial remarks / notes preview */}
                                   {(l.remarks || l.notes || l.discussion_notes) && (
@@ -5190,8 +5225,14 @@ Ghumo Firoo Travels`
                 <div className="space-y-2 border-t border-slate-200/80 pt-3">
                   {(() => {
                     const leadPkgPrice = Number(activeLead.budget || activeLead.package_price || activeLead.packagePrice || activeLead.expected_booking_value || activeLead.expectedBookingValue || 0);
-                    const leadPaymentsList = allPayments.filter(p => String(p.lead_id) === String(activeLead.id));
-                    const leadTotalPaid = leadPaymentsList.reduce((sum, p) => sum + Number(p.amount_received || 0), 0);
+                    const leadPaymentsFromAll = allPayments.filter(p => String(p.lead_id) === String(activeLead.id));
+                    const leadPaymentsList = leadPaymentsFromAll.length > 0 
+                      ? leadPaymentsFromAll 
+                      : (mockPayments || []).map((p: any) => ({ ...p, amount_received: p.amount, reference_number: p.ref, payment_date: p.date, payment_mode: p.mode }));
+                    const paymentsSum = leadPaymentsList.reduce((sum, p) => sum + Number(p.amount_received || p.amount || 0), 0);
+                    const leadTotalPaid = paymentsSum > 0 
+                      ? paymentsSum 
+                      : Number(activeLead.total_paid_amount || activeLead.advance_payment_amount || 0);
                     const leadBalanceDue = Math.max(0, leadPkgPrice - leadTotalPaid);
                     
                     const rawStatus = (activeLead.status || 'New').toLowerCase().trim();
@@ -5244,6 +5285,29 @@ Ghumo Firoo Travels`
                                 <div className="text-[10px] text-amber-300 font-semibold bg-amber-500/10 border border-amber-500/20 px-2 py-1 rounded-lg flex items-center gap-1">
                                   <Clock className="w-3 h-3 text-amber-400 shrink-0" />
                                   To be paid by {dueDateStr}
+                                </div>
+                              )}
+
+                              {leadPaymentsList.length > 0 && (
+                                <div className="pt-2 border-t border-slate-800 space-y-1.5">
+                                  <div className="flex justify-between items-center text-[10px] text-slate-400 font-bold uppercase tracking-wider">
+                                    <span>Payment History</span>
+                                    <span className="text-emerald-400 font-mono">{leadPaymentsList.length} recorded</span>
+                                  </div>
+                                  <div className="space-y-1 max-h-32 overflow-y-auto pr-1">
+                                    {leadPaymentsList.map((p: any, pIdx: number) => (
+                                      <div key={`lead-rec-pay-${p.id || pIdx}`} className="bg-white/5 border border-white/5 rounded-lg px-2.5 py-1.5 flex justify-between items-center text-[11px]">
+                                        <div className="space-y-0.5">
+                                          <div className="font-semibold text-white flex items-center gap-1.5">
+                                            <span className="text-amber-400 font-bold">{p.payment_mode || 'UPI'}</span>
+                                            {p.reference_number && <span className="font-mono text-[10px] text-slate-400">({p.reference_number})</span>}
+                                          </div>
+                                          <div className="text-[10px] text-slate-400">{p.payment_date || 'Confirmed'}</div>
+                                        </div>
+                                        <span className="font-extrabold text-emerald-400 text-xs">₹{Number(p.amount_received || p.amount || 0).toLocaleString('en-IN')}</span>
+                                      </div>
+                                    ))}
+                                  </div>
                                 </div>
                               )}
 
@@ -5485,6 +5549,18 @@ Please let us know if you need any customizations. Looking forward to hosting yo
                           className="h-8 bg-gradient-to-r from-[#C9A25A] to-[#D4AF37] hover:opacity-90 text-[#0B1026] text-xs font-extrabold"
                         >
                           Chat with customer
+                        </Button>
+                        <Button 
+                          variant="outline"
+                          size="sm" 
+                          onClick={() => {
+                            setLeadToDelete({ id: activeLead.id, name: activeLead.customer_name });
+                            setDeleteModalOpen(true);
+                          }}
+                          className="h-8 text-xs font-bold border-rose-500/40 text-rose-600 dark:text-rose-400 hover:bg-rose-500/10 cursor-pointer"
+                          title="Delete this Lead"
+                        >
+                          <Trash2 className="w-3.5 h-3.5 mr-1" /> Delete Lead
                         </Button>
 
                         {/* Status Dropdown */}
@@ -5945,7 +6021,29 @@ Please let us know if you need any customizations. Looking forward to hosting yo
                               return (
                                 <tr key={`pay-${pay.id || idx}-${idx}`} className="hover:bg-white/5 transition-colors">
                                   <td className="p-3.5 font-mono text-[11px] text-slate-300 font-semibold">{pay.payment_date}</td>
-                                  <td className="p-3.5 font-extrabold text-xs text-white uppercase">{clientName}</td>
+                                  <td className="p-3.5 space-y-1">
+                                    <div className="font-extrabold text-xs text-white uppercase flex items-center gap-1.5 flex-wrap">
+                                      <span>{clientName}</span>
+                                      {clientObj && (
+                                        <Badge variant="outline" className="text-[9px] font-mono px-1.5 py-0 border-amber-400/40 text-amber-300 bg-amber-500/10">
+                                          #{formatLeadId(clientObj)}
+                                        </Badge>
+                                      )}
+                                    </div>
+                                    {clientObj && (
+                                      <div className="text-[10px] text-slate-300 font-medium flex items-center gap-1">
+                                        <MapPin className="w-2.5 h-2.5 text-amber-400 shrink-0" />
+                                        <span className="truncate max-w-[180px]">{formatLeadRoute(clientObj)}</span>
+                                        <Link 
+                                          to={`/crm/leads/${clientObj.id}`} 
+                                          className="text-[9px] text-amber-400 hover:underline font-bold ml-1"
+                                          title="View this Customer Booking"
+                                        >
+                                          View Booking →
+                                        </Link>
+                                      </div>
+                                    )}
+                                  </td>
                                   <td className="p-3.5 text-slate-300 font-medium">{pay.remarks || 'Online Booking Deposit'}</td>
                                   <td className="p-3.5">
                                     <Badge variant="outline" className={`text-[10px] font-black uppercase border px-2.5 py-0.5 rounded-full ${
@@ -7103,6 +7201,33 @@ Please let us know if you need any customizations. Looking forward to hosting yo
             </DialogDescription>
           </DialogHeader>
           <form onSubmit={handleUpdatePayment} className="space-y-4 pt-2">
+            {/* Customer / Booking Selector */}
+            <div className="space-y-1">
+              <Label className="text-xs font-bold text-slate-200 block uppercase">Client / Booking Reference</Label>
+              <Select 
+                value={editPaymentLeadId} 
+                onValueChange={setEditPaymentLeadId}
+              >
+                <SelectTrigger className="text-xs bg-white/5 border-white/15 text-white h-10 rounded-xl font-bold">
+                  <SelectValue placeholder="-- Select Customer / Booking --" />
+                </SelectTrigger>
+                <SelectContent className="bg-slate-900 border-slate-700 text-white text-xs max-h-64">
+                  {leads.map(l => {
+                    const leadRef = formatLeadId(l);
+                    const dest = formatLeadRoute(l);
+                    const statusIcon = l.status === 'Booking Confirmed' ? '🟢' : l.status === 'Quote Sent' ? '🟡' : '⚪';
+                    const val = Number(l.packagePrice || l.expected_booking_value || 0);
+
+                    return (
+                      <SelectItem key={`edit-lead-${l.id}`} value={String(l.id)} className="py-2">
+                        {statusIcon} {l.customer_name} — <span className="font-mono text-amber-400">{leadRef}</span> ({dest} • {l.status} • Est: ₹{val.toLocaleString('en-IN')})
+                      </SelectItem>
+                    );
+                  })}
+                </SelectContent>
+              </Select>
+            </div>
+
             <div className="space-y-1">
               <Label htmlFor="edit-pay-date" className="text-xs font-bold text-slate-200 block uppercase">Payment Date</Label>
               <Input 
