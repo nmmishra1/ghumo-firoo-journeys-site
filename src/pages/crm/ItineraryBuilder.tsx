@@ -5065,7 +5065,7 @@ export default function ItineraryBuilder({
               onClick={handleOpenInvoice}
               disabled={isDirty}
               className="h-7 text-[10px] font-black uppercase tracking-wider bg-blue-500/10 border-blue-500/30 text-blue-400 hover:bg-blue-500/20 rounded-lg px-2.5 flex items-center gap-1 cursor-pointer disabled:opacity-40 shrink-0"
-              title="Stage 2: Generate & Share GST Proforma Invoice to collect advance deposit"
+              title="Stage 2: Generate & Share Proforma Invoice to collect advance deposit"
             >
               <IndianRupee className="w-3.5 h-3.5" /> 2. Invoice
             </Button>
@@ -6403,7 +6403,7 @@ export default function ItineraryBuilder({
           <div className="no-print bg-slate-950 text-slate-100 p-4 flex justify-between items-center shadow-lg border-b border-slate-900 sticky top-0 z-50">
             <div className="flex items-center gap-2">
               <Sparkles className="w-5 h-5 text-accent animate-pulse" />
-              <span className="font-black text-xs uppercase tracking-widest text-slate-200">Ghumo Firoo Luxury Proposal Portal</span>
+              <span className="font-black text-xs uppercase tracking-widest text-slate-200">Ghumo Firoo Travels Proposal Portal</span>
             </div>
             <div className="flex items-center gap-2">
               <Button 
@@ -6429,15 +6429,15 @@ export default function ItineraryBuilder({
             <div className="bg-[#161d2f] border border-amber-500/20 rounded-2xl p-4 md:p-6 flex flex-col md:flex-row justify-between items-center gap-4 text-left shadow-xl">
               <div className="flex items-center gap-4">
                 <div className="h-14 px-3 py-1.5 rounded-2xl bg-white flex items-center justify-center shadow-lg border border-amber-500/30 shrink-0">
-                  <img src="/ghumo-firoo-logo.png" alt="Ghumo Firoo Luxury Travels" className="h-10 w-auto object-contain" />
+                  <img src="/ghumo-firoo-logo.png" alt="Ghumo Firoo Travels" className="h-10 w-auto object-contain" />
                 </div>
                 <div>
                   <h2 className="text-base font-black uppercase text-white tracking-widest flex flex-wrap items-center gap-2">
-                    GHUMO FIROO LUXURY TRAVELS
+                    GHUMO FIROO TRAVELS
                     <span className="bg-amber-500/20 text-amber-400 border border-amber-500/40 text-[9px] px-2.5 py-0.5 rounded-full font-black">NIDHI & MSME VERIFIED DMC</span>
                   </h2>
-                  <p className="text-xs text-slate-300 font-medium mt-0.5">Curated Luxury Holidays & Pilgrimage Journeys • Govt. Registered Tour Operator • ISO 9001:2026</p>
-                  <p className="text-[11px] text-slate-400">Plot 14, Sector 5, Dwarka, New Delhi - 110075 • GSTIN: 07AAFCG8432L1Z9</p>
+                  <p className="text-xs text-slate-300 font-medium mt-0.5">Curated Holidays & Pilgrimage Journeys • Govt. Registered Tour Operator • ISO 9001:2026</p>
+                  <p className="text-[11px] text-slate-400">Plot 14, Sector 5, Dwarka, New Delhi - 110075</p>
                 </div>
               </div>
               <div className="text-right text-xs font-bold text-slate-300 space-y-1 shrink-0">
@@ -6882,7 +6882,7 @@ export default function ItineraryBuilder({
                     <img src="/ghumo-firoo-logo.png" alt="Ghumo Firoo Travels" className="h-7 w-auto object-contain" />
                   </div>
                   <div>
-                    <span className="text-sm font-black tracking-widest uppercase text-amber-400">Ghumo Firoo Luxury Travels</span>
+                    <span className="text-sm font-black tracking-widest uppercase text-amber-400">Ghumo Firoo Travels</span>
                     <span className="ml-2 text-[9px] bg-amber-500/20 text-amber-300 border border-amber-500/40 px-2 py-0.5 rounded-full font-mono uppercase tracking-wider font-bold">NIDHI VERIFIED DMC</span>
                   </div>
                 </div>
@@ -6965,11 +6965,10 @@ export default function ItineraryBuilder({
             <div className="flex justify-between items-start border-b-2 border-slate-900 pb-6">
               <div className="space-y-1">
                 <img src="/ghumo-firoo-logo.png" alt="Ghumo Firoo Travels" className="h-10 w-auto object-contain mb-2" />
-                <h1 className="text-3xl font-black tracking-tight text-slate-900">GHUMO FIROO LUXURY TRAVELS</h1>
+                <h1 className="text-3xl font-black tracking-tight text-slate-900">GHUMO FIROO TRAVELS</h1>
                 <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">Official Operational Service Confirmation Voucher</span>
                 <p className="text-xs text-slate-500 max-w-[340px] font-semibold mt-2">
                   Plot 14, Sector 5, Dwarka, New Delhi - 110075<br />
-                  GSTIN: 07AAFCG8432L1Z9 | SAC: 998555<br />
                   24x7 Operations Desk: +91 9910987264 / +91 9870229792 | booking@ghumofiroo.com
                 </p>
               </div>
@@ -7185,7 +7184,7 @@ export default function ItineraryBuilder({
                 onClick={() => window.print()}
                 className="bg-gradient-to-r from-amber-600 to-amber-500 text-slate-950 font-bold hover:opacity-90 text-xs h-9 px-4 rounded-xl flex items-center gap-1.5 shadow-md transition-all hover:scale-105 border-0"
               >
-                <Printer className="w-4 h-4" /> Print GST Invoice
+                <Printer className="w-4 h-4" /> Print Invoice
               </Button>
               <Button 
                 variant="ghost" 
@@ -7203,11 +7202,10 @@ export default function ItineraryBuilder({
             <div className="flex justify-between items-start border-b-2 border-slate-900 pb-6">
               <div className="space-y-1">
                 <img src="/ghumo-firoo-logo.png" alt="Ghumo Firoo Travels" className="h-10 w-auto object-contain mb-2" />
-                <h1 className="text-3xl font-black tracking-tight text-slate-900">GHUMO FIROO TRAVELS PVT LTD</h1>
-                <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">Government Registered Tour Operator • GST Compliant Tax Invoice</span>
+                <h1 className="text-3xl font-black tracking-tight text-slate-900">GHUMO FIROO TRAVELS</h1>
+                <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">Government Registered Tour Operator • Proforma Invoice</span>
                 <p className="text-xs text-slate-500 max-w-[340px] font-semibold mt-2">
                   Plot 14, Sector 5, Dwarka, New Delhi - 110075<br />
-                  <strong>GSTIN: 07AAFCG8432L1Z9</strong> | SAC Code: 998555<br />
                   booking@ghumofiroo.com | +91 9910987264 / +91 9870229792
                 </p>
               </div>
@@ -7304,33 +7302,21 @@ export default function ItineraryBuilder({
             {/* Calculations Breakdown */}
             <div className="flex flex-col md:flex-row justify-between items-start border-t-2 border-slate-900 pt-4 gap-6 text-xs">
               <div className="space-y-1 text-slate-500 text-[10px] max-w-sm">
-                <p className="font-extrabold uppercase text-slate-700 dark:text-slate-300">GST Invoice Notes (SAC 998555)</p>
-                <p>Taxable Value includes hotel accommodation, private transfers, and sightseeing expenses for {(itinerary?.adult_count || activeLead?.adult_count || 2)} Guests.</p>
+                <p className="font-extrabold uppercase text-slate-700 dark:text-slate-300">Invoice Notes & Terms</p>
+                <p>Package value includes handpicked hotel accommodations, private vehicle transfers, and curated excursions for {(itinerary?.adult_count || activeLead?.adult_count || 2)} Guests.</p>
               </div>
 
               {(() => {
                 const totalGross = finalPackagePrice || 15000;
-                const subtotal = totalGross / 1.05; // 5% GST Back-calculation
-                const totalTax = totalGross - subtotal;
-                const cgst = totalTax / 2;
-                const sgst = totalTax / 2;
 
                 return (
                   <div className="w-full max-w-[320px] space-y-1.5 font-semibold bg-slate-50 dark:bg-slate-900/40 p-4 rounded-xl border border-slate-200 dark:border-slate-800">
                     <div className="flex justify-between text-slate-600 dark:text-slate-400">
-                      <span>Taxable Amount (Before GST)</span>
-                      <span className="font-mono">₹{Math.round(subtotal).toLocaleString('en-IN')}</span>
-                    </div>
-                    <div className="flex justify-between text-slate-600 dark:text-slate-400">
-                      <span>CGST @ 2.5%</span>
-                      <span className="font-mono">₹{Math.round(cgst).toLocaleString('en-IN')}</span>
-                    </div>
-                    <div className="flex justify-between text-slate-600 dark:text-slate-400">
-                      <span>SGST @ 2.5%</span>
-                      <span className="font-mono">₹{Math.round(sgst).toLocaleString('en-IN')}</span>
+                      <span>Package Value</span>
+                      <span className="font-mono">₹{Math.round(totalGross).toLocaleString('en-IN')}</span>
                     </div>
                     <div className="flex justify-between text-sm font-black text-slate-900 dark:text-white border-t border-slate-300 dark:border-slate-700 pt-2">
-                      <span>Total Invoice Amount Due</span>
+                      <span>Total Amount Due</span>
                       <span className="font-mono text-amber-600">₹{Math.round(totalGross).toLocaleString('en-IN')}</span>
                     </div>
                   </div>
