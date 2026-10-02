@@ -6,7 +6,13 @@ const GAListener = () => {
 
   useEffect(() => {
     // Suppress marketing analytics for internal CRM and Auth panels
-    if (location.pathname.startsWith('/crm') || location.pathname.startsWith('/auth')) {
+    const p = location.pathname || '';
+    if (
+      p.startsWith('/crm') || 
+      p.startsWith('/auth') || 
+      p.startsWith('/forgot-password') || 
+      p.startsWith('/reset-password')
+    ) {
       return;
     }
 

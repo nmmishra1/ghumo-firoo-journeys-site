@@ -16,7 +16,13 @@ const MetaPixel = () => {
   useEffect(() => {
     // Suppress Meta Pixel tracking on internal CRM and Auth routes
     if (typeof window !== 'undefined') {
-      if (window.location.pathname.startsWith('/crm') || window.location.pathname.startsWith('/auth')) {
+      const p = window.location.pathname || '';
+      if (
+        p.startsWith('/crm') || 
+        p.startsWith('/auth') || 
+        p.startsWith('/forgot-password') || 
+        p.startsWith('/reset-password')
+      ) {
         return;
       }
 

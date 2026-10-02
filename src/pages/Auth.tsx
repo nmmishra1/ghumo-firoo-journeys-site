@@ -87,10 +87,10 @@ const Auth = () => {
   const loading_stop = () => setLoading(false);
 
   return (
-    <div className="min-h-screen bg-[#0B1026] flex overflow-hidden font-poppins">
+    <div className="min-h-screen bg-[#0B1026] flex flex-col lg:flex-row overflow-x-hidden font-poppins">
       {/* Left Side - Agency Logo & Branding Cover Image */}
       <div 
-        className="hidden lg:flex lg:w-1/2 lg:flex-col lg:justify-between bg-cover bg-center relative p-12 overflow-hidden border-r border-white/5"
+        className="hidden lg:flex lg:w-1/2 lg:flex-col lg:justify-between bg-cover bg-center relative p-12 overflow-hidden border-r border-white/5 min-h-screen sticky top-0"
         style={{ backgroundImage: "url('https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?q=80&w=1600')" }}
       >
         <div className="absolute inset-0 bg-gradient-to-tr from-[#0B1026] via-[#0B1026]/80 to-transparent z-0" />
@@ -129,11 +129,11 @@ const Auth = () => {
       </div>
 
       {/* Right Side - Login Form (Glassmorphic) */}
-      <div className="w-full lg:w-1/2 flex items-center justify-center p-8 bg-[#0B1026] relative overflow-hidden">
+      <div className="w-full lg:w-1/2 flex items-center justify-center p-6 sm:p-8 bg-[#0B1026] relative min-h-screen py-10 overflow-y-auto">
         {/* Background ambient light */}
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-accent/[0.03] rounded-full blur-[120px] pointer-events-none" />
         
-        <div className="w-full max-w-md relative z-10">
+        <div className="w-full max-w-md relative z-10 my-auto">
           <div className="mb-8 lg:hidden flex justify-between items-center">
             <Link to="/" className="inline-flex items-center text-sm font-semibold text-white/60 hover:text-white transition-colors">
               <ArrowLeft className="w-4 h-4 mr-2 text-accent" />
