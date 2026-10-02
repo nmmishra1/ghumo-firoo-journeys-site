@@ -4633,7 +4633,7 @@ export default function ItineraryBuilder({
             ...authHeaders
           },
           body: JSON.stringify({
-            id: Number(itinerary.id),
+            id: itinerary.id,
             status: 'Booking Confirmed',
             lead_id: currentLeadId
           })
@@ -4670,8 +4670,9 @@ export default function ItineraryBuilder({
             ...authHeaders
           },
           body: JSON.stringify({
-            id: Number(itinerary.id),
-            status: newStatus
+            id: itinerary.id,
+            status: newStatus,
+            lead_id: currentLeadId
           })
         });
         if (res.ok) {
@@ -6408,6 +6409,35 @@ export default function ItineraryBuilder({
             </div>
             <div className="flex items-center gap-2">
               <Button 
+                onClick={() => {
+                  const targetLeadId = activeLead?.id || leadId;
+                  const publicUrl = `${window.location.origin}/proposal/${targetLeadId}`;
+                  navigator.clipboard.writeText(publicUrl);
+                  toast({
+                    title: "📋 Guest Proposal Link Copied!",
+                    description: `Share this link with ${activeLead?.customer_name || 'the guest'}: ${publicUrl}`,
+                    className: "bg-emerald-950 text-white border-emerald-700"
+                  });
+                }}
+                className="bg-slate-800 hover:bg-slate-700 text-amber-300 font-bold text-xs h-9 px-3.5 rounded-xl border border-amber-500/30 flex items-center gap-1.5 transition-all shadow-md"
+                title="Copy public link that guests can open without CRM login to review options and 1-click accept"
+              >
+                <Copy className="w-3.5 h-3.5 text-amber-400" /> Copy Guest Link
+              </Button>
+              <a
+                href={`https://wa.me/${(activeLead?.customer_phone || activeLead?.contact_number || '').replace(/[^0-9]/g, '') || ''}?text=${encodeURIComponent(
+                  `Hi ${activeLead?.customer_name || 'Guest'}, here is your tailored tour proposal for ${activeLead?.destinations || itinerary?.itinerary_name || 'your upcoming trip'} from Ghumo Firoo Travels: ${window.location.origin}/proposal/${activeLead?.id || leadId}\n\nPlease review the options and click Accept to confirm your booking!`
+                )}`}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <Button 
+                  className="bg-[#25D366] hover:bg-[#20ba56] text-white font-bold text-xs h-9 px-3.5 rounded-xl flex items-center gap-1.5 border-none shadow-md"
+                >
+                  <MessageCircle className="w-3.5 h-3.5" /> WhatsApp to Guest
+                </Button>
+              </a>
+              <Button 
                 onClick={() => window.print()}
                 className="bg-gradient-to-r from-[#c5a059] to-[#d4af37] text-slate-950 font-bold hover:opacity-90 text-xs h-9 px-4 rounded-xl flex items-center gap-1.5 shadow-md transition-all hover:scale-105"
               >
@@ -6847,12 +6877,40 @@ export default function ItineraryBuilder({
                     >
                       <IndianRupee className="w-4 h-4 mr-2" /> Open Proforma Invoice
                     </Button>
+                    {isFinancialConfirmed ? (
+                      <Button 
+                        type="button"
+                        onClick={handleOpenVoucher}
+                        className="flex-1 sm:flex-none bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-700 hover:to-teal-800 text-white font-black text-xs h-11 px-5 rounded-xl shadow-lg flex items-center justify-center cursor-pointer"
+                      >
+                        <Car className="w-4 h-4 mr-2" /> View Service Voucher
+                      </Button>
+                    ) : (
+                      <Button 
+                        type="button"
+                        onClick={handleOpenVoucher}
+                        className="flex-1 sm:flex-none bg-slate-800 hover:bg-slate-700 text-amber-300 font-bold text-xs h-11 px-5 rounded-xl border border-amber-500/30 flex items-center justify-center cursor-pointer shadow-lg"
+                        title="Master Operational Voucher is locked until advance payment (min. 30%-50%) is verified and operational allocations are finalized."
+                      >
+                        <Lock className="w-4 h-4 mr-2 text-amber-400" /> Service Voucher (Locked - Advance Pending)
+                      </Button>
+                    )}
                     <Button 
                       type="button"
-                      onClick={handleOpenVoucher}
-                      className="flex-1 sm:flex-none bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-700 hover:to-teal-800 text-white font-black text-xs h-11 px-5 rounded-xl shadow-lg flex items-center justify-center cursor-pointer"
+                      onClick={() => {
+                        const targetLeadId = activeLead?.id || leadId;
+                        const publicUrl = `${window.location.origin}/proposal/${targetLeadId}`;
+                        navigator.clipboard.writeText(publicUrl);
+                        toast({
+                          title: "📋 Guest Proposal Link Copied!",
+                          description: `Share this link with ${activeLead?.customer_name || 'the guest'}: ${publicUrl}`,
+                          className: "bg-emerald-950 text-white border-emerald-700"
+                        });
+                      }}
+                      className="flex-1 sm:flex-none bg-slate-800 hover:bg-slate-700 text-amber-300 font-bold text-xs h-11 px-5 rounded-xl border border-amber-500/30 flex items-center justify-center shadow-lg"
+                      title="Copy shareable link for guest to view and accept options on mobile or desktop"
                     >
-                      <Car className="w-4 h-4 mr-2" /> View Service Voucher
+                      <Copy className="w-4 h-4 mr-2 text-amber-400" /> Copy Client Link
                     </Button>
                   </>
                 )}

@@ -13,11 +13,13 @@ $rawInput = file_get_contents('php://input');
 $body = json_decode($rawInput, true);
 
 $id = $body['id'] ?? null;
+$leadId = $body['lead_id'] ?? null;
 $status = trim($body['status'] ?? '');
 
-if (empty($id) || empty($status)) {
+// Convert $id if passed as 0 or empty string or null
+if (empty($id) && empty($leadId)) {
     http_response_code(400);
-    echo json_encode(['error' => 'Missing itinerary id or status parameter']);
+    echo json_encode(['error' => 'Missing itinerary id/lead_id or status parameter']);
     exit;
 }
 
@@ -29,36 +31,51 @@ if (!in_array($status, $validStatuses, true)) {
 }
 
 try {
-    // 1. Check existing itinerary
-    $checkStmt = $pdo->prepare("SELECT id, lead_id, status FROM itineraries WHERE id = ? LIMIT 1");
-    $checkStmt->execute([$id]);
-    $existing = $checkStmt->fetch(PDO::FETCH_ASSOC);
-
-    if (!$existing) {
-        http_response_code(404);
-        echo json_encode(['error' => 'Itinerary not found']);
-        exit;
+    // 1. Check existing itinerary by id or lead_id
+    $existing = null;
+    if (!empty($id)) {
+        $checkStmt = $pdo->prepare("SELECT id, lead_id, status FROM itineraries WHERE id = ? LIMIT 1");
+        $checkStmt->execute([$id]);
+        $existing = $checkStmt->fetch(PDO::FETCH_ASSOC);
     }
 
-    // 2. Update status in itineraries table
-    $updateStmt = $pdo->prepare("UPDATE itineraries SET status = :status, updated_at = NOW() WHERE id = :id");
-    $updateStmt->execute([
-        ':status' => $status,
-        ':id'     => $id
-    ]);
+    if (!$existing && !empty($leadId)) {
+        $checkStmt = $pdo->prepare("SELECT id, lead_id, status FROM itineraries WHERE lead_id = ? ORDER BY id DESC LIMIT 1");
+        $checkStmt->execute([$leadId]);
+        $existing = $checkStmt->fetch(PDO::FETCH_ASSOC);
+    }
 
-    // 3. Sync lead status if linked lead exists and status is Quote Sent or Booking Confirmed
-    $leadId = $existing['lead_id'] ?? null;
+    $actualId = $existing['id'] ?? $id;
+    $targetLeadId = $existing['lead_id'] ?? $leadId;
+
+    if ($existing && $actualId) {
+        // 2. Update status in itineraries table
+        $updateStmt = $pdo->prepare("UPDATE itineraries SET status = :status, updated_at = NOW() WHERE id = :id");
+        $updateStmt->execute([
+            ':status' => $status,
+            ':id'     => $actualId
+        ]);
+    }
+
+    // 3. Update proposals table if matching lead_id exists
+    if ($targetLeadId) {
+        try {
+            $propStmt = $pdo->prepare("UPDATE proposals SET status = :status, updated_at = NOW() WHERE lead_id = :lead_id");
+            $propStmt->execute([':status' => $status, ':lead_id' => $targetLeadId]);
+        } catch (Exception $pe) {}
+    }
+
+    // 4. Sync lead status if linked lead exists and status is Quote Sent or Booking Confirmed
     $leadUpdated = false;
-    if ($leadId) {
+    if ($targetLeadId) {
         try {
             if ($status === 'Booking Confirmed') {
                 $leadStmt = $pdo->prepare("UPDATE leads SET status = 'Booking Confirmed', updated_at = NOW() WHERE id = ?");
-                $leadStmt->execute([$leadId]);
+                $leadStmt->execute([$targetLeadId]);
                 $leadUpdated = true;
             } else if ($status === 'Quote Sent') {
                 $leadStmt = $pdo->prepare("UPDATE leads SET status = 'Quote Sent', updated_at = NOW() WHERE id = ?");
-                $leadStmt->execute([$leadId]);
+                $leadStmt->execute([$targetLeadId]);
                 $leadUpdated = true;
             }
         } catch (Exception $leadErr) {
@@ -68,9 +85,9 @@ try {
 
     echo json_encode([
         'success'      => true,
-        'id'           => $id,
+        'id'           => $actualId,
         'status'       => $status,
-        'lead_id'      => $leadId,
+        'lead_id'      => $targetLeadId,
         'lead_updated' => $leadUpdated
     ]);
 

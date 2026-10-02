@@ -219,7 +219,7 @@ export const ItineraryWorkspace: React.FC<ItineraryWorkspaceProps> = ({ leads, o
           ...authHeaders
         },
         body: JSON.stringify({
-          id: Number(itineraryId),
+          id: itineraryId,
           status: newStatus
         })
       });

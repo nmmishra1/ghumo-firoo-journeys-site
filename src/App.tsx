@@ -144,6 +144,7 @@ const EnquireSuccess = lazyRetry(() => import('@/pages/EnquireSuccess'));
 const ThankYou = lazyRetry(() => import('@/pages/ThankYou'));
 const QuickPayment = lazyRetry(() => import('@/pages/QuickPayment'));
 const QuoteView = lazyRetry(() => import('@/pages/QuoteView'));
+const PublicProposalView = lazyRetry(() => import('@/pages/public/PublicProposalView'));
 const PublicIndiaExplorer = lazyRetry(() => import('@/pages/public/PublicIndiaExplorer'));
 const PublicDestinationDetail = lazyRetry(() => import('@/pages/public/PublicDestinationDetail'));
 
@@ -318,6 +319,8 @@ function App() {
                <Route path="/reset-password" element={<ResetPassword />} />
                <Route path="/review/:bookingReference" element={<ReviewForm />} />
                <Route path="/quote/:token" element={<QuoteView />} />
+               <Route path="/proposal/:leadId" element={<PublicProposalView />} />
+               <Route path="/proposal" element={<PublicProposalView />} />
                
                {/* Policy pages */}
                <Route path="/privacy-policy" element={<PrivacyPolicy />} />
