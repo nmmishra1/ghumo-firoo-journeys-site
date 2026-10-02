@@ -850,7 +850,7 @@ const EnhancedBrochureDownload: React.FC<EnhancedBrochureDownloadProps> = ({
       rawHotelsList = [{ name: accommodation.trim(), location: destination || 'Handpicked Destination' }];
     }
 
-    const resolvedHotels: Array<{
+    let resolvedHotels: Array<{
       name: string;
       location: string;
       stars?: number;

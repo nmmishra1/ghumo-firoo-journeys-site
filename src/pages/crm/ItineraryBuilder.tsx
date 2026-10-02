@@ -18,7 +18,7 @@ import {
   Trash2, Edit, Plus, ChevronUp, ChevronDown, Copy, Check, Eye, EyeOff, 
   FileText, Send, Share2, Phone, Mail, MessageCircle, RefreshCw, 
   Sparkle, Download, Upload, Loader2, ArrowLeft, ArrowRight, MoreVertical, Layout, 
-  Settings, Printer, HelpCircle, Search, MapPin, Calendar, IndianRupee, BarChart3, X, UserPlus, ShieldAlert
+  Settings, Printer, HelpCircle, Search, MapPin, Calendar, IndianRupee, BarChart3, X, UserPlus, ShieldAlert, CheckCircle2
 } from 'lucide-react';
 import { VoucherInvoiceModal } from '@/components/crm/VoucherInvoiceModal';
 import { crmFetch } from '@/utils/crmApi';
@@ -1970,6 +1970,7 @@ export default function ItineraryBuilder({
 
   // Multi-Option Proposals State
   const [proposalsList, setProposalsList] = useState<any[]>([]);
+  const [isAcceptingProposal, setIsAcceptingProposal] = useState(false);
   const [selectedProposalId, setSelectedProposalId] = useState<string | number | null>(() => {
     if (typeof window !== 'undefined') {
       const urlParam = new URLSearchParams(window.location.search).get('proposalId');
@@ -1977,6 +1978,31 @@ export default function ItineraryBuilder({
     }
     return null;
   });
+
+  const acceptedProposal = useMemo(() => {
+    return proposalsList.find(p => p.status === 'Accepted') || null;
+  }, [proposalsList]);
+
+  const isProposalAccepted = useMemo(() => {
+    return Boolean(acceptedProposal) || ['Booking Confirmed', 'Confirmed', 'Accepted'].includes(itinerary?.status || '');
+  }, [acceptedProposal, itinerary?.status]);
+
+  const currentSelectedOption = useMemo(() => {
+    if (selectedProposalId) {
+      return proposalsList.find(p => String(p.id) === String(selectedProposalId)) || null;
+    }
+    return proposalsList[0] || null;
+  }, [selectedProposalId, proposalsList]);
+
+  const displayOptionLabel = useMemo(() => {
+    if (acceptedProposal) {
+      return acceptedProposal.option_name || `Option ${acceptedProposal.option_number}`;
+    }
+    if (currentSelectedOption) {
+      return currentSelectedOption.option_name || `Option ${currentSelectedOption.option_number}`;
+    }
+    return 'Option 1';
+  }, [acceptedProposal, currentSelectedOption]);
 
   // Fetch Proposals for this lead
   useEffect(() => {
@@ -2001,6 +2027,11 @@ export default function ItineraryBuilder({
                 if (match.itinerary_data?.days && Array.isArray(match.itinerary_data.days) && match.itinerary_data.days.length > 0) {
                   setDays(match.itinerary_data.days);
                 }
+              }
+            } else {
+              const accepted = pData.data.find((p: any) => p.status === 'Accepted');
+              if (accepted) {
+                setSelectedProposalId(accepted.id);
               }
             }
           }
@@ -4556,6 +4587,76 @@ export default function ItineraryBuilder({
     }
   };
 
+  const handleAcceptProposalOption = async (targetPropId?: string | number) => {
+    const currentLeadId = leadId || activeLead?.id;
+    setIsAcceptingProposal(true);
+    try {
+      let optName = 'Option 1';
+
+      if (targetPropId || selectedProposalId || proposalsList.length > 0) {
+        const propToAccept = targetPropId 
+          ? proposalsList.find(p => String(p.id) === String(targetPropId))
+          : (proposalsList.find(p => String(p.id) === String(selectedProposalId)) || proposalsList[0]);
+
+        if (propToAccept) {
+          optName = propToAccept.option_name || `Option ${propToAccept.option_number}`;
+          // 1. Mark selected proposal as Accepted and others as Archived in MySQL
+          const res = await crmFetch(`${apiBase}/proposals.php`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              action: 'accept',
+              proposal_id: propToAccept.id,
+              lead_id: currentLeadId
+            })
+          }, { action: 'accept_proposal', module: 'Leads', recordId: String(propToAccept.id) });
+
+          if (res.ok) {
+            setProposalsList(prev => prev.map(p => 
+              String(p.id) === String(propToAccept.id) 
+                ? { ...p, status: 'Accepted' } 
+                : { ...p, status: 'Archived' }
+            ));
+            setSelectedProposalId(propToAccept.id);
+          }
+        }
+      }
+
+      // 2. Also update itinerary status to 'Booking Confirmed'
+      if (itinerary?.id) {
+        const authHeaders = await getAuthHeader();
+        await fetch(`${apiBase}/itinerary_update_status.php`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            ...authHeaders
+          },
+          body: JSON.stringify({
+            id: Number(itinerary.id),
+            status: 'Booking Confirmed',
+            lead_id: currentLeadId
+          })
+        });
+      }
+
+      setItinerary((prev: any) => prev ? { ...prev, status: 'Booking Confirmed' } : prev);
+
+      toast({
+        title: `🎉 ${optName} Accepted & Confirmed!`,
+        description: `Booking officially confirmed! You can now generate the advance deposit Proforma Invoice.`,
+      });
+    } catch (err: any) {
+      console.error('Failed to accept proposal:', err);
+      toast({
+        title: 'Acceptance failed',
+        description: err.message || 'Could not record proposal acceptance',
+        variant: 'destructive'
+      });
+    } finally {
+      setIsAcceptingProposal(false);
+    }
+  };
+
   const handleStatusSelect = async (newStatus: string) => {
     setItinerary((prev: any) => prev ? { ...prev, status: newStatus } : prev);
     if (itinerary?.id) {
@@ -6325,23 +6426,24 @@ export default function ItineraryBuilder({
           <div id="proposal-print-area" className="proposal-print-container flex-1 max-w-5xl mx-auto w-full p-4 md:p-8 space-y-8 bg-[#0b1021] text-slate-100 shadow-2xl">
             
             {/* Top Luxury Agency Branding Header */}
-            <div className="bg-[#161d2f] border border-slate-800 rounded-2xl p-4 md:p-6 flex flex-col md:flex-row justify-between items-center gap-4 text-left shadow-xl">
+            <div className="bg-[#161d2f] border border-amber-500/20 rounded-2xl p-4 md:p-6 flex flex-col md:flex-row justify-between items-center gap-4 text-left shadow-xl">
               <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-2xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400 font-black text-xl shadow-lg">
-                  GF
+                <div className="h-14 px-3 py-1.5 rounded-2xl bg-white flex items-center justify-center shadow-lg border border-amber-500/30 shrink-0">
+                  <img src="/ghumo-firoo-logo.png" alt="Ghumo Firoo Luxury Travels" className="h-10 w-auto object-contain" />
                 </div>
                 <div>
-                  <h2 className="text-base font-black uppercase text-white tracking-widest flex items-center gap-2">
+                  <h2 className="text-base font-black uppercase text-white tracking-widest flex flex-wrap items-center gap-2">
                     GHUMO FIROO LUXURY TRAVELS
-                    <span className="bg-amber-500/20 text-amber-400 border border-amber-500/40 text-[9px] px-2 py-0.5 rounded-full font-bold">VERIFIED DMC</span>
+                    <span className="bg-amber-500/20 text-amber-400 border border-amber-500/40 text-[9px] px-2.5 py-0.5 rounded-full font-black">NIDHI & MSME VERIFIED DMC</span>
                   </h2>
-                  <p className="text-xs text-slate-300 font-medium">Curated Luxury Holidays & Pilgrimage Journeys • ISO 9001:2026 Certified</p>
+                  <p className="text-xs text-slate-300 font-medium mt-0.5">Curated Luxury Holidays & Pilgrimage Journeys • Govt. Registered Tour Operator • ISO 9001:2026</p>
+                  <p className="text-[11px] text-slate-400">Plot 14, Sector 5, Dwarka, New Delhi - 110075 • GSTIN: 07AAFCG8432L1Z9</p>
                 </div>
               </div>
-              <div className="text-right text-xs font-bold text-slate-300 space-y-0.5">
-                <p>📞 24x7 Concierge: <span className="font-mono text-amber-400 font-extrabold">+91 99109 87264 / +91 98702 29792</span></p>
-                <p>📧 Email: <span className="text-white">luxury@ghumofiroo.com</span></p>
-                <p>🌐 Web: <span className="text-amber-400 font-mono">www.ghumofiroo.com</span></p>
+              <div className="text-right text-xs font-bold text-slate-300 space-y-1 shrink-0">
+                <p>📞 24x7 Concierge: <a href="tel:+919910987264" className="font-mono text-amber-400 font-extrabold hover:underline">+91 99109 87264</a> / <a href="tel:+919870229792" className="font-mono text-amber-400 font-extrabold hover:underline">+91 98702 29792</a></p>
+                <p>📧 Email: <a href="mailto:booking@ghumofiroo.com" className="text-white hover:text-amber-400 transition-colors">booking@ghumofiroo.com</a></p>
+                <p>🌐 Web: <a href="https://www.ghumofiroo.com" target="_blank" rel="noreferrer" className="text-amber-400 font-mono hover:underline">www.ghumofiroo.com</a></p>
               </div>
             </div>
 
@@ -6394,6 +6496,7 @@ export default function ItineraryBuilder({
               <div>
                 <span className="text-[10px] text-amber-400 uppercase font-black tracking-wider block">Proposal Reference</span>
                 <p className="text-sm font-black text-white mt-0.5 font-mono">#{itinerary?.itinerary_code || `ITIN-2026-${activeLead?.id || '001'}`}</p>
+                <p className="text-xs text-slate-300 font-medium">{displayOptionLabel} Selected</p>
               </div>
               <div>
                 <span className="text-[10px] text-amber-400 uppercase font-black tracking-wider block">Travel Window</span>
@@ -6401,14 +6504,138 @@ export default function ItineraryBuilder({
                 <p className="text-xs text-slate-300 font-medium">to {itinerary?.travel_end_date || '---'}</p>
               </div>
               <div>
-                <span className="text-[10px] text-amber-400 uppercase font-black tracking-wider block">Booking Status</span>
-                <p className="text-sm font-black mt-0.5 flex items-center gap-1.5 uppercase tracking-wide text-emerald-400">
-                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping" />
-                  PROPOSAL CONFIRMED
-                </p>
-                <p className="text-xs text-slate-300 font-semibold">Ready for 1-Click Acceptance</p>
+                {isProposalAccepted ? (
+                  <div className="bg-emerald-950/40 border border-emerald-500/50 rounded-xl p-3 flex flex-col justify-between">
+                    <div>
+                      <span className="text-[10px] text-emerald-400 uppercase font-black tracking-wider flex items-center gap-1.5">
+                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" /> BOOKING STATUS
+                      </span>
+                      <p className="text-sm font-black mt-1 text-emerald-300 uppercase tracking-wide flex items-center gap-1.5">
+                        <span className="w-2 h-2 rounded-full bg-emerald-400 shadow-sm shadow-emerald-400/50" />
+                        {displayOptionLabel} ACCEPTED
+                      </p>
+                    </div>
+                    <p className="text-[11px] font-bold text-emerald-200/90 mt-1">
+                      ✓ Confirmed • Ready for Deposit
+                    </p>
+                  </div>
+                ) : (
+                  <div className="bg-amber-950/30 border border-amber-500/40 rounded-xl p-3 flex flex-col justify-between">
+                    <div>
+                      <span className="text-[10px] text-amber-400 uppercase font-black tracking-wider flex items-center gap-1.5">
+                        <Sparkles className="w-3.5 h-3.5 text-amber-400" /> BOOKING STATUS
+                      </span>
+                      <p className="text-sm font-black mt-0.5 text-amber-300 uppercase tracking-wide flex items-center gap-1.5">
+                        <span className="w-2 h-2 rounded-full bg-amber-400 animate-ping" />
+                        {itinerary?.status || 'Proposal Quote'}
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => handleAcceptProposalOption(currentSelectedOption?.id)}
+                      disabled={isAcceptingProposal}
+                      className="mt-2 w-full py-1.5 px-3 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-slate-950 font-black text-xs uppercase tracking-wider rounded-lg shadow-lg hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50"
+                      title="Click to accept this proposal option instantly"
+                    >
+                      {isAcceptingProposal ? (
+                        <>
+                          <Loader2 className="w-3 h-3 animate-spin" /> Accepting...
+                        </>
+                      ) : (
+                        <>
+                          <Check className="w-3.5 h-3.5 stroke-[3]" /> 1-Click Accept Now
+                        </>
+                      )}
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
+
+            {/* Multi-Option Proposal Selector (Shown if options exist) */}
+            {proposalsList.length > 0 && (
+              <div className="bg-[#161d2f] border border-amber-500/30 rounded-2xl p-4 md:p-6 space-y-4 text-left shadow-xl">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b border-slate-800 pb-3">
+                  <div>
+                    <h3 className="text-sm md:text-base font-black uppercase tracking-wider text-white flex items-center gap-2">
+                      <Sparkles className="w-4 h-4 text-amber-400" /> Available Proposal Options ({proposalsList.length})
+                    </h3>
+                    <p className="text-xs text-slate-300 font-medium">Compare tailored options and select or accept your preferred itinerary package.</p>
+                  </div>
+                  {acceptedProposal && (
+                    <Badge className="bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 text-xs font-black uppercase tracking-wider px-3 py-1">
+                      ⭐ {acceptedProposal.option_name || `Option ${acceptedProposal.option_number}`} Confirmed
+                    </Badge>
+                  )}
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
+                  {proposalsList.map((p: any) => {
+                    const isThisSelected = String(selectedProposalId) === String(p.id) || (!selectedProposalId && p === proposalsList[0]);
+                    const isThisAccepted = p.status === 'Accepted';
+
+                    return (
+                      <div 
+                        key={p.id}
+                        onClick={() => handleSwitchProposalOption(p.id)}
+                        className={`relative rounded-xl p-4 transition-all cursor-pointer border flex flex-col justify-between ${
+                          isThisAccepted
+                            ? 'bg-emerald-950/30 border-emerald-500/60 shadow-lg shadow-emerald-950/50 ring-1 ring-emerald-500/40'
+                            : isThisSelected
+                            ? 'bg-amber-500/10 border-amber-500/50 shadow-md ring-1 ring-amber-500/30'
+                            : 'bg-[#0f1420] border-slate-800 hover:border-slate-700'
+                        }`}
+                      >
+                        <div className="space-y-2">
+                          <div className="flex justify-between items-start gap-2">
+                            <span className="font-black text-xs uppercase tracking-wider text-white">
+                              {p.option_name || `Option ${p.option_number}`}
+                            </span>
+                            {isThisAccepted ? (
+                              <span className="bg-emerald-500 text-slate-950 font-black text-[9px] uppercase px-2 py-0.5 rounded-full flex items-center gap-1 shadow">
+                                <Check className="w-2.5 h-2.5 stroke-[3]" /> Accepted
+                              </span>
+                            ) : isThisSelected ? (
+                              <span className="bg-amber-500 text-slate-950 font-black text-[9px] uppercase px-2 py-0.5 rounded-full">
+                                Viewing
+                              </span>
+                            ) : null}
+                          </div>
+
+                          <div className="text-xl font-black text-amber-400 font-mono">
+                            ₹{Number(p.total_price || 0).toLocaleString('en-IN')}
+                          </div>
+                          <p className="text-[11px] text-slate-300 font-medium">
+                            ₹{Number(p.price_per_person || Math.round((p.total_price || 0) / 2)).toLocaleString('en-IN')} per person
+                          </p>
+                        </div>
+
+                        <div className="pt-3 border-t border-slate-800/80 mt-3 flex items-center gap-2">
+                          {isThisAccepted ? (
+                            <span className="text-xs font-black text-emerald-400 flex items-center gap-1">
+                              <CheckCircle2 className="w-3.5 h-3.5" /> Booked & Accepted
+                            </span>
+                          ) : (
+                            <Button
+                              type="button"
+                              size="sm"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleAcceptProposalOption(p.id);
+                              }}
+                              disabled={isAcceptingProposal}
+                              className="w-full bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-black text-[11px] uppercase tracking-wider h-8 rounded-lg shadow cursor-pointer"
+                            >
+                              <Check className="w-3 h-3 mr-1 stroke-[3]" /> Accept {p.option_name || `Option ${p.option_number}`}
+                            </Button>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
 
             {/* Day by Day Vertical Timeline */}
             <div className="space-y-6 text-left">
@@ -6562,52 +6789,110 @@ export default function ItineraryBuilder({
               </div>
             </div>
 
-            {/* Final Pricing Section & 1-Click WhatsApp Acceptance */}
-            <div className="border border-amber-500/30 bg-gradient-to-r from-[#161d2f] to-[#0f1420] p-6 rounded-3xl text-left shadow-2xl flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-              <div className="space-y-1">
-                <span className="text-[10px] font-black text-amber-400 uppercase tracking-widest block">Total Package Investment</span>
-                <div className="text-3xl font-black text-white">
-                  ₹{Math.round(finalPackagePrice).toLocaleString('en-IN')}
+            {/* Final Pricing Section & Acceptance Status Banner */}
+            <div className={`p-6 rounded-3xl text-left shadow-2xl flex flex-col md:flex-row justify-between items-start md:items-center gap-6 border ${
+              isProposalAccepted 
+                ? 'border-emerald-500/50 bg-gradient-to-r from-[#0d2818] via-[#161d2f] to-[#0b1021]' 
+                : 'border-amber-500/30 bg-gradient-to-r from-[#161d2f] to-[#0f1420]'
+            }`}>
+              <div className="space-y-1.5">
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] font-black uppercase tracking-widest text-amber-400">Total Package Investment</span>
+                  {isProposalAccepted && (
+                    <Badge className="bg-emerald-500 text-slate-950 text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full flex items-center gap-1 shadow-md">
+                      <Check className="w-3 h-3 stroke-[3]" /> {displayOptionLabel} Confirmed
+                    </Badge>
+                  )}
+                </div>
+                <div className="text-3xl md:text-4xl font-black text-white font-mono flex items-baseline gap-2">
+                  <span>₹{Math.round(finalPackagePrice).toLocaleString('en-IN')}</span>
+                  <span className="text-xs font-semibold text-slate-400 tracking-normal font-sans">All Inclusive</span>
                 </div>
                 <p className="text-xs text-slate-300 font-bold">
                   Per Person Rate: <span className="font-black text-amber-400 font-mono">₹{Math.round(finalPackagePrice / Math.max(1, (itinerary?.adult_count || 2) + (itinerary?.child_count || 0))).toLocaleString('en-IN')}</span> (For {(itinerary?.adult_count || 2) + (itinerary?.child_count || 0)} Guests)
                 </p>
+                {isProposalAccepted && (
+                  <p className="text-xs text-emerald-300 font-semibold flex items-center gap-1 mt-1">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+                    Trip confirmed by client. Ready to issue Proforma Tax Invoice & Collect Advance Deposit.
+                  </p>
+                )}
               </div>
 
-              <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
+              <div className="flex flex-wrap sm:flex-nowrap gap-3 w-full md:w-auto">
+                {!isProposalAccepted ? (
+                  <Button 
+                    type="button"
+                    onClick={() => handleAcceptProposalOption(currentSelectedOption?.id)}
+                    disabled={isAcceptingProposal}
+                    className="flex-1 sm:flex-none bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-slate-950 font-black text-xs h-11 px-6 rounded-xl shadow-xl flex items-center justify-center cursor-pointer hover:scale-[1.02] active:scale-[0.98] transition-all"
+                  >
+                    {isAcceptingProposal ? (
+                      <>
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" /> Accepting...
+                      </>
+                    ) : (
+                      <>
+                        <Check className="w-4 h-4 mr-2 stroke-[3]" /> 1-Click Accept {displayOptionLabel}
+                      </>
+                    )}
+                  </Button>
+                ) : (
+                  <>
+                    <Button 
+                      type="button"
+                      onClick={handleOpenInvoice}
+                      className="flex-1 sm:flex-none bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white font-black text-xs h-11 px-5 rounded-xl shadow-lg flex items-center justify-center cursor-pointer"
+                    >
+                      <IndianRupee className="w-4 h-4 mr-2" /> Open Proforma Invoice
+                    </Button>
+                    <Button 
+                      type="button"
+                      onClick={handleOpenVoucher}
+                      className="flex-1 sm:flex-none bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-700 hover:to-teal-800 text-white font-black text-xs h-11 px-5 rounded-xl shadow-lg flex items-center justify-center cursor-pointer"
+                    >
+                      <Car className="w-4 h-4 mr-2" /> View Service Voucher
+                    </Button>
+                  </>
+                )}
                 <a 
-                  href={`https://wa.me/?text=${encodeURIComponent(`Hi Ghumo Firoo Travels, I approve the tour proposal for ${itinerary?.customer_name || activeLead?.customer_name} (${itinerary?.itinerary_name || activeLead?.destinations}) priced at ₹${Math.round(finalPackagePrice).toLocaleString('en-IN')}!`)}`}
+                  href={`https://wa.me/919910987264?text=${encodeURIComponent(`Hi Ghumo Firoo Travels, I approve the tour proposal for ${itinerary?.customer_name || activeLead?.customer_name} (${itinerary?.itinerary_name || activeLead?.destinations}) priced at ₹${Math.round(finalPackagePrice).toLocaleString('en-IN')} (${displayOptionLabel})!`)}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex-1 sm:flex-none"
                 >
-                  <Button className="w-full bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-black text-xs h-11 px-5 rounded-xl shadow-lg flex items-center justify-center">
-                    <MessageCircle className="w-4 h-4 mr-2" /> Approve via WhatsApp
+                  <Button className="w-full bg-[#25D366] hover:bg-[#20ba56] text-white font-black text-xs h-11 px-5 rounded-xl shadow-lg flex items-center justify-center border-none">
+                    <MessageCircle className="w-4 h-4 mr-2" /> WhatsApp Approval
                   </Button>
                 </a>
                 <Button 
                   onClick={() => window.print()}
                   className="bg-amber-500 hover:bg-amber-600 text-slate-950 font-black text-xs h-11 px-5 rounded-xl shadow-lg flex items-center justify-center"
                 >
-                  <Printer className="w-4 h-4 mr-2" /> Export PDF Proposal
+                  <Printer className="w-4 h-4 mr-2" /> Export PDF
                 </Button>
               </div>
             </div>
 
             {/* Agent Contact & QR Code Section */}
-            <div className="border-t pt-8 flex flex-col md:flex-row justify-between items-center bg-slate-950 text-white p-6 rounded-3xl gap-6 text-left">
+            <div className="border-t border-slate-800 pt-8 flex flex-col md:flex-row justify-between items-center bg-slate-950 text-white p-6 rounded-3xl gap-6 text-left">
               <div className="space-y-3 flex-1 min-w-0">
-                <div className="flex items-center gap-2">
-                  <span className="text-md font-black tracking-widest uppercase text-accent">Ghumo Firoo Travels</span>
-                  <span className="text-[8px] bg-white/10 text-slate-300 px-2 py-0.5 rounded font-mono uppercase tracking-wider">Premium DMC</span>
+                <div className="flex items-center gap-3">
+                  <div className="h-10 px-2 py-1 rounded-xl bg-white flex items-center justify-center shadow">
+                    <img src="/ghumo-firoo-logo.png" alt="Ghumo Firoo Travels" className="h-7 w-auto object-contain" />
+                  </div>
+                  <div>
+                    <span className="text-sm font-black tracking-widest uppercase text-amber-400">Ghumo Firoo Luxury Travels</span>
+                    <span className="ml-2 text-[9px] bg-amber-500/20 text-amber-300 border border-amber-500/40 px-2 py-0.5 rounded-full font-mono uppercase tracking-wider font-bold">NIDHI VERIFIED DMC</span>
+                  </div>
                 </div>
                 <p className="text-xs text-slate-400 leading-relaxed max-w-md">
-                  Get in touch with your dedicated travel advisor. We are available 24/7 to customize and alter this proposal to matches your absolute desires.
+                  Get in touch with your dedicated travel advisor. We are available 24/7 to customize and alter this proposal to match your absolute desires.
                 </p>
-                <div className="flex flex-wrap gap-x-4 gap-y-1.5 text-[10px] text-slate-300 font-bold uppercase tracking-wider">
-                  <span className="flex items-center gap-1.5">📧 bookings@ghumofiroo.com</span>
-                  <span className="flex items-center gap-1.5">📞 +91 99999 99999</span>
-                  <span className="flex items-center gap-1.5">🌐 www.ghumofiroo.com</span>
+                <div className="flex flex-wrap gap-x-4 gap-y-1.5 text-[11px] text-slate-300 font-bold uppercase tracking-wider">
+                  <span className="flex items-center gap-1.5">📧 <a href="mailto:booking@ghumofiroo.com" className="hover:text-amber-400">booking@ghumofiroo.com</a></span>
+                  <span className="flex items-center gap-1.5">📞 <a href="tel:+919910987264" className="text-amber-400 font-mono hover:underline">+91 99109 87264</a> / <a href="tel:+919870229792" className="text-amber-400 font-mono hover:underline">+91 98702 29792</a></span>
+                  <span className="flex items-center gap-1.5">🌐 <a href="https://www.ghumofiroo.com" target="_blank" rel="noreferrer" className="text-amber-400 hover:underline">www.ghumofiroo.com</a></span>
                 </div>
               </div>
 
@@ -6631,8 +6916,8 @@ export default function ItineraryBuilder({
                 <div className="space-y-1.5">
                   <span className="text-[9px] uppercase tracking-wider text-slate-300 block font-bold">Scan to Chat on WhatsApp</span>
                   <Button 
-                    onClick={() => window.open('https://wa.me/919999999999', '_blank')}
-                    className="bg-[#25D366] hover:bg-[#20ba56] text-white font-black text-[10px] h-8 rounded-xl flex items-center gap-1.5 px-3 uppercase tracking-wider shadow-md transition-all border-none"
+                    onClick={() => window.open('https://wa.me/919910987264', '_blank')}
+                    className="bg-[#25D366] hover:bg-[#20ba56] text-white font-black text-[10px] h-8 rounded-xl flex items-center gap-1.5 px-3 uppercase tracking-wider shadow-md transition-all border-none cursor-pointer"
                   >
                     <MessageCircle className="w-3.5 h-3.5" /> WhatsApp Live
                   </Button>
@@ -6679,12 +6964,13 @@ export default function ItineraryBuilder({
             {/* Header Letterhead */}
             <div className="flex justify-between items-start border-b-2 border-slate-900 pb-6">
               <div className="space-y-1">
+                <img src="/ghumo-firoo-logo.png" alt="Ghumo Firoo Travels" className="h-10 w-auto object-contain mb-2" />
                 <h1 className="text-3xl font-black tracking-tight text-slate-900">GHUMO FIROO LUXURY TRAVELS</h1>
                 <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">Official Operational Service Confirmation Voucher</span>
                 <p className="text-xs text-slate-500 max-w-[340px] font-semibold mt-2">
                   Plot 14, Sector 5, Dwarka, New Delhi - 110075<br />
                   GSTIN: 07AAFCG8432L1Z9 | SAC: 998555<br />
-                  24x7 Operations Desk: +91 9910987264 | bookings@ghumofiroo.com
+                  24x7 Operations Desk: +91 9910987264 / +91 9870229792 | booking@ghumofiroo.com
                 </p>
               </div>
               <div className="text-right space-y-1">
@@ -6916,12 +7202,13 @@ export default function ItineraryBuilder({
             {/* Header */}
             <div className="flex justify-between items-start border-b-2 border-slate-900 pb-6">
               <div className="space-y-1">
+                <img src="/ghumo-firoo-logo.png" alt="Ghumo Firoo Travels" className="h-10 w-auto object-contain mb-2" />
                 <h1 className="text-3xl font-black tracking-tight text-slate-900">GHUMO FIROO TRAVELS PVT LTD</h1>
                 <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">Government Registered Tour Operator • GST Compliant Tax Invoice</span>
                 <p className="text-xs text-slate-500 max-w-[340px] font-semibold mt-2">
                   Plot 14, Sector 5, Dwarka, New Delhi - 110075<br />
                   <strong>GSTIN: 07AAFCG8432L1Z9</strong> | SAC Code: 998555<br />
-                  accounts@ghumofiroo.com | +91 9910987264
+                  booking@ghumofiroo.com | +91 9910987264 / +91 9870229792
                 </p>
               </div>
               <div className="text-right space-y-1">

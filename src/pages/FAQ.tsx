@@ -229,7 +229,7 @@ const FAQ: React.FC = () => {
           {/* Contact CTA */}
           <div className="mt-16 grid md:grid-cols-2 gap-6">
             <a
-              href="https://wa.me/919999999999"
+              href="https://wa.me/919910987264"
               target="_blank"
               rel="noopener noreferrer"
               className="group flex items-center gap-5 p-7 bg-green-50 border-2 border-green-100 rounded-3xl hover:border-green-300 hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
