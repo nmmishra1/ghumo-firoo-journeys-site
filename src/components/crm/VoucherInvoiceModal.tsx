@@ -5,16 +5,18 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
-import { FileText, Download, Car, Bed, ShieldAlert, CheckCircle2, ShieldCheck, Lock, Unlock } from 'lucide-react';
+import { FileText, Download, Car, Bed, ShieldAlert, CheckCircle2, ShieldCheck, Lock, Unlock, Sparkles } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { crmFetch } from '@/utils/crmApi';
 import { 
   generateInvoicePDF, 
   generateHotelVoucherPDF, 
   generateCabVoucherPDF,
+  generateMasterVoucherPDF,
   InvoiceData, 
   HotelVoucherData, 
-  CabVoucherData 
+  CabVoucherData,
+  MasterVoucherData
 } from '@/lib/voucherService';
 
 interface VoucherInvoiceModalProps {
@@ -22,7 +24,7 @@ interface VoucherInvoiceModalProps {
   onClose: () => void;
   lead: any;
   itinerary?: any;
-  initialTab?: 'invoice' | 'hotel' | 'cab';
+  initialTab?: 'invoice' | 'hotel' | 'cab' | 'master';
 }
 
 const apiBase = import.meta.env.VITE_API_BASE_URL || '/php-backend';
@@ -35,7 +37,7 @@ export const VoucherInvoiceModal: React.FC<VoucherInvoiceModalProps> = ({
   initialTab = 'invoice'
 }) => {
   const { toast } = useToast();
-  const [activeTab, setActiveTab] = useState<'invoice' | 'hotel' | 'cab'>(initialTab);
+  const [activeTab, setActiveTab] = useState<'invoice' | 'hotel' | 'cab' | 'master'>(initialTab);
 
   useEffect(() => {
     if (initialTab) {
@@ -294,6 +296,72 @@ export const VoucherInvoiceModal: React.FC<VoucherInvoiceModalProps> = ({
     }
   };
 
+  const handleDownloadMasterVoucher = async () => {
+    if (!isAdvancePaid && !overrideGating) {
+      toast({
+        title: '⚠️ Advance Payment Required',
+        description: 'Master Voucher cannot be released before 50% advance payment is verified.',
+        variant: 'destructive'
+      });
+      return;
+    }
+
+    try {
+      const masterVoucherNo = `MV-${Date.now().toString().slice(-7)}`;
+      const data: MasterVoucherData = {
+        voucherNumber: masterVoucherNo,
+        bookingDate: new Date().toISOString().split('T')[0],
+        guestName: lead?.customer_name || 'Valued Guest',
+        guestPhone: lead?.customer_phone || '',
+        guestEmail: lead?.customer_email || '',
+        destination: lead?.destinations || lead?.destination || lead?.package_name || 'Tour Package',
+        travelDates: `${checkIn} to ${checkOut}`,
+        adults: Number(lead?.adult_count || lead?.number_of_pax || 2),
+        children: Number(lead?.child_count || 0),
+        packageTitle: lead?.package_name || itinerary?.title || `${lead?.destination || 'Custom'} Tour Package`,
+        hotels: hotelList.map(h => ({
+          dayNumber: h.dayNumber,
+          date: h.date,
+          hotelName: h.name,
+          city: h.city,
+          address: h.address,
+          roomCategory: h.roomType,
+          mealPlan: h.mealPlan,
+          checkIn,
+          checkOut,
+          confirmationNumber: h.hotelConfNo || `CONF-${Date.now().toString().slice(-6)}`
+        })),
+        transport: cabList.map(c => ({
+          dayNumber: c.dayNumber,
+          date: c.date,
+          vehicleType: c.vehicleType,
+          vehicleNumber: c.vehicleNo,
+          driverName: c.driverName,
+          driverPhone: c.driverPhone,
+          pickupLocation: c.pickupLoc,
+          dropLocation: c.dropLoc
+        })),
+        activities: [],
+        financials: {
+          baseAmount: basePrice,
+          gstPercent: gstRate,
+          gstAmount,
+          totalAmount: totalPrice,
+          amountPaid,
+          balanceDue
+        }
+      };
+      const doc = generateMasterVoucherPDF(data);
+      const fileName = `${masterVoucherNo}_Master_Tour_Voucher.pdf`;
+      doc.save(fileName);
+      await saveDocumentToDb(fileName, doc);
+      toast({ title: '✅ Master Voucher Downloaded', description: `All-in-one voucher ${masterVoucherNo} archived to lead documents.` });
+    } catch (err) {
+      console.error(err);
+      toast({ title: 'Error', description: 'Failed to generate Master Tour Voucher', variant: 'destructive' });
+    }
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-3xl bg-slate-900 border border-slate-800 text-white shadow-2xl">
@@ -336,15 +404,18 @@ export const VoucherInvoiceModal: React.FC<VoucherInvoiceModalProps> = ({
         </div>
 
         <Tabs value={activeTab} onValueChange={(val: any) => setActiveTab(val)}>
-          <TabsList className="grid grid-cols-3 bg-slate-950 border border-slate-800 p-1 rounded-xl">
+          <TabsList className="grid grid-cols-4 bg-slate-950 border border-slate-800 p-1 rounded-xl">
             <TabsTrigger value="invoice" className="flex items-center gap-1.5 text-xs data-[state=active]:bg-[#C9A25A] data-[state=active]:text-[#0B1026] font-bold">
-              <FileText className="w-3.5 h-3.5" /> GST Proforma Invoice
+              <FileText className="w-3.5 h-3.5" /> GST Invoice
             </TabsTrigger>
             <TabsTrigger value="hotel" className="flex items-center gap-1.5 text-xs data-[state=active]:bg-emerald-600 data-[state=active]:text-white font-bold">
               <Bed className="w-3.5 h-3.5" /> Hotel Voucher
             </TabsTrigger>
             <TabsTrigger value="cab" className="flex items-center gap-1.5 text-xs data-[state=active]:bg-blue-600 data-[state=active]:text-white font-bold">
-              <Car className="w-3.5 h-3.5" /> Cab Transport Voucher
+              <Car className="w-3.5 h-3.5" /> Cab Voucher
+            </TabsTrigger>
+            <TabsTrigger value="master" className="flex items-center gap-1.5 text-xs data-[state=active]:bg-purple-600 data-[state=active]:text-white font-bold">
+              <Sparkles className="w-3.5 h-3.5" /> Master Voucher
             </TabsTrigger>
           </TabsList>
 
@@ -507,6 +578,49 @@ export const VoucherInvoiceModal: React.FC<VoucherInvoiceModalProps> = ({
               className="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold h-10 rounded-xl gap-2 disabled:opacity-40"
             >
               <Download className="w-4 h-4 stroke-[2.5]" /> {savingDoc ? 'Generating & Archiving...' : 'Download & Archive Cab Voucher PDF'}
+            </Button>
+          </TabsContent>
+          {/* TAB 4: MASTER TOUR VOUCHER */}
+          <TabsContent value="master" className="space-y-4 pt-2 text-left">
+            {!isAdvancePaid && !overrideGating && (
+              <div className="p-3 bg-amber-500/10 border border-amber-500/30 rounded-xl flex items-center gap-2.5 text-xs text-amber-300">
+                <ShieldAlert className="w-4 h-4 shrink-0 text-amber-400" />
+                <span>
+                  <strong>Gated:</strong> Master Voucher requires 50% advance deposit verification. Enable override above to release.
+                </span>
+              </div>
+            )}
+
+            <div className="bg-slate-950 border border-slate-800 p-4 rounded-xl space-y-3 text-xs">
+              <div className="flex items-center gap-2 text-purple-300 font-bold text-sm">
+                <Sparkles className="w-4 h-4" /> Complete Tour Document (All-in-One)
+              </div>
+              <p className="text-slate-400 leading-relaxed">
+                Generates a single comprehensive PDF containing the full tour summary, all hotel accommodations, all transport legs, payment ledger, and emergency contacts — ideal for sharing with the guest before departure.
+              </p>
+              <div className="grid grid-cols-3 gap-2 pt-1">
+                <div className="bg-slate-900 rounded-lg p-2.5 text-center border border-slate-700">
+                  <div className="text-lg font-black text-emerald-400">{hotelList.length}</div>
+                  <div className="text-[10px] text-slate-400 mt-0.5">Hotel{hotelList.length !== 1 ? 's' : ''}</div>
+                </div>
+                <div className="bg-slate-900 rounded-lg p-2.5 text-center border border-slate-700">
+                  <div className="text-lg font-black text-blue-400">{cabList.length}</div>
+                  <div className="text-[10px] text-slate-400 mt-0.5">Transport Leg{cabList.length !== 1 ? 's' : ''}</div>
+                </div>
+                <div className="bg-slate-900 rounded-lg p-2.5 text-center border border-slate-700">
+                  <div className="text-lg font-black text-[#C9A25A]">₹{balanceDue.toLocaleString('en-IN')}</div>
+                  <div className="text-[10px] text-slate-400 mt-0.5">Balance Due</div>
+                </div>
+              </div>
+            </div>
+
+            <Button
+              onClick={handleDownloadMasterVoucher}
+              disabled={(!isAdvancePaid && !overrideGating) || savingDoc}
+              className="w-full bg-gradient-to-r from-purple-600 to-purple-500 hover:opacity-95 text-white font-black h-11 rounded-xl gap-2 disabled:opacity-40"
+            >
+              <Sparkles className="w-4 h-4 stroke-[2.5]" />
+              {savingDoc ? 'Generating & Archiving...' : 'Download Master Tour Voucher PDF (All-in-One)'}
             </Button>
           </TabsContent>
         </Tabs>

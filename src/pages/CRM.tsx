@@ -1247,16 +1247,7 @@ const CRM = () => {
       const now = new Date().toISOString();
       const userRoleStr = userProfile?.role || 'Agent';
 
-      // 1. Delete associated itinerary records automatically
-      // TODO: delete related itineraries via PHP/MySQL when itineraries endpoint is available
-      const { error: itineraryDeleteError } = await supabase
-        .from('itineraries')
-        .delete()
-        .eq('lead_id', leadToDelete.id);
-
-      if (itineraryDeleteError) {
-        console.error('Error deleting related itineraries:', itineraryDeleteError);
-      }
+      // 1. Itinerary deletion is handled server-side by MySQL CASCADE when lead is deleted via PHP backend.
 
       // 2. Soft delete the lead via MySQL backend
       await leadService.deleteLead(leadToDelete.id);
@@ -5529,13 +5520,13 @@ Please let us know if you need any customizations. Looking forward to hosting yo
           )}
 
           {/* TOUR ITINERARY BUILDER LIVE */}
-          {['itinerary', 'brochure', 'voucher', 'invoice'].includes(currentSection) && activeLead && (
+          {['itinerary', 'brochure', 'voucher', 'invoice'].includes(currentSection) && (activeLead || leadId) && (
             <Suspense fallback={<NavyGoldLoader />}>
               <ItineraryBuilder 
                 leadId={leadId || ''}
-                activeLead={activeLead}
+                activeLead={activeLead || { id: leadId, customer_name: 'Loading...' } as any}
                 initialDocView={currentSection !== 'itinerary' ? (currentSection as any) : undefined}
-                onBack={() => navigate(`/crm/leads/${activeLead.id}`)}
+                onBack={() => navigate(`/crm/leads/${activeLead?.id || leadId}`)}
                 userProfile={userProfile}
                 onOpenCsvImport={() => setCsvImportOpen(true)}
                 onOpenUserManagement={() => setUserManagementOpen(true)}
