@@ -42,8 +42,8 @@ $resetData = [
 
 // Build reset URL
 $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
-$host = $_SERVER['HTTP_HOST'] ?? 'localhost:8080';
-$resetUrl = "http://localhost:8080/reset-password?email=" . urlencode($email) . "&token=" . $token;
+$host = $_SERVER['HTTP_HOST'] ?? 'ghumofiroo.com';
+$resetUrl = $protocol . '://' . $host . '/reset-password?email=' . urlencode($email) . '&token=' . $token;
 
 // HTML Email Body
 $htmlBody = '
@@ -84,6 +84,12 @@ $htmlBody = '
 
 // Primary Email Provider: Resend REST API
 $resendKey = getenv('RESEND_API_KEY') ?: '';
+
+if (empty($resendKey)) {
+    http_response_code(500);
+    echo json_encode(['error' => 'Email service not configured. Please contact admin.', 'detail' => 'RESEND_API_KEY env var is missing on the server.']);
+    exit;
+}
 
 $resendPayload = json_encode([
     'from' => 'Ghumo Firoo Travels <noreply@ghumofiroo.com>',
