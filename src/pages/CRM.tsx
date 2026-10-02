@@ -1,5 +1,5 @@
 // Updated CRM module - clean HMR reload
-import React, { useState, useEffect, useRef, Suspense } from 'react';
+import React, { useState, useEffect, useRef, Suspense, useCallback } from 'react';
 import { useNavigate, useLocation, useParams, Link, useSearchParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -22,6 +22,7 @@ import {
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import { useIdleTimeout } from '@/hooks/useIdleTimeout';
 import { useToast } from '@/hooks/use-toast';
 import { leadService, mapLeadFromDb } from '@/services/leadService';
 import { reviewService } from '@/services/reviewService';
@@ -218,6 +219,14 @@ const CRM = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { user, loading: authLoading, signOut } = useAuth();
+
+  // Stable callback for idle timeout toast warnings
+  const idleToast = useCallback((opts: { title: string; description: string; variant?: string; duration?: number }) => {
+    toast(opts as any);
+  }, [toast]);
+
+  // Enforce strict 30-minute idle auto-logout across all CRM views
+  useIdleTimeout(user ? idleToast : undefined);
 
   useEffect(() => {
     if (!authLoading && !user) {

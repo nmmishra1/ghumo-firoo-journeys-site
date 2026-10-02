@@ -3,6 +3,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { invalidateApiCache } from '@/utils/crmCache';
+import { isSessionExpired, clearAuthStorage } from '@/hooks/useIdleTimeout';
 
 // Module-level persistent cache across route changes
 let cachedSession: Session | null = null;
@@ -17,6 +18,18 @@ const notifySubscribers = () => {
 // Initialize Supabase Auth listener once globally
 if (typeof window !== 'undefined') {
   supabase.auth.getSession().then(({ data: { session } }) => {
+    if (session && isSessionExpired(session)) {
+      supabase.auth.signOut().catch(() => {});
+      clearAuthStorage();
+      cachedSession = null;
+      cachedUser = null;
+      isInitialized = true;
+      notifySubscribers();
+      if (!window.location.pathname.startsWith('/auth') && !window.location.pathname.startsWith('/login')) {
+        window.location.href = '/auth?reason=idle';
+      }
+      return;
+    }
     cachedSession = session;
     cachedUser = session?.user ?? null;
     isInitialized = true;
@@ -28,7 +41,20 @@ if (typeof window !== 'undefined') {
 
   supabase.auth.onAuthStateChange((event, session) => {
     if (event === 'SIGNED_OUT') {
+      clearAuthStorage();
       invalidateApiCache();
+    }
+    if (session && isSessionExpired(session)) {
+      supabase.auth.signOut().catch(() => {});
+      clearAuthStorage();
+      cachedSession = null;
+      cachedUser = null;
+      isInitialized = true;
+      notifySubscribers();
+      if (!window.location.pathname.startsWith('/auth') && !window.location.pathname.startsWith('/login')) {
+        window.location.href = '/auth?reason=idle';
+      }
+      return;
     }
     cachedSession = session;
     cachedUser = session?.user ?? null;
@@ -58,6 +84,18 @@ export const useAuth = () => {
       setLoading(false);
     } else {
       supabase.auth.getSession().then(({ data: { session } }) => {
+        if (session && isSessionExpired(session)) {
+          supabase.auth.signOut().catch(() => {});
+          clearAuthStorage();
+          cachedSession = null;
+          cachedUser = null;
+          isInitialized = true;
+          handleUpdate();
+          if (!window.location.pathname.startsWith('/auth') && !window.location.pathname.startsWith('/login')) {
+            window.location.href = '/auth?reason=idle';
+          }
+          return;
+        }
         cachedSession = session;
         cachedUser = session?.user ?? null;
         isInitialized = true;
@@ -82,10 +120,8 @@ export const useAuth = () => {
     notifySubscribers();
     invalidateApiCache();
     
-    // Clear auth keys
-    localStorage.removeItem('sb-auth-token');
-    localStorage.removeItem('ghumofiroo-crm-auth-token');
-    sessionStorage.clear();
+    // Clear all auth keys
+    clearAuthStorage();
 
     window.location.href = '/auth';
   }, []);

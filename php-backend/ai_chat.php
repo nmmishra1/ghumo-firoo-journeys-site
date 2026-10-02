@@ -66,10 +66,10 @@ YOUR PERSONALITY & RULES:
 if (!empty($geminiApiKey)) {
     $modelsToTry = array_filter([
         getenv('GEMINI_MODEL'),
+        'gemini-flash-latest',
         'gemini-2.5-flash',
         'gemini-2.0-flash',
         'gemini-1.5-flash',
-        'gemini-flash-latest',
         'gemini-2.5-pro',
         'gemini-1.5-pro'
     ]);
@@ -106,7 +106,10 @@ if (!empty($geminiApiKey)) {
         $ch2 = curl_init($googleUrl);
         curl_setopt($ch2, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch2, CURLOPT_POST, true);
-        curl_setopt($ch2, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
+        curl_setopt($ch2, CURLOPT_HTTPHEADER, [
+            'Content-Type: application/json',
+            "X-goog-api-key: {$geminiApiKey}"
+        ]);
         curl_setopt($ch2, CURLOPT_POSTFIELDS, json_encode($googlePayload));
         curl_setopt($ch2, CURLOPT_TIMEOUT, 6);
         curl_setopt($ch2, CURLOPT_SSL_VERIFYPEER, false);
