@@ -656,12 +656,17 @@ const CRM = () => {
             setIsRepeatCustomer(Boolean(data.is_repeat_customer));
 
             if (data.lead) {
-              setActiveLead((prev: any) => ({
-                ...(prev || {}),
-                ...data.lead,
-                total_paid_amount: data.total_paid_amount ?? data.lead.total_paid_amount,
-                advance_paid_verified: data.advance_paid_verified ?? data.lead.advance_paid_verified,
-                proposals: data.proposals || []
+              setLeads((prevLeads: Lead[]) => prevLeads.map(l => {
+                if (String(l.id) === String(id)) {
+                  return {
+                    ...l,
+                    ...data.lead,
+                    total_paid_amount: data.total_paid_amount ?? data.lead.total_paid_amount,
+                    advance_paid_verified: data.advance_paid_verified ?? data.lead.advance_paid_verified,
+                    proposals: data.proposals || (l as any).proposals || []
+                  };
+                }
+                return l;
               }));
             }
 
