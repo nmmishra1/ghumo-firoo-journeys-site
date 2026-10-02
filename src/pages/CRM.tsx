@@ -541,6 +541,15 @@ const CRM = () => {
   const [paymentMode, setPaymentMode] = useState('UPI');
   const [paymentRef, setPaymentRef] = useState('');
   const [paymentRemarks, setPaymentRemarks] = useState('');
+  const [editingPayment, setEditingPayment] = useState<any | null>(null);
+  const [editPaymentAmount, setEditPaymentAmount] = useState('');
+  const [editPaymentMode, setEditPaymentMode] = useState('UPI');
+  const [editPaymentRef, setEditPaymentRef] = useState('');
+  const [editPaymentRemarks, setEditPaymentRemarks] = useState('');
+  const [editPaymentDate, setEditPaymentDate] = useState('');
+  const [isUpdatingPayment, setIsUpdatingPayment] = useState(false);
+  const [paymentToDelete, setPaymentToDelete] = useState<any | null>(null);
+  const [isDeletingPayment, setIsDeletingPayment] = useState(false);
   const [newDocumentName, setNewDocumentName] = useState('');
   const [isUploadingDoc, setIsUploadingDoc] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -702,13 +711,29 @@ const CRM = () => {
       });
       return;
     }
+
+    const trimmedRef = paymentRef.trim();
+    if (trimmedRef) {
+      const existingPayment = allPayments.find(p => 
+        p.reference_number && p.reference_number.trim().toLowerCase() === trimmedRef.toLowerCase()
+      );
+      if (existingPayment) {
+        toast({
+          title: "Duplicate UPI UTR / Reference Error ⚠️",
+          description: `Reference / UPI UTR '${trimmedRef}' has already been recorded on ${existingPayment.payment_date} (Amount: ₹${Number(existingPayment.amount_received || 0).toLocaleString('en-IN')}). Duplicate entries are not allowed.`,
+          variant: "destructive"
+        });
+        return;
+      }
+    }
+
     try {
       const { data: { session } } = await supabase.auth.getSession();
       const token = session?.access_token;
       const authHeaders = token ? { 'Authorization': `Bearer ${token}` } : {};
 
       const amt = Number(paymentAmount);
-      const refNum = paymentRef || `REF${Math.floor(100000 + Math.random() * 900000)}`;
+      const refNum = trimmedRef || `REF${Math.floor(100000 + Math.random() * 900000)}`;
       const remarksText = paymentRemarks || 'Manual Payment Entry';
       
       const res = await fetch('/php-backend/api.php?table=payments', {
@@ -753,6 +778,7 @@ const CRM = () => {
 
       fetchAllPayments();
       if (activeLead) fetchLeadPaymentsAndDocuments(activeLead.id);
+      fetchLeads(true);
     } catch (err: any) {
       console.error('Error recording payment:', err);
       toast({
@@ -760,6 +786,133 @@ const CRM = () => {
         description: err.message || "Failed to record payment",
         variant: "destructive"
       });
+    }
+  };
+
+  const handleOpenEditPayment = (pay: any) => {
+    setEditingPayment(pay);
+    setEditPaymentAmount(String(pay.amount_received || ''));
+    setEditPaymentMode(pay.payment_mode || 'UPI');
+    setEditPaymentRef(pay.reference_number || '');
+    setEditPaymentRemarks(pay.remarks || '');
+    setEditPaymentDate(pay.payment_date || new Date().toISOString().split('T')[0]);
+  };
+
+  const handleUpdatePayment = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingPayment) return;
+    if (!editPaymentAmount) {
+      toast({
+        title: "Amount Required",
+        description: "Please specify the payment amount.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    const trimmedRef = editPaymentRef.trim();
+    if (trimmedRef) {
+      const dup = allPayments.find(p => 
+        String(p.id) !== String(editingPayment.id) &&
+        p.reference_number && 
+        p.reference_number.trim().toLowerCase() === trimmedRef.toLowerCase()
+      );
+      if (dup) {
+        toast({
+          title: "Duplicate UPI UTR / Reference Detected ⚠️",
+          description: `Reference '${trimmedRef}' was already used for a payment on ${dup.payment_date} (Amount: ₹${Number(dup.amount_received || 0).toLocaleString('en-IN')}).`,
+          variant: "destructive"
+        });
+        return;
+      }
+    }
+
+    setIsUpdatingPayment(true);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const token = session?.access_token;
+      const authHeaders = token ? { 'Authorization': `Bearer ${token}` } : {};
+
+      const amt = Number(editPaymentAmount);
+      const res = await fetch(`/php-backend/api.php?table=payments&id=${encodeURIComponent(editingPayment.id)}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          ...authHeaders
+        },
+        body: JSON.stringify({
+          amount_received: amt,
+          payment_date: editPaymentDate || editingPayment.payment_date,
+          payment_mode: editPaymentMode,
+          reference_number: trimmedRef,
+          remarks: editPaymentRemarks
+        })
+      });
+
+      if (!res.ok) {
+        const errData = await res.json();
+        throw new Error(errData.error || 'Failed to update payment');
+      }
+
+      toast({
+        title: "Payment Updated Successfully! 🟢",
+        description: `Updated record to ₹${amt.toLocaleString('en-IN')} (Ref: ${trimmedRef || 'N/A'}).`
+      });
+
+      setEditingPayment(null);
+      fetchAllPayments();
+      if (activeLead) fetchLeadPaymentsAndDocuments(activeLead.id);
+      fetchLeads(true);
+    } catch (err: any) {
+      console.error('Error updating payment:', err);
+      toast({
+        title: "Update Failed",
+        description: err.message || "Failed to update payment record.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsUpdatingPayment(false);
+    }
+  };
+
+  const handleDeletePayment = async () => {
+    if (!paymentToDelete) return;
+    setIsDeletingPayment(true);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const token = session?.access_token;
+      const authHeaders = token ? { 'Authorization': `Bearer ${token}` } : {};
+
+      const res = await fetch(`/php-backend/api.php?table=payments&id=${encodeURIComponent(paymentToDelete.id)}`, {
+        method: 'DELETE',
+        headers: {
+          ...authHeaders
+        }
+      });
+
+      if (!res.ok) {
+        const errData = await res.json();
+        throw new Error(errData.error || 'Failed to delete payment');
+      }
+
+      toast({
+        title: "Payment Deleted Successfully! 🗑️",
+        description: `Deleted duplicate/unwanted payment entry of ₹${Number(paymentToDelete.amount_received || 0).toLocaleString('en-IN')}.`
+      });
+
+      setPaymentToDelete(null);
+      fetchAllPayments();
+      if (activeLead) fetchLeadPaymentsAndDocuments(activeLead.id);
+      fetchLeads(true);
+    } catch (err: any) {
+      console.error('Error deleting payment:', err);
+      toast({
+        title: "Deletion Failed",
+        description: err.message || "Failed to delete payment entry.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsDeletingPayment(false);
     }
   };
 
@@ -5804,15 +5957,35 @@ Please let us know if you need any customizations. Looking forward to hosting yo
                                   </td>
                                   <td className="p-3.5 text-right font-black text-xs text-emerald-400">₹{net.toLocaleString('en-IN')}</td>
                                   <td className="p-3.5 text-center">
-                                    <Button
-                                      size="sm"
-                                      variant="ghost"
-                                      onClick={handleWhatsAppReceipt}
-                                      className="h-7 px-2 text-[10px] font-bold text-emerald-400 hover:bg-emerald-500/20 rounded-lg border border-emerald-500/30 flex items-center gap-1 mx-auto cursor-pointer"
-                                      title="Send WhatsApp Payment Receipt"
-                                    >
-                                      <Share2 className="w-3 h-3" /> WhatsApp Receipt
-                                    </Button>
+                                    <div className="flex items-center justify-center gap-1.5">
+                                      <Button
+                                        size="sm"
+                                        variant="ghost"
+                                        onClick={handleWhatsAppReceipt}
+                                        className="h-7 px-2 text-[10px] font-bold text-emerald-400 hover:bg-emerald-500/20 rounded-lg border border-emerald-500/30 flex items-center gap-1 cursor-pointer"
+                                        title="Send WhatsApp Payment Receipt"
+                                      >
+                                        <Share2 className="w-3 h-3" /> WhatsApp
+                                      </Button>
+                                      <Button
+                                        size="sm"
+                                        variant="ghost"
+                                        onClick={() => handleOpenEditPayment(pay)}
+                                        className="h-7 px-2 text-[10px] font-bold text-amber-300 hover:bg-amber-500/20 rounded-lg border border-amber-500/30 flex items-center gap-1 cursor-pointer"
+                                        title="Edit Payment / Reference"
+                                      >
+                                        <Edit className="w-3 h-3" /> Edit
+                                      </Button>
+                                      <Button
+                                        size="sm"
+                                        variant="ghost"
+                                        onClick={() => setPaymentToDelete(pay)}
+                                        className="h-7 px-2 text-[10px] font-bold text-rose-400 hover:bg-rose-500/20 rounded-lg border border-rose-500/30 flex items-center gap-1 cursor-pointer"
+                                        title="Delete Duplicate / Invalid Entry"
+                                      >
+                                        <Trash2 className="w-3 h-3" /> Delete
+                                      </Button>
+                                    </div>
                                   </td>
                                 </tr>
                               );
@@ -6908,6 +7081,148 @@ Please let us know if you need any customizations. Looking forward to hosting yo
               <Button type="submit" size="sm" className="bg-gradient-warm text-[#0B1026] font-bold text-xs h-10 px-5 rounded-xl border-0 shadow-lg cursor-pointer">Save Payment Entry</Button>
             </DialogFooter>
           </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* EDIT PAYMENT MODAL */}
+      <Dialog open={!!editingPayment} onOpenChange={(open) => !open && setEditingPayment(null)}>
+        <DialogContent className="sm:max-w-[450px] bg-slate-900 border border-white/10 text-white font-poppins rounded-2xl">
+          <DialogHeader>
+            <DialogTitle className="text-base font-bold uppercase tracking-wider flex items-center gap-2 text-white">
+              <Edit className="w-5 h-5 text-amber-400" />
+              Edit Payment Entry
+            </DialogTitle>
+            <DialogDescription className="text-xs text-slate-300">
+              Update payment amount, payment mode, 12-digit UPI UTR, or remarks.
+            </DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handleUpdatePayment} className="space-y-4 pt-2">
+            <div className="space-y-1">
+              <Label htmlFor="edit-pay-date" className="text-xs font-bold text-slate-200 block uppercase">Payment Date</Label>
+              <Input 
+                id="edit-pay-date"
+                type="date"
+                value={editPaymentDate} 
+                onChange={(e) => setEditPaymentDate(e.target.value)} 
+                required 
+                className="text-xs bg-white/5 border-white/15 text-white h-10 rounded-xl font-bold focus-visible:ring-accent"
+              />
+            </div>
+
+            <div className="space-y-1">
+              <Label htmlFor="edit-pay-amt" className="text-xs font-bold text-slate-200 block uppercase">Payment Amount (INR) *</Label>
+              <Input 
+                id="edit-pay-amt" 
+                type="number" 
+                placeholder="e.g. 15000" 
+                value={editPaymentAmount} 
+                onChange={(e) => setEditPaymentAmount(e.target.value)} 
+                required 
+                className="text-xs bg-white/5 border-white/15 text-white h-10 rounded-xl font-bold focus-visible:ring-accent"
+              />
+            </div>
+
+            <div className="space-y-1">
+              <Label htmlFor="edit-pay-mode" className="text-xs font-bold text-slate-200 block uppercase">Payment Mode</Label>
+              <Select value={editPaymentMode} onValueChange={setEditPaymentMode}>
+                <SelectTrigger id="edit-pay-mode" className="text-xs bg-white/5 border-white/15 text-white h-10 rounded-xl font-bold">
+                  <SelectValue placeholder="Select mode" />
+                </SelectTrigger>
+                <SelectContent className="bg-slate-900 border-slate-700 text-white text-xs">
+                  <SelectItem value="UPI">⚡ UPI / GPay / PhonePe (0% MDR Fee)</SelectItem>
+                  <SelectItem value="Net Banking">🏦 Net Banking / IMPS / NEFT</SelectItem>
+                  <SelectItem value="Credit Card">💳 Credit Card (2.36% Fee)</SelectItem>
+                  <SelectItem value="Debit Card">💳 Debit Card</SelectItem>
+                  <SelectItem value="Cash">💵 Cash</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-1">
+              <Label htmlFor="edit-pay-ref" className="text-xs font-bold text-slate-200 block uppercase">12-Digit UPI UTR / RRN / Transaction ID</Label>
+              <Input 
+                id="edit-pay-ref" 
+                placeholder="e.g. 423891023847 or TXN9810247" 
+                value={editPaymentRef} 
+                onChange={(e) => setEditPaymentRef(e.target.value)} 
+                className="text-xs bg-white/5 border-white/15 text-white h-10 rounded-xl font-mono focus-visible:ring-accent"
+              />
+            </div>
+
+            <div className="space-y-1">
+              <Label htmlFor="edit-pay-rem" className="text-xs font-bold text-slate-200 block uppercase">Remarks / Note</Label>
+              <Input 
+                id="edit-pay-rem" 
+                placeholder="e.g. 30% Token Advance Booking Payment" 
+                value={editPaymentRemarks} 
+                onChange={(e) => setEditPaymentRemarks(e.target.value)} 
+                className="text-xs bg-white/5 border-white/15 text-white h-10 rounded-xl font-semibold"
+              />
+            </div>
+
+            <DialogFooter className="pt-2">
+              <Button type="button" variant="outline" size="sm" onClick={() => setEditingPayment(null)} className="text-xs font-bold bg-white/5 border-white/15 text-slate-300 hover:bg-white/10 rounded-xl">Cancel</Button>
+              <Button type="submit" disabled={isUpdatingPayment} size="sm" className="bg-gradient-warm text-[#0B1026] font-bold text-xs h-10 px-5 rounded-xl border-0 shadow-lg cursor-pointer">
+                {isUpdatingPayment ? 'Saving...' : 'Update Payment Entry'}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* DELETE PAYMENT CONFIRMATION MODAL */}
+      <Dialog open={!!paymentToDelete} onOpenChange={(open) => !open && setPaymentToDelete(null)}>
+        <DialogContent className="sm:max-w-[420px] bg-slate-900 border border-rose-500/30 text-white font-poppins rounded-2xl">
+          <DialogHeader>
+            <DialogTitle className="text-base font-bold uppercase tracking-wider flex items-center gap-2 text-rose-400">
+              <Trash2 className="w-5 h-5 text-rose-400" />
+              Delete Payment Entry
+            </DialogTitle>
+            <DialogDescription className="text-xs text-slate-300">
+              Are you sure you want to permanently delete this payment entry from the accounts ledger?
+            </DialogDescription>
+          </DialogHeader>
+
+          {paymentToDelete && (
+            <div className="p-3.5 bg-rose-500/10 border border-rose-500/20 rounded-xl space-y-2 text-xs">
+              <div className="flex justify-between">
+                <span className="text-slate-400 font-medium">Payment Date:</span>
+                <span className="text-white font-mono font-bold">{paymentToDelete.payment_date}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-slate-400 font-medium">Amount Received:</span>
+                <span className="text-emerald-400 font-bold">₹{Number(paymentToDelete.amount_received || 0).toLocaleString('en-IN')}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-slate-400 font-medium">Payment Mode:</span>
+                <span className="text-amber-300 font-bold">{paymentToDelete.payment_mode || 'UPI'}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-slate-400 font-medium">UPI UTR / Ref:</span>
+                <span className="text-white font-mono font-bold">{paymentToDelete.reference_number || 'N/A'}</span>
+              </div>
+              {paymentToDelete.remarks && (
+                <div className="flex justify-between">
+                  <span className="text-slate-400 font-medium">Remarks:</span>
+                  <span className="text-slate-200">{paymentToDelete.remarks}</span>
+                </div>
+              )}
+            </div>
+          )}
+
+          <DialogFooter className="pt-2 gap-2">
+            <Button type="button" variant="outline" size="sm" onClick={() => setPaymentToDelete(null)} className="text-xs font-bold bg-white/5 border-white/15 text-slate-300 hover:bg-white/10 rounded-xl">Cancel</Button>
+            <Button 
+              type="button" 
+              variant="destructive" 
+              size="sm" 
+              disabled={isDeletingPayment} 
+              onClick={handleDeletePayment}
+              className="bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs h-10 px-5 rounded-xl cursor-pointer"
+            >
+              {isDeletingPayment ? 'Deleting...' : 'Yes, Delete Entry'}
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
 

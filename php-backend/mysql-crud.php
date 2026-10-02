@@ -191,6 +191,23 @@ function checkDuplicateMasterRecord($pdo, $table, $input, $excludeId = null) {
                 return "Duplicate City: City '{$dup['city_name']}' is already registered in database.";
             }
         }
+    } elseif ($table === 'payments') {
+        $refNo = trim($input['reference_number'] ?? ($input['utr'] ?? ($input['transaction_id'] ?? '')));
+        if (!empty($refNo) && strlen($refNo) >= 4) {
+            $sql = "SELECT id, reference_number, amount_received, payment_date FROM `payments` WHERE LOWER(TRIM(reference_number)) = LOWER(TRIM(:refNo))";
+            $params = [':refNo' => $refNo];
+            if ($excludeId) {
+                $sql .= " AND id != :exclude_id";
+                $params[':exclude_id'] = $excludeId;
+            }
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute($params);
+            $dup = $stmt->fetch(PDO::FETCH_ASSOC);
+            if ($dup) {
+                $dupAmt = number_format((float)($dup['amount_received'] ?? 0));
+                return "Duplicate Reference / UPI UTR: Number '{$dup['reference_number']}' was already recorded on {$dup['payment_date']} (Amount: ₹{$dupAmt}). Duplicate entries are not allowed.";
+            }
+        }
     }
     return null;
 }
