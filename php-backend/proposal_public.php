@@ -94,6 +94,22 @@ if ($method === 'GET') {
             $itinerary = $itinStmt->fetch(PDO::FETCH_ASSOC);
         } catch (Exception $itinErr) {}
 
+        // Helper to produce a clean holiday title instead of internal system names like "Trip - Customized Option 4"
+        $rawItinName = trim($itinerary['itinerary_name'] ?? '');
+        $rawLeadDest = trim($lead['destination'] ?: ($lead['destinations'] ?: ''));
+        $displayTourTitle = $rawItinName;
+        if (empty($displayTourTitle) || preg_match('/^(Trip\s*-\s*Customized\s*Option\s*\d+|Customized\s*Option\s*\d+|Itinerary\s*-\s*\d+|Customized\s*Tour)/i', $displayTourTitle)) {
+            if (!empty($rawLeadDest)) {
+                $destParts = array_map('trim', explode('·', $rawLeadDest));
+                $meaningful = array_filter($destParts, function($p) {
+                    return !preg_match('/^\d+N\/\d+D$/i', $p) && !preg_match('/^\d+N$/i', $p);
+                });
+                $displayTourTitle = !empty($meaningful) ? implode(' • ', $meaningful) : $rawLeadDest;
+            } else {
+                $displayTourTitle = 'Bespoke Curated Tour';
+            }
+        }
+
         // Fallback: If no proposals rows exist yet, create default option from itinerary
         if (empty($proposals) && $itinerary) {
             $itinPrice = (float)($itinerary['final_cost'] ?: ($itinerary['total_cost'] ?: 0));
@@ -103,7 +119,7 @@ if ($method === 'GET') {
                     'id'               => $itinerary['id'],
                     'option_number'    => 1,
                     'option_name'      => 'Option 1 (Curated)',
-                    'title'            => $itinerary['itinerary_name'] ?: ($lead['destination'] ? "{$lead['destination']} Package" : 'Bespoke Tour Package'),
+                    'title'            => $displayTourTitle,
                     'total_price'      => $itinPrice,
                     'price_per_person' => $itinPerPax > 0 ? $itinPerPax : round($itinPrice / max(1, (int)($lead['adult_count'] ?? 2))),
                     'advance_required' => round($itinPrice * 0.30, 2),
@@ -119,26 +135,97 @@ if ($method === 'GET') {
                 $hasAccepted = true;
                 $acceptedOption = $proposals[0];
             }
+        } else {
+            // Clean up proposal titles if they have internal system names
+            foreach ($proposals as &$p) {
+                if (empty($p['title']) || preg_match('/^(Trip\s*-\s*Customized\s*Option\s*\d+|Customized\s*Option\s*\d+)/i', $p['title'])) {
+                    $p['title'] = $displayTourTitle;
+                }
+            }
+            unset($p);
         }
 
         $days = [];
         if ($itinerary && !empty($itinerary['id'])) {
             try {
+                // Fetch sub-tables: hotels, transport, excursions
+                $stmtHotels = $pdo->prepare("
+                    SELECT ih.*, h.hotel_name, h.star_rating AS star_category
+                    FROM itinerary_hotels ih
+                    LEFT JOIN hotels h ON h.id = ih.hotel_id
+                    WHERE ih.itinerary_id = ?
+                ");
+                $stmtHotels->execute([$itinerary['id']]);
+                $allHotels = $stmtHotels->fetchAll(PDO::FETCH_ASSOC);
+                $hotelsByDay = [];
+                foreach ($allHotels as $h) {
+                    $dayId = $h['itinerary_day_id'] ?: $h['day_id'];
+                    if ($dayId) $hotelsByDay[$dayId][] = $h;
+                }
+
+                $stmtTrans = $pdo->prepare("SELECT * FROM itinerary_transport WHERE itinerary_id = ?");
+                $stmtTrans->execute([$itinerary['id']]);
+                $allTrans = $stmtTrans->fetchAll(PDO::FETCH_ASSOC);
+                $transByDay = [];
+                foreach ($allTrans as $t) {
+                    $dayId = $t['itinerary_day_id'] ?: $t['day_id'];
+                    if ($dayId) $transByDay[$dayId][] = $t;
+                }
+
+                $stmtExcs = $pdo->prepare("SELECT * FROM itinerary_excursions WHERE itinerary_id = ?");
+                $stmtExcs->execute([$itinerary['id']]);
+                $allExcs = $stmtExcs->fetchAll(PDO::FETCH_ASSOC);
+                $excsByDay = [];
+                foreach ($allExcs as $e) {
+                    $dayId = $e['itinerary_day_id'] ?: $e['day_id'];
+                    if ($dayId) $excsByDay[$dayId][] = $e;
+                }
+
                 $daysStmt = $pdo->prepare("SELECT * FROM itinerary_days WHERE itinerary_id = ? ORDER BY day_number ASC");
                 $daysStmt->execute([$itinerary['id']]);
                 $rawDays = $daysStmt->fetchAll(PDO::FETCH_ASSOC);
+
                 foreach ($rawDays as $rd) {
                     $meta = is_string($rd['metadata']) ? json_decode($rd['metadata'], true) : ($rd['metadata'] ?? []);
+                    $blocks = $meta['blocks'] ?? [];
+
+                    // Look for hotel block in metadata if not on day
+                    $hotelBlockProp = null;
+                    $cabBlockProp = null;
+                    $actBlocks = [];
+
+                    foreach ($blocks as $b) {
+                        $bType = strtolower($b['type'] ?? '');
+                        if ($bType === 'hotel' && !$hotelBlockProp) {
+                            $hotelBlockProp = $b['properties'] ?? [];
+                        } else if (($bType === 'transfer' || $bType === 'cab') && !$cabBlockProp) {
+                            $cabBlockProp = $b['properties'] ?? [];
+                        } else if ($bType === 'activity' || $bType === 'sightseeing') {
+                            $actBlocks[] = $b;
+                        }
+                    }
+
+                    $dayHotels = $hotelsByDay[$rd['id']] ?? [];
+                    $primaryHotel = $dayHotels[0] ?? [];
+
+                    $hotelName = $rd['hotel_name'] ?: ($primaryHotel['hotel_name'] ?? ($hotelBlockProp['hotel_name'] ?? ''));
+                    $roomType = $rd['room_type'] ?: ($primaryHotel['room_type'] ?? ($hotelBlockProp['room_category'] ?? ($hotelBlockProp['room_type'] ?? 'Standard Room')));
+                    $mealPlan = $rd['meal_plan'] ?: ($primaryHotel['meal_plan'] ?? ($hotelBlockProp['meal_plan'] ?? 'CP (Breakfast Included)'));
+
                     $days[] = [
+                        'id'           => $rd['id'],
                         'day_number'   => (int)$rd['day_number'],
                         'date'         => $rd['date'] ?? '',
                         'title'        => $rd['title'] ?: "Day {$rd['day_number']}",
                         'description'  => $rd['description'] ?: '',
                         'destination'  => $rd['destination'] ?: '',
-                        'hotel_name'   => $rd['hotel_name'] ?: '',
-                        'room_type'    => $rd['room_type'] ?: '',
-                        'meal_plan'    => $rd['meal_plan'] ?: '',
-                        'blocks'       => $meta['blocks'] ?? []
+                        'hotel_name'   => $hotelName,
+                        'room_type'    => $roomType,
+                        'meal_plan'    => $mealPlan,
+                        'hotels'       => $dayHotels,
+                        'transport'    => $transByDay[$rd['id']] ?? ($cabBlockProp ? [$cabBlockProp] : []),
+                        'excursions'   => $excsByDay[$rd['id']] ?? [],
+                        'blocks'       => $blocks
                     ];
                 }
             } catch (Exception $dayErr) {}
@@ -172,7 +259,7 @@ if ($method === 'GET') {
             ],
             'itinerary' => $itinerary ? [
                 'id'              => $itinerary['id'],
-                'itinerary_name'  => $itinerary['itinerary_name'] ?: 'Customized Luxury Tour',
+                'itinerary_name'  => $displayTourTitle,
                 'destinations'    => is_string($itinerary['destinations']) ? json_decode($itinerary['destinations'], true) : ($itinerary['destinations'] ?? []),
                 'total_nights'    => (int)($itinerary['total_nights'] ?? 0),
                 'total_cost'      => (float)($itinerary['final_cost'] ?: ($itinerary['total_cost'] ?: 0)),

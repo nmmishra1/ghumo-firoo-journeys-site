@@ -13,23 +13,19 @@ import {
   MessageCircle, 
   Sparkles, 
   Check, 
-  ChevronRight,
   Car, 
   Hotel, 
   Utensils, 
   Camera, 
-  Info,
-  Loader2,
-  FileCheck2,
-  Lock,
-  ArrowRight,
-  Compass,
+  Loader2, 
+  Bed,
   RefreshCw,
-  Award,
-  ExternalLink
+  Compass,
+  ArrowRight,
+  Shield,
+  FileText
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { Helmet } from 'react-helmet-async';
@@ -38,6 +34,9 @@ const API_BASE = import.meta.env.VITE_API_BASE_URL || '/php-backend';
 
 function getDestinationHero(destination: string): string {
   const dest = (destination || '').toLowerCase();
+  if (dest.includes('jodhpur') || dest.includes('rajasthan') || dest.includes('jaipur') || dest.includes('udaipur')) {
+    return 'https://images.unsplash.com/photo-1599661046289-e31897846e41?q=80&w=1600&auto=format&fit=crop';
+  }
   if (dest.includes('kashmir') || dest.includes('srinagar') || dest.includes('gulmarg') || dest.includes('pahalgam')) {
     return 'https://images.unsplash.com/photo-1587570220642-1e967a6d80ff?q=80&w=1600&auto=format&fit=crop';
   }
@@ -56,16 +55,22 @@ function getDestinationHero(destination: string): string {
   if (dest.includes('himachal') || dest.includes('manali') || dest.includes('shimla') || dest.includes('spiti')) {
     return 'https://images.unsplash.com/photo-1626621341517-bbf3d9990a23?q=80&w=1600&auto=format&fit=crop';
   }
-  if (dest.includes('rajasthan') || dest.includes('jaipur') || dest.includes('udaipur') || dest.includes('jaisalmer')) {
-    return 'https://images.unsplash.com/photo-1599661046289-e31897846e41?q=80&w=1600&auto=format&fit=crop';
-  }
-  if (dest.includes('dubai')) {
-    return 'https://images.unsplash.com/photo-1512453979798-5ea266f8880c?q=80&w=1600&auto=format&fit=crop';
-  }
-  if (dest.includes('singapore')) {
-    return 'https://images.unsplash.com/photo-1525625293386-3f8f99389edd?q=80&w=1600&auto=format&fit=crop';
-  }
   return 'https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?q=80&w=1600&auto=format&fit=crop';
+}
+
+function cleanTitle(rawTitle?: string, rawDest?: string): string {
+  const title = (rawTitle || '').trim();
+  const dest = (rawDest || '').trim();
+  
+  if (!title || /^(Trip\s*-\s*Customized\s*Option\s*\d+|Customized\s*Option\s*\d+|Itinerary\s*-\s*\d+|Customized\s*Tour)/i.test(title)) {
+    if (dest) {
+      const parts = dest.split('·').map(s => s.trim()).filter(Boolean);
+      const cleanParts = parts.filter(p => !/^\d+N\/\d+D$/i.test(p) && !/^\d+N$/i.test(p));
+      return cleanParts.join(' • ') || dest;
+    }
+    return 'Bespoke Curated Holiday';
+  }
+  return title;
 }
 
 export default function PublicProposalView() {
@@ -83,7 +88,7 @@ export default function PublicProposalView() {
 
   const fetchProposal = () => {
     if (!leadId) {
-      setError('Missing proposal link reference. Please check your link.');
+      setError('Missing proposal reference. Please check your proposal link.');
       setLoading(false);
       return;
     }
@@ -155,7 +160,7 @@ export default function PublicProposalView() {
 
       toast({
         title: "🎉 Booking Confirmed!",
-        description: `Thank you! ${activeOption.option_name || 'Your option'} is officially confirmed.`,
+        description: `Thank you! ${activeOption.option_name || 'Option 1'} is officially confirmed.`,
         className: 'bg-emerald-950 text-emerald-100 border-emerald-700'
       });
 
@@ -187,10 +192,10 @@ export default function PublicProposalView() {
     }
   };
 
-  // Reusable Top Luxury Header
+  // Luxury Branding Header
   const renderHeader = () => (
-    <header className="sticky top-0 z-40 bg-[#050814]/95 backdrop-blur-md border-b border-amber-500/20 shadow-xl print:hidden">
-      <div className="max-w-6xl mx-auto px-4 h-18 flex items-center justify-between">
+    <header className="sticky top-0 z-40 bg-[#0b1021]/95 backdrop-blur-md border-b border-amber-500/20 shadow-xl print:hidden">
+      <div className="max-w-6xl mx-auto px-4 h-16 sm:h-20 flex items-center justify-between">
         <Link to="/" className="flex items-center gap-3">
           <div className="h-10 px-2.5 py-1.5 rounded-xl bg-white flex items-center justify-center shadow-lg border border-amber-500/30">
             <img src="/ghumo-firoo-logo.png" alt="Ghumo Firoo Travels" className="h-7 w-auto object-contain" />
@@ -200,19 +205,19 @@ export default function PublicProposalView() {
               GHUMO FIROO TRAVELS
             </span>
             <span className="text-[10px] text-[#C9A25A] font-semibold block -mt-0.5">
-              Curated Holidays & Luxury Journeys
+              Official Proposal & Client Booking Portal
             </span>
           </div>
         </Link>
 
-        <div className="flex items-center gap-2.5">
+        <div className="flex items-center gap-2 sm:gap-3">
           <Button 
             onClick={() => window.print()} 
             variant="outline" 
             size="sm" 
-            className="border-slate-800 bg-slate-900/80 text-slate-300 hover:bg-slate-800 text-xs rounded-xl hidden sm:flex items-center gap-1.5"
+            className="border-slate-800 bg-[#161d2f] text-slate-200 hover:bg-slate-800 text-xs rounded-xl hidden sm:flex items-center gap-1.5"
           >
-            <Printer className="w-3.5 h-3.5" /> PDF
+            <Printer className="w-3.5 h-3.5" /> PDF / Print
           </Button>
           <a 
             href="tel:+919910987264"
@@ -236,9 +241,9 @@ export default function PublicProposalView() {
     </header>
   );
 
-  // Reusable Luxury Footer
+  // Luxury Agency Footer
   const renderFooter = () => (
-    <footer className="border-t border-slate-800/80 pt-10 pb-8 mt-12 bg-[#04060e] text-slate-400 text-left print:hidden">
+    <footer className="border-t border-slate-800/80 pt-10 pb-8 mt-14 bg-[#070b16] text-slate-400 text-left print:hidden">
       <div className="max-w-6xl mx-auto px-4 flex flex-col md:flex-row justify-between items-start md:items-center gap-8">
         <div className="space-y-2.5 max-w-lg">
           <div className="flex items-center gap-3">
@@ -247,7 +252,7 @@ export default function PublicProposalView() {
             </div>
             <div>
               <span className="text-sm font-black text-white uppercase tracking-wider block">Ghumo Firoo Travels</span>
-              <span className="text-[10px] text-[#C9A25A] font-bold">Govt. Registered Tour Operator & DMC</span>
+              <span className="text-[10px] text-[#C9A25A] font-bold">NIDHI & MSME Verified Tour Operator & DMC</span>
             </div>
           </div>
           <p className="text-[11px] text-slate-400 leading-relaxed">
@@ -256,13 +261,13 @@ export default function PublicProposalView() {
           <div className="flex flex-wrap gap-4 text-xs font-bold text-slate-300 pt-1">
             <a href="tel:+919910987264" className="hover:text-amber-400 transition-colors">📞 +91 99109 87264</a>
             <a href="tel:+919870229792" className="hover:text-amber-400 transition-colors">📞 +91 98702 29792</a>
-            <a href="mailto:luxury@ghumofiroo.com" className="hover:text-amber-400 transition-colors">✉️ luxury@ghumofiroo.com</a>
+            <a href="mailto:booking@ghumofiroo.com" className="hover:text-amber-400 transition-colors">✉️ booking@ghumofiroo.com</a>
           </div>
         </div>
 
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full md:w-auto">
           <a 
-            href={`https://wa.me/919910987264?text=${encodeURIComponent(`Hi Ghumo Firoo Travels, I am ready to proceed with my tour booking.`)}`}
+            href={`https://wa.me/919910987264?text=${encodeURIComponent(`Hi Ghumo Firoo Travels, I am ready to confirm my travel package.`)}`}
             target="_blank"
             rel="noopener noreferrer"
           >
@@ -280,8 +285,8 @@ export default function PublicProposalView() {
         </div>
       </div>
       <div className="max-w-6xl mx-auto px-4 mt-8 pt-6 border-t border-slate-900 text-[10px] text-slate-500 flex flex-col sm:flex-row justify-between items-center gap-2">
-        <p>© 2026 Ghumo Firoo Travels. All rights reserved. Confidential Client Proposal.</p>
-        <p>100% Verified Accommodations & Sanitized Vehicles</p>
+        <p>© 2026 Ghumo Firoo Travels. All rights reserved. Official Client Proposal.</p>
+        <p>Verified Hotel Bookings & Dedicated Private Chauffeur Services</p>
       </div>
     </footer>
   );
@@ -289,7 +294,7 @@ export default function PublicProposalView() {
   // Loading Screen
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#050814] text-white flex flex-col justify-between">
+      <div className="min-h-screen bg-[#070b16] text-white flex flex-col justify-between">
         {renderHeader()}
         <div className="flex flex-col items-center justify-center p-8 my-auto text-center space-y-4">
           <div className="relative">
@@ -297,8 +302,8 @@ export default function PublicProposalView() {
             <Compass className="w-8 h-8 text-[#C9A25A] absolute inset-0 m-auto animate-pulse" />
           </div>
           <div>
-            <h2 className="text-lg font-black text-white tracking-wide">Retrieving Your Curated Proposal</h2>
-            <p className="text-xs text-slate-400 mt-1">Connecting to Ghumo Firoo luxury reservation desk...</p>
+            <h2 className="text-lg font-black text-white tracking-wide">Retrieving Your Curated Holiday Proposal</h2>
+            <p className="text-xs text-slate-400 mt-1">Connecting to Ghumo Firoo luxury reservations desk...</p>
           </div>
         </div>
         {renderFooter()}
@@ -309,14 +314,14 @@ export default function PublicProposalView() {
   // Graceful Error Screen
   if (error || !proposalData) {
     return (
-      <div className="min-h-screen bg-[#050814] text-white flex flex-col justify-between">
+      <div className="min-h-screen bg-[#070b16] text-white flex flex-col justify-between">
         {renderHeader()}
         <div className="max-w-xl mx-auto px-4 py-16 text-center my-auto">
-          <div className="bg-slate-900/80 border border-slate-800 p-8 md:p-10 rounded-3xl shadow-2xl backdrop-blur-md">
+          <div className="bg-[#161d2f] border border-slate-800 p-8 md:p-10 rounded-3xl shadow-2xl backdrop-blur-md">
             <div className="w-16 h-16 bg-amber-500/10 border border-amber-500/30 rounded-2xl flex items-center justify-center mx-auto mb-5 text-[#C9A25A]">
               <Sparkles className="w-8 h-8" />
             </div>
-            <h2 className="text-2xl font-black text-white mb-2">Proposal Updating or Unavailable</h2>
+            <h2 className="text-2xl font-black text-white mb-2">Proposal Updating or In Review</h2>
             <p className="text-slate-300 text-xs leading-relaxed mb-6">
               Your travel consultant is currently updating your itinerary or options. Please refresh or contact our 24/7 dedicated concierge desk for immediate assistance.
             </p>
@@ -352,6 +357,7 @@ export default function PublicProposalView() {
   const perPersonPrice = activeOption?.price_per_person || Math.round(totalPrice / adultPax);
   const advanceRequired = activeOption?.advance_required || Math.round(totalPrice * 0.3);
   const heroImage = getDestinationHero(lead.destination || itinerary?.itinerary_name || '');
+  const displayTitle = cleanTitle(itinerary?.itinerary_name, lead.destination);
 
   return (
     <>
@@ -359,111 +365,111 @@ export default function PublicProposalView() {
         <title>{lead.customer_name ? `${lead.customer_name}'s Tour Proposal` : 'Curated Travel Proposal'} | Ghumo Firoo Travels</title>
       </Helmet>
 
-      <div className="min-h-screen bg-[#070B18] text-slate-100 font-sans antialiased selection:bg-[#C9A25A] selection:text-slate-950 pb-28 print:bg-white print:text-black print:pb-0">
+      <div className="min-h-screen bg-[#070b16] text-slate-100 font-sans antialiased selection:bg-[#C9A25A] selection:text-slate-950 pb-28 print:bg-white print:text-black print:pb-0">
         
         {renderHeader()}
 
-        {/* Hero Cover Banner */}
+        {/* Hero Destination Cover Banner */}
         <section className="relative overflow-hidden border-b border-slate-800 bg-[#050814]">
-          {/* Hero Background image with gradient mask */}
           <div className="absolute inset-0 z-0">
             <img 
               src={heroImage} 
-              alt={lead.destination} 
-              className="w-full h-full object-cover opacity-35 filter brightness-75 scale-105" 
+              alt={displayTitle} 
+              className="w-full h-full object-cover opacity-45 filter brightness-85 scale-105" 
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-[#070B18] via-[#070B18]/70 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-t from-[#070b16] via-[#070b16]/75 to-transparent" />
           </div>
 
-          <div className="relative z-10 max-w-6xl mx-auto px-4 pt-12 pb-14 text-left">
-            <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-8">
-              
-              <div className="space-y-4 max-w-3xl">
-                <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#C9A25A]/15 border border-[#C9A25A]/40 text-[#C9A25A] text-[11px] font-black uppercase tracking-wider shadow-lg">
-                  <Sparkles className="w-3.5 h-3.5" /> Bespoke Client Itinerary Proposal
-                </div>
-                
-                <h1 className="text-3xl sm:text-4xl md:text-5xl font-black text-white tracking-tight leading-tight uppercase drop-shadow-md">
-                  {itinerary?.itinerary_name || `${lead.destination} Holiday`}
-                </h1>
-
-                <p className="text-sm md:text-base text-slate-200 font-medium">
-                  Curated exclusively for <span className="text-[#C9A25A] font-black">{lead.customer_name}</span> & Travel Companions
-                </p>
-
-                {/* Quick Trip Highlights Grid */}
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2">
-                  <div className="bg-slate-950/70 border border-slate-800 rounded-2xl p-3 backdrop-blur-md">
-                    <div className="flex items-center gap-2 text-[#C9A25A] text-xs font-bold mb-1">
-                      <Calendar className="w-3.5 h-3.5" /> Dates
-                    </div>
-                    <div className="text-xs font-black text-white truncate">
-                      {lead.trip_start_date ? new Date(lead.trip_start_date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' }) : 'Flexible'}
-                      {lead.trip_end_date ? ` - ${new Date(lead.trip_end_date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}` : ''}
-                    </div>
-                  </div>
-
-                  <div className="bg-slate-950/70 border border-slate-800 rounded-2xl p-3 backdrop-blur-md">
-                    <div className="flex items-center gap-2 text-[#C9A25A] text-xs font-bold mb-1">
-                      <Clock className="w-3.5 h-3.5" /> Duration
-                    </div>
-                    <div className="text-xs font-black text-white truncate">
-                      {itinerary?.total_nights ? `${itinerary.total_nights} Nights / ${itinerary.total_nights + 1} Days` : `${days.length} Days`}
-                    </div>
-                  </div>
-
-                  <div className="bg-slate-950/70 border border-slate-800 rounded-2xl p-3 backdrop-blur-md">
-                    <div className="flex items-center gap-2 text-[#C9A25A] text-xs font-bold mb-1">
-                      <Users className="w-3.5 h-3.5" /> Travelers
-                    </div>
-                    <div className="text-xs font-black text-white truncate">
-                      {lead.adult_count || 2} Adults {lead.child_count > 0 ? `, ${lead.child_count} Child` : ''}
-                    </div>
-                  </div>
-
-                  <div className="bg-slate-950/70 border border-slate-800 rounded-2xl p-3 backdrop-blur-md">
-                    <div className="flex items-center gap-2 text-[#C9A25A] text-xs font-bold mb-1">
-                      <MapPin className="w-3.5 h-3.5" /> Destination
-                    </div>
-                    <div className="text-xs font-black text-white truncate">
-                      {lead.destination || 'India'}
-                    </div>
-                  </div>
-                </div>
+          <div className="relative z-10 max-w-6xl mx-auto px-4 pt-10 pb-12 text-left">
+            <div className="space-y-4 max-w-3xl">
+              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#C9A25A]/15 border border-[#C9A25A]/40 text-[#C9A25A] text-[11px] font-black uppercase tracking-wider shadow-lg">
+                <Sparkles className="w-3.5 h-3.5" /> Bespoke Client Itinerary Proposal
               </div>
+              
+              <h1 className="text-3xl sm:text-4xl md:text-5xl font-black text-white tracking-tight leading-tight uppercase drop-shadow-md">
+                {displayTitle}
+              </h1>
 
-              {/* Status Header Badge */}
-              <div className="bg-slate-950/90 border border-slate-800 p-5 rounded-3xl shadow-2xl backdrop-blur-md min-w-[240px] text-left">
-                <div className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2 flex items-center justify-between">
-                  <span>Proposal Status</span>
-                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+              <p className="text-sm md:text-base text-slate-200 font-medium">
+                Curated exclusively for <span className="text-[#C9A25A] font-black">{lead.customer_name}</span> & Travel Companions
+              </p>
+
+              {/* Seamless 5-Card Trip Stats Strip (Clean Uniform Geometry) */}
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 pt-2">
+                <div className="bg-[#161d2f]/80 border border-slate-800 rounded-2xl p-3.5 backdrop-blur-md">
+                  <div className="flex items-center gap-1.5 text-[#C9A25A] text-[11px] font-bold mb-1">
+                    <Calendar className="w-3.5 h-3.5" /> Travel Dates
+                  </div>
+                  <div className="text-xs font-black text-white truncate">
+                    {lead.trip_start_date ? new Date(lead.trip_start_date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' }) : 'Flexible'}
+                    {lead.trip_end_date ? ` - ${new Date(lead.trip_end_date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}` : ''}
+                  </div>
                 </div>
-                <div className={`text-lg font-black ${isAccepted ? 'text-emerald-400' : 'text-[#C9A25A]'}`}>
-                  {isAccepted ? 'Booking Confirmed 🟢' : 'Ready for Guest Review'}
+
+                <div className="bg-[#161d2f]/80 border border-slate-800 rounded-2xl p-3.5 backdrop-blur-md">
+                  <div className="flex items-center gap-1.5 text-[#C9A25A] text-[11px] font-bold mb-1">
+                    <Clock className="w-3.5 h-3.5" /> Duration
+                  </div>
+                  <div className="text-xs font-black text-white truncate">
+                    {itinerary?.total_nights ? `${itinerary.total_nights} Nights / ${itinerary.total_nights + 1} Days` : `${days.length} Days`}
+                  </div>
                 </div>
-                <p className="text-[11px] text-slate-400 mt-1">
-                  {isAccepted ? 'Option accepted. Awaiting advance deposit.' : 'Compare options & 1-click accept below'}
-                </p>
+
+                <div className="bg-[#161d2f]/80 border border-slate-800 rounded-2xl p-3.5 backdrop-blur-md">
+                  <div className="flex items-center gap-1.5 text-[#C9A25A] text-[11px] font-bold mb-1">
+                    <Users className="w-3.5 h-3.5" /> Travelers
+                  </div>
+                  <div className="text-xs font-black text-white truncate">
+                    {lead.adult_count || 2} Adults {lead.child_count > 0 ? `, ${lead.child_count} Child` : ''}
+                  </div>
+                </div>
+
+                <div className="bg-[#161d2f]/80 border border-slate-800 rounded-2xl p-3.5 backdrop-blur-md">
+                  <div className="flex items-center gap-1.5 text-[#C9A25A] text-[11px] font-bold mb-1">
+                    <MapPin className="w-3.5 h-3.5" /> Region
+                  </div>
+                  <div className="text-xs font-black text-white truncate">
+                    {lead.destination ? lead.destination.split('·')[0].trim() : 'India'}
+                  </div>
+                </div>
+
+                <div className={`col-span-2 sm:col-span-1 border rounded-2xl p-3.5 backdrop-blur-md flex flex-col justify-between ${
+                  isAccepted ? 'bg-emerald-950/40 border-emerald-500/50' : 'bg-amber-950/30 border-amber-500/40'
+                }`}>
+                  <div className="flex items-center gap-1.5 text-[11px] font-bold mb-1 text-slate-300">
+                    <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" /> Booking Status
+                  </div>
+                  <div className={`text-xs font-black flex items-center gap-1.5 truncate ${
+                    isAccepted ? 'text-emerald-400' : 'text-[#C9A25A]'
+                  }`}>
+                    <span className={`w-2 h-2 rounded-full ${isAccepted ? 'bg-emerald-400' : 'bg-amber-400 animate-pulse'}`} />
+                    {isAccepted ? 'Confirmed 🟢' : 'Awaiting Choice'}
+                  </div>
+                </div>
               </div>
 
             </div>
           </div>
         </section>
 
-        {/* Main Body */}
-        <main className="max-w-6xl mx-auto px-4 pt-10 space-y-12">
+        {/* Main Content Area */}
+        <main className="max-w-6xl mx-auto px-4 pt-8 space-y-10">
 
-          {/* Option Selection Cards */}
+          {/* Package Options Cards (Single Clear Pricing Display) */}
           {proposals && proposals.length > 0 && (
-            <section className="space-y-5 text-left">
-              <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3">
+            <section className="space-y-4 text-left">
+              <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3 border-b border-slate-800 pb-3">
                 <div>
-                  <h2 className="text-2xl font-black text-white tracking-tight">1. Choose Your Preferred Package Tier</h2>
-                  <p className="text-xs text-slate-400 mt-0.5">Select an option to compare vehicle class, hotel star rating, and price</p>
+                  <h2 className="text-xl sm:text-2xl font-black text-white uppercase tracking-wider flex items-center gap-2">
+                    <Sparkles className="w-5 h-5 text-amber-400" /> 1. Selected Package Options ({proposals.length})
+                  </h2>
+                  <p className="text-xs text-slate-300 font-medium">Review your tailored options below. Click Accept to lock your booking dates.</p>
                 </div>
-                <Badge className="bg-[#C9A25A]/20 text-[#C9A25A] border-[#C9A25A]/40 text-xs px-3 py-1 self-start sm:self-auto">
-                  {proposals.length} Curated Option{proposals.length > 1 ? 's' : ''}
-                </Badge>
+                {isAccepted && (
+                  <Badge className="bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 text-xs font-black uppercase tracking-wider px-3 py-1">
+                    ⭐ Booking Confirmed
+                  </Badge>
+                )}
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
@@ -473,55 +479,84 @@ export default function PublicProposalView() {
                   const pPrice = prop.total_price || 0;
                   const pPerPax = prop.price_per_person || Math.round(pPrice / adultPax);
 
+                  // Extract primary hotel for this option if available
+                  const firstDay = days[0] || {};
+                  const optHotel = firstDay.hotel_name || 'Handpicked Heritage Hotel / Resort';
+                  const optPlan = firstDay.meal_plan || 'CP (Breakfast Included)';
+
                   return (
                     <div
                       key={prop.id || idx}
                       onClick={() => setSelectedOptionIndex(idx)}
-                      className={`relative p-6 rounded-3xl border-2 transition-all cursor-pointer flex flex-col justify-between ${
-                        isSelected 
-                          ? 'bg-slate-950 border-[#C9A25A] shadow-2xl shadow-[#C9A25A]/15 scale-[1.02]' 
-                          : 'bg-slate-950/60 border-slate-800 hover:border-slate-700'
+                      className={`relative p-5 rounded-2xl border-2 transition-all cursor-pointer flex flex-col justify-between ${
+                        isPropAccepted
+                          ? 'bg-emerald-950/20 border-emerald-500/60 shadow-xl shadow-emerald-950/40 ring-1 ring-emerald-500/30'
+                          : isSelected 
+                          ? 'bg-[#161d2f] border-amber-500/70 shadow-2xl shadow-amber-500/10 ring-1 ring-amber-500/40' 
+                          : 'bg-[#161d2f]/60 border-slate-800 hover:border-slate-700'
                       }`}
                     >
                       {isPropAccepted && (
-                        <div className="absolute -top-3 left-6 bg-emerald-600 text-white text-[10px] font-black uppercase px-3 py-1 rounded-full shadow-lg flex items-center gap-1.5">
+                        <div className="absolute -top-3 left-5 bg-emerald-600 text-white text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full shadow flex items-center gap-1">
                           <Check className="w-3 h-3 stroke-[3]" /> Confirmed Choice
                         </div>
                       )}
 
-                      <div className="space-y-4">
+                      <div className="space-y-3.5">
                         <div className="flex items-center justify-between">
-                          <span className={`text-xs font-black uppercase tracking-wider px-3 py-1 rounded-full ${
-                            isSelected ? 'bg-[#C9A25A]/20 text-[#C9A25A]' : 'bg-slate-900 text-slate-400'
+                          <span className={`text-xs font-black uppercase tracking-wider px-2.5 py-0.5 rounded-md ${
+                            isSelected ? 'bg-amber-500 text-slate-950' : 'bg-slate-800 text-slate-300'
                           }`}>
                             {prop.option_name || `Option ${prop.option_number || idx + 1}`}
                           </span>
-                          <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${
+                          <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
                             isSelected ? 'border-[#C9A25A] bg-[#C9A25A] text-slate-950' : 'border-slate-700'
                           }`}>
-                            {isSelected && <Check className="w-3.5 h-3.5 stroke-[3]" />}
+                            {isSelected && <Check className="w-3 h-3 stroke-[3]" />}
                           </div>
                         </div>
 
                         <div>
-                          <div className="text-base font-bold text-white leading-snug">
-                            {prop.title || `${lead.destination} Package`}
-                          </div>
+                          <h4 className="text-base font-black text-white leading-snug">
+                            {cleanTitle(prop.title, lead.destination)}
+                          </h4>
+                          <p className="text-[11px] text-slate-300 font-medium mt-1 flex items-center gap-1.5">
+                            <Hotel className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                            <span className="truncate">{optHotel}</span>
+                          </p>
                         </div>
 
-                        <div className="pt-2 border-t border-slate-900">
-                          <div className="text-3xl font-black text-white tracking-tight">
+                        <div className="pt-2 border-t border-slate-800">
+                          <div className="text-2xl sm:text-3xl font-black text-amber-400 font-mono">
                             ₹{Math.round(pPrice).toLocaleString('en-IN')}
                           </div>
-                          <div className="text-xs font-semibold text-slate-400 mt-0.5">
-                            ₹{Math.round(pPerPax).toLocaleString('en-IN')} / person • All Inclusive
+                          <div className="text-[11px] font-semibold text-slate-300 mt-0.5">
+                            ₹{Math.round(pPerPax).toLocaleString('en-IN')} per adult • All-Inclusive Package
+                          </div>
+                          <div className="text-[10px] text-slate-400 mt-1">
+                            Advance Deposit (30%): <strong className="text-white">₹{Math.round(pPrice * 0.3).toLocaleString('en-IN')}</strong>
                           </div>
                         </div>
                       </div>
 
-                      <div className="mt-5 pt-4 border-t border-slate-900 flex items-center justify-between text-xs">
-                        <span className="text-slate-400">Advance Deposit (30%):</span>
-                        <span className="font-bold text-[#C9A25A]">₹{Math.round(pPrice * 0.3).toLocaleString('en-IN')}</span>
+                      <div className="mt-5 pt-3 border-t border-slate-800">
+                        {isPropAccepted ? (
+                          <div className="w-full py-2 bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 rounded-xl text-xs font-black uppercase text-center flex items-center justify-center gap-1.5">
+                            <CheckCircle2 className="w-4 h-4 text-emerald-400" /> Booking Confirmed
+                          </div>
+                        ) : (
+                          <Button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setSelectedOptionIndex(idx);
+                              setShowConfirmModal(true);
+                            }}
+                            className="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-black text-xs h-10 rounded-xl shadow-md cursor-pointer"
+                          >
+                            <Check className="w-3.5 h-3.5 mr-1 stroke-[3]" /> 1-Click Accept {prop.option_name || `Option ${idx + 1}`}
+                          </Button>
+                        )}
                       </div>
                     </div>
                   );
@@ -530,166 +565,154 @@ export default function PublicProposalView() {
             </section>
           )}
 
-          {/* Pricing Recap & Acceptance Banner */}
-          <section className="bg-gradient-to-r from-slate-950 via-[#0d1326] to-slate-950 border border-amber-500/30 rounded-3xl p-6 md:p-8 shadow-2xl relative overflow-hidden text-left">
-            <div className="relative z-10 flex flex-col lg:flex-row items-center justify-between gap-6">
-              
-              <div className="space-y-2 text-center lg:text-left">
-                <span className="text-[10px] font-black uppercase tracking-widest text-[#C9A25A] bg-[#C9A25A]/10 px-3 py-1 rounded-full border border-[#C9A25A]/30">
-                  {activeOption?.option_name || 'Selected Option'} Summary
-                </span>
-                <div className="flex flex-col sm:flex-row sm:items-baseline gap-2 justify-center lg:justify-start">
-                  <div className="text-4xl sm:text-5xl font-black text-white tracking-tight">
-                    ₹{Math.round(totalPrice).toLocaleString('en-IN')}
-                  </div>
-                  <div className="text-xs text-slate-400 font-semibold">
-                    (₹{Math.round(perPersonPrice).toLocaleString('en-IN')} per adult for {adultPax} travelers)
-                  </div>
-                </div>
-                <p className="text-xs text-slate-400 max-w-xl">
-                  Guaranteed all-inclusive price. Includes complete hotel accommodations, private air-conditioned vehicle, dedicated driver, parking, toll charges, and 24/7 travel desk concierge.
-                </p>
+          {/* Day by Day Vertical Timeline (Rann Utsav / Luxury Brochure Standard) */}
+          <section className="space-y-6 text-left">
+            <div className="border-b border-slate-800 pb-3 flex justify-between items-center">
+              <div>
+                <h3 className="text-lg sm:text-xl font-black uppercase tracking-wider text-white flex items-center gap-2">
+                  <Calendar className="w-5 h-5 text-amber-400" /> 2. Curated Day-by-Day Journey Schedule
+                </h3>
+                <p className="text-xs text-slate-300 font-medium">Detailed schedule of your transfers, sightseeing landmarks, and hotel accommodations.</p>
               </div>
+            </div>
 
-              {/* Action Buttons */}
-              <div className="w-full lg:w-auto flex flex-col sm:flex-row gap-3 items-center">
-                {!isAccepted ? (
-                  <Button
-                    onClick={() => setShowConfirmModal(true)}
-                    className="w-full sm:w-auto bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-600 hover:from-emerald-700 hover:to-teal-700 text-white font-black text-sm h-13 px-8 rounded-2xl shadow-xl shadow-emerald-900/40 flex items-center justify-center cursor-pointer transition-transform active:scale-95 border border-emerald-500/40"
-                  >
-                    <CheckCircle2 className="w-5 h-5 mr-2" />
-                    ⚡ 1-Click Accept {activeOption?.option_name || 'Option'} & Confirm
-                  </Button>
-                ) : (
-                  <div className="bg-emerald-950/80 border border-emerald-700/60 p-4 rounded-2xl text-left max-w-md w-full">
-                    <div className="flex items-center gap-2 text-emerald-400 font-black text-sm mb-1">
-                      <CheckCircle2 className="w-5 h-5" /> Booking Confirmed!
+            <div className="space-y-6">
+              {days.map((day: any, idx: number) => {
+                const blocks = (day.blocks || []).filter((b: any) => b.type !== 'meal');
+                const hotelBlock = blocks.find((b: any) => b.type === 'hotel');
+                const transferBlocks = blocks.filter((b: any) => b.type === 'transfer' || b.type === 'cab');
+                const activityBlocks = blocks.filter((b: any) => b.type === 'activity' || b.type === 'sightseeing');
+
+                // Determine display hotel name & room details
+                const hotelName = day.hotel_name || hotelBlock?.properties?.hotel_name || (day.hotels && day.hotels[0]?.hotel_name);
+                const roomCategory = day.room_type || hotelBlock?.properties?.room_category || hotelBlock?.properties?.room_type || (day.hotels && day.hotels[0]?.room_type) || 'Standard Room';
+                const mealPlan = day.meal_plan || hotelBlock?.properties?.meal_plan || (day.hotels && day.hotels[0]?.meal_plan) || 'CP (Breakfast Included)';
+
+                // Calculate formatted date
+                let displayDate = day.date || '---';
+                if (lead.trip_start_date) {
+                  const d = new Date(lead.trip_start_date);
+                  if (!isNaN(d.getTime())) {
+                    d.setDate(d.getDate() + (day.day_number - 1));
+                    displayDate = d.toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
+                  }
+                }
+
+                return (
+                  <div key={day.id || idx} className="bg-[#161d2f] border border-slate-800 rounded-2xl p-5 md:p-6 space-y-4 shadow-xl text-left">
+                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b border-slate-800 pb-3">
+                      <div className="flex items-center gap-3">
+                        <span className="bg-amber-500 text-slate-950 font-black text-xs px-3 py-1 rounded-lg uppercase tracking-wider">
+                          Day {day.day_number || idx + 1}
+                        </span>
+                        <h4 className="text-base font-black text-white uppercase tracking-wide">
+                          {day.title}
+                        </h4>
+                      </div>
+                      <span className="text-xs font-mono text-amber-400 font-extrabold uppercase">
+                        {displayDate}
+                      </span>
                     </div>
-                    <p className="text-[11px] text-emerald-200/90 leading-relaxed">
-                      Your choice ({activeOption?.option_name || 'Option 1'}) is confirmed. Our reservations team is issuing your Proforma Invoice with the advance payment link. Master Service Voucher will be issued upon advance deposit receipt.
-                    </p>
-                  </div>
-                )}
 
-                <a 
-                  href={`https://wa.me/919910987264?text=${encodeURIComponent(`Hi Ghumo Firoo Travels, I am reviewing the proposal for ${lead.destination} (${activeOption?.option_name || 'Option 1'} - ₹${Math.round(totalPrice).toLocaleString('en-IN')}) and have a few questions.`)}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-full sm:w-auto"
-                >
-                  <Button variant="outline" className="w-full sm:w-auto border-slate-700 bg-slate-900 text-slate-300 hover:bg-slate-800 text-xs h-13 px-5 rounded-2xl font-bold">
-                    <MessageCircle className="w-4 h-4 mr-2 text-[#25D366]" /> Chat with Concierge
-                  </Button>
-                </a>
-              </div>
+                    {/* Day Narrative Description */}
+                    {day.description && (
+                      <p className="text-xs text-slate-200 leading-relaxed font-medium whitespace-pre-line bg-[#0d1322] p-3.5 rounded-xl border border-slate-800/80">
+                        {day.description}
+                      </p>
+                    )}
+
+                    {/* Day Highlights Cards Grid */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-1">
+                      
+                      {/* 1. Stays / Hotel Block */}
+                      {hotelName && (
+                        <div className="border border-purple-500/30 bg-[#0f1420] rounded-xl p-4 flex gap-4 text-left shadow-md">
+                          <div className="w-10 h-10 rounded-xl bg-purple-500/20 flex items-center justify-center shrink-0 border border-purple-500/30">
+                            <Bed className="w-5 h-5 text-purple-300" />
+                          </div>
+                          <div className="space-y-1 min-w-0">
+                            <span className="text-[10px] text-purple-400 font-black uppercase tracking-wider block">Confirmed Accommodation</span>
+                            <h5 className="font-black text-sm text-white uppercase truncate">{hotelName}</h5>
+                            <p className="text-[11px] font-bold text-slate-300">
+                              Room: <strong className="text-amber-400">{roomCategory}</strong> | Plan: <strong className="text-amber-400">{mealPlan}</strong>
+                            </p>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* 2. Cab / Transport Block */}
+                      <div className="border border-emerald-500/30 bg-[#0f2019] rounded-xl p-4 flex gap-4 text-left shadow-md">
+                        <div className="w-10 h-10 rounded-xl bg-emerald-500/20 flex items-center justify-center shrink-0 border border-emerald-500/30">
+                          <Car className="w-5 h-5 text-emerald-300" />
+                        </div>
+                        <div className="space-y-1 min-w-0">
+                          <span className="text-[10px] text-emerald-400 font-black uppercase tracking-wider block">Private Vehicle Transit</span>
+                          <h5 className="font-black text-sm text-white uppercase truncate">
+                            {transferBlocks.length > 0 && transferBlocks[0].properties?.route_from
+                              ? `${transferBlocks[0].properties?.route_from} to ${transferBlocks[0].properties?.route_to}`
+                              : 'Dedicated Private AC Chauffeur Vehicle'}
+                          </h5>
+                          <p className="text-[11px] font-bold text-slate-300">
+                            Vehicle Class: <strong className="text-emerald-400">Private Air-Conditioned Sedan / SUV</strong>
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* 3. Sightseeing / Excursions Highlights */}
+                      {activityBlocks.length > 0 && (
+                        <div className="col-span-1 md:col-span-2 border border-amber-500/30 bg-[#201a0f] rounded-xl p-4 text-left shadow-md space-y-3">
+                          <div className="flex items-center gap-2">
+                            <div className="w-7 h-7 rounded-lg bg-amber-500/20 flex items-center justify-center text-amber-400">
+                              <Sparkles className="w-4 h-4" />
+                            </div>
+                            <span className="text-xs font-black uppercase tracking-wider text-amber-400">Key Places to Visit & Sightseeing Highlights</span>
+                          </div>
+                          
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                            {activityBlocks.map((ab: any, aIdx: number) => {
+                              const p = ab.properties || {};
+                              return (
+                                <div key={ab.id || aIdx} className="bg-slate-900/80 p-2.5 rounded-lg border border-slate-800 flex items-center gap-2.5">
+                                  {p.photo_url ? (
+                                    <img src={p.photo_url} alt={p.excursion_name} className="w-10 h-10 rounded-lg object-cover border border-slate-700 shrink-0" />
+                                  ) : (
+                                    <div className="w-10 h-10 rounded-lg bg-slate-800 flex items-center justify-center text-amber-400 shrink-0">
+                                      <Camera className="w-4 h-4" />
+                                    </div>
+                                  )}
+                                  <div className="min-w-0">
+                                    <div className="text-xs font-bold text-white truncate">{p.excursion_name || p.sightseeing_name || 'Landmark Visit'}</div>
+                                    {p.description && <div className="text-[10px] text-slate-400 truncate">{p.description}</div>}
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      )}
+
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           </section>
 
-          {/* Day-by-Day Schedule */}
-          {days.length > 0 && (
-            <section className="space-y-6 text-left">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h2 className="text-2xl font-black text-white tracking-tight">2. Day-by-Day Journey Schedule</h2>
-                  <p className="text-xs text-slate-400">Curated sequence of transfers, sightseeing, and evening leisure</p>
-                </div>
-                <Badge variant="outline" className="border-slate-800 text-slate-300 text-xs">
-                  {days.length} Days Planned
-                </Badge>
-              </div>
-
-              <div className="space-y-4">
-                {days.map((d: any, index: number) => {
-                  const blocks = d.blocks || [];
-                  const activities = blocks.filter((b: any) => b.type === 'activity');
-
-                  return (
-                    <div 
-                      key={d.day_number || index} 
-                      className="bg-slate-950 border border-slate-800/80 rounded-3xl p-6 transition-all hover:border-slate-700 shadow-lg"
-                    >
-                      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-slate-800/80">
-                        <div className="flex items-center gap-3.5">
-                          <div className="w-11 h-11 rounded-2xl bg-[#C9A25A]/15 border border-[#C9A25A]/30 text-[#C9A25A] flex items-center justify-center font-black text-sm shrink-0">
-                            D{d.day_number || index + 1}
-                          </div>
-                          <div>
-                            <h3 className="text-base font-black text-white">{d.title}</h3>
-                            {d.destination && (
-                              <div className="text-[11px] font-semibold text-[#C9A25A] flex items-center gap-1 mt-0.5">
-                                <MapPin className="w-3 h-3" /> {d.destination}
-                              </div>
-                            )}
-                          </div>
-                        </div>
-
-                        {d.hotel_name && (
-                          <div className="inline-flex items-center gap-2 bg-slate-900/90 px-3.5 py-1.5 rounded-xl border border-slate-800 text-xs text-slate-300">
-                            <Hotel className="w-3.5 h-3.5 text-[#C9A25A]" />
-                            <span className="font-bold text-white">{d.hotel_name}</span>
-                            {d.room_type && <span className="text-slate-400 text-[10px]">({d.room_type})</span>}
-                            {d.meal_plan && <span className="text-emerald-400 font-bold text-[10px]">[{d.meal_plan}]</span>}
-                          </div>
-                        )}
-                      </div>
-
-                      {/* Day narrative */}
-                      {d.description && (
-                        <p className="text-xs text-slate-300 leading-relaxed mt-4">
-                          {d.description}
-                        </p>
-                      )}
-
-                      {/* Activities / Excursions Grid */}
-                      {activities.length > 0 && (
-                        <div className="mt-4 pt-4 border-t border-slate-900 grid grid-cols-1 sm:grid-cols-2 gap-3">
-                          {activities.map((act: any, aIdx: number) => {
-                            const p = act.properties || {};
-                            return (
-                              <div key={act.id || aIdx} className="bg-slate-900/70 border border-slate-800/80 rounded-2xl p-3 flex items-start gap-3">
-                                {p.photo_url ? (
-                                  <img 
-                                    src={p.photo_url} 
-                                    alt={p.excursion_name} 
-                                    className="w-14 h-14 rounded-xl object-cover shrink-0 border border-slate-700" 
-                                  />
-                                ) : (
-                                  <div className="w-14 h-14 rounded-xl bg-slate-800 flex items-center justify-center shrink-0 text-[#C9A25A]">
-                                    <Camera className="w-5 h-5" />
-                                  </div>
-                                )}
-                                <div className="min-w-0">
-                                  <div className="text-xs font-bold text-white truncate">{p.excursion_name || 'Sightseeing Tour'}</div>
-                                  <div className="text-[10px] text-slate-400 line-clamp-2 mt-0.5">{p.description}</div>
-                                </div>
-                              </div>
-                            );
-                          })}
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-            </section>
-          )}
-
-          {/* Inclusions & Booking Process */}
+          {/* Inclusions & Booking Process (Official Ghumo Firoo Standards) */}
           <section className="grid grid-cols-1 md:grid-cols-2 gap-6 text-left">
             {/* Inclusions */}
-            <div className="bg-slate-950 border border-slate-800 rounded-3xl p-6 md:p-7 space-y-4">
+            <div className="bg-[#161d2f] border border-slate-800 rounded-2xl p-6 space-y-4 shadow-xl">
               <div className="flex items-center gap-2 text-emerald-400 font-black text-sm uppercase tracking-wider">
                 <CheckCircle2 className="w-4 h-4" /> Package Inclusions
               </div>
               <ul className="space-y-2.5 text-xs text-slate-300">
                 <li className="flex items-start gap-2.5">
                   <Check className="w-3.5 h-3.5 text-emerald-400 mt-0.5 shrink-0" />
-                  <span>Handpicked accommodations verified for luxury, hygiene & comfort.</span>
+                  <span>Premium accommodation verified for hygiene, comfort and luxury.</span>
                 </li>
                 <li className="flex items-start gap-2.5">
                   <Check className="w-3.5 h-3.5 text-emerald-400 mt-0.5 shrink-0" />
-                  <span>Daily breakfast and meals as indicated in your chosen tier.</span>
+                  <span>Daily breakfast and specified meals as per selected tier.</span>
                 </li>
                 <li className="flex items-start gap-2.5">
                   <Check className="w-3.5 h-3.5 text-emerald-400 mt-0.5 shrink-0" />
@@ -697,19 +720,19 @@ export default function PublicProposalView() {
                 </li>
                 <li className="flex items-start gap-2.5">
                   <Check className="w-3.5 h-3.5 text-emerald-400 mt-0.5 shrink-0" />
-                  <span>All state taxes, driver night allowances, tolls, and parking included.</span>
+                  <span>All state taxes, driver allowances, toll charges, and parking fees included.</span>
                 </li>
                 <li className="flex items-start gap-2.5">
                   <Check className="w-3.5 h-3.5 text-emerald-400 mt-0.5 shrink-0" />
-                  <span>24x7 Dedicated Ghumo Firoo Personal Concierge assistance.</span>
+                  <span>24x7 Dedicated Ghumo Firoo Travel Desk Concierge on WhatsApp and Call.</span>
                 </li>
               </ul>
             </div>
 
             {/* Booking & Operational Process */}
-            <div className="bg-slate-950 border border-slate-800 rounded-3xl p-6 md:p-7 space-y-4">
+            <div className="bg-[#161d2f] border border-slate-800 rounded-2xl p-6 space-y-4 shadow-xl">
               <div className="flex items-center gap-2 text-[#C9A25A] font-black text-sm uppercase tracking-wider">
-                <ShieldCheck className="w-4 h-4" /> Booking & Voucher Confirmation
+                <ShieldCheck className="w-4 h-4" /> Booking & Voucher Process
               </div>
               <div className="space-y-3.5 text-xs text-slate-300">
                 <div className="flex items-start gap-3">
@@ -718,11 +741,11 @@ export default function PublicProposalView() {
                 </div>
                 <div className="flex items-start gap-3">
                   <div className="w-5 h-5 rounded-full bg-slate-900 border border-amber-500/40 text-[#C9A25A] flex items-center justify-center text-[10px] font-bold shrink-0 mt-0.5">2</div>
-                  <p><span className="font-bold text-white">Proforma Invoice & Deposit:</span> Our finance team sends your official Proforma Invoice with secure advance payment link (30%-50% deposit).</p>
+                  <p><span className="font-bold text-white">Proforma Invoice & Deposit:</span> Our accounts desk sends your official Proforma Invoice with secure payment link for deposit (30%-50%).</p>
                 </div>
                 <div className="flex items-start gap-3">
                   <div className="w-5 h-5 rounded-full bg-slate-900 border border-amber-500/40 text-[#C9A25A] flex items-center justify-center text-[10px] font-bold shrink-0 mt-0.5">3</div>
-                  <p><span className="font-bold text-white">Master Service Voucher Release:</span> Once the advance deposit is confirmed and operational details are finalized, your official Master Service Voucher with driver/cab details and hotel check-in codes will be released.</p>
+                  <p><span className="font-bold text-white">Master Service Voucher Release:</span> Upon advance payment confirmation and operations approval, your official Service Voucher with driver/cab contact and hotel check-in vouchers is released.</p>
                 </div>
               </div>
             </div>
@@ -732,17 +755,17 @@ export default function PublicProposalView() {
 
         {renderFooter()}
 
-        {/* Sticky Mobile & Desktop Acceptance Bar */}
-        <div className="fixed bottom-0 inset-x-0 z-30 bg-[#050814]/95 backdrop-blur-md border-t border-slate-800 p-3.5 shadow-2xl print:hidden">
+        {/* Sticky Mobile & Desktop Single Acceptance Bar */}
+        <div className="fixed bottom-0 inset-x-0 z-30 bg-[#070b16]/95 backdrop-blur-md border-t border-slate-800 p-3 shadow-2xl print:hidden">
           <div className="max-w-6xl mx-auto flex items-center justify-between gap-4">
             <div className="text-left min-w-0">
-              <div className="text-[10px] font-bold uppercase tracking-wider text-[#C9A25A] truncate">
-                {activeOption?.option_name || 'Selected Tier'}
+              <div className="text-[10px] font-black uppercase tracking-wider text-[#C9A25A] truncate">
+                {activeOption?.option_name || 'Selected Tier'} • {cleanTitle(activeOption?.title, lead.destination)}
               </div>
-              <div className="text-base sm:text-xl font-black text-white">
+              <div className="text-base sm:text-xl font-black text-white font-mono">
                 ₹{Math.round(totalPrice).toLocaleString('en-IN')}
-                <span className="text-[11px] font-semibold text-slate-400 ml-1.5 hidden sm:inline">
-                  (₹{Math.round(perPersonPrice).toLocaleString('en-IN')}/pax)
+                <span className="text-[11px] font-semibold text-slate-300 ml-2 hidden sm:inline font-sans">
+                  (₹{Math.round(perPersonPrice).toLocaleString('en-IN')} / person)
                 </span>
               </div>
             </div>
@@ -751,18 +774,18 @@ export default function PublicProposalView() {
               {!isAccepted ? (
                 <Button
                   onClick={() => setShowConfirmModal(true)}
-                  className="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-black text-xs sm:text-sm h-11 px-5 sm:px-7 rounded-xl shadow-lg border border-emerald-500/30"
+                  className="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-black text-xs sm:text-sm h-11 px-5 sm:px-7 rounded-xl shadow-lg border border-emerald-500/30 cursor-pointer"
                 >
                   <Check className="w-4 h-4 mr-1.5 stroke-[3]" /> Accept & Confirm
                 </Button>
               ) : (
                 <div className="bg-emerald-950/90 border border-emerald-600/60 px-3.5 py-2 rounded-xl flex items-center gap-2 text-emerald-300 font-bold text-xs">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-400" /> Confirmed
+                  <CheckCircle2 className="w-4 h-4 text-emerald-400" /> Confirmed 🟢
                 </div>
               )}
 
               <a 
-                href={`https://wa.me/919910987264?text=${encodeURIComponent(`Hi Ghumo Firoo Travels, I am reviewing my holiday proposal for ${lead.destination}.`)}`}
+                href={`https://wa.me/919910987264?text=${encodeURIComponent(`Hi Ghumo Firoo Travels, I am reviewing my holiday proposal for ${displayTitle}.`)}`}
                 target="_blank"
                 rel="noopener noreferrer"
               >
@@ -777,22 +800,22 @@ export default function PublicProposalView() {
         {/* 1-Click Acceptance Confirmation Modal */}
         {showConfirmModal && (
           <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4">
-            <div className="bg-slate-950 border border-slate-800 rounded-3xl max-w-md w-full p-6 space-y-5 shadow-2xl text-left">
+            <div className="bg-[#161d2f] border border-amber-500/30 rounded-3xl max-w-md w-full p-6 space-y-5 shadow-2xl text-left">
               <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 flex items-center justify-center">
                 <CheckCircle2 className="w-6 h-6" />
               </div>
 
               <div>
                 <h3 className="text-lg font-black text-white">Confirm Booking Selection</h3>
-                <p className="text-xs text-slate-400 mt-1">
-                  You are locking <span className="text-white font-bold">{activeOption?.option_name || 'Option 1'}</span> for <span className="text-[#C9A25A] font-bold">₹{Math.round(totalPrice).toLocaleString('en-IN')}</span>.
+                <p className="text-xs text-slate-300 mt-1">
+                  You are selecting <span className="text-white font-bold">{activeOption?.option_name || 'Option 1'}</span> for <span className="text-amber-400 font-bold">₹{Math.round(totalPrice).toLocaleString('en-IN')}</span>.
                 </p>
               </div>
 
-              <div className="bg-slate-900 border border-slate-800/80 rounded-2xl p-4 space-y-2 text-xs">
+              <div className="bg-[#0f1420] border border-slate-800 rounded-2xl p-4 space-y-2 text-xs">
                 <div className="flex justify-between text-slate-400">
-                  <span>Destination:</span>
-                  <span className="font-bold text-white">{lead.destination}</span>
+                  <span>Tour Package:</span>
+                  <span className="font-bold text-white truncate max-w-[200px]">{displayTitle}</span>
                 </div>
                 <div className="flex justify-between text-slate-400">
                   <span>Travelers:</span>
@@ -800,12 +823,12 @@ export default function PublicProposalView() {
                 </div>
                 <div className="flex justify-between text-slate-400">
                   <span>Advance Deposit (30%):</span>
-                  <span className="font-bold text-[#C9A25A]">₹{Math.round(advanceRequired).toLocaleString('en-IN')}</span>
+                  <span className="font-bold text-amber-400">₹{Math.round(advanceRequired).toLocaleString('en-IN')}</span>
                 </div>
               </div>
 
-              <p className="text-[11px] text-slate-500 leading-relaxed">
-                By accepting, you confirm your booking request. Our accounts desk will send your official Proforma Invoice with the secure payment link.
+              <p className="text-[11px] text-slate-400 leading-relaxed">
+                By accepting, you lock your tour dates. Our accounts desk will send your official Proforma Invoice with the secure payment link.
               </p>
 
               <div className="flex gap-3 pt-2">
