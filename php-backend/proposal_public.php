@@ -32,14 +32,14 @@ if ($method === 'GET') {
     }
 
     try {
-        // 1. Fetch Lead
+        // 1. Fetch Lead safely with SELECT *
         $lead = null;
         if ($leadId > 0) {
-            $stmt = $pdo->prepare("SELECT id, customer_name, customer_email, customer_phone, email, contact_number, destination, destinations, trip_start_date, trip_end_date, adult_count, child_count, infant_count, status, enquiry_number, created_at FROM leads WHERE id = ? LIMIT 1");
+            $stmt = $pdo->prepare("SELECT * FROM leads WHERE id = ? LIMIT 1");
             $stmt->execute([$leadId]);
             $lead = $stmt->fetch(PDO::FETCH_ASSOC);
         } else if ($proposalId > 0) {
-            $stmt = $pdo->prepare("SELECT l.id, l.customer_name, l.customer_email, l.customer_phone, l.email, l.contact_number, l.destination, l.destinations, l.trip_start_date, l.trip_end_date, l.adult_count, l.child_count, l.infant_count, l.status, l.enquiry_number, l.created_at FROM proposals p JOIN leads l ON p.lead_id = l.id WHERE p.id = ? LIMIT 1");
+            $stmt = $pdo->prepare("SELECT l.* FROM proposals p JOIN leads l ON p.lead_id = l.id WHERE p.id = ? LIMIT 1");
             $stmt->execute([$proposalId]);
             $lead = $stmt->fetch(PDO::FETCH_ASSOC);
             if ($lead) {
@@ -49,7 +49,7 @@ if ($method === 'GET') {
 
         if (!$lead) {
             http_response_code(404);
-            echo json_encode(['success' => false, 'error' => 'Proposal request not found']);
+            echo json_encode(['success' => false, 'error' => 'Proposal request not found. Please contact your travel consultant.']);
             exit();
         }
 
@@ -60,9 +60,14 @@ if ($method === 'GET') {
         }
 
         // 2. Fetch Proposals Options
-        $propStmt = $pdo->prepare("SELECT id, option_number, option_name, title, total_price, price_per_person, advance_required, currency, status, expiry_date, payment_schedule, itinerary_data, created_at FROM proposals WHERE lead_id = ? ORDER BY option_number ASC, id ASC");
-        $propStmt->execute([$leadId]);
-        $proposals = $propStmt->fetchAll(PDO::FETCH_ASSOC);
+        $proposals = [];
+        try {
+            $propStmt = $pdo->prepare("SELECT * FROM proposals WHERE lead_id = ? ORDER BY option_number ASC, id ASC");
+            $propStmt->execute([$leadId]);
+            $proposals = $propStmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (Exception $proErr) {
+            $proposals = [];
+        }
 
         $hasAccepted = false;
         $acceptedOption = null;
@@ -74,7 +79,7 @@ if ($method === 'GET') {
             $p['price_per_person'] = (float)($p['price_per_person'] ?? 0);
             $p['advance_required'] = (float)($p['advance_required'] ?? 0) > 0 ? (float)$p['advance_required'] : round($p['total_price'] * 0.30, 2);
 
-            if (strcasecmp($p['status'], 'Accepted') === 0) {
+            if (strcasecmp($p['status'] ?? '', 'Accepted') === 0) {
                 $hasAccepted = true;
                 $acceptedOption = $p;
             }
@@ -82,35 +87,72 @@ if ($method === 'GET') {
         unset($p);
 
         // 3. Fetch Master Itinerary if available
-        $itinStmt = $pdo->prepare("SELECT * FROM itineraries WHERE lead_id = ? ORDER BY id DESC LIMIT 1");
-        $itinStmt->execute([$leadId]);
-        $itinerary = $itinStmt->fetch(PDO::FETCH_ASSOC);
+        $itinerary = null;
+        try {
+            $itinStmt = $pdo->prepare("SELECT * FROM itineraries WHERE lead_id = ? ORDER BY id DESC LIMIT 1");
+            $itinStmt->execute([$leadId]);
+            $itinerary = $itinStmt->fetch(PDO::FETCH_ASSOC);
+        } catch (Exception $itinErr) {}
 
-        $days = [];
-        if ($itinerary && !empty($itinerary['id'])) {
-            $daysStmt = $pdo->prepare("SELECT * FROM itinerary_days WHERE itinerary_id = ? ORDER BY day_number ASC");
-            $daysStmt->execute([$itinerary['id']]);
-            $rawDays = $daysStmt->fetchAll(PDO::FETCH_ASSOC);
-            foreach ($rawDays as $rd) {
-                $meta = is_string($rd['metadata']) ? json_decode($rd['metadata'], true) : ($rd['metadata'] ?? []);
-                $days[] = [
-                    'day_number'   => (int)$rd['day_number'],
-                    'date'         => $rd['date'],
-                    'title'        => $rd['title'] ?: "Day {$rd['day_number']}",
-                    'description'  => $rd['description'] ?: '',
-                    'destination'  => $rd['destination'] ?: '',
-                    'hotel_name'   => $rd['hotel_name'] ?: '',
-                    'room_type'    => $rd['room_type'] ?: '',
-                    'meal_plan'    => $rd['meal_plan'] ?: '',
-                    'blocks'       => $meta['blocks'] ?? []
-                ];
+        // Fallback: If no proposals rows exist yet, create default option from itinerary
+        if (empty($proposals) && $itinerary) {
+            $itinPrice = (float)($itinerary['final_cost'] ?: ($itinerary['total_cost'] ?: 0));
+            $itinPerPax = (float)($itinerary['cost_per_person'] ?: 0);
+            $proposals = [
+                [
+                    'id'               => $itinerary['id'],
+                    'option_number'    => 1,
+                    'option_name'      => 'Option 1 (Curated)',
+                    'title'            => $itinerary['itinerary_name'] ?: ($lead['destination'] ? "{$lead['destination']} Package" : 'Bespoke Tour Package'),
+                    'total_price'      => $itinPrice,
+                    'price_per_person' => $itinPerPax > 0 ? $itinPerPax : round($itinPrice / max(1, (int)($lead['adult_count'] ?? 2))),
+                    'advance_required' => round($itinPrice * 0.30, 2),
+                    'currency'         => 'INR',
+                    'status'           => $itinerary['status'] ?: 'Draft',
+                    'expiry_date'      => null,
+                    'payment_schedule' => [],
+                    'itinerary_data'   => [],
+                    'created_at'       => $itinerary['created_at'] ?? date('Y-m-d H:i:s')
+                ]
+            ];
+            if (strcasecmp(trim($itinerary['status'] ?? ''), 'Booking Confirmed') === 0) {
+                $hasAccepted = true;
+                $acceptedOption = $proposals[0];
             }
         }
 
-        // 4. Check payments received
-        $payStmt = $pdo->prepare("SELECT COALESCE(SUM(amount_received), 0) FROM payments WHERE lead_id = ? AND LOWER(TRIM(status)) IN ('success', 'completed', 'verified', 'paid')");
-        $payStmt->execute([$leadId]);
-        $paymentsReceived = (float)$payStmt->fetchColumn();
+        $days = [];
+        if ($itinerary && !empty($itinerary['id'])) {
+            try {
+                $daysStmt = $pdo->prepare("SELECT * FROM itinerary_days WHERE itinerary_id = ? ORDER BY day_number ASC");
+                $daysStmt->execute([$itinerary['id']]);
+                $rawDays = $daysStmt->fetchAll(PDO::FETCH_ASSOC);
+                foreach ($rawDays as $rd) {
+                    $meta = is_string($rd['metadata']) ? json_decode($rd['metadata'], true) : ($rd['metadata'] ?? []);
+                    $days[] = [
+                        'day_number'   => (int)$rd['day_number'],
+                        'date'         => $rd['date'] ?? '',
+                        'title'        => $rd['title'] ?: "Day {$rd['day_number']}",
+                        'description'  => $rd['description'] ?: '',
+                        'destination'  => $rd['destination'] ?: '',
+                        'hotel_name'   => $rd['hotel_name'] ?: '',
+                        'room_type'    => $rd['room_type'] ?: '',
+                        'meal_plan'    => $rd['meal_plan'] ?: '',
+                        'blocks'       => $meta['blocks'] ?? []
+                    ];
+                }
+            } catch (Exception $dayErr) {}
+        }
+
+        // 4. Check payments received defensively
+        $paymentsReceived = 0.0;
+        try {
+            $payStmt = $pdo->prepare("SELECT COALESCE(SUM(amount_received), 0) FROM payments WHERE lead_id = ? AND LOWER(TRIM(status)) IN ('success', 'completed', 'verified', 'paid')");
+            $payStmt->execute([$leadId]);
+            $paymentsReceived = (float)$payStmt->fetchColumn();
+        } catch (Exception $payErr) {
+            $paymentsReceived = 0.0;
+        }
 
         $isLeadConfirmed = strcasecmp(trim($lead['status'] ?? ''), 'Booking Confirmed') === 0;
 
@@ -120,8 +162,8 @@ if ($method === 'GET') {
                 'id'              => (int)$lead['id'],
                 'customer_name'   => $customerName,
                 'destination'     => $lead['destination'] ?: ($lead['destinations'] ?: 'Customized Tour'),
-                'trip_start_date' => $lead['trip_start_date'],
-                'trip_end_date'   => $lead['trip_end_date'],
+                'trip_start_date' => $lead['trip_start_date'] ?? null,
+                'trip_end_date'   => $lead['trip_end_date'] ?? null,
                 'adult_count'     => (int)($lead['adult_count'] ?? 2),
                 'child_count'     => (int)($lead['child_count'] ?? 0),
                 'infant_count'    => (int)($lead['infant_count'] ?? 0),
@@ -133,7 +175,7 @@ if ($method === 'GET') {
                 'itinerary_name'  => $itinerary['itinerary_name'] ?: 'Customized Luxury Tour',
                 'destinations'    => is_string($itinerary['destinations']) ? json_decode($itinerary['destinations'], true) : ($itinerary['destinations'] ?? []),
                 'total_nights'    => (int)($itinerary['total_nights'] ?? 0),
-                'total_cost'      => (float)($itinerary['final_cost'] ?: $itinerary['total_cost']),
+                'total_cost'      => (float)($itinerary['final_cost'] ?: ($itinerary['total_cost'] ?: 0)),
                 'days'            => $days
             ] : null,
             'proposals'          => $proposals,
@@ -146,7 +188,7 @@ if ($method === 'GET') {
 
     } catch (Exception $e) {
         http_response_code(500);
-        echo json_encode(['success' => false, 'error' => 'Failed to load proposal details: ' . $e->getMessage()]);
+        echo json_encode(['success' => false, 'error' => 'Unable to load proposal details. Please refresh or contact your travel consultant.']);
         exit();
     }
 }
