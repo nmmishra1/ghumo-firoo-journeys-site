@@ -712,10 +712,10 @@ const CRM = () => {
       return;
     }
 
-    const trimmedRef = paymentRef.trim();
+    const trimmedRef = String(paymentRef || '').trim();
     if (trimmedRef) {
       const existingPayment = allPayments.find(p => 
-        p.reference_number && p.reference_number.trim().toLowerCase() === trimmedRef.toLowerCase()
+        p.reference_number && String(p.reference_number).trim().toLowerCase() === trimmedRef.toLowerCase()
       );
       if (existingPayment) {
         toast({
@@ -793,7 +793,7 @@ const CRM = () => {
     setEditingPayment(pay);
     setEditPaymentAmount(String(pay.amount_received || ''));
     setEditPaymentMode(pay.payment_mode || 'UPI');
-    setEditPaymentRef(pay.reference_number || '');
+    setEditPaymentRef(pay.reference_number != null ? String(pay.reference_number) : '');
     setEditPaymentRemarks(pay.remarks || '');
     setEditPaymentDate(pay.payment_date || new Date().toISOString().split('T')[0]);
   };
@@ -810,12 +810,13 @@ const CRM = () => {
       return;
     }
 
-    const trimmedRef = editPaymentRef.trim();
-    if (trimmedRef) {
+    const trimmedRef = String(editPaymentRef || '').trim();
+    const origRef = String(editingPayment.reference_number != null ? editingPayment.reference_number : '').trim();
+    if (trimmedRef && trimmedRef.toLowerCase() !== origRef.toLowerCase()) {
       const dup = allPayments.find(p => 
         String(p.id) !== String(editingPayment.id) &&
         p.reference_number && 
-        p.reference_number.trim().toLowerCase() === trimmedRef.toLowerCase()
+        String(p.reference_number).trim().toLowerCase() === trimmedRef.toLowerCase()
       );
       if (dup) {
         toast({
@@ -5740,9 +5741,9 @@ Please let us know if you need any customizations. Looking forward to hosting yo
                 ) || pay.leads || pay.lead;
                 const clientName = (clientObj?.customer_name || pay.customer_name || pay.client_name || (pay.lead_id ? `Client (#${pay.lead_id})` : 'Direct Customer')).toLowerCase();
                 const matchClient = clientName.includes(q);
-                const matchRemarks = (pay.remarks || '').toLowerCase().includes(q);
-                const matchRef = (pay.reference_number || '').toLowerCase().includes(q);
-                const matchDate = (pay.payment_date || '').toLowerCase().includes(q);
+                const matchRemarks = String(pay.remarks || '').toLowerCase().includes(q);
+                const matchRef = String(pay.reference_number || '').toLowerCase().includes(q);
+                const matchDate = String(pay.payment_date || '').toLowerCase().includes(q);
                 if (!matchClient && !matchRemarks && !matchRef && !matchDate) return false;
               }
               if (paymentFilterMode !== 'all' && (pay.payment_mode || '').toLowerCase() !== paymentFilterMode.toLowerCase()) return false;

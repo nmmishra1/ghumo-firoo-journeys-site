@@ -192,8 +192,16 @@ function checkDuplicateMasterRecord($pdo, $table, $input, $excludeId = null) {
             }
         }
     } elseif ($table === 'payments') {
-        $refNo = trim($input['reference_number'] ?? ($input['utr'] ?? ($input['transaction_id'] ?? '')));
+        $refNo = trim((string)($input['reference_number'] ?? ($input['utr'] ?? ($input['transaction_id'] ?? ''))));
         if (!empty($refNo) && strlen($refNo) >= 4) {
+            if ($excludeId) {
+                $curStmt = $pdo->prepare("SELECT reference_number FROM `payments` WHERE id = ?");
+                $curStmt->execute([$excludeId]);
+                $curRow = $curStmt->fetch(PDO::FETCH_ASSOC);
+                if ($curRow && strtolower(trim((string)$curRow['reference_number'])) === strtolower($refNo)) {
+                    return null;
+                }
+            }
             $sql = "SELECT id, reference_number, amount_received, payment_date FROM `payments` WHERE LOWER(TRIM(reference_number)) = LOWER(TRIM(:refNo))";
             $params = [':refNo' => $refNo];
             if ($excludeId) {
