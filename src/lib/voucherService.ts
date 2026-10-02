@@ -77,6 +77,62 @@ export interface ActivityVoucherData {
   supplierContact?: string;
 }
 
+export interface MasterVoucherData {
+  voucherNumber: string;
+  issueDate: string;
+  leadId?: string | number;
+  customerName: string;
+  customerPhone?: string;
+  customerEmail?: string;
+  destination: string;
+  travelDates: string;
+  adults: number;
+  children: number;
+  infants?: number;
+  packageTitle?: string;
+  emergencyContact?: string;
+  hotels: Array<{
+    dayNumber?: number;
+    destination: string;
+    hotelName: string;
+    roomCategory?: string;
+    mealPlan?: string;
+    checkIn: string;
+    checkOut: string;
+    nights?: number;
+    rooms?: number;
+    confirmationNumber?: string;
+    hotelContact?: string;
+    address?: string;
+  }>;
+  transport: Array<{
+    dayNumber?: number;
+    vehicleType: string;
+    pickupDate?: string;
+    pickupTime?: string;
+    pickupLocation?: string;
+    dropLocation?: string;
+    driverName?: string;
+    driverPhone?: string;
+    vehicleNumber?: string;
+    inclusions?: string[];
+  }>;
+  activities?: Array<{
+    dayNumber?: number;
+    activityName: string;
+    date?: string;
+    location?: string;
+    inclusions?: string;
+  }>;
+  financials?: {
+    totalAmount: number;
+    advancePaid: number;
+    balanceDue: number;
+    paymentMode?: string;
+  };
+  specialInstructions?: string[];
+}
+
 const BRAND_NAVY = [30, 58, 138]; // #1e3a8a
 const BRAND_GOLD = [217, 119, 6];  // #d97706
 const BRAND_DARK = [30, 41, 59];   // #1e293b
@@ -430,6 +486,268 @@ export function generateActivityVoucherPDF(data: ActivityVoucherData): jsPDF {
   doc.setFontSize(8);
   doc.setTextColor(100, 116, 139);
   doc.text('Ghumo Firoo Journeys — Official Activity Voucher', 14, 280);
+
+  return doc;
+}
+
+/**
+ * Generate Consolidated Master Tour Voucher PDF (Hotels + Cabs + Activities + Financials)
+ */
+export function generateMasterVoucherPDF(data: MasterVoucherData): jsPDF {
+  const doc = new jsPDF();
+  const pageWidth = 210;
+
+  const drawHeader = (pageNum: number, totalPages: number) => {
+    // Header Banner Background
+    doc.setFillColor(11, 16, 38); // #0B1026
+    doc.rect(0, 0, pageWidth, 38, 'F');
+
+    // Gold Accent Stripe
+    doc.setFillColor(201, 162, 90); // #C9A25A
+    doc.rect(0, 38, pageWidth, 2.5, 'F');
+
+    // Brand Name
+    doc.setTextColor(255, 255, 255);
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(16);
+    doc.text('GHUMO FIROO JOURNEYS', 14, 16);
+
+    doc.setFontSize(8.5);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(201, 162, 90);
+    doc.text('PREMIUM TRAVEL EXPERIENCES & TOUR OPERATOR', 14, 22);
+
+    doc.setTextColor(148, 163, 184);
+    doc.text('24x7 Operations: +91 80109 89792 | support@ghumofiroo.com | ghumofiroo.com', 14, 28);
+
+    // Document Title & Voucher Badge
+    doc.setTextColor(255, 255, 255);
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(12);
+    doc.text('CONSOLIDATED TOUR VOUCHER', pageWidth - 14, 16, { align: 'right' });
+
+    doc.setFontSize(9);
+    doc.setTextColor(201, 162, 90);
+    doc.text(`Ref: ${data.voucherNumber}`, pageWidth - 14, 23, { align: 'right' });
+
+    doc.setFontSize(8);
+    doc.setTextColor(203, 213, 225);
+    doc.text(`Issued: ${data.issueDate} | Page ${pageNum} of ${totalPages}`, pageWidth - 14, 30, { align: 'right' });
+  };
+
+  drawHeader(1, 2);
+
+  let y = 47;
+
+  // 1. GUEST & TOUR SUMMARY GRID
+  doc.setFillColor(BRAND_LIGHT[0], BRAND_LIGHT[1], BRAND_LIGHT[2]);
+  doc.rect(14, y, 182, 26, 'F');
+  doc.rect(14, y, 182, 26, 'S');
+
+  doc.setFontSize(8.5);
+  doc.setFont('helvetica', 'bold');
+  doc.setTextColor(BRAND_DARK[0], BRAND_DARK[1], BRAND_DARK[2]);
+  doc.text('PRIMARY GUEST:', 18, y + 6);
+  doc.text('TOUR DESTINATION:', 105, y + 6);
+
+  doc.setFont('helvetica', 'normal');
+  doc.text(`${data.customerName || 'Valued Guest'} ${data.customerPhone ? `(${data.customerPhone})` : ''}`, 18, y + 12);
+  doc.text(data.destination || 'Custom Tour Circuit', 105, y + 12);
+
+  doc.setFont('helvetica', 'bold');
+  doc.text('PASSENGER MANIFEST:', 18, y + 19);
+  doc.text('TRAVEL DURATION:', 105, y + 19);
+
+  doc.setFont('helvetica', 'normal');
+  const paxDetails = `${data.adults || 2} Adults${(data.children || 0) > 0 ? `, ${data.children} Children` : ''}${(data.infants || 0) > 0 ? `, ${data.infants} Infants` : ''}`;
+  doc.text(paxDetails, 18, y + 24);
+  doc.text(data.travelDates || 'Confirmed Itinerary Schedule', 105, y + 24);
+
+  y += 33;
+
+  // 2. ACCOMMODATIONS SCHEDULE
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(10.5);
+  doc.setTextColor(BRAND_NAVY[0], BRAND_NAVY[1], BRAND_NAVY[2]);
+  doc.text('1. CONFIRMED ACCOMMODATIONS (HOTEL PASS)', 14, y);
+  y += 4;
+
+  // Hotel Table Header
+  doc.setFillColor(BRAND_NAVY[0], BRAND_NAVY[1], BRAND_NAVY[2]);
+  doc.rect(14, y, 182, 7, 'F');
+  doc.setFontSize(8);
+  doc.setFont('helvetica', 'bold');
+  doc.setTextColor(255, 255, 255);
+  doc.text('Day / City', 17, y + 5);
+  doc.text('Hotel Name & Address', 52, y + 5);
+  doc.text('Room & Meal Plan', 115, y + 5);
+  doc.text('Stay Dates', 152, y + 5);
+  doc.text('Conf #', 180, y + 5);
+  y += 7;
+
+  const hotelsToRender = data.hotels.length > 0 ? data.hotels : [
+    { destination: data.destination || 'Tour City', hotelName: 'Confirmed Partner Hotel', roomCategory: 'Deluxe Room', mealPlan: 'MAP', checkIn: data.travelDates.split(' - ')[0] || 'Day 1', checkOut: 'Check-out', confirmationNumber: 'CONF-PENDING' }
+  ];
+
+  doc.setFont('helvetica', 'normal');
+  doc.setTextColor(BRAND_DARK[0], BRAND_DARK[1], BRAND_DARK[2]);
+  doc.setFontSize(7.5);
+
+  hotelsToRender.forEach((h, idx) => {
+    const rowH = 12;
+    if (idx % 2 === 1) {
+      doc.setFillColor(248, 250, 252);
+      doc.rect(14, y, 182, rowH, 'F');
+    }
+    doc.rect(14, y, 182, rowH, 'S');
+
+    doc.setFont('helvetica', 'bold');
+    doc.text(h.destination || `Day ${idx + 1}`, 17, y + 5);
+    doc.setFont('helvetica', 'normal');
+
+    // Truncate strings cleanly
+    const hName = h.hotelName.length > 32 ? h.hotelName.substring(0, 30) + '...' : h.hotelName;
+    doc.text(hName, 52, y + 5);
+    if (h.address) {
+      doc.setFontSize(6.5);
+      doc.setTextColor(100, 116, 139);
+      doc.text(h.address.substring(0, 40), 52, y + 9);
+      doc.setFontSize(7.5);
+      doc.setTextColor(BRAND_DARK[0], BRAND_DARK[1], BRAND_DARK[2]);
+    }
+
+    doc.text(`${h.roomCategory || 'Deluxe'} (${h.mealPlan || 'CP'})`, 115, y + 5);
+    doc.text(`${h.checkIn || ''}`, 152, y + 5);
+    if (h.checkOut) {
+      doc.text(`to ${h.checkOut}`, 152, y + 9);
+    }
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(30, 58, 138);
+    doc.text(h.confirmationNumber || 'CONFIRMED', 180, y + 5);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(BRAND_DARK[0], BRAND_DARK[1], BRAND_DARK[2]);
+
+    y += rowH;
+  });
+
+  y += 6;
+
+  // 3. TRANSPORT & CHAUFFEUR ALLOCATION
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(10.5);
+  doc.setTextColor(BRAND_NAVY[0], BRAND_NAVY[1], BRAND_NAVY[2]);
+  doc.text('2. DEDICATED TRANSPORT & CHAUFFEUR PASS', 14, y);
+  y += 4;
+
+  doc.setFillColor(BRAND_NAVY[0], BRAND_NAVY[1], BRAND_NAVY[2]);
+  doc.rect(14, y, 182, 7, 'F');
+  doc.setFontSize(8);
+  doc.setFont('helvetica', 'bold');
+  doc.setTextColor(255, 255, 255);
+  doc.text('Vehicle Assigned', 17, y + 5);
+  doc.text('Chauffeur / Driver Details', 65, y + 5);
+  doc.text('Vehicle Reg Number', 120, y + 5);
+  doc.text('Pickup Schedule & Route', 155, y + 5);
+  y += 7;
+
+  const transportToRender = data.transport.length > 0 ? data.transport : [
+    { vehicleType: 'AC Sedan / Innova Dedicated', driverName: 'Assigned Driver', driverPhone: '+91 80109 89792', vehicleNumber: 'Assigned on arrival', pickupLocation: 'Airport / Station Pickup' }
+  ];
+
+  doc.setFont('helvetica', 'normal');
+  doc.setTextColor(BRAND_DARK[0], BRAND_DARK[1], BRAND_DARK[2]);
+  doc.setFontSize(7.5);
+
+  transportToRender.forEach((t, idx) => {
+    const rowH = 11;
+    if (idx % 2 === 1) {
+      doc.setFillColor(248, 250, 252);
+      doc.rect(14, y, 182, rowH, 'F');
+    }
+    doc.rect(14, y, 182, rowH, 'S');
+
+    doc.setFont('helvetica', 'bold');
+    doc.text(t.vehicleType || 'Dedicated AC Cab', 17, y + 5);
+    doc.setFont('helvetica', 'normal');
+
+    doc.text(`${t.driverName || 'Chauffeur Assigned'} (${t.driverPhone || '+91 8010989792'})`, 65, y + 5);
+    doc.text(t.vehicleNumber || 'State Registered Taxi', 120, y + 5);
+    doc.text((t.pickupLocation || 'Station / Hotel Pickup').substring(0, 24), 155, y + 5);
+
+    y += rowH;
+  });
+
+  y += 6;
+
+  // 4. FINANCIAL SUMMARY & INVOICE BALANCE TABLE
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(10.5);
+  doc.setTextColor(BRAND_NAVY[0], BRAND_NAVY[1], BRAND_NAVY[2]);
+  doc.text('3. PAYMENT LEDGER & VOUCHER BILLING SUMMARY', 14, y);
+  y += 4;
+
+  const fin = data.financials || { totalAmount: 50000, advancePaid: 25000, balanceDue: 25000 };
+
+  doc.setFillColor(248, 250, 252);
+  doc.rect(14, y, 182, 18, 'F');
+  doc.rect(14, y, 182, 18, 'S');
+
+  doc.setFontSize(8.5);
+  doc.setFont('helvetica', 'bold');
+  doc.setTextColor(BRAND_DARK[0], BRAND_DARK[1], BRAND_DARK[2]);
+  doc.text('TOTAL TOUR COST:', 18, y + 6);
+  doc.text('ADVANCE RECEIVED:', 75, y + 6);
+  doc.text('BALANCE DUE ON ARRIVAL:', 135, y + 6);
+
+  doc.setFontSize(9.5);
+  doc.text(`Rs. ${Math.round(fin.totalAmount).toLocaleString('en-IN')}`, 18, y + 13);
+
+  doc.setTextColor(34, 197, 94); // Green
+  doc.text(`Rs. ${Math.round(fin.advancePaid).toLocaleString('en-IN')} (Verified)`, 75, y + 13);
+
+  if (fin.balanceDue > 0) {
+    doc.setTextColor(225, 29, 72); // Red
+    doc.text(`Rs. ${Math.round(fin.balanceDue).toLocaleString('en-IN')}`, 135, y + 13);
+  } else {
+    doc.setTextColor(34, 197, 94);
+    doc.text('NIL (Fully Paid)', 135, y + 13);
+  }
+
+  y += 24;
+
+  // 5. IMPORTANT OPERATIONAL GUIDELINES
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(9.5);
+  doc.setTextColor(BRAND_NAVY[0], BRAND_NAVY[1], BRAND_NAVY[2]);
+  doc.text('4. IMPORTANT OPERATIONAL INSTRUCTIONS FOR TRAVELERS', 14, y);
+  y += 4;
+
+  doc.setFillColor(254, 243, 199); // Amber tint
+  doc.rect(14, y, 182, 28, 'F');
+  doc.rect(14, y, 182, 28, 'S');
+
+  doc.setFontSize(7.5);
+  doc.setFont('helvetica', 'normal');
+  doc.setTextColor(120, 53, 15);
+
+  const guidelines = [
+    'Government Photo ID (Aadhaar / Passport / Voter ID) is mandatory for every guest at hotel check-in.',
+    'Standard Hotel Check-in time is 12:00 PM / 02:00 PM & Check-out time is 10:00 AM / 11:00 AM.',
+    'Air Conditioning will not be operational in hill/mountain routes as per standard regional taxi guidelines.',
+    'Balance payment (if applicable) is strictly payable on Day 1 upon arrival to your tour manager or driver.',
+    'For any roadside assistance, hotel coordination, or route queries, contact our 24x7 desk: +91 80109 89792.'
+  ];
+
+  guidelines.forEach((g) => {
+    y += 5;
+    doc.text(`•  ${g}`, 18, y);
+  });
+
+  // Footer Sign-off
+  doc.setFontSize(7.5);
+  doc.setTextColor(100, 116, 139);
+  doc.text('Generated electronically by Ghumo Firoo Journeys CRM. No physical signature required.', 14, 284);
+  doc.text('Authorized Operations Desk — Ghumo Firoo Journeys', 125, 284);
 
   return doc;
 }
