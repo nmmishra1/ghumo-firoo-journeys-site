@@ -8,4 +8,7 @@ return [
     'MYSQL_DATABASE' => 'a17511nd_Ghumofiroo',
     'MYSQL_USER'     => 'a17511nd_Ghumofiroo_live',
     'MYSQL_PASSWORD' => 'YOUR_ACTUAL_DATABASE_PASSWORD_HERE',
+
+    // Email (Resend API)
+    'RESEND_API_KEY' => 'YOUR_RESEND_API_KEY_HERE',
 ];

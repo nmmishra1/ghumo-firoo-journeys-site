@@ -97,7 +97,8 @@ try {
 
     // 5. Send Notification Email to Admin
     $adminSubject = "🟢 New Newsletter Lead: $email";
-    $adminHtml = "<p>A new visitor subscribed to <strong>Private Travel Inspiration</strong> on your website footer:</p><ul><li>Email: <strong>$email</strong></li><li>Time: " . date('Y-m-d H:i:s') . "</li><li>Source: Website Footer</li></ul><p>View in CRM: <a href='http://localhost:8080/crm/leads'>http://localhost:8080/crm/leads</a></p>";
+    $crmHost = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' ? 'https' : 'http') . '://' . ($_SERVER['HTTP_HOST'] ?? 'ghumofiroo.com');
+    $adminHtml = "<p>A new visitor subscribed to <strong>Private Travel Inspiration</strong> on your website footer:</p><ul><li>Email: <strong>$email</strong></li><li>Time: " . date('Y-m-d H:i:s') . "</li><li>Source: Website Footer</li></ul><p>View in CRM: <a href='$crmHost/crm/leads'>$crmHost/crm/leads</a></p>";
     @sendEmailPHPMailer('booking@ghumofiroo.com', $adminSubject, $adminHtml);
 
     echo json_encode([
