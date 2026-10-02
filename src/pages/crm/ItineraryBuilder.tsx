@@ -6437,7 +6437,7 @@ export default function ItineraryBuilder({
                     <span className="bg-amber-500/20 text-amber-400 border border-amber-500/40 text-[9px] px-2.5 py-0.5 rounded-full font-black">NIDHI & MSME VERIFIED DMC</span>
                   </h2>
                   <p className="text-xs text-slate-300 font-medium mt-0.5">Curated Holidays & Pilgrimage Journeys • Govt. Registered Tour Operator • ISO 9001:2026</p>
-                  <p className="text-[11px] text-slate-400">Plot 14, Sector 5, Dwarka, New Delhi - 110075</p>
+                  <p className="text-[11px] text-slate-400">Shop No. 210, 2nd Floor, Pratap Complex, Metro Gate No. 3, Munirka, New Delhi - 110067</p>
                 </div>
               </div>
               <div className="text-right text-xs font-bold text-slate-300 space-y-1 shrink-0">
@@ -6968,7 +6968,7 @@ export default function ItineraryBuilder({
                 <h1 className="text-3xl font-black tracking-tight text-slate-900">GHUMO FIROO TRAVELS</h1>
                 <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">Official Operational Service Confirmation Voucher</span>
                 <p className="text-xs text-slate-500 max-w-[340px] font-semibold mt-2">
-                  Plot 14, Sector 5, Dwarka, New Delhi - 110075<br />
+                  Shop No. 210, 2nd Floor, Pratap Complex, Metro Gate No. 3, Munirka, New Delhi - 110067<br />
                   24x7 Operations Desk: +91 9910987264 / +91 9870229792 | booking@ghumofiroo.com
                 </p>
               </div>
@@ -7205,7 +7205,7 @@ export default function ItineraryBuilder({
                 <h1 className="text-3xl font-black tracking-tight text-slate-900">GHUMO FIROO TRAVELS</h1>
                 <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">Government Registered Tour Operator • Proforma Invoice</span>
                 <p className="text-xs text-slate-500 max-w-[340px] font-semibold mt-2">
-                  Plot 14, Sector 5, Dwarka, New Delhi - 110075<br />
+                  Shop No. 210, 2nd Floor, Pratap Complex, Metro Gate No. 3, Munirka, New Delhi - 110067<br />
                   booking@ghumofiroo.com | +91 9910987264 / +91 9870229792
                 </p>
               </div>
