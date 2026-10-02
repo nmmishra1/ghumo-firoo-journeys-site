@@ -4531,6 +4531,59 @@ export default function ItineraryBuilder({
     }
   };
 
+  const handleDeleteProposalOption = async (propId: string) => {
+    if (!window.confirm('Are you sure you want to delete this proposal option? This cannot be undone.')) return;
+    try {
+      const res = await crmFetch(`${apiBase}/proposals.php?id=${propId}`, {
+        method: 'DELETE'
+      }, { action: 'delete_proposal_option', module: 'Leads', recordId: String(propId) });
+
+      if (res.ok) {
+        setProposalsList(prev => prev.filter(p => String(p.id) !== String(propId)));
+        setSelectedProposalId(null);
+        toast({
+          title: "Option Deleted",
+          description: "Proposal option has been removed from database."
+        });
+        await syncItineraryStateOnly();
+      }
+    } catch (err: any) {
+      toast({
+        title: "Failed to delete option",
+        description: err.message || "Could not delete proposal option",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleStatusSelect = async (newStatus: string) => {
+    setItinerary((prev: any) => prev ? { ...prev, status: newStatus } : prev);
+    if (itinerary?.id) {
+      try {
+        const authHeaders = await getAuthHeader();
+        const res = await fetch(`${apiBase}/itinerary_update_status.php`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            ...authHeaders
+          },
+          body: JSON.stringify({
+            id: Number(itinerary.id),
+            status: newStatus
+          })
+        });
+        if (res.ok) {
+          toast({
+            title: "Status Updated",
+            description: `Proposal status set to "${newStatus}".`
+          });
+        }
+      } catch (e) {
+        console.warn('Status update API call failed:', e);
+      }
+    }
+  };
+
   // Visual Card Picker Action handlers
   const handleAddExcursionToDay = (item: any) => {
     const adultCount = itinerary?.adult_count || 2;
@@ -4838,10 +4891,7 @@ export default function ItineraryBuilder({
               <span className="text-[10px] text-[#C9A25A] font-extrabold uppercase tracking-wider">Status:</span>
               <select
                 value={itinerary?.status || 'Draft'}
-                onChange={(e) => {
-                  const newStatus = e.target.value;
-                  setItinerary((prev: any) => prev ? { ...prev, status: newStatus } : prev);
-                }}
+                onChange={(e) => handleStatusSelect(e.target.value)}
                 className={`text-xs font-black uppercase bg-transparent cursor-pointer outline-none border-none pr-1 ${
                   itinerary?.status === 'Booking Confirmed'
                     ? 'text-emerald-400'
@@ -4880,6 +4930,16 @@ export default function ItineraryBuilder({
                     </option>
                   ))}
                 </select>
+                {selectedProposalId && (
+                  <button
+                    type="button"
+                    onClick={() => handleDeleteProposalOption(String(selectedProposalId))}
+                    className="p-1 rounded-lg hover:bg-red-500/20 text-red-400 border border-red-500/30 text-xs transition-colors cursor-pointer"
+                    title="Delete this selected proposal option from database"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </button>
+                )}
               </div>
             )}
           </div>
@@ -5007,36 +5067,6 @@ export default function ItineraryBuilder({
                   )}
                 </div>
               )}
-            </div>
-
-            {/* Proposal Status Selector */}
-            <div className="flex items-center gap-1.5 bg-[#0B1026]/90 border border-[#C9A25A]/30 rounded-lg px-2.5 h-7 shrink-0">
-              <span className="text-[10px] text-[#C9A25A] font-extrabold uppercase tracking-wider">Status:</span>
-              <select
-                value={itinerary?.status || 'Draft'}
-                onChange={(e) => {
-                  const newStatus = e.target.value;
-                  setItinerary((prev: any) => prev ? { ...prev, status: newStatus } : prev);
-                }}
-                className={`text-xs font-black uppercase bg-transparent cursor-pointer outline-none border-none pr-1 ${
-                  itinerary?.status === 'Booking Confirmed'
-                    ? 'text-emerald-400'
-                    : itinerary?.status === 'Quote Sent'
-                    ? 'text-amber-400'
-                    : itinerary?.status === 'Saved'
-                    ? 'text-blue-400'
-                    : itinerary?.status === 'Cancelled'
-                    ? 'text-rose-400'
-                    : 'text-slate-300'
-                }`}
-                title="Change proposal status"
-              >
-                <option value="Draft" className="bg-slate-900 text-white">Draft</option>
-                <option value="Saved" className="bg-slate-900 text-white">Saved</option>
-                <option value="Quote Sent" className="bg-slate-900 text-white">Quote Sent</option>
-                <option value="Booking Confirmed" className="bg-slate-900 text-white">Booking Confirmed</option>
-                <option value="Cancelled" className="bg-slate-900 text-white">Cancelled</option>
-              </select>
             </div>
 
             {/* Manual Refresh Button */}

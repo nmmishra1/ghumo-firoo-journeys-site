@@ -315,7 +315,9 @@ $markupPercentage = (float)($data['markup_percentage'] ?? 0);
 $finalCost = (float)($data['final_cost'] ?? 0);
 $costPerPerson = (float)($data['cost_per_person'] ?? 0);
 $notes = $data['notes'] ?? null;
-$status = $data['status'] ?? 'Draft';
+$rawStatus = trim($data['status'] ?? '');
+$validStatuses = ['Draft', 'Saved', 'Quote Sent', 'Booking Confirmed', 'Cancelled', 'Revised'];
+$status = in_array($rawStatus, $validStatuses, true) ? $rawStatus : 'Draft';
 $days = $data['days'] ?? [];
 
 // Extract optional override reason
@@ -647,7 +649,6 @@ try {
         }
     }
 
-    // 5. Update lead pricing details and travel dates in MySQL
     $leadUpdates = [
         'package_name = :itinerary_name',
         'package_cost = :package_cost',
@@ -659,6 +660,11 @@ try {
         ':final_cost' => $finalCost,
         ':lead_id' => $leadId
     ];
+
+    if ($status === 'Booking Confirmed' || $status === 'Quote Sent' || $status === 'Saved') {
+        $leadUpdates[] = 'status = :lead_status';
+        $leadParams[':lead_status'] = $status;
+    }
 
     if (!empty($travelStartDate)) {
         $leadUpdates[] = 'trip_start_date = :travel_start_date';

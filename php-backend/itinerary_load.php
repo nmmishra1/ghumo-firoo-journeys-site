@@ -82,14 +82,18 @@ try {
         } catch (Exception $le) {}
     }
 
-    // Fallback name extraction from itinerary_name if still empty or 'Valued Client'
-    if (empty($itinerary['customer_name']) || strcasecmp(trim($itinerary['customer_name']), 'Valued Client') === 0 || strcasecmp(trim($itinerary['customer_name']), 'Guest') === 0) {
-        if (!empty($itinerary['itinerary_name']) && preg_match('/^Itinerary for\s+([^–—\-|]+)/i', $itinerary['itinerary_name'], $m)) {
-            $extracted = trim($m[1]);
-            if ($extracted && strcasecmp($extracted, 'Valued Client') !== 0 && strcasecmp($extracted, 'Guest') !== 0) {
-                $itinerary['customer_name'] = $extracted;
-            }
+    // Resolve status: ensure it never returns empty string, syncs from lead if draft or empty
+    $validStatuses = ['Draft', 'Saved', 'Quote Sent', 'Booking Confirmed', 'Cancelled', 'Revised'];
+    $rawStatus = trim($itinerary['status'] ?? '');
+    if (empty($rawStatus) || !in_array($rawStatus, $validStatuses, true) || strcasecmp($rawStatus, 'Draft') === 0) {
+        $leadStatus = trim($linkedLead['status'] ?? '');
+        if (!empty($leadStatus) && in_array($leadStatus, $validStatuses, true) && strcasecmp($leadStatus, 'Draft') !== 0) {
+            $itinerary['status'] = $leadStatus;
+        } else {
+            $itinerary['status'] = !empty($rawStatus) && in_array($rawStatus, $validStatuses, true) ? $rawStatus : 'Draft';
         }
+    } else {
+        $itinerary['status'] = $rawStatus;
     }
 
     // 2. Fetch days
