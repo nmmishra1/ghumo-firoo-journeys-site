@@ -1960,6 +1960,9 @@ export default function ItineraryBuilder({
 }: Partial<ItineraryBuilderProps> = {}) {
   const { toast } = useToast();
 
+  const [itinerary, setItinerary] = useState<any>(null);
+  const [days, setDays] = useState<any[]>([]);
+
   // Proposal Brochure, Voucher & Invoice State
   const [proposalOpen, setProposalOpen] = useState(false);
   const [voucherOpen, setVoucherOpen] = useState(false);
@@ -2114,8 +2117,6 @@ export default function ItineraryBuilder({
   const abortControllerRef = React.useRef<AbortController | null>(null);
   const inFlightCityRequests = React.useRef<Record<string, Promise<any>>>({});
 
-  const [itinerary, setItinerary] = useState<any>(null);
-  const [days, setDays] = useState<any[]>([]);
   const [activeDayId, setActiveDayId] = useState<string>('');
   const [activeStep, setActiveStep] = useState<number>(0);
 
