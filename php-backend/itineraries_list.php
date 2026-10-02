@@ -20,7 +20,8 @@ try {
         l.destinations AS lead_destinations,
         l.trip_start_date AS lead_trip_start_date,
         l.trip_end_date AS lead_trip_end_date,
-        l.travel_month AS lead_travel_month
+        l.travel_month AS lead_travel_month,
+        l.status AS lead_status
     FROM itineraries i
     LEFT JOIN leads l ON i.lead_id = l.id
     ORDER BY i.created_at DESC");
@@ -80,9 +81,14 @@ try {
         $itin['travel_start_date'] = $start;
         $itin['travel_end_date'] = $end;
 
-        // Ensure status defaults to Draft
-        if (empty($itin['status'])) {
-            $itin['status'] = 'Draft';
+        // Resolve status: prioritize explicit itinerary status, fallback to linked lead status
+        $rawStatus = !empty($itin['status']) ? trim($itin['status']) : '';
+        if (empty($rawStatus) || strcasecmp($rawStatus, 'Draft') === 0) {
+            if (!empty($itin['lead_status']) && in_array($itin['lead_status'], ['Quote Sent', 'Booking Confirmed', 'Cancelled', 'Saved'])) {
+                $itin['status'] = $itin['lead_status'];
+            } else {
+                $itin['status'] = !empty($rawStatus) ? $rawStatus : 'Draft';
+            }
         }
 
         // Ensure itinerary code is present

@@ -259,8 +259,8 @@ export const ItineraryWorkspace: React.FC<ItineraryWorkspaceProps> = ({ leads, o
     const matchesSearch = name.includes(q) || dest.includes(q) || code.includes(q) || email.includes(q);
 
     if (statusFilter === 'flagged') return matchesSearch && Boolean(item.pricing_flagged == 1);
-    if (statusFilter === 'confirmed') return matchesSearch && (item.status === 'Booking Confirmed' || item.status === 'confirmed');
-    if (statusFilter === 'sent') return matchesSearch && (item.status === 'Quote Sent' || item.status === 'sent');
+    if (statusFilter === 'confirmed') return matchesSearch && (item.status === 'Booking Confirmed' || item.status === 'confirmed' || clientInfo.linkedLead?.status === 'Booking Confirmed');
+    if (statusFilter === 'sent') return matchesSearch && (item.status === 'Quote Sent' || item.status === 'sent' || clientInfo.linkedLead?.status === 'Quote Sent');
     return matchesSearch;
   });
 
@@ -374,8 +374,8 @@ export const ItineraryWorkspace: React.FC<ItineraryWorkspaceProps> = ({ leads, o
         </Card>
 
         <Card 
-          onClick={() => { setActiveTab('saved'); setStatusFilter('all'); }}
-          className={`border-border/60 bg-card shadow-xs cursor-pointer transition-all hover:scale-[1.02] hover:border-amber-500/60 group`}
+          onClick={() => { setActiveTab('saved'); setStatusFilter('sent'); }}
+          className={`border-border/60 bg-card shadow-xs cursor-pointer transition-all hover:scale-[1.02] hover:border-amber-500/60 group ${activeTab === 'saved' && statusFilter === 'sent' ? 'ring-2 ring-amber-500 border-amber-500 shadow-md' : ''}`}
         >
           <CardContent className="p-4 flex items-center justify-between">
             <div>
@@ -390,8 +390,8 @@ export const ItineraryWorkspace: React.FC<ItineraryWorkspaceProps> = ({ leads, o
         </Card>
 
         <Card 
-          onClick={() => { setActiveTab('leads'); }}
-          className={`border-border/60 bg-card shadow-xs cursor-pointer transition-all hover:scale-[1.02] hover:border-emerald-500/60 group ${activeTab === 'leads' ? 'ring-2 ring-emerald-500 border-emerald-500 shadow-md' : ''}`}
+          onClick={() => { setActiveTab('saved'); setStatusFilter('confirmed'); }}
+          className={`border-border/60 bg-card shadow-xs cursor-pointer transition-all hover:scale-[1.02] hover:border-emerald-500/60 group ${activeTab === 'saved' && statusFilter === 'confirmed' ? 'ring-2 ring-emerald-500 border-emerald-500 shadow-md' : ''}`}
         >
           <CardContent className="p-4 flex items-center justify-between">
             <div>

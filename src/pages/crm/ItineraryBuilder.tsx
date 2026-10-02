@@ -717,8 +717,8 @@ export function TripContextStrip({ itinerary, activeLead, cityNames }: TripConte
 
               <Button 
                 variant="outline" 
-                onClick={() => window.open(`/crm/leads/${activeLead?.id}/brochure`, '_blank')} 
-                className="w-full text-xs h-9 font-display font-bold bg-[#1A2342] text-white hover:bg-[#1A2342]/80 border border-[#C9A25A]/30 rounded-xl transition-all uppercase tracking-wider"
+                onClick={() => setProposalOpen(true)} 
+                className="w-full text-xs h-9 font-display font-bold bg-[#1A2342] text-white hover:bg-[#1A2342]/80 border border-[#C9A25A]/30 rounded-xl transition-all uppercase tracking-wider cursor-pointer"
               >
                 <FileText className="w-4 h-4 mr-2" /> Preview Client Brochure
               </Button>
@@ -1911,8 +1911,8 @@ export function CostingDrawer({
 
               <Button 
                 variant="outline" 
-                onClick={() => window.open(`/crm/leads/${leadId || activeLead?.id}/brochure`, '_blank')} 
-                className="w-full text-xs h-9 font-display font-bold bg-[#1A2342] text-white hover:bg-[#1A2342]/80 border border-[#C9A25A]/30 rounded-xl transition-all uppercase tracking-wider"
+                onClick={() => setProposalOpen(true)} 
+                className="w-full text-xs h-9 font-display font-bold bg-[#1A2342] text-white hover:bg-[#1A2342]/80 border border-[#C9A25A]/30 rounded-xl transition-all uppercase tracking-wider cursor-pointer"
               >
                 <FileText className="w-4 h-4 mr-2" /> Preview Client Brochure
               </Button>
@@ -2014,7 +2014,7 @@ export default function ItineraryBuilder({
 
   useEffect(() => {
     if (initialDocView === 'brochure') {
-      window.open(`/crm/leads/${leadId || activeLead?.id}/brochure`, '_blank');
+      setProposalOpen(true);
     }
     if (initialDocView === 'voucher') {
       setDocModalTab('hotel');
@@ -4812,77 +4812,86 @@ export default function ItineraryBuilder({
       {/* MAIN PANEL */}
       <div className="flex-grow flex flex-col h-full overflow-hidden bg-[#0B1026] relative">
         {/* Top bar */}
-        <div className="h-11 bg-[#060D1F] border-b border-[#C9A25A]/15 px-4 flex items-center justify-between shrink-0">
-          {/* Left section: Back + breadcrumbs */}
-          <div className="flex items-center gap-3 text-left">
+        <div className="min-h-[48px] py-1.5 bg-[#060D1F] border-b border-[#C9A25A]/15 px-3 sm:px-4 flex flex-wrap items-center justify-between gap-2 shrink-0 z-20">
+          {/* Left section: Back + breadcrumbs + Status + Options */}
+          <div className="flex items-center gap-2.5 text-left flex-wrap">
             <button
               onClick={onBack}
               className="text-gray-400 hover:text-white text-xs font-bold bg-transparent border-0 flex items-center gap-1 p-0 cursor-pointer"
             >
               <ArrowLeft className="w-3.5 h-3.5" /> Back
             </button>
-            <div className="h-6 w-[0.5px] bg-[#C9A25A]/15" />
-            <div className="flex items-center gap-1.5 text-[11px] font-medium font-display">
-              <span className="text-gray-400/40">Leads</span>
+            <div className="h-5 w-[0.5px] bg-[#C9A25A]/20 hidden sm:block" />
+            
+            <div className="hidden sm:flex items-center gap-1.5 text-[11px] font-medium font-display">
+              <span className="text-gray-400/50">Leads</span>
               <span className="text-gray-400/40">&gt;</span>
-              <span className="text-gray-400/40 truncate max-w-[120px]">
+              <span className="text-gray-300 font-semibold truncate max-w-[130px]">
                 {itinerary?.customer_name || activeLead?.customer_name || 'Guest'}
               </span>
               <span className="text-gray-400/40">&gt;</span>
               <span className="text-[#C9A25A] font-bold">Itinerary</span>
             </div>
 
-            {/* Dual-Key Confirmation Lock Indicator */}
-            <div className="hidden lg:flex items-center gap-1.5 border-l border-[#C9A25A]/15 pl-3 text-left">
-              <span className={`text-[9px] font-black uppercase px-2 py-0.5 rounded-md border ${
-                isFinancialConfirmed ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400' : 'bg-amber-500/10 border-amber-500/30 text-amber-400'
-              }`} title="Key 1: Financial Lock (50% Advance Payment Verified)">
-                💳 Deposit: {isFinancialConfirmed ? 'Paid (50%)' : 'Pending'}
-              </span>
-
-              <span className={`text-[9px] font-black uppercase px-2 py-0.5 rounded-md border ${
-                isInventoryConfirmed ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400' : 'bg-purple-500/10 border-purple-500/30 text-purple-400'
-              }`} title="Key 2: Inventory Lock (Manual Hotel Confirmation Ref # & Driver Details)">
-                🛌 Supplier Lock: {isInventoryConfirmed ? 'Confirmed' : 'Ref # Needed'}
-              </span>
-            </div>
-
-            {/* Multi-Option Proposal Dropdown & Actions */}
-            <div className="hidden sm:flex items-center gap-1.5 border-l border-[#C9A25A]/20 pl-3">
-              <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Option:</span>
+            {/* Proposal Status Selector */}
+            <div className="flex items-center gap-1.5 bg-[#0B1026] border border-[#C9A25A]/30 rounded-lg px-2 h-7 shrink-0">
+              <span className="text-[10px] text-[#C9A25A] font-extrabold uppercase tracking-wider">Status:</span>
               <select
-                value={selectedProposalId ? String(selectedProposalId) : ''}
-                onChange={(e) => handleSwitchProposalOption(e.target.value)}
-                className="bg-slate-900 border border-[#C9A25A]/40 text-amber-300 font-bold text-xs rounded-lg px-2 py-1 outline-none max-w-[180px] truncate"
-                title="Select proposal quote option for this pax"
+                value={itinerary?.status || 'Draft'}
+                onChange={(e) => {
+                  const newStatus = e.target.value;
+                  setItinerary((prev: any) => prev ? { ...prev, status: newStatus } : prev);
+                }}
+                className={`text-xs font-black uppercase bg-transparent cursor-pointer outline-none border-none pr-1 ${
+                  itinerary?.status === 'Booking Confirmed'
+                    ? 'text-emerald-400'
+                    : itinerary?.status === 'Quote Sent'
+                    ? 'text-amber-400'
+                    : itinerary?.status === 'Saved'
+                    ? 'text-blue-400'
+                    : itinerary?.status === 'Cancelled'
+                    ? 'text-rose-400'
+                    : 'text-slate-300'
+                }`}
+                title="Change proposal status"
               >
-                <option value="">Default Itinerary</option>
-                {proposalsList.map(p => (
-                  <option key={p.id} value={p.id}>
-                    {p.option_name || `Option ${p.option_number}`}: ₹{Number(p.total_price || 0).toLocaleString('en-IN')} {p.status === 'Accepted' ? '⭐' : ''}
-                  </option>
-                ))}
+                <option value="Draft" className="bg-slate-900 text-white">Draft</option>
+                <option value="Saved" className="bg-slate-900 text-white">Saved</option>
+                <option value="Quote Sent" className="bg-slate-900 text-white">Quote Sent</option>
+                <option value="Booking Confirmed" className="bg-slate-900 text-white">Booking Confirmed</option>
+                <option value="Cancelled" className="bg-slate-900 text-white">Cancelled</option>
               </select>
-
-              <button
-                type="button"
-                onClick={handleSaveAsNewOption}
-                className="bg-[#C9A25A]/15 hover:bg-[#C9A25A]/25 text-[#C9A25A] border border-[#C9A25A]/30 text-[10px] font-black uppercase tracking-wider rounded-lg px-2 py-1 flex items-center gap-1 shrink-0 cursor-pointer"
-                title="Save this itinerary snapshot as a new proposal option"
-              >
-                <Plus className="w-3 h-3 stroke-[3]" /> + Option
-              </button>
             </div>
+
+            {/* Multi-Option Proposal Dropdown - Only show if proposals exist */}
+            {proposalsList.length > 0 && (
+              <div className="flex items-center gap-1.5 border-l border-[#C9A25A]/20 pl-2">
+                <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Option:</span>
+                <select
+                  value={selectedProposalId ? String(selectedProposalId) : ''}
+                  onChange={(e) => handleSwitchProposalOption(e.target.value)}
+                  className="bg-slate-900 border border-[#C9A25A]/40 text-amber-300 font-bold text-xs rounded-lg px-2 py-0.5 outline-none max-w-[150px] truncate"
+                  title="Select proposal quote option for this pax"
+                >
+                  <option value="">Default Option</option>
+                  {proposalsList.map(p => (
+                    <option key={p.id} value={p.id}>
+                      {p.option_name || `Option ${p.option_number}`}: ₹{Number(p.total_price || 0).toLocaleString('en-IN')} {p.status === 'Accepted' ? '⭐' : ''}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
           </div>
 
           {/* Right section: 3-Stage Workflow + More + Save & Sync */}
           <div className="flex items-center gap-2 shrink-0 ml-auto">
-            {/* Stage 1: Proposal Quote */}
+            {/* Stage 1: Proposal Quote (Opens in-app modal directly) */}
             <Button
               type="button"
               variant="outline"
-              onClick={() => window.open(`/crm/leads/${leadId || activeLead?.id}/brochure`, '_blank')}
-              className="h-7 text-[10px] font-black uppercase tracking-wider bg-amber-500/10 border-amber-500/30 text-amber-400 hover:bg-amber-500/20 rounded-lg px-2.5 hidden xl:flex items-center gap-1 cursor-pointer shrink-0"
+              onClick={() => setProposalOpen(true)}
+              className="h-7 text-[10px] font-black uppercase tracking-wider bg-amber-500/10 border-amber-500/30 text-amber-400 hover:bg-amber-500/20 rounded-lg px-2.5 flex items-center gap-1 cursor-pointer shrink-0"
               title="Stage 1: Share Itinerary Proposal Brochure to finalize quote with client"
             >
               <FileText className="w-3.5 h-3.5" /> 1. Proposal
@@ -4894,7 +4903,7 @@ export default function ItineraryBuilder({
               variant="outline"
               onClick={handleOpenInvoice}
               disabled={isDirty}
-              className="h-7 text-[10px] font-black uppercase tracking-wider bg-blue-500/10 border-blue-500/30 text-blue-400 hover:bg-blue-500/20 rounded-lg px-2.5 hidden xl:flex items-center gap-1 cursor-pointer disabled:opacity-40 shrink-0"
+              className="h-7 text-[10px] font-black uppercase tracking-wider bg-blue-500/10 border-blue-500/30 text-blue-400 hover:bg-blue-500/20 rounded-lg px-2.5 flex items-center gap-1 cursor-pointer disabled:opacity-40 shrink-0"
               title="Stage 2: Generate & Share GST Proforma Invoice to collect advance deposit"
             >
               <IndianRupee className="w-3.5 h-3.5" /> 2. Invoice
@@ -4906,7 +4915,7 @@ export default function ItineraryBuilder({
               variant="outline"
               onClick={handleOpenVoucher}
               disabled={isDirty}
-              className="h-7 text-[10px] font-black uppercase tracking-wider bg-emerald-500/10 border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/20 rounded-lg px-2.5 hidden xl:flex items-center gap-1 cursor-pointer disabled:opacity-40 shrink-0"
+              className="h-7 text-[10px] font-black uppercase tracking-wider bg-emerald-500/10 border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/20 rounded-lg px-2.5 flex items-center gap-1 cursor-pointer disabled:opacity-40 shrink-0"
               title="Stage 3: Issue Final Operational Service Voucher after manual hotel/cab confirmation"
             >
               <Car className="w-3.5 h-3.5" /> 3. Voucher
@@ -4925,34 +4934,33 @@ export default function ItineraryBuilder({
                   className="absolute right-0 mt-2 w-64 bg-slate-900 border border-slate-800 rounded-xl shadow-2xl z-50 p-2 text-left space-y-1 animate-in fade-in zoom-in-95 duration-100"
                 >
                   <div className="px-3 py-1 text-[9px] font-black uppercase text-amber-400 tracking-wider">
-                    Travel Booking Lifecycle Steps
+                    Proposal Options
                   </div>
                   <button
-                    onClick={() => { window.open(`/crm/leads/${leadId || activeLead?.id}/brochure`, '_blank'); setMoreMenuOpen(false); }}
+                    onClick={() => { handleSaveAsNewOption(); setMoreMenuOpen(false); }}
                     className="w-full text-left text-xs font-bold py-2 px-3 rounded-lg hover:bg-slate-800 text-amber-300 flex items-center gap-2"
                   >
-                    <FileText className="w-4 h-4 text-amber-400" /> 1. Share Proposal Brochure
-                  </button>
-                  <button
-                    onClick={() => { handleOpenInvoice(); setMoreMenuOpen(false); }}
-                    disabled={isDirty}
-                    className="w-full text-left text-xs font-bold py-2 px-3 rounded-lg hover:bg-slate-800 text-blue-300 flex items-center gap-2 disabled:opacity-40"
-                  >
-                    <IndianRupee className="w-4 h-4 text-blue-400" /> 2. Share Proforma Invoice
-                  </button>
-                  <button
-                    onClick={() => { handleOpenVoucher(); setMoreMenuOpen(false); }}
-                    disabled={isDirty}
-                    className="w-full text-left text-xs font-bold py-2 px-3 rounded-lg hover:bg-slate-800 text-emerald-300 flex items-center gap-2 disabled:opacity-40"
-                  >
-                    <Car className="w-4 h-4 text-emerald-400" /> 3. Issue Service Voucher
+                    <Plus className="w-4 h-4 text-amber-400" /> + Save As New Option
                   </button>
                   <button
                     onClick={() => { window.open(`/crm/leads/${leadId || activeLead?.id}/proposals`, '_blank'); setMoreMenuOpen(false); }}
-                    className="w-full text-left text-xs font-bold py-2 px-3 rounded-lg hover:bg-slate-800 text-amber-300 flex items-center gap-2"
+                    className="w-full text-left text-xs font-bold py-2 px-3 rounded-lg hover:bg-slate-800 text-[#C9A25A] flex items-center gap-2"
                   >
                     <Sparkles className="w-4 h-4 text-[#C9A25A]" /> View Multi-Option Proposals Grid
                   </button>
+
+                  <div className="h-px bg-slate-800 my-1" />
+                  <div className="px-3 py-1 text-[9px] font-black uppercase text-slate-400 tracking-wider">
+                    Booking Verification
+                  </div>
+                  <div className="px-3 py-1 text-[11px] text-slate-300">
+                    💳 Deposit: <strong>{isFinancialConfirmed ? 'Paid (50%)' : 'Pending'}</strong>
+                  </div>
+                  <div className="px-3 py-1 text-[11px] text-slate-300">
+                    🛌 Supplier Lock: <strong>{isInventoryConfirmed ? 'Confirmed' : 'Ref # Needed'}</strong>
+                  </div>
+
+                  <div className="h-px bg-slate-800 my-1" />
                   <div className="h-px bg-slate-800 my-1" />
                   
                   {/* Admin Global Actions */}
