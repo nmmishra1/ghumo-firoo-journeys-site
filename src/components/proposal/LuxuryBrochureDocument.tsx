@@ -108,7 +108,11 @@ export default function LuxuryBrochureDocument({
   const refNumber = lead?.enquiry_number || `885${leadId.toString().padStart(4, '0')}`;
   
   const rawDest = lead?.destination || lead?.destinations || itinerary?.itinerary_name || 'Jodhpur';
-  const destinationClean = typeof rawDest === 'string' ? rawDest.split('·')[0].split('(')[0].trim() : 'Custom Tour';
+  const destinationClean = typeof rawDest === 'string'
+    ? rawDest.split('·')[0].split('(')[0].trim()
+    : Array.isArray(rawDest) && rawDest.length > 0
+    ? String(rawDest[0]).split('·')[0].split('(')[0].trim()
+    : 'Jodhpur';
   
   const nights = itinerary?.total_nights || (itinerary?.days?.length ? itinerary.days.length - 1 : 1);
   const daysCount = nights + 1;
@@ -127,9 +131,34 @@ export default function LuxuryBrochureDocument({
   const totalPrice = Number(activeOption?.total_price || itinerary?.final_cost || 21262);
   const pricePerAdult = activeOption?.price_per_person || Math.round(totalPrice / adultCount);
   
-  // Extract hotel info from day 1 or hotels list
+  // Extract hotel info from day 1 or hotels list or metadata blocks
   const days = itinerary?.days || [];
-  const firstHotel = days[0]?.hotels?.[0] || {
+  let hotelFound: any = null;
+  for (const d of days) {
+    if (d?.hotels && d.hotels.length > 0) {
+      hotelFound = {
+        hotel_name: d.hotels[0].hotel_name || d.hotels[0].name,
+        room_category: d.hotels[0].room_category || d.hotels[0].room_type,
+        meal_plan: d.hotels[0].meal_plan,
+        address: d.hotels[0].address || d.hotels[0].hotel_address,
+        star_category: d.hotels[0].star_category || 4
+      };
+      break;
+    }
+    const blockHotel = d?.metadata?.blocks?.find((b: any) => b.type === 'hotel');
+    if (blockHotel) {
+      hotelFound = {
+        hotel_name: blockHotel.properties?.hotel_name || blockHotel.title,
+        room_category: blockHotel.properties?.room_category || blockHotel.properties?.room_type,
+        meal_plan: blockHotel.properties?.meal_plan,
+        address: blockHotel.properties?.hotel_address || blockHotel.properties?.address,
+        star_category: blockHotel.properties?.stars || 4
+      };
+      break;
+    }
+  }
+
+  const firstHotel = hotelFound || {
     hotel_name: 'WelcomHeritage Bal Samand Lake Palace',
     room_category: 'Garden Room',
     meal_plan: 'Breakfast (CP)',

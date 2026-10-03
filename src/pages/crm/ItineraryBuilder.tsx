@@ -23,6 +23,7 @@ import {
 import { VoucherInvoiceModal } from '@/components/crm/VoucherInvoiceModal';
 import { crmFetch } from '@/utils/crmApi';
 import LuxuryBrochureDocument from '@/components/proposal/LuxuryBrochureDocument';
+import { OFFICIAL_BANK_DETAILS } from '@/constants/bankDetails';
 
 interface ItineraryBuilderProps {
   leadId: string;
@@ -729,7 +730,6 @@ export function TripContextStrip({ itinerary, activeLead, cityNames }: TripConte
                   variant="outline" 
                   size="sm" 
                   onClick={handleOpenVoucher}
-                  disabled={isDirty}
                   className="text-[10px] h-8 font-bold border border-[#C9A25A]/20 rounded-xl hover:bg-slate-800 bg-[#0B1026] text-slate-200 disabled:opacity-40"
                 >
                   <Car className="w-3.5 h-3.5 mr-1" /> Voucher
@@ -738,7 +738,6 @@ export function TripContextStrip({ itinerary, activeLead, cityNames }: TripConte
                   variant="outline" 
                   size="sm" 
                   onClick={handleOpenInvoice}
-                  disabled={isDirty}
                   className="text-[10px] h-8 font-bold border border-[#C9A25A]/20 rounded-xl hover:bg-slate-800 bg-[#0B1026] text-slate-200 disabled:opacity-40"
                 >
                   <IndianRupee className="w-3.5 h-3.5 mr-1" /> Invoice
@@ -4431,6 +4430,10 @@ export default function ItineraryBuilder({
   const isFinancialConfirmed = Boolean(
     activeLead?.advance_paid_verified ||
     activeLead?.status === 'Booking Confirmed' ||
+    itinerary?.status === 'Booking Confirmed' ||
+    itinerary?.status === 'Confirmed' ||
+    activeLead?.status === 'Voucher Issued' ||
+    itinerary?.status === 'Voucher Issued' ||
     (advanceDepositRequired > 0 && totalPaidRecorded >= advanceDepositRequired)
   );
   
@@ -4458,20 +4461,6 @@ export default function ItineraryBuilder({
     : 'Stage 2: Advance Invoice Pending (50% Deposit) 🟡';
 
   const handleOpenVoucher = () => {
-    if (isDirty) {
-      toast({
-        title: 'Unsaved Changes Detected',
-        description: 'Please click "Save & Sync" in the header to save your changes before generating operational service vouchers.',
-        variant: 'destructive'
-      });
-      return;
-    }
-
-    if (!isFinancialConfirmed) {
-      setIsVoucherGatedOpen(true);
-      return;
-    }
-
     setDocModalTab('hotel');
     setDocModalOpen(true);
   };
@@ -4889,6 +4878,53 @@ export default function ItineraryBuilder({
       fetchHotelsForCity(newDayId, autoCity);
     }
   };
+
+  const effectiveItineraryForPreview = useMemo(() => {
+    const calculatedNights = stayStops.reduce((sum, s) => sum + (Number(s.nights) || 0), 0) || (days?.length > 1 ? days.length - 1 : 1);
+    const startD = (days && days[0]?.date) || itinerary?.travel_start_date || activeLead?.trip_start_date || new Date().toISOString().split('T')[0];
+    const endD = (days && days[days.length - 1]?.date) || itinerary?.travel_end_date || activeLead?.trip_end_date || new Date(new Date(startD).getTime() + calculatedNights * 86400000).toISOString().split('T')[0];
+
+    return {
+      ...itinerary,
+      days: (days && days.length > 0) ? days : (itinerary?.days || []),
+      total_cost: finalPackagePrice,
+      final_cost: finalPackagePrice,
+      cost_per_person: perPersonPrice,
+      adult_count: composerAdults || itinerary?.adult_count || activeLead?.adult_count || 2,
+      child_count: composerChildren || itinerary?.child_count || activeLead?.child_count || 0,
+      total_nights: calculatedNights,
+      travel_start_date: startD,
+      travel_end_date: endD,
+      itinerary_name: itinerary?.itinerary_name || itinerary?.title || activeLead?.lead_title || activeLead?.destination || 'Custom Tour',
+      destinations: (itinerary?.destinations && itinerary.destinations.length > 0)
+        ? itinerary.destinations
+        : (activeLead?.destinations || [activeLead?.destination || 'Custom Tour'])
+    };
+  }, [itinerary, days, finalPackagePrice, perPersonPrice, composerAdults, composerChildren, stayStops, activeLead]);
+
+  const effectiveLeadForPreview = useMemo(() => {
+    return {
+      ...activeLead,
+      customer_name: activeLead?.customer_name || itinerary?.customer_name || 'Valued Guest',
+      customer_phone: activeLead?.customer_phone || itinerary?.customer_phone || '',
+      customer_email: activeLead?.customer_email || itinerary?.customer_email || '',
+      destination: activeLead?.destination || itinerary?.itinerary_name || 'Custom Tour',
+      destinations: activeLead?.destinations || itinerary?.destinations || [activeLead?.destination || 'Custom Tour'],
+      trip_start_date: (days && days[0]?.date) || activeLead?.trip_start_date || itinerary?.travel_start_date,
+      trip_end_date: (days && days[days.length - 1]?.date) || activeLead?.trip_end_date || itinerary?.travel_end_date,
+      adult_count: composerAdults || activeLead?.adult_count || itinerary?.adult_count || 2,
+      child_count: composerChildren || activeLead?.child_count || itinerary?.child_count || 0,
+      id: activeLead?.id || leadId
+    };
+  }, [activeLead, itinerary, days, composerAdults, composerChildren, leadId]);
+
+  const effectiveOptionForPreview = useMemo(() => {
+    return currentSelectedOption || {
+      option_name: 'Official Quotation',
+      total_price: finalPackagePrice || itinerary?.final_cost || itinerary?.total_cost || 0,
+      price_per_person: perPersonPrice || itinerary?.cost_per_person || 0
+    };
+  }, [currentSelectedOption, finalPackagePrice, perPersonPrice, itinerary]);
 
   return (
     <div className="flex flex-row w-full h-full overflow-hidden bg-[#0B1026] text-white select-none relative">
@@ -6465,13 +6501,9 @@ export default function ItineraryBuilder({
           <div className="flex-1 bg-[#070b16] py-8 px-4 flex justify-center overflow-y-auto print:p-0 print:bg-white">
             <div className="w-full max-w-[210mm] shadow-2xl rounded-2xl overflow-hidden print:shadow-none print:rounded-none">
               <LuxuryBrochureDocument 
-                lead={activeLead || { customer_name: itinerary?.customer_name, id: leadId, destinations: itinerary?.destinations }}
-                itinerary={itinerary}
-                activeOption={currentSelectedOption || {
-                  total_price: itinerary?.final_cost || itinerary?.total_cost,
-                  price_per_person: itinerary?.cost_per_person,
-                  option_name: 'Official Quotation'
-                }}
+                lead={effectiveLeadForPreview}
+                itinerary={effectiveItineraryForPreview}
+                activeOption={effectiveOptionForPreview}
                 agentProfile={{
                   name: userProfile?.full_name || 'Ghumo Firoo Concierge',
                   phone: userProfile?.phone,
@@ -6569,9 +6601,27 @@ export default function ItineraryBuilder({
               {(() => {
                 const staysList: any[] = [];
                 days.forEach(day => {
+                  (day.hotels || []).forEach((h: any) => {
+                    staysList.push({
+                      day,
+                      block: {
+                        properties: {
+                          hotel_name: h.hotel_name || h.name,
+                          room_category: h.room_category || h.room_type,
+                          meal_plan: h.meal_plan,
+                          hotel_conf_no: h.hotel_conf_no || h.confirmation_number,
+                          stars: h.star_category || 4,
+                          hotel_contact: h.hotel_contact
+                        }
+                      }
+                    });
+                  });
                   (day.metadata?.blocks || []).forEach((block: any) => {
                     if (block.type === 'hotel') {
-                      staysList.push({ day, block });
+                      const hName = block.properties?.hotel_name || block.title;
+                      if (!staysList.some(s => s.day.day_number === day.day_number && s.block.properties?.hotel_name === hName)) {
+                        staysList.push({ day, block });
+                      }
                     }
                   });
                 });
@@ -6645,8 +6695,24 @@ export default function ItineraryBuilder({
               {(() => {
                 const transportList: any[] = [];
                 days.forEach(day => {
+                  (day.transport || []).forEach((t: any) => {
+                    transportList.push({
+                      day,
+                      block: {
+                        properties: {
+                          vehicle_type: t.vehicle_type || t.model || 'AC Sedan / SUV Cab',
+                          usage_type: 'Full Circuit Private Cab',
+                          voucher_ref: 'V-8794',
+                          pickup_location: t.pickup_location || `${day.city} Station / Airport`,
+                          drop_location: t.drop_location || `${day.accommodation_city || day.city} Hotel`,
+                          vehicle_no: t.vehicle_no || 'RJ-19-TA-4455',
+                          driver_details: `${t.driver_name || 'Assigned Chauffeur'} • ${t.driver_phone || '+91 9910987264'}`
+                        }
+                      }
+                    });
+                  });
                   (day.metadata?.blocks || []).forEach((block: any) => {
-                    if (block.type === 'transport') {
+                    if (block.type === 'transport' || block.type === 'transfer') {
                       transportList.push({ day, block });
                     }
                   });
@@ -6886,11 +6952,12 @@ export default function ItineraryBuilder({
                   <IndianRupee className="w-4 h-4 text-amber-500" />
                   Bank Wire Transfer & UPI Details
                 </h5>
-                <p className="font-bold text-slate-600 dark:text-slate-300">Account Name: <strong className="text-slate-900 dark:text-white">Ghumo Firoo Travels Private Limited</strong></p>
-                <p className="font-bold text-slate-600 dark:text-slate-300">Bank Name: <strong className="text-slate-900 dark:text-white">HDFC Bank / ICICI Bank</strong></p>
-                <p className="font-bold text-slate-600 dark:text-slate-300">Account Number: <strong className="text-slate-900 dark:text-white">50200084321948</strong></p>
-                <p className="font-bold text-slate-600 dark:text-slate-300">IFSC Code: <strong className="text-slate-900 dark:text-white">HDFC0001203</strong></p>
-                <p className="font-bold text-slate-600 dark:text-slate-300">UPI Handle: <strong className="text-amber-600">ghumofiroo@icici</strong></p>
+                <p className="font-bold text-slate-600 dark:text-slate-300">Account Name: <strong className="text-slate-900 dark:text-white">{OFFICIAL_BANK_DETAILS.accountName}</strong></p>
+                <p className="font-bold text-slate-600 dark:text-slate-300">Bank Name: <strong className="text-slate-900 dark:text-white">{OFFICIAL_BANK_DETAILS.bankName}</strong></p>
+                <p className="font-bold text-slate-600 dark:text-slate-300">Account Number: <strong className="text-slate-900 dark:text-white">{OFFICIAL_BANK_DETAILS.accountNumber}</strong></p>
+                <p className="font-bold text-slate-600 dark:text-slate-300">IFSC Code: <strong className="text-slate-900 dark:text-white">{OFFICIAL_BANK_DETAILS.ifscCode}</strong></p>
+                <p className="font-bold text-slate-600 dark:text-slate-300">Branch: <strong className="text-slate-900 dark:text-white">{OFFICIAL_BANK_DETAILS.branch}</strong></p>
+                <p className="font-bold text-slate-600 dark:text-slate-300">UPI Handle: <strong className="text-amber-600">{OFFICIAL_BANK_DETAILS.upiId}</strong></p>
               </div>
 
               <div className="flex flex-col justify-between space-y-4">
@@ -6981,14 +7048,13 @@ export default function ItineraryBuilder({
         <VoucherInvoiceModal
           isOpen={docModalOpen}
           onClose={() => setDocModalOpen(false)}
-          lead={activeLead}
-          itinerary={{
-            ...itinerary,
-            days: days,
-            total_price: finalPackagePrice,
-            title: itinerary?.title || activeLead?.destination
-          }}
+          lead={effectiveLeadForPreview}
+          itinerary={effectiveItineraryForPreview}
           initialTab={docModalTab}
+          onOpenFullScreenVoucher={() => {
+            setDocModalOpen(false);
+            setVoucherOpen(true);
+          }}
         />
       )}
     </div>

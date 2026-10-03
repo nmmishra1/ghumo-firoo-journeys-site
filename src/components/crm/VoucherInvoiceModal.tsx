@@ -18,6 +18,7 @@ import {
   CabVoucherData,
   MasterVoucherData
 } from '@/lib/voucherService';
+import { OFFICIAL_BANK_DETAILS } from '@/constants/bankDetails';
 
 interface VoucherInvoiceModalProps {
   isOpen: boolean;
@@ -25,6 +26,7 @@ interface VoucherInvoiceModalProps {
   lead: any;
   itinerary?: any;
   initialTab?: 'invoice' | 'hotel' | 'cab' | 'master';
+  onOpenFullScreenVoucher?: () => void;
 }
 
 const apiBase = import.meta.env.VITE_API_BASE_URL || '/php-backend';
@@ -34,7 +36,8 @@ export const VoucherInvoiceModal: React.FC<VoucherInvoiceModalProps> = ({
   onClose,
   lead,
   itinerary,
-  initialTab = 'invoice'
+  initialTab = 'invoice',
+  onOpenFullScreenVoucher
 }) => {
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState<'invoice' | 'hotel' | 'cab' | 'master'>(initialTab);
@@ -45,48 +48,82 @@ export const VoucherInvoiceModal: React.FC<VoucherInvoiceModalProps> = ({
     }
   }, [initialTab, isOpen]);
 
-  // Extract real hotels from itinerary days
+  // Extract real hotels from itinerary days (checking both day.hotels from MySQL and day.metadata.blocks)
   const hotelList = useMemo(() => {
     const list: any[] = [];
     (itinerary?.days || []).forEach((day: any, dIdx: number) => {
+      // 1. Direct hotels array from DB
+      (day.hotels || []).forEach((h: any, hIdx: number) => {
+        list.push({
+          id: h.id || `htl_${dIdx}_${hIdx}`,
+          dayNumber: day.day_number || (dIdx + 1),
+          date: day.date || h.check_in_date || '',
+          city: day.accommodation_city || day.city || 'Destination',
+          name: h.hotel_name || h.name || 'WelcomHeritage Bal Samand Lake Palace',
+          address: h.address || h.hotel_address || `${day.accommodation_city || day.city || 'Jodhpur'}, Rajasthan`,
+          roomType: h.room_category || h.room_type || 'Premium Room',
+          mealPlan: h.meal_plan || 'MAP (Breakfast & Dinner)',
+          hotelConfNo: h.hotel_conf_no || h.confirmation_number || '',
+          hotelContact: h.hotel_contact || ''
+        });
+      });
+      // 2. Metadata blocks
       const blocks = day.metadata?.blocks || [];
       blocks.forEach((b: any) => {
         if (b.type === 'hotel') {
-          list.push({
-            id: b.id,
-            dayNumber: day.day_number || (dIdx + 1),
-            date: day.date || '',
-            city: day.accommodation_city || day.city || 'Destination',
-            name: b.title || b.properties?.hotel_name || b.properties?.name || 'Partner Luxury Hotel',
-            address: b.properties?.hotel_address || b.properties?.address || `${day.accommodation_city || day.city || 'City'}, India`,
-            roomType: b.properties?.room_type || b.properties?.room_category || 'Deluxe Room',
-            mealPlan: b.properties?.meal_plan || 'MAP (Breakfast & Dinner)',
-            hotelConfNo: b.properties?.hotel_conf_no || '',
-            hotelContact: b.properties?.hotel_contact || ''
-          });
+          const hName = b.title || b.properties?.hotel_name || b.properties?.name;
+          if (hName && !list.some(existing => existing.dayNumber === (day.day_number || (dIdx + 1)) && existing.name === hName)) {
+            list.push({
+              id: b.id,
+              dayNumber: day.day_number || (dIdx + 1),
+              date: day.date || '',
+              city: day.accommodation_city || day.city || 'Destination',
+              name: hName || 'Partner Luxury Hotel',
+              address: b.properties?.hotel_address || b.properties?.address || `${day.accommodation_city || day.city || 'City'}, India`,
+              roomType: b.properties?.room_type || b.properties?.room_category || 'Deluxe Room',
+              mealPlan: b.properties?.meal_plan || 'MAP (Breakfast & Dinner)',
+              hotelConfNo: b.properties?.hotel_conf_no || '',
+              hotelContact: b.properties?.hotel_contact || ''
+            });
+          }
         }
       });
     });
     return list;
   }, [itinerary]);
 
-  // Extract real cabs from itinerary days
+  // Extract real cabs from itinerary days (checking both day.transport and day.metadata.blocks supporting transfer & transport)
   const cabList = useMemo(() => {
     const list: any[] = [];
     (itinerary?.days || []).forEach((day: any, dIdx: number) => {
+      // 1. Direct transport array from DB
+      (day.transport || []).forEach((t: any, tIdx: number) => {
+        list.push({
+          id: t.id || `trans_${dIdx}_${tIdx}`,
+          dayNumber: day.day_number || (dIdx + 1),
+          date: day.date || '',
+          vehicleType: t.vehicle_type || t.model || 'AC Sedan / SUV Cab',
+          driverName: t.driver_name || t.driver_details || 'Dedicated Chauffeur',
+          driverPhone: t.driver_phone || '+91 9910987264',
+          vehicleNo: t.vehicle_no || 'RJ-19-TA-4455',
+          pickupLoc: t.pickup_location || `${day.city || 'Airport / Station'}`,
+          dropLoc: t.drop_location || `${day.accommodation_city || day.city || 'Hotel'}`
+        });
+      });
+      // 2. Metadata blocks
       const blocks = day.metadata?.blocks || [];
       blocks.forEach((b: any) => {
-        if (b.type === 'transport') {
+        if (b.type === 'transport' || b.type === 'transfer') {
           list.push({
             id: b.id,
             dayNumber: day.day_number || (dIdx + 1),
             date: day.date || '',
-            vehicleType: b.title || b.properties?.cab_model || 'Innova Crysta (AC SUV)',
-            driverName: b.properties?.driver_details || b.properties?.driver_name || 'Ramesh Singh',
-            driverPhone: b.properties?.driver_phone || '+91-9876543210',
-            vehicleNo: b.properties?.vehicle_no || 'DL-01-AB-1234',
-            pickupLoc: b.properties?.pickup_location || `${day.city || 'Station / Airport'} Arrival Point`,
-            dropLoc: b.properties?.drop_location || `${day.accommodation_city || day.city || 'Hotel'} Hotel Transfer`
+            vehicleType: b.title || b.properties?.vehicle_type || b.properties?.cab_model || 'Private AC Vehicle (Sedan / SUV)',
+            driverName: b.properties?.driver_details || b.properties?.driver_name || 'Assigned Chauffeur',
+            driverPhone: b.properties?.driver_phone || '+91 9910987264',
+            vehicleNo: b.properties?.vehicle_no || 'RJ-19-TA-4455',
+            pickupLoc: b.properties?.pickup_location || b.properties?.route_from || `${day.city || 'Arrival Point'}`,
+            dropLoc: b.properties?.drop_location || b.properties?.route_to || `${day.accommodation_city || day.city || 'Hotel'}`
           });
         }
       });
@@ -155,6 +192,10 @@ export const VoucherInvoiceModal: React.FC<VoucherInvoiceModalProps> = ({
   const isAdvancePaid = Boolean(
     lead?.advance_paid_verified || 
     lead?.status === 'Booking Confirmed' || 
+    lead?.status === 'Voucher Issued' ||
+    itinerary?.status === 'Booking Confirmed' ||
+    itinerary?.status === 'Confirmed' ||
+    itinerary?.status === 'Voucher Issued' ||
     (advanceRequired > 0 && totalPaid >= advanceRequired)
   );
 
@@ -365,15 +406,27 @@ export const VoucherInvoiceModal: React.FC<VoucherInvoiceModalProps> = ({
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-3xl bg-slate-900 border border-slate-800 text-white shadow-2xl">
-        <DialogHeader className="text-left">
-          <DialogTitle className="flex items-center gap-2 text-lg font-bold text-white font-montserrat">
-            <FileText className="w-5 h-5 text-[#C9A25A]" />
-            Travel Document Suite: {lead?.customer_name || 'Guest'} (Lead #{lead?.id || 'N/A'})
-          </DialogTitle>
-          <DialogDescription className="text-slate-400 text-xs">
-            Generate and persist GST Invoices, Hotel Confirmation Vouchers, and Cab Transport Passes directly to MySQL.
-          </DialogDescription>
-        </DialogHeader>
+        <div className="flex justify-between items-start">
+          <DialogHeader className="text-left flex-1">
+            <DialogTitle className="flex items-center gap-2 text-lg font-bold text-white font-montserrat">
+              <FileText className="w-5 h-5 text-[#C9A25A]" />
+              Travel Document Suite: {lead?.customer_name || 'Guest'} (Lead #{lead?.id || 'N/A'})
+            </DialogTitle>
+            <DialogDescription className="text-slate-400 text-xs">
+              Generate, preview and persist GST Invoices, Hotel Confirmation Vouchers, and Cab Transport Passes directly.
+            </DialogDescription>
+          </DialogHeader>
+          {onOpenFullScreenVoucher && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={onOpenFullScreenVoucher}
+              className="border-[#C9A25A]/40 text-[#C9A25A] hover:bg-[#C9A25A]/15 text-xs font-bold shrink-0 ml-2"
+            >
+              <FileText className="w-3.5 h-3.5 mr-1" /> View Full Printable Voucher
+            </Button>
+          )}
+        </div>
 
         {/* Verification Status Pill */}
         <div className="flex items-center justify-between bg-slate-950 p-3 rounded-xl border border-slate-800 text-xs">
@@ -448,6 +501,19 @@ export const VoucherInvoiceModal: React.FC<VoucherInvoiceModalProps> = ({
               <div className="flex justify-between text-rose-400 font-semibold"><span>Balance Due:</span><span>₹{balanceDue.toLocaleString('en-IN')}</span></div>
             </div>
 
+            {/* Official Bank Account for Wire/UPI */}
+            <div className="bg-[#0A2540]/30 border border-[#C9A25A]/30 p-3 rounded-xl text-xs space-y-1">
+              <div className="text-[11px] font-bold text-[#C9A25A] uppercase flex items-center gap-1.5">
+                <ShieldCheck className="w-3.5 h-3.5" /> Official Bank Account Details
+              </div>
+              <div className="text-[10px] text-slate-300 font-mono grid grid-cols-2 gap-1 pt-1">
+                <div><strong>A/C Name:</strong> {OFFICIAL_BANK_DETAILS.accountName}</div>
+                <div><strong>Bank:</strong> {OFFICIAL_BANK_DETAILS.bankName}</div>
+                <div><strong>A/C No:</strong> <span className="text-white font-bold">{OFFICIAL_BANK_DETAILS.accountNumber}</span></div>
+                <div><strong>IFSC:</strong> <span className="text-white font-bold">{OFFICIAL_BANK_DETAILS.ifscCode}</span></div>
+              </div>
+            </div>
+
             <Button onClick={handleDownloadInvoice} disabled={savingDoc} className="w-full bg-gradient-to-r from-[#C9A25A] to-[#D4AF37] hover:opacity-95 text-[#0B1026] font-black h-10 rounded-xl gap-2">
               <Download className="w-4 h-4 stroke-[2.5]" /> {savingDoc ? 'Generating & Archiving...' : 'Download & Archive Tax Invoice PDF'}
             </Button>
@@ -463,6 +529,40 @@ export const VoucherInvoiceModal: React.FC<VoucherInvoiceModalProps> = ({
                 </span>
               </div>
             )}
+
+            {/* Live Visual Voucher Preview Card */}
+            <div className="bg-slate-950 border border-emerald-500/30 rounded-xl p-4 space-y-3 shadow-inner">
+              <div className="flex justify-between items-start border-b border-slate-800 pb-2.5">
+                <div>
+                  <div className="text-[10px] font-black uppercase tracking-wider text-emerald-400 flex items-center gap-1.5">
+                    <Bed className="w-3.5 h-3.5" /> Official Hotel Confirmation Voucher Preview
+                  </div>
+                  <div className="text-sm font-bold text-white mt-1">{hotelName || 'WelcomHeritage Bal Samand Lake Palace'}</div>
+                  <div className="text-[11px] text-slate-400">{hotelAddress || 'Jodhpur, Rajasthan'}</div>
+                </div>
+                <Badge className="bg-emerald-600 text-white font-mono text-[10px] font-black">
+                  {hotelConfNo ? `CONF: ${hotelConfNo}` : 'CONFIRMED'}
+                </Badge>
+              </div>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
+                <div>
+                  <span className="text-[10px] text-slate-400 block font-bold uppercase">Guest</span>
+                  <span className="font-bold text-white">{lead?.customer_name || 'Valued Guest'}</span>
+                </div>
+                <div>
+                  <span className="text-[10px] text-slate-400 block font-bold uppercase">Check-In / Out</span>
+                  <span className="font-bold text-white">{checkIn} → {checkOut}</span>
+                </div>
+                <div>
+                  <span className="text-[10px] text-slate-400 block font-bold uppercase">Room Category</span>
+                  <span className="font-bold text-white">{roomCategory}</span>
+                </div>
+                <div>
+                  <span className="text-[10px] text-slate-400 block font-bold uppercase">Meal Plan</span>
+                  <span className="font-bold text-emerald-400">{mealPlan}</span>
+                </div>
+              </div>
+            </div>
 
             {hotelList.length > 1 && (
               <div className="flex items-center gap-2">
@@ -530,6 +630,40 @@ export const VoucherInvoiceModal: React.FC<VoucherInvoiceModalProps> = ({
               </div>
             )}
 
+            {/* Live Visual Cab Voucher Preview Card */}
+            <div className="bg-slate-950 border border-blue-500/30 rounded-xl p-4 space-y-3 shadow-inner">
+              <div className="flex justify-between items-start border-b border-slate-800 pb-2.5">
+                <div>
+                  <div className="text-[10px] font-black uppercase tracking-wider text-blue-400 flex items-center gap-1.5">
+                    <Car className="w-3.5 h-3.5" /> Operational Transport & Cab Voucher Preview
+                  </div>
+                  <div className="text-sm font-bold text-white mt-1">{vehicleType} ({vehicleNo})</div>
+                  <div className="text-[11px] text-slate-400">{pickupLoc} → {dropLoc}</div>
+                </div>
+                <Badge className="bg-blue-600 text-white font-mono text-[10px] font-black">
+                  DISPATCH CONFIRMED
+                </Badge>
+              </div>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
+                <div>
+                  <span className="text-[10px] text-slate-400 block font-bold uppercase">Lead Guest</span>
+                  <span className="font-bold text-white">{lead?.customer_name || 'Valued Guest'}</span>
+                </div>
+                <div>
+                  <span className="text-[10px] text-slate-400 block font-bold uppercase">Chauffeur</span>
+                  <span className="font-bold text-white">{driverName}</span>
+                </div>
+                <div>
+                  <span className="text-[10px] text-slate-400 block font-bold uppercase">Driver Phone</span>
+                  <span className="font-bold text-emerald-400 font-mono">{driverPhone}</span>
+                </div>
+                <div>
+                  <span className="text-[10px] text-slate-400 block font-bold uppercase">Inclusions</span>
+                  <span className="font-bold text-slate-300">Fuel, Tolls & Permits</span>
+                </div>
+              </div>
+            </div>
+
             {cabList.length > 1 && (
               <div className="flex items-center gap-2">
                 <Label className="text-xs text-slate-400">Select Cab Route from Itinerary:</Label>
@@ -580,6 +714,7 @@ export const VoucherInvoiceModal: React.FC<VoucherInvoiceModalProps> = ({
               <Download className="w-4 h-4 stroke-[2.5]" /> {savingDoc ? 'Generating & Archiving...' : 'Download & Archive Cab Voucher PDF'}
             </Button>
           </TabsContent>
+
           {/* TAB 4: MASTER TOUR VOUCHER */}
           <TabsContent value="master" className="space-y-4 pt-2 text-left">
             {!isAdvancePaid && !overrideGating && (
