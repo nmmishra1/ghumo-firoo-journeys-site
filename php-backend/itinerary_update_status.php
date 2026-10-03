@@ -59,12 +59,19 @@ try {
     $actualId = $existing['id'] ?? $id;
     $targetLeadId = $existing['lead_id'] ?? $leadId;
 
-    if ($existing && $actualId) {
+    if ($actualId) {
         // 2. Update status in itineraries table
         $updateStmt = $pdo->prepare("UPDATE itineraries SET status = :status, updated_at = NOW() WHERE id = :id");
         $updateStmt->execute([
             ':status' => $status,
             ':id'     => $actualId
+        ]);
+    }
+    if ($targetLeadId) {
+        $updateLeadItins = $pdo->prepare("UPDATE itineraries SET status = :status, updated_at = NOW() WHERE lead_id = :lead_id");
+        $updateLeadItins->execute([
+            ':status' => $status,
+            ':lead_id' => $targetLeadId
         ]);
     }
 

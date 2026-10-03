@@ -1637,6 +1637,19 @@ const CRM = () => {
     }
 
     if (newStatus === 'Booking Confirmed') {
+      try {
+        await leadService.updateLead(lead.id, { status: 'Booking Confirmed' });
+        toast({ title: "Booking Confirmed", description: `Lead status changed to Booking Confirmed.` });
+        await logActivity(lead.id, {
+          type: 'status_change',
+          content: `Status changed to "Booking Confirmed"`,
+          metadata: { fromStatus: lead.status, toStatus: 'Booking Confirmed' }
+        });
+        fetchLeads(true);
+      } catch (err) {
+        console.error(err);
+      }
+
       const pkgPrice = Number(lead.budget || lead.package_price || lead.packagePrice || lead.expected_booking_value || 0);
       setLeadForAdvance({
         id: lead.id,

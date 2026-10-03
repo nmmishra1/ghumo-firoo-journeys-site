@@ -115,6 +115,26 @@ function getDb(): PDO
                 exit;
             }
         }
+
+        // Auto-migrate restrictive ENUM status columns to VARCHAR(100)
+        static $migrated = false;
+        if (!$migrated && $pdo) {
+            try {
+                $colItin = $pdo->query("SHOW COLUMNS FROM itineraries LIKE 'status'")->fetch(PDO::FETCH_ASSOC);
+                if ($colItin && strpos(strtolower($colItin['Type'] ?? ''), 'enum') !== false) {
+                    $pdo->exec("ALTER TABLE itineraries MODIFY COLUMN status VARCHAR(100) NOT NULL DEFAULT 'Draft'");
+                }
+            } catch (Exception $eItin) {}
+
+            try {
+                $colLead = $pdo->query("SHOW COLUMNS FROM leads LIKE 'status'")->fetch(PDO::FETCH_ASSOC);
+                if ($colLead && strpos(strtolower($colLead['Type'] ?? ''), 'enum') !== false) {
+                    $pdo->exec("ALTER TABLE leads MODIFY COLUMN status VARCHAR(100) NOT NULL DEFAULT 'New'");
+                }
+            } catch (Exception $eLead) {}
+
+            $migrated = true;
+        }
     }
 
     return $pdo;

@@ -4,6 +4,7 @@
  */
 
 import jsPDF from 'jspdf';
+import { OFFICIAL_BANK_DETAILS } from '@/constants/bankDetails';
 
 export interface InvoiceData {
   invoiceNumber: string;
@@ -261,9 +262,9 @@ export function generateInvoicePDF(data: InvoiceData): jsPDF {
   doc.setFont('helvetica', 'bold');
   doc.text('Bank Transfer Details for Payment:', 18, startY + 7);
   doc.setFont('helvetica', 'normal');
-  doc.text('Account Name: Ghumo Firoo Travels Pvt Ltd', 18, startY + 13);
-  doc.text('Bank Name: HDFC Bank Ltd | Branch: Dehradun Main', 18, startY + 19);
-  doc.text('Account No: 50200012345678 | IFSC Code: HDFC0000123', 18, startY + 25);
+  doc.text(`Account Name: ${OFFICIAL_BANK_DETAILS.accountName}`, 18, startY + 13);
+  doc.text(`Bank Name: ${OFFICIAL_BANK_DETAILS.bankName} | Branch: ${OFFICIAL_BANK_DETAILS.branch}`, 18, startY + 19);
+  doc.text(`Account No: ${OFFICIAL_BANK_DETAILS.accountNumber} | IFSC Code: ${OFFICIAL_BANK_DETAILS.ifscCode}`, 18, startY + 25);
 
   // Footer / Terms
   doc.setFontSize(8);

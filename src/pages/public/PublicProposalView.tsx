@@ -23,12 +23,14 @@ import {
   Compass,
   ArrowRight,
   Shield,
-  FileText
+  FileText,
+  LayoutGrid
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { Helmet } from 'react-helmet-async';
+import LuxuryBrochureDocument from '@/components/proposal/LuxuryBrochureDocument';
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || '/php-backend';
 
@@ -131,6 +133,9 @@ export default function PublicProposalView() {
   const [selectedOptionIndex, setSelectedOptionIndex] = useState(0);
   const [isAccepting, setIsAccepting] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [viewMode, setViewMode] = useState<'brochure' | 'portal'>(() => {
+    return searchParams.get('mode') === 'portal' || searchParams.get('view') === 'portal' ? 'portal' : 'brochure';
+  });
 
   const fetchProposal = () => {
     if (!leadId) {
@@ -397,7 +402,6 @@ export default function PublicProposalView() {
   }
 
   const { lead, itinerary, proposals = [] } = proposalData;
-  const days = itinerary?.days || [];
   const totalPrice = activeOption?.total_price || itinerary?.total_cost || 0;
   const adultPax = Math.max(1, lead.adult_count || 2);
   const perPersonPrice = activeOption?.price_per_person || Math.round(totalPrice / adultPax);
@@ -405,6 +409,17 @@ export default function PublicProposalView() {
   const cleanDest = parseDestinationString(lead.destination || itinerary?.itinerary_name || '');
   const heroImage = getDestinationHero(cleanDest);
   const displayTitle = cleanTitle(itinerary?.itinerary_name, lead.destination);
+
+  const effectiveItinerary = {
+    ...itinerary,
+    days: (activeOption?.itinerary_data?.days && activeOption.itinerary_data.days.length > 0)
+      ? activeOption.itinerary_data.days
+      : (itinerary?.days || []),
+    final_cost: totalPrice,
+    cost_per_person: perPersonPrice,
+    destinations: activeOption?.itinerary_data?.destination || lead.destination || itinerary?.itinerary_name || 'Curated Holiday'
+  };
+  const days = effectiveItinerary.days;
 
   return (
     <>
@@ -415,6 +430,107 @@ export default function PublicProposalView() {
       <div className="min-h-screen bg-[#070b16] text-slate-100 font-sans antialiased selection:bg-[#C9A25A] selection:text-slate-950 pb-28 print:bg-white print:text-black print:pb-0">
         
         {renderHeader()}
+
+        {/* Navigation & View Mode Sub-Header Bar (no-print) */}
+        <div className="bg-[#0b1021] border-b border-amber-500/20 px-4 py-3 print:hidden sticky top-16 sm:top-20 z-30 shadow-md backdrop-blur-md">
+          <div className="max-w-6xl mx-auto flex flex-wrap items-center justify-between gap-3">
+            
+            {/* Left: Proposal Options Switcher */}
+            <div className="flex items-center gap-2 overflow-x-auto py-1 max-w-full">
+              <span className="text-[11px] font-black uppercase tracking-wider text-slate-400 mr-1 shrink-0">
+                Options:
+              </span>
+              {proposals.map((p: any, idx: number) => {
+                const isSelected = selectedOptionIndex === idx;
+                const isOptionAccepted = String(p.status || '').toLowerCase() === 'accepted';
+                return (
+                  <button
+                    key={p.id || idx}
+                    type="button"
+                    onClick={() => setSelectedOptionIndex(idx)}
+                    className={`text-xs px-3.5 py-1.5 rounded-xl font-bold transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap shrink-0 ${
+                      isSelected
+                        ? 'bg-gradient-to-r from-[#C9A25A] to-[#D4AF37] text-slate-950 shadow-md font-black'
+                        : 'bg-slate-800/80 hover:bg-slate-800 text-slate-300 border border-slate-700'
+                    }`}
+                  >
+                    <span>{p.option_name || `Option ${p.option_number || idx + 1}`}</span>
+                    {isOptionAccepted && (
+                      <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" title="Accepted Option" />
+                    )}
+                    <span className="text-[10px] opacity-75 font-mono">
+                      ₹{Math.round(p.total_price || 0).toLocaleString('en-IN')}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Right: View Switcher (Magazine Brochure vs Interactive Portal) + Print */}
+            <div className="flex items-center gap-2 ml-auto">
+              <div className="bg-[#161d2f] p-1 rounded-xl border border-slate-800 flex items-center gap-1">
+                <button
+                  type="button"
+                  onClick={() => setViewMode('brochure')}
+                  className={`text-xs px-3 py-1.5 rounded-lg font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
+                    viewMode === 'brochure'
+                      ? 'bg-[#C9A25A] text-slate-950 shadow font-black'
+                      : 'text-slate-400 hover:text-white'
+                  }`}
+                  title="View luxury 9-page editorial A4 magazine brochure"
+                >
+                  <FileText className="w-3.5 h-3.5" />
+                  <span>Brochure (A4)</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setViewMode('portal')}
+                  className={`text-xs px-3 py-1.5 rounded-lg font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
+                    viewMode === 'portal'
+                      ? 'bg-[#C9A25A] text-slate-950 shadow font-black'
+                      : 'text-slate-400 hover:text-white'
+                  }`}
+                  title="Interactive web portal view with day-by-day tabs"
+                >
+                  <Compass className="w-3.5 h-3.5" />
+                  <span>Web Portal</span>
+                </button>
+              </div>
+
+              <Button
+                onClick={() => window.print()}
+                variant="outline"
+                size="sm"
+                className="bg-amber-500/10 border-amber-500/30 text-amber-300 hover:bg-amber-500/20 text-xs font-bold rounded-xl h-9 cursor-pointer flex items-center gap-1.5"
+              >
+                <Printer className="w-3.5 h-3.5 text-amber-400" />
+                <span>PDF / Print</span>
+              </Button>
+            </div>
+
+          </div>
+        </div>
+
+        {/* ============================================================== */}
+        {/* LUXURY BROCHURE VIEW (Exact 9-Page Editorial Document)         */}
+        {/* ============================================================== */}
+        <div className={viewMode === 'brochure' ? 'block print:block' : 'hidden print:block'}>
+          <div className="py-6 sm:py-10 px-2 sm:px-4 flex flex-col items-center bg-[#070b16] print:p-0 print:bg-white">
+            <div className="w-full max-w-[210mm] shadow-2xl rounded-2xl overflow-hidden print:shadow-none print:rounded-none">
+              <LuxuryBrochureDocument 
+                lead={lead} 
+                itinerary={effectiveItinerary} 
+                activeOption={activeOption} 
+                agentProfile={proposalData?.agent} 
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* ============================================================== */}
+        {/* INTERACTIVE DIGITAL PORTAL VIEW                                */}
+        {/* ============================================================== */}
+        <div className={viewMode === 'portal' ? 'block print:hidden' : 'hidden print:hidden'}>
 
         {/* Hero Destination Cover Banner */}
         <section className="relative overflow-hidden border-b border-slate-800 bg-[#050814]">
@@ -799,6 +915,7 @@ export default function PublicProposalView() {
           </section>
 
         </main>
+        </div> {/* Closes Interactive Digital Portal View wrapper */}
 
         {renderFooter()}
 
