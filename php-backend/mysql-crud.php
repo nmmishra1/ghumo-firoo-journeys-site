@@ -54,7 +54,9 @@ $allowedTables = [
     'hotel_contracts',
     'hotel_contract_rates',
     'hotel_rates',
-    'login_audit_logs'
+    'login_audit_logs',
+    'itineraries',
+    'leads'
 ];
 
 $table = $_GET['table'] ?? '';

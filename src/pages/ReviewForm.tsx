@@ -138,11 +138,10 @@ export default function ReviewForm() {
         // Tier 2: Direct Supabase Itineraries Table Lookup
         if (!verifiedData) {
           try {
-            const { data: supaIti } = await supabase
-              .from('itineraries')
-              .select('*')
-              .or(`id.eq.${bookingReference},itinerary_code.eq.${bookingReference}`)
-              .maybeSingle();
+            const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(bookingReference);
+            const { data: supaIti } = isUuid
+              ? await supabase.from('itineraries').select('*').or(`id.eq.${bookingReference},itinerary_code.eq.${bookingReference}`).maybeSingle()
+              : await supabase.from('itineraries').select('*').eq('itinerary_code', bookingReference).maybeSingle();
 
             if (supaIti) {
               let dests: string[] = [];
@@ -178,11 +177,12 @@ export default function ReviewForm() {
           try {
             const res = await fetch(`/php-backend/api.php?table=itineraries`);
             if (res.ok) {
-              const list = await res.json();
+              const cleanSuffix = bookingReference.replace(/[^a-zA-Z0-9]/g, '').replace(/^GFJITN/i, '');
               const found = (list || []).find((i: any) => 
                 String(i.id) === String(bookingReference) || 
                 String(i.itinerary_code) === String(bookingReference) ||
-                String(i.lead_id) === String(bookingReference)
+                String(i.lead_id) === String(bookingReference) ||
+                (cleanSuffix.length >= 4 && String(i.id).replace(/[^a-zA-Z0-9]/g, '').toLowerCase().startsWith(cleanSuffix.toLowerCase()))
               );
               if (found) {
                 verifiedData = {

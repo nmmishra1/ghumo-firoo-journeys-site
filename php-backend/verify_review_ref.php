@@ -25,8 +25,22 @@ try {
     $pdo = getDb();
     
     // 1. Search in itineraries table by id, itinerary_code, or lead_id
-    $stmt = $pdo->prepare("SELECT * FROM itineraries WHERE id = ? OR itinerary_code = ? OR lead_id = ? LIMIT 1");
-    $stmt->execute([$ref, $ref, $ref]);
+    $cleanRef = preg_replace('/[^a-zA-Z0-9]/', '', $ref);
+    $cleanSuffix = preg_replace('/^GFJITN/i', '', $cleanRef);
+
+    $sql = "SELECT * FROM itineraries WHERE id = ? OR itinerary_code = ? OR lead_id = ?";
+    $params = [$ref, $ref, $ref];
+
+    if (!empty($cleanSuffix) && strlen($cleanSuffix) >= 4) {
+        $sql .= " OR REPLACE(id, '-', '') LIKE ? OR id LIKE ? OR itinerary_code LIKE ?";
+        $params[] = $cleanSuffix . '%';
+        $params[] = $cleanSuffix . '%';
+        $params[] = '%' . $cleanSuffix . '%';
+    }
+    $sql .= " LIMIT 1";
+
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute($params);
     $iti = $stmt->fetch(PDO::FETCH_ASSOC);
 
     $customerName = '';
@@ -37,8 +51,8 @@ try {
     $leadId = '';
 
     if ($iti) {
-        $customerName = $iti['customer_name'] ?? '';
-        $packageName = $iti['package_name'] ?? $iti['itinerary_name'] ?? $iti['title'] ?? '';
+        $customerName = $iti['customer_name'] ?? ($iti['customerName'] ?? '');
+        $packageName = $iti['package_name'] ?? ($iti['itinerary_name'] ?? ($iti['title'] ?? ''));
         $startDate = $iti['travel_start_date'] ?? '';
         $endDate = $iti['travel_end_date'] ?? '';
         $leadId = $iti['lead_id'] ?? '';
@@ -51,7 +65,7 @@ try {
                     foreach ($decoded as $item) {
                         if (is_string($item)) $destinations[] = $item;
                         else if (is_array($item)) {
-                            $dName = $item['DESTINATION'] ?? $item['destination'] ?? $item['city'] ?? $item['name'] ?? $item['STATE'] ?? '';
+                            $dName = $item['DESTINATION'] ?? ($item['destination'] ?? ($item['city'] ?? ($item['name'] ?? ($item['STATE'] ?? ''))));
                             if ($dName) $destinations[] = $dName;
                         }
                     }
@@ -60,18 +74,28 @@ try {
                 $destinations[] = $rawDest;
             }
         }
+
+        // Cache the friendly code on the record if missing
+        if (empty($iti['itinerary_code']) && strpos($ref, 'GFJ-ITN-') === 0) {
+            try {
+                $pdo->prepare("UPDATE itineraries SET itinerary_code = ? WHERE id = ?")->execute([$ref, $iti['id']]);
+            } catch (Throwable $eCode) {}
+        }
     }
 
     // 2. Fallback to leads table if missing customer_name or itinerary not found
     if (empty($customerName) || !empty($leadId)) {
         $searchLeadId = $leadId ?: $ref;
+        if (!is_numeric($searchLeadId) && is_numeric($cleanSuffix)) {
+            $searchLeadId = $cleanSuffix;
+        }
         $lStmt = $pdo->prepare("SELECT * FROM leads WHERE id = ? LIMIT 1");
         $lStmt->execute([$searchLeadId]);
         $lead = $lStmt->fetch(PDO::FETCH_ASSOC);
 
         if ($lead) {
             if (empty($customerName)) {
-                $customerName = $lead['customer_name'] ?? '';
+                $customerName = $lead['customer_name'] ?? ($lead['name'] ?? '');
             }
             if (empty($packageName)) {
                 $packageName = $lead['travel_interest'] ?? $lead['tour_type'] ?? 'Tour Package';
