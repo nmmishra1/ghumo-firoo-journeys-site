@@ -26,13 +26,13 @@ try {
     
     // 1. Search in itineraries table by id, itinerary_code, or lead_id
     $cleanRef = preg_replace('/[^a-zA-Z0-9]/', '', $ref);
-    $cleanSuffix = preg_replace('/^GFJITN/i', '', $cleanRef);
+    $cleanSuffix = strtolower(preg_replace('/^GFJITN/i', '', $cleanRef));
 
     $sql = "SELECT * FROM itineraries WHERE id = ? OR itinerary_code = ? OR lead_id = ?";
     $params = [$ref, $ref, $ref];
 
     if (!empty($cleanSuffix) && strlen($cleanSuffix) >= 4) {
-        $sql .= " OR REPLACE(id, '-', '') LIKE ? OR id LIKE ? OR itinerary_code LIKE ?";
+        $sql .= " OR LOWER(REPLACE(id, '-', '')) LIKE ? OR LOWER(id) LIKE ? OR LOWER(itinerary_code) LIKE ?";
         $params[] = $cleanSuffix . '%';
         $params[] = $cleanSuffix . '%';
         $params[] = '%' . $cleanSuffix . '%';
