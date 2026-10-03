@@ -18,7 +18,7 @@ import {
   UserCheck, ChevronDown, Calendar, MapPin, Menu, Home, Hotel, LogOut, 
   ChevronRight, ArrowLeft, Send, CheckCircle2, Shield, Info, Landmark, 
   Sparkles, FileText, Share2, IndianRupee, MessageSquare, Globe, Package, Activity, Map, Eye, Trash2,
-  Car, Star, FileSpreadsheet, UploadCloud, ShieldCheck, DollarSign, Zap, RefreshCw
+  Car, Star, FileSpreadsheet, UploadCloud, ShieldCheck, ShieldAlert, DollarSign, Zap, RefreshCw
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
