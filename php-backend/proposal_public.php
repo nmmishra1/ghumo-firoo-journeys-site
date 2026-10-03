@@ -94,21 +94,81 @@ if ($method === 'GET') {
             $itinerary = $itinStmt->fetch(PDO::FETCH_ASSOC);
         } catch (Exception $itinErr) {}
 
-        // Helper to produce a clean holiday title instead of internal system names like "Trip - Customized Option 4"
-        $rawItinName = trim($itinerary['itinerary_name'] ?? '');
+function formatStopsArrayHelper($stops) {
+    $parts = [];
+    $count = count($stops);
+    foreach ($stops as $item) {
+        if (is_array($item)) {
+            $city = trim($item['city'] ?? $item['destination'] ?? $item['name'] ?? '');
+            $state = trim($item['state'] ?? '');
+            $nights = !empty($item['nights']) ? " ({$item['nights']}N)" : '';
+            if (!empty($city) && !empty($state) && $count === 1) {
+                $parts[] = "{$city}, {$state}{$nights}";
+            } elseif (!empty($city)) {
+                $parts[] = "{$city}{$nights}";
+            } elseif (!empty($state)) {
+                $parts[] = "{$state}{$nights}";
+            }
+        } elseif (is_string($item)) {
+            $clean = trim($item);
+            if (!empty($clean) && !str_starts_with($clean, '[') && !str_starts_with($clean, '{')) {
+                $parts[] = $clean;
+            }
+        }
+    }
+    return !empty($parts) ? implode(' • ', $parts) : 'Curated Holiday';
+}
+
+function formatDestinationStops($val) {
+    if (empty($val)) return '';
+    if (is_array($val)) {
+        return formatStopsArrayHelper($val);
+    }
+    $val = trim($val);
+    if ((str_starts_with($val, '[') && str_ends_with($val, ']')) || (str_starts_with($val, '{') && str_ends_with($val, '}'))) {
+        $decoded = json_decode($val, true);
+        if (is_array($decoded)) {
+            return formatStopsArrayHelper($decoded);
+        }
+    }
+    return $val;
+}
+
+        // Clean lead destination from any raw JSON stops
         $rawLeadDest = trim($lead['destination'] ?: ($lead['destinations'] ?: ''));
+        $cleanLeadDest = formatDestinationStops($rawLeadDest);
+        $lead['destination'] = $cleanLeadDest;
+        $lead['destinations'] = $cleanLeadDest;
+
+        // Clean itinerary name from any raw JSON stops
+        $rawItinName = formatDestinationStops($itinerary['itinerary_name'] ?? '');
+        if (!empty($itinerary)) {
+            $itinerary['itinerary_name'] = $rawItinName;
+        }
+
+        // Helper to produce a clean holiday title instead of internal system names like "Trip - Customized Option 4"
         $displayTourTitle = $rawItinName;
-        if (empty($displayTourTitle) || preg_match('/^(Trip\s*-\s*Customized\s*Option\s*\d+|Customized\s*Option\s*\d+|Itinerary\s*-\s*\d+|Customized\s*Tour)/i', $displayTourTitle)) {
-            if (!empty($rawLeadDest)) {
-                $destParts = array_map('trim', explode('·', $rawLeadDest));
+        if (empty($displayTourTitle) || preg_match('/^(Trip\s*-\s*Customized\s*Option\s*\d+|Customized\s*Option\s*\d+|Itinerary\s*-\s*\d+|Customized\s*Tour)/i', $displayTourTitle) || str_starts_with($displayTourTitle, '[')) {
+            if (!empty($cleanLeadDest)) {
+                $destParts = array_map('trim', explode('·', $cleanLeadDest));
                 $meaningful = array_filter($destParts, function($p) {
                     return !preg_match('/^\d+N\/\d+D$/i', $p) && !preg_match('/^\d+N$/i', $p);
                 });
-                $displayTourTitle = !empty($meaningful) ? implode(' • ', $meaningful) : $rawLeadDest;
+                $displayTourTitle = !empty($meaningful) ? implode(' • ', $meaningful) : $cleanLeadDest;
             } else {
                 $displayTourTitle = 'Bespoke Curated Tour';
             }
         }
+
+        // Clean up proposal titles if they have JSON or internal system names
+        foreach ($proposals as &$p) {
+            $cleanTitle = formatDestinationStops($p['title'] ?? '');
+            if (empty($cleanTitle) || preg_match('/^(Trip\s*-\s*Customized\s*Option\s*\d+|Customized\s*Option\s*\d+)/i', $cleanTitle) || str_starts_with($cleanTitle, '[')) {
+                $cleanTitle = $displayTourTitle;
+            }
+            $p['title'] = $cleanTitle;
+        }
+        unset($p);
 
         // Fallback: If no proposals rows exist yet, create default option from itinerary
         if (empty($proposals) && $itinerary) {
@@ -135,14 +195,6 @@ if ($method === 'GET') {
                 $hasAccepted = true;
                 $acceptedOption = $proposals[0];
             }
-        } else {
-            // Clean up proposal titles if they have internal system names
-            foreach ($proposals as &$p) {
-                if (empty($p['title']) || preg_match('/^(Trip\s*-\s*Customized\s*Option\s*\d+|Customized\s*Option\s*\d+)/i', $p['title'])) {
-                    $p['title'] = $displayTourTitle;
-                }
-            }
-            unset($p);
         }
 
         $days = [];

@@ -37,9 +37,35 @@ try {
         }
     } catch (Exception $pe) {}
 
+    $cleanDest = function($val) {
+        if (empty($val)) return '';
+        $v = trim($val);
+        if ((str_starts_with($v, '[') && str_ends_with($v, ']')) || (str_starts_with($v, '{') && str_ends_with($v, '}'))) {
+            $decoded = json_decode($v, true);
+            if (is_array($decoded)) {
+                $parts = [];
+                foreach ($decoded as $item) {
+                    if (is_array($item)) {
+                        $c = trim($item['city'] ?? $item['destination'] ?? $item['name'] ?? '');
+                        $s = trim($item['state'] ?? '');
+                        $n = !empty($item['nights']) ? " ({$item['nights']}N)" : '';
+                        if ($c && $s && count($decoded) === 1) $parts[] = "{$c}, {$s}{$n}";
+                        elseif ($c) $parts[] = "{$c}{$n}";
+                        elseif ($s) $parts[] = "{$s}{$n}";
+                    } elseif (is_string($item) && !str_starts_with($item, '[') && !str_starts_with($item, '{')) {
+                        $parts[] = trim($item);
+                    }
+                }
+                return !empty($parts) ? implode(' • ', $parts) : $val;
+            }
+        }
+        return $val;
+    };
+
     foreach ($itineraries as &$itin) {
         // Resolve package name
-        $packageName = !empty($itin['itinerary_name']) ? $itin['itinerary_name'] : ($itin['package_name'] ?? 'Custom Tour Package');
+        $rawPkg = !empty($itin['itinerary_name']) ? $itin['itinerary_name'] : ($itin['package_name'] ?? 'Custom Tour Package');
+        $packageName = $cleanDest($rawPkg);
         $itin['package_name'] = $packageName;
 
         // Resolve customer name
@@ -72,7 +98,7 @@ try {
 
         // Resolve destinations
         $dests = !empty($itin['destinations']) ? $itin['destinations'] : (!empty($itin['lead_destinations']) ? $itin['lead_destinations'] : '');
-        $itin['destinations'] = $dests;
+        $itin['destinations'] = $cleanDest($dests);
 
         // Resolve travel dates
         $start = (!empty($itin['travel_start_date']) && $itin['travel_start_date'] !== '0000-00-00' && strpos($itin['travel_start_date'], '0000-00-00') !== 0)

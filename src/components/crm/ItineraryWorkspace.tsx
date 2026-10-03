@@ -38,6 +38,26 @@ export const getValidDateCandidate = (...dates: any[]): string | undefined => {
   return undefined;
 };
 
+export const cleanDestinationDisplay = (raw: any): string => {
+  if (!raw) return 'Custom Tour';
+  if (typeof raw !== 'string') {
+    if (Array.isArray(raw)) {
+      return raw.map((s: any) => s && s.city ? `${s.city}${s.nights ? ` (${s.nights}N)` : ''}` : String(s)).join(' • ') || 'Custom Tour';
+    }
+    return String(raw);
+  }
+  const str = raw.trim();
+  if ((str.startsWith('[') && str.endsWith(']')) || (str.startsWith('{') && str.endsWith('}'))) {
+    try {
+      const parsed = JSON.parse(str);
+      if (Array.isArray(parsed)) {
+        return parsed.map((s: any) => s && s.city ? `${s.city}${s.nights ? ` (${s.nights}N)` : ''}` : (s?.name || s?.destination || String(s))).join(' • ') || 'Custom Tour';
+      }
+    } catch {}
+  }
+  return str;
+};
+
 const formatTravelDate = (dateVal: any, endDateVal?: any): string => {
   if (!dateVal) return 'Dates TBD';
   const cleanVal = String(dateVal).trim();
@@ -596,7 +616,7 @@ export const ItineraryWorkspace: React.FC<ItineraryWorkspaceProps> = ({ leads, o
                       {/* Destination & Dates */}
                       <div className="col-span-3 space-y-1">
                         <p className="font-extrabold text-slate-900 dark:text-slate-100 truncate uppercase">
-                          {item.package_name || item.destinations || 'Custom Tour'}
+                          {cleanDestinationDisplay(item.package_name || item.destinations)}
                         </p>
                         <p className="text-xs text-slate-600 dark:text-slate-300 font-semibold flex items-center gap-1">
                           <Calendar className="w-3.5 h-3.5 text-amber-500 shrink-0" />
@@ -752,7 +772,7 @@ export const ItineraryWorkspace: React.FC<ItineraryWorkspaceProps> = ({ leads, o
                       </div>
 
                       <div className="col-span-2 font-extrabold text-slate-900 dark:text-slate-100 uppercase truncate text-xs">
-                        {l.destinations || l.packageName || linkedItin?.package_name || 'Custom Package'}
+                        {cleanDestinationDisplay(l.destinations || l.packageName || linkedItin?.package_name)}
                       </div>
 
                       <div className="col-span-2 font-semibold text-slate-700 dark:text-slate-300 text-xs">

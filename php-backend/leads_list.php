@@ -31,8 +31,54 @@ try {
     exit;
 }
 
+function formatStopsArrayHelper($stops) {
+    $parts = [];
+    $count = count($stops);
+    foreach ($stops as $item) {
+        if (is_array($item)) {
+            $city = trim($item['city'] ?? $item['destination'] ?? $item['name'] ?? '');
+            $state = trim($item['state'] ?? '');
+            $nights = !empty($item['nights']) ? " ({$item['nights']}N)" : '';
+            if (!empty($city) && !empty($state) && $count === 1) {
+                $parts[] = "{$city}, {$state}{$nights}";
+            } elseif (!empty($city)) {
+                $parts[] = "{$city}{$nights}";
+            } elseif (!empty($state)) {
+                $parts[] = "{$state}{$nights}";
+            }
+        } elseif (is_string($item)) {
+            $clean = trim($item);
+            if (!empty($clean) && !str_starts_with($clean, '[') && !str_starts_with($clean, '{')) {
+                $parts[] = $clean;
+            }
+        }
+    }
+    return !empty($parts) ? implode(' • ', $parts) : 'Curated Holiday';
+}
+
+function formatDestinationStops($val) {
+    if (empty($val)) return '';
+    if (is_array($val)) {
+        return formatStopsArrayHelper($val);
+    }
+    $val = trim($val);
+    if ((str_starts_with($val, '[') && str_ends_with($val, ']')) || (str_starts_with($val, '{') && str_ends_with($val, '}'))) {
+        $decoded = json_decode($val, true);
+        if (is_array($decoded)) {
+            return formatStopsArrayHelper($decoded);
+        }
+    }
+    return $val;
+}
+
 function enrichLeads(PDO $pdo, array $leads): array {
     return array_map(function($lead) use ($pdo) {
+        if (!empty($lead['destinations'])) {
+            $lead['destinations'] = formatDestinationStops($lead['destinations']);
+        }
+        if (!empty($lead['destination'])) {
+            $lead['destination'] = formatDestinationStops($lead['destination']);
+        }
         if (empty($lead['agent_name']) || $lead['agent_name'] === 'Unassigned') {
             if (!empty($lead['assigned_to'])) {
                 try {

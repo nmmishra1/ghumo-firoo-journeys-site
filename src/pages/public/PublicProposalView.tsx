@@ -58,12 +58,58 @@ function getDestinationHero(destination: string): string {
   return 'https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?q=80&w=1600&auto=format&fit=crop';
 }
 
+export function parseDestinationString(raw: any): string {
+  if (!raw) return '';
+  if (typeof raw !== 'string') {
+    if (Array.isArray(raw)) {
+      return formatStopsArray(raw);
+    }
+    return String(raw);
+  }
+  const str = raw.trim();
+  if ((str.startsWith('[') && str.endsWith(']')) || (str.startsWith('{') && str.endsWith('}'))) {
+    try {
+      const parsed = JSON.parse(str);
+      if (Array.isArray(parsed)) {
+        return formatStopsArray(parsed);
+      } else if (parsed && typeof parsed === 'object') {
+        const city = parsed.city || parsed.destination || parsed.name || '';
+        const state = parsed.state || '';
+        const nights = parsed.nights ? ` (${parsed.nights}N)` : '';
+        if (city && state && city.toLowerCase() !== state.toLowerCase()) {
+          return `${city}, ${state}${nights}`;
+        }
+        return (city || state || 'Curated Holiday') + nights;
+      }
+    } catch {}
+  }
+  return str;
+}
+
+function formatStopsArray(stops: any[]): string {
+  if (!stops || stops.length === 0) return 'Curated Holiday';
+  const parts = stops.map(s => {
+    if (typeof s === 'string') return s;
+    const city = s.city || s.destination || s.name || '';
+    const state = s.state || '';
+    const nights = s.nights ? ` (${s.nights}N)` : '';
+    if (city && state && stops.length === 1 && city.toLowerCase() !== state.toLowerCase()) {
+      return `${city}, ${state}${nights}`;
+    }
+    return (city || state || '') + nights;
+  }).filter(Boolean);
+  return parts.join(' • ') || 'Curated Holiday';
+}
+
 function cleanTitle(rawTitle?: string, rawDest?: string): string {
-  const title = (rawTitle || '').trim();
-  const dest = (rawDest || '').trim();
+  const parsedTitle = parseDestinationString(rawTitle);
+  const parsedDest = parseDestinationString(rawDest);
+
+  const title = (parsedTitle || '').trim();
+  const dest = (parsedDest || '').trim();
   
-  if (!title || /^(Trip\s*-\s*Customized\s*Option\s*\d+|Customized\s*Option\s*\d+|Itinerary\s*-\s*\d+|Customized\s*Tour)/i.test(title)) {
-    if (dest) {
+  if (!title || /^(Trip\s*-\s*Customized\s*Option\s*\d+|Customized\s*Option\s*\d+|Itinerary\s*-\s*\d+|Customized\s*Tour)/i.test(title) || title.startsWith('[')) {
+    if (dest && !dest.startsWith('[')) {
       const parts = dest.split('·').map(s => s.trim()).filter(Boolean);
       const cleanParts = parts.filter(p => !/^\d+N\/\d+D$/i.test(p) && !/^\d+N$/i.test(p));
       return cleanParts.join(' • ') || dest;
@@ -356,7 +402,8 @@ export default function PublicProposalView() {
   const adultPax = Math.max(1, lead.adult_count || 2);
   const perPersonPrice = activeOption?.price_per_person || Math.round(totalPrice / adultPax);
   const advanceRequired = activeOption?.advance_required || Math.round(totalPrice * 0.3);
-  const heroImage = getDestinationHero(lead.destination || itinerary?.itinerary_name || '');
+  const cleanDest = parseDestinationString(lead.destination || itinerary?.itinerary_name || '');
+  const heroImage = getDestinationHero(cleanDest);
   const displayTitle = cleanTitle(itinerary?.itinerary_name, lead.destination);
 
   return (
@@ -429,7 +476,7 @@ export default function PublicProposalView() {
                     <MapPin className="w-3.5 h-3.5" /> Region
                   </div>
                   <div className="text-xs font-black text-white truncate">
-                    {lead.destination ? lead.destination.split('·')[0].trim() : 'India'}
+                    {parseDestinationString(lead.destination) ? parseDestinationString(lead.destination).split('·')[0].split('(')[0].trim() : 'India'}
                   </div>
                 </div>
 
