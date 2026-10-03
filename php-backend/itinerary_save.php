@@ -81,43 +81,70 @@ function withinTolerance(float $expected, float $actual): bool {
  * whichever table the rate the agent actually picked came from.
  * Deliberately does not add extra-bed/child surcharges — see file header.
  */
-function computeHotelFloor(PDO $pdo, $hotelRateId, int $nights, int $rooms): ?float {
-    if (empty($hotelRateId)) return null;
-
-    if (tableExistsFor($pdo, 'hotel_contract_rates')) {
-        $stmt = $pdo->prepare("SELECT * FROM hotel_contract_rates WHERE id = ?");
-        $stmt->execute([$hotelRateId]);
-        if ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-            $nightly = (float)($row['selling_cost'] ?? 0) ?: (float)($row['double_rate'] ?? 0) ?: (float)($row['net_cost'] ?? 0);
-            $base = $nightly * max(1, $nights) * max(1, $rooms);
-            $isInclusive = ($row['rate_type'] ?? '') === 'inclusive';
-            $gstPct = (float)($row['gst_percentage'] ?? 0);
-            if (!$isInclusive && $gstPct > 0) {
-                $base *= (1 + ($gstPct / 100));
+function computeHotelFloor(PDO $pdo, $hotelRateId, int $nights, int $rooms, $hotelId = null, $hotelName = null): ?float {
+    if (!empty($hotelRateId)) {
+        if (tableExistsFor($pdo, 'hotel_contract_rates')) {
+            $stmt = $pdo->prepare("SELECT * FROM hotel_contract_rates WHERE id = ?");
+            $stmt->execute([$hotelRateId]);
+            if ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+                $nightly = (float)($row['selling_cost'] ?? 0) ?: (float)($row['double_rate'] ?? 0) ?: (float)($row['net_cost'] ?? 0);
+                $base = $nightly * max(1, $nights) * max(1, $rooms);
+                $isInclusive = ($row['rate_type'] ?? '') === 'inclusive';
+                $gstPct = (float)($row['gst_percentage'] ?? 0);
+                if (!$isInclusive && $gstPct > 0) {
+                    $base *= (1 + ($gstPct / 100));
+                }
+                return $base;
             }
-            return $base;
+        }
+
+        // Fall back to legacy hotel_rates — same as before this table existed.
+        if (tableExistsFor($pdo, 'hotel_rates')) {
+            $rateCol = getExistingColumn($pdo, 'hotel_rates', ['rate_per_night', 'rate', 'nightly_rate']);
+            $gstPctCol = getExistingColumn($pdo, 'hotel_rates', ['gst_percentage']);
+            $gstIncludedCol = getExistingColumn($pdo, 'hotel_rates', ['gst_included']);
+            if ($rateCol) {
+                $stmt = $pdo->prepare("SELECT * FROM hotel_rates WHERE id = ?");
+                $stmt->execute([$hotelRateId]);
+                if ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+                    $base = (float)$row[$rateCol] * max(1, $nights) * max(1, $rooms);
+                    $gstIncluded = $gstIncludedCol ? (bool)$row[$gstIncludedCol] : true;
+                    if (!$gstIncluded && $gstPctCol && (float)$row[$gstPctCol] > 0) {
+                        $base *= (1 + ((float)$row[$gstPctCol] / 100));
+                    }
+                    return $base;
+                }
+            }
         }
     }
 
-    // Fall back to legacy hotel_rates — same as before this table existed.
-    if (!tableExistsFor($pdo, 'hotel_rates')) return null;
-
-    $rateCol = getExistingColumn($pdo, 'hotel_rates', ['rate_per_night', 'rate', 'nightly_rate']);
-    $gstPctCol = getExistingColumn($pdo, 'hotel_rates', ['gst_percentage']);
-    $gstIncludedCol = getExistingColumn($pdo, 'hotel_rates', ['gst_included']);
-    if (!$rateCol) return null;
-
-    $stmt = $pdo->prepare("SELECT * FROM hotel_rates WHERE id = ?");
-    $stmt->execute([$hotelRateId]);
-    $row = $stmt->fetch(PDO::FETCH_ASSOC);
-    if (!$row) return null;
-
-    $base = (float)$row[$rateCol] * max(1, $nights) * max(1, $rooms);
-    $gstIncluded = $gstIncludedCol ? (bool)$row[$gstIncludedCol] : true;
-    if (!$gstIncluded && $gstPctCol && (float)$row[$gstPctCol] > 0) {
-        $base *= (1 + ((float)$row[$gstPctCol] / 100));
+    // Secondary fallback: lookup by hotel_id or hotel_name in hotel_rates if rate_id is null
+    if (!empty($hotelId) || !empty($hotelName)) {
+        if (tableExistsFor($pdo, 'hotel_rates')) {
+            $rateCol = getExistingColumn($pdo, 'hotel_rates', ['rate_per_night', 'rate', 'nightly_rate']);
+            if ($rateCol) {
+                if (!empty($hotelId)) {
+                    $stmt = $pdo->prepare("SELECT * FROM hotel_rates WHERE hotel_id = ? AND is_active = 1 ORDER BY $rateCol ASC LIMIT 1");
+                    $stmt->execute([$hotelId]);
+                    if ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+                        return (float)$row[$rateCol] * max(1, $nights) * max(1, $rooms);
+                    }
+                }
+                if (!empty($hotelName) && tableExistsFor($pdo, 'hotels')) {
+                    $nameCol = getExistingColumn($pdo, 'hotels', ['hotel_name', 'name']);
+                    if ($nameCol) {
+                        $stmt = $pdo->prepare("SELECT r.* FROM hotel_rates r JOIN hotels h ON r.hotel_id = h.id WHERE LOWER(h.`$nameCol`) LIKE LOWER(?) AND r.is_active = 1 ORDER BY r.$rateCol ASC LIMIT 1");
+                        $stmt->execute(['%' . trim($hotelName) . '%']);
+                        if ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+                            return (float)$row[$rateCol] * max(1, $nights) * max(1, $rooms);
+                        }
+                    }
+                }
+            }
+        }
     }
-    return $base;
+
+    return null;
 }
 
 /**
@@ -216,9 +243,19 @@ function validateAndAnnotatePricing(PDO $pdo, array $days): array {
 
         foreach (($d['hotels'] ?? []) as $h) {
             $submitted = (float)($h['total_cost'] ?? 0);
-            $floor = computeHotelFloor($pdo, $h['hotel_rate_id'] ?? null, (int)($h['nights'] ?? 1), (int)($h['rooms'] ?? 1));
+            $floor = computeHotelFloor(
+                $pdo, 
+                $h['hotel_rate_id'] ?? null, 
+                (int)($h['nights'] ?? 1), 
+                (int)($h['rooms'] ?? 1),
+                $h['hotel_id'] ?? null,
+                $h['hotel_name'] ?? null
+            );
             if ($floor === null) {
-                $variances[] = ['day' => $dayLabel, 'type' => 'hotel', 'id' => $h['hotel_rate_id'] ?? null, 'issue' => 'no_matching_rate', 'submitted' => $submitted];
+                // If hotel submitted has an amount, don't flag as error if it's an ad-hoc custom property
+                if ($submitted <= 0) {
+                    $variances[] = ['day' => $dayLabel, 'type' => 'hotel', 'id' => $h['hotel_rate_id'] ?? null, 'issue' => 'no_matching_rate', 'submitted' => $submitted];
+                }
             } elseif ($submitted < $floor && !withinTolerance($floor, $submitted)) {
                 $variances[] = ['day' => $dayLabel, 'type' => 'hotel', 'id' => $h['hotel_rate_id'] ?? null, 'issue' => 'below_rate_card', 'submitted' => $submitted, 'expected_floor' => round($floor, 2)];
             }

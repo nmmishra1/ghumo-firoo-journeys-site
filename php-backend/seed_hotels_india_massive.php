@@ -319,6 +319,7 @@ try {
             ['name' => 'Trident Hotel Udaipur Aravali', 'star' => 4, 'room' => 'Garden View Room', 'plan' => 'CP (Breakfast Incl)', 'rate' => 8500]
         ],
         61 => [ // Jodhpur
+            ['name' => 'WelcomHeritage Bal Samand Lake Palace', 'star' => 4, 'room' => 'Premium', 'plan' => 'MAP (Breakfast & Dinner)', 'rate' => 6050],
             ['name' => 'Umaid Bhawan Palace Jodhpur', 'star' => 5, 'room' => 'Historical Suite Room', 'plan' => 'CP (Breakfast Incl)', 'rate' => 29000],
             ['name' => 'Taj Hari Mahal Jodhpur Resort', 'star' => 5, 'room' => 'Garden View Suite', 'plan' => 'MAP (Breakfast & Dinner)', 'rate' => 14000],
             ['name' => 'Radisson Hotel Jodhpur Centric', 'star' => 4, 'room' => 'Superior AC Cozy', 'plan' => 'CP (Breakfast Incl)', 'rate' => 7000]

@@ -133,6 +133,72 @@ function getDb(): PDO
                 }
             } catch (Exception $eLead) {}
 
+            // Auto-seed WelcomHeritage Bal Samand Lake Palace if missing
+            try {
+                $checkH = $pdo->query("SELECT id FROM hotels WHERE LOWER(hotel_name) LIKE '%bal samand%' OR LOWER(name) LIKE '%bal samand%' LIMIT 1");
+                $existsH = $checkH ? $checkH->fetchColumn() : null;
+                if (!$existsH) {
+                    $jodhpurId = 61;
+                    $cStmt = $pdo->query("SELECT id FROM cities WHERE LOWER(name) LIKE '%jodhpur%' OR LOWER(city_name) LIKE '%jodhpur%' LIMIT 1");
+                    if ($cR = $cStmt->fetch(PDO::FETCH_ASSOC)) {
+                        $jodhpurId = (int)$cR['id'];
+                    }
+
+                    $hCols = [];
+                    $qCols = $pdo->query("SHOW COLUMNS FROM hotels");
+                    while ($r = $qCols->fetch(PDO::FETCH_ASSOC)) {
+                        $hCols[] = strtolower($r['Field']);
+                    }
+
+                    $hotelId = 'hotel-6abb986e4e0866.11840170';
+                    $hotelName = 'WelcomHeritage Bal Samand Lake Palace';
+                    $addr = 'BSF STC, Mandore Rd, Mandore, Jodhpur, Rajasthan 342026';
+
+                    $fields = ['id'];
+                    $vals = [$hotelId];
+                    $placeholders = ['?'];
+
+                    if (in_array('hotel_name', $hCols)) { $fields[] = 'hotel_name'; $vals[] = $hotelName; $placeholders[] = '?'; }
+                    elseif (in_array('name', $hCols)) { $fields[] = 'name'; $vals[] = $hotelName; $placeholders[] = '?'; }
+
+                    if (in_array('city_id', $hCols)) { $fields[] = 'city_id'; $vals[] = $jodhpurId; $placeholders[] = '?'; }
+                    if (in_array('city', $hCols)) { $fields[] = 'city'; $vals[] = 'Jodhpur'; $placeholders[] = '?'; }
+                    elseif (in_array('city_name', $hCols)) { $fields[] = 'city_name'; $vals[] = 'Jodhpur'; $placeholders[] = '?'; }
+
+                    if (in_array('state', $hCols)) { $fields[] = 'state'; $vals[] = 'Rajasthan'; $placeholders[] = '?'; }
+                    elseif (in_array('state_name', $hCols)) { $fields[] = 'state_name'; $vals[] = 'Rajasthan'; $placeholders[] = '?'; }
+
+                    if (in_array('country', $hCols)) { $fields[] = 'country'; $vals[] = 'India'; $placeholders[] = '?'; }
+                    if (in_array('star_rating', $hCols)) { $fields[] = 'star_rating'; $vals[] = 4; $placeholders[] = '?'; }
+                    elseif (in_array('star_category', $hCols)) { $fields[] = 'star_category'; $vals[] = 4; $placeholders[] = '?'; }
+
+                    if (in_array('address', $hCols)) { $fields[] = 'address'; $vals[] = $addr; $placeholders[] = '?'; }
+                    if (in_array('active_status', $hCols)) { $fields[] = 'active_status'; $vals[] = 1; $placeholders[] = '?'; }
+                    if (in_array('active', $hCols)) { $fields[] = 'active'; $vals[] = 1; $placeholders[] = '?'; }
+                    if (in_array('is_active', $hCols)) { $fields[] = 'is_active'; $vals[] = 1; $placeholders[] = '?'; }
+
+                    $pdo->prepare("INSERT INTO hotels (" . implode(', ', $fields) . ") VALUES (" . implode(', ', $placeholders) . ")")->execute($vals);
+
+                    try {
+                        $pdo->prepare("INSERT IGNORE INTO hotel_contracts (id, hotel_id, contract_name, season, valid_from, valid_to, status, active_status) VALUES ('contract-bal-samand-2026', ?, 'Official Ratecard 2026-2027', 'Normal Season', '2026-01-01', '2027-12-31', 'active', 1)")->execute([$hotelId]);
+                    } catch (Exception $eC) {}
+
+                    try {
+                        $rates = [
+                            ['Premium', 'MAP', 6050.00],
+                            ['Premium', 'CP', 5500.00],
+                            ['Garden Room', 'CP', 5500.00],
+                            ['Garden Room', 'MAP', 6050.00],
+                            ['Regal Suite', 'CP', 8500.00],
+                            ['Regal Suite', 'MAP', 9500.00]
+                        ];
+                        foreach ($rates as $r) {
+                            $pdo->prepare("INSERT INTO hotel_rates (hotel_id, room_type, meal_plan, season_start, season_end, rate_per_night, is_active) VALUES (?, ?, ?, '2026-01-01', '2027-12-31', ?, 1)")->execute([$hotelId, $r[0], $r[1], $r[2]]);
+                        }
+                    } catch (Exception $eR) {}
+                }
+            } catch (Exception $eH) {}
+
             $migrated = true;
         }
     }
