@@ -1361,9 +1361,10 @@ export const HotelContractWizard: React.FC<HotelContractWizardProps> = ({
           recordId: hotelId
         });
         if (selectedFacilities.length > 0) {
-          const facilityMappings = selectedFacilities.map(facId => ({
+          const uniqueFacilities = Array.from(new Set(selectedFacilities.filter(Boolean)));
+          const facilityMappings = uniqueFacilities.map(facId => ({
             hotel_id: hotelId,
-            facility_id: facId
+            facility_id: String(facId)
           }));
           await Promise.all(facilityMappings.map(mapping => 
             crmFetch(`${API_BASE}/api.php?table=hotel_facility_mapping`, {
@@ -1376,8 +1377,8 @@ export const HotelContractWizard: React.FC<HotelContractWizardProps> = ({
             }, {
               action: 'create_hotel_facility_mapping',
               module: 'Hotels'
-            }).then(r => {
-              if (!r.ok) throw new Error('Failed to insert facility mapping');
+            }).catch(e => {
+              console.warn('Facility mapping individual insert error:', e);
             })
           ));
         }

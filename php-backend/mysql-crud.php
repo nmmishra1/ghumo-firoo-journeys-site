@@ -393,8 +393,9 @@ try {
         $cols = array_keys($data);
         $placeholders = array_map(function($c) { return ":$c"; }, $cols);
         
+        $insertVerb = ($table === 'hotel_facility_mapping') ? 'INSERT IGNORE INTO' : 'INSERT INTO';
         if ($isAutoIncrement) {
-            $sql = "INSERT INTO `$table` (`" . implode("`, `", $cols) . "`) VALUES (" . implode(", ", $placeholders) . ")";
+            $sql = "$insertVerb `$table` (`" . implode("`, `", $cols) . "`) VALUES (" . implode(", ", $placeholders) . ")";
             $stmt = $pdo->prepare($sql);
             $params = array_combine($placeholders, array_values($data));
             $stmt->execute($params);
@@ -402,10 +403,10 @@ try {
         } else {
             $newId = $input['id'] ?? (substr($table, 0, 3) . '-' . time() . '-' . rand(1000, 9999));
             if (in_array('id', $columns)) {
-                $sql = "INSERT INTO `$table` (`id`, `" . implode("`, `", $cols) . "`) VALUES (:id, " . implode(", ", $placeholders) . ")";
+                $sql = "$insertVerb `$table` (`id`, `" . implode("`, `", $cols) . "`) VALUES (:id, " . implode(", ", $placeholders) . ")";
                 $params = array_merge([':id' => $newId], array_combine($placeholders, array_values($data)));
             } else {
-                $sql = "INSERT INTO `$table` (`" . implode("`, `", $cols) . "`) VALUES (" . implode(", ", $placeholders) . ")";
+                $sql = "$insertVerb `$table` (`" . implode("`, `", $cols) . "`) VALUES (" . implode(", ", $placeholders) . ")";
                 $params = array_combine($placeholders, array_values($data));
             }
             $stmt = $pdo->prepare($sql);

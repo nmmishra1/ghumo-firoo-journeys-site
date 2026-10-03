@@ -133,6 +133,61 @@ function getDb(): PDO
                 }
             } catch (Exception $eLead) {}
 
+            // Auto-migrate hotel_facility_mapping.facility_id to VARCHAR(100) to support string amenity IDs
+            try {
+                $pdo->exec("CREATE TABLE IF NOT EXISTS `hotel_facility_mapping` (
+                    `id` INT AUTO_INCREMENT PRIMARY KEY,
+                    `hotel_id` VARCHAR(100) NOT NULL,
+                    `facility_id` VARCHAR(100) NOT NULL,
+                    `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    UNIQUE KEY `uc_hotel_facility` (`hotel_id`, `facility_id`)
+                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+
+                $colFac = $pdo->query("SHOW COLUMNS FROM hotel_facility_mapping LIKE 'facility_id'")->fetch(PDO::FETCH_ASSOC);
+                if ($colFac && strpos(strtolower($colFac['Type'] ?? ''), 'varchar') === false) {
+                    $pdo->exec("ALTER TABLE hotel_facility_mapping MODIFY COLUMN facility_id VARCHAR(100) NOT NULL");
+                }
+            } catch (Exception $eFacCol) {}
+
+            // Auto-seed hotel_facilities if table exists and is empty
+            try {
+                $pdo->exec("CREATE TABLE IF NOT EXISTS `hotel_facilities` (
+                    `id` INT AUTO_INCREMENT PRIMARY KEY,
+                    `facility_name` VARCHAR(150) NOT NULL,
+                    `active_status` TINYINT(1) DEFAULT 1,
+                    `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    UNIQUE KEY `uc_facility_name` (`facility_name`)
+                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+
+                $facCount = (int)($pdo->query("SELECT COUNT(*) FROM hotel_facilities")->fetchColumn() ?: 0);
+                if ($facCount === 0) {
+                    $defaultFacs = [
+                        'Free High-Speed Wi-Fi',
+                        'Swimming Pool',
+                        'Multi-Cuisine Restaurant',
+                        '24/7 Room Service',
+                        'Spa & Ayurvedic Wellness',
+                        'Fitness Centre / Gym',
+                        'Bar & Lounge',
+                        'Air Conditioning (Climate Control)',
+                        'Free Valet / Self Parking',
+                        'Airport / Railway Shuttle',
+                        'Mountain / Valley Scenic View',
+                        'Electric Kettle & Tea/Coffee Maker',
+                        'Banquet & Conference Hall',
+                        'Kids Play Zone & Activity Area',
+                        'Pet Friendly Accommodations',
+                        'Bonfire & Outdoor BBQ Setup',
+                        'Elevator / Lift Access',
+                        'Doctor on Call & First Aid'
+                    ];
+                    $insF = $pdo->prepare("INSERT IGNORE INTO hotel_facilities (facility_name, active_status) VALUES (?, 1)");
+                    foreach ($defaultFacs as $fname) {
+                        $insF->execute([$fname]);
+                    }
+                }
+            } catch (Exception $eFacSeed) {}
+
             // Auto-seed WelcomHeritage Bal Samand Lake Palace if missing
             try {
                 $checkH = $pdo->query("SELECT id FROM hotels WHERE LOWER(hotel_name) LIKE '%bal samand%' OR LOWER(name) LIKE '%bal samand%' LIMIT 1");
