@@ -4662,7 +4662,8 @@ export default function ItineraryBuilder({
 
   const handleStatusSelect = async (newStatus: string) => {
     setItinerary((prev: any) => prev ? { ...prev, status: newStatus } : prev);
-    if (itinerary?.id) {
+    const currentLeadId = leadId || activeLead?.id || itinerary?.lead_id;
+    if (itinerary?.id || currentLeadId) {
       try {
         const authHeaders = await getAuthHeader();
         const res = await fetch(`${apiBase}/itinerary_update_status.php`, {
@@ -4672,7 +4673,7 @@ export default function ItineraryBuilder({
             ...authHeaders
           },
           body: JSON.stringify({
-            id: itinerary.id,
+            id: itinerary?.id,
             status: newStatus,
             lead_id: currentLeadId
           })
