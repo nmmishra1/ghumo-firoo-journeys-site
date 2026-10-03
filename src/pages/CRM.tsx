@@ -1084,7 +1084,7 @@ const CRM = () => {
     | 'activities'
     | 'sightseeings'
     | 'visas'
-    | 'itineraries-mocked'
+    | 'itineraries'
     | 'packages'
     | 'blogs'
     | 'suppliers-mocked'
@@ -1132,7 +1132,7 @@ const CRM = () => {
   } else if (location.pathname.startsWith('/crm/email-marketing')) {
     currentSection = 'email-marketing';
   } else if (location.pathname === '/crm/itineraries') {
-    currentSection = 'itineraries-mocked';
+    currentSection = 'itineraries';
   } else if (location.pathname.startsWith('/crm/packages')) {
     currentSection = 'packages';
   } else if (location.pathname.startsWith('/crm/blogs')) {
@@ -1226,7 +1226,7 @@ const CRM = () => {
         fetchDashboardInventory();
       }
       const needsQuotesOrProfiles = ['quotes', 'opportunities', 'reports', 'payments'].some(s => currentSection.includes(s));
-      if (needsQuotesOrProfiles && quotes.length === 0) fetchQuotes();
+      if (needsQuotesOrProfiles) fetchQuotes();
       if (currentSection !== 'dashboard' && profiles.length === 0) fetchProfiles();
       if (allPayments.length === 0 || currentSection === 'payments' || currentSection === 'payments-mocked' || currentSection === 'reports-mocked') {
         fetchAllPayments();
@@ -1328,8 +1328,12 @@ const CRM = () => {
   const fetchQuotes = async () => {
     try {
       const allQuotes = await quoteService.getQuotesForLead(0);
-      const grouped = quoteService.groupQuotes(allQuotes);
-      setQuotes(grouped);
+      if (allQuotes && Array.isArray(allQuotes) && allQuotes.length > 0) {
+        const grouped = quoteService.groupQuotes(allQuotes);
+        setQuotes(grouped);
+      } else {
+        setQuotes([]);
+      }
     } catch (error) {
       console.error('Error fetching quotes:', error);
     }
@@ -3331,7 +3335,7 @@ const CRM = () => {
             { label: 'Opportunities', icon: Sparkles, section: 'opportunities', path: '/crm/opportunities' },
             { label: 'Quotes', icon: FileText, section: 'quotes', path: '/crm/quotes' },
             { label: 'Performance', icon: UserCheck, section: 'user-dashboard', path: '/crm/user-dashboard' },
-            { label: 'Itineraries', icon: Map, section: 'itineraries-mocked', path: '/crm/itineraries' },
+            { label: 'Itineraries', icon: Map, section: 'itineraries', path: '/crm/itineraries' },
             { label: 'Packages', icon: Package, section: 'packages', path: '/crm/packages', activeSections: ['packages'], moduleId: 'packages' },
             { label: 'Blogs', icon: FileText, section: 'blogs', path: '/crm/blogs', activeSections: ['blogs'], moduleId: 'blogs' },
             { label: 'Hotels', icon: Landmark, section: 'hotels', path: '/crm/hotels', moduleId: 'hotels' },
@@ -3456,7 +3460,7 @@ const CRM = () => {
                 {currentSection === 'edit-lead' && 'Edit Travel Lead'}
                 {currentSection === 'profile' && `Lead Profile: ${activeLead?.customer_name}`}
                 {currentSection === 'followups' && `Follow-up History`}
-                {currentSection === 'itineraries-mocked' && 'Global Itinerary Workspace'}
+                {currentSection === 'itineraries' && 'Global Itinerary Workspace'}
                 {currentSection === 'packages' && 'Packages Directory'}
                 {currentSection === 'blogs' && 'Blog Articles Management'}
                 {currentSection === 'hotels' && 'Hotel Contracts Management'}
@@ -5236,7 +5240,7 @@ Ghumo Firoo Travels`
                     const leadBalanceDue = Math.max(0, leadPkgPrice - leadTotalPaid);
                     
                     const rawStatus = (activeLead.status || 'New').toLowerCase().trim();
-                    const isConfirmed = (rawStatus === 'booking confirmed' || rawStatus === 'confirmed' || rawStatus === 'converted') || (leadTotalPaid > 0 && rawStatus !== 'new');
+                    const isConfirmed = (rawStatus === 'booking confirmed' || rawStatus === 'confirmed' || rawStatus === 'converted' || rawStatus === 'voucher issued') || leadTotalPaid > 0;
                     const isQuoted = rawStatus === 'quote sent' || rawStatus === 'proposal sent';
 
                     const rawTripStart = getValidDateCandidate(activeLead.trip_start_date, activeLead.tripStartDate, activeLead.travel_dates, activeLead.travel_date, activeLead.travel_month, activeLead.travelMonth);
@@ -5253,11 +5257,12 @@ Ghumo Firoo Travels`
                             {isConfirmed ? 'Booking Ledger & Balance' : isQuoted ? 'Quoted Package Value' : 'Estimated Deal Budget'}
                           </p>
                           <span className={`text-[9px] font-black uppercase px-2 py-0.5 rounded-full border ${
-                            isConfirmed ? 'bg-emerald-500/15 text-emerald-600 border-emerald-500/30' :
-                            isQuoted ? 'bg-amber-500/15 text-amber-600 border-amber-500/30' :
-                            'bg-blue-500/15 text-blue-600 border-blue-500/30'
+                            rawStatus === 'voucher issued' ? 'bg-indigo-500/15 text-indigo-400 border-indigo-500/30' :
+                            isConfirmed ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30' :
+                            isQuoted ? 'bg-amber-500/15 text-amber-400 border-amber-500/30' :
+                            'bg-blue-500/15 text-blue-400 border-blue-500/30'
                           }`}>
-                            {activeLead.status || 'New Enquiry'}
+                            {rawStatus === 'new' && leadTotalPaid > 0 ? 'Confirmed (Paid)' : (activeLead.status || 'New Enquiry')}
                           </span>
                         </div>
 
@@ -5447,27 +5452,67 @@ Ghumo Firoo Travels`
                     </>
                   ) : (
                     <>
-                      {/* Breadcrumbs & Quote Ref */}
+                      {/* Lead Ref & Quote Identifier */}
                       <div className="flex items-center gap-2 flex-wrap">
-                        <div className="text-[11px] font-medium text-slate-500">
-                          Home &rsaquo; My Leads &rsaquo; <span className="text-[#C9A25A] font-bold font-mono">{formatLeadId(activeLead)}</span>
-                        </div>
+                        <span className="text-xs font-mono font-bold px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700">
+                          {formatLeadId(activeLead)}
+                        </span>
                         {(() => {
                           const destCode = getDestinationCode(typeof activeLead.destinations === 'string' ? activeLead.destinations : (activeLead.destinations as any)?.[0] || '', activeLead.package_name || undefined);
                           const quoteRef = `GFQ-${destCode}-${String(activeLead.id).padStart(4, '0')}`;
                           return (
                             <span 
-                              className="text-[10.5px] font-mono font-bold px-2 py-0.5 rounded bg-amber-500/15 text-amber-800 dark:text-amber-300 border border-amber-500/30"
+                              className="text-[11px] font-mono font-bold px-2.5 py-1 rounded-lg bg-amber-500/15 text-amber-800 dark:text-amber-300 border border-amber-500/30 flex items-center gap-1.5"
                               title="Official Quotation Reference"
                             >
                               📄 {quoteRef}
                             </span>
                           );
                         })()}
+                        {(Number(activeLead.total_paid_amount || 0) > 0 || (mockPayments && mockPayments.length > 0)) && (
+                          <span className="text-[10.5px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 flex items-center gap-1">
+                            <CheckCircle2 className="w-3 h-3 text-emerald-500" /> Advance Received
+                          </span>
+                        )}
                       </div>
-                      {/* Right actions */}
+
+                      {/* Right action toolbar */}
                       <div className="flex gap-2 items-center flex-wrap">
-                        {/* 1-Click WhatsApp Quote Button */}
+                        {/* 1. Primary Action: Itinerary Builder */}
+                        <Button 
+                          size="sm" 
+                          onClick={() => navigate(`/crm/leads/${activeLead.id}/itinerary`)}
+                          className="h-8 bg-gradient-to-r from-[#C9A25A] to-[#D4AF37] hover:opacity-90 text-[#0B1026] text-xs font-black shadow-xs rounded-lg px-3 flex items-center gap-1.5"
+                          title="Open Itinerary Builder & Proposals for this Lead"
+                        >
+                          <Map className="w-3.5 h-3.5 text-[#0B1026]" /> Itinerary Builder
+                        </Button>
+
+                        {/* 2. Record Payment Button */}
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          onClick={() => {
+                            const pkgPrice = Number(activeLead.budget || activeLead.package_price || activeLead.packagePrice || activeLead.expected_booking_value || 0);
+                            setLeadForAdvance({
+                              id: activeLead.id,
+                              name: activeLead.customer_name,
+                              price: pkgPrice,
+                              destination: typeof activeLead.destinations === 'string' ? activeLead.destinations : (activeLead.destinations as any)?.[0] || 'Tour',
+                              packageName: activeLead.package_name || undefined
+                            });
+                            setAdvanceAmountInput(String(Math.round(pkgPrice * 0.25) || 5000));
+                            setAdvancePaymentMode('UPI / QR Code');
+                            setAdvancePaymentRef('');
+                            setAdvanceModalOpen(true);
+                          }}
+                          className="h-8 text-xs font-bold border-amber-500/40 text-amber-600 dark:text-amber-400 hover:bg-amber-500/10 rounded-lg px-3"
+                          title="Record Advance or Progress Payment"
+                        >
+                          <IndianRupee className="w-3.5 h-3.5 mr-1" /> Record Payment
+                        </Button>
+
+                        {/* 3. 1-Click WhatsApp Quote Button */}
                         <Button 
                           variant="outline" 
                           size="sm" 
@@ -5499,57 +5544,24 @@ Please let us know if you need any customizations. Looking forward to hosting yo
                               handleStatusChange('Quote Sent');
                             }
                           }}
-                          className="h-8 text-xs font-bold border-emerald-500/40 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/10"
+                          className="h-8 text-xs font-bold border-emerald-500/40 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/10 rounded-lg px-3"
+                          title="Send official quotation via WhatsApp"
                         >
                           <Share2 className="w-3.5 h-3.5 mr-1" /> WhatsApp Quote
                         </Button>
 
-                        {/* Record Advance Button */}
+                        {/* 4. Packages Drawer Toggle */}
                         <Button 
                           variant="outline" 
                           size="sm" 
-                          onClick={() => {
-                            const pkgPrice = Number(activeLead.budget || activeLead.package_price || activeLead.packagePrice || activeLead.expected_booking_value || 0);
-                            setLeadForAdvance({
-                              id: activeLead.id,
-                              name: activeLead.customer_name,
-                              price: pkgPrice,
-                              destination: typeof activeLead.destinations === 'string' ? activeLead.destinations : (activeLead.destinations as any)?.[0] || 'Tour',
-                              packageName: activeLead.package_name || undefined
-                            });
-                            setAdvanceAmountInput(String(Math.round(pkgPrice * 0.25) || 5000));
-                            setAdvancePaymentMode('UPI / QR Code');
-                            setAdvancePaymentRef('');
-                            setAdvanceModalOpen(true);
-                          }}
-                          className="h-8 text-xs font-bold border-amber-500/40 text-amber-600 dark:text-amber-400 hover:bg-amber-500/10"
-                        >
-                          <IndianRupee className="w-3.5 h-3.5 mr-1" /> Record Advance
-                        </Button>
-
-                        <Button 
-                          variant="outline" 
-                          size="sm" 
-                          onClick={() => setShowPackagesPanel(true)}
-                          className="h-8 text-xs font-semibold border-slate-200"
+                          onClick={() => setShowPackagesPanel(!showPackagesPanel)}
+                          className={`h-8 text-xs font-semibold rounded-lg px-2.5 ${showPackagesPanel ? 'bg-amber-500/15 border-amber-500/40 text-amber-600' : 'border-slate-200'}`}
+                          title="Browse pre-built packages for this destination"
                         >
                           Packages
                         </Button>
-                        <Button 
-                          variant="outline" 
-                          size="sm" 
-                          onClick={() => setProposalDialogOpen(true)}
-                          className="h-8 text-xs font-bold border-[#C9A25A]/30 text-[#C9A25A] hover:bg-[#C9A25A]/15"
-                        >
-                          Send quotation
-                        </Button>
-                        <Button 
-                          size="sm" 
-                          onClick={() => window.open(`https://wa.me/${activeLead.whatsapp_number || activeLead.contact_number || activeLead.customer_phone || ''}`)}
-                          className="h-8 bg-gradient-to-r from-[#C9A25A] to-[#D4AF37] hover:opacity-90 text-[#0B1026] text-xs font-extrabold"
-                        >
-                          Chat with customer
-                        </Button>
+
+                        {/* 5. Delete Lead Icon */}
                         <Button 
                           variant="outline"
                           size="sm" 
@@ -5557,20 +5569,28 @@ Please let us know if you need any customizations. Looking forward to hosting yo
                             setLeadToDelete({ id: activeLead.id, name: activeLead.customer_name });
                             setDeleteModalOpen(true);
                           }}
-                          className="h-8 text-xs font-bold border-rose-500/40 text-rose-600 dark:text-rose-400 hover:bg-rose-500/10 cursor-pointer"
+                          className="h-8 w-8 p-0 text-xs font-bold border-rose-500/30 text-rose-500 hover:bg-rose-500/10 rounded-lg cursor-pointer"
                           title="Delete this Lead"
                         >
-                          <Trash2 className="w-3.5 h-3.5 mr-1" /> Delete Lead
+                          <Trash2 className="w-3.5 h-3.5" />
                         </Button>
 
-                        {/* Status Dropdown */}
+                        {/* 6. Styled Status Dropdown */}
                         <select 
                           value={activeLead.status} 
                           onChange={(e) => handleStatusChange(e.target.value as Lead['status'])}
-                          className="border border-slate-200 rounded px-2 py-1 text-[12px] bg-background font-semibold text-slate-700 focus:outline-none focus:ring-1 focus:ring-[#C9A25A] cursor-pointer"
+                          className={`h-8 rounded-lg px-2.5 text-xs font-bold border cursor-pointer focus:outline-none transition-colors ${
+                            activeLead.status === 'Booking Confirmed' || activeLead.status === 'Voucher Issued'
+                              ? 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border-emerald-500/40'
+                              : activeLead.status === 'Quote Sent'
+                              ? 'bg-amber-500/15 text-amber-800 dark:text-amber-300 border-amber-500/40'
+                              : activeLead.status === 'Closed Lost'
+                              ? 'bg-rose-500/15 text-rose-700 dark:text-rose-300 border-rose-500/40'
+                              : 'bg-background text-slate-700 dark:text-slate-300 border-slate-300 dark:border-slate-700'
+                          }`}
                         >
                           {['New', 'Assigned', 'Follow-up Due', 'Quote Sent', 'Booked (Advance Pending)', 'Booking Confirmed', 'Voucher Issued', 'Closed Lost'].map(st => (
-                            <option key={st} value={st}>{st}</option>
+                            <option key={st} value={st} className="bg-background text-foreground font-semibold">{st}</option>
                           ))}
                         </select>
                       </div>
@@ -5789,7 +5809,7 @@ Please let us know if you need any customizations. Looking forward to hosting yo
           )}
 
           {/* GLOBAL ITINERARY WORKSPACE */}
-          {currentSection === 'itineraries-mocked' && (
+          {currentSection === 'itineraries' && (
             <ItineraryWorkspace
               leads={leads}
               onNavigateLead={(leadId, suffix) => navigate(suffix ? `/crm/leads/${leadId}/${suffix}` : `/crm/leads/${leadId}`)}

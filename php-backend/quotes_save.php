@@ -54,6 +54,33 @@ function generateUUID() {
 }
 
 try {
+    // Ensure quotes table exists with complete schema
+    $pdo->exec("CREATE TABLE IF NOT EXISTS `quotes` (
+        `id` VARCHAR(36) PRIMARY KEY,
+        `lead_id` INT NOT NULL,
+        `itinerary_id` VARCHAR(100) NULL,
+        `version_number` INT NOT NULL DEFAULT 1,
+        `parent_quote_id` VARCHAR(36) NULL,
+        `status` VARCHAR(50) DEFAULT 'Draft',
+        `total_amount` DECIMAL(12,2) NOT NULL DEFAULT 0.00,
+        `package_name` VARCHAR(255) NOT NULL,
+        `cost_breakdown` JSON NULL,
+        `inclusions` JSON NULL,
+        `exclusions` JSON NULL,
+        `terms` TEXT NULL,
+        `notes` TEXT NULL,
+        `share_token` VARCHAR(64) NULL,
+        `share_message` TEXT NULL,
+        `shared_at` TIMESTAMP NULL,
+        `viewed_at` TIMESTAMP NULL,
+        `expires_at` TIMESTAMP NULL,
+        `created_by` VARCHAR(255) NULL,
+        `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        INDEX `idx_quotes_lead_id` (`lead_id`),
+        INDEX `idx_quotes_version` (`lead_id`, `version_number`)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;");
+
     // Validate that lead_id exists in the leads table to satisfy foreign key constraint
     $checkLead = $pdo->prepare("SELECT id FROM leads WHERE id = :lid LIMIT 1");
     $checkLead->execute([':lid' => $leadId]);

@@ -173,6 +173,35 @@ export default function QuoteWorkspace({ quotes: propQuotes = [], onCreateRevisi
     setNewQuoteModalOpen(false);
     setNewQuoteData({ customerName: '', customerEmail: '', customerPhone: '', destination: 'Kashmir', margin: 15 });
 
+    // Persist new quote to MySQL database
+    quoteService.saveQuote({
+      id: null,
+      lead_id: 0,
+      itinerary_id: null,
+      package_name: newQuoteData.destination.trim(),
+      total_amount: sellingPrice,
+      cost_breakdown: {
+        hotels: totalCost,
+        transport: 0,
+        sightseeing: 0,
+        // @ts-ignore
+        items: initialItems,
+        margin: newQuoteData.margin
+      },
+      inclusions: [],
+      exclusions: [],
+      validity_days: 7,
+      notes: `Direct Quote Created for ${newQuoteData.customerName.trim()} | Email: ${newQuoteData.customerEmail.trim()} | Phone: ${newQuoteData.customerPhone.trim()}`
+    }).then(res => {
+      if (res && res.quote_id) {
+        newVersion.id = res.quote_id;
+        newQuoteObj.id = res.quote_id;
+      }
+      if (onRefresh) onRefresh();
+    }).catch(err => {
+      console.warn("Could not save new quote to backend:", err);
+    });
+
     toast({
       title: "New Quote Created",
       description: `Created quote ${newQuoteNum} for ${newQuoteObj.customerName}.`,
@@ -704,7 +733,7 @@ export default function QuoteWorkspace({ quotes: propQuotes = [], onCreateRevisi
       const transportCost = editItems.filter(i => i.type === 'transfer' || i.type === 'flight').reduce((sum, i) => sum + i.total, 0);
       const sightseeingCost = editItems.filter(i => i.type === 'excursion' || i.type === 'meal').reduce((sum, i) => sum + i.total, 0);
 
-      const leadId = Number(selectedQuote.quoteNumber.split('-').pop()) || 1;
+      const leadId = selectedQuote.leadId || Number(selectedQuote.quoteNumber.split('-').pop()) || 1;
 
       const response = await quoteService.saveQuote({
         id: vA.id.includes('-') ? null : vA.id,
@@ -754,7 +783,7 @@ export default function QuoteWorkspace({ quotes: propQuotes = [], onCreateRevisi
 
     setSavingQuote(true);
     try {
-      const leadId = Number(quote.quoteNumber.split('-').pop()) || 1;
+      const leadId = quote.leadId || Number(quote.quoteNumber.split('-').pop()) || 1;
 
       const response = await quoteService.saveQuote({
         id: baseVersionId,

@@ -54,6 +54,14 @@ function tableExists(PDO $pdo, string $table): bool {
 }
 
 try {
+    // Ensure leads.status supports modern statuses
+    try {
+        $colCheck = $pdo->query("SHOW COLUMNS FROM leads LIKE 'status'")->fetch(PDO::FETCH_ASSOC);
+        if ($colCheck && strpos(strtolower($colCheck['Type'] ?? ''), 'enum') !== false) {
+            $pdo->exec("ALTER TABLE leads MODIFY COLUMN status VARCHAR(100) NOT NULL DEFAULT 'New'");
+        }
+    } catch (Exception $e) {}
+
     // 1. Fetch Lead Profile
     $lead = null;
     if (tableExists($pdo, 'leads')) {

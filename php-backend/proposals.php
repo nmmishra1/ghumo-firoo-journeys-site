@@ -137,6 +137,33 @@ try {
         
         $new_id = (int)$pdo->lastInsertId();
 
+        // Sync to quotes table so newly created proposal option appears in QuoteWorkspace
+        try {
+            $quoteUuid = 'prop-' . $new_id;
+            $qIns = $pdo->prepare("
+                INSERT INTO quotes (
+                    id, lead_id, version_number, status, total_amount, package_name, cost_breakdown, created_by
+                ) VALUES (
+                    :id, :lead_id, :ver, :st, :amt, :pkg, :breakdown, :author
+                )
+                ON DUPLICATE KEY UPDATE
+                    total_amount = VALUES(total_amount),
+                    package_name = VALUES(package_name),
+                    cost_breakdown = VALUES(cost_breakdown),
+                    status = VALUES(status)
+            ");
+            $qIns->execute([
+                ':id' => $quoteUuid,
+                ':lead_id' => $lead_id,
+                ':ver' => $option_number,
+                ':st' => $status,
+                ':amt' => $total_price,
+                ':pkg' => $title,
+                ':breakdown' => json_encode(['margin' => 15, 'totalCost' => round($total_price * 0.85)]),
+                ':author' => $user['id'] ?? null
+            ]);
+        } catch (Exception $syncQ) {}
+
         writeAuditLog($pdo, 'proposals', (string)$new_id, 'CREATE_PROPOSAL_OPTION', null, "Created Option {$option_number}: {$title} (₹{$total_price}, Advance: ₹{$advance_required})", $user);
 
         echo json_encode([
@@ -184,6 +211,11 @@ try {
             $pdo->prepare("UPDATE proposals SET status = 'Archived' WHERE lead_id = ? AND id != ? AND status != 'Expired'")->execute([$lead_id, $proposal_id]);
             $pdo->prepare("UPDATE proposals SET status = 'Accepted' WHERE id = ?")->execute([$proposal_id]);
             
+            // Sync to quotes table
+            try {
+                $pdo->prepare("UPDATE quotes SET status = 'Accepted' WHERE id = ? OR (lead_id = ? AND version_number = ?)")->execute(['prop-' . $proposal_id, $lead_id, $accepted['option_number']]);
+            } catch (Exception $qe) {}
+
             // 2. Update lead status to Booking Confirmed & sync expected value
             $pdo->prepare("UPDATE leads SET status = 'Booking Confirmed', expected_booking_value = ? WHERE id = ?")->execute([$accepted['total_price'], $lead_id]);
 

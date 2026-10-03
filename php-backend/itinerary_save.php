@@ -690,6 +690,78 @@ try {
     $stmtLead = $pdo->prepare("UPDATE leads SET " . implode(', ', $leadUpdates) . " WHERE id = :lead_id");
     $stmtLead->execute($leadParams);
 
+    // Sync to quotes table so newly saved itinerary immediately appears in /crm/quotes workspace
+    try {
+        $checkQuote = $pdo->prepare("SELECT id, version_number FROM quotes WHERE lead_id = ? AND (itinerary_id = ? OR itinerary_id IS NULL) ORDER BY version_number DESC LIMIT 1");
+        $checkQuote->execute([$leadId, $itineraryId]);
+        $existingQuote = $checkQuote->fetch(PDO::FETCH_ASSOC);
+
+        $breakdownData = json_encode([
+            'hotels' => (float)$hotelCost,
+            'transport' => (float)$transportCost,
+            'sightseeing' => (float)$excursionCost,
+            'margin' => (float)$markupPercentage,
+            'sellingPrice' => (float)$finalCost,
+            'totalCost' => (float)$totalCost
+        ]);
+
+        if ($existingQuote) {
+            $upQuote = $pdo->prepare("
+                UPDATE quotes SET 
+                    itinerary_id = :itin_id,
+                    total_amount = :amt,
+                    package_name = :pkg,
+                    cost_breakdown = :breakdown,
+                    status = 'Draft',
+                    updated_at = NOW()
+                WHERE id = :qid
+            ");
+            $upQuote->execute([
+                ':itin_id' => $itineraryId,
+                ':amt' => $finalCost,
+                ':pkg' => $packageName,
+                ':breakdown' => $breakdownData,
+                ':qid' => $existingQuote['id']
+            ]);
+        } else {
+            $quoteUuid = sprintf(
+                '%04x%04x-%04x-%04x-%04x-%04x%04x%04x',
+                mt_rand(0, 0xffff), mt_rand(0, 0xffff),
+                mt_rand(0, 0xffff),
+                mt_rand(0, 0x0fff) | 0x4000,
+                mt_rand(0, 0x3fff) | 0x8000,
+                mt_rand(0, 0xffff), mt_rand(0, 0xffff), mt_rand(0, 0xffff)
+            );
+
+            $vStmt = $pdo->prepare("SELECT MAX(version_number) FROM quotes WHERE lead_id = ?");
+            $vStmt->execute([$leadId]);
+            $maxVer = (int)$vStmt->fetchColumn();
+            $newVer = $maxVer > 0 ? $maxVer + 1 : 1;
+
+            $insQuote = $pdo->prepare("
+                INSERT INTO quotes (
+                    id, lead_id, itinerary_id, version_number, status,
+                    total_amount, package_name, cost_breakdown, created_by
+                ) VALUES (
+                    :id, :lead_id, :itinerary_id, :ver, 'Draft',
+                    :amt, :pkg, :breakdown, :created_by
+                )
+            ");
+            $insQuote->execute([
+                ':id' => $quoteUuid,
+                ':lead_id' => $leadId,
+                ':itinerary_id' => $itineraryId,
+                ':ver' => $newVer,
+                ':amt' => $finalCost,
+                ':pkg' => $packageName,
+                ':breakdown' => $breakdownData,
+                ':created_by' => $user['id'] ?? null
+            ]);
+        }
+    } catch (Exception $qSyncErr) {
+        error_log("Itinerary quote sync error: " . $qSyncErr->getMessage());
+    }
+
     $pdo->commit();
     echo json_encode([
         'success' => true,

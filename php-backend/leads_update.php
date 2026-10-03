@@ -39,6 +39,14 @@ if ($leadId <= 0) {
     exit;
 }
 
+// Auto-migrate leads.status from restrictive ENUM to VARCHAR(100) if needed
+try {
+    $colCheck = $pdo->query("SHOW COLUMNS FROM leads LIKE 'status'")->fetch(PDO::FETCH_ASSOC);
+    if ($colCheck && strpos(strtolower($colCheck['Type'] ?? ''), 'enum') !== false) {
+        $pdo->exec("ALTER TABLE leads MODIFY COLUMN status VARCHAR(100) NOT NULL DEFAULT 'New'");
+    }
+} catch (Exception $e) {}
+
 $fieldMapping = [
     'customer_name'         => ['customerName', 'customer_name', 'name', 'full_name'],
     'customer_email'        => ['customerEmail', 'customer_email', 'email'],

@@ -32,6 +32,7 @@ export interface QuoteVersion {
 
 export interface QuoteHeader {
   id: string;
+  leadId?: number;
   quoteNumber: string;
   customerName: string;
   destination: string;
@@ -60,6 +61,7 @@ export const quoteService = {
       
       return {
         id: list[0].id,
+        leadId: Number(lid),
         quoteNumber: `QT-2026-${String(lid).padStart(3, '0')}`,
         customerName: latest.customer_name || 'Guest',
         destination: latest.package_name,

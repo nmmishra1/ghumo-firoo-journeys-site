@@ -628,14 +628,25 @@ export const ItineraryWorkspace: React.FC<ItineraryWorkspaceProps> = ({ leads, o
                       {/* Actions */}
                       <div className="col-span-2 text-right flex justify-end gap-1.5">
                         {item.lead_id && (
-                          <Button
-                            size="sm"
-                            onClick={() => onNavigateLead(String(item.lead_id), 'itinerary')}
-                            className="bg-amber-500 hover:bg-amber-600 text-slate-950 font-extrabold text-xs h-8 rounded-lg px-3 shadow-xs"
-                            title="Open Itinerary Builder"
-                          >
-                            <Edit className="w-3.5 h-3.5 mr-1" /> Edit
-                          </Button>
+                          <>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => navigate('/crm/quotes')}
+                              className="border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 font-bold text-xs h-8 rounded-lg px-2.5"
+                              title="View Commercial Quotes & Proposals"
+                            >
+                              <FileText className="w-3.5 h-3.5 mr-1 text-[#C9A25A]" /> Quotes
+                            </Button>
+                            <Button
+                              size="sm"
+                              onClick={() => onNavigateLead(String(item.lead_id), 'itinerary')}
+                              className="bg-amber-500 hover:bg-amber-600 text-slate-950 font-extrabold text-xs h-8 rounded-lg px-3 shadow-xs"
+                              title="Open Itinerary Builder"
+                            >
+                              <Edit className="w-3.5 h-3.5 mr-1" /> Edit
+                            </Button>
+                          </>
                         )}
                       </div>
                     </div>
@@ -656,10 +667,10 @@ export const ItineraryWorkspace: React.FC<ItineraryWorkspaceProps> = ({ leads, o
                 {/* Table Header */}
                 <div className="grid grid-cols-12 gap-3 p-3.5 text-xs font-black text-slate-800 dark:text-slate-200 uppercase tracking-wider bg-slate-100 dark:bg-slate-900/80 border-b border-border/40">
                   <div className="col-span-4">Lead / Customer</div>
-                  <div className="col-span-3">Destination</div>
+                  <div className="col-span-2">Destination</div>
                   <div className="col-span-2">Travel Dates</div>
                   <div className="col-span-1">Status</div>
-                  <div className="col-span-2 text-right">Actions</div>
+                  <div className="col-span-3 text-right">Actions</div>
                 </div>
 
                 {/* Lead Items */}
@@ -695,7 +706,7 @@ export const ItineraryWorkspace: React.FC<ItineraryWorkspaceProps> = ({ leads, o
                         </div>
                       </div>
 
-                      <div className="col-span-3 font-extrabold text-slate-900 dark:text-slate-100 uppercase truncate text-xs">
+                      <div className="col-span-2 font-extrabold text-slate-900 dark:text-slate-100 uppercase truncate text-xs">
                         {l.destinations || l.packageName || linkedItin?.package_name || 'Custom Package'}
                       </div>
 
@@ -717,7 +728,16 @@ export const ItineraryWorkspace: React.FC<ItineraryWorkspaceProps> = ({ leads, o
                       </Badge>
                     </div>
 
-                    <div className="col-span-2 text-right flex justify-end gap-1.5">
+                    <div className="col-span-3 text-right flex justify-end gap-1.5">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => navigate('/crm/quotes')}
+                        className="border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 font-bold text-xs h-8 rounded-lg px-2.5"
+                        title="View Quotes"
+                      >
+                        <FileText className="w-3.5 h-3.5 mr-1 text-[#C9A25A]" /> Quotes
+                      </Button>
                       <Button
                         size="sm"
                         onClick={() => onNavigateLead(l.id, 'itinerary')}
