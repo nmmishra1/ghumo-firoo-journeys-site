@@ -4879,6 +4879,8 @@ export default function ItineraryBuilder({
     }
   };
 
+  const perPersonPrice = Math.round(finalPackagePrice / Math.max(1, (composerAdults + composerChildren) || Number(itinerary?.adult_count) || Number(activeLead?.adult_count) || 2));
+
   const effectiveItineraryForPreview = useMemo(() => {
     const calculatedNights = stayStops.reduce((sum, s) => sum + (Number(s.nights) || 0), 0) || (days?.length > 1 ? days.length - 1 : 1);
     const startD = (days && days[0]?.date) || itinerary?.travel_start_date || activeLead?.trip_start_date || new Date().toISOString().split('T')[0];
