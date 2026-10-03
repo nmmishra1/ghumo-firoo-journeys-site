@@ -289,7 +289,7 @@ try {
             
             if ($isPaginated) {
                 $page = max(1, (int)($_GET['page'] ?? 1));
-                $limit = min(100, max(1, (int)($_GET['limit'] ?? 20)));
+                $limit = min(5000, max(1, (int)($_GET['limit'] ?? 20)));
                 $offset = ($page - 1) * $limit;
 
                 // Count total matching records

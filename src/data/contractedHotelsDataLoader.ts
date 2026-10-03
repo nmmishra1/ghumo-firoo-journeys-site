@@ -69,6 +69,7 @@ const CITY_STATE_MAP: Record<string, { state: string; country: string }> = {
   'Bekal': { state: 'Kerala', country: 'India' },
   'Athirappilly': { state: 'Kerala', country: 'India' },
   'Kozhikode': { state: 'Kerala', country: 'India' },
+  'Jodhpur': { state: 'Rajasthan', country: 'India' },
 };
 
 /**

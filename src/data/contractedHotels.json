@@ -1,5 +1,14 @@
 [
   {
+    "city": "Jodhpur",
+    "name": "WelcomHeritage Bal Samand Lake Palace",
+    "cat_or_room": "Premium",
+    "b2b_cost": 6050,
+    "state": "Rajasthan",
+    "country": "India",
+    "rates": [6050]
+  },
+  {
     "city": "Janki Chatti",
     "name": "Gaurav Hotel",
     "cat_or_room": "Budget",

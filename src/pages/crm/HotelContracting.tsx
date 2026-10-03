@@ -689,9 +689,19 @@ export const HotelContracting: React.FC = () => {
     try {
       let dbHotels: any[] = [];
       try {
-        const res = await fetchCachedJson(`/php-backend/hotels.php?limit=1000`);
-        if (res && res.success && Array.isArray(res.data)) {
-          dbHotels = res.data.map((h: any) => {
+        const queryParams = new URLSearchParams();
+        queryParams.set('limit', '5000');
+        if (search && search.trim()) queryParams.set('search', search.trim());
+        if (country && country !== 'all') queryParams.set('country_id', country);
+        if (state && state !== 'all') queryParams.set('state_id', state);
+        if (city && city !== 'all') queryParams.set('city_id', city);
+        if (star && star !== 'all') queryParams.set('star_rating', star);
+
+        const res = await fetch(`/php-backend/hotels.php?${queryParams.toString()}`);
+        if (res.ok) {
+          const json = await res.json();
+          const items = Array.isArray(json) ? json : (Array.isArray(json.data) ? json.data : []);
+          dbHotels = items.map((h: any) => {
             const rawCity = h.city || h.cities?.city_name;
             const rawState = h.state || h.states?.state_name;
             const rawCountry = h.country || h.countries?.country_name;
