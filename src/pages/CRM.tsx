@@ -5604,6 +5604,38 @@ Please let us know if you need any customizations. Looking forward to hosting yo
                           <Share2 className="w-3.5 h-3.5 mr-1" /> WhatsApp Quote
                         </Button>
 
+                        {/* 3.5. 1-Click WhatsApp Feedback / Review Invite */}
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          onClick={() => {
+                            const destStr = typeof activeLead.destinations === 'string' ? activeLead.destinations : (activeLead.destinations as any)?.[0] || 'your tour';
+                            const guestName = activeLead.customer_name || 'Valued Guest';
+                            const reviewLink = `${window.location.origin}/review/${activeLead.id}`;
+                            const msg = encodeURIComponent(
+`*GHUMO FIROO TRAVELS - TRIP FEEDBACK & REVIEW* 🙏
+
+Hi ${guestName}, hope you had a wonderful journey to ${destStr}! 🏔️✨
+
+We would truly love to hear your feedback & see your trip photos. Please take a minute to share your review with us here:
+${reviewLink}
+
+Thank you for choosing Ghumo Firoo Travels! Looking forward to hosting you again soon. 🌟`
+                            );
+                            const phone = (activeLead.whatsapp_number || activeLead.contact_number || activeLead.customer_phone || '').replace(/[^0-9]/g, '');
+                            window.open(`https://wa.me/${phone}?text=${msg}`);
+                            navigator.clipboard.writeText(reviewLink);
+                            toast({
+                              title: "Review Invite Dispatched",
+                              description: `Feedback link copied to clipboard: ${reviewLink}`
+                            });
+                          }}
+                          className="h-8 text-xs font-bold border-purple-500/40 text-purple-600 dark:text-purple-400 hover:bg-purple-500/10 rounded-lg px-3 cursor-pointer"
+                          title="Invite traveler to leave feedback & review via WhatsApp"
+                        >
+                          <Star className="w-3.5 h-3.5 mr-1 text-purple-500 fill-purple-500/30" /> Ask Feedback
+                        </Button>
+
                         {/* 4. Packages Drawer Toggle */}
                         <Button 
                           variant="outline" 
