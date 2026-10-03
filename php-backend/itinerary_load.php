@@ -65,7 +65,7 @@ try {
     $targetLeadId = !empty($itinerary['lead_id']) ? $itinerary['lead_id'] : $leadId;
     if (!empty($targetLeadId)) {
         try {
-            $leadStmt = $pdo->prepare("SELECT id, customer_name, customer_email, customer_phone, email, contact_number, destination, destinations, trip_start_date, trip_end_date, adult_count, child_count, infant_count, status, enquiry_number FROM leads WHERE id = ? LIMIT 1");
+            $leadStmt = $pdo->prepare("SELECT id, customer_name, customer_email, customer_phone, email, contact_number, destination, destinations, trip_start_date, trip_end_date, adult_count, child_count, infant_count, status FROM leads WHERE id = ? LIMIT 1");
             $leadStmt->execute([$targetLeadId]);
             $linkedLead = $leadStmt->fetch(PDO::FETCH_ASSOC);
             if ($linkedLead) {
@@ -82,18 +82,35 @@ try {
         } catch (Exception $le) {}
     }
 
-    // Resolve status: ensure it never returns empty string, syncs from lead if draft or empty
-    $validStatuses = ['Draft', 'Saved', 'Quote Sent', 'Booking Confirmed', 'Cancelled', 'Revised'];
-    $rawStatus = trim($itinerary['status'] ?? '');
-    if (empty($rawStatus) || !in_array($rawStatus, $validStatuses, true) || strcasecmp($rawStatus, 'Draft') === 0) {
-        $leadStatus = trim($linkedLead['status'] ?? '');
-        if (!empty($leadStatus) && in_array($leadStatus, $validStatuses, true) && strcasecmp($leadStatus, 'Draft') !== 0) {
-            $itinerary['status'] = $leadStatus;
-        } else {
-            $itinerary['status'] = !empty($rawStatus) && in_array($rawStatus, $validStatuses, true) ? $rawStatus : 'Draft';
+    // Resolve status: normalize case & synonyms ('Confirmed', 'Accepted', 'Converted' -> 'Booking Confirmed')
+    $normalizeStatus = function(?string $st): string {
+        $s = trim($st ?? '');
+        if (strcasecmp($s, 'Booking Confirmed') === 0 || strcasecmp($s, 'Confirmed') === 0 || strcasecmp($s, 'Accepted') === 0 || strcasecmp($s, 'Converted') === 0) {
+            return 'Booking Confirmed';
         }
+        if (strcasecmp($s, 'Quote Sent') === 0 || strcasecmp($s, 'Quoted') === 0 || strcasecmp($s, 'Sent') === 0) {
+            return 'Quote Sent';
+        }
+        if (strcasecmp($s, 'Saved') === 0) return 'Saved';
+        if (strcasecmp($s, 'Cancelled') === 0 || strcasecmp($s, 'Rejected') === 0 || strcasecmp($s, 'Dropped') === 0) return 'Cancelled';
+        if (strcasecmp($s, 'Revised') === 0) return 'Revised';
+        return 'Draft';
+    };
+
+    $rawStatus = trim($itinerary['status'] ?? '');
+    $leadStatus = trim($linkedLead['status'] ?? '');
+
+    $normItinStatus = $normalizeStatus($rawStatus);
+    $normLeadStatus = $normalizeStatus($leadStatus);
+
+    if ($normItinStatus === 'Booking Confirmed' || $normLeadStatus === 'Booking Confirmed') {
+        $itinerary['status'] = 'Booking Confirmed';
+    } elseif ($normItinStatus !== 'Draft') {
+        $itinerary['status'] = $normItinStatus;
+    } elseif ($normLeadStatus !== 'Draft') {
+        $itinerary['status'] = $normLeadStatus;
     } else {
-        $itinerary['status'] = $rawStatus;
+        $itinerary['status'] = 'Draft';
     }
 
     // 2. Fetch days

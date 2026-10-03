@@ -3832,7 +3832,9 @@ export default function ItineraryBuilder({
       final_cost: finalCost,
       cost_per_person: finalCost / (composerAdults + composerChildren || 1),
       notes: itinerary?.notes || '',
-      status: itinerary?.status || 'Draft',
+      status: (itinerary?.status === 'Confirmed' || itinerary?.status === 'Booking Confirmed' || activeLead?.status === 'Booking Confirmed')
+        ? 'Booking Confirmed'
+        : (itinerary?.status || 'Draft'),
       days: mappedDays
     };
   };
@@ -4993,10 +4995,14 @@ export default function ItineraryBuilder({
             <div className="flex items-center gap-1.5 bg-[#0B1026] border border-[#C9A25A]/30 rounded-lg px-2 h-7 shrink-0">
               <span className="text-[10px] text-[#C9A25A] font-extrabold uppercase tracking-wider">Status:</span>
               <select
-                value={itinerary?.status || 'Draft'}
+                value={
+                  (itinerary?.status === 'Booking Confirmed' || itinerary?.status === 'Confirmed')
+                    ? 'Booking Confirmed'
+                    : (itinerary?.status || 'Draft')
+                }
                 onChange={(e) => handleStatusSelect(e.target.value)}
                 className={`text-xs font-black uppercase bg-transparent cursor-pointer outline-none border-none pr-1 ${
-                  itinerary?.status === 'Booking Confirmed'
+                  (itinerary?.status === 'Booking Confirmed' || itinerary?.status === 'Confirmed')
                     ? 'text-emerald-400'
                     : itinerary?.status === 'Quote Sent'
                     ? 'text-amber-400'

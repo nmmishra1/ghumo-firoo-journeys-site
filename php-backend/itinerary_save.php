@@ -316,8 +316,31 @@ $finalCost = (float)($data['final_cost'] ?? 0);
 $costPerPerson = (float)($data['cost_per_person'] ?? 0);
 $notes = $data['notes'] ?? null;
 $rawStatus = trim($data['status'] ?? '');
-$validStatuses = ['Draft', 'Saved', 'Quote Sent', 'Booking Confirmed', 'Cancelled', 'Revised'];
-$status = in_array($rawStatus, $validStatuses, true) ? $rawStatus : 'Draft';
+if (strcasecmp($rawStatus, 'Booking Confirmed') === 0 || strcasecmp($rawStatus, 'Confirmed') === 0 || strcasecmp($rawStatus, 'Accepted') === 0 || strcasecmp($rawStatus, 'Converted') === 0) {
+    $status = 'Booking Confirmed';
+} elseif (strcasecmp($rawStatus, 'Quote Sent') === 0 || strcasecmp($rawStatus, 'Quoted') === 0 || strcasecmp($rawStatus, 'Sent') === 0) {
+    $status = 'Quote Sent';
+} elseif (strcasecmp($rawStatus, 'Saved') === 0) {
+    $status = 'Saved';
+} elseif (strcasecmp($rawStatus, 'Cancelled') === 0 || strcasecmp($rawStatus, 'Rejected') === 0 || strcasecmp($rawStatus, 'Dropped') === 0) {
+    $status = 'Cancelled';
+} elseif (strcasecmp($rawStatus, 'Revised') === 0) {
+    $status = 'Revised';
+} else {
+    // If incoming status is Draft or empty, check if this lead or itinerary is already confirmed in DB so we never accidentally overwrite it to Draft
+    $existingConfirmed = false;
+    if ($leadId) {
+        try {
+            $lCheck = $pdo->prepare("SELECT status FROM leads WHERE id = ? LIMIT 1");
+            $lCheck->execute([$leadId]);
+            $lSt = $lCheck->fetchColumn();
+            if ($lSt && (strcasecmp($lSt, 'Booking Confirmed') === 0 || strcasecmp($lSt, 'Confirmed') === 0)) {
+                $existingConfirmed = true;
+            }
+        } catch (Exception $lcEx) {}
+    }
+    $status = $existingConfirmed ? 'Booking Confirmed' : 'Draft';
+}
 $days = $data['days'] ?? [];
 
 // Extract optional override reason

@@ -23,10 +23,21 @@ if (empty($id) && empty($leadId)) {
     exit;
 }
 
-$validStatuses = ['Draft', 'Saved', 'Quote Sent', 'Booking Confirmed', 'Cancelled', 'Revised'];
-if (!in_array($status, $validStatuses, true)) {
+if (strcasecmp($status, 'Booking Confirmed') === 0 || strcasecmp($status, 'Confirmed') === 0 || strcasecmp($status, 'Accepted') === 0 || strcasecmp($status, 'Converted') === 0) {
+    $status = 'Booking Confirmed';
+} elseif (strcasecmp($status, 'Quote Sent') === 0 || strcasecmp($status, 'Quoted') === 0 || strcasecmp($status, 'Sent') === 0) {
+    $status = 'Quote Sent';
+} elseif (strcasecmp($status, 'Saved') === 0) {
+    $status = 'Saved';
+} elseif (strcasecmp($status, 'Cancelled') === 0 || strcasecmp($status, 'Rejected') === 0 || strcasecmp($status, 'Dropped') === 0) {
+    $status = 'Cancelled';
+} elseif (strcasecmp($status, 'Revised') === 0) {
+    $status = 'Revised';
+} elseif (strcasecmp($status, 'Draft') === 0) {
+    $status = 'Draft';
+} else {
     http_response_code(400);
-    echo json_encode(['error' => 'Invalid status provided. Allowed: ' . implode(', ', $validStatuses)]);
+    echo json_encode(['error' => 'Invalid status provided. Allowed: Draft, Saved, Quote Sent, Booking Confirmed, Cancelled, Revised']);
     exit;
 }
 
