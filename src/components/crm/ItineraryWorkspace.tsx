@@ -557,14 +557,37 @@ export const ItineraryWorkspace: React.FC<ItineraryWorkspaceProps> = ({ leads, o
                     <div key={item.id} className="grid grid-cols-12 gap-3 p-4 items-center hover:bg-slate-50/80 dark:hover:bg-slate-900/50 transition-all text-xs border-b border-border/10">
                       {/* Code & Client */}
                       <div className="col-span-3 space-y-1">
-                        <div className="flex items-center gap-1.5">
+                        <div className="flex items-center gap-1.5 flex-wrap">
                           <span className="font-mono font-extrabold text-amber-600 dark:text-amber-400 text-xs bg-amber-500/10 px-2 py-0.5 rounded-md border border-amber-500/20">
                             {item.itinerary_code || `ITN-${item.id}`}
                           </span>
+                          {item.lead_id ? (
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                onNavigateLead(String(item.lead_id));
+                              }}
+                              className="inline-flex items-center gap-1 font-mono font-black text-[11px] bg-indigo-500/15 text-indigo-700 dark:text-indigo-300 border border-indigo-500/30 px-2 py-0.5 rounded-md hover:bg-indigo-500/25 transition-all cursor-pointer shadow-2xs"
+                              title={`Open Lead Profile #${item.lead_id}`}
+                            >
+                              <Users className="w-3 h-3 text-indigo-500" />
+                              Lead #{item.lead_id}
+                            </button>
+                          ) : (
+                            <span className="text-[10px] text-slate-400 font-medium italic">No Lead Linked</span>
+                          )}
                         </div>
-                        <p className="font-extrabold text-slate-950 dark:text-white text-xs uppercase tracking-wide truncate">
-                          {clientInfo.name}
-                        </p>
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          <p className="font-extrabold text-slate-950 dark:text-white text-xs uppercase tracking-wide truncate">
+                            {clientInfo.name}
+                          </p>
+                          {item.is_client_selected && (
+                            <span className="text-[10px] font-black bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border border-emerald-500/40 px-1.5 py-0.2 rounded-sm flex items-center gap-0.5">
+                              <CheckCircle2 className="w-2.5 h-2.5 text-emerald-500" /> Confirmed
+                            </span>
+                          )}
+                        </div>
                         <p className="text-xs text-slate-600 dark:text-slate-400 font-mono truncate">
                           {clientInfo.email ? clientInfo.email : (clientInfo.phone ? clientInfo.phone : 'No contact registered')}
                         </p>
@@ -626,27 +649,36 @@ export const ItineraryWorkspace: React.FC<ItineraryWorkspaceProps> = ({ leads, o
                       </div>
 
                       {/* Actions */}
-                      <div className="col-span-2 text-right flex justify-end gap-1.5">
+                      <div className="col-span-2 text-right flex justify-end gap-1.5 flex-wrap">
                         {item.lead_id && (
-                          <>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => navigate('/crm/quotes')}
-                              className="border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 font-bold text-xs h-8 rounded-lg px-2.5"
-                              title="View Commercial Quotes & Proposals"
-                            >
-                              <FileText className="w-3.5 h-3.5 mr-1 text-[#C9A25A]" /> Quotes
-                            </Button>
-                            <Button
-                              size="sm"
-                              onClick={() => onNavigateLead(String(item.lead_id), 'itinerary')}
-                              className="bg-amber-500 hover:bg-amber-600 text-slate-950 font-extrabold text-xs h-8 rounded-lg px-3 shadow-xs"
-                              title="Open Itinerary Builder"
-                            >
-                              <Edit className="w-3.5 h-3.5 mr-1" /> Edit
-                            </Button>
-                          </>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => onNavigateLead(String(item.lead_id))}
+                            className="border-indigo-300 dark:border-indigo-800 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-50 dark:hover:bg-indigo-950/50 font-bold text-xs h-8 rounded-lg px-2"
+                            title={`Open Lead Profile #${item.lead_id}`}
+                          >
+                            <Users className="w-3.5 h-3.5 mr-1 text-indigo-500" /> Lead #{item.lead_id}
+                          </Button>
+                        )}
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => navigate('/crm/quotes')}
+                          className="border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 font-bold text-xs h-8 rounded-lg px-2.5"
+                          title="View Commercial Quotes & Proposals"
+                        >
+                          <FileText className="w-3.5 h-3.5 mr-1 text-[#C9A25A]" /> Quotes
+                        </Button>
+                        {item.lead_id && (
+                          <Button
+                            size="sm"
+                            onClick={() => onNavigateLead(String(item.lead_id), 'itinerary')}
+                            className="bg-amber-500 hover:bg-amber-600 text-slate-950 font-extrabold text-xs h-8 rounded-lg px-3 shadow-xs"
+                            title="Open Itinerary Builder"
+                          >
+                            <Edit className="w-3.5 h-3.5 mr-1" /> Edit
+                          </Button>
                         )}
                       </div>
                     </div>
@@ -701,7 +733,20 @@ export const ItineraryWorkspace: React.FC<ItineraryWorkspaceProps> = ({ leads, o
                           {custName.charAt(0) || 'L'}
                         </div>
                         <div className="min-w-0">
-                          <p className="font-extrabold text-slate-950 dark:text-white uppercase tracking-wide truncate text-xs">{custName}</p>
+                          <div className="flex items-center gap-1.5 flex-wrap">
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                onNavigateLead(l.id);
+                              }}
+                              className="font-mono font-black text-[11px] bg-indigo-500/15 text-indigo-700 dark:text-indigo-300 border border-indigo-500/30 px-1.5 py-0.2 rounded hover:bg-indigo-500/25 transition-colors cursor-pointer"
+                              title={`Open Lead Profile #${l.id}`}
+                            >
+                              #GF-{l.id}
+                            </button>
+                            <p className="font-extrabold text-slate-950 dark:text-white uppercase tracking-wide truncate text-xs">{custName}</p>
+                          </div>
                           <p className="text-xs text-slate-600 dark:text-slate-400 font-mono truncate">{custEmail || 'No email'} • {custPhone || 'No phone'}</p>
                         </div>
                       </div>
@@ -728,7 +773,16 @@ export const ItineraryWorkspace: React.FC<ItineraryWorkspaceProps> = ({ leads, o
                       </Badge>
                     </div>
 
-                    <div className="col-span-3 text-right flex justify-end gap-1.5">
+                    <div className="col-span-3 text-right flex justify-end gap-1.5 flex-wrap">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => onNavigateLead(l.id)}
+                        className="border-indigo-300 dark:border-indigo-800 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-50 dark:hover:bg-indigo-950/50 font-bold text-xs h-8 rounded-lg px-2"
+                        title="View Lead Profile"
+                      >
+                        <Users className="w-3.5 h-3.5 mr-1 text-indigo-500" /> Lead #{l.id}
+                      </Button>
                       <Button
                         variant="outline"
                         size="sm"

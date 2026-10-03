@@ -368,6 +368,7 @@ const CRM = () => {
   // Lead Deletion States
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [leadToDelete, setLeadToDelete] = useState<{ id: string; name: string } | null>(null);
+  const [confirmedBlockedModal, setConfirmedBlockedModal] = useState<{ id: string | number; name: string } | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [showDeletedLeads, setShowDeletedLeads] = useState(false);
   const leadsLoadedRef = useRef(false);
@@ -1384,19 +1385,17 @@ const CRM = () => {
     // Find the full lead object to check its status
     const leadObj = leads.find(l => l.id === leadToDelete.id);
     
-    const isUserAdmin = isAdminRole(userProfile?.role);
-    if (leadObj && !isUserAdmin) {
-      if (leadObj.status === 'Booking Confirmed') {
-        toast({
-          title: "Deletion Restricted",
-          description: "Confirmed booking leads can only be deleted or archived by an Administrator.",
-          variant: "destructive"
-        });
+    if (leadObj) {
+      const isConfirmed = leadObj.status === 'Booking Confirmed' || leadObj.status === 'Voucher Issued' || leadObj.status === 'Booked (Advance Pending)' || Number(leadObj.total_paid_amount || 0) > 0;
+      if (isConfirmed) {
+        setConfirmedBlockedModal({ id: leadObj.id, name: leadObj.customer_name });
         setDeleteModalOpen(false);
         setLeadToDelete(null);
         return;
       }
     }
+
+    const isUserAdmin = isAdminRole(userProfile?.role);
 
     setIsDeleting(true);
     try {
@@ -4926,18 +4925,35 @@ Please let us know if you need any customizations. Looking forward to hosting yo
                                     >
                                       <Clock className="w-3.5 h-3.5" />
                                     </button>
-                                    <button 
-                                      type="button" 
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        setLeadToDelete({ id: l.id, name: l.customer_name });
-                                        setDeleteModalOpen(true);
-                                      }}
-                                      className="w-7 h-7 rounded-lg border-none cursor-pointer flex items-center justify-center bg-rose-500/10 text-rose-600 dark:text-rose-400 hover:bg-rose-500/25 transition-colors"
-                                      title="Delete Lead"
-                                    >
-                                      <Trash2 className="w-3.5 h-3.5" />
-                                    </button>
+                                    {(() => {
+                                      const isRowConfirmed = l.status === 'Booking Confirmed' || l.status === 'Voucher Issued' || l.status === 'Booked (Advance Pending)' || Number(l.total_paid_amount || 0) > 0;
+                                      return (
+                                        <button 
+                                          type="button" 
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            if (isRowConfirmed) {
+                                              setConfirmedBlockedModal({ id: l.id, name: l.customer_name || 'Customer' });
+                                              return;
+                                            }
+                                            setLeadToDelete({ id: l.id, name: l.customer_name });
+                                            setDeleteModalOpen(true);
+                                          }}
+                                          className={`w-7 h-7 rounded-lg border-none cursor-pointer flex items-center justify-center transition-colors ${
+                                            isRowConfirmed 
+                                              ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400 hover:bg-amber-500/25' 
+                                              : 'bg-rose-500/10 text-rose-600 dark:text-rose-400 hover:bg-rose-500/25'
+                                          }`}
+                                          title={isRowConfirmed ? "Confirmed Booking Locked: Cannot be deleted" : "Delete Lead"}
+                                        >
+                                          {isRowConfirmed ? (
+                                            <ShieldAlert className="w-3.5 h-3.5 text-amber-500" />
+                                          ) : (
+                                            <Trash2 className="w-3.5 h-3.5" />
+                                          )}
+                                        </button>
+                                      );
+                                    })()}
                                   </div>
                                   {/* Initial remarks / notes preview */}
                                   {(l.remarks || l.notes || l.discussion_notes) && (
@@ -5425,7 +5441,7 @@ Ghumo Firoo Travels`
               {/* Right Panel: flex-1 */}
               <div className="flex-1 flex flex-col min-w-0 bg-background">
                 {/* Top bar */}
-                <div className="border-b border-border bg-slate-50/50 py-2 px-3 flex justify-between items-center h-[52px]">
+                <div className="border-b border-border bg-slate-50/80 dark:bg-slate-900/60 py-2.5 px-4 flex flex-col md:flex-row md:items-center justify-between gap-3 min-h-[56px]">
                   {showPackagesPanel ? (
                     <>
                       <span className="text-[13px] font-bold text-foreground flex items-center gap-1.5">
@@ -5452,9 +5468,9 @@ Ghumo Firoo Travels`
                     </>
                   ) : (
                     <>
-                      {/* Lead Ref & Quote Identifier */}
+                      {/* Left side: Lead Reference, Quote Reference & Live Status Dropdown */}
                       <div className="flex items-center gap-2 flex-wrap">
-                        <span className="text-xs font-mono font-bold px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700">
+                        <span className="text-xs font-mono font-black px-2.5 py-1 rounded-lg bg-slate-200/80 dark:bg-slate-800 text-slate-800 dark:text-slate-200 border border-slate-300 dark:border-slate-700">
                           {formatLeadId(activeLead)}
                         </span>
                         {(() => {
@@ -5462,27 +5478,52 @@ Ghumo Firoo Travels`
                           const quoteRef = `GFQ-${destCode}-${String(activeLead.id).padStart(4, '0')}`;
                           return (
                             <span 
-                              className="text-[11px] font-mono font-bold px-2.5 py-1 rounded-lg bg-amber-500/15 text-amber-800 dark:text-amber-300 border border-amber-500/30 flex items-center gap-1.5"
+                              className="text-[11px] font-mono font-bold px-2.5 py-1 rounded-lg bg-amber-500/15 text-amber-800 dark:text-amber-300 border border-amber-500/30 flex items-center gap-1"
                               title="Official Quotation Reference"
                             >
                               📄 {quoteRef}
                             </span>
                           );
                         })()}
+
+                        {/* Styled Status Dropdown */}
+                        <div className="relative inline-flex items-center">
+                          <select 
+                            value={activeLead.status} 
+                            onChange={(e) => handleStatusChange(e.target.value as Lead['status'])}
+                            className={`h-8 rounded-lg pl-3 pr-7 text-xs font-black uppercase border cursor-pointer appearance-none outline-none transition-colors ${
+                              activeLead.status === 'Booking Confirmed' || activeLead.status === 'Voucher Issued'
+                                ? 'bg-emerald-500/20 text-emerald-800 dark:text-emerald-300 border-emerald-500/50 shadow-2xs'
+                                : activeLead.status === 'Quote Sent'
+                                ? 'bg-amber-500/20 text-amber-800 dark:text-amber-300 border-amber-500/50'
+                                : activeLead.status === 'Closed Lost'
+                                ? 'bg-rose-500/20 text-rose-800 dark:text-rose-300 border-rose-500/50'
+                                : 'bg-background text-slate-800 dark:text-slate-200 border-slate-300 dark:border-slate-700'
+                            }`}
+                            title="Click to update lead status"
+                          >
+                            {['New', 'Assigned', 'Follow-up Due', 'Quote Sent', 'Booked (Advance Pending)', 'Booking Confirmed', 'Voucher Issued', 'Closed Lost'].map(st => (
+                              <option key={st} value={st} className="bg-background text-foreground font-semibold">{st}</option>
+                            ))}
+                          </select>
+                          <ChevronDown className="w-3.5 h-3.5 absolute right-2 pointer-events-none opacity-60 text-current" />
+                        </div>
+
+                        {/* Advance Received Badge */}
                         {(Number(activeLead.total_paid_amount || 0) > 0 || (mockPayments && mockPayments.length > 0)) && (
-                          <span className="text-[10.5px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 flex items-center gap-1">
-                            <CheckCircle2 className="w-3 h-3 text-emerald-500" /> Advance Received
+                          <span className="text-[11px] font-black px-2.5 py-1 rounded-lg bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30 flex items-center gap-1">
+                            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" /> Advance Received
                           </span>
                         )}
                       </div>
 
-                      {/* Right action toolbar */}
+                      {/* Right side: Action toolbar */}
                       <div className="flex gap-2 items-center flex-wrap">
                         {/* 1. Primary Action: Itinerary Builder */}
                         <Button 
                           size="sm" 
                           onClick={() => navigate(`/crm/leads/${activeLead.id}/itinerary`)}
-                          className="h-8 bg-gradient-to-r from-[#C9A25A] to-[#D4AF37] hover:opacity-90 text-[#0B1026] text-xs font-black shadow-xs rounded-lg px-3 flex items-center gap-1.5"
+                          className="h-8 bg-gradient-to-r from-[#C9A25A] to-[#D4AF37] hover:opacity-90 text-[#0B1026] text-xs font-black shadow-xs rounded-lg px-3 flex items-center gap-1.5 cursor-pointer"
                           title="Open Itinerary Builder & Proposals for this Lead"
                         >
                           <Map className="w-3.5 h-3.5 text-[#0B1026]" /> Itinerary Builder
@@ -5506,7 +5547,7 @@ Ghumo Firoo Travels`
                             setAdvancePaymentRef('');
                             setAdvanceModalOpen(true);
                           }}
-                          className="h-8 text-xs font-bold border-amber-500/40 text-amber-600 dark:text-amber-400 hover:bg-amber-500/10 rounded-lg px-3"
+                          className="h-8 text-xs font-bold border-amber-500/40 text-amber-600 dark:text-amber-400 hover:bg-amber-500/10 rounded-lg px-3 cursor-pointer"
                           title="Record Advance or Progress Payment"
                         >
                           <IndianRupee className="w-3.5 h-3.5 mr-1" /> Record Payment
@@ -5544,7 +5585,7 @@ Please let us know if you need any customizations. Looking forward to hosting yo
                               handleStatusChange('Quote Sent');
                             }
                           }}
-                          className="h-8 text-xs font-bold border-emerald-500/40 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/10 rounded-lg px-3"
+                          className="h-8 text-xs font-bold border-emerald-500/40 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/10 rounded-lg px-3 cursor-pointer"
                           title="Send official quotation via WhatsApp"
                         >
                           <Share2 className="w-3.5 h-3.5 mr-1" /> WhatsApp Quote
@@ -5555,44 +5596,46 @@ Please let us know if you need any customizations. Looking forward to hosting yo
                           variant="outline" 
                           size="sm" 
                           onClick={() => setShowPackagesPanel(!showPackagesPanel)}
-                          className={`h-8 text-xs font-semibold rounded-lg px-2.5 ${showPackagesPanel ? 'bg-amber-500/15 border-amber-500/40 text-amber-600' : 'border-slate-200'}`}
+                          className={`h-8 text-xs font-semibold rounded-lg px-2.5 cursor-pointer ${showPackagesPanel ? 'bg-amber-500/15 border-amber-500/40 text-amber-600' : 'border-slate-200'}`}
                           title="Browse pre-built packages for this destination"
                         >
                           Packages
                         </Button>
 
-                        {/* 5. Delete Lead Icon */}
-                        <Button 
-                          variant="outline"
-                          size="sm" 
-                          onClick={() => {
-                            setLeadToDelete({ id: activeLead.id, name: activeLead.customer_name });
-                            setDeleteModalOpen(true);
-                          }}
-                          className="h-8 w-8 p-0 text-xs font-bold border-rose-500/30 text-rose-500 hover:bg-rose-500/10 rounded-lg cursor-pointer"
-                          title="Delete this Lead"
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </Button>
-
-                        {/* 6. Styled Status Dropdown */}
-                        <select 
-                          value={activeLead.status} 
-                          onChange={(e) => handleStatusChange(e.target.value as Lead['status'])}
-                          className={`h-8 rounded-lg px-2.5 text-xs font-bold border cursor-pointer focus:outline-none transition-colors ${
-                            activeLead.status === 'Booking Confirmed' || activeLead.status === 'Voucher Issued'
-                              ? 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border-emerald-500/40'
-                              : activeLead.status === 'Quote Sent'
-                              ? 'bg-amber-500/15 text-amber-800 dark:text-amber-300 border-amber-500/40'
-                              : activeLead.status === 'Closed Lost'
-                              ? 'bg-rose-500/15 text-rose-700 dark:text-rose-300 border-rose-500/40'
-                              : 'bg-background text-slate-700 dark:text-slate-300 border-slate-300 dark:border-slate-700'
-                          }`}
-                        >
-                          {['New', 'Assigned', 'Follow-up Due', 'Quote Sent', 'Booked (Advance Pending)', 'Booking Confirmed', 'Voucher Issued', 'Closed Lost'].map(st => (
-                            <option key={st} value={st} className="bg-background text-foreground font-semibold">{st}</option>
-                          ))}
-                        </select>
+                        {/* 5. Delete or Protected Indicator */}
+                        {(() => {
+                          const isConfirmed = activeLead.status === 'Booking Confirmed' || activeLead.status === 'Voucher Issued' || activeLead.status === 'Booked (Advance Pending)' || Number(activeLead.total_paid_amount || 0) > 0;
+                          if (isConfirmed) {
+                            return (
+                              <Button 
+                                variant="outline"
+                                size="sm" 
+                                onClick={() => {
+                                  setConfirmedBlockedModal({ id: activeLead.id, name: activeLead.customer_name });
+                                }}
+                                className="h-8 px-2 text-xs font-bold border-slate-300 dark:border-slate-700 text-slate-500 dark:text-slate-400 bg-slate-100/80 dark:bg-slate-800/80 rounded-lg cursor-pointer flex items-center gap-1"
+                                title="Confirmed Booking Locked: Cannot be deleted"
+                              >
+                                <ShieldAlert className="w-3.5 h-3.5 text-amber-500" />
+                                <span className="text-[11px] font-semibold text-slate-600 dark:text-slate-300">Protected</span>
+                              </Button>
+                            );
+                          }
+                          return (
+                            <Button 
+                              variant="outline"
+                              size="sm" 
+                              onClick={() => {
+                                setLeadToDelete({ id: activeLead.id, name: activeLead.customer_name });
+                                setDeleteModalOpen(true);
+                              }}
+                              className="h-8 w-8 p-0 text-xs font-bold border-rose-500/30 text-rose-500 hover:bg-rose-500/10 rounded-lg cursor-pointer"
+                              title="Delete this Lead"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </Button>
+                          );
+                        })()}
                       </div>
                     </>
                   )}
@@ -7092,6 +7135,37 @@ Please let us know if you need any customizations. Looking forward to hosting yo
           isDeleting={isDeleting}
         />
       )}
+
+      {/* CONFIRMED BOOKING PROTECTED MODAL */}
+      <Dialog open={!!confirmedBlockedModal} onOpenChange={(open) => !open && setConfirmedBlockedModal(null)}>
+        <DialogContent className="sm:max-w-[460px] bg-slate-900 border border-amber-500/40 text-white font-poppins rounded-2xl shadow-2xl">
+          <DialogHeader>
+            <div className="w-12 h-12 rounded-2xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-amber-400 mb-2">
+              <ShieldAlert className="w-6 h-6 text-amber-500" />
+            </div>
+            <DialogTitle className="text-base font-black uppercase tracking-wider text-white">
+              Confirmed Booking Cannot Be Deleted
+            </DialogTitle>
+            <DialogDescription className="text-xs text-slate-300 space-y-2 pt-2 leading-relaxed">
+              <p>
+                Lead <strong className="text-white">#{confirmedBlockedModal?.id} ({confirmedBlockedModal?.name})</strong> has an active confirmed itinerary proposal or recorded payment ledger.
+              </p>
+              <div className="p-3 bg-amber-500/10 border border-amber-500/20 rounded-xl text-amber-300 text-xs font-medium">
+                🔒 Confirmed deals and customer-selected itineraries are permanently preserved to protect booking vouchers, hotel confirmations, cab vendor dispatches, and financial accounting audits.
+              </div>
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="mt-4">
+            <Button
+              type="button"
+              onClick={() => setConfirmedBlockedModal(null)}
+              className="w-full bg-amber-500 hover:bg-amber-600 text-slate-950 font-black text-xs h-10 rounded-xl cursor-pointer"
+            >
+              Understood
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* RECORD PAYMENT DIALOG */}
       <Dialog open={recordPaymentDialogOpen} onOpenChange={setRecordPaymentDialogOpen}>

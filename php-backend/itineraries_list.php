@@ -28,6 +28,15 @@ try {
     
     $itineraries = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
+    // Check accepted proposals
+    $acceptedProps = [];
+    try {
+        $pStmt = $pdo->query("SELECT id, lead_id, total_price, title FROM proposals WHERE status = 'Accepted'");
+        while ($pr = $pStmt->fetch(PDO::FETCH_ASSOC)) {
+            $acceptedProps[(int)$pr['lead_id']] = $pr;
+        }
+    } catch (Exception $pe) {}
+
     foreach ($itineraries as &$itin) {
         // Resolve package name
         $packageName = !empty($itin['itinerary_name']) ? $itin['itinerary_name'] : ($itin['package_name'] ?? 'Custom Tour Package');
@@ -81,14 +90,26 @@ try {
         $itin['travel_start_date'] = $start;
         $itin['travel_end_date'] = $end;
 
-        // Resolve status: prioritize explicit itinerary status, fallback to linked lead status
+        // Resolve status: Only mark as 'Booking Confirmed' if THIS specific itinerary is confirmed or matches the customer-accepted proposal
         $rawStatus = !empty($itin['status']) ? trim($itin['status']) : '';
-        if (empty($rawStatus) || strcasecmp($rawStatus, 'Draft') === 0) {
-            if (!empty($itin['lead_status']) && in_array($itin['lead_status'], ['Quote Sent', 'Booking Confirmed', 'Cancelled', 'Saved'])) {
-                $itin['status'] = $itin['lead_status'];
-            } else {
-                $itin['status'] = !empty($rawStatus) ? $rawStatus : 'Draft';
-            }
+        $leadId = !empty($itin['lead_id']) ? (int)$itin['lead_id'] : 0;
+        $hasAcceptedPropForLead = isset($acceptedProps[$leadId]);
+        $acceptedProp = $hasAcceptedPropForLead ? $acceptedProps[$leadId] : null;
+
+        $isConfirmedItin = false;
+        if (strcasecmp($rawStatus, 'Booking Confirmed') === 0 || strcasecmp($rawStatus, 'Confirmed') === 0) {
+            $isConfirmedItin = true;
+        } elseif ($hasAcceptedPropForLead && (float)($itin['final_cost'] ?? 0) > 0) {
+            $isConfirmedItin = true;
+        }
+
+        if ($isConfirmedItin) {
+            $itin['status'] = 'Booking Confirmed';
+            $itin['is_client_selected'] = true;
+        } else {
+            // Keep draft/sent status; DO NOT inherit 'Booking Confirmed' onto $0 draft proposals
+            $itin['status'] = (!empty($rawStatus) && strcasecmp($rawStatus, 'Booking Confirmed') !== 0) ? $rawStatus : 'Draft';
+            $itin['is_client_selected'] = false;
         }
 
         // Ensure itinerary code is present
