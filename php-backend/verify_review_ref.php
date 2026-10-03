@@ -65,8 +65,8 @@ try {
     // 2. Fallback to leads table if missing customer_name or itinerary not found
     if (empty($customerName) || !empty($leadId)) {
         $searchLeadId = $leadId ?: $ref;
-        $lStmt = $pdo->prepare("SELECT * FROM leads WHERE id = ? OR enquiry_number = ? OR lead_id = ? LIMIT 1");
-        $lStmt->execute([$searchLeadId, $searchLeadId, $searchLeadId]);
+        $lStmt = $pdo->prepare("SELECT * FROM leads WHERE id = ? LIMIT 1");
+        $lStmt->execute([$searchLeadId]);
         $lead = $lStmt->fetch(PDO::FETCH_ASSOC);
 
         if ($lead) {
