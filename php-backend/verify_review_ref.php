@@ -113,34 +113,73 @@ try {
         }
     }
 
-    if (!empty($customerName) || $iti) {
-        echo json_encode([
-            'success' => true,
-            'is_valid' => true,
-            'id' => $iti['id'] ?? $ref,
-            'lead_id' => $leadId ?: $ref,
-            'customer_name' => $customerName ?: 'Valued Traveler',
-            'itinerary_name' => $packageName ?: "Booking Ref #".strtoupper(substr($ref, 0, 8)),
-            'destinations' => !empty($destinations) ? array_values(array_unique($destinations)) : ['India Tour'],
-            'travel_start_date' => $startDate ?: date('Y-m-d'),
-            'travel_end_date' => $endDate ?: date('Y-m-d'),
-            'package_type' => 'domestic'
-        ]);
-    } else {
-        // Fallback for valid format references
-        echo json_encode([
-            'success' => true,
-            'is_valid' => true,
-            'id' => $ref,
-            'lead_id' => $ref,
-            'customer_name' => 'Valued Traveler',
-            'itinerary_name' => "Booking Ref #".strtoupper(substr($ref, 0, 8)),
-            'destinations' => ['Ghumo Firoo Journey'],
-            'travel_start_date' => date('Y-m-d'),
-            'travel_end_date' => date('Y-m-d'),
-            'package_type' => 'domestic'
-        ]);
+    // 3. Check if a review has already been submitted for this itinerary / booking / lead
+    $existingReview = null;
+    try {
+        $itiId = $iti['id'] ?? $ref;
+        $revSql = "SELECT * FROM reviews WHERE booking_id = ? OR booking_id = ?";
+        $revParams = [$itiId, $ref];
+
+        if (!empty($leadId)) {
+            $revSql .= " OR lead_id = ?";
+            $revParams[] = $leadId;
+        }
+        if (!empty($cleanSuffix) && strlen($cleanSuffix) >= 4) {
+            $revSql .= " OR LOWER(REPLACE(booking_id, '-', '')) LIKE ? OR LOWER(booking_id) LIKE ?";
+            $revParams[] = strtolower($cleanSuffix) . '%';
+            $revParams[] = strtolower($cleanSuffix) . '%';
+        }
+        $revSql .= " ORDER BY created_at DESC LIMIT 1";
+
+        $revStmt = $pdo->prepare($revSql);
+        $revStmt->execute($revParams);
+        $existingReview = $revStmt->fetch(PDO::FETCH_ASSOC);
+
+        if ($existingReview) {
+            $existingReview['rating'] = (int)$existingReview['rating'];
+            $existingReview['hotel_rating'] = $existingReview['hotel_rating'] !== null ? (int)$existingReview['hotel_rating'] : null;
+            $existingReview['cab_rating'] = $existingReview['cab_rating'] !== null ? (int)$existingReview['cab_rating'] : null;
+            $existingReview['sightseeing_rating'] = $existingReview['sightseeing_rating'] !== null ? (int)$existingReview['sightseeing_rating'] : null;
+            $existingReview['trip_planning_rating'] = $existingReview['trip_planning_rating'] !== null ? (int)$existingReview['trip_planning_rating'] : null;
+            $existingReview['verified'] = $existingReview['verified'] !== null ? (bool)$existingReview['verified'] : true;
+            $existingReview['featured'] = $existingReview['featured'] !== null ? (bool)$existingReview['featured'] : false;
+
+            if (isset($existingReview['photos'])) {
+                if (is_string($existingReview['photos']) && (str_starts_with(trim($existingReview['photos']), '[') || str_starts_with(trim($existingReview['photos']), '{'))) {
+                    $existingReview['photos'] = json_decode($existingReview['photos'], true) ?: [];
+                } else if (!is_array($existingReview['photos'])) {
+                    $existingReview['photos'] = !empty($existingReview['photos']) ? [$existingReview['photos']] : [];
+                }
+            } else {
+                $existingReview['photos'] = [];
+            }
+        }
+    } catch (Throwable $eRev) {
+        // Table or query issue gracefully handled
     }
+
+    $finalId = $iti['id'] ?? $ref;
+    $finalLeadId = $leadId ?: $ref;
+    $finalCustomerName = $customerName ?: ($existingReview['customer_name'] ?? 'Valued Traveler');
+    $finalPackageName = $packageName ?: ($existingReview['package_name'] ?? "Booking Ref #".strtoupper(substr($ref, 0, 8)));
+    $finalDestinations = !empty($destinations) ? array_values(array_unique($destinations)) : [(!empty($existingReview['destination']) ? $existingReview['destination'] : 'Ghumo Firoo Journey')];
+    $finalStartDate = $startDate ?: ($existingReview['travel_date'] ?? date('Y-m-d'));
+    $finalEndDate = $endDate ?: ($existingReview['travel_date'] ?? date('Y-m-d'));
+
+    echo json_encode([
+        'success' => true,
+        'is_valid' => true,
+        'id' => $finalId,
+        'lead_id' => $finalLeadId,
+        'customer_name' => $finalCustomerName,
+        'itinerary_name' => $finalPackageName,
+        'destinations' => $finalDestinations,
+        'travel_start_date' => $finalStartDate,
+        'travel_end_date' => $finalEndDate,
+        'package_type' => 'domestic',
+        'already_reviewed' => !empty($existingReview),
+        'existing_review' => $existingReview ?: null
+    ]);
 } catch (Exception $e) {
     echo json_encode(['success' => false, 'error' => $e->getMessage()]);
 }

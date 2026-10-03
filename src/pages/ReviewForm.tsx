@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { Star, Upload, Video, Image as ImageIcon, Trash2, CheckCircle2, ChevronRight, AlertTriangle, ShieldCheck } from 'lucide-react';
+import { Star, Upload, Video, Image as ImageIcon, Trash2, CheckCircle2, ChevronRight, AlertTriangle, ShieldCheck, Clock, ExternalLink, Award } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import Layout from '@/components/Layout';
 import SEO from '@/components/SEO';
@@ -21,6 +21,24 @@ interface BookingDetails {
   travel_start_date: string;
   travel_end_date: string;
   package_type: string;
+}
+
+interface ExistingReviewDetails {
+  id: string;
+  customer_name: string;
+  rating: number;
+  hotel_rating?: number;
+  cab_rating?: number;
+  sightseeing_rating?: number;
+  trip_planning_rating?: number;
+  review_text?: string;
+  photos?: string[];
+  video_url?: string | null;
+  status: string;
+  created_at: string;
+  destination?: string;
+  package_name?: string;
+  response?: string | null;
 }
 
 const StarRatingInput: React.FC<{
@@ -95,6 +113,8 @@ export default function ReviewForm() {
   // Success states
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [showGooglePrompt, setShowGooglePrompt] = useState(false);
+  const [alreadyReviewed, setAlreadyReviewed] = useState(false);
+  const [existingReview, setExistingReview] = useState<ExistingReviewDetails | null>(null);
   
   useEffect(() => {
     async function verifyBooking() {
@@ -113,8 +133,15 @@ export default function ReviewForm() {
           const res = await fetch(`/php-backend/verify_review_ref.php?ref=${encodeURIComponent(bookingReference)}`);
           if (res.ok) {
             const data = await res.json();
-            if (data && data.success && data.is_valid && data.customer_name && data.customer_name !== 'Valued Traveler') {
+            if (data && data.success && data.is_valid) {
               verifiedData = data;
+              if (data.already_reviewed && data.existing_review) {
+                setAlreadyReviewed(true);
+                setExistingReview(data.existing_review);
+                if (Number(data.existing_review.rating) >= 4) {
+                  setShowGooglePrompt(true);
+                }
+              }
             }
           }
         } catch (phpErr) {
@@ -217,6 +244,41 @@ export default function ReviewForm() {
         }
 
         if (verifiedData) {
+          // If Tier 1 didn't flag an existing review, check /api/reviews as a secondary check
+          if (!verifiedData.already_reviewed) {
+            try {
+              const chkRes = await fetch('/api/reviews');
+              if (chkRes.ok) {
+                const chkData = await chkRes.json();
+                if (chkData && Array.isArray(chkData.reviews)) {
+                  const bId = String(verifiedData.id || bookingReference).toLowerCase();
+                  const lId = String(verifiedData.lead_id || '');
+                  const cleanRef = bookingReference.replace(/[^a-zA-Z0-9]/g, '').toLowerCase().replace(/^gfjitn/i, '');
+
+                  const found = chkData.reviews.find((r: any) => {
+                    const rBId = String(r.booking_id || '').toLowerCase();
+                    const rLId = String(r.lead_id || '');
+                    return (
+                      (rBId && rBId === bId) ||
+                      (cleanRef.length >= 4 && rBId.replace(/[^a-zA-Z0-9]/g, '').startsWith(cleanRef)) ||
+                      (lId && rLId === lId)
+                    );
+                  });
+
+                  if (found) {
+                    setAlreadyReviewed(true);
+                    setExistingReview(found);
+                    if (Number(found.rating) >= 4) {
+                      setShowGooglePrompt(true);
+                    }
+                  }
+                }
+              }
+            } catch (eRev) {
+              // Ignore background check failure
+            }
+          }
+
           const bookingData: BookingDetails = {
             id: verifiedData.id,
             lead_id: verifiedData.lead_id || '',
@@ -539,6 +601,242 @@ export default function ReviewForm() {
               </Button>
             </CardFooter>
           </Card>
+        </div>
+      </Layout>
+    );
+  }
+
+  if (alreadyReviewed && existingReview) {
+    const isApproved = String(existingReview.status).toLowerCase() === 'approved';
+    const displayPhotos = Array.isArray(existingReview.photos) ? existingReview.photos : [];
+
+    return (
+      <Layout>
+        <SEO 
+          title="Review Status | Ghumo Firoo Journeys" 
+          description="View your submitted travel review and current moderation status." 
+        />
+        <div className="py-12 bg-gradient-to-b from-slate-50 via-orange-50/20 to-slate-50 min-h-[85vh] px-4">
+          <div className="max-w-2xl mx-auto space-y-6">
+            
+            <Card className="border-0 shadow-xl bg-white/95 backdrop-blur-md rounded-2xl overflow-hidden">
+              {/* Header Status Bar */}
+              <div className={`px-6 py-4 flex justify-between items-center text-white ${
+                isApproved 
+                  ? 'bg-gradient-to-r from-emerald-600 to-teal-600' 
+                  : 'bg-gradient-to-r from-amber-500 to-orange-500'
+              }`}>
+                <div className="flex items-center gap-2 font-bold text-sm">
+                  {isApproved ? (
+                    <>
+                      <CheckCircle2 className="w-5 h-5 text-white" />
+                      <span>Review Approved & Published</span>
+                    </>
+                  ) : (
+                    <>
+                      <Clock className="w-5 h-5 text-white animate-pulse" />
+                      <span>Review Received — Under Moderation</span>
+                    </>
+                  )}
+                </div>
+                <span className="bg-white/20 text-white border border-white/20 px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1.5 backdrop-blur-sm">
+                  ✓ Verified Booking
+                </span>
+              </div>
+
+              <CardHeader className="p-6 border-b border-slate-100 bg-slate-50/50">
+                <div className="flex items-start justify-between flex-wrap gap-4">
+                  <div>
+                    <span className="text-xs uppercase font-bold tracking-wider text-slate-400">Booking Reference</span>
+                    <h2 className="text-xl font-extrabold text-slate-800">{bookingReference}</h2>
+                  </div>
+                  <div className="text-right">
+                    <span className="text-xs uppercase font-bold tracking-wider text-slate-400">Submitted On</span>
+                    <p className="text-sm font-semibold text-slate-700">
+                      {existingReview.created_at ? new Date(existingReview.created_at).toLocaleDateString('en-IN', {
+                        day: 'numeric',
+                        month: 'short',
+                        year: 'numeric'
+                      }) : 'Recent'}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="mt-4 p-3.5 bg-white rounded-xl border border-slate-200/80 flex flex-wrap gap-y-2 gap-x-6 text-sm text-slate-600">
+                  <div className="flex items-center gap-2">
+                    <span className="text-slate-400 text-xs uppercase font-semibold">Traveler:</span>
+                    <strong className="text-slate-900">{existingReview.customer_name || customerName || 'Valued Traveler'}</strong>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-slate-400 text-xs uppercase font-semibold">Package:</span>
+                    <strong className="text-slate-900">{existingReview.package_name || booking?.itinerary_name || 'Tour Package'}</strong>
+                  </div>
+                  {existingReview.destination && (
+                    <div className="flex items-center gap-2">
+                      <span className="text-slate-400 text-xs uppercase font-semibold">Destination:</span>
+                      <strong className="text-slate-900">{existingReview.destination}</strong>
+                    </div>
+                  )}
+                </div>
+              </CardHeader>
+
+              <CardContent className="p-6 space-y-6">
+                {/* Moderation message */}
+                <div className={`p-4 rounded-xl border ${
+                  isApproved
+                    ? 'bg-emerald-50/70 border-emerald-200 text-emerald-900'
+                    : 'bg-amber-50/70 border-amber-200 text-amber-900'
+                }`}>
+                  <p className="text-sm font-medium leading-relaxed">
+                    {isApproved
+                      ? 'Your review has been verified and published! It is now visible to travelers across our website.'
+                      : 'You have already submitted your review for this trip. Our team is verifying your feedback, and it will be visible on the website once approved.'}
+                  </p>
+                </div>
+
+                {/* Star Ratings Display */}
+                <div>
+                  <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3">Your Trip Rating</h3>
+                  <div className="bg-slate-50 p-5 rounded-2xl border border-slate-200">
+                    <div className="flex items-center justify-between mb-4">
+                      <div>
+                        <span className="text-xs text-slate-500 font-semibold uppercase">Overall Experience</span>
+                        <div className="flex items-center gap-2 mt-1">
+                          <div className="flex gap-1">
+                            {[1, 2, 3, 4, 5].map((star) => (
+                              <Star
+                                key={star}
+                                className={`w-6 h-6 ${
+                                  star <= Number(existingReview.rating)
+                                    ? 'text-amber-500 fill-amber-500 drop-shadow-sm'
+                                    : 'text-slate-300'
+                                }`}
+                              />
+                            ))}
+                          </div>
+                          <span className="text-lg font-extrabold text-slate-800 ml-1">
+                            {existingReview.rating} / 5
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3 pt-3 border-t border-slate-200/80 text-xs">
+                      {existingReview.hotel_rating ? (
+                        <div className="flex items-center justify-between bg-white px-3 py-2 rounded-lg border border-slate-100">
+                          <span className="text-slate-600 font-medium">Hotel:</span>
+                          <span className="font-bold text-amber-600 flex items-center gap-1">
+                            {existingReview.hotel_rating} <Star className="w-3 h-3 fill-amber-500 text-amber-500 inline" />
+                          </span>
+                        </div>
+                      ) : null}
+                      {existingReview.cab_rating ? (
+                        <div className="flex items-center justify-between bg-white px-3 py-2 rounded-lg border border-slate-100">
+                          <span className="text-slate-600 font-medium">Cab & Transport:</span>
+                          <span className="font-bold text-amber-600 flex items-center gap-1">
+                            {existingReview.cab_rating} <Star className="w-3 h-3 fill-amber-500 text-amber-500 inline" />
+                          </span>
+                        </div>
+                      ) : null}
+                      {existingReview.sightseeing_rating ? (
+                        <div className="flex items-center justify-between bg-white px-3 py-2 rounded-lg border border-slate-100">
+                          <span className="text-slate-600 font-medium">Sightseeing:</span>
+                          <span className="font-bold text-amber-600 flex items-center gap-1">
+                            {existingReview.sightseeing_rating} <Star className="w-3 h-3 fill-amber-500 text-amber-500 inline" />
+                          </span>
+                        </div>
+                      ) : null}
+                      {existingReview.trip_planning_rating ? (
+                        <div className="flex items-center justify-between bg-white px-3 py-2 rounded-lg border border-slate-100">
+                          <span className="text-slate-600 font-medium">Planning & Support:</span>
+                          <span className="font-bold text-amber-600 flex items-center gap-1">
+                            {existingReview.trip_planning_rating} <Star className="w-3 h-3 fill-amber-500 text-amber-500 inline" />
+                          </span>
+                        </div>
+                      ) : null}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Review Text */}
+                {existingReview.review_text && (
+                  <div>
+                    <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Your Feedback</h3>
+                    <div className="bg-slate-50 p-5 rounded-2xl border border-slate-200 text-slate-800 text-sm leading-relaxed italic relative">
+                      <span className="text-3xl text-slate-300 font-serif absolute top-2 left-3 leading-none">“</span>
+                      <p className="relative pl-4 whitespace-pre-wrap">{existingReview.review_text}</p>
+                    </div>
+                  </div>
+                )}
+
+                {/* Photos if any */}
+                {displayPhotos.length > 0 && (
+                  <div>
+                    <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Submitted Photos</h3>
+                    <div className="grid grid-cols-3 sm:grid-cols-4 gap-3">
+                      {displayPhotos.map((pUrl: string, pIdx: number) => (
+                        <div key={pIdx} className="aspect-square rounded-xl overflow-hidden border border-slate-200 bg-slate-100 shadow-sm">
+                          <img 
+                            src={pUrl} 
+                            alt={`Review photo ${pIdx + 1}`} 
+                            className="w-full h-full object-cover hover:scale-105 transition-transform" 
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Admin response if any */}
+                {existingReview.response && (
+                  <div className="p-4 rounded-xl bg-blue-50 border border-blue-200 text-blue-950">
+                    <div className="flex items-center gap-2 mb-1">
+                      <Award className="w-4 h-4 text-blue-600" />
+                      <span className="text-xs font-bold uppercase tracking-wider text-blue-700">Response from Ghumo Firoo</span>
+                    </div>
+                    <p className="text-sm font-medium leading-relaxed">{existingReview.response}</p>
+                  </div>
+                )}
+
+                {/* Google Review Prompt for satisfied travelers (>= 4 stars) */}
+                {Number(existingReview.rating) >= 4 && (
+                  <div className="border border-indigo-100 bg-gradient-to-br from-indigo-50/80 to-purple-50/50 rounded-2xl p-6 text-center space-y-3 shadow-sm">
+                    <div className="flex justify-center">
+                      <span className="text-3xl">✨</span>
+                    </div>
+                    <h4 className="font-extrabold text-indigo-950 text-lg">Mind sharing on Google too?</h4>
+                    <p className="text-indigo-900 text-sm max-w-md mx-auto leading-relaxed">
+                      Since you had a memorable {existingReview.rating}★ journey, it would mean the world to our team if you could post your review on our Google Business Profile. It takes just 30 seconds!
+                    </p>
+                    <Button
+                      onClick={handleGoogleReviewRedirect}
+                      className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold py-6 px-8 rounded-xl shadow-lg transition-transform hover:scale-[1.02] active:scale-95 flex items-center justify-center gap-2 mx-auto"
+                    >
+                      <Star className="w-4 h-4 fill-amber-400 text-amber-400" />
+                      Review Us On Google
+                      <ExternalLink className="w-4 h-4 ml-1" />
+                    </Button>
+                  </div>
+                )}
+              </CardContent>
+
+              <CardFooter className="bg-slate-50 p-6 border-t border-slate-100 flex flex-col sm:flex-row gap-3">
+                <Button
+                  onClick={() => navigate('/')}
+                  variant="outline"
+                  className="w-full sm:w-1/2 border-slate-200 text-slate-700 hover:bg-slate-100 rounded-xl py-5"
+                >
+                  Go to Homepage
+                </Button>
+                <Button
+                  onClick={() => navigate('/packages')}
+                  className="w-full sm:w-1/2 bg-slate-900 hover:bg-slate-800 text-white rounded-xl py-5"
+                >
+                  Explore More Journeys
+                </Button>
+              </CardFooter>
+            </Card>
+          </div>
         </div>
       </Layout>
     );

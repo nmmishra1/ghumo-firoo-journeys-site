@@ -123,6 +123,22 @@ try {
             mt_rand(0, 0xffff), mt_rand(0, 0xffff), mt_rand(0, 0xffff)
         );
 
+        $bookingId = trim($input['booking_id'] ?? '');
+        if (!empty($bookingId)) {
+            $dupStmt = $pdo->prepare("SELECT id FROM reviews WHERE booking_id = ? LIMIT 1");
+            $dupStmt->execute([$bookingId]);
+            $existing = $dupStmt->fetch(PDO::FETCH_ASSOC);
+            if ($existing) {
+                echo json_encode([
+                    'success' => true,
+                    'id' => $existing['id'],
+                    'already_exists' => true,
+                    'message' => 'Review has already been submitted for this booking.'
+                ]);
+                exit;
+            }
+        }
+
         $photos = isset($input['photos']) ? json_encode($input['photos']) : null;
         $verified = isset($input['verified']) ? (int)$input['verified'] : 1;
         $featured = isset($input['featured']) ? (int)$input['featured'] : 0;
