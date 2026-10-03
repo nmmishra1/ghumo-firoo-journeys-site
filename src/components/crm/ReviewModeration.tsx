@@ -482,19 +482,43 @@ export default function ReviewModeration() {
 
                         {/* High Rating Google Business Prompt Callout */}
                         {review.rating >= 4 && (
-                          <div className="bg-emerald-500/10 border border-emerald-500/30 p-2.5 rounded-xl text-xs text-emerald-300 flex items-center justify-between">
-                            <span className="font-semibold">🌟 High Rating ({review.rating} Stars)! Invite to post on Google Business Profile:</span>
-                            <Button 
-                              size="sm" 
-                              variant="ghost" 
-                              onClick={() => {
-                                const gUrl = "https://search.google.com/local/writereview?placeid=YOUR_PLACE_ID";
-                                window.open(gUrl, '_blank');
-                              }}
-                              className="h-7 text-[10px] font-bold bg-emerald-500/20 text-emerald-300 hover:bg-emerald-500/30 rounded-lg border border-emerald-500/40"
-                            >
-                              Google Review Link ↗
-                            </Button>
+                          <div className="bg-emerald-500/10 border border-emerald-500/30 p-2.5 rounded-xl text-xs text-emerald-300 flex items-center justify-between flex-wrap gap-2">
+                            <span className="font-semibold flex items-center gap-1.5">
+                              🌟 High Rating ({review.rating} Stars)! Invite to post on Google Business Profile:
+                            </span>
+                            <div className="flex items-center gap-2">
+                              <Button 
+                                size="sm" 
+                                variant="ghost" 
+                                onClick={() => {
+                                  const gUrl = "https://search.google.com/local/writereview?placeid=ChIJmRCMB27iDDkR0UyN2wppQYQ";
+                                  navigator.clipboard.writeText(gUrl);
+                                  toast({
+                                    title: "Link Copied!",
+                                    description: "Google Review link copied to clipboard."
+                                  });
+                                }}
+                                className="h-7 text-[10px] font-bold bg-white/10 text-emerald-200 hover:bg-white/20 rounded-lg border border-white/20 flex items-center gap-1"
+                                title="Copy direct Google review link"
+                              >
+                                <Copy className="w-3 h-3" />
+                                Copy Link
+                              </Button>
+
+                              <Button 
+                                size="sm" 
+                                variant="ghost" 
+                                onClick={() => {
+                                  const gUrl = "https://search.google.com/local/writereview?placeid=ChIJmRCMB27iDDkR0UyN2wppQYQ";
+                                  window.open(gUrl, '_blank');
+                                }}
+                                className="h-7 text-[10px] font-bold bg-emerald-500/20 text-emerald-300 hover:bg-emerald-500/30 rounded-lg border border-emerald-500/40 flex items-center gap-1"
+                                title="Open Google Review dialog in new tab"
+                              >
+                                <ExternalLink className="w-3 h-3" />
+                                Open Review ↗
+                              </Button>
+                            </div>
                           </div>
                         )}
 

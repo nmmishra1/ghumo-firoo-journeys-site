@@ -501,7 +501,7 @@ export default function ReviewForm() {
   const handleGoogleReviewRedirect = () => {
     // Save flag to localStorage to prevent bothering them again
     localStorage.setItem(`reviewed_on_google_for_${bookingReference}`, 'true');
-    window.open("https://www.google.com/search?sca_esv=b1da9f5fcde7e62b&sxsrf=AE3TifNvmzZRf8MinhdUHTEow3hk3Q48Ow:1762272258593&kgmid=/g/11g02b2j1t&q=Ghumo+Firoo+Travels&shndl=30&shem=lcuae,uaasie,shrtsdl&source=sh/x/loc/uni/m1/1&kgs=0a956e5fbc9e4460&utm_source=lcuae,uaasie,shrtsdl,sh/x/loc/uni/m1/1", "_blank");
+    window.open("https://search.google.com/local/writereview?placeid=ChIJmRCMB27iDDkR0UyN2wppQYQ", "_blank");
     navigate('/');
   };
   
