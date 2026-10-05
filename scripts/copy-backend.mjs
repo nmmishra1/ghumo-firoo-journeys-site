@@ -14,12 +14,14 @@ console.log(`📦 Copying PHP backend to dist/php-backend and dist/public_html/p
   }
 });
 
-// Copy recursively to both locations, filtering out sensitive files
+// Copy recursively to both locations, filtering out sensitive and test/diagnostic files
 const copyFilter = (src) => {
   const base = path.basename(src).toLowerCase();
   if (base.startsWith('.env') || base.includes('.env')) return false;
   if (base.includes('backup') || base.endsWith('.bak')) return false;
-  if (base.endsWith('.sql') || base.endsWith('.log') || base.endsWith('.key') || base.endsWith('.pem')) return false;
+  if (base.endsWith('.sql') || base.endsWith('.log') || base.endsWith('.key') || base.endsWith('.pem') || base.endsWith('.zip')) return false;
+  // Exclude test, diagnostic, inspection, and temporary script files from live bundle
+  if (base.startsWith('test_') || base.startsWith('check_') || base.startsWith('diagnostics_') || base.startsWith('inspect_') || base === 'list_tables.php') return false;
   return true;
 };
 
