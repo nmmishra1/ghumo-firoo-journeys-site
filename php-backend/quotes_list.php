@@ -48,18 +48,18 @@ try {
     try {
         if ($leadId > 0) {
             $stmt = $pdo->prepare("
-                SELECT q.*, l.customer_name, l.customer_phone
+                SELECT q.*, COALESCE(l.customer_name, 'Valued Client') as customer_name, l.customer_phone
                 FROM quotes q
-                JOIN leads l ON q.lead_id = l.id
+                LEFT JOIN leads l ON q.lead_id = l.id
                 WHERE q.lead_id = ? 
                 ORDER BY q.created_at DESC, q.version_number DESC
             ");
             $stmt->execute([$leadId]);
         } else {
             $stmt = $pdo->query("
-                SELECT q.*, l.customer_name, l.customer_phone
+                SELECT q.*, COALESCE(l.customer_name, 'Valued Client') as customer_name, l.customer_phone
                 FROM quotes q
-                JOIN leads l ON q.lead_id = l.id
+                LEFT JOIN leads l ON q.lead_id = l.id
                 ORDER BY q.created_at DESC, q.version_number DESC
             ");
         }
@@ -75,8 +75,8 @@ try {
         $hasPropTable = (int)$pdo->query("SELECT COUNT(*) FROM information_schema.TABLES WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'proposals'")->fetchColumn() > 0;
         if ($hasPropTable) {
             $pSql = $leadId > 0 
-                ? "SELECT p.*, l.customer_name, l.customer_phone FROM proposals p JOIN leads l ON p.lead_id = l.id WHERE p.lead_id = ? ORDER BY p.created_at DESC, p.option_number DESC"
-                : "SELECT p.*, l.customer_name, l.customer_phone FROM proposals p JOIN leads l ON p.lead_id = l.id ORDER BY p.created_at DESC, p.option_number DESC";
+                ? "SELECT p.*, COALESCE(l.customer_name, 'Valued Client') as customer_name, l.customer_phone FROM proposals p LEFT JOIN leads l ON p.lead_id = l.id WHERE p.lead_id = ? ORDER BY p.created_at DESC, p.option_number DESC"
+                : "SELECT p.*, COALESCE(l.customer_name, 'Valued Client') as customer_name, l.customer_phone FROM proposals p LEFT JOIN leads l ON p.lead_id = l.id ORDER BY p.created_at DESC, p.option_number DESC";
             $pStmt = $pdo->prepare($pSql);
             $pStmt->execute($leadId > 0 ? [$leadId] : []);
             $proposals = $pStmt->fetchAll(PDO::FETCH_ASSOC);

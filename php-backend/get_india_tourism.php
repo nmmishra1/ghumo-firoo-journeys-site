@@ -325,6 +325,168 @@ try {
         exit;
     }
 
+    // ==========================================
+    // ACTION: ai_context - Returns sightseeing, activities, and hotels for AI Itinerary & Destination Drawer
+    // ==========================================
+    if ($action === 'ai_context') {
+        $destQuery = trim($_GET['destination'] ?? $_GET['slug'] ?? $_GET['city'] ?? '');
+        if (empty($destQuery)) {
+            echo json_encode([
+                'success' => true,
+                'destination' => '',
+                'sightseeing_spots' => [],
+                'activities' => [],
+                'contracted_hotels' => []
+            ]);
+            exit;
+        }
+
+        $cleanQuery = strtolower(trim(str_replace(['/', '\\'], '', $destQuery)));
+        $queryText = str_replace('-', ' ', $cleanQuery);
+        $queryTerm = '%' . $queryText . '%';
+
+        // 1. Try to find matching city or state
+        $cityId = null;
+        $cityName = '';
+        $stateId = null;
+        try {
+            $stmt = $pdo->prepare("
+                SELECT c.id, COALESCE(c.city_name, c.name) as city_name, c.state_id
+                FROM cities c
+                LEFT JOIN states s ON c.state_id = s.id
+                WHERE LOWER(TRIM(COALESCE(c.city_name, c.name))) = ?
+                   OR LOWER(TRIM(COALESCE(c.city_name, c.name))) LIKE ?
+                   OR LOWER(TRIM(s.state_name)) = ?
+                   OR LOWER(TRIM(s.state_name)) LIKE ?
+                ORDER BY 
+                   CASE WHEN LOWER(TRIM(COALESCE(c.city_name, c.name))) = ? THEN 1
+                        WHEN LOWER(TRIM(s.state_name)) = ? THEN 2
+                        ELSE 3 END ASC
+                LIMIT 1
+            ");
+            $stmt->execute([$queryText, $queryTerm, $queryText, $queryTerm, $queryText, $queryText]);
+            $cityRow = $stmt->fetch(PDO::FETCH_ASSOC);
+            if ($cityRow) {
+                $cityId = $cityRow['id'];
+                $cityName = $cityRow['city_name'];
+                $stateId = $cityRow['state_id'];
+            }
+        } catch (Exception $e) {}
+
+        // 2. Fetch Sightseeing Spots
+        $sightseeingSpots = [];
+        try {
+            $sql = "
+                SELECT sg.id, sg.sightseeing_name as name, 
+                       COALESCE(c.city_name, c.name, sg.destination, :qName) as city,
+                       sg.duration as recommended_duration_hours,
+                       sg.description,
+                       sg.adult_cost as entry_fee_estimate,
+                       sg.category
+                FROM sightseeings sg
+                LEFT JOIN cities c ON sg.city_id = c.id
+                LEFT JOIN states s ON (sg.state_id = s.id OR c.state_id = s.id)
+                WHERE (:cId IS NOT NULL AND sg.city_id = :cId)
+                   OR LOWER(TRIM(sg.destination)) = :qExact
+                   OR LOWER(TRIM(sg.destination)) LIKE :qLike
+                   OR LOWER(TRIM(COALESCE(c.city_name, c.name, ''))) LIKE :qLike
+                   OR LOWER(TRIM(COALESCE(s.state_name, ''))) LIKE :qLike
+                ORDER BY sg.sightseeing_name ASC
+                LIMIT 50
+            ";
+            $sStmt = $pdo->prepare($sql);
+            $sStmt->execute([
+                ':cId' => $cityId,
+                ':qName' => $cityName ?: $destQuery,
+                ':qExact' => $queryText,
+                ':qLike' => $queryTerm
+            ]);
+            $sightseeingSpots = $sStmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (Exception $e) {}
+
+        // Fallback sightseeing if none found
+        if (empty($sightseeingSpots)) {
+            try {
+                $stmt = $pdo->prepare("SELECT name, city_id, duration as recommended_duration_hours, description, adult_cost as entry_fee_estimate FROM india_sightseeing WHERE LOWER(name) LIKE :q OR LOWER(description) LIKE :q LIMIT 25");
+                $stmt->execute([':q' => $queryTerm]);
+                $sightseeingSpots = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            } catch (Exception $e) {}
+        }
+
+        // 3. Fetch Activities
+        $activities = [];
+        try {
+            $sql = "
+                SELECT ac.id, ac.activity_name as name, 
+                       COALESCE(c.city_name, c.name, ac.destination, :qName) as city,
+                       ac.duration as duration_hours,
+                       ac.description,
+                       ac.adult_cost as average_cost,
+                       ac.activity_category as category
+                FROM activities ac
+                LEFT JOIN cities c ON ac.city_id = c.id
+                LEFT JOIN states s ON (ac.state_id = s.id OR c.state_id = s.id)
+                WHERE (:cId IS NOT NULL AND ac.city_id = :cId)
+                   OR LOWER(TRIM(ac.destination)) = :qExact
+                   OR LOWER(TRIM(ac.destination)) LIKE :qLike
+                   OR LOWER(TRIM(COALESCE(c.city_name, c.name, ''))) LIKE :qLike
+                   OR LOWER(TRIM(COALESCE(s.state_name, ''))) LIKE :qLike
+                ORDER BY ac.activity_name ASC
+                LIMIT 50
+            ";
+            $aStmt = $pdo->prepare($sql);
+            $aStmt->execute([
+                ':cId' => $cityId,
+                ':qName' => $cityName ?: $destQuery,
+                ':qExact' => $queryText,
+                ':qLike' => $queryTerm
+            ]);
+            $activities = $aStmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (Exception $e) {}
+
+        // 4. Fetch Contracted Hotels
+        $contractedHotels = [];
+        try {
+            $hSql = "
+                SELECT h.id, h.hotel_name, h.star_rating, 
+                       COALESCE(c.city_name, c.name, h.city, :qName) as city,
+                       hc.room_type, hc.meal_plan, hc.contract_rate
+                FROM hotels h
+                LEFT JOIN cities c ON h.city_id = c.id
+                LEFT JOIN states s ON (h.state_id = s.id OR c.state_id = s.id)
+                LEFT JOIN hotel_contracts hc ON hc.hotel_id = h.id
+                WHERE (h.active_status = 1 OR h.active = 1 OR h.active_status IS NULL)
+                  AND (
+                      (:cId IS NOT NULL AND h.city_id = :cId)
+                      OR LOWER(TRIM(h.city)) = :qExact
+                      OR LOWER(TRIM(h.city)) LIKE :qLike
+                      OR LOWER(TRIM(COALESCE(c.city_name, c.name, ''))) LIKE :qLike
+                      OR LOWER(TRIM(COALESCE(s.state_name, ''))) LIKE :qLike
+                  )
+                ORDER BY h.star_rating DESC, h.hotel_name ASC
+                LIMIT 50
+            ";
+            $hStmt = $pdo->prepare($hSql);
+            $hStmt->execute([
+                ':cId' => $cityId,
+                ':qName' => $cityName ?: $destQuery,
+                ':qExact' => $queryText,
+                ':qLike' => $queryTerm
+            ]);
+            $contractedHotels = $hStmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (Exception $e) {}
+
+        header('Cache-Control: public, max-age=1800, stale-while-revalidate=86400');
+        echo json_encode([
+            'success' => true,
+            'destination' => $destQuery,
+            'sightseeing_spots' => $sightseeingSpots,
+            'activities' => $activities,
+            'contracted_hotels' => $contractedHotels
+        ]);
+        exit;
+    }
+
     http_response_code(400);
     echo json_encode(['error' => 'Invalid action']);
 

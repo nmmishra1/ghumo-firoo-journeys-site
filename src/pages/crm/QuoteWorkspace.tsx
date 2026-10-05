@@ -180,6 +180,9 @@ export default function QuoteWorkspace({ quotes: propQuotes = [], onCreateRevisi
       itinerary_id: null,
       package_name: newQuoteData.destination.trim(),
       total_amount: sellingPrice,
+      customer_name: newQuoteData.customerName.trim(),
+      customer_email: newQuoteData.customerEmail.trim(),
+      customer_phone: newQuoteData.customerPhone.trim(),
       cost_breakdown: {
         hotels: totalCost,
         transport: 0,
@@ -196,6 +199,9 @@ export default function QuoteWorkspace({ quotes: propQuotes = [], onCreateRevisi
       if (res && res.quote_id) {
         newVersion.id = res.quote_id;
         newQuoteObj.id = res.quote_id;
+        if (res.lead_id) {
+          newQuoteObj.leadId = res.lead_id;
+        }
       }
       if (onRefresh) onRefresh();
     }).catch(err => {
@@ -370,6 +376,42 @@ export default function QuoteWorkspace({ quotes: propQuotes = [], onCreateRevisi
       setVersionB('');
       setEditItems(items);
       setEditMargin(margin);
+
+      // Persist newly generated AI Quote to MySQL database
+      quoteService.saveQuote({
+        id: null,
+        lead_id: 0,
+        itinerary_id: null,
+        package_name: (aiResult.destination || aiFormData.destination).trim(),
+        total_amount: sellingPrice,
+        customer_name: clientName,
+        customer_email: aiFormData.customerEmail?.trim() || '',
+        customer_phone: aiFormData.customerPhone?.trim() || '',
+        cost_breakdown: {
+          hotels: totalCost,
+          transport: 0,
+          sightseeing: 0,
+          // @ts-ignore
+          items: items,
+          itineraryDays: aiResult.day_by_day as any,
+          margin: margin
+        },
+        inclusions: [],
+        exclusions: [],
+        validity_days: 7,
+        notes: `AI Generated Proposal for ${clientName}`
+      }).then(res => {
+        if (res && res.quote_id) {
+          newVersion.id = res.quote_id;
+          newQuoteObj.id = res.quote_id;
+          if (res.lead_id) {
+            newQuoteObj.leadId = res.lead_id;
+          }
+        }
+        if (onRefresh) onRefresh();
+      }).catch(err => {
+        console.warn("Could not save AI quote to backend:", err);
+      });
 
       toast({
         title: "✨ New AI Quote Created",
@@ -733,14 +775,16 @@ export default function QuoteWorkspace({ quotes: propQuotes = [], onCreateRevisi
       const transportCost = editItems.filter(i => i.type === 'transfer' || i.type === 'flight').reduce((sum, i) => sum + i.total, 0);
       const sightseeingCost = editItems.filter(i => i.type === 'excursion' || i.type === 'meal').reduce((sum, i) => sum + i.total, 0);
 
-      const leadId = selectedQuote.leadId || Number(selectedQuote.quoteNumber.split('-').pop()) || 1;
+      const isTempId = !vA.id || vA.id.startsWith('ver-') || vA.id.startsWith('q-') || vA.id.startsWith('prop_');
+      const leadId = selectedQuote.leadId || 0;
 
       const response = await quoteService.saveQuote({
-        id: vA.id.includes('-') ? null : vA.id,
+        id: isTempId ? null : vA.id,
         lead_id: leadId,
         itinerary_id: null,
         package_name: selectedQuote.destination,
         total_amount: sellingPrice,
+        customer_name: selectedQuote.customerName,
         cost_breakdown: {
           hotels: hotelsCost,
           transport: transportCost,
@@ -752,10 +796,17 @@ export default function QuoteWorkspace({ quotes: propQuotes = [], onCreateRevisi
         },
         inclusions: [],
         exclusions: [],
-        validity_days: 7
+        validity_days: 7,
+        is_revision: false
       });
 
       if (response.success) {
+        if (response.quote_id) {
+          vA.id = response.quote_id;
+        }
+        if (response.lead_id) {
+          selectedQuote.leadId = response.lead_id;
+        }
         toast({
           title: "Quote Saved",
           description: `Quote version details updated in MySQL database successfully.`,
@@ -783,14 +834,16 @@ export default function QuoteWorkspace({ quotes: propQuotes = [], onCreateRevisi
 
     setSavingQuote(true);
     try {
-      const leadId = quote.leadId || Number(quote.quoteNumber.split('-').pop()) || 1;
+      const isTempId = !baseVersionId || baseVersionId.startsWith('ver-') || baseVersionId.startsWith('q-') || baseVersionId.startsWith('prop_');
+      const leadId = quote.leadId || 0;
 
       const response = await quoteService.saveQuote({
-        id: baseVersionId,
+        id: isTempId ? null : baseVersionId,
         lead_id: leadId,
         itinerary_id: null,
         package_name: quote.destination,
         total_amount: baseVer.sellingPrice,
+        customer_name: quote.customerName,
         cost_breakdown: {
           hotels: baseVer.totalCost,
           transport: 0,
@@ -801,7 +854,8 @@ export default function QuoteWorkspace({ quotes: propQuotes = [], onCreateRevisi
         },
         inclusions: [],
         exclusions: [],
-        validity_days: 7
+        validity_days: 7,
+        is_revision: true
       });
 
       if (response.success) {

@@ -18,11 +18,7 @@ if (!$input) {
 }
 
 $leadId = (int)($input['lead_id'] ?? 0);
-if ($leadId <= 0) {
-    http_response_code(400);
-    echo json_encode(['error' => 'lead_id is required']);
-    exit;
-}
+// Note: If lead_id is 0 or null, it will be auto-resolved or auto-created below
 
 $packageName = trim($input['package_name'] ?? '');
 if (empty($packageName)) {
@@ -36,6 +32,7 @@ $itineraryId = !empty($input['itinerary_id']) ? trim($input['itinerary_id']) : n
 $validityDays = (int)($input['validity_days'] ?? 7);
 $notes = $input['notes'] ?? null;
 $terms = $input['terms'] ?? null;
+$isRevision = !empty($input['is_revision']);
 
 $costBreakdown = isset($input['cost_breakdown']) ? json_encode($input['cost_breakdown']) : null;
 $inclusions = isset($input['inclusions']) ? json_encode($input['inclusions']) : null;
@@ -81,18 +78,67 @@ try {
         INDEX `idx_quotes_version` (`lead_id`, `version_number`)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;");
 
-    // Validate that lead_id exists in the leads table to satisfy foreign key constraint
-    $checkLead = $pdo->prepare("SELECT id FROM leads WHERE id = :lid LIMIT 1");
-    $checkLead->execute([':lid' => $leadId]);
-    $existingLead = $checkLead->fetchColumn();
+    // Validate or auto-resolve lead_id to ensure foreign key constraint
+    $existingLead = null;
+    if ($leadId > 0) {
+        $checkLead = $pdo->prepare("SELECT id FROM leads WHERE id = :lid LIMIT 1");
+        $checkLead->execute([':lid' => $leadId]);
+        $existingLead = $checkLead->fetchColumn();
+    }
 
     if (!$existingLead) {
-        $firstLead = $pdo->query("SELECT id FROM leads ORDER BY id ASC LIMIT 1")->fetchColumn();
-        if ($firstLead) {
-            $leadId = (int)$firstLead;
-        } else {
-            $pdo->exec("INSERT INTO leads (title, name, status, created_at) VALUES ('Direct Quote Lead', 'Valued Client', 'New', NOW())");
-            $leadId = (int)$pdo->lastInsertId();
+        // Extract customer name/phone/email
+        $custName = trim($input['customer_name'] ?? '');
+        $custPhone = trim($input['customer_phone'] ?? '');
+        $custEmail = trim($input['customer_email'] ?? '');
+
+        if (empty($custName) && !empty($input['notes']) && preg_match('/(?:Direct Quote Created for|Proposal for)\s+([^|$\n]+)/i', $input['notes'], $m)) {
+            $custName = trim($m[1]);
+        }
+        if (empty($custPhone) && !empty($input['notes']) && preg_match('/Phone:\s*([^|$\n]+)/i', $input['notes'], $m)) {
+            $custPhone = trim($m[1]);
+        }
+        if (empty($custEmail) && !empty($input['notes']) && preg_match('/Email:\s*([^|$\n]+)/i', $input['notes'], $m)) {
+            $custEmail = trim($m[1]);
+        }
+
+        // Try linking to an existing lead by phone or email
+        if (!empty($custPhone) || !empty($custEmail)) {
+            try {
+                $findLeadStmt = $pdo->prepare("SELECT id FROM leads WHERE (customer_phone = :ph AND :ph != '') OR (customer_email = :em AND :em != '') ORDER BY id DESC LIMIT 1");
+                $findLeadStmt->execute([':ph' => $custPhone, ':em' => $custEmail]);
+                $matchedLeadId = $findLeadStmt->fetchColumn();
+                if ($matchedLeadId) {
+                    $leadId = (int)$matchedLeadId;
+                    $existingLead = $leadId;
+                }
+            } catch (Exception $fle) {}
+        }
+
+        // Auto-create a lead record for this direct quote if none matched
+        if (!$existingLead) {
+            $leadTitle = !empty($packageName) ? "Quote: " . $packageName : "Direct Quote Lead";
+            $clientName = !empty($custName) ? $custName : 'Valued Client';
+            try {
+                $insLead = $pdo->prepare("INSERT INTO leads (title, customer_name, customer_email, customer_phone, destination, status, created_at) VALUES (:title, :name, :email, :phone, :dest, 'New', NOW())");
+                $insLead->execute([
+                    ':title' => $leadTitle,
+                    ':name' => $clientName,
+                    ':email' => $custEmail ?: null,
+                    ':phone' => $custPhone ?: null,
+                    ':dest' => $packageName ?: null
+                ]);
+                $leadId = (int)$pdo->lastInsertId();
+            } catch (Exception $ie) {
+                // In case schema uses slightly different columns
+                $firstLead = $pdo->query("SELECT id FROM leads ORDER BY id ASC LIMIT 1")->fetchColumn();
+                if ($firstLead) {
+                    $leadId = (int)$firstLead;
+                } else {
+                    $pdo->exec("INSERT INTO leads (title, status, created_at) VALUES ('Direct Quote Lead', 'New', NOW())");
+                    $leadId = (int)$pdo->lastInsertId();
+                }
+            }
         }
     }
 
@@ -139,12 +185,12 @@ try {
         echo json_encode([
             'success' => true,
             'quote_id' => $newId,
-            'version' => $versionNum
+            'version' => $versionNum,
+            'lead_id' => $leadId
         ]);
         exit;
     } else {
-        // Option B: Revise existing quote
-        // 1. Fetch old quote to verify it exists and get its version number
+        // Option B: Revise or update existing quote
         $stmtOld = $pdo->prepare("SELECT version_number, lead_id FROM quotes WHERE id = ?");
         $stmtOld->execute([$quoteId]);
         $oldQuote = $stmtOld->fetch(PDO::FETCH_ASSOC);
@@ -189,16 +235,51 @@ try {
             echo json_encode([
                 'success' => true,
                 'quote_id' => $newId,
-                'version' => $nextVerNum
+                'version' => $nextVerNum,
+                'lead_id' => $leadId
             ]);
             exit;
         }
 
-        // 2. Mark old quote status as 'Revised'
+        // Quote exists in database. Check if this is an in-place update or a new revision
+        if (!$isRevision) {
+            $stmtUpdateOld = $pdo->prepare("
+                UPDATE quotes SET
+                    total_amount = :total_amount,
+                    package_name = :package_name,
+                    cost_breakdown = :cost_breakdown,
+                    inclusions = :inclusions,
+                    exclusions = :exclusions,
+                    terms = :terms,
+                    notes = :notes,
+                    updated_at = NOW()
+                WHERE id = :id
+            ");
+            $stmtUpdateOld->execute([
+                ':id' => $quoteId,
+                ':total_amount' => $totalAmount,
+                ':package_name' => $packageName,
+                ':cost_breakdown' => $costBreakdown,
+                ':inclusions' => $inclusions,
+                ':exclusions' => $exclusions,
+                ':terms' => $terms,
+                ':notes' => $notes
+            ]);
+
+            $pdo->commit();
+            echo json_encode([
+                'success' => true,
+                'quote_id' => $quoteId,
+                'version' => (int)$oldQuote['version_number'],
+                'lead_id' => (int)$oldQuote['lead_id']
+            ]);
+            exit;
+        }
+
+        // Branch new revision: Mark old quote status as 'Revised' and create version + 1
         $stmtUpdateOld = $pdo->prepare("UPDATE quotes SET status = 'Revised' WHERE id = ?");
         $stmtUpdateOld->execute([$quoteId]);
 
-        // 3. Insert new quote version
         $newId = generateUUID();
         $nextVerNum = (int)$oldQuote['version_number'] + 1;
 
@@ -235,7 +316,8 @@ try {
         echo json_encode([
             'success' => true,
             'quote_id' => $newId,
-            'version' => $nextVerNum
+            'version' => $nextVerNum,
+            'lead_id' => (int)$oldQuote['lead_id']
         ]);
         exit;
     }

@@ -105,13 +105,17 @@ export const quoteService = {
     itinerary_id: string | null;
     package_name: string;
     total_amount: number;
-    cost_breakdown: { hotels: number; transport: number; sightseeing: number };
+    cost_breakdown: any;
     inclusions: string[];
     exclusions: string[];
     terms?: string;
     validity_days?: number;
     notes?: string;
-  }): Promise<{ success: boolean; quote_id: string; version: number }> {
+    customer_name?: string;
+    customer_email?: string;
+    customer_phone?: string;
+    is_revision?: boolean;
+  }): Promise<{ success: boolean; quote_id: string; version: number; lead_id?: number }> {
     const session = await supabase.auth.getSession();
     const token = session.data.session?.access_token;
 
