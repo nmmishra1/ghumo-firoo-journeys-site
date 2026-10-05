@@ -2095,10 +2095,27 @@ export default function ItineraryBuilder({
     const startIdx = allDays.findIndex(d => d.id === startDayId);
     if (startIdx === -1) return [startDayId];
 
+    // In travel itineraries, the final day of the trip (departure day) is checkout only - no overnight stay
+    if (allDays.length > 1 && startIdx === allDays.length - 1) {
+      return [startDayId];
+    }
+
     const startCity = (allDays[startIdx].accommodation_city || allDays[startIdx].city || '').toLowerCase().trim();
     const ids: string[] = [startDayId];
 
+    // Determine nights planned for this stop from stayStops if available
+    const matchingStop = stayStops.find(s => s.city.toLowerCase().trim() === startCity);
+    const maxNightsForStop = matchingStop ? Math.max(1, Number(matchingStop.nights) || 1) : Math.max(1, allDays.length - 1);
+
     for (let i = startIdx + 1; i < allDays.length; i++) {
+      // Rule 1: The final day of the entire itinerary is departure day — guests check out, no overnight hotel night
+      if (allDays.length > 1 && i === allDays.length - 1) {
+        break;
+      }
+      // Rule 2: Do not propagate more nights than planned for this destination stop
+      if (ids.length >= maxNightsForStop) {
+        break;
+      }
       const nextCity = (allDays[i].accommodation_city || allDays[i].city || '').toLowerCase().trim();
       if (startCity && nextCity && startCity === nextCity) {
         ids.push(allDays[i].id);
@@ -3645,8 +3662,8 @@ export default function ItineraryBuilder({
           const base = Number(updatedProps.room_cost) || 0;
           const gst = Number(updatedProps.gst_cost) || 0;
           updatedProps.total_cost = base + gst;
-        } else if (b.type === 'transfer') {
-          const base = Number(updatedProps.base_cost) || 0;
+} else if (b.type === 'transfer') {
+          const base = Number(updatedProps.base_cost) || Number(updatedProps.selling_rate) || Number(updatedProps.contract_rate) || 0;
           const gst = Number(updatedProps.gst_cost) || 0;
           const drv = Number(updatedProps.driver_cost) || 0;
           const toll = Number(updatedProps.toll_charges) || 0;
@@ -6131,9 +6148,18 @@ export default function ItineraryBuilder({
                       <Button
                         size="sm"
                         onClick={() => {
-                          const consecutiveDayIds = getConsecutiveSameCityDayIds(days, hotelPickerDayId);
-                          setDays(prevDays => prevDays.map(day => {
-                            if (!consecutiveDayIds.includes(day.id)) return day;
+const consecutiveDayIds = getConsecutiveSameCityDayIds(days, hotelPickerDayId);
+                          setDays(prevDays => prevDays.map((day, dIdx) => {
+                            const isFinalDepartureDay = prevDays.length > 1 && dIdx === prevDays.length - 1;
+
+                            if (!consecutiveDayIds.includes(day.id)) {
+                              // If this is the departure day and had an overnight hotel block, remove it so guest isn't billed for departure night
+                              if (isFinalDepartureDay) {
+                                const blocks = (day.metadata?.blocks || []).filter((b: any) => b.type !== 'hotel');
+                                return { ...day, metadata: { ...day.metadata, blocks } };
+                              }
+                              return day;
+                            }
                             
                             let blocks = [...(day.metadata?.blocks || [])];
                             let hotelBlockFound = false;

@@ -79,15 +79,15 @@ const ROUTE_TYPES = [
   'Disposal'
 ];
 const RATE_MODEL_OPTIONS = [
-  { value: 'Per KM', label: 'Per KM — Rann Utsav / Outstation (Rate × Min KM/Day)' },
-  { value: 'Per Day', label: 'Per Day — Char Dham Day Basis (Rate × Days)' },
-  { value: 'Block Circuit', label: 'Block Circuit — Kerala / Char Dham Full (Fixed Total per Circuit)' },
-  { value: 'Per Transfer', label: 'Per Transfer (Airport/Station)' },
-  { value: 'Package Basis', label: 'Package Basis (8H/80KM)' },
+  { value: 'Block Circuit', label: 'Block Circuit — Fixed Package (Rann Utsav, Kerala, Circuits & All Destinations)' },
+  { value: 'Per KM', label: 'Per KM — Outstation / Distance Basis (Rate × Min KM/Day)' },
+  { value: 'Per Day', label: 'Per Day — Daily Rental Basis (Rate × Days)' },
+  { value: 'Per Transfer', label: 'Per Transfer — Airport / Railway / City Transfer' },
+  { value: 'Package Basis', label: 'Package Basis — Local Sightseeing (8H/80KM)' },
   { value: 'One-Way Drop', label: 'One-Way Drop' },
   { value: 'Hill Station Surcharge', label: 'Hill Station Surcharge' },
   { value: 'Interstate Permit', label: 'Interstate Permit' },
-  { value: 'Disposal Basis', label: 'Disposal Basis' }
+  { value: 'Disposal Basis', label: 'Disposal Basis (Vehicle on Standby)' }
 ];
 
 const BLOCK_CIRCUIT_DURATIONS = [
