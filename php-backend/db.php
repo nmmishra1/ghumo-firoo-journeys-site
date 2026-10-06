@@ -116,9 +116,10 @@ function getDb(): PDO
             }
         }
 
-        // Auto-migrate restrictive ENUM status columns to VARCHAR(100)
+        // Auto-migrate restrictive ENUM status columns to VARCHAR(100) (Run once only, persistent lock)
         static $migrated = false;
-        if (!$migrated && $pdo) {
+        $migrationLock = __DIR__ . '/cache/schema_migrated.lock';
+        if (!$migrated && !file_exists($migrationLock) && $pdo) {
             try {
                 $colItin = $pdo->query("SHOW COLUMNS FROM itineraries LIKE 'status'")->fetch(PDO::FETCH_ASSOC);
                 if ($colItin && strpos(strtolower($colItin['Type'] ?? ''), 'enum') !== false) {
@@ -255,6 +256,10 @@ function getDb(): PDO
             } catch (Exception $eH) {}
 
             $migrated = true;
+            if (!is_dir(__DIR__ . '/cache')) {
+                @mkdir(__DIR__ . '/cache', 0755, true);
+            }
+            @file_put_contents($migrationLock, date('Y-m-d H:i:s'));
         }
     }
 

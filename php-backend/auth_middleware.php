@@ -88,7 +88,8 @@ function checkRateLimit($maxRequests = 120, $secondsWindow = 60): bool {
 function writeAuditLog(PDO $pdo, string $recordType, string $recordId, string $action, ?string $oldValue = null, ?string $newValue = null, ?array $user = null): bool {
     try {
         static $ensured = false;
-        if (!$ensured) {
+        $lock = __DIR__ . '/cache/audit_logs_table.lock';
+        if (!$ensured && !file_exists($lock)) {
             $pdo->exec("CREATE TABLE IF NOT EXISTS `audit_logs` (
                 `id` VARCHAR(100) PRIMARY KEY,
                 `lead_id` INT NULL,
@@ -102,6 +103,10 @@ function writeAuditLog(PDO $pdo, string $recordType, string $recordId, string $a
                 `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )");
             $ensured = true;
+            if (!is_dir(__DIR__ . '/cache')) {
+                @mkdir(__DIR__ . '/cache', 0755, true);
+            }
+            @file_put_contents($lock, time());
         }
 
         $id = sprintf('%04x%04x-%04x-%04x-%04x-%04x%04x%04x',

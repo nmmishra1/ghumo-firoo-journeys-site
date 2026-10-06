@@ -234,15 +234,26 @@ if ($table === 'hotel_facility_mapping') {
 }
 
 try {
-    // Retrieve list of actual table columns to filter inserts/updates safely
-    try {
-        $q = $pdo->query("DESCRIBE `$table`");
-        $columns = $q ? $q->fetchAll(PDO::FETCH_COLUMN) : [];
-    } catch (Throwable $e) {
-        $columns = [];
-        if ($method === 'GET') {
-            echo json_encode([]);
-            exit;
+    // Retrieve list of actual table columns to filter inserts/updates safely (cached)
+    $colCacheFile = __DIR__ . '/cache/cols_' . preg_replace('/[^a-zA-Z0-9_]/', '', $table) . '.json';
+    if (file_exists($colCacheFile)) {
+        $columns = json_decode(file_get_contents($colCacheFile), true) ?: [];
+    } else {
+        try {
+            $q = $pdo->query("DESCRIBE `$table`");
+            $columns = $q ? $q->fetchAll(PDO::FETCH_COLUMN) : [];
+            if (!empty($columns)) {
+                if (!is_dir(__DIR__ . '/cache')) {
+                    @mkdir(__DIR__ . '/cache', 0755, true);
+                }
+                @file_put_contents($colCacheFile, json_encode($columns));
+            }
+        } catch (Throwable $e) {
+            $columns = [];
+            if ($method === 'GET') {
+                echo json_encode([]);
+                exit;
+            }
         }
     }
 

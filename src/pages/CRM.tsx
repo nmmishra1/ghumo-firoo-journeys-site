@@ -1228,8 +1228,8 @@ const CRM = () => {
       }
       const needsQuotesOrProfiles = ['quotes', 'opportunities', 'reports', 'payments'].some(s => currentSection.includes(s));
       if (needsQuotesOrProfiles) fetchQuotes();
-      if (currentSection !== 'dashboard' && profiles.length === 0) fetchProfiles();
-      if (allPayments.length === 0 || currentSection === 'payments' || currentSection === 'payments-mocked' || currentSection === 'reports-mocked') {
+      const needsPayments = currentSection === 'payments' || currentSection === 'payments-mocked' || currentSection === 'reports-mocked';
+      if (needsPayments && allPayments.length === 0) {
         fetchAllPayments();
       }
       if (currentSection === 'reports-mocked') {

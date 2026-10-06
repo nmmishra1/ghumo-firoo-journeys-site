@@ -12,34 +12,41 @@ $profile = requireRole($user, $pdo, ['admin', 'manager', 'agent']);
 
 $leadId = isset($_GET['lead_id']) ? (int)$_GET['lead_id'] : 0;
 
-// Ensure quotes table exists
-try {
-    $pdo->exec("CREATE TABLE IF NOT EXISTS `quotes` (
-        `id` VARCHAR(36) PRIMARY KEY,
-        `lead_id` INT NOT NULL,
-        `itinerary_id` VARCHAR(100) NULL,
-        `version_number` INT NOT NULL DEFAULT 1,
-        `parent_quote_id` VARCHAR(36) NULL,
-        `status` VARCHAR(50) DEFAULT 'Draft',
-        `total_amount` DECIMAL(12,2) NOT NULL DEFAULT 0.00,
-        `package_name` VARCHAR(255) NOT NULL,
-        `cost_breakdown` JSON NULL,
-        `inclusions` JSON NULL,
-        `exclusions` JSON NULL,
-        `terms` TEXT NULL,
-        `notes` TEXT NULL,
-        `share_token` VARCHAR(64) NULL,
-        `share_message` TEXT NULL,
-        `shared_at` TIMESTAMP NULL,
-        `viewed_at` TIMESTAMP NULL,
-        `expires_at` TIMESTAMP NULL,
-        `created_by` VARCHAR(255) NULL,
-        `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-        INDEX `idx_quotes_lead_id` (`lead_id`),
-        INDEX `idx_quotes_version` (`lead_id`, `version_number`)
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;");
-} catch (Exception $te) {}
+// Ensure quotes table exists (run once only)
+$quotesLock = __DIR__ . '/cache/quotes_table.lock';
+if (!file_exists($quotesLock)) {
+    try {
+        $pdo->exec("CREATE TABLE IF NOT EXISTS `quotes` (
+            `id` VARCHAR(36) PRIMARY KEY,
+            `lead_id` INT NOT NULL,
+            `itinerary_id` VARCHAR(100) NULL,
+            `version_number` INT NOT NULL DEFAULT 1,
+            `parent_quote_id` VARCHAR(36) NULL,
+            `status` VARCHAR(50) DEFAULT 'Draft',
+            `total_amount` DECIMAL(12,2) NOT NULL DEFAULT 0.00,
+            `package_name` VARCHAR(255) NOT NULL,
+            `cost_breakdown` JSON NULL,
+            `inclusions` JSON NULL,
+            `exclusions` JSON NULL,
+            `terms` TEXT NULL,
+            `notes` TEXT NULL,
+            `share_token` VARCHAR(64) NULL,
+            `share_message` TEXT NULL,
+            `shared_at` TIMESTAMP NULL,
+            `viewed_at` TIMESTAMP NULL,
+            `expires_at` TIMESTAMP NULL,
+            `created_by` VARCHAR(255) NULL,
+            `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            INDEX `idx_quotes_lead_id` (`lead_id`),
+            INDEX `idx_quotes_version` (`lead_id`, `version_number`)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;");
+        if (!is_dir(__DIR__ . '/cache')) {
+            @mkdir(__DIR__ . '/cache', 0755, true);
+        }
+        @file_put_contents($quotesLock, time());
+    } catch (Exception $te) {}
+}
 
 try {
     $quotes = [];

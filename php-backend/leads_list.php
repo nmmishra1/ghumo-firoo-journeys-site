@@ -72,7 +72,61 @@ function formatDestinationStops($val) {
 }
 
 function enrichLeads(PDO $pdo, array $leads): array {
-    return array_map(function($lead) use ($pdo) {
+    // Collect all assigned_to IDs that require agent name resolution in a single batch
+    $assignedIds = [];
+    foreach ($leads as $l) {
+        if ((empty($l['agent_name']) || $l['agent_name'] === 'Unassigned') && !empty($l['assigned_to'])) {
+            $assignedIds[$l['assigned_to']] = true;
+        }
+    }
+
+    $userMap = [];
+    if (!empty($assignedIds)) {
+        $ids = array_values(array_unique(array_keys($assignedIds)));
+        $count = count($ids);
+        $placeholders = implode(',', array_fill(0, $count, '?'));
+
+        // 1. Batch lookup in profiles table
+        try {
+            $pStmt = $pdo->prepare("SELECT id, supabase_uid, full_name FROM profiles WHERE id IN ($placeholders) OR supabase_uid IN ($placeholders)");
+            $pStmt->execute(array_merge($ids, $ids));
+            while ($row = $pStmt->fetch(PDO::FETCH_ASSOC)) {
+                if (!empty($row['id']) && !empty($row['full_name'])) {
+                    $userMap[$row['id']] = $row['full_name'];
+                }
+                if (!empty($row['supabase_uid']) && !empty($row['full_name'])) {
+                    $userMap[$row['supabase_uid']] = $row['full_name'];
+                }
+            }
+        } catch (Exception $pe) {}
+
+        // 2. Batch lookup any missing in users table
+        $missing = [];
+        foreach ($ids as $id) {
+            if (empty($userMap[$id])) {
+                $missing[] = $id;
+            }
+        }
+
+        if (!empty($missing)) {
+            $mCount = count($missing);
+            $mPlaceholders = implode(',', array_fill(0, $mCount, '?'));
+            try {
+                $uStmt = $pdo->prepare("SELECT id, email, full_name FROM users WHERE id IN ($mPlaceholders) OR email IN ($mPlaceholders)");
+                $uStmt->execute(array_merge($missing, $missing));
+                while ($row = $uStmt->fetch(PDO::FETCH_ASSOC)) {
+                    if (!empty($row['id']) && !empty($row['full_name'])) {
+                        $userMap[$row['id']] = $row['full_name'];
+                    }
+                    if (!empty($row['email']) && !empty($row['full_name'])) {
+                        $userMap[$row['email']] = $row['full_name'];
+                    }
+                }
+            } catch (Exception $ue) {}
+        }
+    }
+
+    return array_map(function($lead) use ($userMap) {
         if (!empty($lead['destinations'])) {
             $lead['destinations'] = formatDestinationStops($lead['destinations']);
         }
@@ -80,23 +134,8 @@ function enrichLeads(PDO $pdo, array $leads): array {
             $lead['destination'] = formatDestinationStops($lead['destination']);
         }
         if (empty($lead['agent_name']) || $lead['agent_name'] === 'Unassigned') {
-            if (!empty($lead['assigned_to'])) {
-                try {
-                    $aStmt = $pdo->prepare("SELECT full_name FROM profiles WHERE id = ? OR supabase_uid = ? LIMIT 1");
-                    $aStmt->execute([$lead['assigned_to'], $lead['assigned_to']]);
-                    $name = $aStmt->fetchColumn();
-                    if (!$name) {
-                        $uStmt = $pdo->prepare("SELECT full_name FROM users WHERE id = ? OR email = ? LIMIT 1");
-                        $uStmt->execute([$lead['assigned_to'], $lead['assigned_to']]);
-                        $name = $uStmt->fetchColumn();
-                    }
-                    $lead['agent_name'] = $name ?: 'Navin Mishra';
-                } catch (Exception $ae) {
-                    $lead['agent_name'] = 'Navin Mishra';
-                }
-            } else {
-                $lead['agent_name'] = 'Navin Mishra';
-            }
+            $aid = $lead['assigned_to'] ?? '';
+            $lead['agent_name'] = (!empty($aid) && !empty($userMap[$aid])) ? $userMap[$aid] : 'Navin Mishra';
         }
 
         // Sanitize zero/invalid MySQL dates

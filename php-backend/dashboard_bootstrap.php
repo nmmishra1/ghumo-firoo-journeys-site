@@ -13,18 +13,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 
 require_once __DIR__ . '/db.php';
 
-function tableExistsBootstrap(PDO $pdo, string $table): bool {
-    static $cache = [];
-    if (!isset($cache[$table])) {
+function getExistingTables(PDO $pdo): array {
+    static $tables = null;
+    if ($tables === null) {
         try {
-            $stmt = $pdo->prepare("SELECT COUNT(*) FROM information_schema.TABLES WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = ?");
-            $stmt->execute([$table]);
-            $cache[$table] = (int)$stmt->fetchColumn() > 0;
+            $stmt = $pdo->query("SHOW TABLES");
+            $rows = $stmt ? $stmt->fetchAll(PDO::FETCH_COLUMN) : [];
+            $tables = array_flip(array_map('strtolower', $rows));
         } catch (Exception $e) {
-            $cache[$table] = false;
+            $tables = [];
         }
     }
-    return $cache[$table];
+    return $tables;
+}
+
+function tableExistsBootstrap(PDO $pdo, string $table): bool {
+    $tables = getExistingTables($pdo);
+    return isset($tables[strtolower($table)]);
 }
 
 try {
@@ -53,9 +58,16 @@ try {
 
     if (tableExistsBootstrap($pdo, 'leads')) {
         try {
-            $todaysLeadsCount = (int)$pdo->query("SELECT COUNT(*) FROM leads WHERE DATE(created_at) = CURDATE()")->fetchColumn();
-            $openLeadsCount = (int)$pdo->query("SELECT COUNT(*) FROM leads WHERE status IN ('New', 'Contacted', 'In Progress', 'Negotiation')")->fetchColumn();
-            $followupsDueCount = (int)$pdo->query("SELECT COUNT(*) FROM leads WHERE status = 'Followup Required'")->fetchColumn();
+            $stmtLeadStats = $pdo->query("SELECT 
+                COUNT(CASE WHEN created_at >= CURDATE() THEN 1 END) AS todays_count,
+                COUNT(CASE WHEN status IN ('New', 'Contacted', 'In Progress', 'Negotiation') THEN 1 END) AS open_count,
+                COUNT(CASE WHEN status = 'Followup Required' THEN 1 END) AS followups_count
+            FROM leads");
+            if ($row = ($stmtLeadStats ? $stmtLeadStats->fetch(PDO::FETCH_ASSOC) : null)) {
+                $todaysLeadsCount = (int)($row['todays_count'] ?? 0);
+                $openLeadsCount = (int)($row['open_count'] ?? 0);
+                $followupsDueCount = (int)($row['followups_count'] ?? 0);
+            }
         } catch (Exception $e) {}
     }
 
@@ -105,9 +117,6 @@ try {
     $leads = [];
     if (tableExistsBootstrap($pdo, 'leads')) {
         try {
-            // Clean up legacy dummy subscriber entries from leads table if any exist
-            $pdo->exec("DELETE FROM leads WHERE customer_name LIKE 'Subscriber (%' OR source_detail = 'Newsletter Footer Subscriber'");
-            
             $stmt = $pdo->query("SELECT * FROM leads WHERE customer_name NOT LIKE 'Subscriber (%' AND (source_detail IS NULL OR source_detail != 'Newsletter Footer Subscriber') ORDER BY id DESC LIMIT 25");
             $rawLeads = $stmt ? $stmt->fetchAll(PDO::FETCH_ASSOC) : [];
             $leads = array_map(function($l) {

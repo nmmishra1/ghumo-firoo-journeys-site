@@ -21,6 +21,11 @@ header('X-Request-ID: ' . $GLOBALS['REQUEST_ID']);
 function ensureApiLogsTable($pdo) {
     static $created = false;
     if ($created || !$pdo) return;
+    $lock = __DIR__ . '/cache/api_logs_table.lock';
+    if (file_exists($lock)) {
+        $created = true;
+        return;
+    }
     try {
         $pdo->exec("
             CREATE TABLE IF NOT EXISTS api_request_logs (
@@ -39,6 +44,10 @@ function ensureApiLogsTable($pdo) {
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
         ");
         $created = true;
+        if (!is_dir(__DIR__ . '/cache')) {
+            @mkdir(__DIR__ . '/cache', 0755, true);
+        }
+        @file_put_contents($lock, time());
     } catch (Exception $e) {
         // Silent fallback to file logger if table creation fails
     }
