@@ -1,6 +1,6 @@
 <?php
 /**
- * Ghumo Firoo Journeys Enterprise API Root Endpoint
+ * Ghumo Firoo Travels Enterprise API Root Endpoint
  * Path: php-backend/index.php
  */
 
@@ -9,7 +9,7 @@ header('Access-Control-Allow-Origin: *');
 
 echo json_encode([
     'status' => 'ONLINE',
-    'service' => 'Ghumo Firoo Journeys Enterprise Backend API',
+    'service' => 'Ghumo Firoo Travels Enterprise Backend API',
     'version' => '2.0',
     'endpoints' => [
         'health' => '/php-backend/health.php',

@@ -815,7 +815,7 @@ export default function DestinationManager() {
                           https://ghumofiroo.com/destination/{seoForm.url_slug || 'destination-slug'}
                         </div>
                         <div className="text-sm font-bold text-[#1a0dab] dark:text-blue-400 hover:underline cursor-pointer">
-                          {seoForm.seo_title || `${selectedDest.city} Holidays & Packages | Ghumo Firoo Journeys`}
+                          {seoForm.seo_title || `${selectedDest.city} Holidays & Packages | Ghumo Firoo Travels`}
                         </div>
                         <div className="text-xs text-[#4d5156] dark:text-slate-300 line-clamp-2">
                           {seoForm.meta_description || `Discover ${selectedDest.city} with curated tour itineraries, handpicked hotels, excursions, and local travel guides.`}

@@ -1,4 +1,4 @@
-# Master Complete & Fully Compatible .htaccess for Ghumo Firoo Journeys
+# Master Complete & Fully Compatible .htaccess for Ghumo Firoo Travels
 
 Options -Indexes
 DirectoryIndex index.html

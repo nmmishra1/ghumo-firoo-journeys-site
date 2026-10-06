@@ -38,7 +38,7 @@ async function generatePDF() {
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Culture Kutch - 03 Nights / 04 Days | Ghumo Firoo Journeys</title>
+  <title>Culture Kutch - 03 Nights / 04 Days | Ghumo Firoo Travels</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800;900&family=Montserrat:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -529,8 +529,8 @@ async function generatePDF() {
   <!-- ==================== PAGE 1: COVER ==================== -->
   <div class="page page-1">
     <div class="cover-top-brand">
-      <img src="${logoBase64}" alt="Ghumo Firoo Journeys" class="cover-logo">
-      <h1 class="cover-brand-title">Ghumo Firoo Journeys</h1>
+      <img src="${logoBase64}" alt="Ghumo Firoo Travels" class="cover-logo">
+      <h1 class="cover-brand-title">Ghumo Firoo Travels</h1>
       <p class="cover-brand-sub">Journeys Crafted With Intention · Luxury Travel Specialist</p>
 
       <div class="cover-tagline-bar">
@@ -560,7 +560,7 @@ async function generatePDF() {
       <div class="brand-logo-wrap">
         <img src="${logoBase64}" alt="Ghumo Firoo" class="brand-logo-img">
         <div class="brand-text">
-          <span class="brand-name">Ghumo Firoo Journeys</span>
+          <span class="brand-name">Ghumo Firoo Travels</span>
           <span class="brand-tagline">Ministry of Tourism Registered Partner</span>
         </div>
       </div>
@@ -701,7 +701,7 @@ async function generatePDF() {
       <div class="brand-logo-wrap">
         <img src="${logoBase64}" alt="Ghumo Firoo" class="brand-logo-img">
         <div class="brand-text">
-          <span class="brand-name">Ghumo Firoo Journeys</span>
+          <span class="brand-name">Ghumo Firoo Travels</span>
           <span class="brand-tagline">Ministry of Tourism Registered Partner</span>
         </div>
       </div>
@@ -809,7 +809,7 @@ async function generatePDF() {
       <div class="brand-logo-wrap">
         <img src="${logoBase64}" alt="Ghumo Firoo" class="brand-logo-img">
         <div class="brand-text">
-          <span class="brand-name">Ghumo Firoo Journeys</span>
+          <span class="brand-name">Ghumo Firoo Travels</span>
           <span class="brand-tagline">Ministry of Tourism Registered Partner</span>
         </div>
       </div>

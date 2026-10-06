@@ -1,5 +1,5 @@
 <?php
-// ai_chat.php — Dynamic AI Travel Designer for Ghumo Firoo Journeys
+// ai_chat.php — Dynamic AI Travel Designer for Ghumo Firoo Travels
 header('Content-Type: application/json');
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Headers: Content-Type, Authorization');
@@ -51,7 +51,7 @@ if (!empty($livePackages)) {
 $geminiApiUrl = getenv('GEMINI_WEB2API_URL') ?: getenv('VITE_GEMINI_WEB2API_URL') ?: 'https://gemini-web2api-sxti.onrender.com/v1';
 $geminiApiKey = getenv('GEMINI_API_KEY') ?: getenv('VITE_GEMINI_API_KEY') ?: '';
 
-$systemPrompt = "You are Sarah, Lead AI Travel Designer for Ghumo Firoo Journeys — India's premier luxury travel agency (Ministry of Tourism Registered Partner, Official Evoke Partner).
+$systemPrompt = "You are Sarah, Lead AI Travel Designer for Ghumo Firoo Travels — India's premier luxury travel agency (Ministry of Tourism Registered Partner, Official Evoke Partner).
 
 YOUR PERSONALITY & RULES:
 1. Speak warmly, naturally, and professionally like an expert human luxury travel designer.
@@ -81,7 +81,7 @@ if (!empty($geminiApiKey)) {
         ],
         [
             'role' => 'model',
-            'parts' => [['text' => "Understood! I'm Sarah, Senior AI Travel Designer at Ghumo Firoo Journeys. I will maintain context and provide bespoke luxury holiday recommendations."]]
+            'parts' => [['text' => "Understood! I'm Sarah, Senior AI Travel Designer at Ghumo Firoo Travels. I will maintain context and provide bespoke luxury holiday recommendations."]]
         ]
     ];
 
@@ -226,7 +226,7 @@ function generateDynamicDatabaseReply(string $msg, array $history, array $livePa
     // GREETINGS FILTER
     $greetings = ['hi', 'hello', 'hey', 'namaste', 'good morning', 'good afternoon', 'good evening', 'hola', 'start', 'help', 'menu', 'hi there'];
     if (in_array($query, $greetings)) {
-        return "Hello! 👋 I'm **Sarah**, Senior AI Travel Designer at Ghumo Firoo Journeys (Official Evoke Partner).\n\nWhich dream destination are you looking to explore next (Rann Utsav Kutch, Coorg, Char Dham Yatra, Kashmir, Kerala, Rajasthan, Europe, Thailand, Bali, or Dubai)? Tell me a bit about your travel plans!";
+        return "Hello! 👋 I'm **Sarah**, Senior AI Travel Designer at Ghumo Firoo Travels (Official Evoke Partner).\n\nWhich dream destination are you looking to explore next (Rann Utsav Kutch, Coorg, Char Dham Yatra, Kashmir, Kerala, Rajasthan, Europe, Thailand, Bali, or Dubai)? Tell me a bit about your travel plans!";
     }
 
     if (!empty($livePackages)) {

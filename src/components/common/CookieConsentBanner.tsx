@@ -72,7 +72,7 @@ export const CookieConsentBanner: React.FC = () => {
                 </span>
               </h3>
               <p className="text-[11px] text-slate-400 font-light">
-                Ghumo Firoo Journeys
+                Ghumo Firoo Travels
               </p>
             </div>
           </div>

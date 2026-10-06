@@ -1,7 +1,7 @@
 <?php
 /**
  * Interactive API Schema Specification & Data Contract Inspector
- * Ghumo Firoo Journeys Enterprise Backend
+ * Ghumo Firoo Travels Enterprise Backend
  */
 header('Content-Type: application/json; charset=utf-8');
 header('Access-Control-Allow-Origin: *');

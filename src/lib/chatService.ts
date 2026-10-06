@@ -28,7 +28,7 @@ const CANDIDATE_GEMINI_MODELS = [
   'gemini-flash-latest'
 ];
 
-const SYSTEM_PROMPT = `You are Sarah, Lead Travel Designer & Concierge at Ghumo Firoo Journeys — India's premier luxury travel company (Ministry of Tourism Registered Partner, Official Evoke Partner).
+const SYSTEM_PROMPT = `You are Sarah, Lead Travel Designer & Concierge at Ghumo Firoo Travels — India's premier luxury travel company (Ministry of Tourism Registered Partner, Official Evoke Partner).
 
 YOUR CHAT PERSONALITY & RULES:
 1. Speak warmly, naturally, and concisely like a real luxury travel designer chatting on WhatsApp/LiveChat. Avoid stiff essays or robotically long lectures.
@@ -70,7 +70,7 @@ export const generateChatResponse = async (
       },
       {
         role: 'model',
-        parts: [{ text: "Hello! I'm Sarah, Lead Travel Designer at Ghumo Firoo Journeys. How can I help you design your dream holiday?" }]
+        parts: [{ text: "Hello! I'm Sarah, Lead Travel Designer at Ghumo Firoo Travels. How can I help you design your dream holiday?" }]
       }
     ];
 
@@ -279,7 +279,7 @@ function getRichDestinationReply(msg: string, history: ChatMessage[], context?: 
 
   // 2. GREETINGS
   if (entities.isGreeting && !entities.destination) {
-    return "Hello! 👋 I'm **Sarah**, Senior Travel Designer at Ghumo Firoo Journeys (Official Evoke Partner).\n\nWhich dream destination are you looking to explore next (Rann Utsav Kutch, Kashmir, Kerala, Ooty, Char Dham Yatra, Europe, Thailand, Bali, or Dubai)? Tell me a bit about your travel plans!";
+    return "Hello! 👋 I'm **Sarah**, Senior Travel Designer at Ghumo Firoo Travels (Official Evoke Partner).\n\nWhich dream destination are you looking to explore next (Rann Utsav Kutch, Kashmir, Kerala, Ooty, Char Dham Yatra, Europe, Thailand, Bali, or Dubai)? Tell me a bit about your travel plans!";
   }
 
   // 3. CONTACT INFO CAPTURED

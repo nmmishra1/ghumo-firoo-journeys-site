@@ -53,7 +53,7 @@ function wrapLuxuryEmailTemplate($subject, $contentHtml) {
         <div class='main-card'>
           <div class='header'>
             <a href='https://ghumofiroo.com' target='_blank'>
-              <img src='https://ghumofiroo.com/ghumo-firoo-logo.png' alt='Ghumo Firoo Journeys' class='header-logo' />
+              <img src='https://ghumofiroo.com/ghumo-firoo-logo.png' alt='Ghumo Firoo Travels' class='header-logo' />
             </a>
             <div>
               <span class='badge'>🌐 Ministry of Tourism (MoT) NIDHI Registered Partner</span>
@@ -65,7 +65,7 @@ function wrapLuxuryEmailTemplate($subject, $contentHtml) {
           <div class='footer'>
             <p style='margin: 0 0 6px 0; color: #F8FAFC;'><strong>Ghumo Firoo Travels Private Limited</strong></p>
             <p style='margin: 0 0 10px 0; color: #94A3B8;'>📞 Concierge: <a href='tel:+919910987264' style='color: #E5C378;'>+91 99109 87264</a> / <a href='tel:+919870229792' style='color: #E5C378;'>+91 98702 29792</a> | ✉️ <a href='mailto:booking@ghumofiroo.com' style='color: #E5C378;'>booking@ghumofiroo.com</a></p>
-            <p style='margin: 0; color: #64748B;'>&copy; {$year} Ghumo Firoo Journeys. All rights reserved. Built for Luxury Travel.</p>
+            <p style='margin: 0; color: #64748B;'>&copy; {$year} Ghumo Firoo Travels. All rights reserved. Built for Luxury Travel.</p>
           </div>
         </div>
       </div>
@@ -83,7 +83,7 @@ function sendEmailPHPMailer($to, $subject, $htmlBody) {
     $resendKey = getenv('RESEND_API_KEY') ?: '';
     if (!empty($resendKey)) {
         $resendPayload = json_encode([
-            'from' => 'Ghumo Firoo Journeys <noreply@ghumofiroo.com>',
+            'from' => 'Ghumo Firoo Travels <noreply@ghumofiroo.com>',
             'to' => [$to],
             'subject' => $subject,
             'html' => $htmlBody

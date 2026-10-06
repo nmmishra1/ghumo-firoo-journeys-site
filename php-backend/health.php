@@ -1,6 +1,6 @@
 <?php
 /**
- * Ghumo Firoo Journeys Enterprise Health & Performance Monitor
+ * Ghumo Firoo Travels Enterprise Health & Performance Monitor
  * Endpoint: /php-backend/health.php
  */
 

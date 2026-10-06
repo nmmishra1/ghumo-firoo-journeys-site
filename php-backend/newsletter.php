@@ -41,7 +41,7 @@ try {
     // 4. Send Automated Luxury HTML Welcome Email to Subscriber
     require_once __DIR__ . '/payment_mail_helper.php';
     
-    $welcomeSubject = "Welcome to Ghumo Firoo Journeys — Your 2026 Private Travel Journal";
+    $welcomeSubject = "Welcome to Ghumo Firoo Travels — Your 2026 Private Travel Journal";
     $welcomeHtml = "
     <!DOCTYPE html>
     <html>
@@ -61,7 +61,7 @@ try {
     <body>
       <div class='container'>
         <div class='header'>
-          <a href='https://ghumofiroo.com' class='logo'>✨ GHUMO FIROO JOURNEYS</a>
+          <a href='https://ghumofiroo.com' class='logo'>✨ GHUMO FIROO TRAVELS</a>
           <p style='color: #94A3B8; font-size: 12px; margin-top: 4px;'>Ministry of Tourism (MoT) NIDHI Registered Partner</p>
         </div>
         <div class='content'>
@@ -87,7 +87,7 @@ try {
         </div>
         <div class='footer'>
           <p>Ghumo Firoo Travels • Delhi NCR, India • Concierge: +91 99109 87264 / +91 98702 29792</p>
-          <p>&copy; " . date('Y') . " Ghumo Firoo Journeys. All rights reserved.</p>
+          <p>&copy; " . date('Y') . " Ghumo Firoo Travels. All rights reserved.</p>
         </div>
       </div>
     </body>

@@ -1,5 +1,5 @@
 <?php
-// send_whatsapp.php — Universal WhatsApp Dispatcher for Ghumo Firoo Journeys
+// send_whatsapp.php — Universal WhatsApp Dispatcher for Ghumo Firoo Travels
 header('Content-Type: application/json');
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Headers: Content-Type, Authorization');
@@ -35,7 +35,7 @@ function sendWhatsAppPdf(string $phone, string $pdfUrl, string $fileName = 'Ghum
                 'url'      => $pdfUrl,
                 'filename' => $fileName
             ],
-            'caption' => $caption ?: '📄 Here is your customized travel PDF quote from Ghumo Firoo Journeys!'
+            'caption' => $caption ?: '📄 Here is your customized travel PDF quote from Ghumo Firoo Travels!'
         ];
     } else {
         $url = $baseUrl;

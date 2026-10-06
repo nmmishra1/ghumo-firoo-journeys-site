@@ -1,5 +1,5 @@
 /**
- * Voucher & Invoice Service — Ghumo Firoo Journeys
+ * Voucher & Invoice Service — Ghumo Firoo Travels
  * Generates GST Invoices, Hotel Vouchers, Cab/Transport Vouchers, and Activity Passes
  */
 
@@ -351,7 +351,7 @@ export function generateHotelVoucherPDF(data: HotelVoucherData): jsPDF {
 
   doc.setFontSize(8);
   doc.setTextColor(100, 116, 139);
-  doc.text('Ghumo Firoo Journeys — Hotel Partner Voucher', 14, 280);
+  doc.text('Ghumo Firoo Travels — Hotel Partner Voucher', 14, 280);
 
   return doc;
 }
@@ -416,7 +416,7 @@ export function generateCabVoucherPDF(data: CabVoucherData): jsPDF {
 
   doc.setFontSize(8);
   doc.setTextColor(100, 116, 139);
-  doc.text('Ghumo Firoo Journeys — Cab Partner Voucher', 14, 280);
+  doc.text('Ghumo Firoo Travels — Cab Partner Voucher', 14, 280);
 
   return doc;
 }
@@ -439,7 +439,7 @@ export function generateActivityVoucherPDF(data: ActivityVoucherData): jsPDF {
 
   doc.setFontSize(9);
   doc.setFont('helvetica', 'normal');
-  doc.text('Ghumo Firoo Journeys | Concierge Desk: +91-9876543210', 14, 27);
+  doc.text('Ghumo Firoo Travels | Concierge Desk: +91-9876543210', 14, 27);
 
   doc.text(`Voucher #: ${data.voucherNumber}`, 145, 18);
   doc.text(`Date: ${data.bookingDate}`, 145, 25);
@@ -486,7 +486,7 @@ export function generateActivityVoucherPDF(data: ActivityVoucherData): jsPDF {
 
   doc.setFontSize(8);
   doc.setTextColor(100, 116, 139);
-  doc.text('Ghumo Firoo Journeys — Official Activity Voucher', 14, 280);
+  doc.text('Ghumo Firoo Travels — Official Activity Voucher', 14, 280);
 
   return doc;
 }
@@ -511,7 +511,7 @@ export function generateMasterVoucherPDF(data: MasterVoucherData): jsPDF {
     doc.setTextColor(255, 255, 255);
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(16);
-    doc.text('GHUMO FIROO JOURNEYS', 14, 16);
+    doc.text('GHUMO FIROO TRAVELS', 14, 16);
 
     doc.setFontSize(8.5);
     doc.setFont('helvetica', 'normal');
@@ -747,14 +747,14 @@ export function generateMasterVoucherPDF(data: MasterVoucherData): jsPDF {
   // Footer Sign-off
   doc.setFontSize(7.5);
   doc.setTextColor(100, 116, 139);
-  doc.text('Generated electronically by Ghumo Firoo Journeys CRM. No physical signature required.', 14, 284);
-  doc.text('Authorized Operations Desk — Ghumo Firoo Journeys', 125, 284);
+  doc.text('Generated electronically by Ghumo Firoo Travels CRM. No physical signature required.', 14, 284);
+  doc.text('Authorized Operations Desk — Ghumo Firoo Travels', 125, 284);
 
   return doc;
 }
 
 /**
- * Standard Destination Code resolver across Ghumo Firoo Journeys
+ * Standard Destination Code resolver across Ghumo Firoo Travels
  */
 export function getDestinationCode(dest?: string, title?: string): string {
   const text = `${dest || ''} ${title || ''}`.toLowerCase();

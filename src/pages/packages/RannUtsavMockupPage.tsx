@@ -625,7 +625,7 @@ const RannUtsavMockupPage: React.FC = () => {
               </div>
               <div>
                 <span className="font-serif text-xl font-black tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-amber-400 to-yellow-500 block leading-tight">
-                  GHUMO FIROO JOURNEYS
+                  GHUMO FIROO TRAVELS
                 </span>
                 <span className="text-[10px] font-bold text-slate-300 tracking-wider uppercase block">
                   Authorized Tent City Booking Partner

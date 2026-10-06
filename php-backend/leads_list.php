@@ -1,5 +1,5 @@
 <?php
-// leads_list.php — returns all active leads for Ghumo Firoo Journeys CRM.
+// leads_list.php — returns all active leads for Ghumo Firoo Travels CRM.
 header('Content-Type: application/json');
 header('Access-Control-Allow-Origin: https://ghumofiroo.com');
 header('Access-Control-Allow-Headers: Content-Type, Authorization');

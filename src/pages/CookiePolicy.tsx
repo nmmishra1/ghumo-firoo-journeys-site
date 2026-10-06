@@ -40,7 +40,7 @@ const CookiePolicy: React.FC = () => {
   return (
     <Layout>
       <SEO 
-        title="Cookie Policy | Ghumo Firoo Journeys"
+        title="Cookie Policy | Ghumo Firoo Travels"
         description="Learn about the cookies and tracking technologies used by Ghumo Firoo Travels, their purpose, and how you can manage your preferences."
         canonicalUrl="/cookie-policy"
       />
@@ -69,7 +69,7 @@ const CookiePolicy: React.FC = () => {
                   <Settings className="w-3.5 h-3.5" /> Your Current Cookie Settings
                 </span>
                 <h3 className="text-lg font-bold text-white font-serif">
-                  Manage Your Ghumo Firoo Journey Preferences
+                  Manage Your Ghumo Firoo Travels Preferences
                 </h3>
               </div>
 

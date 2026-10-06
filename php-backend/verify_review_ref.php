@@ -162,7 +162,7 @@ try {
     $finalLeadId = $leadId ?: $ref;
     $finalCustomerName = $customerName ?: ($existingReview['customer_name'] ?? 'Valued Traveler');
     $finalPackageName = $packageName ?: ($existingReview['package_name'] ?? "Booking Ref #".strtoupper(substr($ref, 0, 8)));
-    $finalDestinations = !empty($destinations) ? array_values(array_unique($destinations)) : [(!empty($existingReview['destination']) ? $existingReview['destination'] : 'Ghumo Firoo Journey')];
+    $finalDestinations = !empty($destinations) ? array_values(array_unique($destinations)) : [(!empty($existingReview['destination']) ? $existingReview['destination'] : 'Ghumo Firoo Travels')];
     $finalStartDate = $startDate ?: ($existingReview['travel_date'] ?? date('Y-m-d'));
     $finalEndDate = $endDate ?: ($existingReview['travel_date'] ?? date('Y-m-d'));
 

@@ -3304,7 +3304,7 @@ const CRM = () => {
           <div className="flex items-center space-x-3 overflow-hidden">
             <img 
               src="/ghumo-firoo-logo.png" 
-              alt="Ghumo Firoo Journeys" 
+              alt="Ghumo Firoo Travels" 
               className="h-10 w-auto object-contain shrink-0 cursor-pointer hover:scale-105 transition-all drop-shadow-md" 
               onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
             />
@@ -3532,7 +3532,7 @@ const CRM = () => {
                   <div className="flex items-start gap-4">
                     <img 
                       src="/ghumo-firoo-logo.png" 
-                      alt="Ghumo Firoo Journeys" 
+                      alt="Ghumo Firoo Travels" 
                       className="h-16 w-auto object-contain shrink-0 bg-white/5 p-2 rounded-2xl border border-white/10 shadow-lg drop-shadow-md hidden sm:block" 
                     />
                     <div className="space-y-1.5 max-w-3xl">
@@ -3548,7 +3548,7 @@ const CRM = () => {
                         Welcome Back, <span className="bg-gradient-to-r from-amber-400 to-amber-200 bg-clip-text text-transparent">{userProfile?.full_name || 'Superadmin'}</span>
                       </h2>
                       <p className="text-xs text-slate-300 font-semibold leading-relaxed">
-                        Real-time luxury travel operations, lead pipeline performance, and automated customer proposal workflows for <strong className="text-amber-400 font-extrabold">Ghumo Firoo Journeys</strong>.
+                        Real-time luxury travel operations, lead pipeline performance, and automated customer proposal workflows for <strong className="text-amber-400 font-extrabold">Ghumo Firoo Travels</strong>.
                       </p>
                     </div>
                   </div>
@@ -4887,7 +4887,7 @@ const CRM = () => {
                                         const pax = l.adult_count || 2;
                                         const msg = encodeURIComponent(
 `Namaste ${guestName}! 🙏
-Thank you for connecting with Ghumo Firoo Journeys.
+Thank you for connecting with Ghumo Firoo Travels.
 
 Here is your official travel proposal & quotation:
 📄 *Quote Ref:* ${qRef}
@@ -5580,7 +5580,7 @@ Ghumo Firoo Travels`
                             const pax = activeLead.adult_count || 2;
                             const msg = encodeURIComponent(
 `Namaste ${guestName}! 🙏
-Thank you for connecting with Ghumo Firoo Journeys.
+Thank you for connecting with Ghumo Firoo Travels.
 
 Here is your official travel proposal & quotation:
 📄 *Quote Ref:* ${qRef}

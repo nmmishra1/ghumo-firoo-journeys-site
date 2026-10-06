@@ -46,7 +46,7 @@ export const LiveChatWidget: React.FC = () => {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
-      text: "Hello! 👋 I'm **Sarah**, Senior Travel Designer at Ghumo Firoo Journeys (Official Evoke Partner).\n\nWhich dream destination are you planning next (Rann Utsav 2026-27, Kashmir, Kerala, Ooty, Europe, Thailand, Bali, or Dubai)?",
+      text: "Hello! 👋 I'm **Sarah**, Senior Travel Designer at Ghumo Firoo Travels (Official Evoke Partner).\n\nWhich dream destination are you planning next (Rann Utsav 2026-27, Kashmir, Kerala, Ooty, Europe, Thailand, Bali, or Dubai)?",
       sender: 'bot',
       timestamp: new Date()
     }

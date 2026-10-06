@@ -187,22 +187,22 @@ export const WhatsAppActionModal: React.FC<WhatsAppActionModalProps> = ({ isOpen
           </div>
           <div className="p-3 bg-slate-950/80 rounded-lg text-slate-200 border border-slate-800/80 leading-relaxed font-sans whitespace-pre-line text-xs">
             {templateType === 'welcome_greeting' && (
-              `🌟 WELCOME TO GHUMO FIROO JOURNEYS! 🌟\n\nDear ${customerName},\nThank you for reaching out regarding your ${destination} trip!\n📅 What is the best time for a short 2-min call today?\n📱 A) Morning (10 AM-1 PM)  📱 B) Afternoon (1 PM-5 PM)  📱 C) Evening (5 PM-8 PM)`
+              `🌟 WELCOME TO GHUMO FIROO TRAVELS! 🌟\n\nDear ${customerName},\nThank you for reaching out regarding your ${destination} trip!\n📅 What is the best time for a short 2-min call today?\n📱 A) Morning (10 AM-1 PM)  📱 B) Afternoon (1 PM-5 PM)  📱 C) Evening (5 PM-8 PM)`
             )}
             {templateType === 'quote_pdf' && (
-              `🌟 GHUMO FIROO JOURNEYS — LUXURY TRAVEL QUOTE 🌟\n\nDear ${customerName},\nGreetings from Ghumo Firoo Journeys! 🏰✨\nThank you for inquiring about your upcoming ${destination} package.\n📄 Attached PDF: Custom Itinerary & Complete Price Breakdown (${price})`
+              `🌟 GHUMO FIROO TRAVELS — LUXURY TRAVEL QUOTE 🌟\n\nDear ${customerName},\nGreetings from Ghumo Firoo Travels! 🏰✨\nThank you for inquiring about your upcoming ${destination} package.\n📄 Attached PDF: Custom Itinerary & Complete Price Breakdown (${price})`
             )}
             {templateType === 'payment_reminder' && (
-              `💳 GHUMO FIROO JOURNEYS — RESERVATION PAYMENT LINK 💳\n\nDear ${customerName},\nYour booking for ${destination} is ready for confirmation!\n💰 Amount Due: ${price}\n🔗 Click to Pay: https://ghumofiroo.com/pay?lead=${lead.id || 10492}`
+              `💳 GHUMO FIROO TRAVELS — RESERVATION PAYMENT LINK 💳\n\nDear ${customerName},\nYour booking for ${destination} is ready for confirmation!\n💰 Amount Due: ${price}\n🔗 Click to Pay: https://ghumofiroo.com/pay?lead=${lead.id || 10492}`
             )}
             {templateType === 'booking_voucher' && (
-              `🎉 BOOKING CONFIRMED — GHUMO FIROO JOURNEYS 🎉\n\nDear ${customerName},\nPack your bags! Your holiday to ${destination} is officially confirmed!\n📄 Attached: Official Booking Confirmation Voucher & Invoice PDF`
+              `🎉 BOOKING CONFIRMED — GHUMO FIROO TRAVELS 🎉\n\nDear ${customerName},\nPack your bags! Your holiday to ${destination} is officially confirmed!\n📄 Attached: Official Booking Confirmation Voucher & Invoice PDF`
             )}
             {templateType === 'post_trip_review' && (
-              `❤️ THANK YOU FOR TRAVELING WITH GHUMO FIROO JOURNEYS! ❤️\n\nDear ${customerName},\nWe hope you had a magical ${destination} holiday!\n⭐ Share Your Review: https://ghumofiroo.com/review`
+              `❤️ THANK YOU FOR TRAVELING WITH GHUMO FIROO TRAVELS! ❤️\n\nDear ${customerName},\nWe hope you had a magical ${destination} holiday!\n⭐ Share Your Review: https://ghumofiroo.com/review`
             )}
             {templateType === 'custom_text' && (
-              `Hello ${customerName}, greetings from Ghumo Firoo Journeys (+91 98702 29792)! How can we assist with your ${destination} travel plans?`
+              `Hello ${customerName}, greetings from Ghumo Firoo Travels (+91 98702 29792)! How can we assist with your ${destination} travel plans?`
             )}
           </div>
         </div>

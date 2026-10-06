@@ -995,7 +995,7 @@ keywords: ${blog.keywords.join(', ')}
 
 Welcome to the ultimate travel guide for **${blog.region}**! Whether you are a first-time traveler, planning a romantic honeymoon, or arranging a spiritual yatra for your family, this guide covers everything you need to know. 
 
-In this comprehensive handbook, we share insider tips, travel logistics, budgeting advice, and custom packages curated by **Ghumo Firoo Journeys**, your trusted premium travel partner.
+In this comprehensive handbook, we share insider tips, travel logistics, budgeting advice, and custom packages curated by **Ghumo Firoo Travels**, your trusted premium travel partner.
 
 ---
 
@@ -1057,7 +1057,7 @@ To make the most of your holiday, we recommend a balanced travel pace:
 
 ## 5. Plan Your Customized Dream Tour
 
-At **Ghumo Firoo Journeys**, we believe no two travelers are alike. We specialize in crafting tailor-made itineraries that match your dates, budget, and travel style perfectly.
+At **Ghumo Firoo Travels**, we believe no two travelers are alike. We specialize in crafting tailor-made itineraries that match your dates, budget, and travel style perfectly.
 
 ### Why Book With Ghumo Firoo?
 * **Verified Stays**: Hand-selected hotels and luxury tents ensuring safety and premium comfort.

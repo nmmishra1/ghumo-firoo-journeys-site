@@ -71,7 +71,7 @@ export default function Reviews() {
   return (
     <Layout>
       <SEO
-        title="Traveler Reviews & Testimonials | Ghumo Firoo Journeys"
+        title="Traveler Reviews & Testimonials | Ghumo Firoo Travels"
         description="Read authentic verified reviews and stories from guests who traveled across Rajasthan, Kerala, Rann of Kutch, Char Dham, and international destinations with Ghumo Firoo."
         canonicalUrl="https://ghumofiroo.com/reviews"
         url="https://ghumofiroo.com/reviews"
@@ -297,7 +297,7 @@ export default function Reviews() {
                           </h4>
                           <p className="text-[11px] font-semibold text-amber-300 flex items-center gap-1">
                             <MapPin className="w-3 h-3 inline text-amber-400" />
-                            {review.location || 'Ghumo Firoo Journey'}
+                            {review.location || 'Ghumo Firoo Travels'}
                           </p>
                         </div>
                       </div>

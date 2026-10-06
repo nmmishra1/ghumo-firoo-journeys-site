@@ -1,4 +1,4 @@
-# 🌍 Ghumo Firoo Journeys — Luxury Travel Platform & Enterprise CRM
+# 🌍 Ghumo Firoo Travels — Luxury Travel Platform & Enterprise CRM
 
 <div align="center">
 
@@ -22,7 +22,7 @@
 
 ## 📖 Executive Summary
 
-**Ghumo Firoo Journeys** is a full-stack, enterprise-grade travel commerce platform and customer relationship management (CRM) suite designed for high-touch luxury bespoke travel, group tours, and pilgrimage expeditions across India, Europe, Southeast Asia, and the Middle East.
+**Ghumo Firoo Travels** is a full-stack, enterprise-grade travel commerce platform and customer relationship management (CRM) suite designed for high-touch luxury bespoke travel, group tours, and pilgrimage expeditions across India, Europe, Southeast Asia, and the Middle East.
 
 The platform combines a **high-speed pre-rendered static storefront** optimized for Google SEO Core Web Vitals with a **robust B2B/B2C CRM ecosystem** featuring automated itinerary generation, real-time hotel contracting, cab pricing engines, multi-channel lead tracking, and Baileys-driven WhatsApp proposal dispatch.
 
@@ -221,7 +221,7 @@ The project utilizes automated GitHub Actions (`.github/workflows/deploy.yml`):
 
 <div align="center">
 
-**© 2026 Ghumo Firoo Journeys. All Rights Reserved.**
+**© 2026 Ghumo Firoo Travels. All Rights Reserved.**
 
 *Crafting Bespoke Luxury Memories Across India & Beyond.*
 

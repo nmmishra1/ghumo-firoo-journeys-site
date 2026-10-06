@@ -846,7 +846,7 @@ const Index: React.FC = () => {
                           </div>
                           <div>
                             <h4 className="text-xs uppercase tracking-wider font-extrabold text-white">{review.reviewer_name}</h4>
-                            <p className="text-[11px] font-semibold text-amber-300">{review.location || 'Ghumo Firoo Journey'}</p>
+                            <p className="text-[11px] font-semibold text-amber-300">{review.location || 'Ghumo Firoo Travels'}</p>
                           </div>
                         </div>
 

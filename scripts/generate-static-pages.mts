@@ -141,20 +141,20 @@ const staticRoutesMeta: Record<string, { title: string; description: string; h1:
     `
   },
   '/reviews': {
-    title: 'Traveler Reviews & Testimonials | Ghumo Firoo Journeys',
-    description: 'Read authentic verified guest reviews and stories from travelers who explored Rajasthan, Kerala, Rann of Kutch, Char Dham, and international destinations with Ghumo Firoo.',
-    h1: 'Traveler Reviews & Verified Experiences — Ghumo Firoo Journeys',
+    title: 'Traveler Reviews & Testimonials | Ghumo Firoo Travels',
+    description: 'Read authentic verified guest reviews and stories from travelers who explored Rajasthan, Kerala, Rann of Kutch, Char Dham, and international destinations with Ghumo Firoo Travels.',
+    h1: 'Traveler Reviews & Verified Experiences — Ghumo Firoo Travels',
     h2: 'Real Stories, Unedited Photos, and Genuine Feedback from Our Guests',
     bodyHtml: `
       <section>
         <h2>Verified Guest Testimonials & Experiences</h2>
-        <p>Explore real traveler feedback, ratings, and vacation photos from guests who booked their journeys with Ghumo Firoo. With an aggregate 4.9/5 star rating across hotels, transportation, sightseeing, and planning support, our priority is crafting memorable journeys.</p>
+        <p>Explore real traveler feedback, ratings, and vacation photos from guests who booked their journeys with Ghumo Firoo Travels. With an aggregate 4.9/5 star rating across hotels, transportation, sightseeing, and planning support, our priority is crafting memorable journeys.</p>
       </section>
     `
   },
   '/review': {
-    title: 'Submit Your Trip Review | Ghumo Firoo Journeys',
-    description: 'Share your feedback, ratings, and vacation photos with Ghumo Firoo Journeys. Help fellow travelers discover memorable tour experiences.',
+    title: 'Submit Your Trip Review | Ghumo Firoo Travels',
+    description: 'Share your feedback, ratings, and vacation photos with Ghumo Firoo Travels. Help fellow travelers discover memorable tour experiences.',
     h1: 'Share Your Travel Story & Feedback',
     h2: 'Help Us Craft Better Journeys by Reviewing Your Trip Details',
     bodyHtml: `

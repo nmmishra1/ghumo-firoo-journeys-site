@@ -159,7 +159,7 @@ if (!empty($dbPackages)) {
 }
 
 // 3. BUILD AI SYSTEM & GENERATION PROMPTS
-$systemPrompt = "You are Sarah, Chief Travel Designer & Senior Destination Architect at Ghumo Firoo Journeys — India's premier luxury & experiential travel company.
+$systemPrompt = "You are Sarah, Chief Travel Designer & Senior Destination Architect at Ghumo Firoo Travels — India's premier luxury & experiential travel company.
 Your role is to assemble hyper-detailed, practical, and breathtaking day-by-day travel itineraries and quote cost proposals for private travelers.
 
 STRICT OPERATIONAL RULES:

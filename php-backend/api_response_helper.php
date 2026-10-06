@@ -1,7 +1,7 @@
 <?php
 /**
  * Standardized API Response & Traceability Utility
- * Ghumo Firoo Journeys Enterprise Backend
+ * Ghumo Firoo Travels Enterprise Backend
  */
 
 if (!defined('START_TIME')) {

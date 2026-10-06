@@ -93,7 +93,7 @@ try {
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $input = json_decode(file_get_contents('php://input'), true);
         $title = trim($input['title'] ?? 'Luxury Travel Digest');
-        $rawSubject = trim($input['subject'] ?? 'Exclusive 2026 Travel Escapes — Ghumo Firoo Journeys');
+        $rawSubject = trim($input['subject'] ?? 'Exclusive 2026 Travel Escapes — Ghumo Firoo Travels');
         $rawBodyHtml = $input['body_html'] ?? '';
         $targetEmails = $input['target_emails'] ?? [];
 

@@ -242,7 +242,7 @@ export default function ReviewForm() {
             lead_id: bookingReference,
             customer_name: 'Valued Traveler',
             itinerary_name: `Booking Ref #${bookingReference.slice(0, 8).toUpperCase()}`,
-            destinations: ['Ghumo Firoo Journey'],
+            destinations: ['Ghumo Firoo Travels'],
             travel_start_date: new Date().toISOString().split('T')[0],
             travel_end_date: new Date().toISOString().split('T')[0],
             package_type: 'domestic'
@@ -531,7 +531,7 @@ export default function ReviewForm() {
   if (!bookingReference && !booking && !isDirectReview) {
     return (
       <Layout>
-        <SEO title="Submit a Trip Review | Ghumo Firoo Journeys" description="Share your travel review with Ghumo Firoo" />
+        <SEO title="Submit a Trip Review | Ghumo Firoo Travels" description="Share your travel review with Ghumo Firoo Travels" />
         <div className="py-16 min-h-[80vh] flex items-center justify-center px-4 bg-gradient-to-b from-[#050A18] via-[#0B1026] to-[#0D1536]">
           <Card className="max-w-lg w-full bg-[#151D3B]/95 border border-amber-500/30 rounded-3xl p-6 sm:p-8 backdrop-blur-xl shadow-2xl text-white">
             <div className="text-center mb-6">
@@ -735,7 +735,7 @@ export default function ReviewForm() {
     return (
       <Layout>
         <SEO 
-          title="Review Status | Ghumo Firoo Journeys" 
+          title="Review Status | Ghumo Firoo Travels" 
           description="View your submitted travel review and current moderation status." 
         />
         <div className="py-12 bg-gradient-to-b from-slate-50 via-orange-50/20 to-slate-50 min-h-[85vh] px-4">
@@ -964,7 +964,7 @@ export default function ReviewForm() {
     );
   }
   
-  const destDisplay = customDestination.trim() || (booking?.destinations && booking.destinations.length > 0 ? booking.destinations.join(', ') : 'Ghumo Firoo Journey');
+  const destDisplay = customDestination.trim() || (booking?.destinations && booking.destinations.length > 0 ? booking.destinations.join(', ') : 'Ghumo Firoo Travels');
   
   return (
     <Layout>

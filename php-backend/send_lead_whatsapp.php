@@ -1,5 +1,5 @@
 <?php
-// send_lead_whatsapp.php — Branded CRM WhatsApp Dispatcher for Ghumo Firoo Journeys
+// send_lead_whatsapp.php — Branded CRM WhatsApp Dispatcher for Ghumo Firoo Travels
 header('Content-Type: application/json');
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Headers: Content-Type, Authorization');
@@ -85,9 +85,9 @@ $result = [];
 
 switch ($templateType) {
     case 'welcome_greeting':
-        $messageText = $customText ?: "🌟 *WELCOME TO GHUMO FIROO JOURNEYS!* 🌟\n\n"
+        $messageText = $customText ?: "🌟 *WELCOME TO GHUMO FIROO TRAVELS!* 🌟\n\n"
             . "Dear *{$customerName}*,\n\n"
-            . "Thank you for reaching out to *Ghumo Firoo Journeys* regarding your upcoming *{$destination}* travel plan! 🏰✨\n\n"
+            . "Thank you for reaching out to *Ghumo Firoo Travels* regarding your upcoming *{$destination}* travel plan! 🏰✨\n\n"
             . "We are preparing your customized holiday options.\n"
             . "📅 *What is the best time today for your dedicated Travel Concierge to connect with a short 2-minute call?*\n\n"
             . "📱 *A)* Morning (10 AM - 1 PM)\n"
@@ -99,9 +99,9 @@ switch ($templateType) {
         break;
 
     case 'quote_pdf':
-        $messageText = $customText ?: "🌟 *GHUMO FIROO JOURNEYS — LUXURY TRAVEL QUOTE* 🌟\n\n"
+        $messageText = $customText ?: "🌟 *GHUMO FIROO TRAVELS — LUXURY TRAVEL QUOTE* 🌟\n\n"
             . "Dear *{$customerName}*,\n\n"
-            . "Greetings from Ghumo Firoo Journeys! 🏰✨\n\n"
+            . "Greetings from Ghumo Firoo Travels! 🏰✨\n\n"
             . "Thank you for inquiring about your upcoming *{$destination}* holiday package.\n\n"
             . "📄 *Attached PDF*: Complete Day-by-Day Itinerary & Price Breakdown\n"
             . "💰 *Special Package Price*: *{$packagePrice}*\n"
@@ -119,7 +119,7 @@ switch ($templateType) {
 
     case 'payment_reminder':
         $payLink = $paymentUrl ?: "https://ghumofiroo.com/pay?lead={$leadId}";
-        $messageText = $customText ?: "💳 *GHUMO FIROO JOURNEYS — RESERVATION PAYMENT LINK* 💳\n\n"
+        $messageText = $customText ?: "💳 *GHUMO FIROO TRAVELS — RESERVATION PAYMENT LINK* 💳\n\n"
             . "Dear *{$customerName}*,\n\n"
             . "Your booking for *{$destination}* (*{$travelDates}*) is ready for instant confirmation!\n\n"
             . "📄 *Reference ID*: `#GF-{$leadId}`\n"
@@ -132,7 +132,7 @@ switch ($templateType) {
         break;
 
     case 'booking_voucher':
-        $messageText = $customText ?: "🎉 *BOOKING CONFIRMED — GHUMO FIROO JOURNEYS* 🎉\n\n"
+        $messageText = $customText ?: "🎉 *BOOKING CONFIRMED — GHUMO FIROO TRAVELS* 🎉\n\n"
             . "Dear *{$customerName}*,\n\n"
             . "Pack your bags! Your holiday to *{$destination}* is officially confirmed! 🧳✨\n\n"
             . "🎫 *Voucher ID*: `#VCH-{$leadId}`\n"
@@ -146,7 +146,7 @@ switch ($templateType) {
 
     case 'post_trip_review':
         $reviewLink = "https://ghumofiroo.com/review";
-        $messageText = $customText ?: "❤️ *THANK YOU FOR TRAVELING WITH GHUMO FIROO JOURNEYS!* ❤️\n\n"
+        $messageText = $customText ?: "❤️ *THANK YOU FOR TRAVELING WITH GHUMO FIROO TRAVELS!* ❤️\n\n"
             . "Dear *{$customerName}*,\n\n"
             . "We hope you had an unforgettable, magical experience on your *{$destination}* holiday! 🏔️✨\n\n"
             . "Could you spare 60 seconds to share your review with fellow travelers?\n"
@@ -159,7 +159,7 @@ switch ($templateType) {
 
     case 'custom_text':
     default:
-        $messageText = $customText ?: "Hello *{$customerName}*, greetings from Ghumo Firoo Journeys (+91 98702 29792)! How can we assist with your *{$destination}* travel plans?";
+        $messageText = $customText ?: "Hello *{$customerName}*, greetings from Ghumo Firoo Travels (+91 98702 29792)! How can we assist with your *{$destination}* travel plans?";
         $result = sendWhatsAppText($phone, $messageText);
         break;
 }

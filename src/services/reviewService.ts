@@ -88,7 +88,7 @@ const mockReviews: GoogleReview[] = [
 const mapDbReviewToGoogleReview = (db: any): GoogleReview => {
   const rawLoc = db.destination || '';
   const cleanLoc = (rawLoc.startsWith('Trip -') || rawLoc.startsWith('Booking Ref #'))
-    ? (rawLoc.includes('Customized') ? 'Jodhpur, Rajasthan' : 'Ghumo Firoo Journey')
+    ? (rawLoc.includes('Customized') ? 'Jodhpur, Rajasthan' : 'Ghumo Firoo Travels')
     : (rawLoc || 'India');
 
   return {

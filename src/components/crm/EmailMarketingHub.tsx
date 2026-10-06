@@ -28,7 +28,7 @@ export const EmailMarketingHub: React.FC = () => {
 
   // Form State
   const [title, setTitle] = useState('2026 Luxury Travel Special');
-  const [subject, setSubject] = useState('Exclusive 2026 Travel Inspiration — Ghumo Firoo Journeys');
+  const [subject, setSubject] = useState('Exclusive 2026 Travel Inspiration — Ghumo Firoo Travels');
   const [bodyHtml, setBodyHtml] = useState(getDefaultTemplate('rann-utsav'));
   const [selectedTemplate, setSelectedTemplate] = useState('rann-utsav');
   const [statusMessage, setStatusMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
@@ -114,7 +114,7 @@ export const EmailMarketingHub: React.FC = () => {
   function getDefaultTemplate(type: string): string {
     if (type === 'rann-utsav') {
       return `<h2 style="color: #0F172A; font-size: 22px; margin-top: 0; font-weight: 800;">Dear {{NAME}},</h2>
-<p style="font-size: 14px; color: #334155; line-height: 1.6;">Greetings from <strong>Ghumo Firoo Journeys</strong>! We are delighted to present an exclusive early-bird invitation for the official <strong>Rann Utsav Kutch {{YEAR}}</strong> White Desert festival season.</p>
+<p style="font-size: 14px; color: #334155; line-height: 1.6;">Greetings from <strong>Ghumo Firoo Travels</strong>! We are delighted to present an exclusive early-bird invitation for the official <strong>Rann Utsav Kutch {{YEAR}}</strong> White Desert festival season.</p>
 
 <div style="background: #FFFDF5; border-left: 4px solid #C9A25A; border: 1px solid #F3E8D0; padding: 18px; border-radius: 12px; margin: 20px 0;">
   <h3 style="color: #855B14; margin: 0 0 10px 0; font-size: 16px; font-weight: 800;">🎪 Rann Utsav Tent City Highlights & Packages:</h3>
@@ -136,7 +136,7 @@ export const EmailMarketingHub: React.FC = () => {
 <p style="font-size: 11px; color: #64748B; margin-top: 30px; text-align: center;">Need assistance? Speak with our Kutch Travel Specialist at <a href="tel:+919910987264" style="color: #855B14; font-weight: 700;">+91 99109 87264</a> | <a href="{{UNSUBSCRIBE_LINK}}" style="color: #94A3B8;">Unsubscribe</a></p>`;
     } else if (type === 'char-dham') {
       return `<h2 style="color: #0F172A; font-size: 22px; margin-top: 0; font-weight: 800;">Respected {{NAME}},</h2>
-<p style="font-size: 14px; color: #334155; line-height: 1.6;">Jai Badri Vishal! <strong>Ghumo Firoo Journeys</strong> is honored to open pre-registrations for the sacred <strong>Char Dham Yatra {{YEAR}} by Helicopter</strong>.</p>
+<p style="font-size: 14px; color: #334155; line-height: 1.6;">Jai Badri Vishal! <strong>Ghumo Firoo Travels</strong> is honored to open pre-registrations for the sacred <strong>Char Dham Yatra {{YEAR}} by Helicopter</strong>.</p>
 
 <div style="background: #FFFDF5; border-left: 4px solid #C9A25A; border: 1px solid #F3E8D0; padding: 18px; border-radius: 12px; margin: 20px 0;">
   <h3 style="color: #855B14; margin: 0 0 10px 0; font-size: 16px; font-weight: 800;">🚁 VIP Helicopter Yatra Benefits:</h3>
@@ -209,7 +209,7 @@ export const EmailMarketingHub: React.FC = () => {
     setSubject(`✈️ Exclusive Special: ${pkgTitle} (${duration}) — Reserve Your VIP Slot!`);
 
     const dynamicHtml = `<h2 style="color: #0F172A; font-size: 22px; margin-top: 0; font-weight: 800;">Dear {{NAME}},</h2>
-<p style="font-size: 14px; color: #334155; line-height: 1.6;">Greetings from <strong>Ghumo Firoo Journeys</strong>! We are delighted to present an exclusive luxury itinerary for <strong>${pkgTitle}</strong> (${duration}).</p>
+<p style="font-size: 14px; color: #334155; line-height: 1.6;">Greetings from <strong>Ghumo Firoo Travels</strong>! We are delighted to present an exclusive luxury itinerary for <strong>${pkgTitle}</strong> (${duration}).</p>
 
 <div style="background: #FFFDF5; border-left: 4px solid #C9A25A; border: 1px solid #F3E8D0; padding: 18px; border-radius: 12px; margin: 20px 0;">
   <h3 style="color: #855B14; margin: 0 0 10px 0; font-size: 16px; font-weight: 800;">🌟 ${pkgTitle} Package Highlights:</h3>
@@ -604,7 +604,7 @@ export const EmailMarketingHub: React.FC = () => {
               </h4>
               <div className="bg-[#FAF7F2] text-slate-900 rounded-xl p-5 shadow-inner min-h-[460px] overflow-y-auto border border-slate-200 text-left">
                 <div className="border-b border-slate-300/70 pb-3 mb-4 text-left">
-                  <p className="text-[11px] text-slate-600 font-semibold"><strong>From:</strong> Ghumo Firoo Journeys &lt;noreply@ghumofiroo.com&gt;</p>
+                  <p className="text-[11px] text-slate-600 font-semibold"><strong>From:</strong> Ghumo Firoo Travels &lt;noreply@ghumofiroo.com&gt;</p>
                   <p className="text-xs font-extrabold text-slate-900 mt-1"><strong>Subject:</strong> {subject}</p>
                 </div>
                 <div className="email-preview-content text-slate-900 text-left space-y-3" dangerouslySetInnerHTML={{ __html: bodyHtml }} />
