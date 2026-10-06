@@ -88,6 +88,13 @@ try {
         $stmt->execute();
         $reviews = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
+        // Check if requester is authenticated CRM staff
+        $isCrmStaff = false;
+        try {
+            $u = authenticate();
+            if ($u) $isCrmStaff = true;
+        } catch (Exception $ae) {}
+
         // Decode JSON columns and convert tinyint booleans for strict React types
         foreach ($reviews as &$rev) {
             $rev['rating'] = (int)$rev['rating'];
@@ -103,6 +110,11 @@ try {
                 $rev['photos'] = $decoded !== null ? $decoded : [];
             } else {
                 $rev['photos'] = [];
+            }
+
+            // Security Hardening: Never expose internal CRM lead/booking IDs to public website visitors
+            if (!$isCrmStaff) {
+                unset($rev['lead_id'], $rev['booking_id']);
             }
         }
 
