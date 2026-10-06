@@ -24,6 +24,8 @@ const staticRoutes = [
   '/terms-conditions',
   '/terms-of-service',
   '/refund-policy',
+  '/reviews',
+  '/review',
   '/custom-tour-packages',
   '/packages',
   '/explore-india',

@@ -115,18 +115,24 @@ export default function ReviewForm() {
   const [showGooglePrompt, setShowGooglePrompt] = useState(false);
   const [alreadyReviewed, setAlreadyReviewed] = useState(false);
   const [existingReview, setExistingReview] = useState<ExistingReviewDetails | null>(null);
-  
-  useEffect(() => {
-    async function verifyBooking() {
-      if (!bookingReference) {
-        setErrorMsg("No booking reference provided.");
-        setLoading(false);
-        return;
-      }
-      
-      try {
-        setLoading(true);
-        let verifiedData: any = null;
+
+  // Manual lookup & direct review states when URL has no reference
+  const [manualRefInput, setManualRefInput] = useState('');
+  const [isDirectReview, setIsDirectReview] = useState(false);
+  const [customDestination, setCustomDestination] = useState('');
+
+  const runVerifyBooking = async (ref: string) => {
+    const cleanRef = ref?.trim();
+    if (!cleanRef) {
+      setErrorMsg("Please enter a valid booking reference or trip ID.");
+      setLoading(false);
+      return;
+    }
+
+    try {
+      setLoading(true);
+      setErrorMsg(null);
+      let verifiedData: any = null;
 
         // Tier 1: Public PHP MySQL Verification Endpoint
         try {
@@ -302,10 +308,15 @@ export default function ReviewForm() {
       } finally {
         setLoading(false);
       }
-    }
-    
-    verifyBooking();
-  }, [bookingReference]);
+    };
+
+    useEffect(() => {
+      if (bookingReference) {
+        runVerifyBooking(bookingReference);
+      } else {
+        setLoading(false);
+      }
+    }, [bookingReference]);
   
   const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
@@ -439,8 +450,7 @@ export default function ReviewForm() {
       const payload = {
         booking_id: booking.id,
         lead_id: booking.lead_id || null,
-        customer_name: customerName,
-        destination: booking.destinations && booking.destinations.length > 0 ? booking.destinations.join(', ') : 'Unknown',
+        destination: destDisplay,
         package_name: booking.itinerary_name,
         travel_date: booking.travel_end_date,
         rating: ratings.overall,
@@ -518,6 +528,86 @@ export default function ReviewForm() {
     );
   }
   
+  if (!bookingReference && !booking && !isDirectReview) {
+    return (
+      <Layout>
+        <SEO title="Submit a Trip Review | Ghumo Firoo Journeys" description="Share your travel review with Ghumo Firoo" />
+        <div className="py-16 min-h-[80vh] flex items-center justify-center px-4 bg-gradient-to-b from-[#050A18] via-[#0B1026] to-[#0D1536]">
+          <Card className="max-w-lg w-full bg-[#151D3B]/95 border border-amber-500/30 rounded-3xl p-6 sm:p-8 backdrop-blur-xl shadow-2xl text-white">
+            <div className="text-center mb-6">
+              <div className="w-16 h-16 bg-gradient-to-tr from-amber-500/20 to-amber-500/40 text-amber-400 rounded-full flex items-center justify-center mx-auto mb-4 border border-amber-500/40 shadow-inner">
+                <Star className="w-8 h-8 fill-amber-400" />
+              </div>
+              <h2 className="text-2xl sm:text-3xl font-serif font-bold text-white">Share Your Experience</h2>
+              <p className="text-xs sm:text-sm text-slate-300 mt-2">
+                Help fellow travelers by sharing your thoughts on hotel stays, cab services, sightseeing, and tour planning.
+              </p>
+            </div>
+
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                if (manualRefInput.trim()) {
+                  runVerifyBooking(manualRefInput.trim());
+                }
+              }}
+              className="space-y-4"
+            >
+              <div className="space-y-2 text-left">
+                <Label htmlFor="manualRef" className="text-xs font-bold uppercase tracking-wider text-amber-400">
+                  Have a Booking ID or Trip Ref?
+                </Label>
+                <div className="flex gap-2">
+                  <Input
+                    id="manualRef"
+                    value={manualRefInput}
+                    onChange={(e) => setManualRefInput(e.target.value)}
+                    placeholder="e.g. GFJ-..., or Lead ID"
+                    className="bg-white/10 border-white/20 text-white placeholder:text-slate-400 rounded-xl"
+                  />
+                  <Button
+                    type="submit"
+                    className="bg-amber-500 hover:bg-amber-600 text-black font-bold px-5 rounded-xl whitespace-nowrap"
+                  >
+                    Verify Trip
+                  </Button>
+                </div>
+                <p className="text-[11px] text-slate-400">Found on your booking confirmation voucher or quote.</p>
+              </div>
+
+              <div className="relative my-6">
+                <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-white/10" /></div>
+                <div className="relative flex justify-center text-xs uppercase"><span className="bg-[#151D3B] px-3 text-slate-400 font-semibold">Or</span></div>
+              </div>
+
+              <Button
+                type="button"
+                onClick={() => {
+                  setIsDirectReview(true);
+                  setBooking({
+                    id: 'traveler-' + Date.now(),
+                    lead_id: '',
+                    customer_name: '',
+                    itinerary_name: 'Custom Tour Experience',
+                    destinations: [],
+                    travel_start_date: new Date().toISOString().split('T')[0],
+                    travel_end_date: new Date().toISOString().split('T')[0],
+                    package_type: 'custom'
+                  });
+                  setCustomerName('');
+                }}
+                variant="outline"
+                className="w-full border-amber-500/40 text-amber-300 hover:bg-amber-500/10 rounded-xl py-6 font-semibold"
+              >
+                Write an Open Traveler Review
+              </Button>
+            </form>
+          </Card>
+        </div>
+      </Layout>
+    );
+  }
+
   if (errorMsg) {
     return (
       <Layout>
@@ -528,14 +618,46 @@ export default function ReviewForm() {
               <div className="mx-auto w-16 h-16 bg-red-50 text-red-500 rounded-full flex items-center justify-center mb-4">
                 <AlertTriangle className="w-8 h-8" />
               </div>
-              <CardTitle className="text-2xl font-bold text-slate-800">Verification Failed</CardTitle>
+              <CardTitle className="text-2xl font-bold text-slate-800">Verification Notice</CardTitle>
             </CardHeader>
-            <CardContent className="text-center">
+            <CardContent className="text-center space-y-4">
               <p className="text-slate-600 leading-relaxed">{errorMsg}</p>
+              <div className="flex flex-col gap-2 pt-2">
+                <Button
+                  onClick={() => {
+                    setErrorMsg(null);
+                    setBooking(null);
+                    setIsDirectReview(false);
+                  }}
+                  className="bg-amber-500 hover:bg-amber-600 text-black font-semibold rounded-xl"
+                >
+                  Enter Another Booking ID
+                </Button>
+                <Button
+                  onClick={() => {
+                    setErrorMsg(null);
+                    setIsDirectReview(true);
+                    setBooking({
+                      id: 'traveler-' + Date.now(),
+                      lead_id: '',
+                      customer_name: '',
+                      itinerary_name: 'Custom Tour Experience',
+                      destinations: [],
+                      travel_start_date: new Date().toISOString().split('T')[0],
+                      travel_end_date: new Date().toISOString().split('T')[0],
+                      package_type: 'custom'
+                    });
+                  }}
+                  variant="outline"
+                  className="rounded-xl border-slate-300"
+                >
+                  Write Open Review Instead
+                </Button>
+              </div>
             </CardContent>
-            <CardFooter className="flex justify-center gap-4">
-              <Button onClick={() => navigate('/')} className="bg-slate-800 hover:bg-slate-900 text-white rounded-full px-6">
-                Go to Homepage
+            <CardFooter className="flex justify-center border-t border-slate-100 pt-4">
+              <Button onClick={() => navigate('/')} variant="ghost" className="text-slate-600 text-xs">
+                Back to Homepage
               </Button>
             </CardFooter>
           </Card>
@@ -842,13 +964,13 @@ export default function ReviewForm() {
     );
   }
   
-  const destDisplay = booking?.destinations && booking.destinations.length > 0 ? booking.destinations.join(', ') : 'Unknown';
+  const destDisplay = customDestination.trim() || (booking?.destinations && booking.destinations.length > 0 ? booking.destinations.join(', ') : 'Ghumo Firoo Journey');
   
   return (
     <Layout>
       <SEO 
         title={`Review Your Trip to ${destDisplay} | Ghumo Firoo Travels`} 
-        description={`Submit review for booking ref ${bookingReference}`}
+        description={`Submit review for booking ref ${bookingReference || booking?.id || 'Ghumo Firoo Trip'}`}
       />
       <div className="py-12 bg-gradient-to-b from-slate-50 via-orange-50/20 to-slate-50 min-h-screen px-4">
         <div className="max-w-2xl mx-auto">
@@ -876,7 +998,9 @@ export default function ReviewForm() {
               </div>
               
               <CardHeader className="space-y-2 border-b border-slate-100 bg-slate-50/50">
-                <CardTitle className="text-xl font-bold text-slate-800">Trip Reference: {bookingReference}</CardTitle>
+                <CardTitle className="text-xl font-bold text-slate-800">
+                  Trip Reference: {bookingReference || (isDirectReview ? 'Open Traveler Review' : booking?.id)}
+                </CardTitle>
                 <div className="grid grid-cols-2 gap-4 pt-2 text-sm">
                   <div>
                     <span className="text-slate-400 block text-xs uppercase tracking-wider">Destination</span>
@@ -903,6 +1027,22 @@ export default function ReviewForm() {
               </CardHeader>
               
               <CardContent className="p-6 space-y-6">
+                {/* Destination Visited (for open review or when not preset) */}
+                {(isDirectReview || !booking?.destinations || booking.destinations.length === 0) && (
+                  <div className="space-y-2">
+                    <Label htmlFor="customDestination" className="font-bold text-slate-900 text-sm">Destination Visited</Label>
+                    <Input 
+                      id="customDestination" 
+                      value={customDestination} 
+                      onChange={(e) => setCustomDestination(e.target.value)} 
+                      placeholder="e.g. Jodhpur, Rajasthan or Kerala Backwaters"
+                      required
+                      className="rounded-xl border-slate-300 bg-white text-slate-900 font-semibold placeholder:text-slate-400 focus:border-amber-500 py-6 text-sm"
+                    />
+                    <p className="text-xs text-slate-500 font-medium">Where did your journey take place?</p>
+                  </div>
+                )}
+
                 {/* Customer Name */}
                 <div className="space-y-2">
                   <Label htmlFor="customerName" className="font-bold text-slate-900 text-sm">Your Name (Display Name)</Label>

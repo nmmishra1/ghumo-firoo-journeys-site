@@ -128,6 +128,7 @@ const SignUp = lazyRetry(() => import('@/pages/SignUp'));
 const ForgotPassword = lazyRetry(() => import('@/pages/ForgotPassword'));
 const ResetPassword = lazyRetry(() => import('@/pages/ResetPassword'));
 const ReviewForm = lazyRetry(() => import('@/pages/ReviewForm'));
+const Reviews = lazyRetry(() => import('@/pages/Reviews'));
 
 // Lazy load policy pages (grouped for better caching)
 const PrivacyPolicy = lazyRetry(() => import('@/pages/PrivacyPolicy'));
@@ -317,6 +318,8 @@ function App() {
                <Route path="/signup" element={<SignUp />} />
                <Route path="/forgot-password" element={<ForgotPassword />} />
                <Route path="/reset-password" element={<ResetPassword />} />
+               <Route path="/reviews" element={<Reviews />} />
+               <Route path="/review" element={<ReviewForm />} />
                <Route path="/review/:bookingReference" element={<ReviewForm />} />
                <Route path="/quote/:token" element={<QuoteView />} />
                <Route path="/proposal/:leadId" element={<PublicProposalView />} />
