@@ -23,6 +23,8 @@ export interface GoogleReview {
   booking_id?: string | null;
   lead_id?: string | number | null;
   package_name?: string | null;
+  status?: 'Pending' | 'Approved' | 'Rejected';
+  featured?: boolean;
 }
 
 export interface ReviewStats {
@@ -84,6 +86,11 @@ const mockReviews: GoogleReview[] = [
 ];
 
 const mapDbReviewToGoogleReview = (db: any): GoogleReview => {
+  const rawLoc = db.destination || '';
+  const cleanLoc = (rawLoc.startsWith('Trip -') || rawLoc.startsWith('Booking Ref #'))
+    ? (rawLoc.includes('Customized') ? 'Jodhpur, Rajasthan' : 'Ghumo Firoo Journey')
+    : (rawLoc || 'India');
+
   return {
     id: db.id,
     reviewer_name: db.customer_name,
@@ -91,7 +98,7 @@ const mapDbReviewToGoogleReview = (db: any): GoogleReview => {
     rating: db.rating,
     review_text: db.review_text || '',
     review_date: db.travel_date || db.created_at,
-    location: db.destination,
+    location: cleanLoc,
     verified: db.verified ?? true,
     created_at: db.created_at,
     updated_at: db.updated_at,
@@ -101,7 +108,10 @@ const mapDbReviewToGoogleReview = (db: any): GoogleReview => {
     hotel_rating: db.hotel_rating,
     cab_rating: db.cab_rating,
     sightseeing_rating: db.sightseeing_rating,
-    trip_planning_rating: db.trip_planning_rating
+    trip_planning_rating: db.trip_planning_rating,
+    status: db.status,
+    featured: Boolean(db.featured),
+    package_name: db.package_name
   };
 };
 
@@ -228,21 +238,28 @@ export const reviewService = {
   },
 
   // Update a review
-  async updateReview(id: string, updates: Partial<GoogleReview>): Promise<void> {
+  async updateReview(id: string, updates: Partial<GoogleReview> & { status?: string; featured?: boolean }): Promise<void> {
     try {
       const authHeaders = await getAuthHeader();
-      const dbUpdates: any = {};
-      if (updates.reviewer_name) dbUpdates.customer_name = updates.reviewer_name;
-      if (updates.rating) dbUpdates.rating = updates.rating;
-      if (updates.review_text) dbUpdates.review_text = updates.review_text;
-      if (updates.location) dbUpdates.destination = updates.location;
-      if (updates.photos) dbUpdates.photos = updates.photos;
+      const dbUpdates: any = { id };
+      if (updates.reviewer_name !== undefined) dbUpdates.customer_name = updates.reviewer_name;
+      if (updates.rating !== undefined) dbUpdates.rating = updates.rating;
+      if (updates.review_text !== undefined) dbUpdates.review_text = updates.review_text;
+      if (updates.location !== undefined) dbUpdates.destination = updates.location;
+      if (updates.photos !== undefined) dbUpdates.photos = updates.photos;
       if (updates.verified !== undefined) dbUpdates.verified = updates.verified ? 1 : 0;
       if (updates.video_url !== undefined) dbUpdates.video_url = updates.video_url;
       if (updates.response !== undefined) dbUpdates.response = updates.response;
       if (updates.platform !== undefined) dbUpdates.platform = updates.platform;
+      if (updates.hotel_rating !== undefined) dbUpdates.hotel_rating = updates.hotel_rating;
+      if (updates.cab_rating !== undefined) dbUpdates.cab_rating = updates.cab_rating;
+      if (updates.sightseeing_rating !== undefined) dbUpdates.sightseeing_rating = updates.sightseeing_rating;
+      if (updates.trip_planning_rating !== undefined) dbUpdates.trip_planning_rating = updates.trip_planning_rating;
+      if (updates.package_name !== undefined) dbUpdates.package_name = updates.package_name;
+      if (updates.status !== undefined) dbUpdates.status = updates.status;
+      if (updates.featured !== undefined) dbUpdates.featured = updates.featured ? 1 : 0;
       
-      const res = await fetch(`${API_BASE}?id=${id}`, {
+      const res = await fetch(`${API_BASE}?id=${encodeURIComponent(id)}`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',

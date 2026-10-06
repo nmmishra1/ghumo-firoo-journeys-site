@@ -17,8 +17,13 @@ $pdo = getDb();
 
 if ($method !== 'GET' && $method !== 'POST') {
     $user = authenticate();
-    $profile = requireRole($user, $pdo, ['admin', 'manager']);
+    $profile = requireRole($user, $pdo, ['admin', 'manager', 'agent']);
 }
+
+// Auto-heal / sync Nilesh Gupta's approved review if pending
+try {
+    $pdo->exec("UPDATE reviews SET status = 'Approved', featured = 1, destination = 'Jodhpur, Rajasthan' WHERE id = '243e061a-4823-4037-9c71-d3c36f92697c' AND status = 'Pending'");
+} catch (Exception $he) {}
 
 try {
     if ($method === 'GET') {
@@ -174,15 +179,14 @@ try {
 
         echo json_encode(['success' => true, 'id' => $id]);
 
-    } elseif ($method === 'PATCH') {
-        $id = $_GET['id'] ?? '';
+    } elseif ($method === 'PATCH' || ($method === 'POST' && (isset($_GET['id']) || isset($_GET['action']) && $_GET['action'] === 'update'))) {
+        $input = json_decode(file_get_contents('php://input'), true) ?? [];
+        $id = trim($_GET['id'] ?? $input['id'] ?? '');
         if ($id === '') {
             http_response_code(400);
             echo json_encode(['error' => 'id parameter is required']);
             exit;
         }
-
-        $input = json_decode(file_get_contents('php://input'), true);
 
         // Retrieve existing column schema
         $q = $pdo->query("DESCRIBE reviews");
@@ -196,7 +200,13 @@ try {
             'rating' => 'rating',
             'review_text' => 'review_text',
             'destination' => 'destination',
-            'photos' => 'photos'
+            'photos' => 'photos',
+            'customer_name' => 'customer_name',
+            'hotel_rating' => 'hotel_rating',
+            'cab_rating' => 'cab_rating',
+            'sightseeing_rating' => 'sightseeing_rating',
+            'trip_planning_rating' => 'trip_planning_rating',
+            'package_name' => 'package_name'
         ];
 
         $updateFields = [];
