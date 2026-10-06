@@ -171,7 +171,7 @@ export const VoucherInvoiceModal: React.FC<VoucherInvoiceModalProps> = ({
   const [pickupLoc, setPickupLoc] = useState(activeCab?.pickupLoc || 'Haridwar Railway Station');
   const [dropLoc, setDropLoc] = useState(activeCab?.dropLoc || 'Dehradun Airport');
   const [driverName, setDriverName] = useState(activeCab?.driverName || 'Ramesh Singh');
-  const [driverPhone, setDriverPhone] = useState(activeCab?.driverPhone || '+91-9876543210');
+  const [driverPhone, setDriverPhone] = useState(activeCab?.driverPhone || '+91 99109 87264');
   const [vehicleNo, setVehicleNo] = useState(activeCab?.vehicleNo || 'UK-07-TA-4455');
 
   // Update cab fields when selected cab changes

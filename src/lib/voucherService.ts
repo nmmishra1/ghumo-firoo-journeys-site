@@ -439,7 +439,7 @@ export function generateActivityVoucherPDF(data: ActivityVoucherData): jsPDF {
 
   doc.setFontSize(9);
   doc.setFont('helvetica', 'normal');
-  doc.text('Ghumo Firoo Travels | Concierge Desk: +91-9876543210', 14, 27);
+  doc.text('Ghumo Firoo Travels | Concierge Desk: +91 99109 87264', 14, 27);
 
   doc.text(`Voucher #: ${data.voucherNumber}`, 145, 18);
   doc.text(`Date: ${data.bookingDate}`, 145, 25);
