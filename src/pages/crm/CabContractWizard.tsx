@@ -203,6 +203,8 @@ export const CabContractWizard: React.FC<CabContractWizardProps> = ({
 
   // Rate config mapping: key is "vehicleId-routeId-season"
   const [gridRates, setGridRates] = useState<Record<string, any>>({});
+  // Currently expanded / inspected rate key in breakdown sidebar and inline editor
+  const [activeRateKey, setActiveRateKey] = useState<string | null>(null);
   // Filter states for Step 4 Rate Slabs Grid
   const [rateFilterVehicle, setRateFilterVehicle] = useState<string>('all');
   const [rateFilterSeason, setRateFilterSeason] = useState<string>('all');
@@ -1353,13 +1355,27 @@ export const CabContractWizard: React.FC<CabContractWizardProps> = ({
                                     </Select>
                                   </td>
                                   <td className="p-1.5">
-                                    <Input type="number" className="bg-slate-900 border-slate-700 h-8 text-xs text-center text-amber-300 font-extrabold" value={rate.markup_percentage ?? ''} onChange={e => handleUpdateRateField(rateKey, 'markup_percentage', e.target.value === '' ? '' : (parseFloat(e.target.value) || 0))} placeholder="%" />
+                                    <div className="flex items-center gap-1">
+                                      <Input type="number" className="bg-slate-900 border-slate-700 h-8 text-xs text-center text-amber-300 font-extrabold flex-1" value={rate.markup_percentage ?? ''} onChange={e => handleUpdateRateField(rateKey, 'markup_percentage', e.target.value === '' ? '' : (parseFloat(e.target.value) || 0))} placeholder="%" />
+                                      <button
+                                        type="button"
+                                        onClick={() => setActiveRateKey(prev => prev === rateKey ? null : rateKey)}
+                                        title={activeRateKey === rateKey ? "Hide Detailed Breakdown" : "View & Edit Detailed Breakdown"}
+                                        className={`h-8 w-8 rounded-lg flex items-center justify-center shrink-0 border transition-all ${
+                                          activeRateKey === rateKey
+                                            ? 'bg-amber-500 text-slate-950 border-amber-400 font-bold'
+                                            : 'bg-slate-800 text-slate-400 border-slate-700 hover:text-white hover:bg-slate-700'
+                                        }`}
+                                      >
+                                        <Eye className="w-3.5 h-3.5" />
+                                      </button>
+                                    </div>
                                   </td>
                                 </tr>
 
                                 {activeRateKey === rateKey && (
                                   <tr className="bg-[#0f1420]">
-                                    <td colSpan={6} className="p-4 border-y border-amber-500/30">
+                                    <td colSpan={7} className="p-4 border-y border-amber-500/30">
                                       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-stretch text-xs p-5 bg-[#161d2f] border border-slate-700/80 rounded-xl shadow-xl w-full">
                                         
                                         {/* Rate Model Inputs */}
