@@ -53,7 +53,11 @@ export default function ReviewModeration() {
   const fetchReviews = async () => {
     try {
       setLoading(true);
-      const res = await fetch('/api/reviews');
+      const { data: { session } } = await supabase.auth.getSession();
+      const token = session?.access_token;
+      const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
+
+      const res = await fetch('/api/reviews', { headers });
       if (!res.ok) throw new Error("Failed to fetch reviews");
       const data = await res.json();
       setReviews((data.reviews || []) as Review[]);

@@ -88,12 +88,37 @@ try {
         $stmt->execute();
         $reviews = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-        // Check if requester is authenticated CRM staff
+        // Check if requester is authenticated CRM staff (safe optional check)
         $isCrmStaff = false;
         try {
-            $u = authenticate();
-            if ($u) $isCrmStaff = true;
-        } catch (Exception $ae) {}
+            $u = authenticateOptional();
+            if ($u) {
+                $cStmt = $pdo->prepare('
+                    SELECT r.name as role_name, s.is_platform_admin 
+                    FROM profiles_new p 
+                    INNER JOIN user_security s ON p.id = s.profile_id 
+                    LEFT JOIN roles r ON r.id = p.role_id 
+                    WHERE p.supabase_uid = ? LIMIT 1
+                ');
+                $cStmt->execute([$u['user_id']]);
+                $cProfile = $cStmt->fetch(PDO::FETCH_ASSOC);
+                if ($cProfile) {
+                    $rName = strtolower($cProfile['role_name'] ?? '');
+                    if (!empty($cProfile['is_platform_admin']) || in_array($rName, ['admin', 'manager', 'agent'])) {
+                        $isCrmStaff = true;
+                    }
+                } else {
+                    $lStmt = $pdo->prepare('SELECT role FROM profiles WHERE id = ? OR supabase_uid = ? LIMIT 1');
+                    $lStmt->execute([$u['user_id'], $u['user_id']]);
+                    $lRole = strtolower((string)$lStmt->fetchColumn());
+                    if (in_array($lRole, ['admin', 'manager', 'agent', 'super_admin'])) {
+                        $isCrmStaff = true;
+                    }
+                }
+            }
+        } catch (Throwable $ae) {
+            $isCrmStaff = false;
+        }
 
         // Decode JSON columns and convert tinyint booleans for strict React types
         foreach ($reviews as &$rev) {
