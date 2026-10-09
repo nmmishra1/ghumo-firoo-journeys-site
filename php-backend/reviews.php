@@ -25,6 +25,11 @@ try {
     $pdo->exec("UPDATE reviews SET status = 'Approved', featured = 1, destination = 'Jodhpur, Rajasthan' WHERE id = '243e061a-4823-4037-9c71-d3c36f92697c' AND status = 'Pending'");
 } catch (Exception $he) {}
 
+// Auto-delete test review ("VerVer;lsmvgmvm...")
+try {
+    $pdo->exec("DELETE FROM reviews WHERE id = 'a948fca9-a75a-43b7-8842-9311c90ddb1b' OR review_text LIKE '%VerVer;lsmvgmvm%' OR booking_id = '97403e98-eb54-4884-8b23-07eb9e20d347'");
+} catch (Exception $de) {}
+
 try {
     if ($method === 'GET') {
         $status = $_GET['status'] ?? '';
