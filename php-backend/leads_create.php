@@ -200,7 +200,8 @@ try {
         } catch (Throwable $ct) {}
     }
 
-    if (!empty($phone) && file_exists(__DIR__ . '/send_lead_whatsapp.php')) {
+    $sendWelcome = isset($input['send_whatsapp_welcome']) ? (bool)$input['send_whatsapp_welcome'] : true;
+    if ($sendWelcome && !empty($phone) && file_exists(__DIR__ . '/send_lead_whatsapp.php')) {
         try {
             require_once __DIR__ . '/send_lead_whatsapp.php';
             sendBrandedLeadWhatsApp($newLeadId, 'welcome_greeting', $phone, null, null, null, $customerName, $destinations ?: null);

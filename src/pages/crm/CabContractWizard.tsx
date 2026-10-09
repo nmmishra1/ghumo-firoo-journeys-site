@@ -203,7 +203,9 @@ export const CabContractWizard: React.FC<CabContractWizardProps> = ({
 
   // Rate config mapping: key is "vehicleId-routeId-season"
   const [gridRates, setGridRates] = useState<Record<string, any>>({});
-  const [activeRateKey, setActiveRateKey] = useState<string | null>(null);
+  // Filter states for Step 4 Rate Slabs Grid
+  const [rateFilterVehicle, setRateFilterVehicle] = useState<string>('all');
+  const [rateFilterSeason, setRateFilterSeason] = useState<string>('all');
 
   const [citiesList, setCitiesList] = useState<any[]>([]);
 
@@ -514,6 +516,43 @@ export const CabContractWizard: React.FC<CabContractWizardProps> = ({
     });
   };
 
+  const handleCopyNormalSeasonRates = () => {
+    setGridRates(prev => {
+      const updated = { ...prev };
+      let copiedCount = 0;
+      vehicles.forEach(veh => {
+        routes.forEach(route => {
+          const normalKey = `${veh.id}-${route.id}-Normal Season`;
+          const normalRate = updated[normalKey];
+          if (normalRate) {
+            SEASONS.forEach(season => {
+              if (season !== 'Normal Season') {
+                const targetKey = `${veh.id}-${route.id}-${season}`;
+                updated[targetKey] = {
+                  ...normalRate,
+                  season: season
+                };
+                copiedCount++;
+              }
+            });
+          }
+        });
+      });
+      if (copiedCount > 0) {
+        toast({
+          title: "Rates Copied! ⚡",
+          description: `Copied Normal Season base rates to other seasons across fleet routes.`
+        });
+      } else {
+        toast({
+          title: "Notice",
+          description: "Please enter Normal Season rates first before copying."
+        });
+      }
+      return updated;
+    });
+  };
+
   const handleNextStep = () => {
     // Validate inputs
     if (activeStep === 1) {
@@ -794,16 +833,23 @@ export const CabContractWizard: React.FC<CabContractWizardProps> = ({
         });
       });
 
-      for (const ratePayload of ratesPayloads) {
-        const ratePostRes = await crmFetch(`${API_BASE}/api.php?table=cab_contract_rates`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', ...authHeaders },
-          body: JSON.stringify(ratePayload)
-        }, {
-          action: 'create_cab_contract_rate',
-          module: 'Cabs'
-        });
-        if (!ratePostRes.ok) throw new Error('Failed to save rate payload');
+      // 6. Bulk Insert contract rates in concurrent batches (6 per batch) to eliminate blocking sequential loop
+      const BATCH_SIZE = 6;
+      for (let i = 0; i < ratesPayloads.length; i += BATCH_SIZE) {
+        const batch = ratesPayloads.slice(i, i + BATCH_SIZE);
+        await Promise.all(
+          batch.map(async ratePayload => {
+            const ratePostRes = await crmFetch(`${API_BASE}/api.php?table=cab_contract_rates`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json', ...authHeaders },
+              body: JSON.stringify(ratePayload)
+            }, {
+              action: 'create_cab_contract_rate',
+              module: 'Cabs'
+            });
+            if (!ratePostRes.ok) throw new Error('Failed to save rate payload');
+          })
+        );
       }
 
       toast({ title: 'Success', description: 'Cab Contract negotiated successfully.' });
@@ -1071,7 +1117,63 @@ export const CabContractWizard: React.FC<CabContractWizardProps> = ({
             {/* STEP 4: RATE SLABS GRID */}
             {activeStep === 4 && (
               <div className="space-y-4">
-                <span className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider">Configure contracted rates grid</span>
+                <div className="flex flex-wrap justify-between items-center gap-2">
+                  <span className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider">Configure contracted rates grid</span>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    onClick={handleCopyNormalSeasonRates}
+                    className="h-7 text-[10px] font-extrabold border-amber-500/40 text-amber-300 hover:bg-amber-500/20 rounded-lg shadow-sm"
+                  >
+                    <Sparkles className="w-3.5 h-3.5 mr-1 text-amber-400" /> Copy Normal Season Rates to Other Seasons
+                  </Button>
+                </div>
+
+                {/* Filter Pills for Step 4 */}
+                <div className="p-3 bg-slate-900/80 border border-slate-800 rounded-xl space-y-2.5">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wide">Vehicle:</span>
+                    <button
+                      type="button"
+                      onClick={() => setRateFilterVehicle('all')}
+                      className={`px-2.5 py-1 rounded-lg text-[10px] font-extrabold transition-all ${rateFilterVehicle === 'all' ? 'bg-amber-500 text-slate-950' : 'bg-slate-800 text-slate-300 hover:bg-slate-700'}`}
+                    >
+                      All Vehicles ({vehicles.length})
+                    </button>
+                    {vehicles.map(v => (
+                      <button
+                        key={v.id}
+                        type="button"
+                        onClick={() => setRateFilterVehicle(v.id)}
+                        className={`px-2.5 py-1 rounded-lg text-[10px] font-bold transition-all ${rateFilterVehicle === v.id ? 'bg-amber-500 text-slate-950' : 'bg-slate-800 text-slate-300 hover:bg-slate-700'}`}
+                      >
+                        {v.vehicle_type}
+                      </button>
+                    ))}
+                  </div>
+
+                  <div className="flex flex-wrap items-center gap-2 border-t border-slate-800/80 pt-2">
+                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wide">Season:</span>
+                    <button
+                      type="button"
+                      onClick={() => setRateFilterSeason('all')}
+                      className={`px-2.5 py-1 rounded-lg text-[10px] font-extrabold transition-all ${rateFilterSeason === 'all' ? 'bg-indigo-600 text-white' : 'bg-slate-800 text-slate-300 hover:bg-slate-700'}`}
+                    >
+                      All Seasons ({SEASONS.length})
+                    </button>
+                    {SEASONS.map(s => (
+                      <button
+                        key={s}
+                        type="button"
+                        onClick={() => setRateFilterSeason(s)}
+                        className={`px-2.5 py-1 rounded-lg text-[10px] font-bold transition-all ${rateFilterSeason === s ? 'bg-indigo-600 text-white' : 'bg-slate-800 text-slate-300 hover:bg-slate-700'}`}
+                      >
+                        {s}
+                      </button>
+                    ))}
+                  </div>
+                </div>
                 
                 <div className="overflow-x-auto border border-slate-800 rounded-xl bg-[#161d2f]">
                   <table className="w-full text-left text-xs border-collapse">
@@ -1087,10 +1189,14 @@ export const CabContractWizard: React.FC<CabContractWizardProps> = ({
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-800/80 bg-[#161d2f] text-slate-100">
-                      {vehicles.map(veh => {
+                      {vehicles
+                        .filter(veh => rateFilterVehicle === 'all' || veh.id === rateFilterVehicle)
+                        .map(veh => {
                         const vehDefaults = getDefaultRateForVehicle(veh.vehicle_type);
                         return routes.map(route => {
-                          return SEASONS.map(season => {
+                          return SEASONS
+                            .filter(season => rateFilterSeason === 'all' || season === rateFilterSeason)
+                            .map(season => {
                             const rateKey = `${veh.id}-${route.id}-${season}`;
                             const defaultModel = getDefaultRateModelForRoute(route.route_type);
                             const rate = gridRates[rateKey] || {
@@ -1140,8 +1246,8 @@ export const CabContractWizard: React.FC<CabContractWizardProps> = ({
                                             type="number"
                                             placeholder="e.g. 14"
                                             className="bg-slate-900 border-emerald-700/60 h-8 text-xs text-center text-emerald-300 font-extrabold w-[70px]"
-                                            value={rate.rate_per_km || ''}
-                                            onChange={e => handleUpdateRateField(rateKey, 'rate_per_km', parseFloat(e.target.value) || 0)}
+                                            value={rate.rate_per_km ?? ''}
+                                            onChange={e => handleUpdateRateField(rateKey, 'rate_per_km', e.target.value === '' ? '' : (parseFloat(e.target.value) || 0))}
                                           />
                                         </div>
                                         <div className="space-y-0.5">
@@ -1150,8 +1256,8 @@ export const CabContractWizard: React.FC<CabContractWizardProps> = ({
                                             type="number"
                                             placeholder="300"
                                             className="bg-slate-900 border-slate-700 h-8 text-xs text-center text-slate-100 font-bold w-[70px]"
-                                            value={rate.min_km_per_day || ''}
-                                            onChange={e => handleUpdateRateField(rateKey, 'min_km_per_day', parseFloat(e.target.value) || 0)}
+                                            value={rate.min_km_per_day ?? ''}
+                                            onChange={e => handleUpdateRateField(rateKey, 'min_km_per_day', e.target.value === '' ? '' : (parseFloat(e.target.value) || 0))}
                                           />
                                         </div>
                                       </div>
@@ -1163,8 +1269,8 @@ export const CabContractWizard: React.FC<CabContractWizardProps> = ({
                                           type="number"
                                           placeholder="e.g. 3200"
                                           className="bg-slate-900 border-emerald-700/60 h-8 text-xs text-center text-emerald-300 font-extrabold w-[110px]"
-                                          value={rate.daily_rate || ''}
-                                          onChange={e => handleUpdateRateField(rateKey, 'daily_rate', parseFloat(e.target.value) || 0)}
+                                          value={rate.daily_rate ?? ''}
+                                          onChange={e => handleUpdateRateField(rateKey, 'daily_rate', e.target.value === '' ? '' : (parseFloat(e.target.value) || 0))}
                                         />
                                       </div>
                                     )}
@@ -1176,8 +1282,8 @@ export const CabContractWizard: React.FC<CabContractWizardProps> = ({
                                             type="number"
                                             placeholder="e.g. 16000"
                                             className="bg-slate-900 border-amber-700/60 h-8 text-xs text-center text-amber-300 font-extrabold w-[90px]"
-                                            value={rate.block_circuit_cost || ''}
-                                            onChange={e => handleUpdateRateField(rateKey, 'block_circuit_cost', parseFloat(e.target.value) || 0)}
+                                            value={rate.block_circuit_cost ?? ''}
+                                            onChange={e => handleUpdateRateField(rateKey, 'block_circuit_cost', e.target.value === '' ? '' : (parseFloat(e.target.value) || 0))}
                                           />
                                         </div>
                                         <div className="space-y-0.5">
@@ -1205,8 +1311,8 @@ export const CabContractWizard: React.FC<CabContractWizardProps> = ({
                                           type="number"
                                           placeholder="e.g. 1200"
                                           className="bg-slate-900 border-emerald-700/60 h-8 text-xs text-center text-emerald-300 font-extrabold w-[110px]"
-                                          value={rate.transfer_cost || ''}
-                                          onChange={e => handleUpdateRateField(rateKey, 'transfer_cost', parseFloat(e.target.value) || 0)}
+                                          value={rate.transfer_cost ?? ''}
+                                          onChange={e => handleUpdateRateField(rateKey, 'transfer_cost', e.target.value === '' ? '' : (parseFloat(e.target.value) || 0))}
                                         />
                                       </div>
                                     )}
@@ -1217,8 +1323,8 @@ export const CabContractWizard: React.FC<CabContractWizardProps> = ({
                                           type="number"
                                           placeholder="0"
                                           className="bg-slate-900 border-slate-700 h-8 text-xs text-center text-slate-100 font-bold w-[110px]"
-                                          value={rate.vehicle_cost || ''}
-                                          onChange={e => handleUpdateRateField(rateKey, 'vehicle_cost', parseFloat(e.target.value) || 0)}
+                                          value={rate.vehicle_cost ?? ''}
+                                          onChange={e => handleUpdateRateField(rateKey, 'vehicle_cost', e.target.value === '' ? '' : (parseFloat(e.target.value) || 0))}
                                         />
                                       </div>
                                     )}
@@ -1247,7 +1353,7 @@ export const CabContractWizard: React.FC<CabContractWizardProps> = ({
                                     </Select>
                                   </td>
                                   <td className="p-1.5">
-                                    <Input type="number" className="bg-slate-900 border-slate-700 h-8 text-xs text-center text-amber-300 font-extrabold" value={rate.markup_percentage} onChange={e => handleUpdateRateField(rateKey, 'markup_percentage', parseFloat(e.target.value) || 0)} placeholder="%" />
+                                    <Input type="number" className="bg-slate-900 border-slate-700 h-8 text-xs text-center text-amber-300 font-extrabold" value={rate.markup_percentage ?? ''} onChange={e => handleUpdateRateField(rateKey, 'markup_percentage', e.target.value === '' ? '' : (parseFloat(e.target.value) || 0))} placeholder="%" />
                                   </td>
                                 </tr>
 

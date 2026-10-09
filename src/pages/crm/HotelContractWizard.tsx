@@ -21,7 +21,7 @@ import { MASTER_DESTINATIONS, MasterDestination } from '@/data/masterDestination
 import { resolveGeography } from '@/data/geographyMaster';
 import { crmFetch } from '@/utils/crmApi';
 
-const API_BASE = import.meta.env.VITE_API_BASE_URL || '';
+const API_BASE = import.meta.env.VITE_PHP_BASE_URL || import.meta.env.VITE_API_BASE_URL || '/php-backend';
 
 async function getAuthHeader(): Promise<Record<string, string>> {
   const { data: { session } } = await supabase.auth.getSession();
@@ -836,7 +836,7 @@ export const HotelContractWizard: React.FC<HotelContractWizardProps> = ({
   };
 
   // ---------------- CONTRACT RATES GRID UTILITIES ----------------
-  const handleUpdateGridRate = (seasonId: string, roomId: string, planCode: string, field: string, value: number) => {
+  const handleUpdateGridRate = (seasonId: string, roomId: string, planCode: string, field: string, value: any) => {
     handleUpdateGridRateField(seasonId, roomId, planCode, field, value);
   };
 
@@ -1013,8 +1013,25 @@ export const HotelContractWizard: React.FC<HotelContractWizardProps> = ({
       setActiveStep(2);
       return;
     }
-    if (!hotelForm.city_id) {
-      toast({ title: 'Missing Information', description: 'Please select a City on Step 1.', variant: 'warning' as any });
+
+    let effectiveCityId = hotelForm.city_id;
+    let effectiveCityName = (hotelForm.city || '').trim();
+
+    // Auto-match city against loaded cities or unified destinations if city_id was not explicitly set
+    if (!effectiveCityId && effectiveCityName) {
+      const trimmedLower = effectiveCityName.toLowerCase();
+      const matchCity = cities.find((c: any) => {
+        const cName = (c.city_name || c.name || '').toLowerCase().trim();
+        return cName === trimmedLower || cName.includes(trimmedLower) || trimmedLower.includes(cName);
+      });
+      if (matchCity) {
+        effectiveCityId = String(matchCity.id);
+        if (!effectiveCityName) effectiveCityName = matchCity.city_name || matchCity.name;
+      }
+    }
+
+    if (!effectiveCityId && !effectiveCityName && !hotelForm.destination?.trim()) {
+      toast({ title: 'Missing Information', description: 'Please specify a City on Step 1.', variant: 'warning' as any });
       setActiveStep(1);
       return;
     }
@@ -1022,7 +1039,7 @@ export const HotelContractWizard: React.FC<HotelContractWizardProps> = ({
     setLoading(true);
     try {
       const authHeaders = await getAuthHeader();
-      const selectedCity = cities.find(c => String(c.id) === String(hotelForm.city_id));
+      const selectedCity = cities.find(c => String(c.id) === String(effectiveCityId));
       const selectedState = states.find(s => String(s.id) === String(hotelForm.state_id));
       const selectedCountry = countries.find(c => String(c.id) === String(hotelForm.country_id));
 
@@ -1031,10 +1048,10 @@ export const HotelContractWizard: React.FC<HotelContractWizardProps> = ({
         hotel_code: hotelForm.hotel_code || 'H-' + Date.now().toString().slice(-6),
         country_id: hotelForm.country_id || null,
         state_id: hotelForm.state_id || null,
-        city_id: hotelForm.city_id || null,
-        city: selectedCity?.city_name || '',
-        state: selectedState?.state_name || '',
-        country: selectedCountry?.country_name || '',
+        city_id: effectiveCityId || null,
+        city: effectiveCityName || selectedCity?.city_name || selectedCity?.name || hotelForm.destination || '',
+        state: hotelForm.state || selectedState?.state_name || selectedState?.name || '',
+        country: hotelForm.country || selectedCountry?.country_name || selectedCountry?.name || '',
         star_rating: hotelForm.star_rating,
         category_id: hotelForm.category_id || null,
         address: hotelForm.address || null,
@@ -1150,7 +1167,7 @@ export const HotelContractWizard: React.FC<HotelContractWizardProps> = ({
 
       const savedRooms = await Promise.all(
         roomInsertions.map(room => 
-          fetch('/php-backend/api.php?table=room_categories', {
+          fetch(`${API_BASE}/api.php?table=room_categories`, {
             method: 'POST',
             headers: { 
               'Content-Type': 'application/json',
@@ -1716,14 +1733,29 @@ export const HotelContractWizard: React.FC<HotelContractWizardProps> = ({
                       <span className="text-[10px] text-muted-foreground font-normal">Editable</span>
                     </Label>
                     <Input
+                      list="city-suggestions-list"
                       value={hotelForm.city || ''}
                       onChange={e => {
                         const val = e.target.value;
-                        const matchCity = cities.find((c: any) => (c.city_name || c.name)?.toLowerCase() === val.toLowerCase());
+                        const matchCity = cities.find((c: any) => (c.city_name || c.name)?.toLowerCase() === val.toLowerCase().trim());
+                        let matchedStateId = hotelForm.state_id;
+                        let matchedCountryId = hotelForm.country_id;
+                        let matchedStateName = hotelForm.state;
+                        let matchedCountryName = hotelForm.country;
+                        if (matchCity) {
+                          if (matchCity.state_id) matchedStateId = String(matchCity.state_id);
+                          if (matchCity.country_id) matchedCountryId = String(matchCity.country_id);
+                          if (matchCity.state) matchedStateName = matchCity.state;
+                          if (matchCity.country) matchedCountryName = matchCity.country;
+                        }
                         setHotelForm(prev => ({
                           ...prev,
                           city: val,
                           city_id: matchCity ? String(matchCity.id) : prev.city_id,
+                          state_id: matchedStateId || prev.state_id,
+                          state: matchedStateName || prev.state,
+                          country_id: matchedCountryId || prev.country_id,
+                          country: matchedCountryName || prev.country,
                           destination: val
                         }));
                       }}
@@ -1731,6 +1763,17 @@ export const HotelContractWizard: React.FC<HotelContractWizardProps> = ({
                       className="bg-background border-border text-xs font-semibold"
                       required
                     />
+                    <datalist id="city-suggestions-list">
+                      {cities.slice(0, 150).map((c: any) => {
+                        const cityName = c.city_name || c.name;
+                        if (!cityName) return null;
+                        return (
+                          <option key={c.id} value={cityName}>
+                            {c.state ? `${cityName} (${c.state})` : cityName}
+                          </option>
+                        );
+                      })}
+                    </datalist>
                   </div>
                 </div>
 
@@ -2344,27 +2387,28 @@ export const HotelContractWizard: React.FC<HotelContractWizardProps> = ({
                                   <td className="p-2 font-bold text-xs text-white min-w-[130px] whitespace-nowrap">{room.room_category_name || 'Standard Room'}</td>
                                   <td className="p-2 font-mono text-xs text-amber-300 font-black">{plan}</td>
                                   <td className="p-1">
-                                    <Input type="number" className="bg-slate-900 border-slate-700 h-8 text-xs text-center px-1 font-extrabold text-slate-100 min-w-[85px] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none [aria-hidden]" value={rate.single_rate ?? ''} onChange={e => handleUpdateGridRate(season.id, room.id, plan, 'single_rate', parseFloat(e.target.value) || 0)} />
+                                    <Input type="number" className="bg-slate-900 border-slate-700 h-8 text-xs text-center px-1 font-extrabold text-slate-100 min-w-[85px] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none [aria-hidden]" value={rate.single_rate ?? ''} onChange={e => handleUpdateGridRate(season.id, room.id, plan, 'single_rate', e.target.value === '' ? '' : (parseFloat(e.target.value) || 0))} />
                                   </td>
                                   <td className="p-1">
                                     <Input type="number" className="bg-slate-900 border-amber-500/60 h-8 text-xs text-center px-1 font-black text-amber-300 shadow-md min-w-[100px] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none [aria-hidden]" value={rate.double_rate ?? ''} onChange={e => {
-                                      const newDouble = parseFloat(e.target.value) || 0;
+                                      const rawVal = e.target.value;
+                                      const newDouble = rawVal === '' ? '' : (parseFloat(rawVal) || 0);
                                       handleUpdateGridRate(season.id, room.id, plan, 'double_rate', newDouble);
-                                      const autoGst = getSuggestedTaxRate(countryName, newDouble, isInclusive);
+                                      const autoGst = getSuggestedTaxRate(countryName, Number(newDouble) || 0, isInclusive);
                                       handleUpdateGridRateField(season.id, room.id, plan, 'gst_percentage', autoGst);
                                     }} />
                                   </td>
                                   <td className="p-1">
-                                    <Input type="number" className="bg-slate-900 border-slate-700 h-8 text-xs text-center px-1 font-extrabold text-slate-100 min-w-[95px] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none [aria-hidden]" value={rate.triple_rate ?? ''} onChange={e => handleUpdateGridRate(season.id, room.id, plan, 'triple_rate', parseFloat(e.target.value) || 0)} />
+                                    <Input type="number" className="bg-slate-900 border-slate-700 h-8 text-xs text-center px-1 font-extrabold text-slate-100 min-w-[95px] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none [aria-hidden]" value={rate.triple_rate ?? ''} onChange={e => handleUpdateGridRate(season.id, room.id, plan, 'triple_rate', e.target.value === '' ? '' : (parseFloat(e.target.value) || 0))} />
                                   </td>
                                   <td className="p-1">
-                                    <Input type="number" className="bg-slate-900 border-slate-700 h-8 text-xs text-center px-1 font-extrabold text-slate-100 min-w-[85px] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none [aria-hidden]" value={rate.extra_adult_rate ?? ''} onChange={e => handleUpdateGridRate(season.id, room.id, plan, 'extra_adult_rate', parseFloat(e.target.value) || 0)} />
+                                    <Input type="number" className="bg-slate-900 border-slate-700 h-8 text-xs text-center px-1 font-extrabold text-slate-100 min-w-[85px] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none [aria-hidden]" value={rate.extra_adult_rate ?? ''} onChange={e => handleUpdateGridRate(season.id, room.id, plan, 'extra_adult_rate', e.target.value === '' ? '' : (parseFloat(e.target.value) || 0))} />
                                   </td>
                                   <td className="p-1">
-                                    <Input type="number" className="bg-slate-900 border-slate-700 h-8 text-xs text-center px-1 font-extrabold text-slate-100 min-w-[85px] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none [aria-hidden]" value={rate.child_with_bed_rate ?? ''} onChange={e => handleUpdateGridRate(season.id, room.id, plan, 'child_with_bed_rate', parseFloat(e.target.value) || 0)} />
+                                    <Input type="number" className="bg-slate-900 border-slate-700 h-8 text-xs text-center px-1 font-extrabold text-slate-100 min-w-[85px] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none [aria-hidden]" value={rate.child_with_bed_rate ?? ''} onChange={e => handleUpdateGridRate(season.id, room.id, plan, 'child_with_bed_rate', e.target.value === '' ? '' : (parseFloat(e.target.value) || 0))} />
                                   </td>
                                   <td className="p-1">
-                                    <Input type="number" className="bg-slate-900 border-slate-700 h-8 text-xs text-center px-1 font-extrabold text-slate-100 min-w-[85px] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none [aria-hidden]" placeholder="0" value={rate.child_without_bed_rate ?? ''} onChange={e => handleUpdateGridRate(season.id, room.id, plan, 'child_without_bed_rate', parseFloat(e.target.value) || 0)} />
+                                    <Input type="number" className="bg-slate-900 border-slate-700 h-8 text-xs text-center px-1 font-extrabold text-slate-100 min-w-[85px] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none [aria-hidden]" placeholder="0" value={rate.child_without_bed_rate ?? ''} onChange={e => handleUpdateGridRate(season.id, room.id, plan, 'child_without_bed_rate', e.target.value === '' ? '' : (parseFloat(e.target.value) || 0))} />
                                   </td>
                                   <td className="p-1 text-center min-w-[145px]">
                                     <Select 
@@ -2389,7 +2433,7 @@ export const HotelContractWizard: React.FC<HotelContractWizardProps> = ({
                                     </Select>
                                   </td>
                                   <td className="p-1">
-                                    <Input type="number" className="bg-slate-900 border-slate-700 h-8 text-xs text-center px-1 text-indigo-400 font-black min-w-[75px] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none [aria-hidden]" value={rate.markup ?? ''} onChange={e => handleUpdateGridRate(season.id, room.id, plan, 'markup', parseFloat(e.target.value) || 0)} />
+                                    <Input type="number" className="bg-slate-900 border-slate-700 h-8 text-xs text-center px-1 text-indigo-400 font-black min-w-[75px] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none [aria-hidden]" value={rate.markup ?? ''} onChange={e => handleUpdateGridRate(season.id, room.id, plan, 'markup', e.target.value === '' ? '' : (parseFloat(e.target.value) || 0))} />
                                   </td>
                                 </tr>
 

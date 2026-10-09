@@ -366,6 +366,8 @@ const QUICK_TEMPLATES = [
   ]}
 ];
 
+const API_BASE = import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_PHP_BASE_URL || '/php-backend';
+
 export const LeadForm: React.FC<LeadFormProps> = ({
   editingLead,
   onSubmit,
@@ -386,7 +388,7 @@ export const LeadForm: React.FC<LeadFormProps> = ({
   ]);
 
   useEffect(() => {
-    fetch('/php-backend/lead_sources.php')
+    fetch(`${API_BASE}/lead_sources.php`)
       .then(res => res.json())
       .then(data => {
         if (data && data.success && Array.isArray(data.sources) && data.sources.length > 0) {
@@ -408,8 +410,7 @@ export const LeadForm: React.FC<LeadFormProps> = ({
         try {
           const { data: { session } } = await supabase.auth.getSession();
           const token = session?.access_token;
-          const apiBase = import.meta.env.VITE_PHP_BASE_URL || import.meta.env.VITE_API_BASE_URL || '/php-backend';
-          const res = await fetch(`${apiBase}/users.php`, {
+          const res = await fetch(`${API_BASE}/users.php`, {
             headers: token ? { 'Authorization': `Bearer ${token}` } : {}
           });
           if (res.ok) {
@@ -436,6 +437,7 @@ export const LeadForm: React.FC<LeadFormProps> = ({
   const [emailError, setEmailError] = useState<string | null>(null);
   const [phoneDuplicateLead, setPhoneDuplicateLead] = useState<{ id: string; customer_name: string } | null>(null);
   const [emailDuplicateLead, setEmailDuplicateLead] = useState<{ id: string; customer_name: string } | null>(null);
+  const [sendWhatsAppWelcome, setSendWhatsAppWelcome] = useState<boolean>(true);
 
   // Main Form Data State
   const [formData, setFormData] = useState({
@@ -669,8 +671,6 @@ export const LeadForm: React.FC<LeadFormProps> = ({
   const [countries, setCountries] = useState<any[]>([]);
   const [states, setStates] = useState<any[]>([]);
   const [cities, setCities] = useState<any[]>([]);
-
-  const API_BASE = import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_PHP_BASE_URL || '/php-backend';
 
   const getAuthHeader = async () => {
     try {
@@ -1210,7 +1210,8 @@ export const LeadForm: React.FC<LeadFormProps> = ({
       discussion_notes: formData.remarks.trim() || null,
       notes: formData.remarks.trim() || null,
       remarks: formData.remarks.trim() || null,
-      package_name: titleToSave
+      package_name: titleToSave,
+      send_whatsapp_welcome: sendWhatsAppWelcome
     };
 
     onSubmit(submissionData);
@@ -1353,7 +1354,7 @@ export const LeadForm: React.FC<LeadFormProps> = ({
                   {phoneError && <p className="text-[10px] text-rose-400 font-bold">{phoneError}</p>}
                   {phoneDuplicateLead && (
                     <div className="text-[10px] text-amber-300 bg-amber-500/10 p-1.5 rounded border border-amber-500/30 font-bold">
-                      Already registered: <Link to={`/crm/leads/${phoneDuplicateLead.id}`} className="font-bold underline text-amber-400">{phoneDuplicateLead.customer_name}</Link>
+                      Already registered: <Link to={`/crm/leads/${phoneDuplicateLead.id}`} target="_blank" rel="noopener noreferrer" className="font-bold underline text-amber-400">{phoneDuplicateLead.customer_name}</Link>
                     </div>
                   )}
                 </div>
@@ -1373,15 +1374,33 @@ export const LeadForm: React.FC<LeadFormProps> = ({
                       value={formData.email}
                       onChange={(e) => handleFieldChange('email', e.target.value)}
                       onBlur={handleEmailBlur}
-                      className="pl-8 h-9 text-xs bg-slate-950 border-slate-800 text-slate-100 font-bold placeholder:text-slate-500 focus:border-amber-500"
+                      className={`pl-8 h-9 text-xs bg-slate-950 border-slate-800 text-slate-100 font-bold placeholder:text-slate-500 focus:border-amber-500 ${emailError ? 'border-rose-500' : ''}`}
                     />
                   </div>
+                  {emailError && <p className="text-[10px] text-rose-400 font-bold">{emailError}</p>}
+                  {emailDuplicateLead && (
+                    <div className="text-[10px] text-amber-300 bg-amber-500/10 p-1.5 rounded border border-amber-500/30 font-bold">
+                      Already registered: <Link to={`/crm/leads/${emailDuplicateLead.id}`} target="_blank" rel="noopener noreferrer" className="font-bold underline text-amber-400">{emailDuplicateLead.customer_name}</Link>
+                    </div>
+                  )}
                 </div>
 
                 <div className="space-y-1">
-                  <Label htmlFor="whatsapp_number" className="text-xs font-bold uppercase tracking-wide text-slate-300">
-                    WhatsApp (if different)
-                  </Label>
+                  <div className="flex justify-between items-center">
+                    <Label htmlFor="whatsapp_number" className="text-xs font-bold uppercase tracking-wide text-slate-300">
+                      WhatsApp (if different)
+                    </Label>
+                    {formData.contact_number && formData.whatsapp_number !== formData.contact_number && (
+                      <button
+                        type="button"
+                        onClick={() => handleFieldChange('whatsapp_number', formData.contact_number)}
+                        className="text-[10px] font-bold text-emerald-400 hover:text-emerald-300 flex items-center gap-1 bg-emerald-500/10 border border-emerald-500/20 px-1.5 py-0.5 rounded cursor-pointer transition-colors"
+                        title="Copy mobile number to WhatsApp"
+                      >
+                        ⚡ Same as Mobile
+                      </button>
+                    )}
+                  </div>
                   <div className="relative">
                     <MessageSquare className="absolute left-2.5 top-2.5 h-4 w-4 text-slate-400" />
                     <Input
@@ -1404,11 +1423,17 @@ export const LeadForm: React.FC<LeadFormProps> = ({
                     <Building2 className="absolute left-2.5 top-2.5 h-4 w-4 text-slate-400" />
                     <Input
                       id="customer_home_city"
+                      list="home-city-suggestions-list"
                       placeholder="e.g. Mumbai, Delhi, Ahmedabad, Kolkata"
                       value={formData.customer_home_city}
                       onChange={(e) => handleFieldChange('customer_home_city', e.target.value)}
                       className="pl-8 h-9 text-xs bg-slate-950 border-slate-800 text-slate-100 font-bold placeholder:text-slate-500 focus:border-amber-500"
                     />
+                    <datalist id="home-city-suggestions-list">
+                      {['Mumbai', 'Delhi', 'Ahmedabad', 'Surat', 'Vadodara', 'Rajkot', 'Pune', 'Bengaluru', 'Hyderabad', 'Chennai', 'Kolkata', 'Jaipur', 'Chandigarh', 'Lucknow', 'Indore', 'Bhopal', 'Nagpur', 'Goa', 'Kochi'].map(c => (
+                        <option key={c} value={c} />
+                      ))}
+                    </datalist>
                   </div>
                 </div>
 
@@ -1615,7 +1640,37 @@ export const LeadForm: React.FC<LeadFormProps> = ({
 
               {/* Departure Date */}
               <div className="space-y-1">
-                <Label htmlFor="trip_start_date" className="text-xs font-bold uppercase text-slate-300">Departure Date</Label>
+                <div className="flex justify-between items-center">
+                  <Label htmlFor="trip_start_date" className="text-xs font-bold uppercase text-slate-300">Departure Date</Label>
+                  <div className="flex gap-1">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const d = new Date();
+                        const day = d.getDay();
+                        const diff = (6 - day + 7) % 7 || 7;
+                        d.setDate(d.getDate() + diff);
+                        handleFieldChange('trip_start_date', d.toISOString().split('T')[0]);
+                      }}
+                      className="text-[10px] font-bold text-slate-400 hover:text-amber-300 bg-slate-900 border border-slate-800 px-1.5 py-0.5 rounded cursor-pointer transition-colors"
+                      title="Set to this coming Saturday"
+                    >
+                      This Sat
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const d = new Date();
+                        d.setMonth(d.getMonth() + 1, 1);
+                        handleFieldChange('trip_start_date', d.toISOString().split('T')[0]);
+                      }}
+                      className="text-[10px] font-bold text-slate-400 hover:text-amber-300 bg-slate-900 border border-slate-800 px-1.5 py-0.5 rounded cursor-pointer transition-colors"
+                      title="Set to 1st of next month"
+                    >
+                      Next Mo
+                    </button>
+                  </div>
+                </div>
                 <Input
                   id="trip_start_date"
                   type="date"
@@ -1627,7 +1682,14 @@ export const LeadForm: React.FC<LeadFormProps> = ({
 
               {/* Budget */}
               <div className="space-y-1">
-                <Label htmlFor="budget" className="text-xs font-bold uppercase text-slate-300">Budget per person (₹)</Label>
+                <div className="flex justify-between items-center">
+                  <Label htmlFor="budget" className="text-xs font-bold uppercase text-slate-300">Budget per person (₹)</Label>
+                  {formData.budget && !isNaN(Number(formData.budget)) && (
+                    <span className="text-[10px] font-bold text-amber-400">
+                      ₹{Number(formData.budget).toLocaleString('en-IN')}
+                    </span>
+                  )}
+                </div>
                 <Input
                   id="budget"
                   placeholder="e.g. 80000"
@@ -1635,6 +1697,22 @@ export const LeadForm: React.FC<LeadFormProps> = ({
                   onChange={(e) => handleFieldChange('budget', e.target.value)}
                   className="h-9 text-xs bg-slate-950 border-slate-800 text-slate-100 font-bold placeholder:text-slate-500 focus:border-amber-500"
                 />
+                <div className="flex flex-wrap gap-1 pt-1">
+                  {['25000', '50000', '75000', '100000', '150000', '250000'].map(bVal => (
+                    <button
+                      key={bVal}
+                      type="button"
+                      onClick={() => handleFieldChange('budget', bVal)}
+                      className={`text-[10px] px-2 py-0.5 rounded-md font-bold transition-colors border cursor-pointer ${
+                        formData.budget === bVal 
+                          ? 'bg-amber-500 text-slate-950 border-amber-400' 
+                          : 'bg-slate-900 text-slate-300 border-slate-800 hover:bg-slate-800 hover:text-amber-300'
+                      }`}
+                    >
+                      ₹{parseInt(bVal, 10) >= 100000 ? `${parseInt(bVal, 10) / 100000}L` : `${parseInt(bVal, 10) / 1000}k`}
+                    </button>
+                  ))}
+                </div>
               </div>
 
               {/* Hotel & Transport */}
@@ -1785,7 +1863,11 @@ export const LeadForm: React.FC<LeadFormProps> = ({
                   </div>
                   <div className="text-[10px] text-slate-400 font-medium">Send automatic greeting on lead save</div>
                 </div>
-                <Switch defaultChecked />
+                <Switch 
+                  id="wa-welcome" 
+                  checked={sendWhatsAppWelcome} 
+                  onCheckedChange={setSendWhatsAppWelcome} 
+                />
               </div>
 
               {/* Submit Buttons */}

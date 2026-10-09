@@ -1609,7 +1609,12 @@ const CRM = () => {
             metadata: { toStatus: processedData.status } 
           });
         }
-        navigate(`/crm/leads/${leadIdToRedirect}`);
+        if ((window as any)._buildItineraryAfterSave) {
+          delete (window as any)._buildItineraryAfterSave;
+          navigate(`/crm/leads/${leadIdToRedirect}/itinerary`);
+        } else {
+          navigate(`/crm/leads/${leadIdToRedirect}`);
+        }
       } else {
         navigate('/crm/leads');
       }

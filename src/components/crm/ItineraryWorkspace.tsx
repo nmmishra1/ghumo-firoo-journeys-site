@@ -8,7 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { 
   Map, FileText, Send, CheckCircle2, AlertTriangle, Plus, Search, 
   Eye, Edit, Copy, ExternalLink, Calendar, Users, IndianRupee, ShieldAlert,
-  Loader2, RefreshCw, X, Sparkles, ArrowRight, Trash2, ChevronDown
+  Loader2, RefreshCw, X, Sparkles, ArrowRight, Trash2, ChevronDown, MessageCircle
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
@@ -322,10 +322,17 @@ export const ItineraryWorkspace: React.FC<ItineraryWorkspaceProps> = ({ leads, o
           </p>
         </div>
 
-        <div className="flex items-center gap-2 z-10">
+        <div className="flex items-center gap-2 z-10 flex-wrap">
+          <Button 
+            onClick={() => setActiveTab('leads')}
+            className="bg-emerald-600 hover:bg-emerald-500 text-white text-xs gap-1.5 rounded-xl font-extrabold shadow-md h-9 px-3.5"
+          >
+            <Plus className="w-3.5 h-3.5 stroke-[3]" />
+            <span>+ Build New Itinerary</span>
+          </Button>
           <Button 
             onClick={() => fetchSavedItineraries(true)} 
-            className="bg-amber-500 hover:bg-amber-600 text-slate-950 border border-amber-400 text-xs gap-1.5 rounded-xl font-extrabold shadow-md"
+            className="bg-amber-500 hover:bg-amber-600 text-slate-950 border border-amber-400 text-xs gap-1.5 rounded-xl font-extrabold shadow-md h-9"
             style={{ backgroundColor: '#f59e0b', color: '#090d16' }}
           >
             <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} style={{ color: '#090d16' }} />
@@ -536,13 +543,27 @@ export const ItineraryWorkspace: React.FC<ItineraryWorkspaceProps> = ({ leads, o
           ) : activeTab === 'saved' ? (
             /* TAB 1: SAVED PROPOSALS LIST */
             filteredSavedItineraries.length === 0 ? (
-              <div className="text-center py-16 text-slate-600 dark:text-slate-300 text-xs bg-muted/10 rounded-b-2xl">
-                <Map className="w-12 h-12 mx-auto mb-3 text-amber-500/50" />
-                <p className="font-extrabold text-sm text-slate-900 dark:text-white mb-1">No Saved Itinerary Proposals Found</p>
-                <p className="text-slate-600 dark:text-slate-300 mb-4 font-medium">Saved proposals will appear here once created from a lead profile.</p>
-                <Button size="sm" onClick={() => setActiveTab('leads')} className="bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs rounded-xl px-4">
-                  Select a Lead to Build Itinerary
-                </Button>
+              <div className="text-center py-16 text-slate-600 dark:text-slate-300 text-xs bg-muted/10 rounded-b-2xl space-y-2">
+                <Map className="w-12 h-12 mx-auto mb-2 text-amber-500/50" />
+                <p className="font-extrabold text-sm text-slate-900 dark:text-white mb-0.5">No Saved Itinerary Proposals Found</p>
+                <p className="text-slate-600 dark:text-slate-300 font-medium">
+                  {search || statusFilter !== 'all' ? 'No proposals matched your search or status filter.' : 'Saved proposals will appear here once created from a lead profile.'}
+                </p>
+                <div className="flex justify-center gap-2 pt-2">
+                  {(search || statusFilter !== 'all') && (
+                    <Button 
+                      size="sm" 
+                      variant="outline"
+                      onClick={() => { setSearch(''); setStatusFilter('all'); }} 
+                      className="border-slate-700 text-amber-400 font-bold text-xs rounded-xl px-3"
+                    >
+                      Reset Filters
+                    </Button>
+                  )}
+                  <Button size="sm" onClick={() => setActiveTab('leads')} className="bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs rounded-xl px-4">
+                    Select a Lead to Build Itinerary
+                  </Button>
+                </div>
               </div>
             ) : (
               <div className="divide-y divide-border/20">
@@ -671,15 +692,44 @@ export const ItineraryWorkspace: React.FC<ItineraryWorkspaceProps> = ({ leads, o
                       {/* Actions */}
                       <div className="col-span-2 text-right flex justify-end gap-1.5 flex-wrap">
                         {item.lead_id && (
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => onNavigateLead(String(item.lead_id))}
-                            className="border-indigo-300 dark:border-indigo-800 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-50 dark:hover:bg-indigo-950/50 font-bold text-xs h-8 rounded-lg px-2"
-                            title={`Open Lead Profile #${item.lead_id}`}
-                          >
-                            <Users className="w-3.5 h-3.5 mr-1 text-indigo-500" /> Lead #{item.lead_id}
-                          </Button>
+                          <>
+                            {clientInfo.phone && (
+                              <a
+                                href={`https://wa.me/${clientInfo.phone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(
+                                  `✈️ *GHUMO FIROO TRAVELS ITINERARY*\nHello ${clientInfo.name}!\n\nYour customized itinerary proposal for *${cleanDestinationDisplay(item.package_name || item.destinations)}* is ready!\n\n💰 *Total Proposal Cost:* ₹${Number(item.final_cost || 0).toLocaleString('en-IN')}\n\n🔗 *View Interactive Proposal:* \n${window.location.origin}/crm/leads/${item.lead_id}/itinerary`
+                                )}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                title="Send Proposal via WhatsApp"
+                              >
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="border-emerald-500/40 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/20 font-bold text-xs h-8 rounded-lg px-2"
+                                >
+                                  <MessageCircle className="w-3.5 h-3.5 text-emerald-500" />
+                                </Button>
+                              </a>
+                            )}
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => window.open(`/crm/leads/${item.lead_id}/itinerary`, '_blank')}
+                              className="border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 font-bold text-xs h-8 rounded-lg px-2"
+                              title="Open Customer Preview in New Tab"
+                            >
+                              <Eye className="w-3.5 h-3.5 text-sky-400" />
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => onNavigateLead(String(item.lead_id))}
+                              className="border-indigo-300 dark:border-indigo-800 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-50 dark:hover:bg-indigo-950/50 font-bold text-xs h-8 rounded-lg px-2"
+                              title={`Open Lead Profile #${item.lead_id}`}
+                            >
+                              <Users className="w-3.5 h-3.5 mr-1 text-indigo-500" /> #{item.lead_id}
+                            </Button>
+                          </>
                         )}
                         <Button
                           variant="outline"

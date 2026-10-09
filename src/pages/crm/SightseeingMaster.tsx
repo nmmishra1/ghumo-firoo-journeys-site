@@ -100,29 +100,48 @@ const parseJsonArray = (val: any): any[] => {
 
 // ─── Tag Input ─────────────────────────────────────────────────────────────────
 
-const TagInput = ({ label, items: rawItems, onChange, placeholder, colorClass = 'bg-amber-500/10 text-amber-700 border-amber-500/20' }: {
+const TagInput = ({ label, items: rawItems, onChange, placeholder, colorClass = 'bg-amber-500/10 text-amber-700 border-amber-500/20', suggestions }: {
   label: string;
   items: string[];
   onChange: (items: string[]) => void;
   placeholder: string;
   colorClass?: string;
+  suggestions?: string[];
 }) => {
   const items = parseJsonArray(rawItems);
   const [val, setVal] = useState('');
-  const add = () => {
-    const v = val.trim();
+  const add = (valToAdd?: string) => {
+    const v = (valToAdd !== undefined ? valToAdd : val).trim();
     if (v && !items.includes(v)) onChange([...items, v]);
-    setVal('');
+    if (valToAdd === undefined) setVal('');
   };
+  const availableSuggestions = suggestions?.filter(s => !items.includes(s)) || [];
+
   return (
     <div className="space-y-2">
       <Label className="text-xs font-bold text-slate-300 uppercase tracking-wider">{label}</Label>
       <div className="flex gap-2">
         <Input value={val} onChange={e => setVal(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); add(); } }} placeholder={placeholder} className="h-9 text-sm bg-slate-950 border-slate-800 text-slate-100 font-bold placeholder:text-slate-500 focus:border-amber-500" />
-        <Button type="button" size="sm" onClick={add} className="h-9 px-3.5 shrink-0 bg-amber-500 hover:bg-amber-600 text-slate-950 font-black rounded-xl border-none shadow-sm flex items-center justify-center">
+        <Button type="button" size="sm" onClick={() => add()} className="h-9 px-3.5 shrink-0 bg-amber-500 hover:bg-amber-600 text-slate-950 font-black rounded-xl border-none shadow-sm flex items-center justify-center">
           <Plus className="w-4 h-4 text-slate-950 stroke-[3]" />
         </Button>
       </div>
+      {availableSuggestions.length > 0 && (
+        <div className="flex flex-wrap gap-1 items-center pt-0.5">
+          <span className="text-[10px] text-slate-400 font-semibold mr-0.5">Quick Add:</span>
+          {availableSuggestions.slice(0, 5).map(s => (
+            <button
+              key={s}
+              type="button"
+              onClick={() => add(s)}
+              className="text-[11px] px-2 py-0.5 rounded-full bg-slate-800 hover:bg-slate-700 text-amber-300 border border-slate-700/80 transition-colors flex items-center gap-1 font-medium"
+            >
+              <Plus className="w-2.5 h-2.5" />
+              {s}
+            </button>
+          ))}
+        </div>
+      )}
       {items.length > 0 && (
         <div className="flex flex-wrap gap-1.5 mt-1">
           {items.map(item => (
@@ -174,7 +193,7 @@ const CostSummary = ({ form }: { form: typeof BLANK_FORM }) => {
 
 // ─── Main Component ───────────────────────────────────────────────────────────
 
-const API_BASE = import.meta.env.VITE_API_BASE_URL || '';
+const API_BASE = import.meta.env.VITE_PHP_BASE_URL || import.meta.env.VITE_API_BASE_URL || '/php-backend';
 
 async function getAuthHeader(): Promise<Record<string, string>> {
   const { data: { session } } = await supabase.auth.getSession();
@@ -730,11 +749,11 @@ export default function SightseeingMaster() {
                   </div>
                   <div className="sm:col-span-2 flex flex-wrap gap-6 pt-2 border-t border-border/30">
                     <div className="flex items-center gap-2">
-                      <Switch id="half-day" checked={form.is_half_day} onCheckedChange={chk => setForm(f => ({ ...f, is_half_day: chk }))} />
+                      <Switch id="half-day" checked={form.is_half_day} onCheckedChange={chk => setForm(f => ({ ...f, is_half_day: chk, ...(chk ? { is_full_day: false } : {}) }))} />
                       <Label htmlFor="half-day" className="text-xs font-semibold cursor-pointer">Half Day Tour</Label>
                     </div>
                     <div className="flex items-center gap-2">
-                      <Switch id="full-day" checked={form.is_full_day} onCheckedChange={chk => setForm(f => ({ ...f, is_full_day: chk }))} />
+                      <Switch id="full-day" checked={form.is_full_day} onCheckedChange={chk => setForm(f => ({ ...f, is_full_day: chk, ...(chk ? { is_half_day: false } : {}) }))} />
                       <Label htmlFor="full-day" className="text-xs font-semibold cursor-pointer">Full Day Tour</Label>
                     </div>
                     <div className="flex items-center gap-2">
@@ -814,9 +833,29 @@ export default function SightseeingMaster() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="pt-4 space-y-4">
-                  <TagInput label="Key Highlights" items={form.highlights} onChange={h => setForm(f => ({ ...f, highlights: h }))} placeholder="e.g. Photo stop at Atlantis" />
-                  <TagInput label="Inclusions" items={form.inclusions} onChange={inc => setForm(f => ({ ...f, inclusions: inc }))} placeholder="e.g. AC Transfer included" colorClass="bg-emerald-500/10 text-emerald-600 border-emerald-500/20" />
-                  <TagInput label="Exclusions" items={form.exclusions} onChange={exc => setForm(f => ({ ...f, exclusions: exc }))} placeholder="e.g. Entry ticket extra" colorClass="bg-rose-500/10 text-rose-600 border-rose-500/20" />
+                  <TagInput
+                    label="Key Highlights"
+                    items={form.highlights}
+                    onChange={h => setForm(f => ({ ...f, highlights: h }))}
+                    placeholder="e.g. Photo stop at Atlantis"
+                    suggestions={['Panoramic City Views', 'Instant Confirmation', 'English Speaking Guide', 'Hotel Pickup & Drop', 'Photo Stop']}
+                  />
+                  <TagInput
+                    label="Inclusions"
+                    items={form.inclusions}
+                    onChange={inc => setForm(f => ({ ...f, inclusions: inc }))}
+                    placeholder="e.g. AC Transfer included"
+                    colorClass="bg-emerald-500/10 text-emerald-600 border-emerald-500/20"
+                    suggestions={['Hotel Pickup & Drop', 'Entry Ticket Included', 'Air-Conditioned Vehicle', 'Mineral Water', 'Professional Guide']}
+                  />
+                  <TagInput
+                    label="Exclusions"
+                    items={form.exclusions}
+                    onChange={exc => setForm(f => ({ ...f, exclusions: exc }))}
+                    placeholder="e.g. Entry ticket extra"
+                    colorClass="bg-rose-500/10 text-rose-600 border-rose-500/20"
+                    suggestions={['Personal Expenses & Tips', 'Meals & Beverages', 'Camera / Video Fees', 'Monument Entry Tickets', 'Travel Insurance']}
+                  />
                   <div className="space-y-1.5 pt-2">
                     <Label className="text-xs font-bold text-slate-300 uppercase tracking-wide">Description</Label>
                     <Textarea value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} rows={3} placeholder="Full tour itinerary description..." className="bg-slate-950 border-slate-800 text-slate-100 font-bold focus:border-amber-500" />
@@ -840,19 +879,19 @@ export default function SightseeingMaster() {
                   <div className="grid grid-cols-2 gap-3">
                     <div className="space-y-1.5">
                       <Label className="text-xs font-semibold">Supplier Cost (₹)</Label>
-                      <Input type="number" value={form.supplier_cost} onChange={e => setForm(f => ({ ...f, supplier_cost: Number(e.target.value) }))} className="h-9 font-bold" />
+                      <Input type="number" value={form.supplier_cost === 0 ? '' : form.supplier_cost} onChange={e => setForm(f => ({ ...f, supplier_cost: e.target.value === '' ? 0 : Number(e.target.value) }))} placeholder="0" className="h-9 font-bold bg-slate-950 border-slate-800 text-slate-100" />
                     </div>
                     <div className="space-y-1.5">
                       <Label className="text-xs font-semibold">Selling Cost (₹)</Label>
-                      <Input type="number" value={form.selling_cost} onChange={e => setForm(f => ({ ...f, selling_cost: Number(e.target.value) }))} className="h-9 font-extrabold text-emerald-600" />
+                      <Input type="number" value={form.selling_cost === 0 ? '' : form.selling_cost} onChange={e => setForm(f => ({ ...f, selling_cost: e.target.value === '' ? 0 : Number(e.target.value) }))} placeholder="0" className="h-9 font-extrabold text-emerald-400 bg-slate-950 border-slate-800" />
                     </div>
                     <div className="space-y-1.5">
                       <Label className="text-xs font-semibold">Adult Rate (₹)</Label>
-                      <Input type="number" value={form.adult_cost} onChange={e => setForm(f => ({ ...f, adult_cost: Number(e.target.value) }))} className="h-9 font-bold" />
+                      <Input type="number" value={form.adult_cost === 0 ? '' : form.adult_cost} onChange={e => setForm(f => ({ ...f, adult_cost: e.target.value === '' ? 0 : Number(e.target.value) }))} placeholder="0" className="h-9 font-bold bg-slate-950 border-slate-800 text-slate-100" />
                     </div>
                     <div className="space-y-1.5">
                       <Label className="text-xs font-semibold">Child Rate (₹)</Label>
-                      <Input type="number" value={form.child_cost} onChange={e => setForm(f => ({ ...f, child_cost: Number(e.target.value) }))} className="h-9 font-bold" />
+                      <Input type="number" value={form.child_cost === 0 ? '' : form.child_cost} onChange={e => setForm(f => ({ ...f, child_cost: e.target.value === '' ? 0 : Number(e.target.value) }))} placeholder="0" className="h-9 font-bold bg-slate-950 border-slate-800 text-slate-100" />
                     </div>
                   </div>
 
@@ -862,8 +901,11 @@ export default function SightseeingMaster() {
                       <Switch id="gst-inc" checked={form.gst_included} onCheckedChange={chk => setForm(f => ({ ...f, gst_included: chk }))} />
                     </div>
                     <div className="space-y-1.5">
-                      <Label className="text-xs font-semibold">GST Percentage (%)</Label>
-                      <Input type="number" value={form.gst_percentage} onChange={e => setForm(f => ({ ...f, gst_percentage: Number(e.target.value) }))} className="h-9 font-bold" />
+                      <div className="flex items-center justify-between">
+                        <Label className="text-xs font-semibold">GST Percentage (%)</Label>
+                        <span className="text-[10px] text-amber-400/80 font-medium">Standard: 5% (Transport) | 18% (Ticket)</span>
+                      </div>
+                      <Input type="number" value={form.gst_percentage === 0 ? '' : form.gst_percentage} onChange={e => setForm(f => ({ ...f, gst_percentage: e.target.value === '' ? 0 : Number(e.target.value) }))} placeholder="0" className="h-9 font-bold bg-slate-950 border-slate-800 text-slate-100" />
                     </div>
                   </div>
 

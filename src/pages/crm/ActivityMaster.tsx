@@ -108,20 +108,23 @@ const BLANK_FORM = {
 
 // ─── Tag Input component ───────────────────────────────────────────────────────
 
-const TagInput = ({ label, items, onChange, placeholder, colorClass = 'bg-amber-500/10 text-amber-600 border-amber-500/20' }: {
+const TagInput = ({ label, items, onChange, placeholder, colorClass = 'bg-amber-500/10 text-amber-600 border-amber-500/20', suggestions }: {
   label: string;
   items: string[];
   onChange: (items: string[]) => void;
   placeholder: string;
   colorClass?: string;
+  suggestions?: string[];
 }) => {
   const [inputVal, setInputVal] = useState('');
-  const add = () => {
-    const v = inputVal.trim();
+  const add = (valToAdd?: string) => {
+    const v = (valToAdd !== undefined ? valToAdd : inputVal).trim();
     if (v && !items.includes(v)) { onChange([...items, v]); }
-    setInputVal('');
+    if (valToAdd === undefined) setInputVal('');
   };
   const remove = (item: string) => onChange(items.filter(i => i !== item));
+  const availableSuggestions = suggestions?.filter(s => !items.includes(s)) || [];
+
   return (
     <div className="space-y-2">
       <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">{label}</Label>
@@ -133,10 +136,26 @@ const TagInput = ({ label, items, onChange, placeholder, colorClass = 'bg-amber-
           placeholder={placeholder}
           className="h-9 text-sm"
         />
-        <Button type="button" size="sm" onClick={add} className="h-9 px-3.5 shrink-0 bg-amber-500 hover:bg-amber-600 text-slate-950 font-black rounded-xl border-none shadow-sm flex items-center justify-center">
+        <Button type="button" size="sm" onClick={() => add()} className="h-9 px-3.5 shrink-0 bg-amber-500 hover:bg-amber-600 text-slate-950 font-black rounded-xl border-none shadow-sm flex items-center justify-center">
           <Plus className="w-4 h-4 text-slate-950 stroke-[3]" />
         </Button>
       </div>
+      {availableSuggestions.length > 0 && (
+        <div className="flex flex-wrap gap-1 items-center pt-0.5">
+          <span className="text-[10px] text-muted-foreground font-semibold mr-0.5">Quick Add:</span>
+          {availableSuggestions.slice(0, 5).map(s => (
+            <button
+              key={s}
+              type="button"
+              onClick={() => add(s)}
+              className="text-[11px] px-2 py-0.5 rounded-full bg-secondary/80 hover:bg-secondary text-secondary-foreground border border-border/50 transition-colors flex items-center gap-1 font-medium"
+            >
+              <Plus className="w-2.5 h-2.5" />
+              {s}
+            </button>
+          ))}
+        </div>
+      )}
       {items.length > 0 && (
         <div className="flex flex-wrap gap-1.5 mt-1">
           {items.map(item => (
@@ -208,7 +227,7 @@ const CostSummary = ({ form }: { form: typeof BLANK_FORM }) => {
 
 // ─── Main Component ───────────────────────────────────────────────────────────
 
-const API_BASE = import.meta.env.VITE_API_BASE_URL || '';
+const API_BASE = import.meta.env.VITE_PHP_BASE_URL || import.meta.env.VITE_API_BASE_URL || '/php-backend';
 
 async function getAuthHeader(): Promise<Record<string, string>> {
   const { data: { session } } = await supabase.auth.getSession();
@@ -305,10 +324,12 @@ export default function ActivityMaster() {
   useEffect(() => {
     if (form.state_id) {
       setFilteredCities(cities.filter(c => String(c.state_id) === String(form.state_id)));
+    } else if (form.country_id) {
+      setFilteredCities(cities.filter(c => String(c.country_id) === String(form.country_id)));
     } else {
       setFilteredCities([]);
     }
-  }, [form.state_id, cities]);
+  }, [form.state_id, form.country_id, cities]);
 
   const loadBaseline = async () => {
     try {
@@ -783,12 +804,21 @@ export default function ActivityMaster() {
                     <Label className="text-xs font-semibold">City</Label>
                     <Select
                       value={form.city_id}
-                      onValueChange={v => setForm(f => ({ ...f, city_id: v }))}
-                      disabled={!form.state_id}
+                      onValueChange={v => {
+                        const selectedC = cities.find(c => String(c.id) === String(v));
+                        setForm(f => ({
+                          ...f,
+                          city_id: v,
+                          state_id: selectedC?.state_id ? String(selectedC.state_id) : f.state_id,
+                          country_id: selectedC?.country_id ? String(selectedC.country_id) : f.country_id,
+                          destination: selectedC ? (selectedC.city_name || selectedC.name || f.destination) : f.destination
+                        }));
+                      }}
+                      disabled={!form.state_id && !form.country_id}
                     >
                       <SelectTrigger className="h-9"><SelectValue placeholder="Select city" /></SelectTrigger>
                       <SelectContent>
-                        {filteredCities.map(c => <SelectItem key={c.id} value={String(c.id)}>{c.city_name}</SelectItem>)}
+                        {filteredCities.map(c => <SelectItem key={c.id} value={String(c.id)}>{c.city_name || c.name}</SelectItem>)}
                       </SelectContent>
                     </Select>
                   </div>
@@ -807,9 +837,29 @@ export default function ActivityMaster() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="pt-4 space-y-4">
-                  <TagInput label="Key Highlights" items={form.highlights} onChange={h => setForm(f => ({ ...f, highlights: h }))} placeholder="e.g. Skip-the-line Ticket" />
-                  <TagInput label="Inclusions" items={form.inclusions} onChange={inc => setForm(f => ({ ...f, inclusions: inc }))} placeholder="e.g. Hotel Pickup included" colorClass="bg-emerald-500/10 text-emerald-600 border-emerald-500/20" />
-                  <TagInput label="Exclusions" items={form.exclusions} onChange={exc => setForm(f => ({ ...f, exclusions: exc }))} placeholder="e.g. Gratuities excluded" colorClass="bg-rose-500/10 text-rose-600 border-rose-500/20" />
+                  <TagInput
+                    label="Key Highlights"
+                    items={form.highlights}
+                    onChange={h => setForm(f => ({ ...f, highlights: h }))}
+                    placeholder="e.g. Skip-the-line Ticket"
+                    suggestions={['Instant Confirmation', 'Mobile Voucher Accepted', 'English Speaking Guide', 'Hotel Pickup & Drop', 'Skip The Line']}
+                  />
+                  <TagInput
+                    label="Inclusions"
+                    items={form.inclusions}
+                    onChange={inc => setForm(f => ({ ...f, inclusions: inc }))}
+                    placeholder="e.g. Hotel Pickup included"
+                    colorClass="bg-emerald-500/10 text-emerald-600 border-emerald-500/20"
+                    suggestions={['Hotel Pickup & Drop', 'Activity Equipment', 'Certified Instructor', 'Bottled Drinking Water', 'Safety Gear Included']}
+                  />
+                  <TagInput
+                    label="Exclusions"
+                    items={form.exclusions}
+                    onChange={exc => setForm(f => ({ ...f, exclusions: exc }))}
+                    placeholder="e.g. Gratuities excluded"
+                    colorClass="bg-rose-500/10 text-rose-600 border-rose-500/20"
+                    suggestions={['Personal Expenses & Tips', 'Meals & Drinks', 'Video / Photography Fee', 'Hotel Transfers', 'Medical Insurance']}
+                  />
                   <div className="space-y-1.5 pt-2">
                     <Label className="text-xs font-semibold">Description</Label>
                     <Textarea value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} rows={3} placeholder="Full experience description..." />
@@ -834,19 +884,19 @@ export default function ActivityMaster() {
                   <div className="grid grid-cols-2 gap-3">
                     <div className="space-y-1.5">
                       <Label className="text-xs font-semibold">Supplier Cost (₹)</Label>
-                      <Input type="number" value={form.supplier_cost} onChange={e => setForm(f => ({ ...f, supplier_cost: Number(e.target.value) }))} className="h-9 font-bold" />
+                      <Input type="number" value={form.supplier_cost === 0 ? '' : form.supplier_cost} onChange={e => setForm(f => ({ ...f, supplier_cost: e.target.value === '' ? 0 : Number(e.target.value) }))} placeholder="0" className="h-9 font-bold" />
                     </div>
                     <div className="space-y-1.5">
                       <Label className="text-xs font-semibold">Selling Cost (₹)</Label>
-                      <Input type="number" value={form.selling_cost} onChange={e => setForm(f => ({ ...f, selling_cost: Number(e.target.value) }))} className="h-9 font-extrabold text-emerald-600" />
+                      <Input type="number" value={form.selling_cost === 0 ? '' : form.selling_cost} onChange={e => setForm(f => ({ ...f, selling_cost: e.target.value === '' ? 0 : Number(e.target.value) }))} placeholder="0" className="h-9 font-extrabold text-emerald-600" />
                     </div>
                     <div className="space-y-1.5">
                       <Label className="text-xs font-semibold">Adult Rate (₹)</Label>
-                      <Input type="number" value={form.adult_cost} onChange={e => setForm(f => ({ ...f, adult_cost: Number(e.target.value) }))} className="h-9 font-bold" />
+                      <Input type="number" value={form.adult_cost === 0 ? '' : form.adult_cost} onChange={e => setForm(f => ({ ...f, adult_cost: e.target.value === '' ? 0 : Number(e.target.value) }))} placeholder="0" className="h-9 font-bold" />
                     </div>
                     <div className="space-y-1.5">
                       <Label className="text-xs font-semibold">Child Rate (₹)</Label>
-                      <Input type="number" value={form.child_cost} onChange={e => setForm(f => ({ ...f, child_cost: Number(e.target.value) }))} className="h-9 font-bold" />
+                      <Input type="number" value={form.child_cost === 0 ? '' : form.child_cost} onChange={e => setForm(f => ({ ...f, child_cost: e.target.value === '' ? 0 : Number(e.target.value) }))} placeholder="0" className="h-9 font-bold" />
                     </div>
                   </div>
 
@@ -857,7 +907,7 @@ export default function ActivityMaster() {
                     </div>
                     <div className="space-y-1.5">
                       <Label className="text-xs font-semibold">GST Percentage (%)</Label>
-                      <Input type="number" value={form.gst_percentage} onChange={e => setForm(f => ({ ...f, gst_percentage: Number(e.target.value) }))} className="h-9 font-bold" />
+                      <Input type="number" value={form.gst_percentage === 0 ? '' : form.gst_percentage} onChange={e => setForm(f => ({ ...f, gst_percentage: e.target.value === '' ? 0 : Number(e.target.value) }))} placeholder="0" className="h-9 font-bold" />
                     </div>
                   </div>
 

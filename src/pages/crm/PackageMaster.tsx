@@ -33,18 +33,19 @@ import { CONTRACTED_HOTELS_REGISTRY, type ContractedHotelItem } from '@/data/con
 import { itineraryService } from '@/services/itineraryService';
 
 // ─── Tag Input component ───────────────────────────────────────────────────────
-const TagInput = ({ label, items, onChange, placeholder, colorClass = 'bg-amber-500/10 text-amber-400 border-amber-500/30' }: {
+const TagInput = ({ label, items, onChange, placeholder, colorClass = 'bg-amber-500/10 text-amber-400 border-amber-500/30', suggestions = [] }: {
   label: string;
   items: string[];
   onChange: (items: string[]) => void;
   placeholder: string;
   colorClass?: string;
+  suggestions?: string[];
 }) => {
   const [inputVal, setInputVal] = useState('');
-  const add = () => {
-    const v = inputVal.trim();
+  const add = (textToAdd?: string) => {
+    const v = (textToAdd !== undefined ? textToAdd : inputVal).trim();
     if (v && !items.includes(v)) { onChange([...items, v]); }
-    setInputVal('');
+    if (textToAdd === undefined) setInputVal('');
   };
   const remove = (item: string) => onChange(items.filter(i => i !== item));
   return (
@@ -58,10 +59,35 @@ const TagInput = ({ label, items, onChange, placeholder, colorClass = 'bg-amber-
           placeholder={placeholder}
           className="h-9.5 text-sm bg-slate-900 border-slate-700 text-white placeholder:text-slate-500 focus:border-amber-500"
         />
-        <Button type="button" size="sm" variant="outline" onClick={add} className="h-9.5 px-3 bg-slate-800 border-slate-700 text-amber-400 hover:bg-slate-700 shrink-0">
+        <Button type="button" size="sm" variant="outline" onClick={() => add()} className="h-9.5 px-3 bg-slate-800 border-slate-700 text-amber-400 hover:bg-slate-700 shrink-0">
           <Plus className="w-4 h-4" />
         </Button>
       </div>
+      {suggestions.length > 0 && (
+        <div className="flex flex-wrap items-center gap-1.5 pt-0.5">
+          <span className="text-[10px] uppercase font-bold text-slate-400 flex items-center gap-1">
+            <Sparkles className="w-3 h-3 text-amber-400" /> Quick Add:
+          </span>
+          {suggestions.map(s => {
+            const alreadyAdded = items.includes(s);
+            return (
+              <button
+                key={s}
+                type="button"
+                onClick={() => add(s)}
+                disabled={alreadyAdded}
+                className={`text-[11px] font-semibold px-2 py-0.5 rounded-md border transition-all ${
+                  alreadyAdded
+                    ? 'bg-slate-800/40 text-slate-500 border-slate-800 cursor-not-allowed line-through'
+                    : 'bg-slate-800/90 hover:bg-slate-700 text-slate-200 border-slate-700 hover:border-amber-500/50 hover:text-amber-300'
+                }`}
+              >
+                + {s}
+              </button>
+            );
+          })}
+        </div>
+      )}
       {items.length > 0 && (
         <div className="flex flex-wrap gap-1.5 mt-2">
           {items.map(item => (
@@ -154,7 +180,7 @@ export default function PackageMaster() {
   useEffect(() => {
     const fetchMasterHotels = async () => {
       try {
-        const data = await fetchCachedJson('/php-backend/bootstrap.php');
+        const data = await fetchCachedJson(`${API_BASE}/bootstrap.php`);
         if (data && data.success && Array.isArray(data.hotels) && data.hotels.length > 0) {
           setMasterHotels(data.hotels);
         }
@@ -168,7 +194,7 @@ export default function PackageMaster() {
 
     const fetchMasterSightseeings = async () => {
       try {
-        const res = await fetchCachedJson('/php-backend/mysql-crud.php?table=sightseeings');
+        const res = await fetchCachedJson(`${API_BASE}/mysql-crud.php?table=sightseeings`);
         if (Array.isArray(res) && res.length > 0) {
           setMasterSightseeings(res);
         }
@@ -525,7 +551,7 @@ export default function PackageMaster() {
   const loadPackageVariants = async (pkgId: string) => {
     setLoadingVariants(true);
     try {
-      const res = await fetch(`/php-backend/packages.php?id=${pkgId}&include_variants=1`);
+      const res = await fetch(`${API_BASE}/packages.php?id=${pkgId}&include_variants=1`);
       if (res.ok) {
         const data = await res.json();
         setVariantsList(data.package?.variants || data.variants || []);
@@ -556,7 +582,7 @@ export default function PackageMaster() {
         package_id: editingId || editId
       };
 
-      const res = await fetch('/php-backend/packages.php?action=save_variant', {
+      const res = await fetch(`${API_BASE}/packages.php?action=save_variant`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -583,7 +609,7 @@ export default function PackageMaster() {
     if (!confirm('Are you sure you want to delete this variant?')) return;
     try {
       const authHeaders = await getAuthHeader();
-      const res = await fetch(`/php-backend/packages.php?action=delete_variant&id=${variantId}`, {
+      const res = await fetch(`${API_BASE}/packages.php?action=delete_variant&id=${variantId}`, {
         method: 'DELETE',
         headers: authHeaders
       });
@@ -708,7 +734,7 @@ export default function PackageMaster() {
       const localStored = localStorage.getItem('crm_package_catalog');
       const localPackages = localStored ? JSON.parse(localStored) : null;
 
-      const res = await fetch('/php-backend/packages.php');
+      const res = await fetch(`${API_BASE}/packages.php`);
       if (res.ok) {
         const data = await res.json();
         if (Array.isArray(data) && data.length > 0) {
@@ -752,7 +778,7 @@ export default function PackageMaster() {
       if (!pkg) return;
 
       const authHeaders = await getAuthHeader();
-      const res = await fetch(`/php-backend/packages.php?id=${id}`, {
+      const res = await fetch(`${API_BASE}/packages.php?id=${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json', ...authHeaders },
         body: JSON.stringify({ ...pkg, is_active: !currentStatus })
@@ -772,7 +798,7 @@ export default function PackageMaster() {
     if (!confirm('Are you sure you want to delete this package? This cannot be undone.')) return;
     try {
       const authHeaders = await getAuthHeader();
-      const res = await fetch(`/php-backend/packages.php?id=${id}`, {
+      const res = await fetch(`${API_BASE}/packages.php?id=${id}`, {
         method: 'DELETE',
         headers: authHeaders
       });
@@ -916,7 +942,7 @@ export default function PackageMaster() {
 
       try {
         // 3. Check for duplicates in slug (excluding current editing package)
-        const res = await fetch('/php-backend/packages.php');
+        const res = await fetch(`${API_BASE}/packages.php`);
         if (res.ok) {
           const allPkgs = await res.json();
           const duplicate = allPkgs.find((p: any) => p.slug === form.slug.trim() && p.id !== (editingId || '00000000-0000-0000-0000-000000000000'));
@@ -1000,13 +1026,13 @@ export default function PackageMaster() {
 
       let res: Response;
       if (editingId) {
-        res = await fetch(`/php-backend/packages.php?id=${editingId}`, {
+        res = await fetch(`${API_BASE}/packages.php?id=${editingId}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json', ...authHeaders },
           body: JSON.stringify(payload)
         });
       } else {
-        res = await fetch('/php-backend/packages.php', {
+        res = await fetch(`${API_BASE}/packages.php`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', ...authHeaders },
           body: JSON.stringify(payload)
@@ -1292,13 +1318,13 @@ export default function PackageMaster() {
               {/* Sub tabs navigation */}
               <div className="flex flex-wrap gap-1.5 bg-slate-900 border border-slate-800 p-1.5 rounded-xl mt-4 max-w-fit">
                 {[
-                  { id: 'basic', label: 'Basic Details', icon: Info },
-                  { id: 'lists', label: 'Highlights & Inclusions', icon: Tag },
-                  { id: 'hotels_attractions', label: 'Hotels & Attractions', icon: Building2 },
-                  { id: 'itinerary', label: 'Day Timeline', icon: Calendar },
-                  { id: 'map', label: 'Map & Routes', icon: Map },
-                  { id: 'seo', label: 'FAQs & SEO Meta', icon: Globe },
-                  { id: 'variants', label: 'Package Variants & Tiers', icon: Sparkles }
+                  { id: 'basic', label: 'Basic Details', icon: Info, isComplete: Boolean(form.name && form.slug && form.duration && form.price) },
+                  { id: 'lists', label: 'Highlights & Inclusions', icon: Tag, isComplete: Boolean(form.highlights.length > 0 || form.inclusions.length > 0) },
+                  { id: 'hotels_attractions', label: 'Hotels & Attractions', icon: Building2, isComplete: Boolean((form.hotels && form.hotels.length > 0) || (form.attractions && form.attractions.length > 0)) },
+                  { id: 'itinerary', label: 'Day Timeline', icon: Calendar, isComplete: Boolean(form.itinerary.length > 0) },
+                  { id: 'map', label: 'Map & Routes', icon: Map, isComplete: Boolean(form.map_locations && form.map_locations.length > 0) },
+                  { id: 'seo', label: 'FAQs & SEO Meta', icon: Globe, isComplete: Boolean(form.seo_title || form.faqs?.length > 0) },
+                  { id: 'variants', label: 'Package Variants & Tiers', icon: Sparkles, isComplete: Boolean(variantsList.length > 0) }
                 ].map(tab => {
                   const Icon = tab.icon;
                   const isActive = activeSubTab === tab.id;
@@ -1309,7 +1335,7 @@ export default function PackageMaster() {
                       variant="ghost"
                       size="sm"
                       onClick={() => setActiveSubTab(tab.id)}
-                      className={`text-xs gap-1.5 h-8.5 rounded-lg font-bold transition-all ${
+                      className={`text-xs gap-1.5 h-8.5 rounded-lg font-bold transition-all relative ${
                         isActive
                           ? 'bg-amber-500 text-slate-950 shadow-md hover:bg-amber-400'
                           : 'text-slate-300 hover:text-white hover:bg-slate-800'
@@ -1317,6 +1343,9 @@ export default function PackageMaster() {
                     >
                       <Icon className="w-3.5 h-3.5" />
                       {tab.label}
+                      {tab.isComplete && (
+                        <span className={`w-1.5 h-1.5 rounded-full ${isActive ? 'bg-slate-950' : 'bg-emerald-400'}`} />
+                      )}
                     </Button>
                   );
                 })}
@@ -1339,7 +1368,14 @@ export default function PackageMaster() {
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label className="text-xs font-bold text-slate-300 uppercase tracking-wider">Route Slug (Unique URL)</Label>
+                      <div className="flex items-center justify-between">
+                        <Label className="text-xs font-bold text-slate-300 uppercase tracking-wider">Route Slug (Unique URL)</Label>
+                        {form.slug && (
+                          <span className="text-[10px] text-slate-400 font-mono truncate max-w-[150px]">
+                            /packages/{form.slug}
+                          </span>
+                        )}
+                      </div>
                       <Input
                         value={form.slug}
                         onChange={e => setForm(prev => ({ ...prev, slug: e.target.value }))}
@@ -1355,15 +1391,33 @@ export default function PackageMaster() {
                       <Label className="text-xs font-bold text-slate-300 uppercase tracking-wider">Starting Price (₹)</Label>
                       <Input
                         type="number"
-                        value={form.price || ''}
-                        onChange={e => setForm(prev => ({ ...prev, price: Number(e.target.value) }))}
+                        value={form.price === 0 ? '' : form.price}
+                        onChange={e => {
+                          const val = e.target.value === '' ? 0 : Number(e.target.value);
+                          setForm(prev => ({ ...prev, price: isNaN(val) ? 0 : val }));
+                        }}
                         placeholder="e.g., 45000"
                         required
                         className="h-10 text-sm font-extrabold bg-slate-900 border-slate-700 text-emerald-400 focus:border-amber-500"
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label className="text-xs font-bold text-slate-300 uppercase tracking-wider">Duration String</Label>
+                      <div className="flex items-center justify-between">
+                        <Label className="text-xs font-bold text-slate-300 uppercase tracking-wider">Duration String</Label>
+                        {form.itinerary && form.itinerary.length > 0 && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const days = form.itinerary.length;
+                              const nights = Math.max(0, days - 1);
+                              setForm(prev => ({ ...prev, duration: `${days} Days / ${nights} Nights` }));
+                            }}
+                            className="text-[10px] text-amber-400 hover:text-amber-300 hover:underline font-bold flex items-center gap-0.5"
+                          >
+                            ⚡ Sync ({form.itinerary.length}D / {Math.max(0, form.itinerary.length - 1)}N)
+                          </button>
+                        )}
+                      </div>
                       <Input
                         value={form.duration}
                         onChange={e => setForm(prev => ({ ...prev, duration: e.target.value }))}
@@ -1436,8 +1490,11 @@ export default function PackageMaster() {
                         step="0.1"
                         min="1"
                         max="5"
-                        value={form.rating || ''}
-                        onChange={e => setForm(prev => ({ ...prev, rating: Number(e.target.value) }))}
+                        value={form.rating === 0 ? '' : form.rating}
+                        onChange={e => {
+                          const val = e.target.value === '' ? 0 : Number(e.target.value);
+                          setForm(prev => ({ ...prev, rating: isNaN(val) ? 5.0 : val }));
+                        }}
                         placeholder="e.g., 4.8"
                         className="h-10 text-sm bg-slate-900 border-slate-700 text-amber-400 focus:border-amber-500 font-bold"
                       />
@@ -1446,8 +1503,11 @@ export default function PackageMaster() {
                       <Label className="text-xs font-bold text-slate-300 uppercase tracking-wider">Total Review Count</Label>
                       <Input
                         type="number"
-                        value={form.reviews || ''}
-                        onChange={e => setForm(prev => ({ ...prev, reviews: Number(e.target.value) }))}
+                        value={form.reviews === 0 ? '' : form.reviews}
+                        onChange={e => {
+                          const val = e.target.value === '' ? 0 : Number(e.target.value);
+                          setForm(prev => ({ ...prev, reviews: isNaN(val) ? 0 : val }));
+                        }}
                         placeholder="e.g., 178"
                         className="h-10 text-sm bg-slate-900 border-slate-700 text-white focus:border-amber-500 font-medium"
                       />
@@ -1472,6 +1532,7 @@ export default function PackageMaster() {
                       onChange={items => setForm(prev => ({ ...prev, destinations: items }))}
                       placeholder="Type destination and press Enter"
                       colorClass="bg-emerald-500/10 text-emerald-400 border-emerald-500/30"
+                      suggestions={['Dubai', 'Abu Dhabi', 'Goa', 'Kashmir', 'Kerala', 'Himachal', 'Andaman', 'Bali', 'Thailand', 'Vietnam', 'Singapore', 'Maldives', 'Uttarakhand']}
                     />
                     <TagInput
                       label="Categories for Filter mapping (e.g. premium, honeymoon)"
@@ -1479,6 +1540,7 @@ export default function PackageMaster() {
                       onChange={items => setForm(prev => ({ ...prev, category: items }))}
                       placeholder="Type category and press Enter"
                       colorClass="bg-amber-500/10 text-amber-400 border-amber-500/30"
+                      suggestions={['Honeymoon', 'Family', 'Luxury', 'Adventure', 'Beach', 'Spiritual', 'Budget', 'Weekend Getaway', 'Group Tour']}
                     />
                   </div>
 
@@ -1558,6 +1620,16 @@ export default function PackageMaster() {
                     onChange={items => setForm(prev => ({ ...prev, highlights: items }))}
                     placeholder="e.g., Burj Khalifa entry tickets (Press Enter to Add)"
                     colorClass="bg-amber-500/10 text-amber-500 border-amber-500/20"
+                    suggestions={[
+                      'Iconic Sightseeing Included',
+                      'Desert Safari with BBQ Dinner',
+                      'Private AC Vehicle for All Transfers',
+                      'Buffet Breakfast Every Morning',
+                      'Sunset Dhow Cruise with Dinner',
+                      'English Speaking Tour Guide',
+                      'Skip-the-Line Attraction Entry Tickets',
+                      '24x7 On-Trip Assistance'
+                    ]}
                   />
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <TagInput
@@ -1566,6 +1638,15 @@ export default function PackageMaster() {
                       onChange={items => setForm(prev => ({ ...prev, inclusions: items }))}
                       placeholder="e.g., 4-star hotel stay with breakfast (Press Enter)"
                       colorClass="bg-green-600/10 text-green-600 border-green-600/20"
+                      suggestions={[
+                        'Hotel accommodation with breakfast',
+                        'Airport pickup and drop transfers',
+                        'Private AC cab for all sightseeing',
+                        'All toll tax, parking, fuel and driver allowance',
+                        'Welcome drink on arrival',
+                        'Entry permits and inner line passes',
+                        '24/7 dedicated trip support'
+                      ]}
                     />
                     <TagInput
                       label="Exclusions list"
@@ -1573,6 +1654,15 @@ export default function PackageMaster() {
                       onChange={items => setForm(prev => ({ ...prev, exclusions: items }))}
                       placeholder="e.g., Flight tickets (India-Dubai) (Press Enter)"
                       colorClass="bg-red-600/10 text-red-600 border-red-600/20"
+                      suggestions={[
+                        'Airfare / Train tickets',
+                        '5% GST / Government Tax',
+                        'Personal expenses & laundry',
+                        'Entry fees not mentioned in itinerary',
+                        'Travel and medical insurance',
+                        'Early check-in / Late checkout charges',
+                        'Tips to driver and tour guide'
+                      ]}
                     />
                   </div>
                 </div>

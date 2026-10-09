@@ -577,7 +577,8 @@ class LeadService {
         hotel_category: (lead as any).hotelCategory || null,
         status: lead.status || 'New',
         assigned_to: (lead as any).assignedTo || null,
-        whatsapp_number: lead.customerPhone || (lead as any).phone || ''
+        whatsapp_number: lead.customerPhone || (lead as any).phone || '',
+        send_whatsapp_welcome: (lead as any).send_whatsapp_welcome !== undefined ? (lead as any).send_whatsapp_welcome : ((lead as any).sendWhatsAppWelcome ?? true)
       };
 
       let ok = false;

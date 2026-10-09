@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { 
   FileText, Plus, GitCompare, Eye, RefreshCw, Copy, CheckCircle2, 
   ArrowLeft, ArrowRight, User, Calendar, IndianRupee, Settings, Filter, Search, Edit, Trash2, Save, X, Share2, MessageCircle, Loader2,
-  TrendingUp, ShieldAlert, Star, Globe, MapPin, Compass, Sparkles, Camera, Landmark, Wand2, Bot, Hotel, Car, CheckCircle
+  TrendingUp, ShieldAlert, Star, Globe, MapPin, Compass, Sparkles, Camera, Landmark, Wand2, Bot, Hotel, Car, CheckCircle, Printer
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -13,6 +13,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { useToast } from '@/hooks/use-toast';
 import { quoteService, QuoteHeader, QuoteVersion, QuoteItem } from '@/services/quoteService';
 import { itineraryService, GeneratedAIItineraryResult } from '@/services/itineraryService';
+
+const API_BASE = import.meta.env.VITE_PHP_BASE_URL || import.meta.env.VITE_API_BASE_URL || '/php-backend';
 
 interface QuoteWorkspaceProps {
   quotes: QuoteHeader[];
@@ -439,7 +441,7 @@ export default function QuoteWorkspace({ quotes: propQuotes = [], onCreateRevisi
     if (!query.trim()) return;
     setDestDrawerLoading(true);
     try {
-      const res = await fetch(`/php-backend/get_india_tourism.php?action=ai_context&destination=${encodeURIComponent(query)}`);
+      const res = await fetch(`${API_BASE}/get_india_tourism.php?action=ai_context&destination=${encodeURIComponent(query)}`);
       const data = await res.json();
       if (data.success) {
         setDestData({
@@ -471,7 +473,7 @@ export default function QuoteWorkspace({ quotes: propQuotes = [], onCreateRevisi
     if (!importUrlInput.trim()) return;
     setImportUrlLoading(true);
     try {
-      const res = await fetch(`/php-backend/import_itinerary_url.php?url=${encodeURIComponent(importUrlInput.trim())}`);
+      const res = await fetch(`${API_BASE}/import_itinerary_url.php?url=${encodeURIComponent(importUrlInput.trim())}`);
       const data = await res.json();
       if (data.success) {
         setScrapedItinerary(data);
@@ -644,7 +646,7 @@ export default function QuoteWorkspace({ quotes: propQuotes = [], onCreateRevisi
 
   // Fetch contracts from database
   useEffect(() => {
-    fetch('/php-backend/get_contracts.php')
+    fetch(`${API_BASE}/get_contracts.php`)
       .then(res => res.json())
       .then(data => {
         if (data.success) {
@@ -1138,14 +1140,31 @@ export default function QuoteWorkspace({ quotes: propQuotes = [], onCreateRevisi
                   <TableBody>
                     {filteredQuotes.length === 0 ? (
                       <TableRow>
-                        <TableCell colSpan={7} className="text-center py-12 text-xs text-slate-600 dark:text-slate-400 font-bold">
-                          No quotes found matching your search or filter criteria.
+                        <TableCell colSpan={7} className="text-center py-12 text-xs text-slate-600 dark:text-slate-400 font-bold space-y-2">
+                          <p>No quotes found matching your search or filter criteria.</p>
+                          {(searchTerm || statusFilter !== 'all') && (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => { setSearchTerm(''); setStatusFilter('all'); }}
+                              className="text-[11px] h-7 px-3 rounded-lg border-slate-700 text-amber-400 hover:bg-slate-800"
+                            >
+                              Reset Search & Filters
+                            </Button>
+                          )}
                         </TableCell>
                       </TableRow>
                     ) : (
                       filteredQuotes.map((quote) => {
                         const latestVer = quote.versions.find(v => v.versionNumber === quote.currentVersion);
                         const clientName = quote.customerName || (quote as any).clientName || 'Raj Sharma';
+                        const shareUrl = latestVer?.shareToken 
+                          ? `${window.location.origin}/quote/${latestVer.shareToken}`
+                          : (latestVer ? `${window.location.origin}/quote/${latestVer.id}` : '');
+                        const waText = encodeURIComponent(
+                          `✈️ *GHUMO FIROO TRAVELS PROPOSAL*\nHello ${clientName}!\n\nYour customized tour proposal for *${quote.destination}* is ready!\n\n💰 *Quote Selling Price:* ₹${latestVer?.sellingPrice?.toLocaleString('en-IN') || 0}\n\n🔗 *View Interactive Proposal & Confirm:* \n${shareUrl}`
+                        );
+
                         return (
                           <TableRow key={quote.id} className="hover:bg-slate-50/80 dark:hover:bg-slate-900/50 transition-all border-b border-border/20">
                             <TableCell className="font-mono font-black text-amber-600 dark:text-amber-400 text-xs">
@@ -1180,15 +1199,31 @@ export default function QuoteWorkspace({ quotes: propQuotes = [], onCreateRevisi
                             <TableCell className="text-right">
                               <div className="flex justify-end gap-1.5">
                                 {latestVer && (
-                                  <Button
-                                    size="sm"
-                                    variant="outline"
-                                    onClick={() => handleShareQuoteClick(latestVer)}
-                                    className="border-amber-500/30 text-amber-600 dark:text-amber-400 hover:bg-amber-500/10 text-xs font-bold rounded-xl h-8 px-2.5"
-                                    title="Share Customer Link"
-                                  >
-                                    <Share2 className="w-3.5 h-3.5 mr-1" /> Share
-                                  </Button>
+                                  <>
+                                    <a
+                                      href={`https://wa.me/?text=${waText}`}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      title="Dispatch via WhatsApp"
+                                    >
+                                      <Button
+                                        size="sm"
+                                        variant="outline"
+                                        className="border-emerald-500/40 bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 text-xs font-bold rounded-xl h-8 px-2.5"
+                                      >
+                                        <MessageCircle className="w-3.5 h-3.5 mr-1 text-emerald-400" /> WhatsApp
+                                      </Button>
+                                    </a>
+                                    <Button
+                                      size="sm"
+                                      variant="outline"
+                                      onClick={() => handleShareQuoteClick(latestVer)}
+                                      className="border-amber-500/30 text-amber-600 dark:text-amber-400 hover:bg-amber-500/10 text-xs font-bold rounded-xl h-8 px-2.5"
+                                      title="Share Customer Link"
+                                    >
+                                      <Share2 className="w-3.5 h-3.5 mr-1" /> Share
+                                    </Button>
+                                  </>
                                 )}
                                 <Button 
                                   size="sm" 
@@ -1335,6 +1370,15 @@ export default function QuoteWorkspace({ quotes: propQuotes = [], onCreateRevisi
                           className="bg-indigo-600 hover:bg-indigo-700 text-white font-black text-xs rounded-xl h-9 px-3.5 shadow-md flex items-center gap-1"
                         >
                           <Landmark className="w-3.5 h-3.5 mr-1" /> + Add Hotel
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => window.print()}
+                          className="border-slate-700 bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs rounded-xl h-9 px-3 shadow-md flex items-center gap-1.5"
+                          title="Print or Save PDF"
+                        >
+                          <Printer className="w-3.5 h-3.5" /> Print / PDF
                         </Button>
                         <Button size="sm" onClick={() => handleShareQuoteClick(vA)} className="bg-amber-500 hover:bg-amber-600 text-slate-950 font-black text-xs rounded-xl h-9 px-3.5 shadow-md">
                           <Share2 className="w-3.5 h-3.5 mr-1" /> Share Link
