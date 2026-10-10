@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { 
   FileText, Plus, GitCompare, Eye, RefreshCw, Copy, CheckCircle2, 
   ArrowLeft, ArrowRight, User, Calendar, IndianRupee, Settings, Filter, Search, Edit, Trash2, Save, X, Share2, MessageCircle, Loader2,
-  TrendingUp, ShieldAlert, Star, Globe, MapPin, Compass, Sparkles, Camera, Landmark, Wand2, Bot, Hotel, Car, CheckCircle, Printer
+  TrendingUp, ShieldAlert, Star, Globe, MapPin, Compass, Sparkles, Camera, Landmark, Wand2, Bot, Hotel, Car, CheckCircle, Printer,
+  Package, Zap, Layers, ChevronRight, Phone, Mail
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -64,9 +65,12 @@ export default function QuoteWorkspace({ quotes: propQuotes = [], onCreateRevisi
     margin: 15
   });
 
-  // New Quote Creation Modal State
+  // Upgraded Unified Quote Creation Modal State
   const [newQuoteModalOpen, setNewQuoteModalOpen] = useState(false);
+  const [creationMode, setCreationMode] = useState<'ai' | 'package' | 'custom'>('ai');
   const [creatingQuote, setCreatingQuote] = useState(false);
+  const [masterPackages, setMasterPackages] = useState<any[]>([]);
+  const [selectedPackageId, setSelectedPackageId] = useState<string>('');
   const [newQuoteData, setNewQuoteData] = useState({
     customerName: '',
     customerEmail: '',
@@ -244,6 +248,148 @@ export default function QuoteWorkspace({ quotes: propQuotes = [], onCreateRevisi
       toast({
         title: "Failed to Create Quote",
         description: error.message || "An unexpected error occurred. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setCreatingQuote(false);
+    }
+  };
+
+  // Create Quote from Pre-built Master Package
+  const handleCreateFromPackage = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newQuoteData.customerName.trim()) {
+      toast({
+        title: "Client Name Required",
+        description: "Please enter the client name.",
+        variant: "destructive"
+      });
+      return;
+    }
+    const pkg = masterPackages.find(p => String(p.id) === String(selectedPackageId) || p.slug === selectedPackageId);
+    if (!pkg) {
+      toast({
+        title: "Package Selection Required",
+        description: "Please select a master tour package from the catalog.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setCreatingQuote(true);
+    try {
+      const newQuoteId = `q-${Date.now()}`;
+      const newQuoteNum = `QT-${new Date().getFullYear()}-${Math.floor(100 + Math.random() * 900)}`;
+      const basePrice = Number(pkg.price || pkg.starting_price || 25000);
+      const pkgDuration = Number(pkg.duration_days || pkg.duration || 5);
+      const pkgNights = Math.max(1, pkgDuration - 1);
+      const marginVal = Number(newQuoteData.margin) || 15;
+
+      const items: QuoteItem[] = [
+        {
+          type: 'hotel',
+          name: `${pkg.title || pkg.name} Hotel Accommodations (${pkgNights}N)`,
+          detail: `Selected handpicked 3-Star / 4-Star Partner Hotels with Breakfast (CP Plan)`,
+          qty: pkgNights,
+          rate: Math.round((basePrice * 0.5) / pkgNights),
+          total: Math.round(basePrice * 0.5)
+        },
+        {
+          type: 'transfer',
+          name: `Dedicated AC Private Vehicle (${pkgDuration} Days)`,
+          detail: `Airport / Station pickup, intercity transfers, and sightseeing with driver allowance & tolls`,
+          qty: pkgDuration,
+          rate: Math.round((basePrice * 0.3) / pkgDuration),
+          total: Math.round(basePrice * 0.3)
+        },
+        {
+          type: 'excursion',
+          name: `${pkg.destination || 'Circuit'} Guided Sightseeing & Experiences`,
+          detail: `Key attraction entries, permits, and designated activities`,
+          qty: 1,
+          rate: Math.round(basePrice * 0.2),
+          total: Math.round(basePrice * 0.2)
+        }
+      ];
+
+      const totalCost = items.reduce((sum, it) => sum + it.total, 0);
+      const sellingPrice = Math.round(totalCost * (1 + (marginVal / 100)));
+
+      const newVersion: QuoteVersion = {
+        id: `ver-${Date.now()}`,
+        versionNumber: 1,
+        createdAt: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+        createdBy: 'Sales Agent (Package Template)',
+        status: 'Draft',
+        items: items,
+        totalCost: totalCost,
+        margin: marginVal,
+        sellingPrice: sellingPrice
+      };
+
+      const newQuoteObj: QuoteHeader = {
+        id: newQuoteId,
+        quoteNumber: newQuoteNum,
+        customerName: newQuoteData.customerName.trim(),
+        destination: pkg.destination || pkg.title || 'Tour Package',
+        createdAt: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+        currentVersion: 1,
+        decisionStatus: 'Draft',
+        versions: [newVersion]
+      };
+
+      setQuotes(prev => [newQuoteObj, ...prev]);
+      setSelectedQuote(newQuoteObj);
+      setVersionA(newVersion.id);
+      setVersionB('');
+      setEditItems(items);
+      setNewQuoteModalOpen(false);
+
+      try {
+        const res = await quoteService.saveQuote({
+          id: null,
+          lead_id: 0,
+          itinerary_id: String(pkg.id || ''),
+          package_name: (pkg.title || pkg.name || 'Tour Package').trim(),
+          total_amount: sellingPrice,
+          customer_name: newQuoteData.customerName.trim(),
+          customer_email: newQuoteData.customerEmail.trim(),
+          customer_phone: newQuoteData.customerPhone.trim(),
+          cost_breakdown: {
+            hotels: Math.round(basePrice * 0.5),
+            transport: Math.round(basePrice * 0.3),
+            sightseeing: Math.round(basePrice * 0.2),
+            items: items,
+            margin: marginVal
+          },
+          inclusions: pkg.inclusions ? (Array.isArray(pkg.inclusions) ? pkg.inclusions : [pkg.inclusions]) : [],
+          exclusions: pkg.exclusions ? (Array.isArray(pkg.exclusions) ? pkg.exclusions : [pkg.exclusions]) : [],
+          validity_days: 7,
+          notes: `Quote from Package Master "${pkg.title || pkg.name}" for ${newQuoteData.customerName.trim()}`
+        });
+
+        if (res && res.quote_id) {
+          newVersion.id = res.quote_id;
+          newQuoteObj.id = res.quote_id;
+          if (res.lead_id) {
+            newQuoteObj.leadId = res.lead_id;
+          }
+          setVersionA(res.quote_id);
+        }
+        if (onRefresh) onRefresh();
+      } catch (err: any) {
+        console.warn("Could not save package quote:", err);
+      }
+
+      toast({
+        title: "Quote Created from Master Package",
+        description: `Imported "${pkg.title || pkg.name}" for ${newQuoteData.customerName.trim()}.`,
+        className: 'bg-slate-900 text-white border-emerald-500/40'
+      });
+    } catch (err: any) {
+      toast({
+        title: "Creation Failed",
+        description: err.message || "Failed to create quote from package.",
         variant: "destructive"
       });
     } finally {
@@ -671,7 +817,7 @@ export default function QuoteWorkspace({ quotes: propQuotes = [], onCreateRevisi
   const [selectedStatesByRow, setSelectedStatesByRow] = useState<Record<number, string>>({});
   const [selectedCitiesByRow, setSelectedCitiesByRow] = useState<Record<number, string>>({});
 
-  // Fetch contracts from database
+  // Fetch contracts & master packages from database
   useEffect(() => {
     fetch(`${API_BASE}/get_contracts.php`)
       .then(res => res.json())
@@ -685,6 +831,17 @@ export default function QuoteWorkspace({ quotes: propQuotes = [], onCreateRevisi
         }
       })
       .catch(err => console.error("Failed to load database contracts:", err));
+
+    fetch(`${API_BASE}/packages.php`)
+      .then(res => res.json())
+      .then(data => {
+        if (Array.isArray(data)) {
+          setMasterPackages(data);
+        } else if (data?.packages && Array.isArray(data.packages)) {
+          setMasterPackages(data.packages);
+        }
+      })
+      .catch(err => console.warn("Failed to load master packages:", err));
   }, []);
 
   // Update internal quotes list if prop changes
@@ -1086,27 +1243,19 @@ export default function QuoteWorkspace({ quotes: propQuotes = [], onCreateRevisi
                 <div className="flex items-center gap-2.5">
                   <Button 
                     onClick={() => {
-                      setAiFormData({
-                        destination: 'Kashmir',
-                        durationDays: 5,
-                        passengerCount: 2,
-                        travelStyle: 'Honeymoon Romantic',
-                        budgetTier: '4-Star Premium',
-                        customerName: '',
-                        customerEmail: '',
-                        customerPhone: '',
-                        customNotes: '',
-                        margin: 15
-                      });
+                      setCreationMode('ai');
                       setAiResult(null);
-                      setAiModalOpen(true);
+                      setNewQuoteModalOpen(true);
                     }}
                     className="bg-gradient-to-r from-purple-600 via-indigo-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-black text-xs rounded-xl h-9 px-4 shadow-md flex items-center gap-1.5 shrink-0 border border-purple-400/30"
                   >
                     <Sparkles className="w-4 h-4 text-amber-300 animate-pulse" /> ✨ Generate with Gemini AI
                   </Button>
                   <Button 
-                    onClick={() => setNewQuoteModalOpen(true)}
+                    onClick={() => {
+                      setCreationMode('custom');
+                      setNewQuoteModalOpen(true);
+                    }}
                     className="bg-amber-500 hover:bg-amber-600 text-slate-950 font-black text-xs rounded-xl h-9 px-4 shadow-md flex items-center gap-1.5 shrink-0"
                   >
                     <Plus className="w-4 h-4 stroke-[3]" /> Create New Quote
@@ -1974,18 +2123,36 @@ export default function QuoteWorkspace({ quotes: propQuotes = [], onCreateRevisi
         </div>
       )}
 
-      {/* CREATE NEW QUOTE PROPOSAL MODAL DIALOG */}
+      {/* UPGRADED UNIFIED SMART QUOTE & PROPOSAL BUILDER MODAL */}
       {newQuoteModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-xs animate-in fade-in duration-200">
-          <div className="w-full max-w-md bg-[#111827] border border-slate-800 rounded-2xl text-slate-100 p-5 shadow-2xl space-y-4">
-            <div className="flex justify-between items-center border-b border-slate-800 pb-3">
-              <div className="flex items-center gap-2">
-                <div className="p-2 bg-amber-500/20 text-amber-400 border border-amber-500/30 rounded-xl">
-                  <Plus className="w-5 h-5 stroke-[3]" />
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-950/85 backdrop-blur-md animate-in fade-in duration-200 overflow-y-auto">
+          <div className="w-full max-w-2xl bg-[#111827] border border-slate-800 rounded-3xl text-slate-100 p-5 sm:p-6 shadow-2xl space-y-4 my-6 max-h-[92vh] flex flex-col justify-between">
+            {/* Modal Header */}
+            <div className="flex justify-between items-center border-b border-slate-800 pb-3 shrink-0">
+              <div className="flex items-center gap-3">
+                <div className={`p-2.5 rounded-2xl border shadow-inner ${
+                  creationMode === 'ai' 
+                    ? 'bg-purple-500/20 text-purple-400 border-purple-500/30' 
+                    : creationMode === 'package' 
+                    ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30' 
+                    : 'bg-amber-500/20 text-amber-400 border-amber-500/30'
+                }`}>
+                  {creationMode === 'ai' ? <Sparkles className="w-5 h-5 animate-pulse text-amber-300" /> : creationMode === 'package' ? <Package className="w-5 h-5" /> : <Plus className="w-5 h-5 stroke-[3]" />}
                 </div>
                 <div>
-                  <h3 className="text-sm font-black uppercase text-white tracking-wide">Create New Quote Proposal</h3>
-                  <p className="text-[11px] text-slate-400 font-semibold">Generate a multi-version pricing quote for client</p>
+                  <h3 className="text-base font-black uppercase text-white tracking-wide flex items-center gap-2">
+                    {creationMode === 'ai' ? '1-Click Gemini AI Proposal' : creationMode === 'package' ? 'Quote from Master Package' : 'Create Custom Tour Quote'}
+                    <Badge className="text-[10px] uppercase font-black px-2 py-0.5 bg-slate-800 border-slate-700 text-slate-300">
+                      Version 1
+                    </Badge>
+                  </h3>
+                  <p className="text-xs text-slate-400 font-medium mt-0.5">
+                    {creationMode === 'ai' 
+                      ? 'Queries real database contracted hotels & sightseeings to assemble a day-by-day proposal' 
+                      : creationMode === 'package' 
+                      ? 'Instantly import from your 34+ curated catalog tour packages with auto-costing' 
+                      : 'Create a blank customizable quote with your preferred markup and destination'}
+                  </p>
                 </div>
               </div>
               <Button size="icon" variant="ghost" onClick={() => setNewQuoteModalOpen(false)} className="text-slate-400 hover:text-white rounded-xl">
@@ -1993,57 +2160,435 @@ export default function QuoteWorkspace({ quotes: propQuotes = [], onCreateRevisi
               </Button>
             </div>
 
-            <form onSubmit={handleCreateNewQuote} className="space-y-3 pt-1">
-              <div className="space-y-1">
-                <label className="text-xs font-extrabold uppercase text-slate-300">Customer / Client Name *</label>
-                <Input
-                  required
-                  value={newQuoteData.customerName}
-                  onChange={(e) => setNewQuoteData({ ...newQuoteData, customerName: e.target.value })}
-                  placeholder="e.g. Rahul Sharma"
-                  className="h-9 text-xs bg-slate-900 border-slate-700 text-white rounded-xl"
-                  autoFocus
-                />
+            {/* Creation Mode Tabs */}
+            <div className="grid grid-cols-3 gap-2 p-1 bg-slate-900 border border-slate-800 rounded-2xl shrink-0">
+              <button
+                type="button"
+                onClick={() => setCreationMode('ai')}
+                className={`flex items-center justify-center gap-2 py-2 px-3 text-xs font-black rounded-xl transition-all ${
+                  creationMode === 'ai'
+                    ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-md'
+                    : 'text-slate-400 hover:text-slate-200'
+                }`}
+              >
+                <Sparkles className="w-3.5 h-3.5 text-amber-300" />
+                <span className="hidden sm:inline">✨ 1-Click</span> Gemini AI
+              </button>
+              <button
+                type="button"
+                onClick={() => setCreationMode('package')}
+                className={`flex items-center justify-center gap-2 py-2 px-3 text-xs font-black rounded-xl transition-all ${
+                  creationMode === 'package'
+                    ? 'bg-emerald-600 text-white shadow-md'
+                    : 'text-slate-400 hover:text-slate-200'
+                }`}
+              >
+                <Package className="w-3.5 h-3.5 text-emerald-300" />
+                <span className="hidden sm:inline">From</span> Master Package
+              </button>
+              <button
+                type="button"
+                onClick={() => setCreationMode('custom')}
+                className={`flex items-center justify-center gap-2 py-2 px-3 text-xs font-black rounded-xl transition-all ${
+                  creationMode === 'custom'
+                    ? 'bg-amber-500 text-slate-950 shadow-md'
+                    : 'text-slate-400 hover:text-slate-200'
+                }`}
+              >
+                <Layers className="w-3.5 h-3.5 text-slate-950" />
+                <span className="hidden sm:inline">Custom</span> Blank Quote
+              </button>
+            </div>
+
+            {/* Modal Body Based on Selected Tab */}
+            <div className="flex-1 overflow-y-auto pr-1 space-y-4">
+              {/* Client Information Section (Common to All Modes) */}
+              <div className="p-3.5 bg-slate-900/80 border border-slate-800/80 rounded-2xl space-y-3">
+                <div className="text-[11px] font-black uppercase text-amber-400 tracking-wider flex items-center gap-1.5">
+                  <User className="w-3.5 h-3.5" /> Client / Lead Information
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                  <div className="space-y-1 sm:col-span-1">
+                    <label className="text-[11px] font-bold text-slate-300">Client Full Name *</label>
+                    <Input
+                      required
+                      value={newQuoteData.customerName}
+                      onChange={(e) => {
+                        setNewQuoteData({ ...newQuoteData, customerName: e.target.value });
+                        setAiFormData(prev => ({ ...prev, customerName: e.target.value }));
+                      }}
+                      placeholder="e.g. Rahul Sharma"
+                      className="h-9 text-xs bg-slate-950 border-slate-700 text-white rounded-xl"
+                      autoFocus
+                    />
+                  </div>
+                  <div className="space-y-1 sm:col-span-1">
+                    <label className="text-[11px] font-bold text-slate-300 flex items-center gap-1">
+                      <Phone className="w-3 h-3 text-slate-400" /> Phone Number
+                    </label>
+                    <Input
+                      value={newQuoteData.customerPhone}
+                      onChange={(e) => {
+                        setNewQuoteData({ ...newQuoteData, customerPhone: e.target.value });
+                        setAiFormData(prev => ({ ...prev, customerPhone: e.target.value }));
+                      }}
+                      placeholder="e.g. +91 98765 43210"
+                      className="h-9 text-xs bg-slate-950 border-slate-700 text-white rounded-xl"
+                    />
+                  </div>
+                  <div className="space-y-1 sm:col-span-1">
+                    <label className="text-[11px] font-bold text-slate-300 flex items-center gap-1">
+                      <Mail className="w-3 h-3 text-slate-400" /> Email Address
+                    </label>
+                    <Input
+                      type="email"
+                      value={newQuoteData.customerEmail}
+                      onChange={(e) => {
+                        setNewQuoteData({ ...newQuoteData, customerEmail: e.target.value });
+                        setAiFormData(prev => ({ ...prev, customerEmail: e.target.value }));
+                      }}
+                      placeholder="e.g. client@example.com"
+                      className="h-9 text-xs bg-slate-950 border-slate-700 text-white rounded-xl"
+                    />
+                  </div>
+                </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-2">
-                <div className="space-y-1">
-                  <label className="text-xs font-extrabold uppercase text-slate-300">Destination *</label>
-                  <Input
-                    required
-                    value={newQuoteData.destination}
-                    onChange={(e) => setNewQuoteData({ ...newQuoteData, destination: e.target.value })}
-                    placeholder="e.g. Kashmir"
-                    className="h-9 text-xs bg-slate-900 border-slate-700 text-white rounded-xl"
-                  />
-                </div>
-                <div className="space-y-1">
-                  <label className="text-xs font-extrabold uppercase text-slate-300">Margin %</label>
-                  <Input
-                    type="number"
-                    value={newQuoteData.margin}
-                    onChange={(e) => setNewQuoteData({ ...newQuoteData, margin: Number(e.target.value) })}
-                    className="h-9 text-xs bg-slate-900 border-slate-700 text-white rounded-xl"
-                  />
-                </div>
-              </div>
+              {/* TAB 1: GEMINI AI GENERATOR */}
+              {creationMode === 'ai' && (
+                <div className="space-y-3.5">
+                  {!aiResult ? (
+                    <form onSubmit={handleGenerateAIProposal} className="space-y-3">
+                      <div className="space-y-1.5">
+                        <label className="text-xs font-extrabold uppercase text-purple-300 flex items-center justify-between">
+                          <span>Destination / Circuit *</span>
+                          <span className="text-[10px] text-slate-400 lowercase">Queries verified DB hotels & sightseeings</span>
+                        </label>
+                        <Input
+                          required
+                          value={aiFormData.destination}
+                          onChange={(e) => {
+                            setAiFormData(prev => ({ ...prev, destination: e.target.value }));
+                            setNewQuoteData(prev => ({ ...prev, destination: e.target.value }));
+                          }}
+                          placeholder="e.g. Kashmir / Kerala / Rann of Kutch / Rajasthan / Andaman"
+                          className="h-9 text-xs bg-slate-900 border-slate-700 text-white rounded-xl focus:border-purple-500"
+                        />
+                        <div className="flex items-center gap-1.5 flex-wrap pt-0.5">
+                          {['Kashmir', 'Kerala', 'Rann of Kutch', 'Rajasthan', 'Char Dham', 'Goa', 'Andaman', 'Himachal', 'Dubai'].map(dest => (
+                            <button
+                              key={dest}
+                              type="button"
+                              onClick={() => {
+                                setAiFormData(prev => ({ ...prev, destination: dest }));
+                                setNewQuoteData(prev => ({ ...prev, destination: dest }));
+                              }}
+                              className={`text-[10px] px-2.5 py-0.5 rounded-lg font-bold transition-colors ${
+                                aiFormData.destination.toLowerCase() === dest.toLowerCase()
+                                  ? 'bg-purple-600 text-white'
+                                  : 'bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700/60'
+                              }`}
+                            >
+                              {dest}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
 
-              <div className="flex gap-2 justify-end pt-3 border-t border-slate-800">
-                <Button type="button" variant="ghost" size="sm" onClick={() => setNewQuoteModalOpen(false)} disabled={creatingQuote} className="text-xs text-slate-400 rounded-xl">
-                  Cancel
-                </Button>
-                <Button type="submit" size="sm" disabled={creatingQuote} className="bg-amber-500 hover:bg-amber-600 text-slate-950 font-black text-xs rounded-xl h-9 px-4 flex items-center gap-1.5">
-                  {creatingQuote ? (
-                    <>
-                      <Loader2 className="w-3.5 h-3.5 animate-spin text-slate-950" />
-                      <span>Creating Quote...</span>
-                    </>
+                      <div className="grid grid-cols-3 gap-2.5">
+                        <div className="space-y-1">
+                          <label className="text-xs font-bold text-slate-300">Duration (Days)</label>
+                          <Input
+                            type="number"
+                            min={1}
+                            max={30}
+                            value={aiFormData.durationDays}
+                            onChange={(e) => setAiFormData(prev => ({ ...prev, durationDays: Math.max(1, Number(e.target.value)) }))}
+                            className="h-9 text-xs bg-slate-900 border-slate-700 text-white rounded-xl"
+                          />
+                        </div>
+                        <div className="space-y-1">
+                          <label className="text-xs font-bold text-slate-300">Adults (Pax)</label>
+                          <Input
+                            type="number"
+                            min={1}
+                            max={50}
+                            value={aiFormData.passengerCount}
+                            onChange={(e) => setAiFormData(prev => ({ ...prev, passengerCount: Math.max(1, Number(e.target.value)) }))}
+                            className="h-9 text-xs bg-slate-900 border-slate-700 text-white rounded-xl"
+                          />
+                        </div>
+                        <div className="space-y-1">
+                          <label className="text-xs font-bold text-slate-300">Markup Margin %</label>
+                          <Input
+                            type="number"
+                            min={0}
+                            max={100}
+                            value={aiFormData.margin}
+                            onChange={(e) => {
+                              const val = Math.max(0, Number(e.target.value));
+                              setAiFormData(prev => ({ ...prev, margin: val }));
+                              setNewQuoteData(prev => ({ ...prev, margin: val }));
+                            }}
+                            className="h-9 text-xs bg-slate-900 border-slate-700 text-white rounded-xl"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-2.5">
+                        <div className="space-y-1">
+                          <label className="text-xs font-bold text-slate-300">Travel Vibe / Style</label>
+                          <Select 
+                            value={aiFormData.travelStyle} 
+                            onValueChange={(val) => setAiFormData(prev => ({ ...prev, travelStyle: val }))}
+                          >
+                            <SelectTrigger className="h-9 text-xs bg-slate-900 border-slate-700 text-white rounded-xl">
+                              <SelectValue placeholder="Select Style" />
+                            </SelectTrigger>
+                            <SelectContent className="bg-slate-900 border-slate-700 text-white">
+                              <SelectItem value="Honeymoon Romantic">💍 Honeymoon & Romantic</SelectItem>
+                              <SelectItem value="Family Leisure">👨‍👩‍👧‍👦 Family Leisure & Kids</SelectItem>
+                              <SelectItem value="Luxury Heritage Palace">👑 Luxury Heritage Palace</SelectItem>
+                              <SelectItem value="Spiritual Pilgrimage">🕉️ Spiritual Pilgrimage</SelectItem>
+                              <SelectItem value="Adventure & Nature Trek">⛰️ Adventure & Nature</SelectItem>
+                              <SelectItem value="Corporate Executive Retreat">💼 Corporate Retreat</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+
+                        <div className="space-y-1">
+                          <label className="text-xs font-bold text-slate-300">Hotel & Budget Tier</label>
+                          <Select 
+                            value={aiFormData.budgetTier} 
+                            onValueChange={(val) => setAiFormData(prev => ({ ...prev, budgetTier: val }))}
+                          >
+                            <SelectTrigger className="h-9 text-xs bg-slate-900 border-slate-700 text-white rounded-xl">
+                              <SelectValue placeholder="Select Tier" />
+                            </SelectTrigger>
+                            <SelectContent className="bg-slate-900 border-slate-700 text-white">
+                              <SelectItem value="4-Star Premium">⭐ 4-Star Premium Boutique</SelectItem>
+                              <SelectItem value="5-Star Luxury">⭐⭐ 5-Star Luxury Resort</SelectItem>
+                              <SelectItem value="3-Star Comfort">✨ 3-Star Deluxe Comfort</SelectItem>
+                              <SelectItem value="Swiss Tent & Houseboat">🏕️ Swiss Tents / Houseboats</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </div>
+
+                      <div className="space-y-1">
+                        <label className="text-xs font-bold text-slate-300">Special Notes / Dietary Requirements</label>
+                        <Input
+                          value={aiFormData.customNotes}
+                          onChange={(e) => setAiFormData(prev => ({ ...prev, customNotes: e.target.value }))}
+                          placeholder="e.g. Jain food required, elderly couple needing relaxed schedule, private shikara included"
+                          className="h-9 text-xs bg-slate-900 border-slate-700 text-white rounded-xl"
+                        />
+                      </div>
+
+                      <Button
+                        type="submit"
+                        disabled={aiLoading}
+                        className="w-full bg-gradient-to-r from-purple-600 via-indigo-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-black text-xs h-10 rounded-xl shadow-lg flex items-center justify-center gap-2 border border-purple-400/40"
+                      >
+                        {aiLoading ? (
+                          <>
+                            <Loader2 className="w-4 h-4 animate-spin text-amber-300" />
+                            <span>Querying database contracts & designing with Gemini...</span>
+                          </>
+                        ) : (
+                          <>
+                            <Wand2 className="w-4 h-4 text-amber-300" />
+                            <span>Generate Proposal with Gemini AI RAG</span>
+                          </>
+                        )}
+                      </Button>
+                    </form>
                   ) : (
-                    <span>Create Quote & Open</span>
+                    <div className="space-y-3 animate-fadeIn">
+                      <div className="p-3 bg-purple-950/40 border border-purple-500/30 rounded-2xl space-y-1.5">
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs font-black text-purple-300">{aiResult.package_title}</span>
+                          <Badge className="bg-purple-500/20 text-purple-300 text-[10px] font-black">
+                            {aiResult.total_days}D / {aiResult.total_nights}N
+                          </Badge>
+                        </div>
+                        <p className="text-[11px] text-slate-300 line-clamp-2">{aiResult.overview}</p>
+                      </div>
+
+                      {/* Day summary preview */}
+                      <div className="max-h-48 overflow-y-auto space-y-1.5 pr-1">
+                        {aiResult.day_by_day.map((d, dIdx) => (
+                          <div key={dIdx} className="p-2 bg-slate-900 border border-slate-800 rounded-xl">
+                            <span className="text-xs font-bold text-amber-400 block">{d.title}</span>
+                            <p className="text-[10px] text-slate-300 mt-0.5 line-clamp-1">{d.description}</p>
+                          </div>
+                        ))}
+                      </div>
+
+                      <div className="flex gap-2 justify-end pt-2 border-t border-slate-800">
+                        <Button type="button" variant="ghost" size="sm" onClick={() => setAiResult(null)} className="text-xs text-slate-400 rounded-xl">
+                          ← Edit Inputs
+                        </Button>
+                        <Button 
+                          type="button"
+                          onClick={() => {
+                            handleApplyAIProposal();
+                            setNewQuoteModalOpen(false);
+                          }}
+                          className="bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs rounded-xl h-9 px-4"
+                        >
+                          <CheckCircle className="w-4 h-4 mr-1.5" /> Save AI Proposal & Open
+                        </Button>
+                      </div>
+                    </div>
                   )}
-                </Button>
-              </div>
-            </form>
+                </div>
+              )}
+
+              {/* TAB 2: FROM PRE-BUILT MASTER PACKAGE */}
+              {creationMode === 'package' && (
+                <form onSubmit={handleCreateFromPackage} className="space-y-3.5">
+                  <div className="space-y-1">
+                    <label className="text-xs font-extrabold uppercase text-emerald-400">Select Tour Package *</label>
+                    <Select 
+                      value={selectedPackageId} 
+                      onValueChange={(val) => {
+                        setSelectedPackageId(val);
+                        const found = masterPackages.find(p => String(p.id) === String(val) || p.slug === val);
+                        if (found) {
+                          setNewQuoteData(prev => ({ ...prev, destination: found.destination || found.title }));
+                        }
+                      }}
+                    >
+                      <SelectTrigger className="h-10 text-xs bg-slate-900 border-slate-700 text-white rounded-xl">
+                        <SelectValue placeholder="Choose a Master Tour Package..." />
+                      </SelectTrigger>
+                      <SelectContent className="bg-slate-900 border-slate-700 text-white max-h-56">
+                        {masterPackages.map((pkg: any) => (
+                          <SelectItem key={pkg.id || pkg.slug} value={String(pkg.id || pkg.slug)}>
+                            {pkg.title || pkg.name} • {pkg.duration_days || pkg.duration || 5}D (~₹{Number(pkg.price || pkg.starting_price || 20000).toLocaleString('en-IN')})
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {selectedPackageId && (
+                    (() => {
+                      const sel = masterPackages.find(p => String(p.id) === String(selectedPackageId) || p.slug === selectedPackageId);
+                      if (!sel) return null;
+                      const baseP = Number(sel.price || sel.starting_price || 25000);
+                      const marginVal = Number(newQuoteData.margin) || 15;
+                      const estSell = Math.round(baseP * (1 + (marginVal / 100)));
+                      return (
+                        <div className="p-3 bg-emerald-950/20 border border-emerald-500/30 rounded-2xl space-y-2">
+                          <div className="flex items-center justify-between">
+                            <span className="text-xs font-black text-emerald-300">{sel.title || sel.name}</span>
+                            <Badge className="bg-emerald-500/20 text-emerald-300 text-[10px] font-bold">
+                              {sel.duration_days || 5} Days / {Math.max(1, (sel.duration_days || 5) - 1)} Nights
+                            </Badge>
+                          </div>
+                          <div className="grid grid-cols-2 gap-2 text-xs pt-1">
+                            <div>
+                              <span className="text-[10px] text-slate-400 uppercase font-bold block">Base Supplier Tariff:</span>
+                              <span className="font-mono font-bold text-white">₹{baseP.toLocaleString('en-IN')}</span>
+                            </div>
+                            <div className="text-right">
+                              <span className="text-[10px] text-slate-400 uppercase font-bold block">Client Selling Price ({marginVal}% Margin):</span>
+                              <span className="font-mono font-black text-emerald-400">₹{estSell.toLocaleString('en-IN')}</span>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })()
+                  )}
+
+                  <div className="grid grid-cols-2 gap-2.5">
+                    <div className="space-y-1">
+                      <label className="text-xs font-bold text-slate-300">Destination</label>
+                      <Input
+                        value={newQuoteData.destination}
+                        onChange={(e) => setNewQuoteData({ ...newQuoteData, destination: e.target.value })}
+                        placeholder="e.g. Kashmir"
+                        className="h-9 text-xs bg-slate-900 border-slate-700 text-white rounded-xl"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-xs font-bold text-slate-300">Markup Margin %</label>
+                      <Input
+                        type="number"
+                        value={newQuoteData.margin}
+                        onChange={(e) => setNewQuoteData({ ...newQuoteData, margin: Number(e.target.value) })}
+                        className="h-9 text-xs bg-slate-900 border-slate-700 text-white rounded-xl"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="flex gap-2 justify-end pt-2 border-t border-slate-800">
+                    <Button type="button" variant="ghost" size="sm" onClick={() => setNewQuoteModalOpen(false)} disabled={creatingQuote} className="text-xs text-slate-400 rounded-xl">
+                      Cancel
+                    </Button>
+                    <Button type="submit" size="sm" disabled={creatingQuote || !selectedPackageId} className="bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs rounded-xl h-9 px-4 flex items-center gap-1.5">
+                      {creatingQuote ? (
+                        <>
+                          <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                          <span>Importing Package...</span>
+                        </>
+                      ) : (
+                        <span>Create Quote from Package</span>
+                      )}
+                    </Button>
+                  </div>
+                </form>
+              )}
+
+              {/* TAB 3: CUSTOM BLANK QUOTE */}
+              {creationMode === 'custom' && (
+                <form onSubmit={handleCreateNewQuote} className="space-y-3.5">
+                  <div className="grid grid-cols-2 gap-2.5">
+                    <div className="space-y-1">
+                      <label className="text-xs font-extrabold uppercase text-slate-300">Destination Circuit *</label>
+                      <Input
+                        required
+                        value={newQuoteData.destination}
+                        onChange={(e) => setNewQuoteData({ ...newQuoteData, destination: e.target.value })}
+                        placeholder="e.g. Kashmir / Kerala / Dubai"
+                        className="h-9 text-xs bg-slate-900 border-slate-700 text-white rounded-xl"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-xs font-extrabold uppercase text-slate-300">Agency Margin %</label>
+                      <Input
+                        type="number"
+                        value={newQuoteData.margin}
+                        onChange={(e) => setNewQuoteData({ ...newQuoteData, margin: Number(e.target.value) })}
+                        className="h-9 text-xs bg-slate-900 border-slate-700 text-white rounded-xl"
+                      />
+                    </div>
+                  </div>
+
+                  <p className="text-[11px] text-slate-400 font-medium">
+                    This will initialize Version 1 as a blank proposal where you can manually attach contracted hotels, cabs, excursions, and flights.
+                  </p>
+
+                  <div className="flex gap-2 justify-end pt-3 border-t border-slate-800">
+                    <Button type="button" variant="ghost" size="sm" onClick={() => setNewQuoteModalOpen(false)} disabled={creatingQuote} className="text-xs text-slate-400 rounded-xl">
+                      Cancel
+                    </Button>
+                    <Button type="submit" size="sm" disabled={creatingQuote} className="bg-amber-500 hover:bg-amber-600 text-slate-950 font-black text-xs rounded-xl h-9 px-4 flex items-center gap-1.5">
+                      {creatingQuote ? (
+                        <>
+                          <Loader2 className="w-3.5 h-3.5 animate-spin text-slate-950" />
+                          <span>Creating Quote...</span>
+                        </>
+                      ) : (
+                        <span>Create Quote & Open</span>
+                      )}
+                    </Button>
+                  </div>
+                </form>
+              )}
+            </div>
           </div>
         </div>
       )}
@@ -2136,313 +2681,6 @@ export default function QuoteWorkspace({ quotes: propQuotes = [], onCreateRevisi
               <Button onClick={handleAddCustomHotelStay} size="sm" className="bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold text-xs rounded-xl h-9 px-4">
                 Add Hotel Stay
               </Button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* 1-CLICK GEMINI AI ITINERARY & PROPOSAL GENERATOR MODAL */}
-      {aiModalOpen && (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 z-50 animate-fadeIn overflow-y-auto">
-          <div className="bg-[#111827] border border-purple-500/40 rounded-3xl p-6 max-w-2xl w-full shadow-2xl text-slate-100 space-y-5 my-8 max-h-[90vh] flex flex-col justify-between">
-            {/* Modal Header */}
-            <div className="flex items-center justify-between border-b border-slate-800 pb-4 shrink-0">
-              <div className="flex items-center gap-3">
-                <div className="p-3 bg-gradient-to-br from-purple-500/20 to-indigo-500/20 text-purple-400 rounded-2xl border border-purple-500/30 shadow-inner">
-                  <Sparkles className="w-5 h-5 text-amber-300 animate-pulse" />
-                </div>
-                <div>
-                  <h3 className="text-base font-black text-white flex items-center gap-2">
-                    1-Click Gemini AI Itinerary &amp; Quote Builder
-                    <Badge className="bg-emerald-500/20 text-emerald-300 border-emerald-500/40 text-[10px] font-extrabold uppercase">
-                      Database Priority RAG
-                    </Badge>
-                  </h3>
-                  <p className="text-xs text-slate-400 font-medium mt-0.5">
-                    Queries MySQL database for verified hotels &amp; sightseeings, then builds a tailored proposal.
-                  </p>
-                </div>
-              </div>
-              <Button size="icon" variant="ghost" onClick={() => { setAiModalOpen(false); setAiResult(null); }} className="text-slate-400 hover:text-white rounded-xl">
-                <X className="w-5 h-5" />
-              </Button>
-            </div>
-
-            {/* Modal Body */}
-            <div className="flex-1 overflow-y-auto pr-1 space-y-4">
-              {!aiResult ? (
-                /* STEP 1: FORM INPUTS */
-                <form onSubmit={handleGenerateAIProposal} className="space-y-4">
-                  {/* Destination Input + Quick Chips */}
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-extrabold uppercase tracking-wider text-purple-300 flex items-center justify-between">
-                      <span>Destination / Circuit *</span>
-                      <span className="text-[10px] text-slate-400 lowercase">e.g. Kashmir, Rann of Kutch, Kerala</span>
-                    </label>
-                    <Input
-                      required
-                      value={aiFormData.destination}
-                      onChange={(e) => setAiFormData(prev => ({ ...prev, destination: e.target.value }))}
-                      placeholder="e.g. Kashmir / Rann of Kutch / Kerala / Rajasthan / Andaman"
-                      className="h-10 text-xs bg-slate-900 border-slate-700 text-white rounded-xl focus:border-purple-500"
-                    />
-                    {/* Quick Selection Chips */}
-                    <div className="flex items-center gap-1.5 flex-wrap pt-1">
-                      {['Kashmir', 'Rann of Kutch', 'Kerala', 'Rajasthan', 'Char Dham', 'Goa', 'Andaman', 'Himachal', 'Dubai'].map(dest => (
-                        <button
-                          key={dest}
-                          type="button"
-                          onClick={() => setAiFormData(prev => ({ ...prev, destination: dest }))}
-                          className={`text-[11px] px-2.5 py-1 rounded-lg font-bold transition-colors ${
-                            aiFormData.destination.toLowerCase() === dest.toLowerCase()
-                              ? 'bg-purple-600 text-white'
-                              : 'bg-slate-800/80 hover:bg-slate-700 text-slate-300 border border-slate-700/60'
-                          }`}
-                        >
-                          {dest}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Duration, Pax & Margin Grid */}
-                  <div className="grid grid-cols-3 gap-3">
-                    <div className="space-y-1">
-                      <label className="text-xs font-extrabold uppercase text-slate-300">Duration (Days)</label>
-                      <Input
-                        type="number"
-                        min={1}
-                        max={30}
-                        value={aiFormData.durationDays}
-                        onChange={(e) => setAiFormData(prev => ({ ...prev, durationDays: Math.max(1, Number(e.target.value)) }))}
-                        className="h-9 text-xs bg-slate-900 border-slate-700 text-white rounded-xl"
-                      />
-                      <span className="text-[10px] text-slate-400 font-medium">({aiFormData.durationDays - 1} Nights)</span>
-                    </div>
-
-                    <div className="space-y-1">
-                      <label className="text-xs font-extrabold uppercase text-slate-300">Travelers (Adults)</label>
-                      <Input
-                        type="number"
-                        min={1}
-                        max={50}
-                        value={aiFormData.passengerCount}
-                        onChange={(e) => setAiFormData(prev => ({ ...prev, passengerCount: Math.max(1, Number(e.target.value)) }))}
-                        className="h-9 text-xs bg-slate-900 border-slate-700 text-white rounded-xl"
-                      />
-                    </div>
-
-                    <div className="space-y-1">
-                      <label className="text-xs font-extrabold uppercase text-slate-300">Markup Margin %</label>
-                      <Input
-                        type="number"
-                        min={0}
-                        max={100}
-                        value={aiFormData.margin}
-                        onChange={(e) => setAiFormData(prev => ({ ...prev, margin: Math.max(0, Number(e.target.value)) }))}
-                        className="h-9 text-xs bg-slate-900 border-slate-700 text-white rounded-xl"
-                      />
-                    </div>
-                  </div>
-
-                  {/* Travel Style & Budget Tier */}
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="space-y-1">
-                      <label className="text-xs font-extrabold uppercase text-slate-300">Travel Vibe / Style</label>
-                      <Select 
-                        value={aiFormData.travelStyle} 
-                        onValueChange={(val) => setAiFormData(prev => ({ ...prev, travelStyle: val }))}
-                      >
-                        <SelectTrigger className="h-9 text-xs bg-slate-900 border-slate-700 text-white rounded-xl">
-                          <SelectValue placeholder="Select Style" />
-                        </SelectTrigger>
-                        <SelectContent className="bg-slate-900 border-slate-700 text-white">
-                          <SelectItem value="Honeymoon Romantic">💍 Honeymoon &amp; Romantic</SelectItem>
-                          <SelectItem value="Family Leisure">👨‍👩‍👧‍👦 Family Leisure &amp; Kids</SelectItem>
-                          <SelectItem value="Luxury Heritage Palace">👑 Luxury Heritage &amp; Boutique Stays</SelectItem>
-                          <SelectItem value="Spiritual Pilgrimage">🕉️ Spiritual Pilgrimage &amp; VIP Darshan</SelectItem>
-                          <SelectItem value="Adventure & Nature Trek">⛰️ Adventure &amp; Scenic Nature</SelectItem>
-                          <SelectItem value="Corporate Executive Retreat">💼 Corporate &amp; Group Tour</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    <div className="space-y-1">
-                      <label className="text-xs font-extrabold uppercase text-slate-300">Hotel &amp; Budget Tier</label>
-                      <Select 
-                        value={aiFormData.budgetTier} 
-                        onValueChange={(val) => setAiFormData(prev => ({ ...prev, budgetTier: val }))}
-                      >
-                        <SelectTrigger className="h-9 text-xs bg-slate-900 border-slate-700 text-white rounded-xl">
-                          <SelectValue placeholder="Select Tier" />
-                        </SelectTrigger>
-                        <SelectContent className="bg-slate-900 border-slate-700 text-white">
-                          <SelectItem value="4-Star Premium">⭐ 4-Star Premium / Boutique Stays</SelectItem>
-                          <SelectItem value="5-Star Luxury">⭐⭐ 5-Star Luxury / 5-Star Resorts</SelectItem>
-                          <SelectItem value="3-Star Comfort">✨ 3-Star Deluxe Comfort (Value)</SelectItem>
-                          <SelectItem value="Swiss Tent & Houseboat">🏕️ Swiss Tents / Deluxe Houseboats</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-
-                  {/* Customer Name (Optional) */}
-                  {!selectedQuote && (
-                    <div className="space-y-1">
-                      <label className="text-xs font-extrabold uppercase text-slate-300">Customer Name (Optional)</label>
-                      <Input
-                        value={aiFormData.customerName}
-                        onChange={(e) => setAiFormData(prev => ({ ...prev, customerName: e.target.value }))}
-                        placeholder="e.g. Rahul Sharma"
-                        className="h-9 text-xs bg-slate-900 border-slate-700 text-white rounded-xl"
-                      />
-                    </div>
-                  )}
-
-                  {/* Special Requests & Client Preferences */}
-                  <div className="space-y-1">
-                    <label className="text-xs font-extrabold uppercase text-slate-300 flex items-center justify-between">
-                      <span>Client Notes / Special Requests</span>
-                      <span className="text-[10px] text-slate-400">Optional</span>
-                    </label>
-                    <textarea
-                      rows={2}
-                      value={aiFormData.customNotes}
-                      onChange={(e) => setAiFormData(prev => ({ ...prev, customNotes: e.target.value }))}
-                      placeholder="e.g. Prefers pure vegetarian Jain food, elderly traveler needing gentle pacing, private Dal Lake shikara included."
-                      className="w-full p-2.5 text-xs bg-slate-900 border border-slate-700 text-white rounded-xl focus:outline-none focus:border-purple-500 font-medium"
-                    />
-                  </div>
-
-                  {/* Submit Button */}
-                  <div className="pt-2">
-                    <Button
-                      type="submit"
-                      disabled={aiLoading}
-                      className="w-full bg-gradient-to-r from-purple-600 via-indigo-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-black text-xs sm:text-sm h-11 rounded-2xl shadow-xl flex items-center justify-center gap-2 border border-purple-400/40"
-                    >
-                      {aiLoading ? (
-                        <>
-                          <Loader2 className="w-4 h-4 animate-spin text-amber-300" />
-                          <span>Querying database &amp; building itinerary with Gemini...</span>
-                        </>
-                      ) : (
-                        <>
-                          <Wand2 className="w-4 h-4 text-amber-300" />
-                          <span>Generate Tailored Itinerary &amp; Quote Proposal</span>
-                        </>
-                      )}
-                    </Button>
-                  </div>
-                </form>
-              ) : (
-                /* STEP 2: GENERATED RESULT PREVIEW */
-                <div className="space-y-4 animate-fadeIn">
-                  {/* Proposal Banner */}
-                  <div className="p-4 rounded-2xl bg-gradient-to-br from-purple-950/60 via-slate-900 to-indigo-950/60 border border-purple-500/30 space-y-2">
-                    <div className="flex items-center justify-between flex-wrap gap-2">
-                      <Badge className="bg-purple-500/20 text-purple-300 border-purple-500/40 font-extrabold text-[10px]">
-                        {aiResult.total_days} Days / {aiResult.total_nights} Nights
-                      </Badge>
-                      <Badge className="bg-amber-500/20 text-amber-400 border-amber-500/40 font-bold text-[10px]">
-                        {aiResult.travel_style}
-                      </Badge>
-                      {aiResult.source && (
-                        <span className="text-[10px] text-slate-400 font-mono">Engine: {aiResult.source}</span>
-                      )}
-                    </div>
-                    <h4 className="text-base font-black text-white">{aiResult.package_title}</h4>
-                    <p className="text-xs text-slate-300 leading-relaxed font-medium line-clamp-3">
-                      {aiResult.overview}
-                    </p>
-                  </div>
-
-                  {/* Suggested Hotel Stays (From DB) */}
-                  {aiResult.suggested_hotels && aiResult.suggested_hotels.length > 0 && (
-                    <div className="space-y-2">
-                      <h5 className="text-xs font-black text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
-                        <Hotel className="w-3.5 h-3.5 text-indigo-400" /> Contracted Hotel Stays ({aiResult.suggested_hotels.length})
-                      </h5>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                        {aiResult.suggested_hotels.map((h, hIdx) => (
-                          <div key={hIdx} className="p-3 bg-slate-900/90 border border-slate-800 rounded-xl space-y-1">
-                            <div className="flex items-center justify-between">
-                              <span className="text-xs font-black text-white">{h.hotel_name}</span>
-                              <span className="text-[10px] text-amber-400 font-bold">{h.star_rating}★</span>
-                            </div>
-                            <p className="text-[11px] text-slate-400">{h.city} • {h.nights} Nights</p>
-                            <p className="text-[10px] text-emerald-400 font-semibold">₹{h.est_rate_per_night.toLocaleString('en-IN')}/night</p>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Day-by-Day Schedule Accordion */}
-                  <div className="space-y-2">
-                    <h5 className="text-xs font-black text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
-                      <Calendar className="w-3.5 h-3.5 text-amber-400" /> Day-by-Day Route &amp; Sightseeing Schedule
-                    </h5>
-                    <div className="space-y-2 max-h-56 overflow-y-auto pr-1">
-                      {aiResult.day_by_day.map((d, dIdx) => (
-                        <div key={dIdx} className="p-3 bg-slate-900/80 border border-slate-800/80 rounded-xl space-y-1.5">
-                          <div className="flex items-center justify-between">
-                            <span className="text-xs font-black text-amber-400">{d.title}</span>
-                            {d.drive_distance_km ? (
-                              <span className="text-[10px] text-slate-400 flex items-center gap-1">
-                                <Car className="w-3 h-3" /> ~{d.drive_distance_km} km
-                              </span>
-                            ) : null}
-                          </div>
-                          <p className="text-[11px] text-slate-300 leading-relaxed font-medium">
-                            {d.description}
-                          </p>
-                          {d.overnight_stay && (
-                            <p className="text-[10px] text-indigo-400 font-bold">
-                              🏨 Overnight: {d.overnight_stay}
-                            </p>
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Pre-Calculated Pricing Breakdown */}
-                  {aiResult.quote_items && (
-                    <div className="p-3 bg-slate-900 border border-slate-800 rounded-2xl flex items-center justify-between">
-                      <div>
-                        <span className="text-[10px] text-slate-400 uppercase font-extrabold block">Net Cost + {aiFormData.margin}% Margin</span>
-                        <span className="text-xs text-slate-300 font-bold">{aiResult.quote_items.length} Line Items Computed</span>
-                      </div>
-                      <div className="text-right">
-                        <span className="text-lg font-black text-emerald-400">
-                          ₹{Math.round(aiResult.quote_items.reduce((s, it) => s + (it.total || 0), 0) * (1 + (aiFormData.margin / 100))).toLocaleString('en-IN')}
-                        </span>
-                        <span className="text-[10px] text-slate-400 block font-medium">Estimated Client Selling Price</span>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Actions: Re-generate or Apply */}
-                  <div className="flex gap-2 justify-end pt-2 border-t border-slate-800">
-                    <Button 
-                      type="button" 
-                      variant="outline" 
-                      onClick={() => setAiResult(null)} 
-                      className="text-xs border-slate-700 text-slate-300 rounded-xl h-9"
-                    >
-                      ← Modify Details
-                    </Button>
-                    <Button 
-                      onClick={handleApplyAIProposal} 
-                      className="bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs rounded-xl h-9 px-5 shadow-lg flex items-center gap-1.5"
-                    >
-                      <CheckCircle className="w-4 h-4" /> 
-                      {selectedQuote ? 'Apply to Active Proposal' : 'Create New Quote with this Itinerary'}
-                    </Button>
-                  </div>
-                </div>
-              )}
             </div>
           </div>
         </div>
