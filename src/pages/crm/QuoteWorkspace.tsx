@@ -66,6 +66,7 @@ export default function QuoteWorkspace({ quotes: propQuotes = [], onCreateRevisi
 
   // New Quote Creation Modal State
   const [newQuoteModalOpen, setNewQuoteModalOpen] = useState(false);
+  const [creatingQuote, setCreatingQuote] = useState(false);
   const [newQuoteData, setNewQuoteData] = useState({
     customerName: '',
     customerEmail: '',
@@ -73,6 +74,13 @@ export default function QuoteWorkspace({ quotes: propQuotes = [], onCreateRevisi
     destination: 'Kashmir',
     margin: 15
   });
+
+  // Contract Lookups
+  const [contracts, setContracts] = useState<{
+    hotels: any[];
+    excursions: any[];
+    transfers: any[];
+  }>({ hotels: [], excursions: [], transfers: [] });
 
   // Custom Multi-City Hotel Stay Modal state
   const [showAddHotelModal, setShowAddHotelModal] = useState(false);
@@ -112,109 +120,135 @@ export default function QuoteWorkspace({ quotes: propQuotes = [], onCreateRevisi
     });
   };
 
-  const handleCreateNewQuote = (e: React.FormEvent) => {
+  const handleCreateNewQuote = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newQuoteData.customerName.trim()) return;
-
-    const newQuoteId = `q-${Date.now()}`;
-    const newQuoteNum = `QT-${new Date().getFullYear()}-${Math.floor(100 + Math.random() * 900)}`;
-    const dest = newQuoteData.destination.trim().toLowerCase();
-
-    // Check if real contracted hotels exist in database for this destination
-    const matchedHotel = contracts.hotels.find((h: any) => 
-      (h.city_name && h.city_name.toLowerCase().includes(dest)) ||
-      (h.state_name && h.state_name.toLowerCase().includes(dest)) ||
-      (h.hotel_name && h.hotel_name.toLowerCase().includes(dest))
-    );
-
-    const initialItems: QuoteItem[] = [];
-
-    if (matchedHotel) {
-      const rate = Number(matchedHotel.standard_rate || 3500);
-      initialItems.push({
-        type: 'hotel',
-        name: `${matchedHotel.hotel_name} (${matchedHotel.star_rating || 4}★)`,
-        detail: `City: ${matchedHotel.city_name || 'Standard'} • Deluxe Room CP Plan`,
-        qty: 2,
-        rate: rate,
-        total: rate * 2
+    if (!newQuoteData.customerName.trim()) {
+      toast({
+        title: "Client Name Required",
+        description: "Please enter the customer / client name.",
+        variant: "destructive"
       });
+      return;
     }
 
-    const totalCost = initialItems.reduce((sum, item) => sum + item.total, 0);
-    const sellingPrice = Math.round(totalCost * (1 + (newQuoteData.margin / 100)));
+    setCreatingQuote(true);
 
-    const newVersion: QuoteVersion = {
-      id: `ver-${Date.now()}`,
-      versionNumber: 1,
-      createdAt: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
-      createdBy: 'Sales Agent',
-      status: 'Draft',
-      items: initialItems,
-      totalCost: totalCost,
-      margin: newQuoteData.margin,
-      sellingPrice: sellingPrice
-    };
+    try {
+      const newQuoteId = `q-${Date.now()}`;
+      const newQuoteNum = `QT-${new Date().getFullYear()}-${Math.floor(100 + Math.random() * 900)}`;
+      const dest = (newQuoteData.destination || '').trim().toLowerCase();
 
-    const newQuoteObj: QuoteHeader = {
-      id: newQuoteId,
-      quoteNumber: newQuoteNum,
-      customerName: newQuoteData.customerName.trim(),
-      destination: newQuoteData.destination.trim(),
-      createdAt: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
-      currentVersion: 1,
-      decisionStatus: 'Draft',
-      versions: [newVersion]
-    };
+      // Safe lookup for contracted hotels
+      const hotelList = contracts?.hotels || [];
+      const matchedHotel = hotelList.find((h: any) => 
+        (h.city_name && h.city_name.toLowerCase().includes(dest)) ||
+        (h.state_name && h.state_name.toLowerCase().includes(dest)) ||
+        (h.hotel_name && h.hotel_name.toLowerCase().includes(dest))
+      );
 
-    setQuotes(prev => [newQuoteObj, ...prev]);
-    setSelectedQuote(newQuoteObj);
-    setVersionA(newVersion.id);
-    setVersionB('');
-    setEditItems(initialItems);
-    setNewQuoteModalOpen(false);
-    setNewQuoteData({ customerName: '', customerEmail: '', customerPhone: '', destination: 'Kashmir', margin: 15 });
+      const initialItems: QuoteItem[] = [];
 
-    // Persist new quote to MySQL database
-    quoteService.saveQuote({
-      id: null,
-      lead_id: 0,
-      itinerary_id: null,
-      package_name: newQuoteData.destination.trim(),
-      total_amount: sellingPrice,
-      customer_name: newQuoteData.customerName.trim(),
-      customer_email: newQuoteData.customerEmail.trim(),
-      customer_phone: newQuoteData.customerPhone.trim(),
-      cost_breakdown: {
-        hotels: totalCost,
-        transport: 0,
-        sightseeing: 0,
-        // @ts-ignore
-        items: initialItems,
-        margin: newQuoteData.margin
-      },
-      inclusions: [],
-      exclusions: [],
-      validity_days: 7,
-      notes: `Direct Quote Created for ${newQuoteData.customerName.trim()} | Email: ${newQuoteData.customerEmail.trim()} | Phone: ${newQuoteData.customerPhone.trim()}`
-    }).then(res => {
-      if (res && res.quote_id) {
-        newVersion.id = res.quote_id;
-        newQuoteObj.id = res.quote_id;
-        if (res.lead_id) {
-          newQuoteObj.leadId = res.lead_id;
-        }
+      if (matchedHotel) {
+        const rate = Number(matchedHotel.standard_rate || 3500);
+        initialItems.push({
+          type: 'hotel',
+          name: `${matchedHotel.hotel_name} (${matchedHotel.star_rating || 4}★)`,
+          detail: `City: ${matchedHotel.city_name || 'Standard'} • Deluxe Room CP Plan`,
+          qty: 2,
+          rate: rate,
+          total: rate * 2
+        });
       }
-      if (onRefresh) onRefresh();
-    }).catch(err => {
-      console.warn("Could not save new quote to backend:", err);
-    });
 
-    toast({
-      title: "New Quote Created",
-      description: `Created quote ${newQuoteNum} for ${newQuoteObj.customerName}.`,
-      className: 'bg-slate-900 text-white border-emerald-500/40'
-    });
+      const totalCost = initialItems.reduce((sum, item) => sum + item.total, 0);
+      const marginVal = Number(newQuoteData.margin) || 15;
+      const sellingPrice = Math.round(totalCost * (1 + (marginVal / 100)));
+
+      const newVersion: QuoteVersion = {
+        id: `ver-${Date.now()}`,
+        versionNumber: 1,
+        createdAt: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+        createdBy: 'Sales Agent',
+        status: 'Draft',
+        items: initialItems,
+        totalCost: totalCost,
+        margin: marginVal,
+        sellingPrice: sellingPrice
+      };
+
+      const newQuoteObj: QuoteHeader = {
+        id: newQuoteId,
+        quoteNumber: newQuoteNum,
+        customerName: newQuoteData.customerName.trim(),
+        destination: newQuoteData.destination.trim() || 'Custom Tour',
+        createdAt: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+        currentVersion: 1,
+        decisionStatus: 'Draft',
+        versions: [newVersion]
+      };
+
+      setQuotes(prev => [newQuoteObj, ...prev]);
+      setSelectedQuote(newQuoteObj);
+      setVersionA(newVersion.id);
+      setVersionB('');
+      setEditItems(initialItems);
+      setNewQuoteModalOpen(false);
+
+      // Persist new quote to MySQL database
+      try {
+        const res = await quoteService.saveQuote({
+          id: null,
+          lead_id: 0,
+          itinerary_id: null,
+          package_name: (newQuoteData.destination || 'Custom Tour').trim(),
+          total_amount: sellingPrice,
+          customer_name: newQuoteData.customerName.trim(),
+          customer_email: newQuoteData.customerEmail.trim(),
+          customer_phone: newQuoteData.customerPhone.trim(),
+          cost_breakdown: {
+            hotels: totalCost,
+            transport: 0,
+            sightseeing: 0,
+            // @ts-ignore
+            items: initialItems,
+            margin: marginVal
+          },
+          inclusions: [],
+          exclusions: [],
+          validity_days: 7,
+          notes: `Direct Quote Created for ${newQuoteData.customerName.trim()} | Email: ${newQuoteData.customerEmail.trim()} | Phone: ${newQuoteData.customerPhone.trim()}`
+        });
+
+        if (res && res.quote_id) {
+          newVersion.id = res.quote_id;
+          newQuoteObj.id = res.quote_id;
+          if (res.lead_id) {
+            newQuoteObj.leadId = res.lead_id;
+          }
+          setVersionA(res.quote_id);
+        }
+        if (onRefresh) onRefresh();
+      } catch (err: any) {
+        console.warn("Could not save new quote to backend:", err);
+      }
+
+      setNewQuoteData({ customerName: '', customerEmail: '', customerPhone: '', destination: 'Kashmir', margin: 15 });
+
+      toast({
+        title: "New Quote Created",
+        description: `Created quote ${newQuoteNum} for ${newQuoteObj.customerName}.`,
+        className: 'bg-slate-900 text-white border-emerald-500/40'
+      });
+    } catch (error: any) {
+      console.error("Error creating new quote:", error);
+      toast({
+        title: "Failed to Create Quote",
+        description: error.message || "An unexpected error occurred. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setCreatingQuote(false);
+    }
   };
 
   // AI Proposal Generation Handler
@@ -636,13 +670,6 @@ export default function QuoteWorkspace({ quotes: propQuotes = [], onCreateRevisi
   // Cascading Location selections by Row Index
   const [selectedStatesByRow, setSelectedStatesByRow] = useState<Record<number, string>>({});
   const [selectedCitiesByRow, setSelectedCitiesByRow] = useState<Record<number, string>>({});
-
-  // Contract Lookups
-  const [contracts, setContracts] = useState<{
-    hotels: any[];
-    excursions: any[];
-    transfers: any[];
-  }>({ hotels: [], excursions: [], transfers: [] });
 
   // Fetch contracts from database
   useEffect(() => {
@@ -2002,11 +2029,18 @@ export default function QuoteWorkspace({ quotes: propQuotes = [], onCreateRevisi
               </div>
 
               <div className="flex gap-2 justify-end pt-3 border-t border-slate-800">
-                <Button type="button" variant="ghost" size="sm" onClick={() => setNewQuoteModalOpen(false)} className="text-xs text-slate-400 rounded-xl">
+                <Button type="button" variant="ghost" size="sm" onClick={() => setNewQuoteModalOpen(false)} disabled={creatingQuote} className="text-xs text-slate-400 rounded-xl">
                   Cancel
                 </Button>
-                <Button type="submit" size="sm" className="bg-amber-500 hover:bg-amber-600 text-slate-950 font-black text-xs rounded-xl h-9 px-4">
-                  Create Quote & Open
+                <Button type="submit" size="sm" disabled={creatingQuote} className="bg-amber-500 hover:bg-amber-600 text-slate-950 font-black text-xs rounded-xl h-9 px-4 flex items-center gap-1.5">
+                  {creatingQuote ? (
+                    <>
+                      <Loader2 className="w-3.5 h-3.5 animate-spin text-slate-950" />
+                      <span>Creating Quote...</span>
+                    </>
+                  ) : (
+                    <span>Create Quote & Open</span>
+                  )}
                 </Button>
               </div>
             </form>

@@ -1,6 +1,6 @@
 import { supabase } from '@/integrations/supabase/client';
 
-const API_BASE = import.meta.env.VITE_API_BASE_URL || '/php-backend';
+const API_BASE = import.meta.env.VITE_PHP_BASE_URL || import.meta.env.VITE_API_BASE_URL || '/php-backend';
 
 export interface QuoteItem {
   type: 'hotel' | 'excursion' | 'transfer' | 'flight' | 'visa' | 'meal';
