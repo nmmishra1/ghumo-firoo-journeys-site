@@ -1025,7 +1025,8 @@ export default function QuoteWorkspace({ quotes: propQuotes = [], onCreateRevisi
         inclusions: [],
         exclusions: [],
         validity_days: 7,
-        is_revision: false
+        is_revision: false,
+        expected_version: vA.versionNumber
       });
 
       if (response.success) {

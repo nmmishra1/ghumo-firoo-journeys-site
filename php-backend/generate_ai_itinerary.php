@@ -39,6 +39,37 @@ try {
     // Graceful database fallback
 }
 
+// Check 7-Day High-Speed Itinerary Cache (Instant <50ms response for repeat queries)
+$cacheKey = md5(strtolower("{$destination}_{$durationDays}_{$travelStyle}_{$budgetTier}"));
+if ($pdo && empty($customNotes)) {
+    try {
+        $pdo->exec("CREATE TABLE IF NOT EXISTS `ai_itinerary_cache` (
+            `cache_key` VARCHAR(32) PRIMARY KEY,
+            `destination` VARCHAR(100) NOT NULL,
+            `duration_days` INT NOT NULL,
+            `payload` JSON NOT NULL,
+            `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            INDEX `idx_cache_dest` (`destination`, `duration_days`)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;");
+
+        $cStmt = $pdo->prepare("SELECT payload FROM ai_itinerary_cache WHERE cache_key = ? AND created_at >= NOW() - INTERVAL 7 DAY LIMIT 1");
+        $cStmt->execute([$cacheKey]);
+        $cachedPayload = $cStmt->fetchColumn();
+        if ($cachedPayload) {
+            $cachedData = json_decode($cachedPayload, true);
+            if ($cachedData) {
+                $cachedData['source'] = 'high-speed-database-cache (instant)';
+                echo json_encode([
+                    'success' => true,
+                    'data' => $cachedData,
+                    'cached' => true
+                ]);
+                exit;
+            }
+        }
+    } catch (Exception $ce) {}
+}
+
 $dbSightseeings = [];
 $dbHotels = [];
 $dbPackages = [];
@@ -267,8 +298,82 @@ if (!empty($geminiApiKey)) {
         'gemini-3.1-flash-lite-preview',
         'gemini-3-flash-preview',
         'gemini-3.1-flash-lite',
-        'gemini-3.5-flash',
-        'gemini-3.6-flash'
+        'gemini-2.5-flash',
+        'gemini-2.0-flash',
+        'gemini-1.5-flash'
+    ];
+
+    $itineraryJsonSchema = [
+        'type' => 'OBJECT',
+        'properties' => [
+            'package_title' => ['type' => 'STRING'],
+            'overview' => ['type' => 'STRING'],
+            'total_days' => ['type' => 'INTEGER'],
+            'total_nights' => ['type' => 'INTEGER'],
+            'destination' => ['type' => 'STRING'],
+            'travel_style' => ['type' => 'STRING'],
+            'suggested_hotels' => [
+                'type' => 'ARRAY',
+                'items' => [
+                    'type' => 'OBJECT',
+                    'properties' => [
+                        'hotel_name' => ['type' => 'STRING'],
+                        'city' => ['type' => 'STRING'],
+                        'star_rating' => ['type' => 'INTEGER'],
+                        'nights' => ['type' => 'INTEGER'],
+                        'room_type' => ['type' => 'STRING'],
+                        'est_rate_per_night' => ['type' => 'NUMBER'],
+                        'total_cost' => ['type' => 'NUMBER']
+                    ],
+                    'required' => ['hotel_name', 'city', 'nights', 'est_rate_per_night', 'total_cost']
+                ]
+            ],
+            'day_by_day' => [
+                'type' => 'ARRAY',
+                'items' => [
+                    'type' => 'OBJECT',
+                    'properties' => [
+                        'day_number' => ['type' => 'INTEGER'],
+                        'title' => ['type' => 'STRING'],
+                        'morning_highlight' => ['type' => 'STRING'],
+                        'afternoon_highlight' => ['type' => 'STRING'],
+                        'evening_highlight' => ['type' => 'STRING'],
+                        'overnight_stay' => ['type' => 'STRING'],
+                        'drive_distance_km' => ['type' => 'NUMBER'],
+                        'description' => ['type' => 'STRING'],
+                        'activities' => [
+                            'type' => 'ARRAY',
+                            'items' => ['type' => 'STRING']
+                        ]
+                    ],
+                    'required' => ['day_number', 'title', 'description']
+                ]
+            ],
+            'inclusions' => [
+                'type' => 'ARRAY',
+                'items' => ['type' => 'STRING']
+            ],
+            'exclusions' => [
+                'type' => 'ARRAY',
+                'items' => ['type' => 'STRING']
+            ],
+            'quote_items' => [
+                'type' => 'ARRAY',
+                'items' => [
+                    'type' => 'OBJECT',
+                    'properties' => [
+                        'type' => ['type' => 'STRING'],
+                        'name' => ['type' => 'STRING'],
+                        'detail' => ['type' => 'STRING'],
+                        'qty' => ['type' => 'NUMBER'],
+                        'rate' => ['type' => 'NUMBER'],
+                        'total' => ['type' => 'NUMBER']
+                    ],
+                    'required' => ['type', 'name', 'qty', 'rate', 'total']
+                ]
+            ]
+        ],
+        'required' => ['package_title', 'overview', 'total_days', 'total_nights', 'destination', 'day_by_day', 'inclusions', 'exclusions', 'quote_items']
     ];
 
     $fullPrompt = "{$systemPrompt}\n\n{$userPrompt}";
@@ -282,7 +387,8 @@ if (!empty($geminiApiKey)) {
         'generationConfig' => [
             'temperature' => 0.4,
             'maxOutputTokens' => 4096,
-            'responseMimeType' => 'application/json'
+            'responseMimeType' => 'application/json',
+            'responseSchema' => $itineraryJsonSchema
         ]
     ];
 
@@ -363,6 +469,14 @@ if (!$aiResult) {
 if (!$aiResult) {
     $aiResult = buildDeterministicDbItinerary($destination, $durationDays, $durationNights, $travelStyle, $budgetTier, $passengerCount, $dbSightseeings, $dbHotels);
     $aiResult['source'] = 'database-deterministic-fallback';
+}
+
+// Save result to high-speed cache for 7 days
+if ($pdo && !empty($aiResult) && empty($customNotes)) {
+    try {
+        $insCache = $pdo->prepare("REPLACE INTO ai_itinerary_cache (cache_key, destination, duration_days, payload, created_at) VALUES (?, ?, ?, ?, NOW())");
+        $insCache->execute([$cacheKey, $destination, $durationDays, json_encode($aiResult)]);
+    } catch (Exception $ice) {}
 }
 
 echo json_encode([

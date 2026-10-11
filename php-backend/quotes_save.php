@@ -252,6 +252,19 @@ try {
 
         // Quote exists in database. Check if this is an in-place update or a new revision
         if (!$isRevision) {
+            $expectedVersion = isset($input['expected_version']) ? (int)$input['expected_version'] : null;
+            if ($expectedVersion !== null && (int)$oldQuote['version_number'] !== $expectedVersion) {
+                $pdo->rollBack();
+                http_response_code(409);
+                echo json_encode([
+                    'success' => false,
+                    'error' => "Optimistic Lock Conflict: Quote has been modified (current version: V{$oldQuote['version_number']}, expected: V{$expectedVersion}). Please refresh before saving.",
+                    'conflict' => true,
+                    'current_version' => (int)$oldQuote['version_number']
+                ]);
+                exit;
+            }
+
             $stmtUpdateOld = $pdo->prepare("
                 UPDATE quotes SET
                     total_amount = :total_amount,

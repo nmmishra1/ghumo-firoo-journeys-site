@@ -21,6 +21,57 @@ try {
     $search = $_GET['search'] ?? '';
 
     // ==========================================
+    // ACTION: circuits - Returns tourism circuits & destination clusters
+    // ==========================================
+    if ($action === 'circuits') {
+        header('Cache-Control: public, max-age=86400, stale-while-revalidate=604800');
+        try {
+            $pdo->exec("CREATE TABLE IF NOT EXISTS `tourism_circuits` (
+                `id` VARCHAR(50) PRIMARY KEY,
+                `name` VARCHAR(150) NOT NULL,
+                `primary_city` VARCHAR(100) NOT NULL,
+                `state_name` VARCHAR(100) NULL,
+                `subtitle` VARCHAR(255) NULL,
+                `hub_cities` JSON NOT NULL,
+                `aliases` JSON NOT NULL,
+                `recommended_days` INT DEFAULT 5,
+                `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;");
+
+            // Seed circuits if empty
+            $count = (int)$pdo->query("SELECT COUNT(*) FROM tourism_circuits")->fetchColumn();
+            if ($count === 0) {
+                $seedCircuits = [
+                    ['rann_of_kutch', 'Rann of Kutch White Desert', 'Rann of Kutch', 'Gujarat', 'Bhuj • Dhordo Tent City • Mandvi Beach • Dholavira', json_encode(['Dhordo', 'Bhuj', 'Mandvi', 'Dholavira', 'Kutch']), json_encode(['rann utsav', 'kutch', 'bhuj', 'dhordo', 'white desert']), 4],
+                    ['kashmir_valley', 'Kashmir Valley Circuit', 'Kashmir', 'Jammu & Kashmir', 'Srinagar • Gulmarg • Pahalgam • Sonmarg', json_encode(['Srinagar', 'Gulmarg', 'Pahalgam', 'Sonmarg']), json_encode(['kashmir', 'srinagar', 'gulmarg', 'pahalgam', 'sonmarg']), 6],
+                    ['char_dham', 'Char Dham Sacred Yatra', 'Char Dham', 'Uttarakhand', 'Haridwar • Barkot • Uttarkashi • Kedarnath • Badrinath', json_encode(['Haridwar', 'Rishikesh', 'Barkot', 'Uttarkashi', 'Kedarnath', 'Badrinath']), json_encode(['chardham', 'char dham', 'kedarnath', 'badrinath', 'yamunotri', 'gangotri', 'haridwar']), 10],
+                    ['kerala_backwaters', 'Kerala Backwaters & Hills', 'Kerala', 'Kerala', 'Cochin • Munnar • Thekkady • Alleppey', json_encode(['Cochin', 'Munnar', 'Thekkady', 'Alleppey']), json_encode(['kerala', 'munnar', 'alleppey', 'cochin', 'kochi', 'thekkady']), 6],
+                    ['royal_rajasthan', 'Royal Rajasthan Heritage', 'Rajasthan', 'Rajasthan', 'Jaipur • Jodhpur • Jaisalmer • Udaipur', json_encode(['Jaipur', 'Jodhpur', 'Jaisalmer', 'Udaipur']), json_encode(['rajasthan', 'jaipur', 'jodhpur', 'jaisalmer', 'udaipur']), 7],
+                    ['himachal_hills', 'Himachal Hill Stations', 'Himachal', 'Himachal Pradesh', 'Shimla • Kullu • Manali • Dharamshala', json_encode(['Shimla', 'Manali', 'Kullu', 'Dharamshala']), json_encode(['himachal', 'manali', 'shimla', 'kullu', 'dharamshala']), 6],
+                    ['golden_triangle', 'Golden Triangle Heritage', 'Delhi', 'Delhi / UP / Rajasthan', 'Delhi • Agra (Taj Mahal) • Jaipur', json_encode(['Delhi', 'Agra', 'Jaipur']), json_encode(['golden triangle', 'delhi', 'agra', 'taj mahal', 'jaipur']), 5],
+                    ['andaman_islands', 'Andaman Tropical Islands', 'Andaman', 'Andaman & Nicobar', 'Port Blair • Havelock • Neil Island', json_encode(['Port Blair', 'Havelock', 'Neil Island']), json_encode(['andaman', 'port blair', 'havelock', 'neil island']), 5],
+                    ['goa_coastal', 'Goa Coastal Leisure', 'Goa', 'Goa', 'North Goa Beaches • South Goa Heritage Resorts', json_encode(['North Goa', 'South Goa', 'Panaji', 'Calangute']), json_encode(['goa', 'calangute', 'baga', 'panaji']), 4]
+                ];
+                $cIns = $pdo->prepare("INSERT INTO tourism_circuits (id, name, primary_city, state_name, subtitle, hub_cities, aliases, recommended_days) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+                foreach ($seedCircuits as $sc) {
+                    $cIns->execute($sc);
+                }
+            }
+
+            $circuits = $pdo->query("SELECT * FROM tourism_circuits ORDER BY name ASC")->fetchAll(PDO::FETCH_ASSOC);
+            foreach ($circuits as &$cr) {
+                $cr['hub_cities'] = json_decode($cr['hub_cities'], true);
+                $cr['aliases'] = json_decode($cr['aliases'], true);
+            }
+            echo json_encode(['success' => true, 'circuits' => $circuits]);
+            exit;
+        } catch (Exception $ce) {
+            echo json_encode(['success' => false, 'error' => $ce->getMessage()]);
+            exit;
+        }
+    }
+
+    // ==========================================
     // ACTION: baseline - Returns all states and cities with live counts
     // ==========================================
     if ($action === 'baseline') {
