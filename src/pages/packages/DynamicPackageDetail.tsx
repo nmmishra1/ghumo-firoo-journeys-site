@@ -4029,6 +4029,136 @@ const DynamicPackageDetail: React.FC<DynamicPackageDetailProps> = ({ slug: propS
   const [dhamRoomsCount, setDhamRoomsCount] = useState<number>(1);
   const [selectedMealPlan, setSelectedMealPlan] = useState<string>('cp');
 
+  // Evoke 2D/1N Dedicated State & Configuration
+  const isEvoke2D1N = currentSlug === 'rann-utsav-2d1n';
+  const [selectedEvokeCategory, setSelectedEvokeCategory] = useState<string>('deluxe_ac');
+  const [evokeTravelDate, setEvokeTravelDate] = useState<string>('2026-11-15');
+
+  const EVOKE_ACCOMMODATION_CATEGORIES: Record<string, {
+    id: string;
+    name: string;
+    badge: string;
+    delta: number;
+    icon: string;
+    sub: string;
+    description: string;
+    popular?: boolean;
+  }> = {
+    deluxe_ac: {
+      id: 'deluxe_ac',
+      name: 'Deluxe AC Swiss Cottages',
+      badge: 'DEFAULT INCLUDED (₹12,500)',
+      delta: 0,
+      icon: '⛺',
+      sub: 'Twin / Double Bed • Air Conditioned • Attached Washroom',
+      description: 'Spacious cottage with twin/double beds, attached bath with geyser, and Kutchi aesthetic. Base included stay.'
+    },
+    ac_premium: {
+      id: 'ac_premium',
+      name: 'Premium AC Tent',
+      badge: '+₹1,000 / PAX UPGRADE',
+      delta: 1000,
+      icon: '🎪',
+      popular: true,
+      sub: 'Luxury Fabric Tent • Upgraded Plush Interiors',
+      description: 'Upgraded luxury fabric tent featuring plush linens, cozy seating, tea/coffee maker, and modern bathroom amenities.'
+    },
+    super_premium: {
+      id: 'super_premium',
+      name: 'Super Premium AC Tent',
+      badge: '+₹2,000 / PAX UPGRADE',
+      delta: 2000,
+      icon: '✨',
+      sub: 'Ultra Luxury Tent • Prime Central Zone Location',
+      description: 'Prime central location near dining hall & cultural arena. Extra spacious living foyer and executive amenities.'
+    },
+    rajwadi: {
+      id: 'rajwadi',
+      name: 'Rajwadi Suite',
+      badge: '+₹7,000 / PAX ROYAL UPGRADE',
+      delta: 7000,
+      icon: '👑',
+      sub: 'Royal Heritage 2-Pax Suite • Private Lounge',
+      description: 'Opulent royal heritage suite with dedicated living room, antique furniture, VIP check-in, and club lounge access.'
+    },
+    darbari: {
+      id: 'darbari',
+      name: 'Darbari Royal Suite',
+      badge: '+₹7,000 / PAX PRESIDENTIAL UPGRADE',
+      delta: 7000,
+      icon: '🏰',
+      sub: 'Presidential Suite (Up to 4 Pax) • Dedicated Butler',
+      description: 'Grand royal presidential suite with master lounge, dining foyer, private sit-out, luxury bathrobes, and butler service.'
+    },
+    non_ac: {
+      id: 'non_ac',
+      name: 'Non AC Swiss Cottages',
+      badge: '-₹2,000 / PAX DISCOUNT',
+      delta: -2000,
+      icon: '🛖',
+      sub: 'Traditional Desert Cottage • Attached Bath',
+      description: 'Classic desert-style tent with comfortable bedding and attached bathroom. Recommended for chilly winter months (Dec-Jan).'
+    }
+  };
+
+  const getEvokeSeasonInfo = (inStr: string) => {
+    if (!inStr) return { tier: 1, surcharge: 0, label: 'Season 1: Regular Base Tariff (₹0)', categoryName: 'Regular Dates' };
+    const dateObj = new Date(inStr);
+    if (isNaN(dateObj.getTime())) return { tier: 1, surcharge: 0, label: 'Season 1: Regular Base Tariff (₹0)', categoryName: 'Regular Dates' };
+
+    const month = dateObj.getMonth() + 1;
+    const day = dateObj.getDate();
+
+    let tier: 1 | 2 | 3 = 1;
+    let categoryName = 'Regular Dates';
+
+    if (month === 11) {
+      if (day >= 8 && day <= 14) {
+        tier = 2;
+        categoryName = 'Diwali Week Special';
+      } else if (day >= 22 && day <= 25) {
+        tier = 2;
+        categoryName = 'November Full Moon (Purnima)';
+      }
+    } else if (month === 12) {
+      if (day >= 20) {
+        tier = 3;
+        categoryName = 'Christmas, New Year & Dec Full Moon Peak';
+      } else {
+        tier = 2;
+        categoryName = 'December Peak Dates';
+      }
+    } else if (month === 1) {
+      if (day >= 1 && day <= 3) {
+        tier = 3;
+        categoryName = 'New Year Peak Weekend';
+      } else if (day >= 20 && day <= 23) {
+        tier = 3;
+        categoryName = 'January Full Moon (Purnima) Peak';
+      } else {
+        tier = 2;
+        categoryName = 'January Winter Festival Season';
+      }
+    } else if (month === 2) {
+      if (day >= 18 && day <= 21) {
+        tier = 2;
+        categoryName = 'February Full Moon (Purnima)';
+      }
+    } else if (month === 3) {
+      tier = 1;
+      categoryName = 'Season Closing Regular Dates';
+    }
+
+    const surcharge = tier === 3 ? 4000 : tier === 2 ? 2000 : 0;
+    const label = tier === 3
+      ? `Season 3 Peak: ${categoryName} (+₹4,000/pax)`
+      : tier === 2
+      ? `Season 2: ${categoryName} (+₹2,000/pax)`
+      : `Season 1: Regular Dates (₹0 Surcharge)`;
+
+    return { tier, surcharge, label, categoryName };
+  };
+
   useEffect(() => {
     // If it's an Evoke Tent City package, and user has selected shared coach, keep it across all pax counts
     if (selectedCabId === 'evoke_coach') {
@@ -4697,7 +4827,14 @@ const DynamicPackageDetail: React.FC<DynamicPackageDetailProps> = ({ slug: propS
   const roomsRequired = activeRooms;
   const cabPerPersonSurcharge = Math.round(selectedCab.priceTotal / Math.max(1, passengerCount));
   const basePricePerPerson = activeVariant ? activeVariant.pricePerPerson : numericPrice;
-  const finalPricePerPerson = Math.max(1000, basePricePerPerson + cabPerPersonSurcharge + (isDhamPackage ? occupancyPriceModifier : 0) + mealPriceModifier);
+
+  const evokeCategoryDelta = isEvoke2D1N ? (EVOKE_ACCOMMODATION_CATEGORIES[selectedEvokeCategory]?.delta ?? 0) : 0;
+  const evokeSeasonInfo = isEvoke2D1N ? getEvokeSeasonInfo(evokeTravelDate) : null;
+  const evokeSeasonDelta = isEvoke2D1N ? (evokeSeasonInfo?.surcharge ?? 0) : 0;
+
+  const finalPricePerPerson = isEvoke2D1N
+    ? Math.max(1000, 12500 + evokeCategoryDelta + evokeSeasonDelta + cabPerPersonSurcharge)
+    : Math.max(1000, basePricePerPerson + cabPerPersonSurcharge + (isDhamPackage ? occupancyPriceModifier : 0) + mealPriceModifier);
   const formattedFinalPrice = finalPricePerPerson.toLocaleString('en-IN');
 
   // Build JSON-LD Structured Data
@@ -5004,10 +5141,10 @@ const DynamicPackageDetail: React.FC<DynamicPackageDetailProps> = ({ slug: propS
                     <div className="w-1.5 h-6 bg-[#C9A25A] rounded-full" />
                     <div>
                       <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#C9A25A] mb-0.5">
-                        {isEvokePackage ? '✦ Evoke Tent City Transfer Options' : '✦ Private Transport Customizer'}
+                        {isEvoke2D1N ? '✦ Official Evoke Tent City 2D/1N Configurator' : isEvokePackage ? '✦ Evoke Tent City Transfer Options' : '✦ Private Transport Customizer'}
                       </div>
                       <h2 className="font-serif font-bold text-white text-xl md:text-2xl">
-                        {isEvokePackage ? 'Scheduled Bus or Private Chauffeur' : 'Select Private Vehicle / Cab Type'}
+                        {isEvoke2D1N ? 'Configure Tent Category, Dates & Transfers' : isEvokePackage ? 'Scheduled Bus or Private Chauffeur' : 'Select Private Vehicle / Cab Type'}
                       </h2>
                     </div>
                   </div>
@@ -5042,12 +5179,174 @@ const DynamicPackageDetail: React.FC<DynamicPackageDetailProps> = ({ slug: propS
                   )}
                 </div>
 
-                {/* Evoke Scheduled Coach Notice */}
+                {/* EXCLUSIVE EVOKE 2D/1N STEP 1: ACCOMMODATION CATEGORY SELECTOR */}
+                {isEvoke2D1N && (
+                  <div className="mb-8 p-5 bg-gradient-to-br from-amber-500/10 via-[#0B1226] to-slate-900 border border-[#C9A25A]/40 rounded-2xl shadow-xl space-y-4">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-white/10 pb-3">
+                      <div>
+                        <div className="text-[10px] font-black uppercase tracking-wider text-[#C9A25A] flex items-center gap-1.5">
+                          <span>🎪</span> Step 1: Accommodation Category (Evoke Partner Portal)
+                        </div>
+                        <h3 className="text-base font-bold text-white mt-0.5">
+                          Select Tent City Accommodation Tier
+                        </h3>
+                      </div>
+                      <span className="inline-flex items-center gap-1 text-[11px] font-bold bg-[#C9A25A]/20 text-amber-300 border border-[#C9A25A]/40 px-3 py-1 rounded-full self-start sm:self-auto">
+                        <span>Current:</span>
+                        <strong className="text-white">{EVOKE_ACCOMMODATION_CATEGORIES[selectedEvokeCategory]?.name}</strong>
+                      </span>
+                    </div>
+
+                    <p className="text-xs text-slate-300 leading-relaxed">
+                      All accommodation categories include all gourmet buffet meals (AP Plan), official White Rann border entry permit, evening cultural folk performances, and Bhuj coach transfers.
+                    </p>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5 pt-1">
+                      {Object.values(EVOKE_ACCOMMODATION_CATEGORIES).map((cat) => {
+                        const isSelected = selectedEvokeCategory === cat.id;
+                        return (
+                          <div
+                            key={cat.id}
+                            onClick={() => setSelectedEvokeCategory(cat.id)}
+                            className={`p-4 rounded-xl border transition-all duration-200 cursor-pointer relative flex flex-col justify-between ${
+                              isSelected
+                                ? 'bg-[#C9A25A]/20 border-[#C9A25A] shadow-[0_0_20px_rgba(201,162,90,0.25)] ring-1 ring-[#C9A25A]'
+                                : 'bg-white/5 border-white/10 hover:border-[#C9A25A]/50 hover:bg-white/10'
+                            }`}
+                          >
+                            <div className="space-y-1.5">
+                              <div className="flex items-start justify-between gap-2">
+                                <span className="text-2xl">{cat.icon}</span>
+                                <span className={`text-[10px] font-extrabold px-2 py-0.5 rounded-full uppercase tracking-wider ${
+                                  cat.delta === 0
+                                    ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
+                                    : cat.delta > 0
+                                    ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30'
+                                    : 'bg-sky-500/20 text-sky-300 border border-sky-500/30'
+                                }`}>
+                                  {cat.badge}
+                                </span>
+                              </div>
+                              <h4 className="text-sm font-bold text-white leading-snug">{cat.name}</h4>
+                              <p className="text-[11px] font-semibold text-amber-200/80">{cat.sub}</p>
+                              <p className="text-[11px] text-slate-300 font-light leading-relaxed pt-1">
+                                {cat.description}
+                              </p>
+                            </div>
+
+                            <div className="pt-3 mt-2 border-t border-white/10 flex items-center justify-between text-[11px]">
+                              <span className="font-mono text-slate-400">
+                                {cat.delta === 0 ? 'Base ₹12,500' : cat.delta > 0 ? `+₹${cat.delta.toLocaleString('en-IN')}/pax` : `-₹${Math.abs(cat.delta).toLocaleString('en-IN')}/pax`}
+                              </span>
+                              {isSelected ? (
+                                <span className="text-amber-400 font-black flex items-center gap-1">
+                                  ✓ Selected Tier
+                                </span>
+                              ) : (
+                                <span className="text-slate-400 hover:text-white">
+                                  Click to Select
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+
+                {/* EXCLUSIVE EVOKE 2D/1N STEP 2: CHECK-IN DATE & FULL MOON DETECTOR */}
+                {isEvoke2D1N && (
+                  <div className="mb-8 p-5 bg-[#0B1226] border border-[#C9A25A]/40 rounded-2xl shadow-xl space-y-4">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-white/10 pb-3">
+                      <div>
+                        <div className="text-[10px] font-black uppercase tracking-wider text-[#C9A25A] flex items-center gap-1.5">
+                          <span>📅</span> Step 2: Check-In Date & Full Moon (Purnima) Tariff
+                        </div>
+                        <h3 className="text-base font-bold text-white mt-0.5">
+                          Travel Date & Live Season Rate Calculator
+                        </h3>
+                      </div>
+                      <span className={`inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1 rounded-full border self-start sm:self-auto ${
+                        evokeSeasonInfo?.tier === 3
+                          ? 'bg-orange-500/20 text-orange-300 border-orange-500/40'
+                          : evokeSeasonInfo?.tier === 2
+                          ? 'bg-amber-500/20 text-amber-300 border-amber-500/40'
+                          : 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40'
+                      }`}>
+                        <span>{evokeSeasonInfo?.tier === 3 ? '🌕' : evokeSeasonInfo?.tier === 2 ? '🌕' : '✨'}</span>
+                        <span>{evokeSeasonInfo?.label}</span>
+                      </span>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
+                      <div className="space-y-1.5">
+                        <label className="text-xs font-bold text-slate-200 flex items-center gap-1.5">
+                          <Calendar className="w-4 h-4 text-amber-400" />
+                          <span>Select Check-In Date at Tent City Dhordo:</span>
+                        </label>
+                        <input
+                          type="date"
+                          value={evokeTravelDate}
+                          min={new Date().toISOString().split('T')[0]}
+                          onChange={(e) => setEvokeTravelDate(e.target.value)}
+                          className="w-full h-11 bg-slate-950 border border-amber-500/40 rounded-xl px-3 text-slate-100 font-bold text-sm focus:ring-2 focus:ring-amber-500 focus:outline-none"
+                        />
+                      </div>
+
+                      <div className="p-3.5 bg-white/5 border border-white/10 rounded-xl space-y-1">
+                        <div className="text-[11px] font-bold text-slate-300 flex items-center gap-1.5">
+                          <span>ℹ️</span> Season Surcharge Rule:
+                        </div>
+                        <p className="text-[11px] text-slate-400 leading-relaxed">
+                          {evokeSeasonInfo?.tier === 3
+                            ? 'Season 3 Peak (Nov/Dec/Jan Full Moon & Xmas/NY) has an official Evoke surcharge of +₹4,000/person.'
+                            : evokeSeasonInfo?.tier === 2
+                            ? 'Season 2 (Diwali Week & Feb Full Moon) has an official Evoke surcharge of +₹2,000/person.'
+                            : 'Regular Season weekday & non-peak dates carry ₹0 surcharge (Base Tariff Included).'}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Quick Test Full Moon Chips */}
+                    <div className="space-y-1.5 pt-1">
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">
+                        Quick Pick 2026-27 Peak Full Moon (Purnima) Dates:
+                      </span>
+                      <div className="flex flex-wrap gap-2">
+                        {[
+                          { date: '2026-11-24', label: '24 Nov (Nov Full Moon 🌕)' },
+                          { date: '2026-12-23', label: '23 Dec (Dec Full Moon 🌕)' },
+                          { date: '2027-01-22', label: '22 Jan (Jan Full Moon 🌕)' },
+                          { date: '2027-02-20', label: '20 Feb (Feb Full Moon 🌕)' },
+                          { date: '2026-11-15', label: '15 Nov (Regular Season ✨)' }
+                        ].map((chip) => (
+                          <button
+                            key={chip.date}
+                            type="button"
+                            onClick={() => setEvokeTravelDate(chip.date)}
+                            className={`text-xs px-3 py-1.5 rounded-lg border font-semibold transition-all ${
+                              evokeTravelDate === chip.date
+                                ? 'bg-amber-500 text-slate-950 border-amber-400 font-black shadow-md'
+                                : 'bg-slate-900 border-slate-700 text-slate-300 hover:border-amber-500/50 hover:text-white'
+                            }`}
+                          >
+                            {chip.label}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Evoke Scheduled Coach Notice (Step 3 Transfer) */}
                 {isEvokePackage && (
                   <div className="mb-6 p-4 bg-emerald-500/10 border border-emerald-500/30 rounded-xl flex items-start gap-3 text-xs text-emerald-300 shadow-md">
                     <span className="text-xl flex-shrink-0">🚌</span>
                     <div className="space-y-1">
-                      <strong className="font-bold text-white block text-xs">Official Evoke Tent City Transfer Included:</strong>
+                      <strong className="font-bold text-white block text-xs">
+                        {isEvoke2D1N ? 'Step 3: Transfer Option (Bhuj ⇄ Tent City Dhordo)' : 'Official Evoke Tent City Transfer Included:'}
+                      </strong>
                       <span>
                         The official Tent City package includes complimentary scheduled <strong>AC Luxury Shared Coach (Bus)</strong> roundtrip transfers from Bhuj Railway Station & Airport (08:15 AM, 10:00 AM, 01:30 PM, 03:30 PM). If you prefer 100% private door-to-door flexibility with your own driver, you can upgrade to a private cab below.
                       </span>
@@ -5288,7 +5587,7 @@ const DynamicPackageDetail: React.FC<DynamicPackageDetailProps> = ({ slug: propS
                           </h2>
                         </div>
                       </div>
-                      <HotelList hotels={((activeVariant?.hotels && activeVariant.hotels.length > 0) ? activeVariant.hotels : effectivePkg.hotels).map((h: any) => {
+                      <HotelList hotels={((activeVariant?.hotels && activeVariant.hotels.length > 0) ? activeVariant.hotels : (isEvoke2D1N ? [{ name: `Tent City Dhordo (${EVOKE_ACCOMMODATION_CATEGORIES[selectedEvokeCategory]?.name})`, location: "Dhordo, Kutch", stars: 5, room_type: EVOKE_ACCOMMODATION_CATEGORIES[selectedEvokeCategory]?.name, meal_plan: "All Meals Included (AP)", image: "/rann_utsav_tent_city.jpg" }] : effectivePkg.hotels)).map((h: any) => {
                         const hName = typeof h === 'string' 
                           ? h 
                           : (h.name || h.hotel_name || h.hotelName || h.title || h.hotel || h.label || 'Premium Hotel / Resort');
@@ -5492,19 +5791,29 @@ const DynamicPackageDetail: React.FC<DynamicPackageDetailProps> = ({ slug: propS
                     itinerary: (activeVariant?.itinerary && activeVariant.itinerary.length > 0) ? activeVariant.itinerary : packageDetails.itinerary,
                     inclusions: (activeVariant?.inclusions && activeVariant.inclusions.length > 0) ? activeVariant.inclusions : packageDetails.inclusions,
                     exclusions: (activeVariant?.exclusions && activeVariant.exclusions.length > 0) ? activeVariant.exclusions : packageDetails.exclusions,
-                    hotels: (activeVariant?.hotels && activeVariant.hotels.length > 0) ? activeVariant.hotels : (effectivePkg.hotels || []),
+                    hotels: isEvoke2D1N
+                      ? [{ name: `Tent City Dhordo (${EVOKE_ACCOMMODATION_CATEGORIES[selectedEvokeCategory]?.name})`, location: "Dhordo, Kutch", stars: 5, room_type: EVOKE_ACCOMMODATION_CATEGORIES[selectedEvokeCategory]?.name, meal_plan: "All Meals Included (AP)" }]
+                      : (activeVariant?.hotels && activeVariant.hotels.length > 0) ? activeVariant.hotels : (effectivePkg.hotels || []),
                     slug: effectivePkg.slug || currentSlug,
                     attractions: effectivePkg.attractions || []
                   } as any}
                   slug={effectivePkg.slug || currentSlug}
                   packageType={packageType}
                   destination={packageDetails.destinations[0] || ""}
-                  quickFacts={quickFacts}
+                  quickFacts={{
+                    ...quickFacts,
+                    accommodation: isEvoke2D1N ? EVOKE_ACCOMMODATION_CATEGORIES[selectedEvokeCategory]?.name : quickFacts.accommodation
+                  }}
                   selectedCabName={selectedCab.name}
                   selectedCabId={selectedCabId}
                   passengerCount={isDhamPackage ? dhamAdultsCount : passengerCount}
                   adultsCount={isDhamPackage ? dhamAdultsCount : passengerCount}
                   totalPayablePrice={finalPricePerPerson * (isDhamPackage ? dhamAdultsCount : passengerCount)}
+                  travelDate={isEvoke2D1N ? evokeTravelDate : undefined}
+                  onTravelDateChange={isEvoke2D1N ? setEvokeTravelDate : undefined}
+                  evokeTentCategoryName={isEvoke2D1N ? EVOKE_ACCOMMODATION_CATEGORIES[selectedEvokeCategory]?.name : undefined}
+                  evokeSeasonName={isEvoke2D1N ? evokeSeasonInfo?.categoryName : undefined}
+                  evokeSeasonSurcharge={isEvoke2D1N ? evokeSeasonInfo?.surcharge : undefined}
                 />
               </div>
             </div>

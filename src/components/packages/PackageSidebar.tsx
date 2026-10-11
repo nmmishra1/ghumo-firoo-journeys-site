@@ -45,6 +45,11 @@ interface PackageSidebarProps {
   passengerCount?: number;
   totalPayablePrice?: number;
   adultsCount?: number;
+  travelDate?: string;
+  onTravelDateChange?: (date: string) => void;
+  evokeTentCategoryName?: string;
+  evokeSeasonName?: string;
+  evokeSeasonSurcharge?: number;
   quickFacts?: {
     groupSize?: string;
     bestTime?: string;
@@ -68,6 +73,11 @@ const PackageSidebar: React.FC<PackageSidebarProps> = ({
   passengerCount,
   totalPayablePrice,
   adultsCount,
+  travelDate: propTravelDate,
+  onTravelDateChange,
+  evokeTentCategoryName,
+  evokeSeasonName,
+  evokeSeasonSurcharge,
   quickFacts = {} 
 }) => {
   const {
@@ -186,7 +196,14 @@ const PackageSidebar: React.FC<PackageSidebarProps> = ({
 
   // Interactive Travel Dates & Passengers state
   const tomorrowStr = new Date(Date.now() + 86400000).toISOString().split('T')[0];
-  const [travelDate, setTravelDate] = React.useState(tomorrowStr);
+  const [internalTravelDate, setInternalTravelDate] = React.useState(tomorrowStr);
+  const travelDate = propTravelDate || internalTravelDate;
+  const setTravelDate = (val: string) => {
+    setInternalTravelDate(val);
+    if (onTravelDateChange) {
+      onTravelDateChange(val);
+    }
+  };
   const [travelers, setTravelers] = React.useState(2);
 
   const nightsMatch = packageDetails.duration ? packageDetails.duration.match(/(\d+)\s*Nights?/i) || packageDetails.duration.match(/(\d+)\s*Days?/i) : null;
@@ -247,6 +264,47 @@ const PackageSidebar: React.FC<PackageSidebarProps> = ({
             <div className="mt-3 inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#C9A25A]/10 text-[#C9A25A] dark:text-[#C9A25A] text-[10px] font-black uppercase tracking-wider">
               <span>💰</span> Best Price Guaranteed
             </div>
+
+            {/* Evoke 2D1N Live Configuration Breakdown */}
+            {slug === 'rann-utsav-2d1n' && (
+              <div className="mt-4 pt-3 border-t border-amber-500/20 text-left space-y-2 text-xs">
+                <div className="text-[10px] font-black uppercase tracking-wider text-amber-500 flex items-center gap-1">
+                  <span>🎪</span> Configured Tent & Transfer:
+                </div>
+                <div className="flex items-center justify-between text-slate-300">
+                  <span className="text-[11px] text-muted-foreground flex items-center gap-1">
+                    <span>⛺</span> Tent Type:
+                  </span>
+                  <span className="font-bold text-amber-500 dark:text-amber-400 text-[11px] text-right truncate max-w-[160px]">
+                    {evokeTentCategoryName || 'Deluxe AC Swiss Cottage'}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between text-slate-300">
+                  <span className="text-[11px] text-muted-foreground flex items-center gap-1">
+                    <span>🚌</span> Transfer:
+                  </span>
+                  <span className="font-bold text-emerald-600 dark:text-emerald-400 text-[11px] text-right truncate max-w-[160px]">
+                    {selectedCabName || 'Official Scheduled AC Bus'}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between text-slate-300">
+                  <span className="text-[11px] text-muted-foreground flex items-center gap-1">
+                    <span>📅</span> Date Tariff:
+                  </span>
+                  <span className={`font-bold text-[11px] text-right truncate max-w-[160px] ${evokeSeasonSurcharge && evokeSeasonSurcharge > 0 ? 'text-amber-500' : 'text-slate-400'}`}>
+                    {evokeSeasonName || 'Regular Season Base'}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between text-slate-300">
+                  <span className="text-[11px] text-muted-foreground flex items-center gap-1">
+                    <span>🍽️</span> Meals:
+                  </span>
+                  <span className="font-bold text-purple-400 text-[11px]">
+                    All Meals Included (AP)
+                  </span>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Interactive Travel Dates Selector */}
