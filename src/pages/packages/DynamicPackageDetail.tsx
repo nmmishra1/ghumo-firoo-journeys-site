@@ -4021,15 +4021,19 @@ const DynamicPackageDetail: React.FC<DynamicPackageDetailProps> = ({ slug: propS
   const [pkg, setPkg] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [activeVariantId, setActiveVariantId] = useState<string>('');
-  const [passengerCount, setPassengerCount] = useState<number>(2);
-  const [selectedCabId, setSelectedCabId] = useState<string>('sedan');
+  const currentSlug = propSlug || params.slug || window.location.pathname.split('/').pop() || '';
+  const isEvokeSlug = currentSlug === 'rann-utsav-2d1n' || currentSlug === 'rann-utsav-3d2n' || currentSlug.includes('tent-city') || currentSlug.includes('rann-utsav-tent');
+  const [selectedCabId, setSelectedCabId] = useState<string>(isEvokeSlug ? 'evoke_coach' : 'sedan');
   const [dhamAdultsCount, setDhamAdultsCount] = useState<number>(2);
   const [dhamRoomsCount, setDhamRoomsCount] = useState<number>(1);
   const [selectedMealPlan, setSelectedMealPlan] = useState<string>('cp');
 
-  const currentSlug = propSlug || params.slug || window.location.pathname.split('/').pop() || '';
-
   useEffect(() => {
+    // If it's an Evoke Tent City package, and user has selected shared coach, keep it across all pax counts
+    if (selectedCabId === 'evoke_coach') {
+      return;
+    }
+
     if (passengerCount >= 1 && passengerCount <= 3) {
       if (selectedCabId !== 'sedan') {
         setSelectedCabId('sedan');
@@ -4047,7 +4051,7 @@ const DynamicPackageDetail: React.FC<DynamicPackageDetailProps> = ({ slug: propS
         setSelectedCabId('tempo');
       }
     }
-  }, [passengerCount]);
+  }, [passengerCount, selectedCabId]);
 
   const getInitialVariantId = (variants: any[], slug: string) => {
     if (!variants || variants.length === 0) return '';
@@ -4508,7 +4512,70 @@ const DynamicPackageDetail: React.FC<DynamicPackageDetailProps> = ({ slug: propS
     ? mappedVariants.find(v => v.id === activeVariantId) || mappedVariants[0]
     : null;
 
-  const CAB_OPTIONS = [
+  const isEvokePackage = Boolean(
+    (effectivePkg.slug && (
+      effectivePkg.slug === 'rann-utsav-2d1n' || 
+      effectivePkg.slug === 'rann-utsav-3d2n' || 
+      effectivePkg.slug.includes('tent-city') || 
+      effectivePkg.slug.includes('rann-utsav-tent')
+    )) ||
+    (effectivePkg.name && (effectivePkg.name.toLowerCase().includes('tent city') || effectivePkg.name.toLowerCase().includes('evoke')))
+  );
+
+  const EVOKE_TRANSPORT_OPTIONS = [
+    {
+      id: 'evoke_coach',
+      name: 'Official Scheduled AC Shared Coach (Bus)',
+      minPax: 1,
+      maxPax: 20,
+      priceTotal: 0,
+      icon: '🚌',
+      badge: 'Official Tent City Coach • Included',
+      description: 'Scheduled departures from Bhuj Station & Airport (08:15 AM, 10:00 AM, 01:30 PM, 03:30 PM). White Rann & sightseeing shuttles included.'
+    },
+    {
+      id: 'sedan',
+      name: 'Private AC Sedan (Swift Dzire / Etios)',
+      minPax: 1,
+      maxPax: 4,
+      priceTotal: 3500,
+      icon: '🚙',
+      badge: 'Private Upgrade (1-4 Pax)',
+      description: 'Dedicated private chauffeur for roundtrip Bhuj airport/station transfer with flexible departure timing.'
+    },
+    {
+      id: 'suv_ertiga',
+      name: 'Private AC SUV (Maruti Ertiga / Triber)',
+      minPax: 1,
+      maxPax: 6,
+      priceTotal: 5500,
+      icon: '🚘',
+      badge: 'Family Upgrade (1-6 Pax)',
+      description: 'Dedicated private 6-seater SUV for extra legroom, luggage and private Bhuj transfers.'
+    },
+    {
+      id: 'suv_innova',
+      name: 'Private AC Premium SUV (Innova Crysta)',
+      minPax: 1,
+      maxPax: 6,
+      priceTotal: 7500,
+      icon: '🚐',
+      badge: 'VIP Upgrade ⭐',
+      description: 'Luxury captain seats, private chauffeur, and flexible customized timings.'
+    },
+    {
+      id: 'tempo',
+      name: 'Private AC Luxury Tempo Traveller',
+      minPax: 7,
+      maxPax: 14,
+      priceTotal: 11000,
+      icon: '🚌',
+      badge: 'Large Group Special (7-14 Pax)',
+      description: 'Exclusive private 12-14 seater tempo for your group only.'
+    }
+  ];
+
+  const STANDARD_CAB_OPTIONS = [
     {
       id: 'sedan',
       name: 'AC Sedan (Swift Dzire / Toyota Etios)',
@@ -4550,6 +4617,8 @@ const DynamicPackageDetail: React.FC<DynamicPackageDetailProps> = ({ slug: propS
       description: 'Exclusive luxury coach for large family & group journeys'
     }
   ];
+
+  const CAB_OPTIONS = isEvokePackage ? EVOKE_TRANSPORT_OPTIONS : STANDARD_CAB_OPTIONS;
 
   const isDhamPackage = Boolean(
     (effectivePkg.slug && (effectivePkg.slug.includes('dham') || effectivePkg.slug.includes('yatra') || effectivePkg.slug.includes('kedarnath') || effectivePkg.slug.includes('badrinath') || effectivePkg.slug.includes('gangotri') || effectivePkg.slug.includes('yamunotri'))) || 
@@ -4728,6 +4797,32 @@ const DynamicPackageDetail: React.FC<DynamicPackageDetailProps> = ({ slug: propS
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
             {/* Main Content */}
             <div className="lg:col-span-2 space-y-10">
+              {/* Evoke Tent City Official Booking Engine Cross-Promotion Banner */}
+              {isEvokePackage && (
+                <div className="bg-gradient-to-r from-amber-500/15 via-[#C9A25A]/20 to-amber-600/15 border-2 border-[#C9A25A]/60 rounded-2xl p-5 md:p-6 shadow-2xl relative overflow-hidden flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                  <div className="space-y-1.5">
+                    <div className="flex items-center gap-2">
+                      <span className="text-xl">🎪</span>
+                      <span className="text-xs font-black uppercase tracking-wider text-[#F3E5AB] bg-[#C9A25A]/30 px-2.5 py-0.5 rounded-full border border-[#C9A25A]/50">
+                        Official Evoke Tent City Rates
+                      </span>
+                    </div>
+                    <h3 className="text-base md:text-lg font-serif font-black text-white">
+                      Looking for specific Swiss Cottage types or Live Calendar Dates?
+                    </h3>
+                    <p className="text-xs text-slate-300 max-w-xl leading-relaxed">
+                      Explore official Darbari Suite, Rajwadi Suite, Super Premium & Deluxe AC Tents with live date-wise peak season tariff calculator and instant voucher confirmation.
+                    </p>
+                  </div>
+                  <Link
+                    to="/packages/rann-utsav-tent"
+                    className="shrink-0 px-4 py-2.5 bg-gradient-to-r from-[#D4AF37] to-amber-500 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-black text-xs uppercase tracking-wider rounded-xl shadow-lg hover:shadow-amber-500/25 transition-all flex items-center gap-2"
+                  >
+                    <span>Open Tent Engine</span>
+                    <span>→</span>
+                  </Link>
+                </div>
+              )}
               {/* Country / Destination Overview Card */}
               {(effectivePkg.capital || effectivePkg.currency || effectivePkg.visa_type) && (
                 <div className="bg-[#0B1226] border border-[#C9A25A]/20 rounded-2xl p-6 shadow-xl">
@@ -4901,17 +4996,17 @@ const DynamicPackageDetail: React.FC<DynamicPackageDetailProps> = ({ slug: propS
                 </div>
               )}
 
-              {/* Smart Private Cab & Vehicle Customizer Card */}
+              {/* Smart Transport Customizer Card */}
               <div className="bg-[#0B1226] border border-[#C9A25A]/30 rounded-2xl p-6 shadow-2xl relative overflow-hidden">
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6 border-b border-white/10 pb-4">
                   <div className="flex items-center gap-3">
                     <div className="w-1.5 h-6 bg-[#C9A25A] rounded-full" />
                     <div>
                       <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#C9A25A] mb-0.5">
-                        ✦ Private Transport Customizer
+                        {isEvokePackage ? '✦ Evoke Tent City Transfer Options' : '✦ Private Transport Customizer'}
                       </div>
                       <h2 className="font-serif font-bold text-white text-xl md:text-2xl">
-                        Select Private Vehicle / Cab Type
+                        {isEvokePackage ? 'Scheduled Bus or Private Chauffeur' : 'Select Private Vehicle / Cab Type'}
                       </h2>
                     </div>
                   </div>
@@ -4946,8 +5041,21 @@ const DynamicPackageDetail: React.FC<DynamicPackageDetailProps> = ({ slug: propS
                   )}
                 </div>
 
-                {/* Luggage Alert Banner for 4 Adults when Sedan is selected */}
-                {passengerCount === 4 && selectedCabId === 'sedan' && (
+                {/* Evoke Scheduled Coach Notice */}
+                {isEvokePackage && (
+                  <div className="mb-6 p-4 bg-emerald-500/10 border border-emerald-500/30 rounded-xl flex items-start gap-3 text-xs text-emerald-300 shadow-md">
+                    <span className="text-xl flex-shrink-0">🚌</span>
+                    <div className="space-y-1">
+                      <strong className="font-bold text-white block text-xs">Official Evoke Tent City Transfer Included:</strong>
+                      <span>
+                        The official Tent City package includes complimentary scheduled <strong>AC Luxury Shared Coach (Bus)</strong> roundtrip transfers from Bhuj Railway Station & Airport (08:15 AM, 10:00 AM, 01:30 PM, 03:30 PM). If you prefer 100% private door-to-door flexibility with your own driver, you can upgrade to a private cab below.
+                      </span>
+                    </div>
+                  </div>
+                )}
+
+                {/* Luggage Alert Banner for 4 Adults when Sedan is selected on standard packages */}
+                {!isEvokePackage && passengerCount === 4 && selectedCabId === 'sedan' && (
                   <div className="mb-6 p-4 bg-[#C9A25A]/10 border border-[#C9A25A]/40 rounded-xl flex items-start gap-3 text-xs text-[#E5C378] animate-fade-in shadow-md">
                     <span className="text-xl flex-shrink-0">🧳</span>
                     <div>
@@ -4957,14 +5065,14 @@ const DynamicPackageDetail: React.FC<DynamicPackageDetailProps> = ({ slug: propS
                   </div>
                 )}
 
-                {/* Group Size Notice for 5 & 6 Pax */}
-                {(passengerCount === 5 || passengerCount === 6) && (
+                {/* Group Size Notice for 5 & 6 Pax on standard packages */}
+                {!isEvokePackage && (passengerCount === 5 || passengerCount === 6) && (
                   <div className="mb-6 p-3 bg-blue-500/10 border border-blue-500/30 rounded-xl flex items-center gap-3 text-xs text-blue-300">
                     <span className="text-base">ℹ️</span>
                     <span>For <strong>{passengerCount} travelers</strong>, 4-seater sedans and tempo travellers are excluded. We recommend spacious 6-seater AC SUVs (Maruti Ertiga or Toyota Innova Crysta) for passenger and luggage capacity.</span>
                   </div>
                 )}
-                {passengerCount > 6 && (
+                {!isEvokePackage && passengerCount > 6 && (
                   <div className="mb-6 p-3 bg-blue-500/10 border border-blue-500/30 rounded-xl flex items-center gap-3 text-xs text-blue-300">
                     <span className="text-base">ℹ️</span>
                     <span>For groups of <strong>{passengerCount} travelers</strong>, AC Luxury Tempo Traveller is provided for maximum group comfort.</span>
@@ -4975,18 +5083,30 @@ const DynamicPackageDetail: React.FC<DynamicPackageDetailProps> = ({ slug: propS
                 {(() => {
                   let visibleCabs = CAB_OPTIONS;
 
-                  if (passengerCount >= 1 && passengerCount <= 3) {
-                    // For 1–3 adults: Only 1 vehicle shown (AC Sedan included in base fare)
-                    visibleCabs = CAB_OPTIONS.filter(c => c.id === 'sedan');
-                  } else if (passengerCount === 4) {
-                    // For 4 adults: Sedan, AC SUV (Ertiga), AC Premium SUV (Innova)
-                    visibleCabs = CAB_OPTIONS.filter(c => c.id !== 'tempo');
-                  } else if (passengerCount === 5 || passengerCount === 6) {
-                    // For 5 & 6 adults: Exclude Sedan and Tempo. Show only AC SUV (Ertiga) & AC Premium SUV (Innova)
-                    visibleCabs = CAB_OPTIONS.filter(c => c.id === 'suv_ertiga' || c.id === 'suv_innova');
-                  } else if (passengerCount > 6) {
-                    // For more than 6 adults (7+): Luxury Tempo Traveller only
-                    visibleCabs = CAB_OPTIONS.filter(c => c.id === 'tempo');
+                  if (isEvokePackage) {
+                    // For Evoke packages: Always show the complimentary Coach.
+                    // Private options filtered by passenger capacity:
+                    if (passengerCount <= 4) {
+                      visibleCabs = CAB_OPTIONS.filter(c => c.id === 'evoke_coach' || c.id === 'sedan' || c.id === 'suv_ertiga' || c.id === 'suv_innova');
+                    } else if (passengerCount <= 6) {
+                      visibleCabs = CAB_OPTIONS.filter(c => c.id === 'evoke_coach' || c.id === 'suv_ertiga' || c.id === 'suv_innova');
+                    } else {
+                      visibleCabs = CAB_OPTIONS.filter(c => c.id === 'evoke_coach' || c.id === 'tempo');
+                    }
+                  } else {
+                    if (passengerCount >= 1 && passengerCount <= 3) {
+                      // For 1–3 adults: Only 1 vehicle shown (AC Sedan included in base fare)
+                      visibleCabs = CAB_OPTIONS.filter(c => c.id === 'sedan');
+                    } else if (passengerCount === 4) {
+                      // For 4 adults: Sedan, AC SUV (Ertiga), AC Premium SUV (Innova)
+                      visibleCabs = CAB_OPTIONS.filter(c => c.id !== 'tempo');
+                    } else if (passengerCount === 5 || passengerCount === 6) {
+                      // For 5 & 6 adults: Exclude Sedan and Tempo. Show only AC SUV (Ertiga) & AC Premium SUV (Innova)
+                      visibleCabs = CAB_OPTIONS.filter(c => c.id === 'suv_ertiga' || c.id === 'suv_innova');
+                    } else if (passengerCount > 6) {
+                      // For more than 6 adults (7+): Luxury Tempo Traveller only
+                      visibleCabs = CAB_OPTIONS.filter(c => c.id === 'tempo');
+                    }
                   }
 
                   return (
@@ -5013,27 +5133,21 @@ const DynamicPackageDetail: React.FC<DynamicPackageDetailProps> = ({ slug: propS
                                 <span className="text-2xl">{cab.icon}</span>
                                 <div>
                                   <h3 className="text-sm font-bold text-white leading-tight">{cab.name}</h3>
-                                  <span className="text-[10px] text-slate-400 font-medium">Max {cab.maxPax} Pax • Private Vehicle</span>
+                                  <span className="text-[10px] text-slate-400 font-medium">
+                                    {cab.id === 'evoke_coach' ? 'All Group Sizes • Official Coach' : `Max ${cab.maxPax} Pax • Private Vehicle`}
+                                  </span>
                                 </div>
                               </div>
                               
                               {/* Clean Feature Badge */}
                               <div className="text-right flex-shrink-0">
-                                {cab.id === 'sedan' ? (
+                                {cab.priceTotal === 0 ? (
                                   <span className="inline-block text-[10px] font-extrabold px-2.5 py-1 rounded bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 uppercase tracking-wider">
                                     INCLUDED
                                   </span>
-                                ) : cab.id === 'suv_ertiga' ? (
-                                  <span className="inline-block text-[10px] font-extrabold px-2.5 py-1 rounded bg-sky-500/20 border border-sky-500/40 text-sky-300 uppercase tracking-wider">
-                                    SPACIOUS 6-SEATER
-                                  </span>
-                                ) : cab.id === 'suv_innova' ? (
-                                  <span className="inline-block text-[10px] font-extrabold px-2.5 py-1 rounded bg-amber-500/20 border border-amber-500/40 text-amber-300 uppercase tracking-wider">
-                                    RECOMMENDED ⭐
-                                  </span>
                                 ) : (
-                                  <span className="inline-block text-[10px] font-extrabold px-2.5 py-1 rounded bg-purple-500/20 border border-purple-500/40 text-purple-300 uppercase tracking-wider">
-                                    GROUP SPECIAL
+                                  <span className="inline-block text-[10px] font-extrabold px-2.5 py-1 rounded bg-[#C9A25A]/20 border border-[#C9A25A]/40 text-[#E5C378] uppercase tracking-wider">
+                                    +₹{perPersonExtra.toLocaleString('en-IN')}/Pax
                                   </span>
                                 )}
                               </div>
@@ -5048,11 +5162,11 @@ const DynamicPackageDetail: React.FC<DynamicPackageDetailProps> = ({ slug: propS
                               </span>
                             ) : isSelected ? (
                               <span className="text-[10px] font-bold text-[#C9A25A] flex items-center gap-1">
-                                ✓ Selected Vehicle for {passengerCount} Travelers
+                                ✓ Selected {cab.id === 'evoke_coach' ? 'Transfer' : 'Vehicle'} for {passengerCount} Travelers
                               </span>
                             ) : (
                               <span className="text-[10px] text-slate-400 flex items-center gap-1">
-                                Click to select vehicle
+                                Click to select {cab.id === 'evoke_coach' ? 'transfer' : 'vehicle'}
                               </span>
                             )}
                           </div>
@@ -5084,13 +5198,13 @@ const DynamicPackageDetail: React.FC<DynamicPackageDetailProps> = ({ slug: propS
                   {/* Cab Selection Summary */}
                   <div className="p-3.5 bg-white/5 border border-white/10 rounded-xl space-y-1">
                     <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
-                      <Car className="w-3.5 h-3.5 text-sky-400" /> Private Transport
+                      <Car className="w-3.5 h-3.5 text-sky-400" /> {selectedCab.id === 'evoke_coach' ? 'Transfer Service' : 'Private Transport'}
                     </div>
                     <div className="text-sm font-extrabold text-sky-300 truncate">
-                      {selectedCab.name.split('(')[0]}
+                      {selectedCab.id === 'evoke_coach' ? 'Official AC Shared Coach' : selectedCab.name.split('(')[0]}
                     </div>
                     <div className="text-[10px] text-slate-300 font-medium">
-                      Chauffeured Private Vehicle
+                      {selectedCab.id === 'evoke_coach' ? 'Complimentary Bhuj Transfers' : 'Chauffeured Private Vehicle'}
                     </div>
                   </div>
 
