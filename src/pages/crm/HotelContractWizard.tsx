@@ -712,9 +712,15 @@ export const HotelContractWizard: React.FC<HotelContractWizardProps> = ({
             const rates = rRes.ok ? await rRes.json() : null;
             if (rates && rates.length > 0) {
               const ratesMap: Record<string, any> = {};
+              const detectedPlans = new Set<string>();
+
               rates.forEach(r => {
+                const planCode = String(r.meal_plan_id || '').toUpperCase().trim();
+                if (planCode) {
+                  detectedPlans.add(planCode);
+                }
                 const resolvedSeasonId = (r.season_id === 0 || r.season_id === '0' || !r.season_id) ? 'season-normal' : r.season_id;
-                const key = `${resolvedSeasonId}-${r.room_category_id}-${r.meal_plan_id}`;
+                const key = `${resolvedSeasonId}-${r.room_category_id}-${planCode}`;
                 ratesMap[key] = {
                   single_rate: r.single_rate,
                   double_rate: r.double_rate,
@@ -724,10 +730,20 @@ export const HotelContractWizard: React.FC<HotelContractWizardProps> = ({
                   child_with_bed_rate: r.child_with_bed_rate,
                   child_without_bed_rate: r.child_without_bed_rate,
                   markup: r.markup,
-                  gst: r.gst_percentage || activeContract.gst_percentage
+                  gst: r.gst_percentage || activeContract.gst_percentage,
+                  rate_type: r.rate_type || 'exclusive'
                 };
               });
+
               setGridRates(ratesMap);
+
+              // Auto-sync selectedMealPlans with any meal plans found in the rates (e.g. MAP, CP, EP, AP)
+              if (detectedPlans.size > 0) {
+                setSelectedMealPlans(prev => {
+                  const combined = new Set([...prev, ...Array.from(detectedPlans)]);
+                  return Array.from(combined);
+                });
+              }
             }
           }
 

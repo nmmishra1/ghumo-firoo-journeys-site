@@ -851,6 +851,7 @@ export const BulkUploadHub: React.FC<{ initialModule?: any }> = ({ initialModule
                   contract_id: contractId,
                   room_category_id: roomCatId || null,
                   meal_plan_id: mealPlan.toUpperCase(),
+                  season_id: 0,
                   single_rate: singleRate,
                   double_rate: doubleRate,
                   triple_rate: tripleRate,
@@ -872,6 +873,15 @@ export const BulkUploadHub: React.FC<{ initialModule?: any }> = ({ initialModule
                   selling_cost: supplierCost + markupVal
                 })
               });
+
+              // Ensure hotel.meal_plan_supported includes this meal plan so the wizard displays it
+              fetch(`${API_BASE}/api.php?table=hotels&id=${hotelId}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json', ...headers },
+                body: JSON.stringify({
+                  meal_plan_supported: [mealPlan.toUpperCase(), 'CP', 'EP', 'MAP']
+                })
+              }).catch(() => {});
             }
 
             // (d) Also populate legacy hotel_rates table for Itinerary Builder fallback
