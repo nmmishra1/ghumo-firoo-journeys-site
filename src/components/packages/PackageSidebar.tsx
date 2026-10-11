@@ -227,18 +227,14 @@ const PackageSidebar: React.FC<PackageSidebarProps> = ({
     }
   }, [contextStr]);
 
-  const isEvokeSharedCoach = contextStr.includes('rann-utsav-tent') || (contextStr.includes('rann') && contextStr.includes('evoke'));
-  
-  const cabOptions = isEvokeSharedCoach 
-    ? [{ id: 'shared_coach', name: 'Official Fixed AC Coach (Included)' }]
-    : [
-        { id: 'swift_dzire', name: 'Swift Dzire (4-Seater Sedan)' },
-        { id: 'maruti_ertiga', name: 'Maruti Ertiga (6-Seater MUV)' },
-        { id: 'innova_crysta', name: 'Innova Crysta (6/7-Seater SUV)' },
-        { id: 'tempo_traveller', name: 'AC Tempo Traveller (12/17-Seater)' }
-      ];
+  const cabOptions = [
+    { id: 'swift_dzire', name: 'Swift Dzire (4-Seater Sedan)' },
+    { id: 'maruti_ertiga', name: 'Maruti Ertiga (6-Seater MUV)' },
+    { id: 'innova_crysta', name: 'Innova Crysta (6/7-Seater SUV)' },
+    { id: 'tempo_traveller', name: 'AC Tempo Traveller (12/17-Seater)' }
+  ];
 
-  const [cabId, setCabId] = React.useState(selectedCabId || (isEvokeSharedCoach ? 'shared_coach' : 'swift_dzire'));
+  const [cabId, setCabId] = React.useState(selectedCabId || 'swift_dzire');
   
   React.useEffect(() => {
     if (selectedCabId) {
@@ -281,10 +277,10 @@ const PackageSidebar: React.FC<PackageSidebarProps> = ({
                 </div>
                 <div className="flex items-center justify-between text-slate-300">
                   <span className="text-[11px] text-muted-foreground flex items-center gap-1">
-                    <span>🚌</span> Transfer:
+                    <span>🚙</span> Vehicle:
                   </span>
                   <span className="font-bold text-emerald-600 dark:text-emerald-400 text-[11px] text-right truncate max-w-[160px]">
-                    {selectedCabName || 'Official Scheduled AC Bus'}
+                    {selectedCabName || 'AC Sedan (Dzire / Etios)'}
                   </span>
                 </div>
                 <div className="flex items-center justify-between text-slate-300">
@@ -354,7 +350,7 @@ const PackageSidebar: React.FC<PackageSidebarProps> = ({
           <div className="bg-slate-900/90 dark:bg-zinc-900/90 p-4 rounded-2xl border border-amber-500/30 space-y-3.5 shadow-md">
             <div className="flex items-center justify-between">
               <h3 className="text-xs font-extrabold text-amber-400 uppercase tracking-wider flex items-center gap-1.5">
-                <Car className="w-4 h-4 text-amber-400" /> {isEvokeSharedCoach ? 'Official Transport Schedule' : 'Private Transport & Transfer Route'}
+                <Car className="w-4 h-4 text-amber-400" /> Private Transport & Transfer Route
               </h3>
               <span className="text-[10px] bg-amber-500/15 text-amber-300 border border-amber-500/30 px-2.5 py-0.5 rounded-full font-bold uppercase tracking-wider">
                 Included
@@ -370,7 +366,7 @@ const PackageSidebar: React.FC<PackageSidebarProps> = ({
                   <div className="flex items-center gap-2 min-w-0">
                     <Car className="w-4 h-4 text-amber-400 shrink-0" />
                     <span className="text-xs font-bold text-slate-100 truncate">
-                      {isEvokeSharedCoach ? 'Official Fixed AC Coach (Included)' : (selectedCabName || activeCab.name)}
+                      {selectedCabName || activeCab.name}
                     </span>
                   </div>
                   <span className="text-[10px] bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 px-2 py-0.5 rounded-full font-bold uppercase tracking-wider shrink-0">
