@@ -202,24 +202,33 @@ const CostSummary = ({ form }: { form: typeof BLANK_FORM }) => {
   const profit = netSelling - sc;
   const margin = sc > 0 ? ((profit / sc) * 100) : 0;
   return (
-    <div className="grid grid-cols-2 gap-3 p-4 rounded-xl border border-border/50 bg-gradient-to-br from-slate-50/50 to-amber-50/30 dark:from-slate-900/50 dark:to-amber-500/10">
-      <div className="col-span-2 text-xs font-bold text-muted-foreground uppercase tracking-wider mb-1 flex items-center gap-1.5">
-        <IndianRupee className="w-3.5 h-3.5 text-amber-500" /> Cost Breakdown
+    <div className="grid grid-cols-2 gap-3 p-4 rounded-2xl border border-slate-800 bg-slate-900/90 shadow-inner">
+      <div className="col-span-2 text-[11px] font-black text-amber-400 uppercase tracking-wider mb-0.5 flex items-center justify-between">
+        <span className="flex items-center gap-1.5">
+          <IndianRupee className="w-3.5 h-3.5 text-amber-400" /> Real-time Cost Breakdown
+        </span>
+        <Badge className={`text-[10px] font-bold py-0 px-2 ${profit >= 0 ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40' : 'bg-rose-500/20 text-rose-300 border-rose-500/40'}`}>
+          {profit >= 0 ? 'Profitable' : 'Loss Warning'}
+        </Badge>
       </div>
       {[
-        { label: 'Supplier Cost', value: sc, color: 'text-foreground' },
-        { label: `GST (${gstPct}%)`, value: gstAmt, color: 'text-amber-500' },
-        { label: 'Selling Price', value: sell, color: 'text-emerald-600 dark:text-emerald-400 font-extrabold' },
-        { label: 'Profit', value: profit, color: profit >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-500' },
+        { label: 'Supplier Net Cost', value: sc, color: 'text-slate-200 font-mono font-bold' },
+        { label: `GST (${gstPct}%)`, value: gstAmt, color: 'text-amber-400 font-mono font-bold' },
+        { label: 'Selling Price (Gross)', value: sell, color: 'text-emerald-400 font-mono font-black text-sm' },
+        { label: 'Estimated Profit', value: profit, color: profit >= 0 ? 'text-emerald-400 font-mono font-black text-sm' : 'text-rose-400 font-mono font-black text-sm' },
       ].map(r => (
-        <div key={r.label} className="flex justify-between items-center text-xs">
-          <span className="text-muted-foreground font-medium">{r.label}</span>
-          <span className={`font-bold ${r.color}`}>₹{r.value.toFixed(2)}</span>
+        <div key={r.label} className="flex justify-between items-center text-xs py-1 border-b border-slate-800/60 last:border-b-0">
+          <span className="text-slate-400 font-medium text-[11px]">{r.label}</span>
+          <span className={r.color}>₹{r.value.toFixed(2)}</span>
         </div>
       ))}
-      <div className="col-span-2 flex justify-between items-center text-xs border-t border-border/30 pt-2 mt-1">
-        <span className="text-muted-foreground font-medium flex items-center gap-1"><Percent className="w-3 h-3" /> Margin</span>
-        <span className={`font-extrabold text-sm ${margin >= 0 ? 'text-emerald-500' : 'text-rose-500'}`}>{margin.toFixed(1)}%</span>
+      <div className="col-span-2 flex justify-between items-center text-xs border-t border-slate-800 pt-2.5 mt-1">
+        <span className="text-slate-300 font-bold flex items-center gap-1 text-[11px]">
+          <Percent className="w-3.5 h-3.5 text-amber-400" /> Agency Margin
+        </span>
+        <span className={`font-black text-base font-mono ${margin >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
+          {margin.toFixed(1)}%
+        </span>
       </div>
     </div>
   );
@@ -696,15 +705,18 @@ export default function ActivityMaster() {
     const isStateLoaded = !form.state_id || filteredStates.some(s => String(s.id) === String(form.state_id));
     const selectedCountryName = form.country_id ? countries.find(c => String(c.id) === String(form.country_id))?.country_name : undefined;
     return (
-      <div className="space-y-6 max-w-5xl mx-auto text-slate-900 dark:text-slate-100">
+      <div className="space-y-6 max-w-5xl mx-auto text-slate-100">
         {/* Header */}
-        <div className="flex items-center gap-3">
-          <Button variant="ghost" size="icon" onClick={() => navigate('/crm/activities')} className="h-9 w-9 rounded-xl border border-border/50">
-            <ArrowLeft className="w-4 h-4" />
+        <div className="flex items-center gap-3.5 pb-2 border-b border-slate-800">
+          <Button variant="ghost" size="icon" onClick={() => navigate('/crm/activities')} className="h-10 w-10 rounded-xl bg-slate-900 border border-slate-800 text-slate-300 hover:text-white hover:bg-slate-800 transition-colors shadow-sm">
+            <ArrowLeft className="w-5 h-5" />
           </Button>
           <div>
-            <h2 className="text-xl font-extrabold text-foreground">{editingId ? 'Edit Activity' : 'Add New Activity'}</h2>
-            <p className="text-xs text-muted-foreground">Fill in all required details below. Fields marked * are mandatory.</p>
+            <h2 className="text-xl font-black text-white flex items-center gap-2">
+              <Activity className="w-5 h-5 text-amber-400" />
+              <span>{editingId ? 'Edit Activity Contract' : 'Add New Activity Experience'}</span>
+            </h2>
+            <p className="text-xs text-slate-400 font-medium mt-0.5">Configure contract rates, excursion details, and multi-tier guest pricing.</p>
           </div>
         </div>
 
@@ -713,67 +725,99 @@ export default function ActivityMaster() {
             {/* Left column — main info */}
             <div className="lg:col-span-2 space-y-5">
               {/* Basic Info Card */}
-              <Card className="border-border/50">
-                <CardHeader className="pb-3 border-b border-border/30">
-                  <CardTitle className="text-sm font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-2">
-                    <Activity className="w-4 h-4 text-amber-500" /> Basic Information
+              <Card className="border border-slate-800 bg-[#0f172a]/95 rounded-2xl shadow-xl">
+                <CardHeader className="p-4 border-b border-slate-800/80">
+                  <CardTitle className="text-xs font-black uppercase tracking-wider text-amber-400 flex items-center gap-2">
+                    <Activity className="w-4 h-4 text-amber-400" /> Basic Experience Details
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="pt-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <CardContent className="p-5 grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="sm:col-span-2 space-y-1.5">
-                    <Label className="text-xs font-semibold">Activity Name *</Label>
+                    <Label className="text-[11px] font-bold text-slate-300">Activity / Excursion Name *</Label>
+                    <Input 
+                      required
+                      value={form.activity_name} 
+                      onChange={e => setForm(f => ({ ...f, activity_name: e.target.value }))} 
+                      placeholder="e.g. Burj Khalifa Observation Deck (124th Floor)" 
+                      className="h-10 bg-slate-950 border-slate-700 text-white placeholder:text-slate-500 rounded-xl text-xs font-medium focus:border-amber-400 focus:ring-1 focus:ring-amber-400" 
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label className="text-[11px] font-bold text-slate-300">Activity Code *</Label>
                     <div className="flex gap-2">
-                      <Input value={form.activity_name} onChange={e => setForm(f => ({ ...f, activity_name: e.target.value }))} placeholder="e.g. Burj Khalifa Observation Deck" className="h-9" />
+                      <Input 
+                        required
+                        value={form.activity_code} 
+                        onChange={e => setForm(f => ({ ...f, activity_code: e.target.value.toUpperCase() }))} 
+                        placeholder="e.g. BUR-KHA-2024" 
+                        className="h-10 bg-slate-950 border-slate-700 text-white placeholder:text-slate-500 rounded-xl text-xs font-mono font-bold focus:border-amber-400 focus:ring-1 focus:ring-amber-400" 
+                      />
+                      <Button type="button" size="sm" onClick={handleAutoCode} className="h-10 px-3.5 text-xs font-black bg-slate-800 hover:bg-slate-700 text-amber-400 border border-slate-700 rounded-xl shrink-0 transition-colors">
+                        Auto
+                      </Button>
                     </div>
                   </div>
                   <div className="space-y-1.5">
-                    <Label className="text-xs font-semibold">Activity Code *</Label>
-                    <div className="flex gap-2">
-                      <Input value={form.activity_code} onChange={e => setForm(f => ({ ...f, activity_code: e.target.value.toUpperCase() }))} placeholder="e.g. BUR-KHA-2024" className="h-9 font-mono" />
-                      <Button type="button" size="sm" variant="outline" onClick={handleAutoCode} className="h-9 px-3 text-xs shrink-0">Auto</Button>
-                    </div>
+                    <Label className="text-[11px] font-bold text-slate-300">Duration</Label>
+                    <Input 
+                      value={form.duration} 
+                      onChange={e => setForm(f => ({ ...f, duration: e.target.value }))} 
+                      placeholder="e.g. 2 Hours, Half Day" 
+                      className="h-10 bg-slate-950 border-slate-700 text-white placeholder:text-slate-500 rounded-xl text-xs focus:border-amber-400 focus:ring-1 focus:ring-amber-400" 
+                    />
                   </div>
                   <div className="space-y-1.5">
-                    <Label className="text-xs font-semibold">Duration</Label>
-                    <Input value={form.duration} onChange={e => setForm(f => ({ ...f, duration: e.target.value }))} placeholder="e.g. 2 Hours, Half Day" className="h-9" />
-                  </div>
-                  <div className="space-y-1.5">
-                    <Label className="text-xs font-semibold">Category *</Label>
+                    <Label className="text-[11px] font-bold text-slate-300">Category *</Label>
                     <Select value={form.activity_category} onValueChange={v => setForm(f => ({ ...f, activity_category: v }))}>
-                      <SelectTrigger className="h-9"><SelectValue placeholder="Select category" /></SelectTrigger>
-                      <SelectContent>
+                      <SelectTrigger className="h-10 bg-slate-950 border-slate-700 text-white rounded-xl text-xs focus:border-amber-400">
+                        <SelectValue placeholder="Select category" />
+                      </SelectTrigger>
+                      <SelectContent className="bg-slate-900 border-slate-700 text-white">
                         {ACTIVITY_CATEGORIES.map(cat => (
-                          <SelectItem key={cat.value} value={cat.value}>{cat.value}</SelectItem>
+                          <SelectItem key={cat.value} value={cat.value} className="text-xs hover:bg-slate-800 focus:bg-slate-800">
+                            {cat.value}
+                          </SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
                   </div>
                   <div className="space-y-1.5">
-                    <Label className="text-xs font-semibold">Activity Type</Label>
+                    <Label className="text-[11px] font-bold text-slate-300">Activity Type</Label>
                     <Select value={form.activity_type} onValueChange={v => setForm(f => ({ ...f, activity_type: v }))}>
-                      <SelectTrigger className="h-9"><SelectValue placeholder="Select type" /></SelectTrigger>
-                      <SelectContent>
-                        {ACTIVITY_TYPES.map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}
+                      <SelectTrigger className="h-10 bg-slate-950 border-slate-700 text-white rounded-xl text-xs focus:border-amber-400">
+                        <SelectValue placeholder="Select type" />
+                      </SelectTrigger>
+                      <SelectContent className="bg-slate-900 border-slate-700 text-white">
+                        {ACTIVITY_TYPES.map(t => (
+                          <SelectItem key={t} value={t} className="text-xs hover:bg-slate-800 focus:bg-slate-800">
+                            {t}
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                   </div>
                   <div className="sm:col-span-2 space-y-1.5">
-                    <Label className="text-xs font-semibold">Cover Image URL</Label>
-                    <Input value={form.image_url} onChange={e => setForm(f => ({ ...f, image_url: e.target.value }))} placeholder="https://images.unsplash.com/photo-..." className="h-9" />
+                    <Label className="text-[11px] font-bold text-slate-300">Cover Image URL</Label>
+                    <Input 
+                      value={form.image_url} 
+                      onChange={e => setForm(f => ({ ...f, image_url: e.target.value }))} 
+                      placeholder="https://images.unsplash.com/photo-..." 
+                      className="h-10 bg-slate-950 border-slate-700 text-white placeholder:text-slate-500 rounded-xl text-xs focus:border-amber-400 focus:ring-1 focus:ring-amber-400" 
+                    />
                   </div>
                 </CardContent>
               </Card>
 
               {/* Location Card */}
-              <Card className="border-border/50">
-                <CardHeader className="pb-3 border-b border-border/30">
-                  <CardTitle className="text-sm font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-2">
-                    <MapPin className="w-4 h-4 text-amber-500" /> Location Details
+              <Card className="border border-slate-800 bg-[#0f172a]/95 rounded-2xl shadow-xl">
+                <CardHeader className="p-4 border-b border-slate-800/80">
+                  <CardTitle className="text-xs font-black uppercase tracking-wider text-amber-400 flex items-center gap-2">
+                    <MapPin className="w-4 h-4 text-amber-400" /> Geography & Destination
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="pt-4 grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <CardContent className="p-5 grid grid-cols-1 sm:grid-cols-3 gap-4">
                   <div className="space-y-1.5">
-                    <Label className="text-xs font-semibold">Country</Label>
+                    <Label className="text-[11px] font-bold text-slate-300">Country</Label>
                     <Select
                       value={form.country_id}
                       onValueChange={v => {
@@ -781,27 +825,31 @@ export default function ActivityMaster() {
                         setForm(f => ({ ...f, country_id: v, state_id: '', city_id: '', gst_percentage: gst }));
                       }}
                     >
-                      <SelectTrigger className="h-9"><SelectValue placeholder="Select country" /></SelectTrigger>
-                      <SelectContent>
-                        {countries.map(c => <SelectItem key={c.id} value={String(c.id)}>{c.country_name}</SelectItem>)}
+                      <SelectTrigger className="h-10 bg-slate-950 border-slate-700 text-white rounded-xl text-xs focus:border-amber-400">
+                        <SelectValue placeholder="Select country" />
+                      </SelectTrigger>
+                      <SelectContent className="bg-slate-900 border-slate-700 text-white max-h-56">
+                        {countries.map(c => <SelectItem key={c.id} value={String(c.id)} className="text-xs hover:bg-slate-800 focus:bg-slate-800">{c.country_name}</SelectItem>)}
                       </SelectContent>
                     </Select>
                   </div>
                   <div className="space-y-1.5">
-                    <Label className="text-xs font-semibold">State</Label>
+                    <Label className="text-[11px] font-bold text-slate-300">State / Region</Label>
                     <Select
                       value={form.state_id}
                       onValueChange={v => setForm(f => ({ ...f, state_id: v, city_id: '' }))}
                       disabled={!form.country_id}
                     >
-                      <SelectTrigger className="h-9"><SelectValue placeholder="Select state" /></SelectTrigger>
-                      <SelectContent>
-                        {filteredStates.map(s => <SelectItem key={s.id} value={String(s.id)}>{s.state_name}</SelectItem>)}
+                      <SelectTrigger className="h-10 bg-slate-950 border-slate-700 text-white rounded-xl text-xs focus:border-amber-400 disabled:opacity-50">
+                        <SelectValue placeholder="Select state" />
+                      </SelectTrigger>
+                      <SelectContent className="bg-slate-900 border-slate-700 text-white max-h-56">
+                        {filteredStates.map(s => <SelectItem key={s.id} value={String(s.id)} className="text-xs hover:bg-slate-800 focus:bg-slate-800">{s.state_name}</SelectItem>)}
                       </SelectContent>
                     </Select>
                   </div>
                   <div className="space-y-1.5">
-                    <Label className="text-xs font-semibold">City</Label>
+                    <Label className="text-[11px] font-bold text-slate-300">City</Label>
                     <Select
                       value={form.city_id}
                       onValueChange={v => {
@@ -816,27 +864,34 @@ export default function ActivityMaster() {
                       }}
                       disabled={!form.state_id && !form.country_id}
                     >
-                      <SelectTrigger className="h-9"><SelectValue placeholder="Select city" /></SelectTrigger>
-                      <SelectContent>
-                        {filteredCities.map(c => <SelectItem key={c.id} value={String(c.id)}>{c.city_name || c.name}</SelectItem>)}
+                      <SelectTrigger className="h-10 bg-slate-950 border-slate-700 text-white rounded-xl text-xs focus:border-amber-400 disabled:opacity-50">
+                        <SelectValue placeholder="Select city" />
+                      </SelectTrigger>
+                      <SelectContent className="bg-slate-900 border-slate-700 text-white max-h-56">
+                        {filteredCities.map(c => <SelectItem key={c.id} value={String(c.id)} className="text-xs hover:bg-slate-800 focus:bg-slate-800">{c.city_name || c.name}</SelectItem>)}
                       </SelectContent>
                     </Select>
                   </div>
                   <div className="sm:col-span-3 space-y-1.5">
-                    <Label className="text-xs font-semibold">Destination / Landmark Label</Label>
-                    <Input value={form.destination} onChange={e => setForm(f => ({ ...f, destination: e.target.value }))} placeholder="e.g. Downtown Dubai" className="h-9" />
+                    <Label className="text-[11px] font-bold text-slate-300">Destination / Landmark Label</Label>
+                    <Input 
+                      value={form.destination} 
+                      onChange={e => setForm(f => ({ ...f, destination: e.target.value }))} 
+                      placeholder="e.g. Downtown Dubai • Near Dubai Mall" 
+                      className="h-10 bg-slate-950 border-slate-700 text-white placeholder:text-slate-500 rounded-xl text-xs focus:border-amber-400 focus:ring-1 focus:ring-amber-400" 
+                    />
                   </div>
                 </CardContent>
               </Card>
 
               {/* Inclusions & Highlights Card */}
-              <Card className="border-border/50">
-                <CardHeader className="pb-3 border-b border-border/30">
-                  <CardTitle className="text-sm font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-2">
-                    <Tag className="w-4 h-4 text-amber-500" /> Highlights & Policy
+              <Card className="border border-slate-800 bg-[#0f172a]/95 rounded-2xl shadow-xl">
+                <CardHeader className="p-4 border-b border-slate-800/80">
+                  <CardTitle className="text-xs font-black uppercase tracking-wider text-amber-400 flex items-center gap-2">
+                    <Tag className="w-4 h-4 text-amber-400" /> Highlights & Policy
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="pt-4 space-y-4">
+                <CardContent className="p-5 space-y-4">
                   <TagInput
                     label="Key Highlights"
                     items={form.highlights}
@@ -849,7 +904,7 @@ export default function ActivityMaster() {
                     items={form.inclusions}
                     onChange={inc => setForm(f => ({ ...f, inclusions: inc }))}
                     placeholder="e.g. Hotel Pickup included"
-                    colorClass="bg-emerald-500/10 text-emerald-600 border-emerald-500/20"
+                    colorClass="bg-emerald-500/10 text-emerald-300 border-emerald-500/30"
                     suggestions={['Hotel Pickup & Drop', 'Activity Equipment', 'Certified Instructor', 'Bottled Drinking Water', 'Safety Gear Included']}
                   />
                   <TagInput
@@ -857,12 +912,18 @@ export default function ActivityMaster() {
                     items={form.exclusions}
                     onChange={exc => setForm(f => ({ ...f, exclusions: exc }))}
                     placeholder="e.g. Gratuities excluded"
-                    colorClass="bg-rose-500/10 text-rose-600 border-rose-500/20"
+                    colorClass="bg-rose-500/10 text-rose-300 border-rose-500/30"
                     suggestions={['Personal Expenses & Tips', 'Meals & Drinks', 'Video / Photography Fee', 'Hotel Transfers', 'Medical Insurance']}
                   />
                   <div className="space-y-1.5 pt-2">
-                    <Label className="text-xs font-semibold">Description</Label>
-                    <Textarea value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} rows={3} placeholder="Full experience description..." />
+                    <Label className="text-[11px] font-bold text-slate-300">Description</Label>
+                    <Textarea 
+                      value={form.description} 
+                      onChange={e => setForm(f => ({ ...f, description: e.target.value }))} 
+                      rows={3} 
+                      placeholder="Full experience description, assembly point instructions, or safety guidelines..." 
+                      className="bg-slate-950 border-slate-700 text-white placeholder:text-slate-500 rounded-xl text-xs focus:border-amber-400 focus:ring-1 focus:ring-amber-400"
+                    />
                   </div>
                 </CardContent>
               </Card>
@@ -870,63 +931,98 @@ export default function ActivityMaster() {
 
             {/* Right column — pricing & actions */}
             <div className="space-y-5">
-              <Card className="border-border/50">
-                <CardHeader className="pb-3 border-b border-border/30">
-                  <CardTitle className="text-sm font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-2">
-                    <IndianRupee className="w-4 h-4 text-amber-500" /> Pricing & Supplier
+              <Card className="border border-slate-800 bg-[#0f172a]/95 rounded-2xl shadow-xl">
+                <CardHeader className="p-4 border-b border-slate-800/80">
+                  <CardTitle className="text-xs font-black uppercase tracking-wider text-amber-400 flex items-center gap-2">
+                    <IndianRupee className="w-4 h-4 text-amber-400" /> Pricing & Supplier
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="pt-4 space-y-4">
+                <CardContent className="p-5 space-y-4">
                   <div className="space-y-1.5">
-                    <Label className="text-xs font-semibold">Supplier Name</Label>
-                    <Input value={form.supplier_name} onChange={e => setForm(f => ({ ...f, supplier_name: e.target.value }))} placeholder="e.g. Rayna Tours" className="h-9" />
+                    <Label className="text-[11px] font-bold text-slate-300">Supplier Name</Label>
+                    <Input 
+                      value={form.supplier_name} 
+                      onChange={e => setForm(f => ({ ...f, supplier_name: e.target.value }))} 
+                      placeholder="e.g. Rayna Tours" 
+                      className="h-10 bg-slate-950 border-slate-700 text-white placeholder:text-slate-500 rounded-xl text-xs focus:border-amber-400 focus:ring-1 focus:ring-amber-400" 
+                    />
                   </div>
                   <div className="grid grid-cols-2 gap-3">
                     <div className="space-y-1.5">
-                      <Label className="text-xs font-semibold">Supplier Cost (₹)</Label>
-                      <Input type="number" value={form.supplier_cost === 0 ? '' : form.supplier_cost} onChange={e => setForm(f => ({ ...f, supplier_cost: e.target.value === '' ? 0 : Number(e.target.value) }))} placeholder="0" className="h-9 font-bold" />
+                      <Label className="text-[11px] font-bold text-slate-300">Supplier Cost (₹)</Label>
+                      <Input 
+                        type="number" 
+                        value={form.supplier_cost === 0 ? '' : form.supplier_cost} 
+                        onChange={e => setForm(f => ({ ...f, supplier_cost: e.target.value === '' ? 0 : Number(e.target.value) }))} 
+                        placeholder="0" 
+                        className="h-10 bg-slate-950 border-slate-700 text-white rounded-xl text-xs font-mono font-bold focus:border-amber-400" 
+                      />
                     </div>
                     <div className="space-y-1.5">
-                      <Label className="text-xs font-semibold">Selling Cost (₹)</Label>
-                      <Input type="number" value={form.selling_cost === 0 ? '' : form.selling_cost} onChange={e => setForm(f => ({ ...f, selling_cost: e.target.value === '' ? 0 : Number(e.target.value) }))} placeholder="0" className="h-9 font-extrabold text-emerald-600" />
+                      <Label className="text-[11px] font-bold text-slate-300">Selling Cost (₹)</Label>
+                      <Input 
+                        type="number" 
+                        value={form.selling_cost === 0 ? '' : form.selling_cost} 
+                        onChange={e => setForm(f => ({ ...f, selling_cost: e.target.value === '' ? 0 : Number(e.target.value) }))} 
+                        placeholder="0" 
+                        className="h-10 bg-slate-950 border-slate-700 text-emerald-400 rounded-xl text-xs font-mono font-black focus:border-emerald-400" 
+                      />
                     </div>
                     <div className="space-y-1.5">
-                      <Label className="text-xs font-semibold">Adult Rate (₹)</Label>
-                      <Input type="number" value={form.adult_cost === 0 ? '' : form.adult_cost} onChange={e => setForm(f => ({ ...f, adult_cost: e.target.value === '' ? 0 : Number(e.target.value) }))} placeholder="0" className="h-9 font-bold" />
+                      <Label className="text-[11px] font-bold text-slate-300">Adult Rate (₹)</Label>
+                      <Input 
+                        type="number" 
+                        value={form.adult_cost === 0 ? '' : form.adult_cost} 
+                        onChange={e => setForm(f => ({ ...f, adult_cost: e.target.value === '' ? 0 : Number(e.target.value) }))} 
+                        placeholder="0" 
+                        className="h-10 bg-slate-950 border-slate-700 text-white rounded-xl text-xs font-mono font-bold focus:border-amber-400" 
+                      />
                     </div>
                     <div className="space-y-1.5">
-                      <Label className="text-xs font-semibold">Child Rate (₹)</Label>
-                      <Input type="number" value={form.child_cost === 0 ? '' : form.child_cost} onChange={e => setForm(f => ({ ...f, child_cost: e.target.value === '' ? 0 : Number(e.target.value) }))} placeholder="0" className="h-9 font-bold" />
+                      <Label className="text-[11px] font-bold text-slate-300">Child Rate (₹)</Label>
+                      <Input 
+                        type="number" 
+                        value={form.child_cost === 0 ? '' : form.child_cost} 
+                        onChange={e => setForm(f => ({ ...f, child_cost: e.target.value === '' ? 0 : Number(e.target.value) }))} 
+                        placeholder="0" 
+                        className="h-10 bg-slate-950 border-slate-700 text-white rounded-xl text-xs font-mono font-bold focus:border-amber-400" 
+                      />
                     </div>
                   </div>
 
-                  <div className="space-y-3 pt-2 border-t border-border/30">
+                  <div className="space-y-3 pt-3 border-t border-slate-800">
                     <div className="flex items-center justify-between">
-                      <Label className="text-xs font-semibold cursor-pointer" htmlFor="gst-inc">GST Included in Selling Price</Label>
+                      <Label className="text-xs font-bold text-slate-200 cursor-pointer" htmlFor="gst-inc">GST Included in Selling Price</Label>
                       <Switch id="gst-inc" checked={form.gst_included} onCheckedChange={chk => setForm(f => ({ ...f, gst_included: chk }))} />
                     </div>
                     <div className="space-y-1.5">
-                      <Label className="text-xs font-semibold">GST Percentage (%)</Label>
-                      <Input type="number" value={form.gst_percentage === 0 ? '' : form.gst_percentage} onChange={e => setForm(f => ({ ...f, gst_percentage: e.target.value === '' ? 0 : Number(e.target.value) }))} placeholder="0" className="h-9 font-bold" />
+                      <Label className="text-[11px] font-bold text-slate-300">GST Percentage (%)</Label>
+                      <Input 
+                        type="number" 
+                        value={form.gst_percentage === 0 ? '' : form.gst_percentage} 
+                        onChange={e => setForm(f => ({ ...f, gst_percentage: e.target.value === '' ? 0 : Number(e.target.value) }))} 
+                        placeholder="0" 
+                        className="h-10 bg-slate-950 border-slate-700 text-white rounded-xl text-xs font-mono font-bold focus:border-amber-400" 
+                      />
                     </div>
                   </div>
 
                   <CostSummary form={form} />
 
-                  <div className="flex items-center justify-between pt-2 border-t border-border/30">
-                    <Label className="text-xs font-semibold cursor-pointer" htmlFor="act-stat">Active Status</Label>
+                  <div className="flex items-center justify-between pt-3 border-t border-slate-800">
+                    <Label className="text-xs font-bold text-slate-200 cursor-pointer" htmlFor="act-stat">Active in Catalog</Label>
                     <Switch id="act-stat" checked={form.active_status} onCheckedChange={chk => setForm(f => ({ ...f, active_status: chk }))} />
                   </div>
                 </CardContent>
               </Card>
 
               {/* Submit Buttons */}
-              <div className="flex flex-col gap-2">
-                <Button type="submit" disabled={saving} className="w-full bg-amber-500 hover:bg-amber-600 text-slate-950 font-extrabold h-10 rounded-xl shadow-xs">
+              <div className="flex flex-col gap-2.5">
+                <Button type="submit" disabled={saving} className="w-full bg-amber-500 hover:bg-amber-600 text-slate-950 font-black h-11 rounded-2xl shadow-lg transition-transform active:scale-[0.98]">
                   {saving ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Save className="w-4 h-4 mr-2" />}
                   {editingId ? 'Update Activity' : 'Save New Activity'}
                 </Button>
-                <Button type="button" variant="outline" onClick={() => navigate('/crm/activities')} className="w-full h-10 rounded-xl">
+                <Button type="button" variant="outline" onClick={() => navigate('/crm/activities')} className="w-full h-10 rounded-2xl bg-slate-900 hover:bg-slate-800 text-slate-300 border-slate-800">
                   Cancel
                 </Button>
               </div>
