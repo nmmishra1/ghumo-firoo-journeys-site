@@ -142,6 +142,26 @@ try {
         if (empty($itin['itinerary_code'])) {
             $itin['itinerary_code'] = 'GFJ-ITN-' . strtoupper(substr(preg_replace('/[^a-zA-Z0-9]/', '', $itin['id'] ?? ''), 0, 6));
         }
+
+        // Harmonize legacy fields with active fields to eliminate misleading nulls:
+        $itin['title'] = $itin['itinerary_name'] ?? $itin['package_name'] ?? 'Tour Itinerary';
+        $itin['markup_percent'] = $itin['markup_percentage'] ?? '0.00';
+        $itin['final_price'] = $itin['final_cost'] ?? '0.00';
+        if (isset($itin['total_cost']) && ((float)$itin['total_cost'] == 0) && ((float)($itin['final_cost'] ?? 0) > 0)) {
+            $itin['total_cost'] = $itin['final_cost'];
+        }
+        if (empty($itin['package_type'])) {
+            $itin['package_type'] = 'Customized Holiday';
+        }
+        if (empty($itin['created_by'])) {
+            $itin['created_by'] = 'System / Sales Agent';
+        }
+
+        // Clean out internal nulls that have no business purpose in the list view
+        unset($itin['destination_city_id']);
+        unset($itin['customer_feedback']);
+        unset($itin['internal_comments']);
+        unset($itin['version_history']);
     }
 
     echo json_encode(['success' => true, 'itineraries' => $itineraries]);
