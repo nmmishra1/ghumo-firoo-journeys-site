@@ -62,11 +62,22 @@ function resolveCityId(PDO $pdo, $cityName, $stateName = null, $countryName = nu
     // 3. Create new city in both tables with matching ID.
     $stateId = 1; 
     if (!empty($stateName)) {
-        $st = $pdo->prepare("SELECT id FROM india_states WHERE state_name LIKE ?");
-        $st->execute(["%$stateName%"]);
-        $stRow = $st->fetch(PDO::FETCH_ASSOC);
-        if ($stRow) {
-            $stateId = (int)$stRow['id'];
+        try {
+            $st = $pdo->prepare("SELECT id FROM states WHERE state_name LIKE ?");
+            $st->execute(["%$stateName%"]);
+            $stRow = $st->fetch(PDO::FETCH_ASSOC);
+            if ($stRow) {
+                $stateId = (int)$stRow['id'];
+            }
+        } catch (Throwable $e) {
+            try {
+                $st = $pdo->prepare("SELECT id FROM india_states WHERE name LIKE ?");
+                $st->execute(["%$stateName%"]);
+                $stRow = $st->fetch(PDO::FETCH_ASSOC);
+                if ($stRow) {
+                    $stateId = (int)$stRow['id'];
+                }
+            } catch (Throwable $e2) {}
         }
     }
 
