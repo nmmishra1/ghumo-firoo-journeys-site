@@ -53,12 +53,14 @@ try {
 
     // 1. Fetch from quotes table
     try {
+        // Automatically prune or exclude abandoned zero-amount test drafts that were created without items
+        $filterSql = "(q.total_amount > 0 OR q.status IN ('Accepted', 'Sent', 'Dispatched') OR (q.cost_breakdown IS NOT NULL AND JSON_LENGTH(COALESCE(JSON_EXTRACT(q.cost_breakdown, '$.items'), '[]')) > 0))";
         if ($leadId > 0) {
             $stmt = $pdo->prepare("
                 SELECT q.*, COALESCE(l.customer_name, 'Valued Client') as customer_name, l.customer_phone
                 FROM quotes q
                 LEFT JOIN leads l ON q.lead_id = l.id
-                WHERE q.lead_id = ? 
+                WHERE q.lead_id = ? AND {$filterSql}
                 ORDER BY q.created_at DESC, q.version_number DESC
             ");
             $stmt->execute([$leadId]);
@@ -67,6 +69,7 @@ try {
                 SELECT q.*, COALESCE(l.customer_name, 'Valued Client') as customer_name, l.customer_phone
                 FROM quotes q
                 LEFT JOIN leads l ON q.lead_id = l.id
+                WHERE {$filterSql}
                 ORDER BY q.created_at DESC, q.version_number DESC
             ");
         }

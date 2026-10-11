@@ -67,10 +67,10 @@ export const quoteService = {
       const rootItem = list[0];
       const lid = Number(latest.lead_id || 0);
       
-      // Generate clean quote number
-      const qNumShort = rootItem.id ? rootItem.id.replace(/[^a-zA-Z0-9]/g, '').slice(-4).toUpperCase() : '001';
+      // Generate clean unique quote number
+      const qNumShort = rootItem.id ? rootItem.id.replace(/[^a-zA-Z0-9]/g, '').slice(-3).toUpperCase() : '001';
       const quoteNum = lid > 0 
-        ? `QT-2026-${String(lid).padStart(3, '0')}`
+        ? `QT-2026-${String(lid).padStart(3, '0')}-${qNumShort}`
         : `QT-2026-${qNumShort}`;
       
       return {

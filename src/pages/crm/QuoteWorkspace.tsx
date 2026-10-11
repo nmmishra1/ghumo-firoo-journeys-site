@@ -223,53 +223,12 @@ export default function QuoteWorkspace({ quotes: propQuotes = [], onCreateRevisi
       setEditItems(initialItems);
       setNewQuoteModalOpen(false);
 
-      // Persist new quote to MySQL database
-      try {
-        const leadIdToSend = selectedLeadId ? Number(selectedLeadId) : 0;
-        const res = await quoteService.saveQuote({
-          id: null,
-          lead_id: leadIdToSend,
-          itinerary_id: null,
-          package_name: (newQuoteData.destination || 'Custom Tour').trim(),
-          total_amount: sellingPrice,
-          customer_name: newQuoteData.customerName.trim(),
-          customer_email: newQuoteData.customerEmail.trim(),
-          customer_phone: newQuoteData.customerPhone.trim(),
-          cost_breakdown: {
-            hotels: totalCost,
-            transport: 0,
-            sightseeing: 0,
-            // @ts-ignore
-            items: initialItems,
-            margin: marginVal
-          },
-          inclusions: [],
-          exclusions: [],
-          validity_days: 7,
-          notes: leadIdToSend > 0
-            ? `Quote Linked to Existing Lead #${leadIdToSend} (${newQuoteData.customerName.trim()})`
-            : `Direct Quote Created for ${newQuoteData.customerName.trim()} | Email: ${newQuoteData.customerEmail.trim()} | Phone: ${newQuoteData.customerPhone.trim()}`
-        });
-
-        if (res && res.quote_id) {
-          newVersion.id = res.quote_id;
-          newQuoteObj.id = res.quote_id;
-          if (res.lead_id) {
-            newQuoteObj.leadId = res.lead_id;
-          }
-          setVersionA(res.quote_id);
-        }
-        if (onRefresh) onRefresh();
-      } catch (err: any) {
-        console.warn("Could not save new quote to backend:", err);
-      }
-
       setNewQuoteData({ customerName: '', customerEmail: '', customerPhone: '', destination: 'Kashmir', margin: 15 });
 
       toast({
-        title: "New Quote Created",
-        description: `Created quote ${newQuoteNum} for ${newQuoteObj.customerName}.`,
-        className: 'bg-slate-900 text-white border-emerald-500/40'
+        title: "Draft Quote Loaded in Workspace",
+        description: `Loaded quote ${newQuoteNum} for ${newQuoteObj.customerName}. Click 'Save Changes' to commit to database.`,
+        className: 'bg-slate-900 text-white border-amber-500/40'
       });
     } catch (error: any) {
       console.error("Error creating new quote:", error);
@@ -373,49 +332,10 @@ export default function QuoteWorkspace({ quotes: propQuotes = [], onCreateRevisi
       setEditItems(items);
       setNewQuoteModalOpen(false);
 
-      try {
-        const leadIdToSend = selectedLeadId ? Number(selectedLeadId) : 0;
-        const res = await quoteService.saveQuote({
-          id: null,
-          lead_id: leadIdToSend,
-          itinerary_id: String(pkg.id || ''),
-          package_name: (pkg.title || pkg.name || 'Tour Package').trim(),
-          total_amount: sellingPrice,
-          customer_name: newQuoteData.customerName.trim(),
-          customer_email: newQuoteData.customerEmail.trim(),
-          customer_phone: newQuoteData.customerPhone.trim(),
-          cost_breakdown: {
-            hotels: Math.round(basePrice * 0.5),
-            transport: Math.round(basePrice * 0.3),
-            sightseeing: Math.round(basePrice * 0.2),
-            items: items,
-            margin: marginVal
-          },
-          inclusions: pkg.inclusions ? (Array.isArray(pkg.inclusions) ? pkg.inclusions : [pkg.inclusions]) : [],
-          exclusions: pkg.exclusions ? (Array.isArray(pkg.exclusions) ? pkg.exclusions : [pkg.exclusions]) : [],
-          validity_days: 7,
-          notes: leadIdToSend > 0
-            ? `Quote Linked to Existing Lead #${leadIdToSend} from Package Master "${pkg.title || pkg.name}"`
-            : `Quote from Package Master "${pkg.title || pkg.name}" for ${newQuoteData.customerName.trim()}`
-        });
-
-        if (res && res.quote_id) {
-          newVersion.id = res.quote_id;
-          newQuoteObj.id = res.quote_id;
-          if (res.lead_id) {
-            newQuoteObj.leadId = res.lead_id;
-          }
-          setVersionA(res.quote_id);
-        }
-        if (onRefresh) onRefresh();
-      } catch (err: any) {
-        console.warn("Could not save package quote:", err);
-      }
-
       toast({
-        title: "Quote Created from Master Package",
-        description: `Imported "${pkg.title || pkg.name}" for ${newQuoteData.customerName.trim()}.`,
-        className: 'bg-slate-900 text-white border-emerald-500/40'
+        title: "Draft Package Quote Loaded",
+        description: `Imported "${pkg.title || pkg.name}" for ${newQuoteData.customerName.trim()}. Review items and click 'Save Changes' to commit.`,
+        className: 'bg-slate-900 text-white border-amber-500/40'
       });
     } catch (err: any) {
       toast({
@@ -590,49 +510,10 @@ export default function QuoteWorkspace({ quotes: propQuotes = [], onCreateRevisi
       setEditItems(items);
       setEditMargin(margin);
 
-      // Persist newly generated AI Quote to MySQL database
-      const leadIdToSend = selectedLeadId ? Number(selectedLeadId) : 0;
-      quoteService.saveQuote({
-        id: null,
-        lead_id: leadIdToSend,
-        itinerary_id: null,
-        package_name: (aiResult.destination || aiFormData.destination).trim(),
-        total_amount: sellingPrice,
-        customer_name: clientName,
-        customer_email: aiFormData.customerEmail?.trim() || '',
-        customer_phone: aiFormData.customerPhone?.trim() || '',
-        cost_breakdown: {
-          hotels: totalCost,
-          transport: 0,
-          sightseeing: 0,
-          // @ts-ignore
-          items: items,
-          itineraryDays: aiResult.day_by_day as any,
-          margin: margin
-        },
-        inclusions: [],
-        exclusions: [],
-        validity_days: 7,
-        notes: leadIdToSend > 0
-          ? `AI Proposal Linked to Existing Lead #${leadIdToSend} (${clientName})`
-          : `AI Generated Proposal for ${clientName}`
-      }).then(res => {
-        if (res && res.quote_id) {
-          newVersion.id = res.quote_id;
-          newQuoteObj.id = res.quote_id;
-          if (res.lead_id) {
-            newQuoteObj.leadId = res.lead_id;
-          }
-        }
-        if (onRefresh) onRefresh();
-      }).catch(err => {
-        console.warn("Could not save AI quote to backend:", err);
-      });
-
       toast({
-        title: "✨ New AI Quote Created",
-        description: `Created proposal ${newQuoteNum} for ${clientName} (${items.length} line items).`,
-        className: 'bg-slate-900 text-white border-emerald-500/40'
+        title: "✨ AI Itinerary Generated & Loaded as Draft",
+        description: `Loaded ${items.length} line items and Day 1–${aiResult.total_days} plan for ${clientName}. Review and click 'Save Changes' to commit.`,
+        className: 'bg-slate-900 text-white border-amber-500/40'
       });
     }
 

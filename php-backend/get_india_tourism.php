@@ -461,6 +461,29 @@ try {
         // 2. Fetch Sightseeing Spots
         $sightseeingSpots = [];
         try {
+            $sgWhereClauses = [
+                "(:cId IS NOT NULL AND sg.city_id = :cId)",
+                "LOWER(TRIM(sg.destination)) = :qExact",
+                "LOWER(TRIM(sg.destination)) LIKE :qLike",
+                "LOWER(TRIM(COALESCE(c.city_name, c.name, ''))) LIKE :qLike",
+                "LOWER(TRIM(COALESCE(s.state_name, ''))) LIKE :qLike"
+            ];
+            $sgBindings = [
+                ':cId' => $cityId,
+                ':qName' => $cityName ?: $destQuery,
+                ':qExact' => $queryText,
+                ':qLike' => $queryTerm
+            ];
+
+            if (!empty($expandedSearchTerms)) {
+                foreach ($expandedSearchTerms as $idx => $t) {
+                    $key = ":altSg_{$idx}";
+                    $sgWhereClauses[] = "LOWER(TRIM(sg.destination)) LIKE {$key} OR LOWER(TRIM(COALESCE(c.city_name, c.name, ''))) LIKE {$key} OR LOWER(TRIM(sg.sightseeing_name)) LIKE {$key}";
+                    $sgBindings[$key] = "%{$t}%";
+                }
+            }
+            $sgWhereStr = implode(' OR ', $sgWhereClauses);
+
             $sql = "
                 SELECT sg.id, sg.sightseeing_name as name, 
                        COALESCE(c.city_name, c.name, sg.destination, :qName) as city,
@@ -471,21 +494,12 @@ try {
                 FROM sightseeings sg
                 LEFT JOIN cities c ON sg.city_id = c.id
                 LEFT JOIN states s ON (sg.state_id = s.id OR c.state_id = s.id)
-                WHERE (:cId IS NOT NULL AND sg.city_id = :cId)
-                   OR LOWER(TRIM(sg.destination)) = :qExact
-                   OR LOWER(TRIM(sg.destination)) LIKE :qLike
-                   OR LOWER(TRIM(COALESCE(c.city_name, c.name, ''))) LIKE :qLike
-                   OR LOWER(TRIM(COALESCE(s.state_name, ''))) LIKE :qLike
+                WHERE ({$sgWhereStr})
                 ORDER BY sg.sightseeing_name ASC
                 LIMIT 50
             ";
             $sStmt = $pdo->prepare($sql);
-            $sStmt->execute([
-                ':cId' => $cityId,
-                ':qName' => $cityName ?: $destQuery,
-                ':qExact' => $queryText,
-                ':qLike' => $queryTerm
-            ]);
+            $sStmt->execute($sgBindings);
             $sightseeingSpots = $sStmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (Exception $e) {}
 
@@ -501,6 +515,29 @@ try {
         // 3. Fetch Activities
         $activities = [];
         try {
+            $actWhereClauses = [
+                "(:cId IS NOT NULL AND ac.city_id = :cId)",
+                "LOWER(TRIM(ac.destination)) = :qExact",
+                "LOWER(TRIM(ac.destination)) LIKE :qLike",
+                "LOWER(TRIM(COALESCE(c.city_name, c.name, ''))) LIKE :qLike",
+                "LOWER(TRIM(COALESCE(s.state_name, ''))) LIKE :qLike"
+            ];
+            $actBindings = [
+                ':cId' => $cityId,
+                ':qName' => $cityName ?: $destQuery,
+                ':qExact' => $queryText,
+                ':qLike' => $queryTerm
+            ];
+
+            if (!empty($expandedSearchTerms)) {
+                foreach ($expandedSearchTerms as $idx => $t) {
+                    $key = ":altAct_{$idx}";
+                    $actWhereClauses[] = "LOWER(TRIM(ac.destination)) LIKE {$key} OR LOWER(TRIM(COALESCE(c.city_name, c.name, ''))) LIKE {$key} OR LOWER(TRIM(ac.activity_name)) LIKE {$key}";
+                    $actBindings[$key] = "%{$t}%";
+                }
+            }
+            $actWhereStr = implode(' OR ', $actWhereClauses);
+
             $sql = "
                 SELECT ac.id, ac.activity_name as name, 
                        COALESCE(c.city_name, c.name, ac.destination, :qName) as city,
@@ -511,21 +548,12 @@ try {
                 FROM activities ac
                 LEFT JOIN cities c ON ac.city_id = c.id
                 LEFT JOIN states s ON (ac.state_id = s.id OR c.state_id = s.id)
-                WHERE (:cId IS NOT NULL AND ac.city_id = :cId)
-                   OR LOWER(TRIM(ac.destination)) = :qExact
-                   OR LOWER(TRIM(ac.destination)) LIKE :qLike
-                   OR LOWER(TRIM(COALESCE(c.city_name, c.name, ''))) LIKE :qLike
-                   OR LOWER(TRIM(COALESCE(s.state_name, ''))) LIKE :qLike
+                WHERE ({$actWhereStr})
                 ORDER BY ac.activity_name ASC
                 LIMIT 50
             ";
             $aStmt = $pdo->prepare($sql);
-            $aStmt->execute([
-                ':cId' => $cityId,
-                ':qName' => $cityName ?: $destQuery,
-                ':qExact' => $queryText,
-                ':qLike' => $queryTerm
-            ]);
+            $aStmt->execute($actBindings);
             $activities = $aStmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (Exception $e) {}
 
