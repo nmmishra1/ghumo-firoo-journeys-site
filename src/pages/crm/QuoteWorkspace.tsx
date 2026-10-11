@@ -16,6 +16,8 @@ import { quoteService, QuoteHeader, QuoteVersion, QuoteItem } from '@/services/q
 import { itineraryService, GeneratedAIItineraryResult } from '@/services/itineraryService';
 import { leadService, Lead } from '@/services/leadService';
 import { getContractedHotelsMasterList } from '@/data/contractedHotelsDataLoader';
+import { SIGHTSEEING_SPOTS } from '@/data/sightseeingData';
+import { MASTER_DESTINATIONS } from '@/data/masterDestinations';
 
 const API_BASE = import.meta.env.VITE_PHP_BASE_URL || import.meta.env.VITE_API_BASE_URL || '/php-backend';
 
@@ -635,21 +637,138 @@ export default function QuoteWorkspace({ quotes: propQuotes = [], onCreateRevisi
     contracted_hotels: any[];
   } | null>(null);
   const [drawerTab, setDrawerTab] = useState<'sightseeing' | 'activities' | 'hotels' | 'ai_planner'>('sightseeing');
+  const [selectedDrawerCity, setSelectedDrawerCity] = useState<string>('All');
+
+  // Edit Line Item Modal state (allows editing hotel name, room plan, qty, and rate)
+  const [editingItemIndex, setEditingItemIndex] = useState<number | null>(null);
+  const [editingItemData, setEditingItemData] = useState<QuoteItem | null>(null);
 
   const fetchDestData = async (query: string) => {
     if (!query.trim()) return;
     setDestDrawerLoading(true);
+    setSelectedDrawerCity('All');
     try {
-      const res = await fetch(`${API_BASE}/get_india_tourism.php?action=ai_context&destination=${encodeURIComponent(query)}`);
-      const data = await res.json();
-      if (data.success) {
-        setDestData({
-          destination: data.destination || query,
-          sightseeing_spots: data.sightseeing_spots || [],
-          activities: data.activities || [],
-          contracted_hotels: data.contracted_hotels || []
-        });
+      let apiSightseeing: any[] = [];
+      let apiActivities: any[] = [];
+      let apiHotels: any[] = [];
+
+      try {
+        const res = await fetch(`${API_BASE}/get_india_tourism.php?action=ai_context&destination=${encodeURIComponent(query)}`);
+        const data = await res.json();
+        if (data.success) {
+          apiSightseeing = data.sightseeing_spots || [];
+          apiActivities = data.activities || [];
+          apiHotels = data.contracted_hotels || [];
+        }
+      } catch (err) {
+        console.warn("PHP Tourism API error, utilizing client-side master registries:", err);
       }
+
+      const qLower = query.toLowerCase().trim();
+      const matchedCircuit = STANDARD_CIRCUITS.find(c =>
+        c.aliases.some(alias => qLower.includes(alias)) || c.primaryCity.toLowerCase() === qLower
+      );
+      const targetKeywords = matchedCircuit 
+        ? matchedCircuit.aliases.map(a => a.toLowerCase())
+        : [qLower];
+
+      // 1. Hybrid Sightseeing: If API empty, harvest from SIGHTSEEING_SPOTS & MASTER_DESTINATIONS
+      let resolvedSightseeing = [...apiSightseeing];
+      if (resolvedSightseeing.length === 0) {
+        const localMatches = SIGHTSEEING_SPOTS.filter(s => {
+          const sDest = s.destination.toLowerCase();
+          const sName = s.name.toLowerCase();
+          return targetKeywords.some(k => sDest.includes(k) || sName.includes(k));
+        }).map((s, idx) => ({
+          id: `local_sg_${idx}`,
+          name: s.name,
+          city: s.destination.split(',')[0].trim(),
+          recommended_duration_hours: s.duration || '2-3 hrs',
+          entry_fee_estimate: 0,
+          category: s.category || 'Sightseeing',
+          description: s.summary || s.description
+        }));
+
+        resolvedSightseeing = localMatches;
+
+        if (resolvedSightseeing.length === 0) {
+          MASTER_DESTINATIONS.forEach(md => {
+            const mCity = md.city.toLowerCase();
+            const mState = md.state.toLowerCase();
+            if (targetKeywords.some(k => mCity.includes(k) || mState.includes(k))) {
+              (md.popular_attractions || []).forEach((att, aIdx) => {
+                resolvedSightseeing.push({
+                  id: `md_att_${md.city}_${aIdx}`,
+                  name: att,
+                  city: md.city,
+                  recommended_duration_hours: 2,
+                  entry_fee_estimate: 0,
+                  category: md.destination_group || 'Attraction',
+                  description: `Must-visit tourist highlight in ${md.city}, ${md.state}.`
+                });
+              });
+            }
+          });
+        }
+      }
+
+      // 2. Hybrid Activities: If API empty, derive from SIGHTSEEING_SPOTS adventure items or defaults
+      let resolvedActivities = [...apiActivities];
+      if (resolvedActivities.length === 0) {
+        const adventureMatches = SIGHTSEEING_SPOTS.filter(s => {
+          const sDest = s.destination.toLowerCase();
+          const sCat = s.category.toLowerCase();
+          return targetKeywords.some(k => sDest.includes(k)) && 
+                 (sCat.includes('adventure') || sCat.includes('safari') || sCat.includes('water') || sCat.includes('snow') || sCat.includes('cable car') || sCat.includes('boating') || sCat.includes('trek'));
+        }).map((s, idx) => ({
+          id: `local_act_${idx}`,
+          name: s.name,
+          city: s.destination.split(',')[0].trim(),
+          duration_hours: s.duration || '2 hrs',
+          average_cost: s.packages?.[0]?.price ? Math.min(2500, Math.round(s.packages[0].price * 0.1)) : 1000,
+          category: s.category,
+          description: s.summary || s.description
+        }));
+        resolvedActivities = adventureMatches;
+      }
+
+      // 3. Multi-City Complete Hotel Catalog: pull ALL contracted properties from getContractedHotelsMasterList()
+      const allMasterHotels = getContractedHotelsMasterList();
+      const matchedMasterHotels = allMasterHotels.filter(h => {
+        const hCity = (h.city || '').toLowerCase();
+        const hState = (h.state || '').toLowerCase();
+        const hName = (h.hotel_name || '').toLowerCase();
+        return targetKeywords.some(k => hCity.includes(k) || hState.includes(k) || hName.includes(k));
+      }).map(h => ({
+        id: h.id,
+        hotel_name: h.hotel_name,
+        star_rating: h.star_rating || 4,
+        city: h.city,
+        room_type: h.cat_or_room || 'Deluxe Room',
+        meal_plan: 'CP Plan (Breakfast)',
+        contract_rate: h.b2b_cost || 3500
+      }));
+
+      // Combine API hotels with Master contracted hotels without duplicate names
+      const hotelMap = new Map<string, any>();
+      apiHotels.forEach(h => {
+        hotelMap.set(h.hotel_name.toLowerCase().trim(), h);
+      });
+      matchedMasterHotels.forEach(h => {
+        const key = h.hotel_name.toLowerCase().trim();
+        if (!hotelMap.has(key)) {
+          hotelMap.set(key, h);
+        }
+      });
+
+      const combinedHotels = Array.from(hotelMap.values());
+
+      setDestData({
+        destination: query,
+        sightseeing_spots: resolvedSightseeing,
+        activities: resolvedActivities,
+        contracted_hotels: combinedHotels
+      });
     } catch (e) {
       console.error("Failed to load destination context:", e);
     } finally {
@@ -816,18 +935,20 @@ export default function QuoteWorkspace({ quotes: propQuotes = [], onCreateRevisi
   };
 
   const handleAddHotelToQuote = (hotel: any) => {
+    const rate = Number(hotel.contract_rate) || 3500;
+    const roomPlan = hotel.room_type || 'Deluxe Room • CP Plan (Breakfast Included)';
     const newItem: QuoteItem = {
       type: 'hotel',
-      name: `${hotel.hotel_name} (${hotel.star_rating || 4}★)`,
-      detail: `City: ${hotel.city || 'Standard'} — Standard Room CP Plan`,
+      name: `${hotel.hotel_name} [${hotel.city || 'Stay'}] (${hotel.star_rating || 4}★)`,
+      detail: `${roomPlan} • 1 Night Stay`,
       qty: 1,
-      rate: 3500,
-      total: 3500
+      rate: rate,
+      total: rate
     };
     appendItemToActiveVersion(newItem);
     toast({
-      title: "Added to Proposal",
-      description: `Added hotel "${hotel.hotel_name}" to line items.`,
+      title: "Added Hotel to Proposal",
+      description: `Added "${hotel.hotel_name}" (₹${rate.toLocaleString('en-IN')}) to line items.`,
       className: 'bg-slate-900 text-white border-amber-500/40'
     });
   };
@@ -1629,6 +1750,7 @@ export default function QuoteWorkspace({ quotes: propQuotes = [], onCreateRevisi
                               <TableHead className="text-xs font-black text-slate-300 uppercase tracking-wider text-center">Qty</TableHead>
                               <TableHead className="text-xs font-black text-slate-300 uppercase tracking-wider text-right">Unit Rate</TableHead>
                               <TableHead className="text-xs font-black text-slate-300 uppercase tracking-wider text-right">Total Net</TableHead>
+                              <TableHead className="text-xs font-black text-slate-300 uppercase tracking-wider text-right w-24">Actions</TableHead>
                             </TableRow>
                           </TableHeader>
                           <TableBody>
@@ -1653,6 +1775,42 @@ export default function QuoteWorkspace({ quotes: propQuotes = [], onCreateRevisi
                                 </TableCell>
                                 <TableCell className="text-right font-black text-xs text-amber-400">
                                   {item.total > 0 ? `₹${item.total.toLocaleString('en-IN')}` : <span className="text-emerald-400 font-extrabold uppercase text-[10px] bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">Included</span>}
+                                </TableCell>
+                                <TableCell className="text-right">
+                                  <div className="flex items-center justify-end gap-1">
+                                    <Button
+                                      size="icon"
+                                      variant="ghost"
+                                      onClick={() => {
+                                        setEditingItemIndex(idx);
+                                        setEditingItemData({ ...item });
+                                      }}
+                                      className="h-7 w-7 text-slate-400 hover:text-amber-400 hover:bg-slate-800 rounded-lg"
+                                      title="Edit Item (Rename hotel, change nights or rate)"
+                                    >
+                                      <Edit className="w-3.5 h-3.5" />
+                                    </Button>
+                                    <Button
+                                      size="icon"
+                                      variant="ghost"
+                                      onClick={() => {
+                                        if (!selectedQuote || !vA) return;
+                                        const newItems = vA.items.filter((_, i) => i !== idx);
+                                        const newCost = newItems.reduce((s, it) => s + it.total, 0);
+                                        const newSell = Math.round(newCost * (1 + (vA.margin / 100)));
+                                        const updatedVers = selectedQuote.versions.map(v => v.id === vA.id ? { ...v, items: newItems, totalCost: newCost, sellingPrice: newSell } : v);
+                                        const updatedQ = { ...selectedQuote, versions: updatedVers };
+                                        setSelectedQuote(updatedQ);
+                                        setQuotes(prev => prev.map(q => q.id === selectedQuote.id ? updatedQ : q));
+                                        setEditItems(newItems);
+                                        toast({ title: "Item Removed", description: `Removed "${item.name}" from quote.` });
+                                      }}
+                                      className="h-7 w-7 text-slate-400 hover:text-rose-400 hover:bg-rose-950/30 rounded-lg"
+                                      title="Delete Item"
+                                    >
+                                      <Trash2 className="w-3.5 h-3.5" />
+                                    </Button>
+                                  </div>
                                 </TableCell>
                               </TableRow>
                             ))}
@@ -2014,27 +2172,79 @@ export default function QuoteWorkspace({ quotes: propQuotes = [], onCreateRevisi
 
                   {drawerTab === 'hotels' && (
                     <div className="space-y-3">
+                      {/* Multi-City Filter Bar */}
+                      {(() => {
+                        const hotels = destData?.contracted_hotels || [];
+                        const cities = Array.from(new Set(hotels.map(h => (h.city || '').trim()).filter(Boolean)));
+                        if (cities.length <= 1) return null;
+                        return (
+                          <div className="flex items-center gap-1.5 flex-wrap p-2 bg-[#101625] rounded-xl border border-slate-800">
+                            <span className="text-[10px] uppercase font-black text-slate-400 mr-1">Filter City:</span>
+                            <button
+                              type="button"
+                              onClick={() => setSelectedDrawerCity('All')}
+                              className={`text-[10px] px-2.5 py-1 rounded-lg font-bold transition-colors ${
+                                selectedDrawerCity === 'All'
+                                  ? 'bg-amber-500 text-slate-950 shadow-sm'
+                                  : 'bg-slate-800 hover:bg-slate-700 text-slate-300'
+                              }`}
+                            >
+                              All Cities ({hotels.length})
+                            </button>
+                            {cities.map(cityName => {
+                              const count = hotels.filter(h => (h.city || '').trim() === cityName).length;
+                              return (
+                                <button
+                                  key={cityName}
+                                  type="button"
+                                  onClick={() => setSelectedDrawerCity(cityName)}
+                                  className={`text-[10px] px-2.5 py-1 rounded-lg font-bold transition-colors ${
+                                    selectedDrawerCity === cityName
+                                      ? 'bg-amber-500 text-slate-950 shadow-sm'
+                                      : 'bg-slate-800 hover:bg-slate-700 text-slate-300'
+                                  }`}
+                                >
+                                  {cityName} ({count})
+                                </button>
+                              );
+                            })}
+                          </div>
+                        );
+                      })()}
+
                       {(!destData?.contracted_hotels || destData.contracted_hotels.length === 0) ? (
                         <div className="text-center py-12 text-slate-400 text-xs font-bold">No contracted hotels found for "{destDrawerQuery}".</div>
                       ) : (
-                        destData.contracted_hotels.map((hotel, i) => (
-                          <div key={i} className="p-3 bg-[#161d2f] border border-slate-800 rounded-xl flex justify-between items-center hover:border-slate-700 transition-all">
-                            <div className="space-y-1">
-                              <div className="flex items-center gap-2">
-                                <span className="font-extrabold text-xs text-white">{hotel.hotel_name}</span>
-                                <span className="text-amber-400 text-[11px] font-black">{hotel.star_rating || 4}★</span>
+                        destData.contracted_hotels
+                          .filter(h => selectedDrawerCity === 'All' || (h.city || '').trim() === selectedDrawerCity)
+                          .map((hotel, i) => (
+                            <div key={i} className="p-3 bg-[#161d2f] border border-slate-800 rounded-xl flex justify-between items-center hover:border-slate-700 transition-all">
+                              <div className="space-y-1">
+                                <div className="flex items-center gap-2">
+                                  <span className="font-extrabold text-xs text-white">{hotel.hotel_name}</span>
+                                  <Badge className="bg-amber-400/10 text-amber-400 border border-amber-400/30 text-[10px] font-black px-1.5 py-0">
+                                    {hotel.star_rating || 4}★
+                                  </Badge>
+                                </div>
+                                <div className="flex items-center gap-2 text-[11px] text-slate-400 font-medium">
+                                  <Badge variant="outline" className="border-slate-700 text-slate-300 text-[9px] px-1.5 py-0">
+                                    📍 {hotel.city || destDrawerQuery}
+                                  </Badge>
+                                  <span>• {hotel.room_type || 'Deluxe Room'}</span>
+                                  {hotel.contract_rate && (
+                                    <span className="text-emerald-400 font-bold">• ₹{Number(hotel.contract_rate).toLocaleString('en-IN')}/night</span>
+                                  )}
+                                </div>
                               </div>
-                              <p className="text-[11px] text-slate-400">{hotel.city || destDrawerQuery} | Contracted Partner</p>
+                              <Button 
+                                size="sm" 
+                                onClick={() => handleAddHotelToQuote(hotel)}
+                                className="bg-amber-500 hover:bg-amber-600 text-slate-950 font-extrabold text-[11px] h-7 px-2.5 rounded-lg shadow-xs"
+                              >
+                                <Plus className="w-3.5 h-3.5 mr-1" /> Add Hotel
+                              </Button>
                             </div>
-                            <Button 
-                              size="sm" 
-                              onClick={() => handleAddHotelToQuote(hotel)}
-                              className="bg-amber-500 hover:bg-amber-600 text-slate-950 font-extrabold text-[11px] h-7 px-2.5 rounded-lg shadow-xs"
-                            >
-                              <Plus className="w-3.5 h-3.5 mr-1" /> Add Hotel
-                            </Button>
-                          </div>
-                        ))
+                          ))
                       )}
                     </div>
                   )}
@@ -2892,6 +3102,149 @@ export default function QuoteWorkspace({ quotes: propQuotes = [], onCreateRevisi
               </Button>
               <Button onClick={handleAddCustomHotelStay} size="sm" className="bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold text-xs rounded-xl h-9 px-4">
                 Add Hotel Stay
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* EDIT LINE ITEM / HOTEL MODAL */}
+      {editingItemIndex !== null && editingItemData && selectedQuote && vA && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 z-50 animate-fadeIn">
+          <div className="bg-[#141b2d] border border-slate-700/80 rounded-2xl p-5 max-w-md w-full shadow-2xl text-slate-100 space-y-4">
+            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+              <div className="flex items-center gap-2">
+                <div className="p-2 bg-amber-500/20 text-amber-400 rounded-xl border border-amber-500/30">
+                  <Edit className="w-4 h-4" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-black text-white">Edit Proposal Line Item</h3>
+                  <p className="text-[11px] text-slate-400 font-medium">Rename hotel/item, adjust nights or rates</p>
+                </div>
+              </div>
+              <Button 
+                size="icon" 
+                variant="ghost" 
+                onClick={() => { setEditingItemIndex(null); setEditingItemData(null); }} 
+                className="text-slate-400 hover:text-white rounded-xl"
+              >
+                <X className="w-5 h-5" />
+              </Button>
+            </div>
+
+            <div className="space-y-3">
+              <div className="space-y-1">
+                <label className="text-xs font-extrabold uppercase text-slate-300">Category / Type</label>
+                <Select
+                  value={editingItemData.type}
+                  onValueChange={(val: any) => setEditingItemData({ ...editingItemData, type: val })}
+                >
+                  <SelectTrigger className="h-9 text-xs bg-slate-900 border-slate-700 text-white rounded-xl">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent className="bg-slate-900 border-slate-700 text-white">
+                    <SelectItem value="hotel">🏨 Hotel / Stay</SelectItem>
+                    <SelectItem value="transfer">🚗 Transfer / Cab</SelectItem>
+                    <SelectItem value="excursion">📸 Sightseeing / Excursion</SelectItem>
+                    <SelectItem value="flight">✈️ Flight</SelectItem>
+                    <SelectItem value="meal">🍽️ Meal / Dining</SelectItem>
+                    <SelectItem value="other">📦 Other Component</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-xs font-extrabold uppercase text-slate-300">Item / Hotel Name *</label>
+                <Input
+                  value={editingItemData.name}
+                  onChange={(e) => setEditingItemData({ ...editingItemData, name: e.target.value })}
+                  placeholder="e.g. The Lalit Grand Palace [Srinagar] (5★)"
+                  className="h-9 text-xs bg-slate-900 border-slate-700 text-white rounded-xl"
+                />
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-xs font-extrabold uppercase text-slate-300">Details / Room Plan</label>
+                <Input
+                  value={editingItemData.detail}
+                  onChange={(e) => setEditingItemData({ ...editingItemData, detail: e.target.value })}
+                  placeholder="e.g. Deluxe Room • CP Plan (Breakfast Included)"
+                  className="h-9 text-xs bg-slate-900 border-slate-700 text-white rounded-xl"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-2">
+                <div className="space-y-1">
+                  <label className="text-xs font-extrabold uppercase text-slate-300">Quantity (Nights/Days)</label>
+                  <Input
+                    type="number"
+                    min={1}
+                    value={editingItemData.qty}
+                    onChange={(e) => {
+                      const q = Number(e.target.value);
+                      setEditingItemData({ ...editingItemData, qty: q, total: q * editingItemData.rate });
+                    }}
+                    className="h-9 text-xs bg-slate-900 border-slate-700 text-white rounded-xl"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-xs font-extrabold uppercase text-slate-300">Unit Rate (₹)</label>
+                  <Input
+                    type="number"
+                    min={0}
+                    value={editingItemData.rate}
+                    onChange={(e) => {
+                      const r = Number(e.target.value);
+                      setEditingItemData({ ...editingItemData, rate: r, total: editingItemData.qty * r });
+                    }}
+                    className="h-9 text-xs bg-slate-900 border-slate-700 text-white rounded-xl"
+                  />
+                </div>
+              </div>
+
+              <div className="p-3 bg-slate-900/90 border border-slate-800 rounded-xl flex items-center justify-between">
+                <span className="text-xs text-slate-400 font-bold">Updated Line Item Total:</span>
+                <span className="text-sm font-black text-amber-400">₹{(editingItemData.qty * editingItemData.rate).toLocaleString('en-IN')}</span>
+              </div>
+            </div>
+
+            <div className="flex gap-2 justify-end pt-2 border-t border-slate-800">
+              <Button 
+                type="button" 
+                variant="ghost" 
+                size="sm" 
+                onClick={() => { setEditingItemIndex(null); setEditingItemData(null); }} 
+                className="text-xs text-slate-400 rounded-xl"
+              >
+                Cancel
+              </Button>
+              <Button 
+                onClick={() => {
+                  if (editingItemIndex === null || !editingItemData) return;
+                  const newItems = [...vA.items];
+                  newItems[editingItemIndex] = {
+                    ...editingItemData,
+                    total: editingItemData.qty * editingItemData.rate
+                  };
+                  const newCost = newItems.reduce((s, it) => s + it.total, 0);
+                  const newSell = Math.round(newCost * (1 + (vA.margin / 100)));
+                  const updatedVers = selectedQuote.versions.map(v => v.id === vA.id ? { ...v, items: newItems, totalCost: newCost, sellingPrice: newSell } : v);
+                  const updatedQ = { ...selectedQuote, versions: updatedVers };
+                  setSelectedQuote(updatedQ);
+                  setQuotes(prev => prev.map(q => q.id === selectedQuote.id ? updatedQ : q));
+                  setEditItems(newItems);
+                  setEditingItemIndex(null);
+                  setEditingItemData(null);
+                  toast({
+                    title: "Item Updated",
+                    description: `Updated "${editingItemData.name}" in proposal.`,
+                    className: 'bg-slate-900 text-white border-emerald-500/40'
+                  });
+                }} 
+                size="sm" 
+                className="bg-amber-500 hover:bg-amber-600 text-slate-950 font-black text-xs rounded-xl h-9 px-4"
+              >
+                Save Item Changes
               </Button>
             </div>
           </div>

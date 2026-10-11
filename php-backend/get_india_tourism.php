@@ -512,6 +512,47 @@ try {
             } catch (Exception $e) {}
         }
 
+        if (empty($sightseeingSpots)) {
+            $destLower = strtolower($destQuery);
+            if (strpos($destLower, 'kashmir') !== false || strpos($destLower, 'srinagar') !== false || strpos($destLower, 'gulmarg') !== false || strpos($destLower, 'pahalgam') !== false) {
+                $sightseeingSpots = [
+                    ['id' => 'sg_kash_1', 'name' => 'Dal Lake Shikara Ride & Floating Market', 'city' => 'Srinagar', 'recommended_duration_hours' => 2, 'entry_fee_estimate' => 800, 'category' => 'Lakes & Scenic', 'description' => 'Traditional decorated wooden Shikara ride through floating lotus gardens and vegetable markets.'],
+                    ['id' => 'sg_kash_2', 'name' => 'Gulmarg Gondola & Apharwat Peak', 'city' => 'Gulmarg', 'recommended_duration_hours' => 5, 'entry_fee_estimate' => 1850, 'category' => 'Snow & Cable Car', 'description' => 'World famous Phase 1 & 2 cable car up to 13,780 ft with panoramic Himalayan peaks.'],
+                    ['id' => 'sg_kash_3', 'name' => 'Pahalgam Betaab Valley & Aru Valley', 'city' => 'Pahalgam', 'recommended_duration_hours' => 4, 'entry_fee_estimate' => 100, 'category' => 'Valleys & Pine Woods', 'description' => 'Scenic alpine valleys with Lidder river bank, pony trails, and Bollywood shooting spots.'],
+                    ['id' => 'sg_kash_4', 'name' => 'Mughal Gardens (Nishat & Shalimar Bagh)', 'city' => 'Srinagar', 'recommended_duration_hours' => 3, 'entry_fee_estimate' => 50, 'category' => 'Heritage Gardens', 'description' => 'Terraced Persian-style botanical gardens overlooking Dal Lake.'],
+                    ['id' => 'sg_kash_5', 'name' => 'Sonmarg Thajiwas Glacier Trek', 'city' => 'Sonmarg', 'recommended_duration_hours' => 4, 'entry_fee_estimate' => 250, 'category' => 'Glaciers & Nature', 'description' => 'Pony ride or hike to pristine snow glacier amidst pine trees.'],
+                    ['id' => 'sg_kash_6', 'name' => 'Shankaracharya Temple', 'city' => 'Srinagar', 'recommended_duration_hours' => 2, 'entry_fee_estimate' => 0, 'category' => 'Heritage & Temple', 'description' => 'Ancient hilltop temple with 360-degree aerial views of Srinagar city and Dal Lake.']
+                ];
+            } else if (strpos($destLower, 'kerala') !== false || strpos($destLower, 'munnar') !== false || strpos($destLower, 'alleppey') !== false || strpos($destLower, 'thekkady') !== false || strpos($destLower, 'kochi') !== false) {
+                $sightseeingSpots = [
+                    ['id' => 'sg_ker_1', 'name' => 'Alleppey Backwaters Houseboat Cruise', 'city' => 'Alleppey', 'recommended_duration_hours' => 5, 'entry_fee_estimate' => 1500, 'category' => 'Backwaters', 'description' => 'Glide past palm-fringed canals, paddy fields, and Vembanad lake in a traditional Kettuvallam.'],
+                    ['id' => 'sg_ker_2', 'name' => 'Munnar Tea Gardens & Eravikulam National Park', 'city' => 'Munnar', 'recommended_duration_hours' => 4, 'entry_fee_estimate' => 200, 'category' => 'Tea Gardens & Wildlife', 'description' => 'Rolling carpet tea estates and home to endangered Nilgiri Tahr mountain goat.'],
+                    ['id' => 'sg_ker_3', 'name' => 'Mattupetty Dam & Echo Point', 'city' => 'Munnar', 'recommended_duration_hours' => 3, 'entry_fee_estimate' => 100, 'category' => 'Lakes & Boating', 'description' => 'Scenic water reservoir with speedboating and natural echo acoustics.'],
+                    ['id' => 'sg_ker_4', 'name' => 'Periyar Lake & Wildlife Sanctuary Boating', 'city' => 'Thekkady', 'recommended_duration_hours' => 3, 'entry_fee_estimate' => 255, 'category' => 'Wildlife Sanctuary', 'description' => 'Boat safari through Periyar lake with elephant, gaur, and wild boar spotting.'],
+                    ['id' => 'sg_ker_5', 'name' => 'Fort Kochi Chinese Fishing Nets & Jew Town', 'city' => 'Kochi', 'recommended_duration_hours' => 3, 'entry_fee_estimate' => 50, 'category' => 'Heritage & Harbor', 'description' => 'Historic coastal port featuring medieval Chinese cantilevered fishing nets and spice bazaar.']
+                ];
+            } else if (strpos($destLower, 'rann') !== false || strpos($destLower, 'kutch') !== false || strpos($destLower, 'dhordo') !== false || strpos($destLower, 'bhuj') !== false) {
+                $sightseeingSpots = [
+                    ['id' => 'sg_kut_1', 'name' => 'White Desert Sunset & Full Moon Viewing', 'city' => 'Dhordo, Kutch', 'recommended_duration_hours' => 3, 'entry_fee_estimate' => 100, 'category' => 'Salt Desert', 'description' => 'Endless shimmering white salt desert glistening under sunset and moonlight.'],
+                    ['id' => 'sg_kut_2', 'name' => 'Road to Heaven (Dholavira Salt Highway)', 'city' => 'Dholavira, Kutch', 'recommended_duration_hours' => 3, 'entry_fee_estimate' => 0, 'category' => 'Scenic Drives', 'description' => 'Spectacular 30km highway surrounded by turquoise sea and glittering white salt plains.'],
+                    ['id' => 'sg_kut_3', 'name' => 'Kalo Dungar (Black Hill & Magnetic Point)', 'city' => 'Kutch', 'recommended_duration_hours' => 2, 'entry_fee_estimate' => 50, 'category' => 'Viewpoints', 'description' => 'Highest panoramic point in Kutch overlooking the Indo-Pak border and Great Rann.'],
+                    ['id' => 'sg_kut_4', 'name' => 'Aina Mahal & Prag Mahal Palaces', 'city' => 'Bhuj', 'recommended_duration_hours' => 2, 'entry_fee_estimate' => 70, 'category' => 'Heritage Palaces', 'description' => 'Historic 18th-century mirror palace and Gothic clock tower in Bhuj town.']
+                ];
+            } else if (strpos($destLower, 'rajasthan') !== false || strpos($destLower, 'jaipur') !== false || strpos($destLower, 'udaipur') !== false) {
+                $sightseeingSpots = [
+                    ['id' => 'sg_raj_1', 'name' => 'Amber Fort & Maota Lake', 'city' => 'Jaipur', 'recommended_duration_hours' => 3, 'entry_fee_estimate' => 200, 'category' => 'Forts & Palaces', 'description' => 'Majestic Rajput hilltop fortress featuring Sheesh Mahal mirror gallery.'],
+                    ['id' => 'sg_raj_2', 'name' => 'Udaipur City Palace & Lake Pichola Cruise', 'city' => 'Udaipur', 'recommended_duration_hours' => 4, 'entry_fee_estimate' => 350, 'category' => 'Palaces & Lakes', 'description' => 'Royal marble palace complex on lake banks with sunset boat tour to Jagmandir.'],
+                    ['id' => 'sg_raj_3', 'name' => 'Sam Sand Dunes Camel Safari', 'city' => 'Jaisalmer', 'recommended_duration_hours' => 3, 'entry_fee_estimate' => 500, 'category' => 'Desert Safari', 'description' => 'Golden Thar desert dunes with sunset camel trek and folk music campfire.']
+                ];
+            } else if (strpos($destLower, 'himachal') !== false || strpos($destLower, 'manali') !== false || strpos($destLower, 'shimla') !== false) {
+                $sightseeingSpots = [
+                    ['id' => 'sg_him_1', 'name' => 'Solang Valley & Rohtang Pass', 'city' => 'Manali', 'recommended_duration_hours' => 5, 'entry_fee_estimate' => 500, 'category' => 'Snow Points', 'description' => 'Snow-capped adventure valley offering paragliding, skiing, and mountain pass views.'],
+                    ['id' => 'sg_him_2', 'name' => 'Atal Tunnel Drive & Sissu Waterfalls', 'city' => 'Lahaul / Manali', 'recommended_duration_hours' => 4, 'entry_fee_estimate' => 0, 'category' => 'Scenic Drives', 'description' => 'World longest highway tunnel leading into the snow valleys of Lahaul.'],
+                    ['id' => 'sg_him_3', 'name' => 'Shimla Mall Road & Ridge', 'city' => 'Shimla', 'recommended_duration_hours' => 3, 'entry_fee_estimate' => 0, 'category' => 'Colonial Heritage', 'description' => 'Colonial promenade, Christ Church, and Jakhoo Temple viewpoints.']
+                ];
+            }
+        }
+
         // 3. Fetch Activities
         $activities = [];
         try {
@@ -556,6 +597,42 @@ try {
             $aStmt->execute($actBindings);
             $activities = $aStmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (Exception $e) {}
+
+        if (empty($activities)) {
+            $destLower = strtolower($destQuery);
+            if (strpos($destLower, 'kashmir') !== false || strpos($destLower, 'srinagar') !== false || strpos($destLower, 'gulmarg') !== false || strpos($destLower, 'pahalgam') !== false) {
+                $activities = [
+                    ['id' => 'act_kash_1', 'name' => 'Gulmarg Skiing & Snowboarding Experience', 'city' => 'Gulmarg', 'duration_hours' => 3, 'average_cost' => 2500, 'category' => 'Snow Sports', 'description' => 'Professional instructor guided ski & snowboard sessions on Kongdoori slopes.'],
+                    ['id' => 'act_kash_2', 'name' => 'Pahalgam Lidder River White Water Rafting', 'city' => 'Pahalgam', 'duration_hours' => 2, 'average_cost' => 1200, 'category' => 'Water Sports', 'description' => 'Grade II & III thrilling river rafting on glacier-fed Lidder stream.'],
+                    ['id' => 'act_kash_3', 'name' => 'Aru Valley & Baisaran Valley Pony Trek', 'city' => 'Pahalgam', 'duration_hours' => 3, 'average_cost' => 1500, 'category' => 'Adventure Trek', 'description' => 'Mountain pony ride to scenic pine-carpeted Mini Switzerland meadow.'],
+                    ['id' => 'act_kash_4', 'name' => 'Traditional Kashmiri Kahwa & Wazwan Cooking Session', 'city' => 'Srinagar', 'duration_hours' => 2, 'average_cost' => 850, 'category' => 'Culinary Experience', 'description' => 'Brew saffron Kahwa tea and taste authentic 7-course Kashmiri Wazwan feast.']
+                ];
+            } else if (strpos($destLower, 'kerala') !== false || strpos($destLower, 'munnar') !== false || strpos($destLower, 'alleppey') !== false || strpos($destLower, 'thekkady') !== false) {
+                $activities = [
+                    ['id' => 'act_ker_1', 'name' => 'Kathakali Dance & Kalaripayattu Martial Arts Show', 'city' => 'Thekkady', 'duration_hours' => 2, 'average_cost' => 500, 'category' => 'Cultural Show', 'description' => 'Live classical Kerala makeup, dance drama, and ancient martial arts performance.'],
+                    ['id' => 'act_ker_2', 'name' => 'Kolukkumalai 4x4 Off-Road Jeep Safari to World Highest Tea Estate', 'city' => 'Munnar', 'duration_hours' => 4, 'average_cost' => 3000, 'category' => 'Jeep Safari', 'description' => 'Thrilling mountain off-road jeep drive to 7,900 ft cloud-sea sunrise viewpoint.'],
+                    ['id' => 'act_ker_3', 'name' => 'Wonder Valley Ziplining & Adventure Park', 'city' => 'Munnar', 'duration_hours' => 3, 'average_cost' => 1000, 'category' => 'Adventure & Zipline', 'description' => 'High-line canopy forest ziplining, rope courses, and 12D motion theater.'],
+                    ['id' => 'act_ker_4', 'name' => 'Spice Plantation Guided Walk & Elephant Ride', 'city' => 'Thekkady', 'duration_hours' => 2, 'average_cost' => 800, 'category' => 'Eco Tour', 'description' => 'Cardamom, cinnamon & vanilla plantation sensory walk with elephant feeding.'],
+                    ['id' => 'act_ker_5', 'name' => 'Narrow Backwater Canal Shikkara Canoe Ride', 'city' => 'Alleppey', 'duration_hours' => 2, 'average_cost' => 700, 'category' => 'Boating & Canoe', 'description' => 'Traditional wooden hand-rowed canoe through shallow village waterways.']
+                ];
+            } else if (strpos($destLower, 'rann') !== false || strpos($destLower, 'kutch') !== false || strpos($destLower, 'dhordo') !== false || strpos($destLower, 'bhuj') !== false) {
+                $activities = [
+                    ['id' => 'act_kut_1', 'name' => 'Desert ATV Quad Biking & Paramotoring', 'city' => 'Dhordo, Kutch', 'duration_hours' => 1, 'average_cost' => 1800, 'category' => 'Desert Sports', 'description' => 'High adrenaline ATV quad biking over white sands and tandem paramotor flights.'],
+                    ['id' => 'act_kut_2', 'name' => 'Sunset Camel Cart Safari into White Rann', 'city' => 'Dhordo, Kutch', 'duration_hours' => 2, 'average_cost' => 600, 'category' => 'Safari', 'description' => 'Decorated Kutchi camel cart ride into the heart of the salt desert at sunset.'],
+                    ['id' => 'act_kut_3', 'name' => 'Nirona Artisan Village Rogan Art Demonstration', 'city' => 'Kutch', 'duration_hours' => 2, 'average_cost' => 300, 'category' => 'Art & Craft', 'description' => 'Meet National Award-winning Khatri family practicing rare 400-year-old castor oil Rogan art.']
+                ];
+            } else if (strpos($destLower, 'rajasthan') !== false || strpos($destLower, 'jaipur') !== false || strpos($destLower, 'jaisalmer') !== false) {
+                $activities = [
+                    ['id' => 'act_raj_1', 'name' => 'Thar Desert Dune Bashing 4x4 Jeep Safari', 'city' => 'Jaisalmer', 'duration_hours' => 2, 'average_cost' => 1500, 'category' => 'Desert Adventure', 'description' => 'High speed open 4x4 jeep roller-coaster ride over golden Sam Sand Dunes.'],
+                    ['id' => 'act_raj_2', 'name' => 'Kalbelia Folk Dance & Fire Show Campfire', 'city' => 'Jaisalmer', 'duration_hours' => 2, 'average_cost' => 750, 'category' => 'Folk Music', 'description' => 'Live Rajasthani desert folk singers, ghoomar, and fire acrobatics under starlit sky.']
+                ];
+            } else if (strpos($destLower, 'himachal') !== false || strpos($destLower, 'manali') !== false) {
+                $activities = [
+                    ['id' => 'act_him_1', 'name' => 'Solang Valley Tandem Paragliding', 'city' => 'Manali', 'duration_hours' => 1, 'average_cost' => 2500, 'category' => 'Aero Sports', 'description' => 'High-altitude flight over cedar valleys with certified pilot.'],
+                    ['id' => 'act_him_2', 'name' => 'Beas River White Water Rafting', 'city' => 'Kullu', 'duration_hours' => 2, 'average_cost' => 1200, 'category' => 'Water Sports', 'description' => '14km thrilling rapids rafting down roaring Beas river.']
+                ];
+            }
+        }
 
         // 4. Fetch Contracted Hotels
         $contractedHotels = [];
@@ -614,19 +691,33 @@ try {
                     ['id' => 'kutch_bhuj_3', 'hotel_name' => 'Regenta Resort Bhuj', 'star_rating' => 4, 'city' => 'Bhuj', 'room_type' => 'Deluxe Room', 'meal_plan' => 'CP (Breakfast)', 'contract_rate' => 4800],
                     ['id' => 'kutch_gateway_4', 'hotel_name' => 'The Gateway Hotel Dempo (Taj)', 'star_rating' => 4, 'city' => 'Bhuj', 'room_type' => 'Superior City View', 'meal_plan' => 'CP (Breakfast)', 'contract_rate' => 5200]
                 ];
-            } else if (strpos($destLower, 'kashmir') !== false || strpos($destLower, 'srinagar') !== false) {
+            } else if (strpos($destLower, 'kashmir') !== false || strpos($destLower, 'srinagar') !== false || strpos($destLower, 'gulmarg') !== false || strpos($destLower, 'pahalgam') !== false || strpos($destLower, 'sonmarg') !== false) {
                 $contractedHotels = [
                     ['id' => 'sri_1', 'hotel_name' => 'The Lalit Grand Palace', 'star_rating' => 5, 'city' => 'Srinagar', 'room_type' => 'Palace Deluxe Room', 'meal_plan' => 'CP (Breakfast)', 'contract_rate' => 12500],
-                    ['id' => 'sri_2', 'hotel_name' => 'Khyber Himalayan Resort & Spa', 'star_rating' => 5, 'city' => 'Gulmarg', 'room_type' => 'Premier Pine View', 'meal_plan' => 'MAP (Breakfast + Dinner)', 'contract_rate' => 16500],
-                    ['id' => 'sri_3', 'hotel_name' => 'Heritage Luxury Houseboat', 'star_rating' => 4, 'city' => 'Nigeen Lake, Srinagar', 'room_type' => 'Super Deluxe Suite', 'meal_plan' => 'MAP Plan', 'contract_rate' => 4500]
+                    ['id' => 'sri_2', 'hotel_name' => 'Vivanta Dal View by Taj', 'star_rating' => 5, 'city' => 'Srinagar', 'room_type' => 'Superior Lake View', 'meal_plan' => 'CP (Breakfast)', 'contract_rate' => 14000],
+                    ['id' => 'sri_3', 'hotel_name' => 'Heritage Luxury Houseboat', 'star_rating' => 4, 'city' => 'Srinagar', 'room_type' => 'Super Deluxe Suite', 'meal_plan' => 'MAP Plan', 'contract_rate' => 4500],
+                    ['id' => 'sri_4', 'hotel_name' => 'Four Points by Sheraton', 'star_rating' => 4, 'city' => 'Srinagar', 'room_type' => 'Comfort Deluxe Room', 'meal_plan' => 'CP (Breakfast)', 'contract_rate' => 6200],
+                    ['id' => 'sri_5', 'hotel_name' => 'Hotel Pine Spring Srinagar', 'star_rating' => 4, 'city' => 'Srinagar', 'room_type' => 'Executive Room', 'meal_plan' => 'CP (Breakfast)', 'contract_rate' => 4200],
+                    ['id' => 'gul_1', 'hotel_name' => 'Khyber Himalayan Resort & Spa', 'star_rating' => 5, 'city' => 'Gulmarg', 'room_type' => 'Premier Pine View', 'meal_plan' => 'MAP (Breakfast + Dinner)', 'contract_rate' => 16500],
+                    ['id' => 'gul_2', 'hotel_name' => 'Hotel Highlands Park', 'star_rating' => 4, 'city' => 'Gulmarg', 'room_type' => 'Heritage Cottage Room', 'meal_plan' => 'MAP (Breakfast + Dinner)', 'contract_rate' => 7800],
+                    ['id' => 'gul_3', 'hotel_name' => 'Hotel Nedous Gulmarg', 'star_rating' => 4, 'city' => 'Gulmarg', 'room_type' => 'Pine Wood Suite', 'meal_plan' => 'CP (Breakfast)', 'contract_rate' => 5600],
+                    ['id' => 'pah_1', 'hotel_name' => 'Pahalgam Hotel', 'star_rating' => 4, 'city' => 'Pahalgam', 'room_type' => 'Lidder River View Room', 'meal_plan' => 'MAP (Breakfast + Dinner)', 'contract_rate' => 6800],
+                    ['id' => 'pah_2', 'hotel_name' => 'Welcomhotel by ITC Hotels Pine N Peak', 'star_rating' => 5, 'city' => 'Pahalgam', 'room_type' => 'Club Pine Room', 'meal_plan' => 'CP (Breakfast)', 'contract_rate' => 11500],
+                    ['id' => 'pah_3', 'hotel_name' => 'Hotel Mountview Pahalgam', 'star_rating' => 4, 'city' => 'Pahalgam', 'room_type' => 'Valley View Room', 'meal_plan' => 'MAP (Breakfast + Dinner)', 'contract_rate' => 4900],
+                    ['id' => 'son_1', 'hotel_name' => 'The Villa Himalaya', 'star_rating' => 4, 'city' => 'Sonmarg', 'room_type' => 'Sind River View Suite', 'meal_plan' => 'MAP (Breakfast + Dinner)', 'contract_rate' => 6200],
+                    ['id' => 'son_2', 'hotel_name' => 'Rah Villas Sonmarg', 'star_rating' => 4, 'city' => 'Sonmarg', 'room_type' => 'Glacier View Cottage', 'meal_plan' => 'CP (Breakfast)', 'contract_rate' => 4800]
                 ];
             } else if (strpos($destLower, 'kerala') !== false || strpos($destLower, 'munnar') !== false || strpos($destLower, 'alleppey') !== false || strpos($destLower, 'kochi') !== false || strpos($destLower, 'thekkady') !== false) {
                 $contractedHotels = [
                     ['id' => 'ker_1', 'hotel_name' => 'Blossom Hill Resort', 'star_rating' => 4, 'city' => 'Munnar', 'room_type' => 'Valley View Cottage (CP)', 'meal_plan' => 'CP (Breakfast)', 'contract_rate' => 3400],
                     ['id' => 'ker_2', 'hotel_name' => 'Sprise Munnar Resort & Spa', 'star_rating' => 5, 'city' => 'Munnar', 'room_type' => 'Luxury Plantation Villa', 'meal_plan' => 'CP (Breakfast)', 'contract_rate' => 5500],
-                    ['id' => 'ker_3', 'hotel_name' => 'Pagoda Plantation Resort', 'star_rating' => 4, 'city' => 'Thekkady', 'room_type' => 'Spice Garden Cottage', 'meal_plan' => 'CP (Breakfast)', 'contract_rate' => 3800],
-                    ['id' => 'ker_4', 'hotel_name' => 'Casino Houseboats (Alleppey)', 'star_rating' => 4, 'city' => 'Alleppey', 'room_type' => '1-Bedroom Premium Houseboat', 'meal_plan' => 'AP (Full Board)', 'contract_rate' => 7500],
-                    ['id' => 'ker_5', 'hotel_name' => 'Broad Bean Hotel Cochin', 'star_rating' => 4, 'city' => 'Kochi', 'room_type' => 'Executive Club Room', 'meal_plan' => 'CP (Breakfast)', 'contract_rate' => 3200]
+                    ['id' => 'ker_3', 'hotel_name' => 'Tea County Munnar (KTDC)', 'star_rating' => 4, 'city' => 'Munnar', 'room_type' => 'Deluxe Room', 'meal_plan' => 'CP (Breakfast)', 'contract_rate' => 4500],
+                    ['id' => 'ker_4', 'hotel_name' => 'Pagoda Plantation Resort', 'star_rating' => 4, 'city' => 'Thekkady', 'room_type' => 'Spice Garden Cottage', 'meal_plan' => 'CP (Breakfast)', 'contract_rate' => 3800],
+                    ['id' => 'ker_5', 'hotel_name' => 'Elephant Court Thekkady', 'star_rating' => 5, 'city' => 'Thekkady', 'room_type' => 'Patio Villa', 'meal_plan' => 'CP (Breakfast)', 'contract_rate' => 5800],
+                    ['id' => 'ker_6', 'hotel_name' => 'Casino Houseboats (Alleppey)', 'star_rating' => 4, 'city' => 'Alleppey', 'room_type' => '1-Bedroom Premium Houseboat', 'meal_plan' => 'AP (Full Board)', 'contract_rate' => 7500],
+                    ['id' => 'ker_7', 'hotel_name' => 'Ramada by Wyndham Alleppey', 'star_rating' => 5, 'city' => 'Alleppey', 'room_type' => 'Punarjani Lake View', 'meal_plan' => 'CP (Breakfast)', 'contract_rate' => 6200],
+                    ['id' => 'ker_8', 'hotel_name' => 'Broad Bean Hotel Cochin', 'star_rating' => 4, 'city' => 'Kochi', 'room_type' => 'Executive Club Room', 'meal_plan' => 'CP (Breakfast)', 'contract_rate' => 3200],
+                    ['id' => 'ker_9', 'hotel_name' => 'Grand Hyatt Kochi Bolgatty', 'star_rating' => 5, 'city' => 'Kochi', 'room_type' => 'Grand Lake View Room', 'meal_plan' => 'CP (Breakfast)', 'contract_rate' => 9500]
                 ];
             } else if (strpos($destLower, 'rajasthan') !== false || strpos($destLower, 'jaipur') !== false || strpos($destLower, 'udaipur') !== false) {
                 $contractedHotels = [
