@@ -620,6 +620,42 @@ try {
                     ['id' => 'sri_2', 'hotel_name' => 'Khyber Himalayan Resort & Spa', 'star_rating' => 5, 'city' => 'Gulmarg', 'room_type' => 'Premier Pine View', 'meal_plan' => 'MAP (Breakfast + Dinner)', 'contract_rate' => 16500],
                     ['id' => 'sri_3', 'hotel_name' => 'Heritage Luxury Houseboat', 'star_rating' => 4, 'city' => 'Nigeen Lake, Srinagar', 'room_type' => 'Super Deluxe Suite', 'meal_plan' => 'MAP Plan', 'contract_rate' => 4500]
                 ];
+            } else if (strpos($destLower, 'kerala') !== false || strpos($destLower, 'munnar') !== false || strpos($destLower, 'alleppey') !== false || strpos($destLower, 'kochi') !== false || strpos($destLower, 'thekkady') !== false) {
+                $contractedHotels = [
+                    ['id' => 'ker_1', 'hotel_name' => 'Blossom Hill Resort', 'star_rating' => 4, 'city' => 'Munnar', 'room_type' => 'Valley View Cottage (CP)', 'meal_plan' => 'CP (Breakfast)', 'contract_rate' => 3400],
+                    ['id' => 'ker_2', 'hotel_name' => 'Sprise Munnar Resort & Spa', 'star_rating' => 5, 'city' => 'Munnar', 'room_type' => 'Luxury Plantation Villa', 'meal_plan' => 'CP (Breakfast)', 'contract_rate' => 5500],
+                    ['id' => 'ker_3', 'hotel_name' => 'Pagoda Plantation Resort', 'star_rating' => 4, 'city' => 'Thekkady', 'room_type' => 'Spice Garden Cottage', 'meal_plan' => 'CP (Breakfast)', 'contract_rate' => 3800],
+                    ['id' => 'ker_4', 'hotel_name' => 'Casino Houseboats (Alleppey)', 'star_rating' => 4, 'city' => 'Alleppey', 'room_type' => '1-Bedroom Premium Houseboat', 'meal_plan' => 'AP (Full Board)', 'contract_rate' => 7500],
+                    ['id' => 'ker_5', 'hotel_name' => 'Broad Bean Hotel Cochin', 'star_rating' => 4, 'city' => 'Kochi', 'room_type' => 'Executive Club Room', 'meal_plan' => 'CP (Breakfast)', 'contract_rate' => 3200]
+                ];
+            } else if (strpos($destLower, 'rajasthan') !== false || strpos($destLower, 'jaipur') !== false || strpos($destLower, 'udaipur') !== false) {
+                $contractedHotels = [
+                    ['id' => 'raj_1', 'hotel_name' => 'WelcomHeritage Bal Samand Lake Palace', 'star_rating' => 5, 'city' => 'Jodhpur', 'room_type' => 'Regal Heritage Suite', 'meal_plan' => 'CP (Breakfast)', 'contract_rate' => 6050],
+                    ['id' => 'raj_2', 'hotel_name' => 'Trident Jaipur', 'star_rating' => 5, 'city' => 'Jaipur', 'room_type' => 'Deluxe Garden View', 'meal_plan' => 'CP (Breakfast)', 'contract_rate' => 6500],
+                    ['id' => 'raj_3', 'hotel_name' => 'Fateh Garh Heritage Resort', 'star_rating' => 5, 'city' => 'Udaipur', 'room_type' => 'Renaissance Lake View Room', 'meal_plan' => 'CP (Breakfast)', 'contract_rate' => 7200]
+                ];
+            } else if (strpos($destLower, 'himachal') !== false || strpos($destLower, 'manali') !== false || strpos($destLower, 'shimla') !== false) {
+                $contractedHotels = [
+                    ['id' => 'him_1', 'hotel_name' => 'The Himalayan Luxury Resort', 'star_rating' => 5, 'city' => 'Manali', 'room_type' => 'Castle View Suite', 'meal_plan' => 'CP (Breakfast)', 'contract_rate' => 6200],
+                    ['id' => 'him_2', 'hotel_name' => 'Wildflower Hall Oberoi Resort', 'star_rating' => 5, 'city' => 'Shimla', 'room_type' => 'Premier Mountain View Room', 'meal_plan' => 'CP (Breakfast)', 'contract_rate' => 12000],
+                    ['id' => 'him_3', 'hotel_name' => 'Snow Valley Resorts', 'star_rating' => 4, 'city' => 'Manali', 'room_type' => 'Luxury Apple Orchard Room', 'meal_plan' => 'MAP (Breakfast + Dinner)', 'contract_rate' => 4200]
+                ];
+            } else if (strpos($destLower, 'char dham') !== false || strpos($destLower, 'chardham') !== false || strpos($destLower, 'kedarnath') !== false) {
+                $contractedHotels = [
+                    ['id' => 'cd_1', 'hotel_name' => 'Gaurav Hotel & Homestay', 'star_rating' => 3, 'city' => 'Janki Chatti', 'room_type' => 'Standard Deluxe Family Room', 'meal_plan' => 'MAP Plan', 'contract_rate' => 3500],
+                    ['id' => 'cd_2', 'hotel_name' => 'Blessings Resort Family Cottages', 'star_rating' => 4, 'city' => 'Janki Chatti', 'room_type' => 'Mountain View Private Balcony', 'meal_plan' => 'MAP Plan', 'contract_rate' => 5000],
+                    ['id' => 'cd_3', 'hotel_name' => 'Kedarnath Valley Camp', 'star_rating' => 3, 'city' => 'Guptkashi / Sonprayag', 'room_type' => 'Swiss Cottage Camp', 'meal_plan' => 'MAP Plan', 'contract_rate' => 4000]
+                ];
+            } else if (strpos($destLower, 'goa') !== false) {
+                $contractedHotels = [
+                    ['id' => 'goa_1', 'hotel_name' => 'Novotel Goa Candolim', 'star_rating' => 5, 'city' => 'North Goa', 'room_type' => 'Superior Pool View Room', 'meal_plan' => 'CP (Breakfast)', 'contract_rate' => 6200],
+                    ['id' => 'goa_2', 'hotel_name' => 'Heritage Village Resort & Spa', 'star_rating' => 4, 'city' => 'South Goa', 'room_type' => 'Grande Club Villa', 'meal_plan' => 'CP (Breakfast)', 'contract_rate' => 5400]
+                ];
+            } else if (strpos($destLower, 'andaman') !== false || strpos($destLower, 'havelock') !== false) {
+                $contractedHotels = [
+                    ['id' => 'and_1', 'hotel_name' => 'Symphony Palms Beach Resort', 'star_rating' => 4, 'city' => 'Havelock Island', 'room_type' => 'Havelock Casa Beach Cottage', 'meal_plan' => 'CP (Breakfast)', 'contract_rate' => 6500],
+                    ['id' => 'and_2', 'hotel_name' => 'Sinclairs Bayview Port Blair', 'star_rating' => 4, 'city' => 'Port Blair', 'room_type' => 'Premier Ocean View', 'meal_plan' => 'CP (Breakfast)', 'contract_rate' => 5800]
+                ];
             }
         }
 

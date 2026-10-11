@@ -15,6 +15,7 @@ import { useToast } from '@/hooks/use-toast';
 import { quoteService, QuoteHeader, QuoteVersion, QuoteItem } from '@/services/quoteService';
 import { itineraryService, GeneratedAIItineraryResult } from '@/services/itineraryService';
 import { leadService, Lead } from '@/services/leadService';
+import { getContractedHotelsMasterList } from '@/data/contractedHotelsDataLoader';
 
 const API_BASE = import.meta.env.VITE_PHP_BASE_URL || import.meta.env.VITE_API_BASE_URL || '/php-backend';
 
@@ -165,29 +166,132 @@ export default function QuoteWorkspace({ quotes: propQuotes = [], onCreateRevisi
     try {
       const newQuoteId = `q-${Date.now()}`;
       const newQuoteNum = `QT-${new Date().getFullYear()}-${Math.floor(100 + Math.random() * 900)}`;
-      const dest = (newQuoteData.destination || '').trim().toLowerCase();
+      const rawDest = (newQuoteData.destination || '').trim();
+      const destLower = rawDest.toLowerCase();
 
-      // Safe lookup for contracted hotels
-      const hotelList = contracts?.hotels || [];
-      const matchedHotel = hotelList.find((h: any) => 
-        (h.city_name && h.city_name.toLowerCase().includes(dest)) ||
-        (h.state_name && h.state_name.toLowerCase().includes(dest)) ||
-        (h.hotel_name && h.hotel_name.toLowerCase().includes(dest))
+      // Resolve destination circuit and hub cities
+      const matchedCircuit = STANDARD_CIRCUITS.find(c => 
+        c.aliases.some(alias => destLower.includes(alias)) ||
+        c.primaryCity.toLowerCase() === destLower
       );
+
+      const targetCities = matchedCircuit 
+        ? matchedCircuit.aliases.map(a => a.toLowerCase()) 
+        : [destLower];
+
+      // Safe lookup for contracted hotels (check contracts, then fallback to master spreadsheet JSON)
+      const hotelList = contracts?.hotels || [];
+      const masterHotels = getContractedHotelsMasterList();
+
+      const matchedHotels: any[] = [];
+      const seenCities = new Set<string>();
+
+      // 1. Try finding from active database supplier contracts
+      for (const h of hotelList) {
+        const cCity = (h.city_name || h.city || '').toLowerCase();
+        const cState = (h.state_name || h.state || '').toLowerCase();
+        const cName = (h.hotel_name || h.name || '').toLowerCase();
+
+        const isMatch = targetCities.some(tc => cCity.includes(tc) || cState.includes(tc) || cName.includes(tc));
+        if (isMatch && !seenCities.has(cCity || cName)) {
+          matchedHotels.push({
+            name: h.hotel_name || h.name,
+            city: h.city_name || h.city || rawDest,
+            star: h.star_rating || 4,
+            rate: Number(h.rate_per_night || h.standard_rate || 3500)
+          });
+          seenCities.add(cCity || cName);
+          if (matchedHotels.length >= 3) break;
+        }
+      }
+
+      // 2. If no DB contracts, query master spreadsheet JSON catalog (contractedHotels.json)
+      if (matchedHotels.length === 0) {
+        for (const mh of masterHotels) {
+          const mCity = (mh.city || '').toLowerCase();
+          const mState = (mh.state || '').toLowerCase();
+          const mName = (mh.hotel_name || '').toLowerCase();
+
+          const isMatch = targetCities.some(tc => mCity.includes(tc) || mState.includes(tc) || mName.includes(tc));
+          if (isMatch && !seenCities.has(mCity || mName)) {
+            const cost = Number(mh.b2b_cost || 3500);
+            matchedHotels.push({
+              name: mh.hotel_name,
+              city: mh.city,
+              star: mh.star_rating || 4,
+              rate: cost < 1000 ? 3500 : cost
+            });
+            seenCities.add(mCity || mName);
+            if (matchedHotels.length >= 3) break;
+          }
+        }
+      }
+
+      // 3. Ultimate circuit fallbacks if still 0
+      if (matchedHotels.length === 0) {
+        if (destLower.includes('kerala')) {
+          matchedHotels.push(
+            { name: 'Blossom Hill Resort', city: 'Munnar', star: 4, rate: 3400 },
+            { name: 'Pagoda Plantation Resort', city: 'Thekkady', star: 4, rate: 3800 },
+            { name: 'Casino Houseboats', city: 'Alleppey', star: 4, rate: 7500 }
+          );
+        } else if (destLower.includes('rann') || destLower.includes('kutch')) {
+          matchedHotels.push(
+            { name: 'Evoke Tent City (White Desert)', city: 'Dhordo, Kutch', star: 5, rate: 8500 },
+            { name: 'Regenta Resort Bhuj', city: 'Bhuj', star: 4, rate: 4800 }
+          );
+        } else if (destLower.includes('kashmir')) {
+          matchedHotels.push(
+            { name: 'The Lalit Grand Palace', city: 'Srinagar', star: 5, rate: 12500 },
+            { name: 'Khyber Himalayan Resort & Spa', city: 'Gulmarg', star: 5, rate: 16500 }
+          );
+        } else {
+          matchedHotels.push({
+            name: `${rawDest || 'Destination'} Heritage Boutique Resort`,
+            city: rawDest || 'Central',
+            star: 4,
+            rate: 4500
+          });
+        }
+      }
 
       const initialItems: QuoteItem[] = [];
 
-      if (matchedHotel) {
-        const rate = Number(matchedHotel.standard_rate || 3500);
+      // Add Hotels
+      matchedHotels.forEach((h, idx) => {
+        const nights = idx === 0 && matchedHotels.length > 1 ? 2 : 1;
         initialItems.push({
           type: 'hotel',
-          name: `${matchedHotel.hotel_name} (${matchedHotel.star_rating || 4}★)`,
-          detail: `City: ${matchedHotel.city_name || 'Standard'} • Deluxe Room CP Plan`,
-          qty: 2,
-          rate: rate,
-          total: rate * 2
+          name: `${h.name} [${h.city}] (${h.star}★)`,
+          detail: `Deluxe Room • CP Plan (Breakfast Included) • ${nights} ${nights === 1 ? 'Night' : 'Nights'} Stay`,
+          qty: nights,
+          rate: h.rate,
+          total: h.rate * nights
         });
-      }
+      });
+
+      // Add dedicated Private AC Vehicle for the circuit duration
+      const totalHotelNights = initialItems.reduce((sum, it) => sum + it.qty, 0);
+      const totalTourDays = Math.max(2, totalHotelNights + 1);
+
+      initialItems.push({
+        type: 'transfer',
+        name: `Dedicated Private AC Vehicle (${totalTourDays} Days)`,
+        detail: `Full-circuit transfers, airport/railway pickup & all state toll permits`,
+        qty: totalTourDays,
+        rate: 3200,
+        total: totalTourDays * 3200
+      });
+
+      // Add Sightseeing & Excursion entry
+      initialItems.push({
+        type: 'excursion',
+        name: `Curated Sightseeing Excursions & Heritage Entries (${rawDest})`,
+        detail: `Guided landmark visits, wildlife/boat permits & cultural highlights`,
+        qty: 1,
+        rate: 2500,
+        total: 2500
+      });
 
       const totalCost = initialItems.reduce((sum, item) => sum + item.total, 0);
       const marginVal = Number(newQuoteData.margin) || 15;

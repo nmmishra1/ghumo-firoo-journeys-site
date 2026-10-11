@@ -155,6 +155,64 @@ if ($pdo) {
     }
 }
 
+// Circuit Aliases & Curated Fallbacks for 100% Reliable Itinerary Generation
+$circuitAliasMap = [
+    'kerala' => [
+        'hubs' => ['Munnar', 'Thekkady', 'Alleppey', 'Kochi'],
+        'hotels' => [
+            ['hotel_name' => 'Blossom Hill Resort', 'city_name' => 'Munnar', 'star_rating' => 4, 'deluxe_rate' => 3400, 'standard_rate' => 3400],
+            ['hotel_name' => 'Pagoda Plantation Resort', 'city_name' => 'Thekkady', 'star_rating' => 4, 'deluxe_rate' => 3800, 'standard_rate' => 3800],
+            ['hotel_name' => 'Casino Houseboats', 'city_name' => 'Alleppey', 'star_rating' => 4, 'deluxe_rate' => 7500, 'standard_rate' => 7500],
+            ['hotel_name' => 'Broad Bean Hotel', 'city_name' => 'Kochi', 'star_rating' => 4, 'deluxe_rate' => 3200, 'standard_rate' => 3200]
+        ],
+        'sightseeings' => [
+            ['name' => 'Eravikulam National Park (Nilgiri Tahr)', 'sightseeing_name' => 'Eravikulam National Park', 'category' => 'Wildlife & Nature', 'recommended_duration_hours' => 3, 'entry_fee_estimate' => '₹200', 'description' => 'Home to endangered Nilgiri Tahr and rolling green tea hills.'],
+            ['name' => 'Mattupetty Dam & Echo Point', 'sightseeing_name' => 'Mattupetty Dam', 'category' => 'Scenic Viewpoint', 'recommended_duration_hours' => 2, 'entry_fee_estimate' => '₹50', 'description' => 'Calm lake waters surrounded by tea gardens with speedboating.'],
+            ['name' => 'Periyar Tiger Reserve Boat Safari', 'sightseeing_name' => 'Periyar National Park', 'category' => 'Wildlife Sanctuary', 'recommended_duration_hours' => 2.5, 'entry_fee_estimate' => '₹450', 'description' => 'Scenic lake safari spotting wild elephants and bird species in Thekkady.'],
+            ['name' => 'Alleppey Backwaters Houseboat Cruise', 'sightseeing_name' => 'Alleppey Backwaters', 'category' => 'Cruises & Lakes', 'recommended_duration_hours' => 4, 'entry_fee_estimate' => 'Included', 'description' => 'Gliding through emerald palm-fringed canals, paddy fields, and lagoons.']
+        ]
+    ],
+    'rann utsav' => [
+        'hubs' => ['Dhordo', 'Bhuj', 'Mandvi', 'Dholavira'],
+        'hotels' => [
+            ['hotel_name' => 'Evoke Tent City Dhordo (White Desert)', 'city_name' => 'Dhordo', 'star_rating' => 5, 'deluxe_rate' => 8500, 'standard_rate' => 8500],
+            ['hotel_name' => 'White Rann Resort (Praveg)', 'city_name' => 'Dhordo', 'star_rating' => 4, 'deluxe_rate' => 7500, 'standard_rate' => 7500],
+            ['hotel_name' => 'Regenta Resort Bhuj', 'city_name' => 'Bhuj', 'star_rating' => 4, 'deluxe_rate' => 4800, 'standard_rate' => 4800]
+        ],
+        'sightseeings' => [
+            ['name' => 'White Desert Sunset View (Dhordo)', 'sightseeing_name' => 'White Desert Salt Flats', 'category' => 'Natural Wonder', 'recommended_duration_hours' => 3, 'entry_fee_estimate' => '₹100', 'description' => 'Spectacular vast expanse of white salt desert shining under sunset and moonlight.'],
+            ['name' => 'Aina Mahal & Prag Mahal (Bhuj)', 'sightseeing_name' => 'Aina Mahal', 'category' => 'Heritage Palace', 'recommended_duration_hours' => 2, 'entry_fee_estimate' => '₹50', 'description' => '18th-century mirror palace with Venetian glass and royal chandeliers.'],
+            ['name' => 'Dholavira Harappan UNESCO World Heritage Site', 'sightseeing_name' => 'Dholavira Harappan Site', 'category' => 'Archeological Heritage', 'recommended_duration_hours' => 4, 'entry_fee_estimate' => '₹40', 'description' => 'Ancient Indus Valley Civilization ruins via the breathtaking Road to Heaven across salt flats.']
+        ]
+    ],
+    'kashmir' => [
+        'hubs' => ['Srinagar', 'Gulmarg', 'Pahalgam', 'Sonmarg'],
+        'hotels' => [
+            ['hotel_name' => 'The Lalit Grand Palace', 'city_name' => 'Srinagar', 'star_rating' => 5, 'deluxe_rate' => 12500, 'standard_rate' => 12500],
+            ['hotel_name' => 'Khyber Himalayan Resort & Spa', 'city_name' => 'Gulmarg', 'star_rating' => 5, 'deluxe_rate' => 16500, 'standard_rate' => 16500],
+            ['hotel_name' => 'Heritage Luxury Houseboat', 'city_name' => 'Srinagar', 'star_rating' => 4, 'deluxe_rate' => 4500, 'standard_rate' => 4500]
+        ],
+        'sightseeings' => [
+            ['name' => 'Dal Lake Shikara Ride & Floating Market', 'sightseeing_name' => 'Dal Lake', 'category' => 'Lakes & Scenic', 'recommended_duration_hours' => 2, 'entry_fee_estimate' => '₹800', 'description' => 'Tranquil wooden shikara cruise past floating lotus gardens.'],
+            ['name' => 'Gulmarg Gondola Cable Car Ride (Phase 1 & 2)', 'sightseeing_name' => 'Gulmarg Gondola', 'category' => 'Adventure & Snow', 'recommended_duration_hours' => 4, 'entry_fee_estimate' => '₹1850', 'description' => 'High-altitude cable car up to 14,000 ft overlooking snow-capped peaks.'],
+            ['name' => 'Betaab Valley & Aru Valley (Pahalgam)', 'sightseeing_name' => 'Betaab Valley', 'category' => 'Valleys & Rivers', 'recommended_duration_hours' => 3, 'entry_fee_estimate' => '₹100', 'description' => 'Lush meadows surrounded by pine forests and crystal-clear Lidder River.']
+        ]
+    ]
+];
+
+$destLower = strtolower($destination);
+foreach ($circuitAliasMap as $cKey => $cData) {
+    if (strpos($destLower, $cKey) !== false || (isset($cData['hubs']) && in_array(ucfirst($destLower), $cData['hubs']))) {
+        if (empty($dbHotels)) {
+            $dbHotels = $cData['hotels'];
+        }
+        if (empty($dbSightseeings)) {
+            $dbSightseeings = $cData['sightseeings'];
+        }
+        break;
+    }
+}
+
 // 2. CONSTRUCT RAG CONTEXT (Real database records for Gemini prompt)
 $sightseeingContextText = "";
 if (!empty($dbSightseeings)) {
@@ -495,24 +553,70 @@ exit;
 function buildDeterministicDbItinerary($dest, $days, $nights, $style, $tier, $pax, $sightseeings, $hotels) {
     $hotelsList = [];
     $hotelCostTotal = 0;
+    $quoteItems = [];
     
-    // Choose hotel from DB or default
-    $selectedHotel = !empty($hotels) ? $hotels[0] : null;
-    $hName = $selectedHotel ? $selectedHotel['hotel_name'] : "{$dest} Heritage Boutique Resort";
-    $hCity = $selectedHotel ? ($selectedHotel['city_name'] ?: $dest) : $dest;
-    $hRate = $selectedHotel ? intval($selectedHotel['deluxe_rate'] ?: $selectedHotel['standard_rate'] ?: 4500) : 4500;
-    $hTotal = $nights * $hRate;
-    $hotelCostTotal += $hTotal;
+    // Multi-hotel distribution if multiple hotels available (e.g. Munnar + Thekkady + Alleppey)
+    if (!empty($hotels) && count($hotels) > 1 && $nights >= 2) {
+        $hotelCount = min(count($hotels), $nights);
+        $nightsPerHotel = (int)floor($nights / $hotelCount);
+        $remainderNights = $nights % $hotelCount;
 
-    $hotelsList[] = [
-        'hotel_name' => $hName,
-        'city' => $hCity,
-        'star_rating' => $selectedHotel['star_rating'] ?? 4,
-        'nights' => $nights,
-        'room_type' => 'Deluxe Room • CP Plan (Breakfast Included)',
-        'est_rate_per_night' => $hRate,
-        'total_cost' => $hTotal
-    ];
+        foreach (array_slice($hotels, 0, $hotelCount) as $idx => $h) {
+            $stayNights = $nightsPerHotel + ($idx === 0 ? $remainderNights : 0);
+            if ($stayNights <= 0) continue;
+            
+            $hName = $h['hotel_name'];
+            $hCity = $h['city_name'] ?: $h['city'] ?: $dest;
+            $hRate = intval($h['deluxe_rate'] ?: $h['standard_rate'] ?: $h['contract_rate'] ?: 4500);
+            $hTotal = $stayNights * $hRate;
+            $hotelCostTotal += $hTotal;
+
+            $hotelsList[] = [
+                'hotel_name' => $hName,
+                'city' => $hCity,
+                'star_rating' => $h['star_rating'] ?? 4,
+                'nights' => $stayNights,
+                'room_type' => 'Deluxe Room • CP Plan (Breakfast Included)',
+                'est_rate_per_night' => $hRate,
+                'total_cost' => $hTotal
+            ];
+
+            $quoteItems[] = [
+                'type' => 'hotel',
+                'name' => "{$hName} [{$hCity}]",
+                'detail' => "Deluxe Room • CP Plan (Breakfast Included) • {$stayNights} Nights Stay",
+                'qty' => $stayNights,
+                'rate' => $hRate,
+                'total' => $hTotal
+            ];
+        }
+    } else {
+        $selectedHotel = !empty($hotels) ? $hotels[0] : null;
+        $hName = $selectedHotel ? $selectedHotel['hotel_name'] : "{$dest} Heritage Boutique Resort";
+        $hCity = $selectedHotel ? ($selectedHotel['city_name'] ?: $selectedHotel['city'] ?: $dest) : $dest;
+        $hRate = $selectedHotel ? intval($selectedHotel['deluxe_rate'] ?: $selectedHotel['standard_rate'] ?: $selectedHotel['contract_rate'] ?: 4500) : 4500;
+        $hTotal = $nights * $hRate;
+        $hotelCostTotal += $hTotal;
+
+        $hotelsList[] = [
+            'hotel_name' => $hName,
+            'city' => $hCity,
+            'star_rating' => $selectedHotel['star_rating'] ?? 4,
+            'nights' => $nights,
+            'room_type' => 'Deluxe Room • CP Plan (Breakfast Included)',
+            'est_rate_per_night' => $hRate,
+            'total_cost' => $hTotal
+        ];
+
+        $quoteItems[] = [
+            'type' => 'hotel',
+            'name' => "{$hName} [{$hCity}]",
+            'detail' => "Deluxe Room • CP Plan (Breakfast Included) • {$nights} Nights",
+            'qty' => $nights,
+            'rate' => $hRate,
+            'total' => $hTotal
+        ];
+    }
 
     $dayByDay = [];
     $sightChunk = !empty($sightseeings) ? array_chunk($sightseeings, 2) : [];
@@ -522,15 +626,26 @@ function buildDeterministicDbItinerary($dest, $days, $nights, $style, $tier, $pa
         $s1 = !empty($chunk[0]) ? ($chunk[0]['name'] ?? $chunk[0]['sightseeing_name']) : "{$dest} Heritage Center";
         $s2 = !empty($chunk[1]) ? ($chunk[1]['name'] ?? $chunk[1]['sightseeing_name']) : "{$dest} Sunset Vantage Point";
 
+        // Assign correct overnight hotel from hotelsList based on day
+        $currentHotel = $hotelsList[0];
+        $cumulativeNights = 0;
+        foreach ($hotelsList as $hl) {
+            $cumulativeNights += $hl['nights'];
+            if ($d <= $cumulativeNights || $hl === end($hotelsList)) {
+                $currentHotel = $hl;
+                break;
+            }
+        }
+
         if ($d === 1) {
-            $dayTitle = "Day 1: Arrival & Welcome to {$dest}";
-            $desc = "Arrive at {$dest}. Meet our dedicated chauffeur at the airport/station. Transfer to your luxury stay, check-in, and relax. In the evening, visit {$s1} and enjoy a serene cultural walk with traditional dinner.";
+            $dayTitle = "Day 1: Arrival & Scenic Transfer to {$currentHotel['city']}";
+            $desc = "Arrive for your {$dest} tour. Meet our dedicated chauffeur at the arrival hub. Enjoy a picturesque drive to your luxury stay at {$currentHotel['hotel_name']}, check-in, and relax. In the evening, visit {$s1} and enjoy local authentic cuisine.";
         } elseif ($d === $days) {
-            $dayTitle = "Day {$d}: Souvenir Shopping & Departure";
-            $desc = "Enjoy a leisurely breakfast at the hotel. Visit local handicraft markets and spice bazaars. Later, our chauffeur will transfer you to the airport/station for your onward journey home with unforgettable memories.";
+            $dayTitle = "Day {$d}: Souvenir Shopping & Departure from {$currentHotel['city']}";
+            $desc = "Enjoy a leisurely breakfast at {$currentHotel['hotel_name']}. Visit local spice and tea markets or craft bazaars. Later, our chauffeur will transfer you to the airport/station for your onward flight with wonderful memories.";
         } else {
-            $dayTitle = "Day {$d}: Exploring {$s1} & {$s2}";
-            $desc = "Morning excursion to {$s1}, admiring ancient architecture and scenic viewpoints. In the afternoon, explore {$s2} followed by local authentic cuisine and evening leisure.";
+            $dayTitle = "Day {$d}: {$currentHotel['city']} Sightseeing → {$s1} & {$s2}";
+            $desc = "Morning excursion to {$s1}, admiring lush panoramic vistas and heritage sights. In the afternoon, explore {$s2} followed by scenic photo stops and evening leisure.";
         }
 
         $dayByDay[] = [
@@ -539,7 +654,7 @@ function buildDeterministicDbItinerary($dest, $days, $nights, $style, $tier, $pa
             'morning_highlight' => $d === 1 ? 'Chauffeur Pickup & Check-in' : "Visit {$s1}",
             'afternoon_highlight' => "Explore {$s2}",
             'evening_highlight' => 'Local Food Trail & Leisure',
-            'overnight_stay' => "{$hName}, {$hCity}",
+            'overnight_stay' => "{$currentHotel['hotel_name']}, {$currentHotel['city']}",
             'drive_distance_km' => rand(30, 80),
             'description' => $desc,
             'activities' => ["Visit {$s1}", "Visit {$s2}", 'Chauffeur Transfers', 'Photo Stops']
@@ -548,6 +663,24 @@ function buildDeterministicDbItinerary($dest, $days, $nights, $style, $tier, $pa
 
     $transportDailyRate = ($pax > 4) ? 4500 : 3200;
     $transportTotal = $days * $transportDailyRate;
+
+    $quoteItems[] = [
+        'type' => 'transport',
+        'name' => "Dedicated Private AC Vehicle ({$days} Days)",
+        'detail' => "Full-circuit multi-city transfers, airport pickup & all toll taxes",
+        'qty' => $days,
+        'rate' => $transportDailyRate,
+        'total' => $transportTotal
+    ];
+
+    $quoteItems[] = [
+        'type' => 'activity',
+        'name' => "Curated Sightseeing & Permit Entry Assistance",
+        'detail' => "Assisted entry & local cultural highlights for {$dest}",
+        'qty' => 1,
+        'rate' => 2000,
+        'total' => 2000
+    ];
 
     return [
         'package_title' => "Signature {$dest} Experience ({$nights}N/{$days}D): Handpicked Stays & Private Chauffeur",
@@ -569,31 +702,6 @@ function buildDeterministicDbItinerary($dest, $days, $nights, $style, $tier, $pa
             "Monument entrance fees, guide charges, and optional adventure activities",
             "Personal expenses, room service, laundry, and tips"
         ],
-        'quote_items' => [
-            [
-                'type' => 'hotel',
-                'name' => "{$hName} ({$hCity})",
-                'detail' => "Deluxe Room • CP Plan (Breakfast Included) • {$nights} Nights",
-                'qty' => $nights,
-                'rate' => $hRate,
-                'total' => $hTotal
-            ],
-            [
-                'type' => 'transport',
-                'name' => "Dedicated Private AC Vehicle ({$days} Days)",
-                'detail' => "Full-circuit sightseeing, airport transfers & all highway tolls",
-                'qty' => $days,
-                'rate' => $transportDailyRate,
-                'total' => $transportTotal
-            ],
-            [
-                'type' => 'activity',
-                'name' => "Curated Sightseeing & Permit Assistance",
-                'detail' => "Assisted entry & local cultural highlights",
-                'qty' => 1,
-                'rate' => 2000,
-                'total' => 2000
-            ]
-        ]
+        'quote_items' => $quoteItems
     ];
 }
