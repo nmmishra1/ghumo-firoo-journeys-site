@@ -46,25 +46,39 @@ export interface QuoteHeader {
 export const quoteService = {
   // Helper to group flat quote rows into QuoteHeader trees
   groupQuotes(rows: any[]): QuoteHeader[] {
-    const groups: Record<number, any[]> = {};
+    const groups: Record<string, any[]> = {};
     rows.forEach(r => {
-      const lid = r.lead_id;
-      if (!groups[lid]) groups[lid] = [];
-      groups[lid].push(r);
+      // If a quote has a valid lead_id > 0 AND shares the same parent_quote_id or package_name, group under lead
+      // If lead_id is 0 or multiple independent quotes exist for lead 0, group by their root quote id / quote_number
+      const rootId = r.parent_quote_id || r.id;
+      const groupKey = (r.lead_id && r.lead_id > 0)
+        ? (r.parent_quote_id ? `lead_${r.lead_id}_root_${r.parent_quote_id}` : `quote_${rootId}`)
+        : `quote_${rootId}`;
+
+      if (!groups[groupKey]) groups[groupKey] = [];
+      groups[groupKey].push(r);
     });
     
-    return Object.keys(groups).map(lid => {
-      const list = groups[Number(lid)];
+    return Object.keys(groups).map(key => {
+      const list = groups[key];
       // Sort versions by version_number ascending
       list.sort((a, b) => a.version_number - b.version_number);
       const latest = list[list.length - 1];
+      const rootItem = list[0];
+      const lid = Number(latest.lead_id || 0);
+      
+      // Generate clean quote number
+      const qNumShort = rootItem.id ? rootItem.id.replace(/[^a-zA-Z0-9]/g, '').slice(-4).toUpperCase() : '001';
+      const quoteNum = lid > 0 
+        ? `QT-2026-${String(lid).padStart(3, '0')}`
+        : `QT-2026-${qNumShort}`;
       
       return {
-        id: list[0].id,
-        leadId: Number(lid),
-        quoteNumber: `QT-2026-${String(lid).padStart(3, '0')}`,
-        customerName: latest.customer_name || 'Guest',
-        destination: latest.package_name,
+        id: rootItem.id,
+        leadId: lid,
+        quoteNumber: quoteNum,
+        customerName: latest.customer_name || 'Valued Client',
+        destination: latest.package_name || 'Custom Package',
         currentVersion: latest.version_number,
         status: latest.status,
         decisionStatus: latest.status === 'Accepted' ? 'Confirmed' : latest.status === 'Rejected' ? 'Lost' : 'Interested',

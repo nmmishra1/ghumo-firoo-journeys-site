@@ -1499,7 +1499,8 @@ export default function QuoteWorkspace({ quotes: propQuotes = [], onCreateRevisi
                     margin: vA?.margin || 15
                   });
                   setAiResult(null);
-                  setAiModalOpen(true);
+                  setCreationMode('ai');
+                  setNewQuoteModalOpen(true);
                 }}
                 className="bg-gradient-to-r from-purple-600 via-indigo-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-black text-xs rounded-xl h-9 px-3.5 shadow-md flex items-center gap-1.5 shrink-0 border border-purple-400/30"
               >
