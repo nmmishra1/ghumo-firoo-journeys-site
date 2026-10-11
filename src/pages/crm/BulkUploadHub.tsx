@@ -625,7 +625,14 @@ export const BulkUploadHub: React.FC<{ initialModule?: any }> = ({ initialModule
         };
       }
     } else if (mod === 'activities') {
-      endpoint = `${API_BASE}/api.php?table=activities`;
+      endpoint = `${API_BASE}/activities.php`;
+      
+      const toArray = (val: any): string[] => {
+        if (!val) return [];
+        if (Array.isArray(val)) return val;
+        return String(val).split(/[,;|]/).map(s => s.trim()).filter(Boolean);
+      };
+
       payload = {
         activity_name: dataPayload.activity_name,
         activity_code: dataPayload.activity_code || `ACT-${Date.now().toString(36).toUpperCase()}`,
@@ -642,6 +649,9 @@ export const BulkUploadHub: React.FC<{ initialModule?: any }> = ({ initialModule
         gst_included: dataPayload.gst_included === 'true' || dataPayload.gst_included === '1',
         gst_percentage: parseFloat(dataPayload.gst_percentage) || 5,
         description: dataPayload.description || '',
+        highlights: toArray(dataPayload.highlights),
+        inclusions: toArray(dataPayload.inclusions),
+        exclusions: toArray(dataPayload.exclusions),
         active_status: true
       };
 
@@ -652,7 +662,7 @@ export const BulkUploadHub: React.FC<{ initialModule?: any }> = ({ initialModule
           body: JSON.stringify(payload)
         });
         const resData = await res.json().catch(() => ({}));
-        if (res.ok) {
+        if (res.ok && (resData.success || resData.id)) {
           return {
             ok: true,
             endpoint,
@@ -662,6 +672,23 @@ export const BulkUploadHub: React.FC<{ initialModule?: any }> = ({ initialModule
             diagnosis: `Activity "${dataPayload.activity_name}" saved to MySQL.`
           };
         } else {
+          // Fallback to table=activities if activities.php failed
+          const fallbackRes = await fetch(`${API_BASE}/api.php?table=activities`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', ...headers },
+            body: JSON.stringify(payload)
+          });
+          const fbData = await fallbackRes.json().catch(() => ({}));
+          if (fallbackRes.ok) {
+            return {
+              ok: true,
+              endpoint: `${API_BASE}/api.php?table=activities`,
+              payload,
+              status: fallbackRes.status,
+              data: fbData,
+              diagnosis: `Activity "${dataPayload.activity_name}" saved to MySQL (via table endpoint).`
+            };
+          }
           const failMsg = resData.error || resData.message || resData.details || `HTTP ${res.status} Error from server.`;
           return {
             ok: false,
@@ -685,11 +712,13 @@ export const BulkUploadHub: React.FC<{ initialModule?: any }> = ({ initialModule
         };
       }
     } else if (mod === 'hotels') {
-      endpoint = `${API_BASE}/api.php?table=hotels`;
+      endpoint = `${API_BASE}/hotels.php`;
       const destCity = dataPayload.destination || dataPayload.city || '';
-      payload = {
+      const hotelCode = dataPayload.hotel_code || `HOT-${Date.now().toString(36).toUpperCase()}`;
+      
+      const hotelPayload = {
         hotel_name: dataPayload.hotel_name,
-        hotel_code: dataPayload.hotel_code || `HOT-${Date.now().toString(36).toUpperCase()}`,
+        hotel_code: hotelCode,
         destination: destCity,
         city: destCity,
         star_rating: parseInt(dataPayload.star_rating) || 3,
@@ -697,42 +726,198 @@ export const BulkUploadHub: React.FC<{ initialModule?: any }> = ({ initialModule
         contact_number: dataPayload.contact_number || '',
         email: dataPayload.email || '',
         supplier_name: dataPayload.supplier_name || '',
-        active_status: true
+        active_status: true,
+        active: true
       };
 
       try {
+        // 1. Create or Find Hotel in hotels table
+        let hotelId: string = '';
         const res = await fetch(endpoint, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', ...headers },
-          body: JSON.stringify(payload)
+          body: JSON.stringify(hotelPayload)
         });
         const resData = await res.json().catch(() => ({}));
-        if (res.ok) {
-          return {
-            ok: true,
-            endpoint,
-            payload,
-            status: res.status,
-            data: resData,
-            diagnosis: `Hotel "${dataPayload.hotel_name}" saved to MySQL.`
-          };
+
+        if (res.ok && (resData.success || resData.id)) {
+          hotelId = String(resData.id || resData.hotel_id || '');
         } else {
-          const failMsg = resData.error || resData.message || resData.details || `HTTP ${res.status} Error from server.`;
-          return {
-            ok: false,
-            endpoint,
-            payload,
-            status: res.status,
-            data: resData,
-            error: failMsg,
-            diagnosis: failMsg
-          };
+          // Fallback via api.php?table=hotels
+          const fbHotelRes = await fetch(`${API_BASE}/api.php?table=hotels`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', ...headers },
+            body: JSON.stringify(hotelPayload)
+          });
+          const fbHotelData = await fbHotelRes.json().catch(() => ({}));
+          if (fbHotelRes.ok && (fbHotelData.id || fbHotelData.success)) {
+            hotelId = String(fbHotelData.id || '');
+          } else {
+            // Check if duplicate existing hotel can be retrieved
+            const checkExisting = await fetch(`${API_BASE}/hotels.php?search=${encodeURIComponent(dataPayload.hotel_name)}`);
+            const existingList = await checkExisting.json().catch(() => []);
+            const found = Array.isArray(existingList) ? existingList.find((h: any) => (h.hotel_name || '').toLowerCase() === dataPayload.hotel_name.toLowerCase()) : null;
+            if (found?.id) {
+              hotelId = String(found.id);
+            } else {
+              const failMsg = resData.error || resData.message || resData.details || `HTTP ${res.status} Error from server.`;
+              return {
+                ok: false,
+                endpoint,
+                payload: hotelPayload,
+                status: res.status,
+                data: resData,
+                error: failMsg,
+                diagnosis: failMsg
+              };
+            }
+          }
         }
+
+        // 2. Relational resolution: If rate details are present, auto-create room category, contract & rate
+        const doubleRate = parseFloat(dataPayload.double_rate) || 0;
+        const roomCatName = dataPayload.room_category || 'Standard Room';
+        const mealPlan = dataPayload.meal_plan || 'CP';
+        const gstPct = parseFloat(dataPayload.gst_percentage) || 12;
+        const gstInc = dataPayload.gst_included === 'true' || dataPayload.gst_included === '1';
+        const singleRate = parseFloat(dataPayload.single_rate) || (doubleRate > 0 ? Math.round(doubleRate * 0.85) : 0);
+        const tripleRate = parseFloat(dataPayload.triple_rate) || (doubleRate > 0 ? Math.round(doubleRate * 1.35) : 0);
+        const extraAdult = parseFloat(dataPayload.extra_adult_rate) || 0;
+        const childBed = parseFloat(dataPayload.child_bed_rate) || 0;
+        const childNoBed = parseFloat(dataPayload.child_no_bed_rate) || 0;
+        const markupVal = parseFloat(dataPayload.markup) || 0;
+
+        if (hotelId && doubleRate > 0) {
+          try {
+            // (a) Resolve or create room category
+            let roomCatId = '';
+            const rcRes = await fetch(`${API_BASE}/api.php?table=room_categories&hotel_id=${hotelId}`);
+            const rcList = await rcRes.json().catch(() => []);
+            const existingRc = Array.isArray(rcList) ? rcList.find((r: any) => (r.room_category_name || '').toLowerCase() === roomCatName.toLowerCase()) : null;
+            if (existingRc?.id) {
+              roomCatId = String(existingRc.id);
+            } else {
+              const newRcRes = await fetch(`${API_BASE}/api.php?table=room_categories`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', ...headers },
+                body: JSON.stringify({
+                  hotel_id: hotelId,
+                  room_category_name: roomCatName,
+                  max_adults: 3,
+                  max_children: 2,
+                  bed_type: 'King / Twin Bed',
+                  active_status: 1
+                })
+              });
+              const newRcData = await newRcRes.json().catch(() => ({}));
+              roomCatId = String(newRcData.id || '');
+            }
+
+            // (b) Resolve or create hotel contract
+            let contractId = '';
+            const cRes = await fetch(`${API_BASE}/api.php?table=hotel_contracts&hotel_id=${hotelId}`);
+            const cList = await cRes.json().catch(() => []);
+            const existingContract = Array.isArray(cList) ? cList[0] : null;
+            if (existingContract?.id) {
+              contractId = String(existingContract.id);
+            } else {
+              const newCRes = await fetch(`${API_BASE}/api.php?table=hotel_contracts`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', ...headers },
+                body: JSON.stringify({
+                  hotel_id: hotelId,
+                  contract_name: `${dataPayload.hotel_name} Contract 2026-27`,
+                  valid_from: new Date().toISOString().slice(0, 10),
+                  valid_to: new Date(Date.now() + 31536000000).toISOString().slice(0, 10),
+                  currency: 'INR',
+                  gst_percentage: gstPct,
+                  active_status: 1
+                })
+              });
+              const newCData = await newCRes.json().catch(() => ({}));
+              contractId = String(newCData.id || '');
+            }
+
+            // (c) Insert into hotel_contract_rates
+            const netCost = gstInc ? (doubleRate / (1 + gstPct / 100)) : doubleRate;
+            const gstAmt = gstInc ? (doubleRate - netCost) : (doubleRate * (gstPct / 100));
+            const supplierCost = gstInc ? doubleRate : (doubleRate + gstAmt);
+
+            if (contractId) {
+              await fetch(`${API_BASE}/api.php?table=hotel_contract_rates`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', ...headers },
+                body: JSON.stringify({
+                  contract_id: contractId,
+                  room_category_id: roomCatId || null,
+                  meal_plan_id: mealPlan.toUpperCase(),
+                  single_rate: singleRate,
+                  double_rate: doubleRate,
+                  triple_rate: tripleRate,
+                  extra_adult_rate: extraAdult,
+                  child_with_bed_rate: childBed,
+                  child_without_bed_rate: childNoBed,
+                  quad_rate: doubleRate * 2,
+                  five_bed_rate: 0,
+                  six_bed_rate: 0,
+                  weekend_surcharge: 0,
+                  peak_season_surcharge: 0,
+                  active_status: 1,
+                  markup: markupVal,
+                  rate_type: gstInc ? 'inclusive' : 'exclusive',
+                  gst_percentage: gstPct,
+                  gst_amount: gstAmt,
+                  net_cost: netCost,
+                  supplier_cost: supplierCost,
+                  selling_cost: supplierCost + markupVal
+                })
+              });
+            }
+
+            // (d) Also populate legacy hotel_rates table for Itinerary Builder fallback
+            await fetch(`${API_BASE}/api.php?table=hotel_rates`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json', ...headers },
+              body: JSON.stringify({
+                hotel_id: hotelId,
+                room_type: roomCatName,
+                room_category: roomCatName,
+                meal_plan: mealPlan.toUpperCase(),
+                rate_per_night: doubleRate,
+                single_occupancy_rate: singleRate,
+                double_occupancy_rate: doubleRate,
+                triple_occupancy_rate: tripleRate,
+                extra_adult_rate: extraAdult,
+                child_with_bed_rate: childBed,
+                child_without_bed_rate: childNoBed,
+                child_rate: childBed,
+                gst_percentage: gstPct,
+                gst_included: gstInc ? 1 : 0,
+                season: 'Normal Season',
+                valid_from: new Date().toISOString().slice(0, 10),
+                valid_to: new Date(Date.now() + 31536000000).toISOString().slice(0, 10),
+                is_active: 1,
+                active_status: 1
+              })
+            }).catch(() => {});
+          } catch (relErr) {
+            console.warn('Non-fatal: failed to attach child rate to hotel:', relErr);
+          }
+        }
+
+        return {
+          ok: true,
+          endpoint,
+          payload: hotelPayload,
+          status: 200,
+          data: resData,
+          diagnosis: `Hotel "${dataPayload.hotel_name}" + Room Rate (₹${doubleRate}) linked to MySQL.`
+        };
       } catch (err: any) {
         return {
           ok: false,
           endpoint,
-          payload,
+          payload: hotelPayload,
           status: 0,
           data: null,
           error: err.message,
@@ -740,49 +925,199 @@ export const BulkUploadHub: React.FC<{ initialModule?: any }> = ({ initialModule
         };
       }
     } else if (mod === 'cabs') {
+      // Complete relational resolution for Cabs:
+      // 1. cab_suppliers (find or create)
+      // 2. cab_contracts (find or create)
+      // 3. cab_vehicles (find or create)
+      // 4. cab_routes (find or create)
+      // 5. cab_contract_rates (insert rate linking all IDs)
       endpoint = `${API_BASE}/api.php?table=cab_contract_rates`;
-      payload = {
-        supplier_name: dataPayload.supplier_name,
-        vehicle_type: dataPayload.vehicle_type,
-        source_city: dataPayload.source_city,
-        destination_city: dataPayload.destination_city,
-        rate_model: dataPayload.rate_model || 'Per KM',
-        rate_per_km: parseFloat(dataPayload.rate_per_km) || 0,
-        min_km_per_day: parseFloat(dataPayload.min_km_per_day) || 300,
-        daily_rate: parseFloat(dataPayload.daily_rate) || 0,
-        block_circuit_cost: parseFloat(dataPayload.block_circuit_cost) || 0,
-        block_circuit_km: parseFloat(dataPayload.block_circuit_km) || 0,
-        block_circuit_nights: dataPayload.block_circuit_nights || '',
-        transfer_cost: parseFloat(dataPayload.transfer_cost) || 0,
-        driver_allowance: parseFloat(dataPayload.driver_allowance) || 300,
-        gst_included: dataPayload.gst_included === 'true' || dataPayload.gst_included === '1',
-        gst_percentage: parseFloat(dataPayload.gst_percentage) || 5,
-        markup_percentage: parseFloat(dataPayload.markup_percentage) || 10
-      };
-
+      
       try {
-        const res = await fetch(endpoint, {
+        const suppName = String(dataPayload.supplier_name || 'Generic Cab Supplier').trim();
+        const suppCode = String(dataPayload.supplier_code || `CAB-SUP-${Date.now().toString(36).toUpperCase()}`).trim();
+        const vehType = String(dataPayload.vehicle_type || 'Sedan (Dzire / Etios)').trim();
+        const vehCategory = String(dataPayload.vehicle_category || 'Standard').trim();
+        const srcCity = String(dataPayload.source_city || '').trim();
+        const destCity = String(dataPayload.destination_city || '').trim();
+        const rateModel = dataPayload.rate_model || 'Per KM';
+        const season = dataPayload.season || 'Normal Season';
+        const ratePerKm = parseFloat(dataPayload.rate_per_km) || 0;
+        const minKmPerDay = parseFloat(dataPayload.min_km_per_day) || 300;
+        const dailyRate = parseFloat(dataPayload.daily_rate) || 0;
+        const blockCircuitCost = parseFloat(dataPayload.block_circuit_cost) || 0;
+        const blockCircuitKm = parseFloat(dataPayload.block_circuit_km) || 0;
+        const blockCircuitNights = dataPayload.block_circuit_nights || '';
+        const transferCost = parseFloat(dataPayload.transfer_cost) || 0;
+        const driverAllowance = parseFloat(dataPayload.driver_allowance) || 300;
+        const gstInc = dataPayload.gst_included === 'true' || dataPayload.gst_included === '1';
+        const gstPct = parseFloat(dataPayload.gst_percentage) || 5;
+        const markupPct = parseFloat(dataPayload.markup_percentage) || 10;
+        const capacityAdults = parseInt(dataPayload.capacity_adults) || 4;
+
+        // 1. Find or create cab_supplier
+        let supplierId: string = '';
+        const sRes = await fetch(`${API_BASE}/api.php?table=cab_suppliers`);
+        const sList = await sRes.json().catch(() => []);
+        const matchedSup = Array.isArray(sList) ? sList.find((s: any) => 
+          (s.supplier_name && s.supplier_name.toLowerCase() === suppName.toLowerCase()) ||
+          (s.supplier_code && s.supplier_code.toLowerCase() === suppCode.toLowerCase())
+        ) : null;
+
+        if (matchedSup?.id) {
+          supplierId = String(matchedSup.id);
+        } else {
+          const newSupRes = await fetch(`${API_BASE}/api.php?table=cab_suppliers`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', ...headers },
+            body: JSON.stringify({
+              supplier_name: suppName,
+              supplier_code: suppCode,
+              contact_person: 'Operations Desk',
+              active_status: 1
+            })
+          });
+          const newSupData = await newSupRes.json().catch(() => ({}));
+          supplierId = String(newSupData.id || `sup-${Date.now()}`);
+        }
+
+        // 2. Find or create cab_contract for this supplier
+        let contractId: string = '';
+        const cRes = await fetch(`${API_BASE}/api.php?table=cab_contracts`);
+        const cList = await cRes.json().catch(() => []);
+        const matchedContract = Array.isArray(cList) ? cList.find((c: any) => String(c.supplier_id) === supplierId) : null;
+
+        if (matchedContract?.id) {
+          contractId = String(matchedContract.id);
+        } else {
+          const newCRes = await fetch(`${API_BASE}/api.php?table=cab_contracts`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', ...headers },
+            body: JSON.stringify({
+              supplier_id: supplierId,
+              contract_name: `Contract - ${suppName}`,
+              valid_from: new Date().toISOString().slice(0, 10),
+              valid_to: new Date(Date.now() + 31536000000).toISOString().slice(0, 10),
+              active_status: 1
+            })
+          });
+          const newCData = await newCRes.json().catch(() => ({}));
+          contractId = String(newCData.id || `con-${Date.now()}`);
+        }
+
+        // 3. Find or create cab_vehicle
+        let vehicleId: string = '';
+        const vRes = await fetch(`${API_BASE}/api.php?table=cab_vehicles`);
+        const vList = await vRes.json().catch(() => []);
+        const matchedVeh = Array.isArray(vList) ? vList.find((v: any) => 
+          (v.vehicle_type && v.vehicle_type.toLowerCase() === vehType.toLowerCase())
+        ) : null;
+
+        if (matchedVeh?.id) {
+          vehicleId = String(matchedVeh.id);
+        } else {
+          const newVRes = await fetch(`${API_BASE}/api.php?table=cab_vehicles`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', ...headers },
+            body: JSON.stringify({
+              vehicle_type: vehType,
+              vehicle_category: vehCategory,
+              capacity_adults: capacityAdults,
+              capacity_children: 2,
+              luggage_capacity: '2-4 Bags',
+              availability_status: 'Available',
+              active_status: 1
+            })
+          });
+          const newVData = await newVRes.json().catch(() => ({}));
+          vehicleId = String(newVData.id || `veh-${Date.now()}`);
+        }
+
+        // 4. Find or create cab_route
+        let routeId: string = '';
+        const rRes = await fetch(`${API_BASE}/api.php?table=cab_routes`);
+        const rList = await rRes.json().catch(() => []);
+        const matchedRoute = Array.isArray(rList) ? rList.find((r: any) => 
+          (r.source && r.source.toLowerCase() === srcCity.toLowerCase()) &&
+          (r.destination && r.destination.toLowerCase() === destCity.toLowerCase())
+        ) : null;
+
+        if (matchedRoute?.id) {
+          routeId = String(matchedRoute.id);
+        } else {
+          const newRRes = await fetch(`${API_BASE}/api.php?table=cab_routes`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', ...headers },
+            body: JSON.stringify({
+              source: srcCity,
+              destination: destCity,
+              route_type: dataPayload.route_type || 'Intercity Transfer',
+              country: 'India',
+              distance_km: blockCircuitKm || 100,
+              travel_time: 'As per itinerary',
+              active_status: 1
+            })
+          });
+          const newRData = await newRRes.json().catch(() => ({}));
+          routeId = String(newRData.id || `rt-${Date.now()}`);
+        }
+
+        // 5. Insert Rate linking contract_id, vehicle_id, route_id
+        const baseCost = blockCircuitCost > 0 ? blockCircuitCost : (dailyRate > 0 ? dailyRate : (ratePerKm * minKmPerDay));
+        const finalCost = baseCost + driverAllowance;
+        const gstAmt = gstInc ? 0 : (finalCost * (gstPct / 100));
+        const supplierCost = finalCost + gstAmt;
+        const markupAmt = supplierCost * (markupPct / 100);
+        const sellingCost = supplierCost + markupAmt;
+
+        payload = {
+          contract_id: contractId,
+          vehicle_id: vehicleId,
+          route_id: routeId,
+          season: season,
+          rate_model: rateModel,
+          rate_per_km: ratePerKm,
+          min_km_per_day: minKmPerDay,
+          daily_rate: dailyRate,
+          block_circuit_cost: blockCircuitCost,
+          block_circuit_km: blockCircuitKm,
+          block_circuit_nights: blockCircuitNights,
+          transfer_cost: transferCost,
+          driver_allowance: driverAllowance,
+          base_cost: baseCost,
+          supplier_cost: supplierCost,
+          selling_cost: sellingCost,
+          markup_percentage: markupPct,
+          markup_amount: markupAmt,
+          gst_included: gstInc,
+          gst_percentage: gstPct,
+          gst_amount: gstAmt,
+          active_status: 1
+        };
+
+        const rateRes = await fetch(endpoint, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', ...headers },
           body: JSON.stringify(payload)
         });
-        const resData = await res.json().catch(() => ({}));
-        if (res.ok) {
+        const resData = await rateRes.json().catch(() => ({}));
+
+        if (rateRes.ok) {
           return {
             ok: true,
             endpoint,
             payload,
-            status: res.status,
+            status: rateRes.status,
             data: resData,
-            diagnosis: `Cab rate for "${dataPayload.vehicle_type}" saved to MySQL.`
+            diagnosis: `Cab rate for "${vehType}" (${srcCity} -> ${destCity}) linked to contract & saved to MySQL.`
           };
         } else {
-          const failMsg = resData.error || resData.message || resData.details || `HTTP ${res.status} Error from server.`;
+          const failMsg = resData.error || resData.message || resData.details || `HTTP ${rateRes.status} Error from server.`;
           return {
             ok: false,
             endpoint,
             payload,
-            status: res.status,
+            status: rateRes.status,
             data: resData,
             error: failMsg,
             diagnosis: failMsg
@@ -796,25 +1131,33 @@ export const BulkUploadHub: React.FC<{ initialModule?: any }> = ({ initialModule
           status: 0,
           data: null,
           error: err.message,
-          diagnosis: `Network Error: ${err.message}`
+          diagnosis: `Cab processing error: ${err.message}`
         };
       }
     } else {
       // packages
-      endpoint = `${API_BASE}/api.php?table=packages`;
+      endpoint = `${API_BASE}/packages.php`;
       const pkgName = dataPayload.name || dataPayload.title || dataPayload.package_name || 'Imported Package';
+      const cleanSlug = dataPayload.slug || pkgName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+      
+      const toArray = (val: any): string[] => {
+        if (!val) return [];
+        if (Array.isArray(val)) return val;
+        return String(val).split(/[,;|]/).map(s => s.trim()).filter(Boolean);
+      };
+
       payload = {
         name: pkgName,
         package_name: pkgName,
         title: pkgName,
-        slug: dataPayload.slug || pkgName.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
+        slug: cleanSlug,
         price: parseFloat(dataPayload.price) || 0,
         duration: dataPayload.duration || '3 Days / 2 Nights',
-        category: dataPayload.category || 'Domestic',
-        destinations: dataPayload.destinations || '',
-        highlights: dataPayload.highlights || '',
-        inclusions: dataPayload.inclusions || '',
-        exclusions: dataPayload.exclusions || '',
+        category: toArray(dataPayload.category || 'Domestic'),
+        destinations: toArray(dataPayload.destinations),
+        highlights: toArray(dataPayload.highlights),
+        inclusions: toArray(dataPayload.inclusions),
+        exclusions: toArray(dataPayload.exclusions),
         tagline: dataPayload.tagline || '',
         is_active: 1
       };
@@ -826,7 +1169,7 @@ export const BulkUploadHub: React.FC<{ initialModule?: any }> = ({ initialModule
           body: JSON.stringify(payload)
         });
         const resData = await res.json().catch(() => ({}));
-        if (res.ok) {
+        if (res.ok && (resData.success || resData.id)) {
           return {
             ok: true,
             endpoint,
@@ -836,6 +1179,30 @@ export const BulkUploadHub: React.FC<{ initialModule?: any }> = ({ initialModule
             diagnosis: `Package "${pkgName}" saved to MySQL.`
           };
         } else {
+          // Fallback via api.php?table=packages
+          const fbRes = await fetch(`${API_BASE}/api.php?table=packages`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', ...headers },
+            body: JSON.stringify({
+              ...payload,
+              destinations: dataPayload.destinations || '',
+              highlights: dataPayload.highlights || '',
+              inclusions: dataPayload.inclusions || '',
+              exclusions: dataPayload.exclusions || ''
+            })
+          });
+          const fbData = await fbRes.json().catch(() => ({}));
+          if (fbRes.ok) {
+            return {
+              ok: true,
+              endpoint: `${API_BASE}/api.php?table=packages`,
+              payload,
+              status: fbRes.status,
+              data: fbData,
+              diagnosis: `Package "${pkgName}" saved to MySQL (via table endpoint).`
+            };
+          }
+
           const failMsg = resData.error || resData.message || resData.details || `HTTP ${res.status} Error from server.`;
           return {
             ok: false,

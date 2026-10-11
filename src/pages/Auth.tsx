@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { Eye, EyeOff, ArrowLeft, Lock, Mail, Sparkles } from 'lucide-react';
+import { Helmet } from 'react-helmet-async';
 
 const Auth = () => {
   const [email, setEmail] = useState('');
@@ -88,6 +89,13 @@ const Auth = () => {
 
   return (
     <div className="min-h-screen bg-[#0B1026] flex flex-col lg:flex-row overflow-x-hidden font-poppins">
+      <Helmet>
+        <title>
+          {isIdle ? 'Session Timed Out | Agent Login | Ghumo Firoo Travels CRM' : 'Agent Sign In | Travel CRM | Ghumo Firoo Travels'}
+        </title>
+        <meta name="robots" content="noindex, nofollow" />
+      </Helmet>
+
       {/* Left Side - Agency Logo & Branding Cover Image */}
       <div 
         className="hidden lg:flex lg:w-1/2 lg:flex-col lg:justify-between bg-cover bg-center relative p-12 overflow-hidden border-r border-white/5 min-h-screen sticky top-0"
@@ -119,7 +127,7 @@ const Auth = () => {
             Smart Lead Management & Automated Itinerary Workflows
           </h1>
           <p className="text-base text-slate-300 font-medium">
-            Streamline your travel consultancy, automate customer proposals, and optimize bookings with the premium Ghumo Firoo enterprise ecosystem.
+            Streamline your travel consultancy, automate customer proposals, and optimize bookings with the premium Ghumo Firoo Travels enterprise ecosystem.
           </p>
         </div>
 
@@ -162,14 +170,32 @@ const Auth = () => {
                 <CardDescription className="text-xs font-medium text-slate-300">
                   Access your premium travel CRM dashboard
                 </CardDescription>
+
                 {isIdle && (
-                  <div className="mt-2 bg-[#C9A25A]/20 border border-[#C9A25A]/45 text-[#C9A25A] rounded-xl p-3 text-[11px] font-semibold text-center animate-pulse">
-                    🔒 You have been logged out due to inactivity. Please log in again.
+                  <div className="mt-3 bg-gradient-to-r from-amber-500/15 via-amber-500/10 to-amber-500/15 border border-amber-500/40 text-amber-200 rounded-2xl p-3.5 text-xs font-medium text-left shadow-lg shadow-amber-950/20 flex items-start gap-3 animate-in fade-in slide-in-from-top-2 duration-300">
+                    <div className="p-2 bg-amber-500/20 text-amber-400 rounded-xl shrink-0 mt-0.5 border border-amber-500/30">
+                      <Lock className="w-4 h-4" />
+                    </div>
+                    <div className="space-y-0.5 min-w-0">
+                      <p className="font-bold text-amber-300 text-xs tracking-wide">Session Timed Out</p>
+                      <p className="text-[11px] text-amber-200/80 leading-relaxed">
+                        You were automatically logged out after 30 minutes of inactivity for account security. Please enter your credentials to resume your workspace.
+                      </p>
+                    </div>
                   </div>
                 )}
+
                 {isRevoked && (
-                  <div className="mt-2 bg-red-500/15 border border-red-500/40 text-red-300 rounded-xl p-3 text-[11px] font-semibold text-center">
-                    🔒 {revokedMessage || 'Your account access has changed. Please contact your administrator.'}
+                  <div className="mt-3 bg-red-500/15 border border-red-500/40 text-red-200 rounded-2xl p-3.5 text-xs font-medium text-left shadow-lg shadow-red-950/20 flex items-start gap-3 animate-in fade-in slide-in-from-top-2 duration-300">
+                    <div className="p-2 bg-red-500/20 text-red-400 rounded-xl shrink-0 mt-0.5 border border-red-500/30">
+                      <Lock className="w-4 h-4" />
+                    </div>
+                    <div className="space-y-0.5 min-w-0">
+                      <p className="font-bold text-red-300 text-xs tracking-wide">Access Notice</p>
+                      <p className="text-[11px] text-red-200/80 leading-relaxed">
+                        {revokedMessage || 'Your account access has changed. Please contact your administrator.'}
+                      </p>
+                    </div>
                   </div>
                 )}
               </div>
@@ -181,13 +207,15 @@ const Auth = () => {
                   <Label htmlFor="email" className="text-xs font-bold text-slate-300 uppercase tracking-wide">Username / Email</Label>
                   <div className="relative">
                     <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                    <Input autoComplete="email"
+                    <Input 
+                      autoComplete="email"
+                      autoFocus={isIdle}
                       id="email"
                       type="email"
                       placeholder="agent@ghumofiroo.com"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      className="h-12 pl-11 focus-visible:ring-accent border-white/10 bg-white/5 text-white placeholder-white/20 rounded-xl font-medium text-sm focus-visible:outline-none"
+                      className="h-12 pl-11 focus-visible:ring-accent border-white/10 bg-white/5 text-white placeholder-white/20 rounded-xl font-medium text-sm focus-visible:outline-none transition-all focus:bg-white/10"
                       required
                     />
                   </div>
@@ -207,13 +235,14 @@ const Auth = () => {
                   </div>
                   <div className="relative">
                     <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                    <Input autoComplete="current-password"
+                    <Input 
+                      autoComplete="current-password"
                       id="password"
                       type={showPassword ? "text" : "password"}
-                      placeholder="••••••"
+                      placeholder="••••••••"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      className="h-12 pl-11 pr-12 focus-visible:ring-accent border-white/10 bg-white/5 text-white placeholder-white/20 rounded-xl font-medium text-sm focus-visible:outline-none"
+                      className="h-12 pl-11 pr-12 focus-visible:ring-accent border-white/10 bg-white/5 text-white placeholder-white/20 rounded-xl font-medium text-sm focus-visible:outline-none transition-all focus:bg-white/10"
                       required
                       minLength={8}
                     />
@@ -221,7 +250,7 @@ const Auth = () => {
                       type="button"
                       variant="ghost"
                       size="sm"
-                      className="absolute right-0 top-0 h-12 px-3 hover:bg-transparent text-slate-400"
+                      className="absolute right-0 top-0 h-12 px-3 hover:bg-transparent text-slate-400 hover:text-white"
                       onClick={() => setShowPassword(!showPassword)}
                     >
                       {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
@@ -231,17 +260,22 @@ const Auth = () => {
 
                 <Button 
                   type="submit" 
-                  className="w-full h-12 text-sm font-bold bg-gradient-warm hover:scale-[1.02] active:scale-95 text-[#0B1026] rounded-xl shadow-lg shadow-accent/10 transition-all duration-300 mt-2 border-0 cursor-pointer" 
+                  className="w-full h-12 text-sm font-bold bg-gradient-warm hover:brightness-110 active:scale-[0.99] text-[#0B1026] rounded-xl shadow-lg shadow-accent/15 transition-all duration-200 mt-2 border-0 cursor-pointer" 
                   disabled={loading}
                 >
-                  {loading ? 'Processing...' : 'Sign In'}
+                  {loading ? 'Signing In...' : (isIdle ? 'Resume Session' : 'Sign In')}
                 </Button>
               </form>
 
-              <div className="mt-6 text-center border-t border-white/10 pt-4">
+              <div className="mt-6 text-center border-t border-white/10 pt-4 space-y-2">
                 <p className="text-xs font-medium text-slate-300">
-                  🔒 Account registration is <span className="text-accent font-semibold">Admin Invitation</span> only. Contact your CRM administrator for an invite.
+                  🔒 Account registration is <span className="text-accent font-semibold">Admin Invitation</span> only.
                 </p>
+                <div className="flex items-center justify-center gap-4 text-[11px] text-slate-400">
+                  <Link to="/" className="hover:text-accent transition-colors">Website Home</Link>
+                  <span>•</span>
+                  <Link to="/contact" className="hover:text-accent transition-colors">Support Desk</Link>
+                </div>
               </div>
             </CardContent>
           </Card>
