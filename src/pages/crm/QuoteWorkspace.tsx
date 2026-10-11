@@ -14,6 +14,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { useToast } from '@/hooks/use-toast';
 import { quoteService, QuoteHeader, QuoteVersion, QuoteItem } from '@/services/quoteService';
 import { itineraryService, GeneratedAIItineraryResult } from '@/services/itineraryService';
+import { leadService, Lead } from '@/services/leadService';
 
 const API_BASE = import.meta.env.VITE_PHP_BASE_URL || import.meta.env.VITE_API_BASE_URL || '/php-backend';
 
@@ -24,6 +25,22 @@ interface QuoteWorkspaceProps {
   onUpdateVersion: (quoteHeaderId: string, versionId: string, updatedVersion: QuoteVersion) => void;
   onRefresh?: () => void;
 }
+
+// Curated verified travel circuits with aliases for spelling tolerance & hotel contract linking
+const STANDARD_CIRCUITS = [
+  { name: 'Kashmir Valley Circuit', primaryCity: 'Kashmir', subtitle: 'Srinagar • Gulmarg • Pahalgam • Sonmarg', aliases: ['kashmir', 'kasmir', 'srinagar', 'gulmarg', 'pahalgam', 'sonmarg'] },
+  { name: 'Kerala Backwaters & Hills', primaryCity: 'Kerala', subtitle: 'Cochin • Munnar • Thekkady • Alleppey', aliases: ['kerala', 'munnar', 'alleppey', 'alappuzha', 'cochin', 'kochi', 'thekkady'] },
+  { name: 'Himachal Hill Stations', primaryCity: 'Himachal', subtitle: 'Shimla • Kullu • Manali • Dharamshala', aliases: ['himachal', 'manali', 'shimla', 'simla', 'kullu', 'dharamshala'] },
+  { name: 'Royal Rajasthan Heritage', primaryCity: 'Rajasthan', subtitle: 'Jaipur • Jodhpur • Jaisalmer • Udaipur', aliases: ['rajasthan', 'jaipur', 'jodhpur', 'jaisalmer', 'udaipur'] },
+  { name: 'Char Dham Sacred Yatra', primaryCity: 'Char Dham', subtitle: 'Haridwar • Barkot • Uttarkashi • Kedarnath • Badrinath', aliases: ['chardham', 'char dham', 'kedarnath', 'badrinath', 'yamunotri', 'gangotri', 'haridwar'] },
+  { name: 'Goa Coastal Leisure', primaryCity: 'Goa', subtitle: 'North Goa Beaches • South Goa Heritage Resorts', aliases: ['goa', 'calangute', 'baga', 'panaji'] },
+  { name: 'Andaman Tropical Islands', primaryCity: 'Andaman', subtitle: 'Port Blair • Havelock • Neil Island', aliases: ['andaman', 'port blair', 'havelock', 'neil island'] },
+  { name: 'Rann of Kutch White Desert', primaryCity: 'Rann of Kutch', subtitle: 'Bhuj • Dhordo Tent City • Mandvi Beach', aliases: ['rann of kutch', 'kutch', 'bhuj', 'dhordo'] },
+  { name: 'Dubai & Abu Dhabi Tour', primaryCity: 'Dubai', subtitle: 'Downtown Dubai • Desert Safari • Marina • Yas Island', aliases: ['dubai', 'abu dhabi', 'uae'] },
+  { name: 'Thailand Tropical Escape', primaryCity: 'Thailand', subtitle: 'Bangkok • Pattaya • Phuket • Krabi', aliases: ['thailand', 'bangkok', 'pattaya', 'phuket', 'krabi'] },
+  { name: 'Singapore City & Sentosa', primaryCity: 'Singapore', subtitle: 'Marina Bay • Sentosa • Universal Studios', aliases: ['singapore', 'sentosa'] },
+  { name: 'Bali Tropical Island', primaryCity: 'Bali', subtitle: 'Ubud • Kuta • Seminyak • Nusa Penida', aliases: ['bali', 'denpasar', 'ubud'] }
+];
 
 export default function QuoteWorkspace({ quotes: propQuotes = [], onCreateRevision = () => {}, onAcceptVersion = () => {}, onUpdateVersion = () => {}, onRefresh = () => {} }: Partial<QuoteWorkspaceProps>) {
   const { toast } = useToast();
@@ -71,6 +88,14 @@ export default function QuoteWorkspace({ quotes: propQuotes = [], onCreateRevisi
   const [creatingQuote, setCreatingQuote] = useState(false);
   const [masterPackages, setMasterPackages] = useState<any[]>([]);
   const [selectedPackageId, setSelectedPackageId] = useState<string>('');
+  
+  // Omni-Search Leads State
+  const [crmLeads, setCrmLeads] = useState<Lead[]>([]);
+  const [leadSearchQuery, setLeadSearchQuery] = useState('');
+  const [selectedLeadId, setSelectedLeadId] = useState<number | null>(null);
+  const [isNewLeadSelected, setIsNewLeadSelected] = useState(true);
+  const [showLeadSuggestions, setShowLeadSuggestions] = useState(false);
+
   const [newQuoteData, setNewQuoteData] = useState({
     customerName: '',
     customerEmail: '',
@@ -200,9 +225,10 @@ export default function QuoteWorkspace({ quotes: propQuotes = [], onCreateRevisi
 
       // Persist new quote to MySQL database
       try {
+        const leadIdToSend = selectedLeadId ? Number(selectedLeadId) : 0;
         const res = await quoteService.saveQuote({
           id: null,
-          lead_id: 0,
+          lead_id: leadIdToSend,
           itinerary_id: null,
           package_name: (newQuoteData.destination || 'Custom Tour').trim(),
           total_amount: sellingPrice,
@@ -220,7 +246,9 @@ export default function QuoteWorkspace({ quotes: propQuotes = [], onCreateRevisi
           inclusions: [],
           exclusions: [],
           validity_days: 7,
-          notes: `Direct Quote Created for ${newQuoteData.customerName.trim()} | Email: ${newQuoteData.customerEmail.trim()} | Phone: ${newQuoteData.customerPhone.trim()}`
+          notes: leadIdToSend > 0
+            ? `Quote Linked to Existing Lead #${leadIdToSend} (${newQuoteData.customerName.trim()})`
+            : `Direct Quote Created for ${newQuoteData.customerName.trim()} | Email: ${newQuoteData.customerEmail.trim()} | Phone: ${newQuoteData.customerPhone.trim()}`
         });
 
         if (res && res.quote_id) {
@@ -346,9 +374,10 @@ export default function QuoteWorkspace({ quotes: propQuotes = [], onCreateRevisi
       setNewQuoteModalOpen(false);
 
       try {
+        const leadIdToSend = selectedLeadId ? Number(selectedLeadId) : 0;
         const res = await quoteService.saveQuote({
           id: null,
-          lead_id: 0,
+          lead_id: leadIdToSend,
           itinerary_id: String(pkg.id || ''),
           package_name: (pkg.title || pkg.name || 'Tour Package').trim(),
           total_amount: sellingPrice,
@@ -365,7 +394,9 @@ export default function QuoteWorkspace({ quotes: propQuotes = [], onCreateRevisi
           inclusions: pkg.inclusions ? (Array.isArray(pkg.inclusions) ? pkg.inclusions : [pkg.inclusions]) : [],
           exclusions: pkg.exclusions ? (Array.isArray(pkg.exclusions) ? pkg.exclusions : [pkg.exclusions]) : [],
           validity_days: 7,
-          notes: `Quote from Package Master "${pkg.title || pkg.name}" for ${newQuoteData.customerName.trim()}`
+          notes: leadIdToSend > 0
+            ? `Quote Linked to Existing Lead #${leadIdToSend} from Package Master "${pkg.title || pkg.name}"`
+            : `Quote from Package Master "${pkg.title || pkg.name}" for ${newQuoteData.customerName.trim()}`
         });
 
         if (res && res.quote_id) {
@@ -560,9 +591,10 @@ export default function QuoteWorkspace({ quotes: propQuotes = [], onCreateRevisi
       setEditMargin(margin);
 
       // Persist newly generated AI Quote to MySQL database
+      const leadIdToSend = selectedLeadId ? Number(selectedLeadId) : 0;
       quoteService.saveQuote({
         id: null,
-        lead_id: 0,
+        lead_id: leadIdToSend,
         itinerary_id: null,
         package_name: (aiResult.destination || aiFormData.destination).trim(),
         total_amount: sellingPrice,
@@ -581,7 +613,9 @@ export default function QuoteWorkspace({ quotes: propQuotes = [], onCreateRevisi
         inclusions: [],
         exclusions: [],
         validity_days: 7,
-        notes: `AI Generated Proposal for ${clientName}`
+        notes: leadIdToSend > 0
+          ? `AI Proposal Linked to Existing Lead #${leadIdToSend} (${clientName})`
+          : `AI Generated Proposal for ${clientName}`
       }).then(res => {
         if (res && res.quote_id) {
           newVersion.id = res.quote_id;
@@ -842,6 +876,14 @@ export default function QuoteWorkspace({ quotes: propQuotes = [], onCreateRevisi
         }
       })
       .catch(err => console.warn("Failed to load master packages:", err));
+
+    leadService.getLeads(false)
+      .then(leads => {
+        if (Array.isArray(leads)) {
+          setCrmLeads(leads);
+        }
+      })
+      .catch(err => console.warn("Failed to load leads for quote omni-search:", err));
   }, []);
 
   // Update internal quotes list if prop changes
@@ -2202,26 +2244,171 @@ export default function QuoteWorkspace({ quotes: propQuotes = [], onCreateRevisi
 
             {/* Modal Body Based on Selected Tab */}
             <div className="flex-1 overflow-y-auto pr-1 space-y-4">
-              {/* Client Information Section (Common to All Modes) */}
-              <div className="p-3.5 bg-slate-900/80 border border-slate-800/80 rounded-2xl space-y-3">
-                <div className="text-[11px] font-black uppercase text-amber-400 tracking-wider flex items-center gap-1.5">
-                  <User className="w-3.5 h-3.5" /> Client / Lead Information
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
-                  <div className="space-y-1 sm:col-span-1">
-                    <label className="text-[11px] font-bold text-slate-300">Client Full Name *</label>
-                    <Input
-                      required
-                      value={newQuoteData.customerName}
-                      onChange={(e) => {
-                        setNewQuoteData({ ...newQuoteData, customerName: e.target.value });
-                        setAiFormData(prev => ({ ...prev, customerName: e.target.value }));
-                      }}
-                      placeholder="e.g. Rahul Sharma"
-                      className="h-9 text-xs bg-slate-950 border-slate-700 text-white rounded-xl"
-                      autoFocus
-                    />
+              {/* Client Information Section (Omni-Search & Auto-fill from Existing Leads) */}
+              <div className="p-3.5 bg-slate-900/90 border border-slate-800 rounded-2xl space-y-3 relative">
+                <div className="flex items-center justify-between">
+                  <div className="text-[11px] font-black uppercase text-amber-400 tracking-wider flex items-center gap-1.5">
+                    <User className="w-3.5 h-3.5" /> Client / Lead Information
                   </div>
+                  {selectedLeadId ? (
+                    <div className="flex items-center gap-1.5">
+                      <Badge className="bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 text-[10px] font-bold py-0.5 px-2">
+                        Linked to Lead #{selectedLeadId}
+                      </Badge>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setSelectedLeadId(null);
+                          setIsNewLeadSelected(true);
+                        }}
+                        className="text-[10px] text-slate-400 hover:text-rose-400 underline transition-colors"
+                      >
+                        Unlink
+                      </button>
+                    </div>
+                  ) : (
+                    <Badge className="bg-blue-500/10 text-blue-400 border border-blue-500/30 text-[10px] font-bold py-0.5 px-2">
+                      + Will Create New Lead on Save
+                    </Badge>
+                  )}
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                  {/* Client Name with Typeahead Omni-Search */}
+                  <div className="space-y-1 sm:col-span-1 relative">
+                    <label className="text-[11px] font-bold text-slate-300 flex items-center justify-between">
+                      <span>Client Full Name *</span>
+                      <span className="text-[9px] text-slate-400">Search or type new</span>
+                    </label>
+                    <div className="relative">
+                      <Input
+                        required
+                        value={newQuoteData.customerName}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          setNewQuoteData(prev => ({ ...prev, customerName: val }));
+                          setAiFormData(prev => ({ ...prev, customerName: val }));
+                          setLeadSearchQuery(val);
+                          setShowLeadSuggestions(true);
+                          if (selectedLeadId) {
+                            setSelectedLeadId(null);
+                            setIsNewLeadSelected(true);
+                          }
+                        }}
+                        onFocus={() => setShowLeadSuggestions(true)}
+                        placeholder="e.g. Rahul Sharma"
+                        className="h-9 text-xs bg-slate-950 border-slate-700 text-white rounded-xl pr-7"
+                        autoFocus
+                      />
+                      {newQuoteData.customerName && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setNewQuoteData(prev => ({ ...prev, customerName: '', customerPhone: '', customerEmail: '' }));
+                            setAiFormData(prev => ({ ...prev, customerName: '', customerPhone: '', customerEmail: '' }));
+                            setSelectedLeadId(null);
+                            setIsNewLeadSelected(true);
+                            setShowLeadSuggestions(false);
+                          }}
+                          className="absolute right-2 top-2.5 text-slate-400 hover:text-white"
+                        >
+                          <X className="w-3.5 h-3.5" />
+                        </button>
+                      )}
+                    </div>
+
+                    {/* Omni-search Dropdown list */}
+                    {showLeadSuggestions && newQuoteData.customerName.trim().length > 0 && (
+                      <div className="absolute left-0 right-0 top-full mt-1 bg-slate-950 border border-slate-700/80 rounded-xl shadow-2xl z-50 max-h-56 overflow-y-auto divide-y divide-slate-800/80">
+                        {crmLeads
+                          .filter(l => {
+                            const q = newQuoteData.customerName.toLowerCase().trim();
+                            const name = (l.customerName || '').toLowerCase();
+                            const phone = (l.customerPhone || '').toLowerCase();
+                            const email = (l.customerEmail || '').toLowerCase();
+                            return name.includes(q) || phone.includes(q) || email.includes(q);
+                          })
+                          .slice(0, 6)
+                          .map(lead => {
+                            const leadNum = lead.id || lead.leadId || '';
+                            return (
+                              <button
+                                key={leadNum || Math.random()}
+                                type="button"
+                                onClick={() => {
+                                  const cName = lead.customerName || '';
+                                  const cPhone = lead.customerPhone || '';
+                                  const cEmail = lead.customerEmail || '';
+                                  const dest = lead.destinations || (lead.leadDestination && lead.leadDestination[0]) || '';
+                                  
+                                  setNewQuoteData(prev => ({
+                                    ...prev,
+                                    customerName: cName,
+                                    customerPhone: cPhone,
+                                    customerEmail: cEmail,
+                                    destination: dest ? dest.split(',')[0].trim() : prev.destination
+                                  }));
+                                  setAiFormData(prev => ({
+                                    ...prev,
+                                    customerName: cName,
+                                    customerPhone: cPhone,
+                                    customerEmail: cEmail,
+                                    destination: dest ? dest.split(',')[0].trim() : prev.destination
+                                  }));
+                                  
+                                  const numericId = parseInt(leadNum.replace(/\D/g, ''), 10);
+                                  setSelectedLeadId(!isNaN(numericId) && numericId > 0 ? numericId : null);
+                                  setIsNewLeadSelected(false);
+                                  setShowLeadSuggestions(false);
+                                  
+                                  toast({
+                                    title: "Existing Lead Auto-Filled",
+                                    description: `Loaded details for ${cName} (Lead #${leadNum}).`,
+                                    className: 'bg-slate-900 text-white border-emerald-500/40'
+                                  });
+                                }}
+                                className="w-full text-left p-2.5 hover:bg-slate-900 transition-colors flex items-center justify-between group"
+                              >
+                                <div>
+                                  <div className="flex items-center gap-2">
+                                    <span className="text-xs font-bold text-white group-hover:text-amber-400">
+                                      {lead.customerName}
+                                    </span>
+                                    <Badge className="bg-slate-800 text-[9px] text-slate-300 border-0 px-1.5 py-0">
+                                      #{leadNum}
+                                    </Badge>
+                                  </div>
+                                  <div className="text-[10px] text-slate-400 flex items-center gap-2 mt-0.5">
+                                    {lead.customerPhone && <span>📞 {lead.customerPhone}</span>}
+                                    {lead.customerEmail && <span>✉️ {lead.customerEmail}</span>}
+                                  </div>
+                                </div>
+                                <div className="text-right">
+                                  <Badge className="bg-emerald-950 text-emerald-400 border border-emerald-800/60 text-[9px]">
+                                    {lead.status || 'Active'}
+                                  </Badge>
+                                </div>
+                              </button>
+                            );
+                          })}
+
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setSelectedLeadId(null);
+                            setIsNewLeadSelected(true);
+                            setShowLeadSuggestions(false);
+                          }}
+                          className="w-full text-left p-2 hover:bg-slate-900 text-[11px] font-bold text-amber-400 flex items-center gap-1.5"
+                        >
+                          <Plus className="w-3.5 h-3.5" />
+                          <span>Use "{newQuoteData.customerName}" as a New Client</span>
+                        </button>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Phone input */}
                   <div className="space-y-1 sm:col-span-1">
                     <label className="text-[11px] font-bold text-slate-300 flex items-center gap-1">
                       <Phone className="w-3 h-3 text-slate-400" /> Phone Number
@@ -2236,6 +2423,8 @@ export default function QuoteWorkspace({ quotes: propQuotes = [], onCreateRevisi
                       className="h-9 text-xs bg-slate-950 border-slate-700 text-white rounded-xl"
                     />
                   </div>
+
+                  {/* Email input */}
                   <div className="space-y-1 sm:col-span-1">
                     <label className="text-[11px] font-bold text-slate-300 flex items-center gap-1">
                       <Mail className="w-3 h-3 text-slate-400" /> Email Address
@@ -2268,28 +2457,34 @@ export default function QuoteWorkspace({ quotes: propQuotes = [], onCreateRevisi
                           required
                           value={aiFormData.destination}
                           onChange={(e) => {
-                            setAiFormData(prev => ({ ...prev, destination: e.target.value }));
-                            setNewQuoteData(prev => ({ ...prev, destination: e.target.value }));
+                            const val = e.target.value;
+                            // Tolerance lookup against aliases
+                            const clean = val.trim().toLowerCase();
+                            const matchedCircuit = STANDARD_CIRCUITS.find(c => 
+                              c.aliases.some(alias => clean.includes(alias))
+                            );
+                            setAiFormData(prev => ({ ...prev, destination: val }));
+                            setNewQuoteData(prev => ({ ...prev, destination: matchedCircuit ? matchedCircuit.primaryCity : val }));
                           }}
                           placeholder="e.g. Kashmir / Kerala / Rann of Kutch / Rajasthan / Andaman"
                           className="h-9 text-xs bg-slate-900 border-slate-700 text-white rounded-xl focus:border-purple-500"
                         />
                         <div className="flex items-center gap-1.5 flex-wrap pt-0.5">
-                          {['Kashmir', 'Kerala', 'Rann of Kutch', 'Rajasthan', 'Char Dham', 'Goa', 'Andaman', 'Himachal', 'Dubai'].map(dest => (
+                          {STANDARD_CIRCUITS.map(circ => (
                             <button
-                              key={dest}
+                              key={circ.name}
                               type="button"
                               onClick={() => {
-                                setAiFormData(prev => ({ ...prev, destination: dest }));
-                                setNewQuoteData(prev => ({ ...prev, destination: dest }));
+                                setAiFormData(prev => ({ ...prev, destination: circ.primaryCity }));
+                                setNewQuoteData(prev => ({ ...prev, destination: circ.primaryCity }));
                               }}
                               className={`text-[10px] px-2.5 py-0.5 rounded-lg font-bold transition-colors ${
-                                aiFormData.destination.toLowerCase() === dest.toLowerCase()
-                                  ? 'bg-purple-600 text-white'
+                                aiFormData.destination.toLowerCase() === circ.primaryCity.toLowerCase()
+                                  ? 'bg-purple-600 text-white shadow-sm'
                                   : 'bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700/60'
                               }`}
                             >
-                              {dest}
+                              {circ.primaryCity}
                             </button>
                           ))}
                         </div>
@@ -2545,25 +2740,55 @@ export default function QuoteWorkspace({ quotes: propQuotes = [], onCreateRevisi
               {/* TAB 3: CUSTOM BLANK QUOTE */}
               {creationMode === 'custom' && (
                 <form onSubmit={handleCreateNewQuote} className="space-y-3.5">
-                  <div className="grid grid-cols-2 gap-2.5">
-                    <div className="space-y-1">
-                      <label className="text-xs font-extrabold uppercase text-slate-300">Destination Circuit *</label>
-                      <Input
-                        required
-                        value={newQuoteData.destination}
-                        onChange={(e) => setNewQuoteData({ ...newQuoteData, destination: e.target.value })}
-                        placeholder="e.g. Kashmir / Kerala / Dubai"
-                        className="h-9 text-xs bg-slate-900 border-slate-700 text-white rounded-xl"
-                      />
+                  <div className="space-y-2">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                      <div className="space-y-1">
+                        <label className="text-xs font-extrabold uppercase text-amber-300 flex items-center justify-between">
+                          <span>Destination Circuit *</span>
+                          <span className="text-[10px] text-slate-400 font-normal lowercase">Contracted hotels auto-link</span>
+                        </label>
+                        <Input
+                          required
+                          value={newQuoteData.destination}
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            const clean = val.trim().toLowerCase();
+                            const matchedCircuit = STANDARD_CIRCUITS.find(c => 
+                              c.aliases.some(alias => clean.includes(alias))
+                            );
+                            setNewQuoteData(prev => ({ ...prev, destination: matchedCircuit ? matchedCircuit.primaryCity : val }));
+                          }}
+                          placeholder="e.g. Kashmir / Kerala / Dubai"
+                          className="h-9 text-xs bg-slate-900 border-slate-700 text-white rounded-xl focus:border-amber-400"
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <label className="text-xs font-extrabold uppercase text-slate-300">Agency Margin %</label>
+                        <Input
+                          type="number"
+                          value={newQuoteData.margin}
+                          onChange={(e) => setNewQuoteData(prev => ({ ...prev, margin: Number(e.target.value) }))}
+                          className="h-9 text-xs bg-slate-900 border-slate-700 text-white rounded-xl"
+                        />
+                      </div>
                     </div>
-                    <div className="space-y-1">
-                      <label className="text-xs font-extrabold uppercase text-slate-300">Agency Margin %</label>
-                      <Input
-                        type="number"
-                        value={newQuoteData.margin}
-                        onChange={(e) => setNewQuoteData({ ...newQuoteData, margin: Number(e.target.value) })}
-                        className="h-9 text-xs bg-slate-900 border-slate-700 text-white rounded-xl"
-                      />
+
+                    {/* Standard Destination Quick-Pills */}
+                    <div className="flex items-center gap-1.5 flex-wrap pt-0.5">
+                      {STANDARD_CIRCUITS.map(circ => (
+                        <button
+                          key={circ.name}
+                          type="button"
+                          onClick={() => setNewQuoteData(prev => ({ ...prev, destination: circ.primaryCity }))}
+                          className={`text-[10px] px-2.5 py-0.5 rounded-lg font-bold transition-colors ${
+                            newQuoteData.destination.toLowerCase() === circ.primaryCity.toLowerCase()
+                              ? 'bg-amber-500 text-slate-950 shadow-sm'
+                              : 'bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700/60'
+                          }`}
+                        >
+                          {circ.primaryCity}
+                        </button>
+                      ))}
                     </div>
                   </div>
 
