@@ -23,6 +23,7 @@ import {
 import { VoucherInvoiceModal } from '@/components/crm/VoucherInvoiceModal';
 import { crmFetch } from '@/utils/crmApi';
 import LuxuryBrochureDocument from '@/components/proposal/LuxuryBrochureDocument';
+import { SIGHTSEEING_SPOTS } from '@/data/sightseeingData';
 import { OFFICIAL_BANK_DETAILS } from '@/constants/bankDetails';
 
 interface ItineraryBuilderProps {
@@ -2581,16 +2582,84 @@ export default function ItineraryBuilder({
 
       const guestCounts = getLeadGuestCounts(effectiveLead, itin);
 
-      // 2. Load cities, states, and countries master lists from consolidated cached bootstrap
+      // 2. Load cities, states, countries, and master activities & sightseeings
       try {
-        const bootstrapData = await fetchCachedJson('/php-backend/bootstrap.php');
+        const [bootstrapData, activitiesRes, sightseeingsRes] = await Promise.all([
+          fetchCachedJson('/php-backend/bootstrap.php').catch(() => null),
+          fetchCachedJson('/php-backend/activities.php').catch(() => null),
+          fetchCachedJson('/php-backend/mysql-crud.php?table=sightseeings').catch(() => null)
+        ]);
         if (bootstrapData && bootstrapData.success) {
           if (Array.isArray(bootstrapData.cities)) setCitiesList(bootstrapData.cities.filter((c: any) => c.is_active || c.is_active === undefined || c.active_status));
           if (Array.isArray(bootstrapData.states)) setStatesList(bootstrapData.states.filter((s: any) => s.active_status || s.active_status === undefined));
           if (Array.isArray(bootstrapData.countries)) setCountriesList(bootstrapData.countries.filter((co: any) => co.active_status || co.active_status === undefined));
         }
+
+        const rawActs = Array.isArray(activitiesRes) ? activitiesRes : (activitiesRes?.data || []);
+        if (Array.isArray(rawActs) && rawActs.length > 0) {
+          setMasterActivities(rawActs);
+          const mappedMasterActs = rawActs.map((a: any) => ({
+            id: a.id || a.activity_id,
+            excursion_name: a.activity_name || a.name,
+            city: a.destination || a.city || '',
+            category: a.activity_category || a.category || 'Activity',
+            duration_hours: a.duration || '2-3 Hours',
+            description: a.description || '',
+            adult_rate: Number(a.rates?.[0]?.adult_rate || a.adult_rate || a.adult_cost || 0),
+            child_rate: Number(a.rates?.[0]?.child_rate || a.child_rate || a.child_cost || 0),
+            photo_url: a.image_url || '',
+            _source: 'activity'
+          }));
+          setExcursions(prev => {
+            const existingIds = new Set(prev.map(p => String(p.id)));
+            const toAdd = mappedMasterActs.filter(m => !existingIds.has(String(m.id)));
+            return [...prev, ...toAdd];
+          });
+        }
+
+        if (Array.isArray(sightseeingsRes) && sightseeingsRes.length > 0) {
+          setMasterSightseeings(sightseeingsRes);
+          const mappedMasterSg = sightseeingsRes.map((s: any) => ({
+            id: s.id,
+            excursion_name: s.sightseeing_name || s.name,
+            city: s.destination || s.city || '',
+            category: s.category || 'Sightseeing',
+            duration_hours: s.duration || 'Half Day',
+            description: s.description || '',
+            adult_rate: Number(s.adult_cost || s.default_adult_rate || 0),
+            child_rate: Number(s.child_cost || s.default_child_rate || 0),
+            photo_url: s.image_url || '',
+            _source: 'sightseeing'
+          }));
+          setExcursions(prev => {
+            const existingIds = new Set(prev.map(p => String(p.id)));
+            const toAdd = mappedMasterSg.filter(m => !existingIds.has(String(m.id)));
+            return [...prev, ...toAdd];
+          });
+        }
+
+        // Also incorporate curated baseline SIGHTSEEING_SPOTS
+        if (Array.isArray(SIGHTSEEING_SPOTS) && SIGHTSEEING_SPOTS.length > 0) {
+          const mappedSpots = SIGHTSEEING_SPOTS.map((sp, idx) => ({
+            id: `spot_${idx}_${sp.slug}`,
+            excursion_name: sp.name,
+            city: (sp.destination || '').split(',')[0].trim(),
+            category: sp.category || 'Sightseeing',
+            duration_hours: sp.duration || '2-3 Hours',
+            description: sp.summary || sp.description || '',
+            adult_rate: 0,
+            child_rate: 0,
+            photo_url: sp.image || '',
+            _source: 'spot'
+          }));
+          setExcursions(prev => {
+            const existingNames = new Set(prev.map(p => (p.excursion_name || '').toLowerCase()));
+            const toAdd = mappedSpots.filter(sp => !existingNames.has(sp.excursion_name.toLowerCase()));
+            return [...prev, ...toAdd];
+          });
+        }
       } catch (e) {
-        console.warn('Error reading bootstrap cache:', e);
+        console.warn('Error reading bootstrap cache or masters:', e);
       }
 
       if (!itin) {

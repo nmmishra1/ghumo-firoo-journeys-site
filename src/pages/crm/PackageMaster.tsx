@@ -30,6 +30,7 @@ import {
   Check, ChevronsUpDown, Send
 } from 'lucide-react';
 import { CONTRACTED_HOTELS_REGISTRY, type ContractedHotelItem } from '@/data/contractedHotelsMaster';
+import { SIGHTSEEING_SPOTS } from '@/data/sightseeingData';
 import { itineraryService } from '@/services/itineraryService';
 
 // ─── Tag Input component ───────────────────────────────────────────────────────
@@ -174,6 +175,7 @@ export default function PackageMaster() {
   // Master Hotels loaded dynamically from Hotel Master Page
   const [masterHotels, setMasterHotels] = useState<any[]>([]);
   const [masterSightseeings, setMasterSightseeings] = useState<any[]>([]);
+  const [masterActivities, setMasterActivities] = useState<any[]>([]);
   const [masterRoomCategories, setMasterRoomCategories] = useState<any[]>([]);
 
   useEffect(() => {
@@ -201,19 +203,27 @@ export default function PackageMaster() {
       }
     };
 
-    const fetchMasterSightseeings = async () => {
+    const fetchMasterSightseeingsAndActivities = async () => {
       try {
-        const res = await fetchCachedJson(`${API_BASE}/mysql-crud.php?table=sightseeings`);
-        if (Array.isArray(res) && res.length > 0) {
-          setMasterSightseeings(res);
+        const [sRes, aRes] = await Promise.all([
+          fetchCachedJson(`${API_BASE}/mysql-crud.php?table=sightseeings`).catch(() => null),
+          fetchCachedJson(`${API_BASE}/activities.php`).catch(() => null)
+        ]);
+        if (Array.isArray(sRes) && sRes.length > 0) {
+          setMasterSightseeings(sRes);
+        }
+        if (Array.isArray(aRes) && aRes.length > 0) {
+          setMasterActivities(aRes);
+        } else if (aRes && Array.isArray(aRes.data) && aRes.data.length > 0) {
+          setMasterActivities(aRes.data);
         }
       } catch (err) {
-        // Handled in fetchMasterHotels bootstrap
+        // Handled in bootstrap
       }
     };
 
     fetchMasterHotels();
-    fetchMasterSightseeings();
+    fetchMasterSightseeingsAndActivities();
   }, []);
 
   // Unified list of all available hotels across DB master + Contracted Registry
@@ -254,10 +264,11 @@ export default function PackageMaster() {
     return list.sort((a, b) => a.name.localeCompare(b.name));
   }, [masterHotels]);
 
-  // Unified list of all available sightseeings / attractions
+  // Unified list of all available sightseeings / attractions / activities
   const allAvailableSightseeings = useMemo(() => {
     const list: any[] = [];
 
+    // 1. From Database Sightseeings
     masterSightseeings.forEach(s => {
       const title = s.sightseeing_name || s.name || s.title;
       if (title && !list.some(item => item.title.toLowerCase() === title.toLowerCase())) {
@@ -266,19 +277,52 @@ export default function PackageMaster() {
           destination: s.destination || s.city || '',
           description: s.description || '',
           duration: s.duration || '2 hrs',
-          image: s.image_url || s.image || ''
+          image: s.image_url || s.image || '',
+          category: s.category || 'Sightseeing',
+          type: 'sightseeing'
+        });
+      }
+    });
+
+    // 2. From Database Activities
+    masterActivities.forEach(a => {
+      const title = a.activity_name || a.name || a.title;
+      if (title && !list.some(item => item.title.toLowerCase() === title.toLowerCase())) {
+        list.push({
+          title,
+          destination: a.destination || a.city || '',
+          description: a.description || '',
+          duration: a.duration || '2-3 hrs',
+          image: a.image_url || a.image || '',
+          category: a.activity_category || a.category || 'Activity',
+          type: 'activity'
+        });
+      }
+    });
+
+    // 3. From Static Master SIGHTSEEING_SPOTS
+    SIGHTSEEING_SPOTS.forEach(spot => {
+      if (spot.name && !list.some(item => item.title.toLowerCase() === spot.name.toLowerCase())) {
+        list.push({
+          title: spot.name,
+          destination: spot.destination || '',
+          description: spot.summary || spot.description || '',
+          duration: spot.duration || '2-3 hrs',
+          image: spot.image || '',
+          category: spot.category || 'Sightseeing',
+          type: 'spot'
         });
       }
     });
 
     const defaultBaseline = [
-      { title: "White Desert Sunset Point", destination: "Dhordo", duration: "3 hrs" },
-      { title: "Kalo Dungar (Black Hill)", destination: "Khavda", duration: "4 hrs" },
-      { title: "Gandhi Nu Gam Artisan Village", destination: "Ludiya", duration: "2 hrs" },
-      { title: "Road to Heaven Highway Drive", destination: "Dholavira", duration: "5 hrs" },
-      { title: "Badrinath Temple", destination: "Badrinath Dham", duration: "3 hrs" },
-      { title: "Mana Village & Saraswati River", destination: "Mana Border", duration: "2.5 hrs" },
-      { title: "Kedarnath Dham Shrine", destination: "Kedarnath", duration: "6 hrs" }
+      { title: "White Desert Sunset Point", destination: "Dhordo", duration: "3 hrs", category: "Sightseeing", type: "sightseeing" },
+      { title: "Kalo Dungar (Black Hill)", destination: "Khavda", duration: "4 hrs", category: "Sightseeing", type: "sightseeing" },
+      { title: "Gandhi Nu Gam Artisan Village", destination: "Ludiya", duration: "2 hrs", category: "Cultural", type: "activity" },
+      { title: "Road to Heaven Highway Drive", destination: "Dholavira", duration: "5 hrs", category: "Scenic Drive", type: "sightseeing" },
+      { title: "Badrinath Temple", destination: "Badrinath Dham", duration: "3 hrs", category: "Religious", type: "sightseeing" },
+      { title: "Mana Village & Saraswati River", destination: "Mana Border", duration: "2.5 hrs", category: "Sightseeing", type: "sightseeing" },
+      { title: "Kedarnath Dham Shrine", destination: "Kedarnath", duration: "6 hrs", category: "Religious", type: "sightseeing" }
     ];
 
     defaultBaseline.forEach(b => {
@@ -288,7 +332,7 @@ export default function PackageMaster() {
     });
 
     return list.sort((a, b) => a.title.localeCompare(b.title));
-  }, [masterSightseeings]);
+  }, [masterSightseeings, masterActivities]);
 
   // Extract target destination keywords for the active package
   const packageTargetDestinations = useMemo(() => {
@@ -2187,61 +2231,62 @@ export default function PackageMaster() {
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 bg-slate-900 border border-slate-800 rounded-xl items-end">
-                      {/* DYNAMIC ATTRACTION TITLE DROPDOWN FROM DATABASE */}
-                      <div className="space-y-1.5 md:col-span-2">
-                        <Label className="text-[10px] font-bold text-emerald-400 uppercase tracking-wider flex items-center gap-1">
-                          <Sparkles className="w-3.5 h-3.5 text-emerald-400" /> Attraction Title (Picked from Master Database)
-                        </Label>
-                        {(() => {
-                          const isCustom = attTitle && !masterSightseeings.some((s: any) => (s.sightseeing_name || s.name || s.title) === attTitle);
-                          return (
-                            <div className="space-y-1.5">
-                              <Select
-                                value={isCustom ? "__custom__" : (attTitle || "")}
-                                onValueChange={v => {
-                                  if (v === '__custom__') {
-                                    setAttTitle('');
-                                  } else {
-                                    setAttTitle(v);
-                                    const selObj = masterSightseeings.find((s: any) => (s.sightseeing_name || s.name || s.title) === v);
-                                    if (selObj) {
-                                      if (selObj.destination || selObj.city) setAttLocation(selObj.destination || selObj.city);
-                                      if (selObj.description) setAttDesc(selObj.description);
-                                      if (selObj.image_url || selObj.image) setAttImage(selObj.image_url || selObj.image);
+                        {/* DYNAMIC ATTRACTION & ACTIVITY TITLE DROPDOWN FROM DATABASE */}
+                        <div className="space-y-1.5 md:col-span-2">
+                          <Label className="text-[10px] font-bold text-emerald-400 uppercase tracking-wider flex items-center gap-1">
+                            <Sparkles className="w-3.5 h-3.5 text-emerald-400" /> Sightseeing / Activity Title (From Master Database)
+                          </Label>
+                          {(() => {
+                            const isCustom = attTitle && !allAvailableSightseeings.some((s: any) => s.title === attTitle);
+                            return (
+                              <div className="space-y-1.5">
+                                <Select
+                                  value={isCustom ? "__custom__" : (attTitle || "")}
+                                  onValueChange={v => {
+                                    if (v === '__custom__') {
+                                      setAttTitle('');
+                                    } else {
+                                      setAttTitle(v);
+                                      const selObj = allAvailableSightseeings.find((s: any) => s.title === v);
+                                      if (selObj) {
+                                        if (selObj.destination) setAttLocation(selObj.destination);
+                                        if (selObj.description) setAttDesc(selObj.description);
+                                        if (selObj.image) setAttImage(selObj.image);
+                                      }
                                     }
-                                  }
-                                }}
-                              >
-                                <SelectTrigger className="h-9.5 text-xs bg-slate-950 border-slate-700 text-emerald-400 font-bold">
-                                  <SelectValue placeholder={masterSightseeings.length ? "Select Attraction from Master Database..." : "Select or Type Attraction Title..."} />
-                                </SelectTrigger>
-                                <SelectContent className="bg-slate-900 border-slate-700 text-white max-h-60 z-50">
-                                  {masterSightseeings.map((s: any, i: number) => {
-                                    const sTitle = s.sightseeing_name || s.name || s.title;
-                                    const sDest = s.destination || s.city || '';
-                                    if (!sTitle) return null;
-                                    return (
-                                      <SelectItem key={`sight-${s.id || i}`} value={sTitle}>
-                                        📍 {sTitle} {sDest ? `(${sDest})` : ''}
-                                      </SelectItem>
-                                    );
-                                  })}
-                                  <SelectItem value="__custom__">➕ Enter Custom Attraction Title...</SelectItem>
-                                </SelectContent>
-                              </Select>
+                                  }}
+                                >
+                                  <SelectTrigger className="h-9.5 text-xs bg-slate-950 border-slate-700 text-emerald-400 font-bold">
+                                    <SelectValue placeholder={allAvailableSightseeings.length ? "Select Sightseeing or Activity from Master..." : "Select or Type Attraction Title..."} />
+                                  </SelectTrigger>
+                                  <SelectContent className="bg-slate-900 border-slate-700 text-white max-h-60 z-50">
+                                    {filteredSightseeingsForPackage.map((s: any, i: number) => {
+                                      const sTitle = s.title;
+                                      const sDest = s.destination || '';
+                                      const sCat = s.category || (s.type === 'activity' ? 'Activity' : 'Sightseeing');
+                                      if (!sTitle) return null;
+                                      return (
+                                        <SelectItem key={`sight-${sTitle}-${i}`} value={sTitle}>
+                                          {s.type === 'activity' ? '🎯' : '📍'} {sTitle} {sDest ? `(${sDest})` : ''} • <span className="text-[10px] text-amber-400">{sCat}</span>
+                                        </SelectItem>
+                                      );
+                                    })}
+                                    <SelectItem value="__custom__">➕ Enter Custom Sightseeing / Activity Title...</SelectItem>
+                                  </SelectContent>
+                                </Select>
 
-                              {(isCustom || attTitle === '') && (
-                                <Input
-                                  placeholder="Type custom attraction title..."
-                                  value={attTitle}
-                                  onChange={e => setAttTitle(e.target.value)}
-                                  className="h-9 text-xs bg-slate-950 border-amber-500/50 text-white font-medium mt-1.5"
-                                />
-                              )}
-                            </div>
-                          );
-                        })()}
-                      </div>
+                                {(isCustom || attTitle === '') && (
+                                  <Input
+                                    placeholder="Type custom attraction or activity title..."
+                                    value={attTitle}
+                                    onChange={e => setAttTitle(e.target.value)}
+                                    className="h-9 text-xs bg-slate-950 border-amber-500/50 text-white font-medium mt-1.5"
+                                  />
+                                )}
+                              </div>
+                            );
+                          })()}
+                        </div>
                       <div className="space-y-1.5">
                         <Label className="text-[10px] font-bold text-slate-300 uppercase">Destination Tag</Label>
                         <Input
@@ -2364,8 +2409,9 @@ export default function PackageMaster() {
                               label="Activities lists for this day"
                               items={day.activities || []}
                               onChange={items => updateItineraryDay(idx, 'activities', items)}
-                              placeholder="e.g., Welcome pickup at Airport and hotel check-in (Press Enter)"
+                              placeholder="e.g., Welcome pickup at Airport, Camel Ride, Temple Visit (Press Enter)"
                               colorClass="bg-sky-500/10 text-sky-400 border-sky-500/30"
+                              suggestions={filteredSightseeingsForPackage.slice(0, 10).map((s: any) => s.title)}
                             />
                           </CardContent>
                         </Card>
@@ -3069,7 +3115,7 @@ export default function PackageMaster() {
                               <div className="grid grid-cols-1 md:grid-cols-4 gap-3 items-center">
                                 {(() => {
                                   const currTitle = e.excursion_name || e.name || '';
-                                  const isCustom = currTitle && !filteredSightseeingsForPackage.some((s: any) => (s.sightseeing_name || s.name || s.title) === currTitle);
+                                  const isCustom = currTitle && !filteredSightseeingsForPackage.some((s: any) => s.title === currTitle);
                                   return (
                                     <div className="md:col-span-2 space-y-1">
                                       <Select
@@ -3079,7 +3125,7 @@ export default function PackageMaster() {
                                           if (v === '__custom__') {
                                             list[idx] = { ...list[idx], excursion_name: '', name: '' };
                                           } else {
-                                            const sel = filteredSightseeingsForPackage.find((s: any) => (s.sightseeing_name || s.name || s.title) === v);
+                                            const sel = filteredSightseeingsForPackage.find((s: any) => s.title === v);
                                             list[idx] = {
                                               ...list[idx],
                                               excursion_name: v,
@@ -3091,19 +3137,21 @@ export default function PackageMaster() {
                                         }}
                                       >
                                         <SelectTrigger className="h-8 text-xs bg-slate-900 border-slate-700 text-emerald-400 font-bold">
-                                          <SelectValue placeholder="Select Destination Excursion..." />
+                                          <SelectValue placeholder="Select Destination Excursion / Activity..." />
                                         </SelectTrigger>
                                         <SelectContent className="bg-slate-900 border-slate-700 text-white max-h-60 z-50">
                                           {filteredSightseeingsForPackage.map((s: any, i: number) => {
-                                            const sTitle = s.sightseeing_name || s.name || s.title;
+                                            const sTitle = s.title;
+                                            const sDest = s.destination || '';
+                                            const sCat = s.category || (s.type === 'activity' ? 'Activity' : 'Sightseeing');
                                             if (!sTitle) return null;
                                             return (
                                               <SelectItem key={`ve-${sTitle}-${i}`} value={sTitle}>
-                                                📍 {sTitle} ({s.destination || s.city || ''})
+                                                {s.type === 'activity' ? '🎯' : '📍'} {sTitle} {sDest ? `(${sDest})` : ''} • <span className="text-[10px] text-amber-400">{sCat}</span>
                                               </SelectItem>
                                             );
                                           })}
-                                          <SelectItem value="__custom__">➕ Custom Excursion...</SelectItem>
+                                          <SelectItem value="__custom__">➕ Custom Excursion / Activity...</SelectItem>
                                         </SelectContent>
                                       </Select>
                                       {(isCustom || !currTitle) && (

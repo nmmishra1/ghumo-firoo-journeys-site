@@ -668,6 +668,43 @@ export default function QuoteWorkspace({ quotes: propQuotes = [], onCreateRevisi
         console.warn("PHP Tourism API error, utilizing client-side master registries:", err);
       }
 
+      // If database activities or sightseeings are empty, supplement with direct live master table queries
+      if (apiActivities.length === 0 || apiSightseeing.length === 0) {
+        try {
+          const [directActRes, directSgRes] = await Promise.all([
+            fetch(`${API_BASE}/activities.php`).then(r => r.json()).catch(() => null),
+            fetch(`${API_BASE}/mysql-crud.php?table=sightseeings`).then(r => r.json()).catch(() => null)
+          ]);
+          if (apiActivities.length === 0) {
+            const rawActs = Array.isArray(directActRes) ? directActRes : (directActRes?.data || []);
+            if (Array.isArray(rawActs) && rawActs.length > 0) {
+              apiActivities = rawActs.map((a: any) => ({
+                id: a.id || a.activity_id,
+                name: a.activity_name || a.name,
+                city: a.destination || a.city || query,
+                duration_hours: a.duration || '2-3 hrs',
+                average_cost: Number(a.adult_cost || a.selling_cost || 0),
+                category: a.activity_category || a.category || 'Activity',
+                description: a.description || ''
+              }));
+            }
+          }
+          if (apiSightseeing.length === 0 && Array.isArray(directSgRes) && directSgRes.length > 0) {
+            apiSightseeing = directSgRes.map((s: any) => ({
+              id: s.id,
+              name: s.sightseeing_name || s.name,
+              city: s.destination || s.city || query,
+              recommended_duration_hours: s.duration || '2-3 hrs',
+              entry_fee_estimate: Number(s.adult_cost || 0),
+              category: s.category || 'Sightseeing',
+              description: s.description || ''
+            }));
+          }
+        } catch (dbErr) {
+          console.warn("Direct activities/sightseeings fetch fallback error:", dbErr);
+        }
+      }
+
       const qLower = query.toLowerCase().trim();
       const matchedCircuit = STANDARD_CIRCUITS.find(c =>
         c.aliases.some(alias => qLower.includes(alias)) || c.primaryCity.toLowerCase() === qLower
