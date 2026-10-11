@@ -44,11 +44,10 @@ if (strpos($query, 'http://') === 0 || strpos($query, 'https://') === 0) {
     if (preg_match('/(share\.google|goo\.gl|g\.page|g\.co|maps\.app)/i', $query)) {
         $chExpand = curl_init();
         curl_setopt($chExpand, CURLOPT_URL, $query);
-        curl_setopt($chExpand, CURLOPT_HEADER, true);
         curl_setopt($chExpand, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($chExpand, CURLOPT_FOLLOWLOCATION, true);
         curl_setopt($chExpand, CURLOPT_SSL_VERIFYPEER, false);
-        curl_setopt($chExpand, CURLOPT_TIMEOUT, 5);
+        curl_setopt($chExpand, CURLOPT_TIMEOUT, 8);
         curl_setopt($chExpand, CURLOPT_USERAGENT, 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36');
         $expandResp = curl_exec($chExpand);
         $expandedUrl = curl_getinfo($chExpand, CURLINFO_EFFECTIVE_URL);
@@ -57,15 +56,28 @@ if (strpos($query, 'http://') === 0 || strpos($query, 'https://') === 0) {
         if (!empty($expandedUrl) && $expandedUrl !== $query) {
             $query = $expandedUrl;
         }
+
+        // If Google presented a landing interstitial with a fallback "click here" link
+        if (!empty($expandResp) && preg_match('/href="([^"]+)"[^>]*>click here/i', $expandResp, $clickMatches)) {
+            $interstitialLink = html_entity_decode($clickMatches[1]);
+            if (strpos($interstitialLink, '/') === 0) {
+                $interstitialLink = 'https://www.google.com' . $interstitialLink;
+            }
+            $query = $interstitialLink;
+        }
     }
 
     $parsedUrl = parse_url($query);
     if (isset($parsedUrl['query'])) {
         parse_str($parsedUrl['query'], $queryParams);
+        // Exclude internal short hashes that Google uses for share.google (e.g. HWzurFfP257xpu75e)
         if (!empty($queryParams['q'])) {
-            $query = $queryParams['q'];
+            $candidate = trim($queryParams['q']);
+            if (!preg_match('/^[a-zA-Z0-9_\-]{15,30}$/', $candidate)) {
+                $query = $candidate;
+            }
         } elseif (!empty($queryParams['query'])) {
-            $query = $queryParams['query'];
+            $query = trim($queryParams['query']);
         }
     }
     
@@ -79,7 +91,7 @@ if (strpos($query, 'http://') === 0 || strpos($query, 'https://') === 0) {
             curl_setopt($chTitle, CURLOPT_RETURNTRANSFER, true);
             curl_setopt($chTitle, CURLOPT_FOLLOWLOCATION, true);
             curl_setopt($chTitle, CURLOPT_SSL_VERIFYPEER, false);
-            curl_setopt($chTitle, CURLOPT_TIMEOUT, 5);
+            curl_setopt($chTitle, CURLOPT_TIMEOUT, 6);
             curl_setopt($chTitle, CURLOPT_USERAGENT, 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36');
             $htmlTitle = curl_exec($chTitle);
             curl_close($chTitle);
@@ -98,7 +110,7 @@ if (strpos($query, 'http://') === 0 || strpos($query, 'https://') === 0) {
             $cleanUrl = preg_replace('/\?.*$/', '', $query);
             $segments = array_filter(explode('/', $cleanUrl));
             $lastSeg = end($segments);
-            if (!empty($lastSeg) && !in_array($lastSeg, ['search', 'travel', 'hotels', 'maps'])) {
+            if (!empty($lastSeg) && !in_array($lastSeg, ['search', 'travel', 'hotels', 'maps', 'share.google'])) {
                 $query = urldecode(str_replace(['-', '_', '+'], ' ', $lastSeg));
             }
         }
