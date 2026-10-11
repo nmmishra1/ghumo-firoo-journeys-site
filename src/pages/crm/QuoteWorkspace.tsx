@@ -643,6 +643,10 @@ export default function QuoteWorkspace({ quotes: propQuotes = [], onCreateRevisi
   const [editingItemIndex, setEditingItemIndex] = useState<number | null>(null);
   const [editingItemData, setEditingItemData] = useState<QuoteItem | null>(null);
 
+  // Print & PDF Export Modal state
+  const [showPrintModal, setShowPrintModal] = useState(false);
+  const [printMode, setPrintMode] = useState<'client' | 'internal'>('client');
+
   const fetchDestData = async (query: string) => {
     if (!query.trim()) return;
     setDestDrawerLoading(true);
@@ -1700,9 +1704,12 @@ export default function QuoteWorkspace({ quotes: propQuotes = [], onCreateRevisi
                         <Button
                           size="sm"
                           variant="outline"
-                          onClick={() => window.print()}
+                          onClick={() => {
+                            setPrintMode('client');
+                            setShowPrintModal(true);
+                          }}
                           className="border-slate-700 bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs rounded-xl h-9 px-3 shadow-md flex items-center gap-1.5"
-                          title="Print or Save PDF"
+                          title="Print or Export PDF"
                         >
                           <Printer className="w-3.5 h-3.5" /> Print / PDF
                         </Button>
@@ -3246,6 +3253,292 @@ export default function QuoteWorkspace({ quotes: propQuotes = [], onCreateRevisi
               >
                 Save Item Changes
               </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* LUXURY CLIENT PROPOSAL & INTERNAL COST SHEET PRINT MODAL */}
+      {showPrintModal && selectedQuote && vA && (
+        <div className="fixed inset-0 bg-black/85 backdrop-blur-md flex items-center justify-center p-3 sm:p-6 z-50 overflow-y-auto animate-fadeIn">
+          <div className="bg-[#0f1422] border border-slate-700/80 rounded-3xl max-w-4xl w-full shadow-2xl text-slate-100 my-auto flex flex-col max-h-[95vh] overflow-hidden">
+            {/* Modal Control Bar (Excluded during printing) */}
+            <div className="p-4 bg-[#141b2d] border-b border-slate-800 flex items-center justify-between shrink-0 print:hidden">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-amber-500/20 text-amber-400 rounded-xl border border-amber-500/30">
+                  <Printer className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-black text-white uppercase tracking-wider">
+                    {printMode === 'client' ? 'Client Proposal Document (No Hotel Rates)' : 'Internal Agency Costing Sheet'}
+                  </h3>
+                  <p className="text-[11px] text-slate-400 font-medium">
+                    {printMode === 'client' 
+                      ? 'Client-safe: Shows itinerary, accommodations & all-inclusive package price only' 
+                      : 'Internal accounting: Displays individual supplier costs, margins, and net rates'}
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2">
+                {/* Mode Selector */}
+                <div className="flex bg-slate-900 border border-slate-700 rounded-xl p-1 text-xs">
+                  <button
+                    type="button"
+                    onClick={() => setPrintMode('client')}
+                    className={`px-3 py-1.5 rounded-lg font-black transition-all ${
+                      printMode === 'client' 
+                        ? 'bg-amber-500 text-slate-950 shadow-sm' 
+                        : 'text-slate-400 hover:text-white'
+                    }`}
+                  >
+                    🌟 Client Proposal
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setPrintMode('internal')}
+                    className={`px-3 py-1.5 rounded-lg font-black transition-all ${
+                      printMode === 'internal' 
+                        ? 'bg-indigo-600 text-white shadow-sm' 
+                        : 'text-slate-400 hover:text-white'
+                    }`}
+                  >
+                    💼 Internal Cost Sheet
+                  </button>
+                </div>
+
+                <Button 
+                  onClick={() => window.print()}
+                  className="bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs h-9 px-4 rounded-xl flex items-center gap-1.5 shadow-md"
+                >
+                  <Printer className="w-4 h-4" /> Print / Save PDF
+                </Button>
+
+                <Button 
+                  size="icon" 
+                  variant="ghost" 
+                  onClick={() => setShowPrintModal(false)}
+                  className="text-slate-400 hover:text-white rounded-xl"
+                >
+                  <X className="w-5 h-5" />
+                </Button>
+              </div>
+            </div>
+
+            {/* Printable Proposal Canvas */}
+            <div className="flex-1 overflow-y-auto p-6 sm:p-8 bg-white text-slate-900 print:p-0 print:m-0 print:overflow-visible">
+              <style dangerouslySetInnerHTML={{ __html: `
+                @media print {
+                  body * { visibility: hidden; }
+                  #client-proposal-print-area, #client-proposal-print-area * { visibility: visible; }
+                  #client-proposal-print-area {
+                    position: absolute;
+                    left: 0;
+                    top: 0;
+                    width: 100%;
+                    background: white !important;
+                    color: #0f172a !important;
+                    padding: 20px !important;
+                  }
+                  .print\\:hidden { display: none !important; }
+                }
+              `}} />
+
+              <div id="client-proposal-print-area" className="max-w-3xl mx-auto space-y-6 text-slate-900">
+                {/* Brand Header */}
+                <div className="flex items-center justify-between border-b-2 border-slate-900 pb-5">
+                  <div>
+                    <h1 className="text-2xl font-black uppercase tracking-wider text-slate-950 flex items-center gap-2">
+                      <span>GHUMO FIROO</span>
+                      <span className="text-amber-600 text-sm font-bold border border-amber-500/40 px-2 py-0.5 rounded-md">JOURNEYS</span>
+                    </h1>
+                    <p className="text-xs text-slate-500 font-semibold mt-1">Bespoke Holiday Packages & Experiential Tours</p>
+                    <p className="text-[11px] text-slate-500">📞 +91 99109 87264 • ✉️ info@ghumofiroo.com • 🌐 ghumofiroo.com</p>
+                  </div>
+                  <div className="text-right">
+                    <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 block">Proposal Reference</span>
+                    <span className="text-base font-black font-mono text-slate-900">{selectedQuote.quoteNumber}-V{vA.versionNumber}</span>
+                    <span className="text-xs text-slate-500 block mt-0.5">Date: {vA.createdAt || new Date().toLocaleDateString()}</span>
+                  </div>
+                </div>
+
+                {/* Proposal Overview Banner */}
+                <div className="bg-slate-50 border border-slate-200 rounded-2xl p-5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                  <div>
+                    <span className="text-[10px] uppercase font-black text-amber-700 tracking-wider">Customized Travel Proposal Prepared For</span>
+                    <h2 className="text-xl font-black text-slate-950 mt-0.5">{selectedQuote.customerName}</h2>
+                    <p className="text-xs font-bold text-slate-600 mt-1">
+                      Circuit / Destination: <span className="text-slate-950">{selectedQuote.destination}</span>
+                    </p>
+                  </div>
+                  <div className="text-left sm:text-right bg-white p-3.5 rounded-xl border border-slate-200 shadow-xs">
+                    <span className="text-[10px] uppercase font-black text-slate-500 tracking-wider block">
+                      {printMode === 'client' ? 'All-Inclusive Package Investment' : 'Client Selling Price'}
+                    </span>
+                    <span className="text-2xl font-black text-amber-600 font-mono block">
+                      ₹{vA.sellingPrice.toLocaleString('en-IN')}
+                    </span>
+                    <span className="text-[10px] text-slate-500 font-medium">Includes All Stays, Cabs, Tolls & Sightseeings</span>
+                  </div>
+                </div>
+
+                {/* Day-by-Day Itinerary Schedule (if present) */}
+                {vA.itineraryDays && vA.itineraryDays.length > 0 && (
+                  <div className="space-y-3 pt-2">
+                    <h3 className="text-xs font-black uppercase tracking-wider text-slate-900 border-b border-slate-200 pb-1.5 flex items-center justify-between">
+                      <span>Day-by-Day Tour Itinerary ({vA.itineraryDays.length} Days)</span>
+                      <span className="text-[11px] font-bold text-amber-700">Detailed Schedule</span>
+                    </h3>
+                    <div className="space-y-2.5">
+                      {vA.itineraryDays.map((d) => (
+                        <div key={d.day} className="p-3 bg-slate-50 border border-slate-200/80 rounded-xl">
+                          <span className="text-xs font-black text-slate-900 block">{d.title}</span>
+                          <p className="text-[11px] text-slate-600 mt-1 leading-relaxed">{d.description}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* ACCOMMODATIONS & HOTEL STAYS (CLIENT SAFE: NO PRICES) */}
+                <div className="space-y-3 pt-2">
+                  <h3 className="text-xs font-black uppercase tracking-wider text-slate-900 border-b border-slate-200 pb-1.5 flex items-center justify-between">
+                    <span>Handpicked Accommodations & Hotel Stays</span>
+                    <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+                      Included in Package
+                    </span>
+                  </h3>
+
+                  <div className="border border-slate-200 rounded-xl overflow-hidden">
+                    <table className="w-full text-left text-xs">
+                      <thead className="bg-slate-100 border-b border-slate-200">
+                        <tr>
+                          <th className="py-2.5 px-3 font-black text-slate-700 uppercase text-[10px]">Hotel / Resort Name</th>
+                          <th className="py-2.5 px-3 font-black text-slate-700 uppercase text-[10px]">Room Plan & Details</th>
+                          <th className="py-2.5 px-3 font-black text-slate-700 uppercase text-[10px] text-center">Nights</th>
+                          {printMode === 'internal' && (
+                            <>
+                              <th className="py-2.5 px-3 font-black text-slate-700 uppercase text-[10px] text-right">Net Rate</th>
+                              <th className="py-2.5 px-3 font-black text-slate-700 uppercase text-[10px] text-right">Total Net</th>
+                            </>
+                          )}
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-200">
+                        {vA.items.filter(i => i.type === 'hotel').map((item, idx) => (
+                          <tr key={idx} className="hover:bg-slate-50/50">
+                            <td className="py-2.5 px-3 font-bold text-slate-900">{item.name}</td>
+                            <td className="py-2.5 px-3 text-slate-600">{item.detail || 'Standard Room • CP Plan (Breakfast)'}</td>
+                            <td className="py-2.5 px-3 text-center font-black text-slate-900">{item.qty}N</td>
+                            {printMode === 'internal' && (
+                              <>
+                                <td className="py-2.5 px-3 text-right text-slate-700 font-mono">₹{item.rate.toLocaleString('en-IN')}</td>
+                                <td className="py-2.5 px-3 text-right font-black text-slate-900 font-mono">₹{item.total.toLocaleString('en-IN')}</td>
+                              </>
+                            )}
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+
+                {/* TRANSFERS & EXPERIENCES (CLIENT SAFE: NO PRICES) */}
+                <div className="space-y-3 pt-2">
+                  <h3 className="text-xs font-black uppercase tracking-wider text-slate-900 border-b border-slate-200 pb-1.5 flex items-center justify-between">
+                    <span>Dedicated Transportation & Curated Experiences</span>
+                    <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+                      Included in Package
+                    </span>
+                  </h3>
+
+                  <div className="border border-slate-200 rounded-xl overflow-hidden">
+                    <table className="w-full text-left text-xs">
+                      <thead className="bg-slate-100 border-b border-slate-200">
+                        <tr>
+                          <th className="py-2.5 px-3 font-black text-slate-700 uppercase text-[10px]">Service & Inclusion</th>
+                          <th className="py-2.5 px-3 font-black text-slate-700 uppercase text-[10px]">Specifications</th>
+                          <th className="py-2.5 px-3 font-black text-slate-700 uppercase text-[10px] text-center">Duration / Qty</th>
+                          {printMode === 'internal' && (
+                            <>
+                              <th className="py-2.5 px-3 font-black text-slate-700 uppercase text-[10px] text-right">Net Rate</th>
+                              <th className="py-2.5 px-3 font-black text-slate-700 uppercase text-[10px] text-right">Total Net</th>
+                            </>
+                          )}
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-200">
+                        {vA.items.filter(i => i.type !== 'hotel').map((item, idx) => (
+                          <tr key={idx} className="hover:bg-slate-50/50">
+                            <td className="py-2.5 px-3 font-bold text-slate-900">{item.name}</td>
+                            <td className="py-2.5 px-3 text-slate-600">{item.detail || 'Included as per itinerary'}</td>
+                            <td className="py-2.5 px-3 text-center font-black text-slate-900">{item.qty}</td>
+                            {printMode === 'internal' && (
+                              <>
+                                <td className="py-2.5 px-3 text-right text-slate-700 font-mono">₹{item.rate.toLocaleString('en-IN')}</td>
+                                <td className="py-2.5 px-3 text-right font-black text-slate-900 font-mono">₹{item.total.toLocaleString('en-IN')}</td>
+                              </>
+                            )}
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+
+                {/* INTERNAL MODE ACCOUNTING SUMMARY */}
+                {printMode === 'internal' && (
+                  <div className="p-4 bg-amber-50 border border-amber-300 rounded-xl space-y-1 text-xs">
+                    <div className="flex justify-between font-bold text-slate-700">
+                      <span>Total Net Supplier Cost:</span>
+                      <span className="font-mono text-slate-900">₹{vA.totalCost.toLocaleString('en-IN')}</span>
+                    </div>
+                    <div className="flex justify-between font-bold text-slate-700">
+                      <span>Agency Markup Profit ({vA.margin}%):</span>
+                      <span className="font-mono text-emerald-700">₹{(vA.sellingPrice - vA.totalCost).toLocaleString('en-IN')}</span>
+                    </div>
+                    <div className="flex justify-between font-black text-slate-900 border-t border-amber-200 pt-1 text-sm">
+                      <span>Final Client Quotation Price:</span>
+                      <span className="font-mono text-amber-800">₹{vA.sellingPrice.toLocaleString('en-IN')}</span>
+                    </div>
+                  </div>
+                )}
+
+                {/* Package Inclusions & Terms */}
+                <div className="grid grid-cols-2 gap-4 text-xs pt-2">
+                  <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl space-y-1">
+                    <span className="font-black text-slate-900 uppercase text-[10px] block">✦ Package Inclusions</span>
+                    <ul className="list-disc list-inside text-slate-600 space-y-0.5 text-[11px]">
+                      <li>Hotel accommodations as listed with breakfast (CP Plan)</li>
+                      <li>Dedicated private AC vehicle for all airport, intercity & sightseeing transfers</li>
+                      <li>Driver allowances, fuel charges, state permits & toll taxes</li>
+                      <li>24/7 dedicated guest concierge & on-ground trip assistance</li>
+                    </ul>
+                  </div>
+
+                  <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl space-y-1">
+                    <span className="font-black text-slate-900 uppercase text-[10px] block">✦ Booking & Payment Terms</span>
+                    <ul className="list-disc list-inside text-slate-600 space-y-0.5 text-[11px]">
+                      <li>50% advance deposit to secure hotel & cab reservations</li>
+                      <li>Balance payment 7 days prior to date of departure</li>
+                      <li>Rooms & rates are subject to availability at the time of final confirmation</li>
+                      <li>Check-in: 12:00 PM / 02:00 PM | Check-out: 10:00 AM / 11:00 AM</li>
+                    </ul>
+                  </div>
+                </div>
+
+                {/* Signature & Confirmation Footer */}
+                <div className="border-t border-slate-300 pt-6 flex justify-between items-end text-xs text-slate-500">
+                  <div>
+                    <p className="font-bold text-slate-800">Ghumo Firoo Travels Pvt. Ltd.</p>
+                    <p>Delivering unforgettable holiday experiences across India</p>
+                  </div>
+                  <div className="text-right">
+                    <div className="h-10 border-b border-slate-400 w-40 mb-1"></div>
+                    <p className="text-[10px] uppercase font-bold text-slate-400">Authorized Signatory</p>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
