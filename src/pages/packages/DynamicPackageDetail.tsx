@@ -4023,6 +4023,7 @@ const DynamicPackageDetail: React.FC<DynamicPackageDetailProps> = ({ slug: propS
   const [activeVariantId, setActiveVariantId] = useState<string>('');
   const currentSlug = propSlug || params.slug || window.location.pathname.split('/').pop() || '';
   const isEvokeSlug = currentSlug === 'rann-utsav-2d1n' || currentSlug === 'rann-utsav-3d2n' || currentSlug.includes('tent-city') || currentSlug.includes('rann-utsav-tent');
+  const [passengerCount, setPassengerCount] = useState<number>(2);
   const [selectedCabId, setSelectedCabId] = useState<string>(isEvokeSlug ? 'evoke_coach' : 'sedan');
   const [dhamAdultsCount, setDhamAdultsCount] = useState<number>(2);
   const [dhamRoomsCount, setDhamRoomsCount] = useState<number>(1);
