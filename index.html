@@ -17,7 +17,7 @@
     <!-- Note: Strict-Transport-Security (HSTS) must be set via server headers -->
     
 
-    <!-- Google Analytics (GA4): initialized conditionally for public website pages -->
+    <!-- Google Analytics (GA4): initialized conditionally for public website pages (Dual Tagging: G-R3ZB8V8DXC & G-W0VQVTRS8W) -->
     <script>
       var p = window.location.pathname || '';
       if (!p.startsWith('/crm') && !p.startsWith('/auth') && !p.startsWith('/forgot-password') && !p.startsWith('/reset-password')) {
@@ -30,7 +30,12 @@
         function gtag(){ window.dataLayer.push(arguments); }
         window.gtag = gtag;
         gtag('js', new Date());
+
+        // Primary Google Analytics 4 Property
         gtag('config', 'G-R3ZB8V8DXC', { send_page_view: false });
+
+        // Secondary Google Analytics 4 Property
+        gtag('config', 'G-W0VQVTRS8W', { send_page_view: false });
       }
     </script>
     
