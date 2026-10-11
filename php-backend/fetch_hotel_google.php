@@ -86,23 +86,34 @@ if (strpos($query, 'http://') === 0 || strpos($query, 'https://') === 0) {
     if (strpos($query, 'http') === 0) {
         if (preg_match('/place\/([^\/@]+)/', $query, $matches)) {
             $query = urldecode(str_replace(['+', '%20'], ' ', $matches[1]));
-        } elseif (preg_match('/(google\.[a-z.]+\/travel|maps\.google|google\.[a-z.]+\/maps)/i', $query)) {
-            $chTitle = curl_init();
-            curl_setopt($chTitle, CURLOPT_URL, $query);
-            curl_setopt($chTitle, CURLOPT_RETURNTRANSFER, true);
-            curl_setopt($chTitle, CURLOPT_FOLLOWLOCATION, true);
-            curl_setopt($chTitle, CURLOPT_SSL_VERIFYPEER, false);
-            curl_setopt($chTitle, CURLOPT_TIMEOUT, 6);
-            curl_setopt($chTitle, CURLOPT_USERAGENT, 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36');
-            $htmlTitle = curl_exec($chTitle);
-            curl_close($chTitle);
+        } elseif (preg_match('/(google\.[a-z.]+\/travel|maps\.google|google\.[a-z.]+\/maps|google\.[a-z.]+\/search)/i', $query)) {
+            // First check if query param 'q' exists in Google search/maps url
+            $parsedSearch = parse_url($query);
+            if (!empty($parsedSearch['query'])) {
+                parse_str($parsedSearch['query'], $searchParams);
+                if (!empty($searchParams['q']) && !preg_match('/^[a-zA-Z0-9_\-]{15,30}$/', $searchParams['q'])) {
+                    $query = trim($searchParams['q']);
+                }
+            }
+            
+            if (strpos($query, 'http') === 0) {
+                $chTitle = curl_init();
+                curl_setopt($chTitle, CURLOPT_URL, $query);
+                curl_setopt($chTitle, CURLOPT_RETURNTRANSFER, true);
+                curl_setopt($chTitle, CURLOPT_FOLLOWLOCATION, true);
+                curl_setopt($chTitle, CURLOPT_SSL_VERIFYPEER, false);
+                curl_setopt($chTitle, CURLOPT_TIMEOUT, 6);
+                curl_setopt($chTitle, CURLOPT_USERAGENT, 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36');
+                $htmlTitle = curl_exec($chTitle);
+                curl_close($chTitle);
 
-            if (!empty($htmlTitle) && preg_match('/<title[^>]*>(.*?)<\/title>/is', $htmlTitle, $titleMatches)) {
-                $extractedTitle = html_entity_decode(trim($titleMatches[1]));
-                $cleanTitle = preg_replace('/(\s*-\s*Google\s*(Hotels|Travel|Search|Maps).*$)/i', '', $extractedTitle);
-                $cleanTitle = trim(preg_replace('/^(Hotels\s*in\s*|Google\s*Hotels\s*:\s*)/i', '', $cleanTitle));
-                if (!empty($cleanTitle) && !preg_match('/^Google\s*(Hotels|Travel|Search)?$/i', $cleanTitle)) {
-                    $query = $cleanTitle;
+                if (!empty($htmlTitle) && preg_match('/<title[^>]*>(.*?)<\/title>/is', $htmlTitle, $titleMatches)) {
+                    $extractedTitle = html_entity_decode(trim($titleMatches[1]));
+                    $cleanTitle = preg_replace('/(\s*-\s*Google\s*(Hotels|Travel|Search|Maps).*$)/i', '', $extractedTitle);
+                    $cleanTitle = trim(preg_replace('/^(Hotels\s*in\s*|Google\s*Hotels\s*:\s*)/i', '', $cleanTitle));
+                    if (!empty($cleanTitle) && !preg_match('/^Google\s*(Hotels|Travel|Search)?$/i', $cleanTitle)) {
+                        $query = $cleanTitle;
+                    }
                 }
             }
         }
@@ -277,7 +288,8 @@ if (!$googleSuccess) {
     }
 
     // 1. Try Photon OSM POI search first (optimized for hotels & tourist venues)
-    $photonUrl = "https://photon.komoot.io/api/?q=" . urlencode($combinedQuery) . "&limit=1&lang=en";
+    // Request multiple candidates so we can prioritize matching country (India by default unless specified)
+    $photonUrl = "https://photon.komoot.io/api/?q=" . urlencode($combinedQuery) . "&limit=5&lang=en";
     $chPhoton = curl_init();
     curl_setopt($chPhoton, CURLOPT_URL, $photonUrl);
     curl_setopt($chPhoton, CURLOPT_RETURNTRANSFER, true);
@@ -290,7 +302,7 @@ if (!$googleSuccess) {
     $photonData = json_decode($photonResp, true);
     // If combined search returned no features, retry with base query
     if ((empty($photonData['features']) || count($photonData['features']) === 0) && $combinedQuery !== $query) {
-        $photonUrlFallback = "https://photon.komoot.io/api/?q=" . urlencode($query) . "&limit=1&lang=en";
+        $photonUrlFallback = "https://photon.komoot.io/api/?q=" . urlencode($query) . "&limit=5&lang=en";
         $chPhotonF = curl_init();
         curl_setopt($chPhotonF, CURLOPT_URL, $photonUrlFallback);
         curl_setopt($chPhotonF, CURLOPT_RETURNTRANSFER, true);
@@ -302,8 +314,28 @@ if (!$googleSuccess) {
         $photonData = json_decode($photonRespF, true);
     }
 
-    if (!empty($photonData['features']) && is_array($photonData['features']) && count($photonData['features']) > 0) {
-        $feat = $photonData['features'][0];
+    $validPhotonFeat = null;
+    if (!empty($photonData['features']) && is_array($photonData['features'])) {
+        foreach ($photonData['features'] as $featCandidate) {
+            $cCode = strtoupper($featCandidate['properties']['countrycode'] ?? '');
+            $cName = strtolower($featCandidate['properties']['country'] ?? '');
+            // Default to India unless destination hint indicates an international country
+            $isIndiaSearch = empty($destinationHint) || stripos($destinationHint, 'india') !== false || stripos($combinedQuery, 'india') !== false || stripos($combinedQuery, 'bhuj') !== false || stripos($combinedQuery, 'gujarat') !== false;
+            
+            if ($isIndiaSearch) {
+                if ($cCode === 'IN' || $cName === 'india') {
+                    $validPhotonFeat = $featCandidate;
+                    break;
+                }
+            } else {
+                $validPhotonFeat = $featCandidate;
+                break;
+            }
+        }
+    }
+
+    if ($validPhotonFeat) {
+        $feat = $validPhotonFeat;
         $prop = $feat['properties'] ?? [];
         $coords = $feat['geometry']['coordinates'] ?? [];
 
@@ -359,9 +391,9 @@ if (!$googleSuccess) {
             'confidence' => 'partial_location_only'
         ];
     } else {
-        // 2. Fallback to Nominatim Geocoding API with English localization
+        // 2. Fallback to Nominatim Geocoding API with countrycodes=in constraint
         $cleanSearch = trim(preg_replace('/^(Hotel|Resort|The)\s+/i', '', $combinedQuery));
-        $osmUrl = "https://nominatim.openstreetmap.org/search?q=" . urlencode($combinedQuery) . "&format=json&addressdetails=1&limit=1&accept-language=en";
+        $osmUrl = "https://nominatim.openstreetmap.org/search?q=" . urlencode($combinedQuery) . "&format=json&addressdetails=1&countrycodes=in&limit=1&accept-language=en";
 
         $chOsm = curl_init();
         curl_setopt($chOsm, CURLOPT_URL, $osmUrl);
@@ -375,7 +407,7 @@ if (!$googleSuccess) {
         $osmData = json_decode($osmResp, true);
 
         if (empty($osmData) || !is_array($osmData) || count($osmData) === 0) {
-            $osmUrl2 = "https://nominatim.openstreetmap.org/search?q=" . urlencode($cleanSearch) . "&format=json&addressdetails=1&limit=1&accept-language=en";
+            $osmUrl2 = "https://nominatim.openstreetmap.org/search?q=" . urlencode($cleanSearch) . "&format=json&addressdetails=1&countrycodes=in&limit=1&accept-language=en";
             $chOsm2 = curl_init();
             curl_setopt($chOsm2, CURLOPT_URL, $osmUrl2);
             curl_setopt($chOsm2, CURLOPT_RETURNTRANSFER, true);
