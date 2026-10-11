@@ -173,19 +173,28 @@ export default function PackageMaster() {
 
   // Master Hotels loaded dynamically from Hotel Master Page
   const [masterHotels, setMasterHotels] = useState<any[]>([]);
-
-  // Master Sightseeings / Attractions loaded dynamically from database
   const [masterSightseeings, setMasterSightseeings] = useState<any[]>([]);
+  const [masterRoomCategories, setMasterRoomCategories] = useState<any[]>([]);
 
   useEffect(() => {
     const fetchMasterHotels = async () => {
       try {
-        const data = await fetchCachedJson(`${API_BASE}/bootstrap.php`);
-        if (data && data.success && Array.isArray(data.hotels) && data.hotels.length > 0) {
-          setMasterHotels(data.hotels);
+        const [hData, rcData] = await Promise.all([
+          fetchCachedJson(`${API_BASE}/api.php?table=hotels`).catch(() => null),
+          fetchCachedJson(`${API_BASE}/api.php?table=room_categories`).catch(() => null)
+        ]);
+
+        if (Array.isArray(hData) && hData.length > 0) {
+          setMasterHotels(hData);
+        } else {
+          const fb = await fetchCachedJson(`${API_BASE}/hotel_bootstrap.php`).catch(() => null);
+          if (fb && Array.isArray(fb.hotels) && fb.hotels.length > 0) {
+            setMasterHotels(fb.hotels);
+          }
         }
-        if (data && data.success && Array.isArray(data.sightseeings) && data.sightseeings.length > 0) {
-          setMasterSightseeings(data.sightseeings);
+
+        if (Array.isArray(rcData) && rcData.length > 0) {
+          setMasterRoomCategories(rcData);
         }
       } catch (err) {
         console.log('Hotel Master API offline, using contracted registry baseline');
@@ -1801,7 +1810,9 @@ export default function PackageMaster() {
                               const sel = contractedOptions.find((o: any) => o.name === v);
                               if (sel) {
                                 setHotelStars(sel.stars);
-                                setHotelRoomType(sel.defaultRoom);
+                                const rawRoom = sel.defaultRoom || '';
+                                const firstRoom = rawRoom.includes('/') ? rawRoom.split('/')[0].trim() : rawRoom;
+                                setHotelRoomType(firstRoom);
                                 if (sel.cost_price) setHotelCostPrice(sel.cost_price);
                                 if (sel.margin_percent) setHotelMarginPercent(sel.margin_percent);
                               }
@@ -1847,20 +1858,52 @@ export default function PackageMaster() {
 
                           const dynamicDbRooms: string[] = [];
 
+                          // Helper to extract and split room type strings
+                          const addRoomTypes = (val: any) => {
+                            if (!val) return;
+                            if (Array.isArray(val)) {
+                              val.forEach(v => addRoomTypes(v));
+                              return;
+                            }
+                            const str = String(val).trim();
+                            if (!str) return;
+                            if (str.includes('/')) {
+                              str.split('/').forEach(part => {
+                                const clean = part.trim();
+                                if (clean) dynamicDbRooms.push(clean);
+                              });
+                            } else {
+                              dynamicDbRooms.push(str);
+                            }
+                          };
+
                           if (selectedHotelObj) {
+                            // 1. Check if hotel exists in masterHotels by ID or Name to pull live DB room categories
+                            const matchedMasterHotel = masterHotels.find(mh => 
+                              (mh.hotel_name || mh.name || '').trim().toLowerCase() === hotelName.trim().toLowerCase() ||
+                              (selectedHotelObj.raw?.id && mh.id === selectedHotelObj.raw.id)
+                            );
+
+                            if (matchedMasterHotel && masterRoomCategories.length > 0) {
+                              const dbRoomsForHotel = masterRoomCategories.filter(rc => rc.hotel_id === matchedMasterHotel.id && rc.active_status);
+                              dbRoomsForHotel.forEach(rc => {
+                                if (rc.room_category_name) addRoomTypes(rc.room_category_name);
+                              });
+                            }
+
                             if (Array.isArray(selectedHotelObj.roomTypes)) {
-                              dynamicDbRooms.push(...selectedHotelObj.roomTypes);
+                              selectedHotelObj.roomTypes.forEach(rt => addRoomTypes(rt));
                             }
                             if (selectedHotelObj.defaultRoom) {
-                              dynamicDbRooms.push(selectedHotelObj.defaultRoom);
+                              addRoomTypes(selectedHotelObj.defaultRoom);
                             }
                             if (selectedHotelObj.raw) {
-                              if (selectedHotelObj.raw.room_type) dynamicDbRooms.push(selectedHotelObj.raw.room_type);
+                              if (selectedHotelObj.raw.room_type) addRoomTypes(selectedHotelObj.raw.room_type);
                               if (Array.isArray(selectedHotelObj.raw.rates)) {
-                                selectedHotelObj.raw.rates.forEach((r: any) => { if (r.room_type) dynamicDbRooms.push(r.room_type); });
+                                selectedHotelObj.raw.rates.forEach((r: any) => { if (r.room_type) addRoomTypes(r.room_type); });
                               }
                               if (Array.isArray(selectedHotelObj.raw.contracts)) {
-                                selectedHotelObj.raw.contracts.forEach((c: any) => { if (c.room_type) dynamicDbRooms.push(c.room_type); });
+                                selectedHotelObj.raw.contracts.forEach((c: any) => { if (c.room_type) addRoomTypes(c.room_type); });
                               }
                             }
                           }
