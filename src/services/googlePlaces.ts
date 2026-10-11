@@ -26,7 +26,7 @@ export interface FetchedHotelMeta {
   confidence?: string;
 }
 
-export async function fetchHotelMetaFromGoogle(queryOrUrl: string): Promise<FetchedHotelMeta | null> {
+export async function fetchHotelMetaFromGoogle(queryOrUrl: string, destinationHint?: string): Promise<FetchedHotelMeta | null> {
   const searchQuery = queryOrUrl.trim();
   if (!searchQuery) return null;
 
@@ -36,7 +36,10 @@ export async function fetchHotelMetaFromGoogle(queryOrUrl: string): Promise<Fetc
       headers: {
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({ query: searchQuery })
+      body: JSON.stringify({ 
+        query: searchQuery,
+        destination_hint: destinationHint ? destinationHint.trim() : undefined
+      })
     });
     if (!res.ok) {
       throw new Error(`Proxy error: ${res.status} ${res.statusText}`);

@@ -216,7 +216,8 @@ export const HotelContractWizard: React.FC<HotelContractWizardProps> = ({
     }
     setIsFetchingGoogleMeta(true);
     try {
-      const meta = await fetchHotelMetaFromGoogle(googleSearchInput);
+      const destHint = destinationSearchQuery.trim() || [hotelForm.city, hotelForm.state].filter(Boolean).join(', ');
+      const meta = await fetchHotelMetaFromGoogle(googleSearchInput, destHint);
       if (meta) {
         setHotelForm(prev => {
           let matchedCountryId = prev.country_id;

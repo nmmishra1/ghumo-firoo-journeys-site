@@ -33,6 +33,7 @@ if (!$apiKey && file_exists(__DIR__ . '/../.env')) {
 
 $input = json_decode(file_get_contents('php://input'), true);
 $query = isset($_GET['query']) ? trim($_GET['query']) : (isset($input['query']) ? trim($input['query']) : '');
+$destinationHint = isset($_GET['destination_hint']) ? trim($_GET['destination_hint']) : (isset($input['destination_hint']) ? trim($input['destination_hint']) : '');
 
 if (empty($query)) {
     echo json_encode(['success' => false, 'error' => 'Query parameter is required', 'source' => 'not_found']);
@@ -123,7 +124,8 @@ if (!is_dir($cacheDir)) {
     @mkdir($cacheDir, 0755, true);
 }
 
-$cacheKey = md5(strtolower(trim($query)));
+// Include destination hint in cache key to avoid cache collisions across different cities
+$cacheKey = md5(strtolower(trim($query)) . '_' . strtolower(trim($destinationHint)));
 $cacheFile = $cacheDir . "/hotel_v4_" . $cacheKey . ".json";
 $cacheTTL = 86400 * 3; // 3 Days Cache
 
@@ -268,8 +270,14 @@ if (!empty($apiKey)) {
 // 🌍 SOURCE 2: OPENSTREETMAP PHOTON & NOMINATIM (FOC FALLBACK)
 // =========================================================================
 if (!$googleSuccess) {
+    // Determine search text with destination hint if available
+    $combinedQuery = $query;
+    if (!empty($destinationHint) && stripos($query, $destinationHint) === false) {
+        $combinedQuery = $query . ' ' . $destinationHint;
+    }
+
     // 1. Try Photon OSM POI search first (optimized for hotels & tourist venues)
-    $photonUrl = "https://photon.komoot.io/api/?q=" . urlencode($query) . "&limit=1&lang=en";
+    $photonUrl = "https://photon.komoot.io/api/?q=" . urlencode($combinedQuery) . "&limit=1&lang=en";
     $chPhoton = curl_init();
     curl_setopt($chPhoton, CURLOPT_URL, $photonUrl);
     curl_setopt($chPhoton, CURLOPT_RETURNTRANSFER, true);
@@ -280,6 +288,20 @@ if (!$googleSuccess) {
     curl_close($chPhoton);
 
     $photonData = json_decode($photonResp, true);
+    // If combined search returned no features, retry with base query
+    if ((empty($photonData['features']) || count($photonData['features']) === 0) && $combinedQuery !== $query) {
+        $photonUrlFallback = "https://photon.komoot.io/api/?q=" . urlencode($query) . "&limit=1&lang=en";
+        $chPhotonF = curl_init();
+        curl_setopt($chPhotonF, CURLOPT_URL, $photonUrlFallback);
+        curl_setopt($chPhotonF, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($chPhotonF, CURLOPT_SSL_VERIFYPEER, false);
+        curl_setopt($chPhotonF, CURLOPT_TIMEOUT, 6);
+        curl_setopt($chPhotonF, CURLOPT_USERAGENT, 'GhumoFirooJourneys/1.0 (info@ghumofiroo.com)');
+        $photonRespF = curl_exec($chPhotonF);
+        curl_close($chPhotonF);
+        $photonData = json_decode($photonRespF, true);
+    }
+
     if (!empty($photonData['features']) && is_array($photonData['features']) && count($photonData['features']) > 0) {
         $feat = $photonData['features'][0];
         $prop = $feat['properties'] ?? [];
@@ -338,8 +360,8 @@ if (!$googleSuccess) {
         ];
     } else {
         // 2. Fallback to Nominatim Geocoding API with English localization
-        $cleanSearch = trim(preg_replace('/^(Hotel|Resort|The)\s+/i', '', $query));
-        $osmUrl = "https://nominatim.openstreetmap.org/search?q=" . urlencode($query) . "&format=json&addressdetails=1&limit=1&accept-language=en";
+        $cleanSearch = trim(preg_replace('/^(Hotel|Resort|The)\s+/i', '', $combinedQuery));
+        $osmUrl = "https://nominatim.openstreetmap.org/search?q=" . urlencode($combinedQuery) . "&format=json&addressdetails=1&limit=1&accept-language=en";
 
         $chOsm = curl_init();
         curl_setopt($chOsm, CURLOPT_URL, $osmUrl);
