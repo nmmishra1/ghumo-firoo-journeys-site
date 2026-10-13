@@ -1,6 +1,6 @@
 <?php
 // php-backend/api/hotels/HotelModel.php — Domain Data Access & Schema Resolution for Hotels
-// Ghumo Firoo Journeys Enterprise Architecture
+// Ghumo Firoo Travels Enterprise Architecture
 
 require_once __DIR__ . '/../../db.php';
 

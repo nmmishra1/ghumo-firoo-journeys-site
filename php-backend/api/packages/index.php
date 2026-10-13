@@ -1,6 +1,6 @@
 <?php
 // php-backend/api/packages/index.php — Domain REST Controller for Packages API
-// Ghumo Firoo Journeys Enterprise Architecture
+// Ghumo Firoo Travels Enterprise Architecture
 
 error_reporting(0);
 ini_set('display_errors', 0);

@@ -1,6 +1,6 @@
 <?php
 // php-backend/api/packages/PackageModel.php — Domain Data Model & Sanitizer for Tour Packages
-// Ghumo Firoo Journeys Enterprise Architecture
+// Ghumo Firoo Travels Enterprise Architecture
 
 require_once __DIR__ . '/../../db.php';
 

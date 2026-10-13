@@ -1,6 +1,6 @@
 <?php
 // php-backend/api/packages/PackageService.php — Domain Business Logic for Packages & Variants
-// Ghumo Firoo Journeys Enterprise Architecture
+// Ghumo Firoo Travels Enterprise Architecture
 
 require_once __DIR__ . '/PackageModel.php';
 require_once __DIR__ . '/../../auth_middleware.php';

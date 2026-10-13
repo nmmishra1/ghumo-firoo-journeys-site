@@ -1,6 +1,6 @@
 <?php
 // php-backend/api/hotels/index.php — Domain REST Controller for Hotels API
-// Ghumo Firoo Journeys Enterprise Architecture
+// Ghumo Firoo Travels Enterprise Architecture
 
 error_reporting(0);
 ini_set('display_errors', 0);

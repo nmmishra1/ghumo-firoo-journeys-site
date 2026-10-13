@@ -1,6 +1,6 @@
 <?php
 // php-backend/api/hotels/HotelService.php — Domain Business Logic & Operations for Hotels
-// Ghumo Firoo Journeys Enterprise Architecture
+// Ghumo Firoo Travels Enterprise Architecture
 
 require_once __DIR__ . '/HotelModel.php';
 require_once __DIR__ . '/../../auth_middleware.php';
