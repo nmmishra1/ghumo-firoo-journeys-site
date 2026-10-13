@@ -15,13 +15,19 @@ require_once __DIR__ . '/db.php';
 
 $pdo = getDb();
 
-// Secure endpoint with Supabase ES256 JWT validation and approved CRM roles
-$user = authenticate();
-$profile = requireRole($user, $pdo, ['admin', 'manager', 'agent']);
-
 $method = $_SERVER['REQUEST_METHOD'];
 $id = $_GET['id'] ?? '';
 $action = $_GET['action'] ?? '';
+
+// GET requests allow reading the activities catalog (used by package master, quote workspace, itinerary builder, and public catalog);
+// Write operations (POST, PUT, DELETE) strictly enforce authentication and CRM staff roles.
+if ($method === 'GET') {
+    $user = authenticateOptional();
+    $profile = null;
+} else {
+    $user = authenticate();
+    $profile = requireRole($user, $pdo, ['admin', 'manager', 'agent']);
+}
 
 // Helper to decode JSON columns
 function parseActivityRow($row) {

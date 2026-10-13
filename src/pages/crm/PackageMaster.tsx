@@ -205,9 +205,10 @@ export default function PackageMaster() {
 
     const fetchMasterSightseeingsAndActivities = async () => {
       try {
+        const authHeaders = await getAuthHeader();
         const [sRes, aRes] = await Promise.all([
-          fetchCachedJson(`${API_BASE}/mysql-crud.php?table=sightseeings`).catch(() => null),
-          fetchCachedJson(`${API_BASE}/activities.php`).catch(() => null)
+          fetchCachedJson(`${API_BASE}/mysql-crud.php?table=sightseeings`, { headers: authHeaders }).catch(() => null),
+          fetchCachedJson(`${API_BASE}/activities.php`, { headers: authHeaders }).catch(() => null)
         ]);
         if (Array.isArray(sRes) && sRes.length > 0) {
           setMasterSightseeings(sRes);
