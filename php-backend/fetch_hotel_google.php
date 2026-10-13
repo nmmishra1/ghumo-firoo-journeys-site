@@ -295,7 +295,7 @@ if (!$googleSuccess) {
     curl_setopt($chPhoton, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($chPhoton, CURLOPT_SSL_VERIFYPEER, false);
     curl_setopt($chPhoton, CURLOPT_TIMEOUT, 6);
-    curl_setopt($chPhoton, CURLOPT_USERAGENT, 'GhumoFirooJourneys/1.0 (info@ghumofiroo.com)');
+    curl_setopt($chPhoton, CURLOPT_USERAGENT, 'GhumoFirooTravels/1.0 (info@ghumofiroo.com)');
     $photonResp = curl_exec($chPhoton);
     curl_close($chPhoton);
 
@@ -308,7 +308,7 @@ if (!$googleSuccess) {
         curl_setopt($chPhotonF, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($chPhotonF, CURLOPT_SSL_VERIFYPEER, false);
         curl_setopt($chPhotonF, CURLOPT_TIMEOUT, 6);
-        curl_setopt($chPhotonF, CURLOPT_USERAGENT, 'GhumoFirooJourneys/1.0 (info@ghumofiroo.com)');
+        curl_setopt($chPhotonF, CURLOPT_USERAGENT, 'GhumoFirooTravels/1.0 (info@ghumofiroo.com)');
         $photonRespF = curl_exec($chPhotonF);
         curl_close($chPhotonF);
         $photonData = json_decode($photonRespF, true);
@@ -400,7 +400,7 @@ if (!$googleSuccess) {
         curl_setopt($chOsm, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($chOsm, CURLOPT_SSL_VERIFYPEER, false);
         curl_setopt($chOsm, CURLOPT_TIMEOUT, 6);
-        curl_setopt($chOsm, CURLOPT_USERAGENT, 'GhumoFirooJourneys/1.0 (info@ghumofiroo.com)');
+        curl_setopt($chOsm, CURLOPT_USERAGENT, 'GhumoFirooTravels/1.0 (info@ghumofiroo.com)');
         $osmResp = curl_exec($chOsm);
         curl_close($chOsm);
 
@@ -413,7 +413,7 @@ if (!$googleSuccess) {
             curl_setopt($chOsm2, CURLOPT_RETURNTRANSFER, true);
             curl_setopt($chOsm2, CURLOPT_SSL_VERIFYPEER, false);
             curl_setopt($chOsm2, CURLOPT_TIMEOUT, 6);
-            curl_setopt($chOsm2, CURLOPT_USERAGENT, 'GhumoFirooJourneys/1.0 (info@ghumofiroo.com)');
+            curl_setopt($chOsm2, CURLOPT_USERAGENT, 'GhumoFirooTravels/1.0 (info@ghumofiroo.com)');
             $osmResp2 = curl_exec($chOsm2);
             curl_close($chOsm2);
             $osmData = json_decode($osmResp2, true);

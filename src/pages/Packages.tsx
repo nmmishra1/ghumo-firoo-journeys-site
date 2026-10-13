@@ -1111,7 +1111,7 @@ const Packages: React.FC = () => {
               <SectionHeading 
                 kicker="Complete Tour Catalog" 
                 title={searchQuery ? `Search Results for "${searchQuery}"` : "All Individual Packages"} 
-                subtitle="Browse every single tour package available on GhumoFiroo Journeys with instant prices, durations & direct links." 
+                subtitle="Browse every single tour package available on Ghumo Firoo Travels with instant prices, durations & direct links." 
                 align="left" 
                 className="mb-12" 
               />
@@ -1369,7 +1369,7 @@ const Packages: React.FC = () => {
         {/* TRUST BADGES FOOTER BANNER */}
         <section className="py-16 bg-[#050A18] border-t border-[#C9A25A]/20">
           <div className="container mx-auto px-6 max-w-6xl text-center space-y-8">
-            <h3 className="text-2xl font-serif font-bold text-white">Why Travel With GhumoFiroo Journeys?</h3>
+            <h3 className="text-2xl font-serif font-bold text-white">Why Travel With Ghumo Firoo Travels?</h3>
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
               {[
                 { title: "100% Private Fleet", desc: "No shared tourist buses. Private chauffeured AC sedans, SUVs & Innovas for your family." },

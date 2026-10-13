@@ -559,7 +559,7 @@ const RannUtsav: React.FC = () => {
     "description": "Official Rann Utsav festival in Kutch Gujarat featuring Tent City Dhordo luxury Swiss Tents, White Salt Desert full moon, Road to Heaven & Dholavira UNESCO tours.",
     "organizer": {
       "@type": "Organization",
-      "name": "GhumoFiroo Journeys - Official Evoke Experiences Partner",
+      "name": "Ghumo Firoo Travels - Official Evoke Experiences Partner",
       "url": config.baseUrl
     }
   }
@@ -687,7 +687,7 @@ const RannUtsav: React.FC = () => {
                   Book Directly With Official Evoke Partner
                 </h3>
                 <p className="text-xs text-slate-300 font-light max-w-2xl leading-relaxed">
-                  GhumoFiroo Journeys holds verified booking authorization for Evoke Experiences & Tent City Dhordo. Enjoy official rate card transparency, guaranteed tent allotment, complimentary border permits, and 24/7 on-ground assistance.
+                  Ghumo Firoo Travels holds verified booking authorization for Evoke Experiences & Tent City Dhordo. Enjoy official rate card transparency, guaranteed tent allotment, complimentary border permits, and 24/7 on-ground assistance.
                 </p>
               </div>
 

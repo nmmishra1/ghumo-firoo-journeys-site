@@ -861,7 +861,7 @@ const EuropeTour: React.FC = () => {
       <PackageSEO
         title={currentTour.title}
         description={currentTour.metaDescription}
-        canonical={`https://ghumofiroojourneys.com/packages/${currentTour.id}`}
+        canonical={`https://ghumofiroo.com/packages/${currentTour.id}`}
         images={currentTour.images}
         price={currentTour.price}
         rating={currentTour.rating}
@@ -879,7 +879,7 @@ const EuropeTour: React.FC = () => {
         structuredData={buildTouristTripJsonLd({
           name: currentTour.title,
           description: currentTour.metaDescription,
-          url: `https://ghumofiroojourneys.com/packages/${currentTour.id}`,
+          url: `https://ghumofiroo.com/packages/${currentTour.id}`,
           image: currentTour.images,
           offer: {
             price: currentTour.price.toString(),

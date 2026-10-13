@@ -883,7 +883,7 @@ const Index: React.FC = () => {
         <section className="py-24 container mx-auto px-6 max-w-7xl">
           <SectionHeading 
             kicker="Shared Moments"
-            title="#GhumoFirooJourneys"
+            title="#GhumoFirooTravels"
             subtitle="Catch a visual preview of real luxury excursions, pristine Swiss peaks, holy shrines, and Rann festivals captured by our guests."
             align="center"
             className="mx-auto mb-16"
