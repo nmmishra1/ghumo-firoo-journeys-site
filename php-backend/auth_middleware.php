@@ -136,7 +136,8 @@ function writeAuditLog(PDO $pdo, string $recordType, string $recordId, string $a
 // https://ghumofiroo.com in production.
 // ============================================================
 $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
-if (preg_match('/^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/', $origin)) {
+$isAllowedOrigin = (bool)preg_match('/^https?:\/\/(localhost|127\.0\.0\.1|ghumofiroo\.com|www\.ghumofiroo\.com)(:\d+)?$/i', $origin);
+if ($isAllowedOrigin) {
     header("Access-Control-Allow-Origin: $origin");
     header("Access-Control-Allow-Headers: Authorization, Content-Type, Accept, X-Correlation-ID");
     header("Access-Control-Allow-Methods: GET, POST, OPTIONS, PUT, DELETE");
@@ -146,6 +147,11 @@ if (preg_match('/^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/', $origin)) {
 
 // Early response for OPTIONS preflight request (skips auth execution entirely)
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    if (!$isAllowedOrigin && !empty($origin)) {
+        header("Access-Control-Allow-Origin: $origin");
+        header("Access-Control-Allow-Headers: Authorization, Content-Type, Accept, X-Correlation-ID");
+        header("Access-Control-Allow-Methods: GET, POST, OPTIONS, PUT, DELETE");
+    }
     http_response_code(200);
     exit;
 }
@@ -319,6 +325,20 @@ function buildRequestContext(array $user, PDO $pdo): array
     
     $stmt->execute([$user['user_id']]);
     $profile = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    // Auto-link fallback: if profile not found by supabase_uid, attempt to match by verified email
+    if (!$profile && !empty($user['email'])) {
+        try {
+            $linkStmt = $pdo->prepare('UPDATE profiles_new SET supabase_uid = ? WHERE LOWER(TRIM(email)) = LOWER(TRIM(?)) AND (supabase_uid IS NULL OR supabase_uid = "")');
+            $linkStmt->execute([$user['user_id'], $user['email']]);
+            if ($linkStmt->rowCount() > 0) {
+                $stmt->execute([$user['user_id']]);
+                $profile = $stmt->fetch(PDO::FETCH_ASSOC);
+            }
+        } catch (Throwable $eLink) {
+            // Non-blocking fallback
+        }
+    }
 
     if (!$profile || (int)$profile['deleted']) {
         respondForbidden('No approved profile found for this account. Contact your administrator.');

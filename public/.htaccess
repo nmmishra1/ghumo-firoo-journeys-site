@@ -107,22 +107,22 @@ ErrorDocument 500 /index.html
   RewriteRule ^api/leads/([0-9]+)$ /php-backend/lead_details.php?id=$1 [L,QSA]
 
   # Map /api/ blog routes
-  RewriteRule ^api/blog-categories$ /api/blog-categories.php [L,QSA]
-  RewriteRule ^api/blogs$ /api/blogs.php [L,QSA]
-  RewriteRule ^api/blogs/([a-zA-Z0-9\-]+)$ /api/blogs.php?slug=$1 [L,QSA]
+  RewriteRule ^api/blog-categories$ /php-backend/mysql-crud.php?table=blog_categories [L,QSA]
+  RewriteRule ^api/blogs$ /php-backend/blogs.php [L,QSA]
+  RewriteRule ^api/blogs/([a-zA-Z0-9\-]+)$ /php-backend/blogs.php?slug=$1 [L,QSA]
 
   # Map Razorpay API calls
-  RewriteRule ^api/razorpay/create-order$ /api/razorpay/create-order.php [L,QSA]
-  RewriteRule ^api/razorpay/verify$ /api/razorpay/verify.php [L,QSA]
+  RewriteRule ^api/razorpay/create-order$ /php-backend/razorpay_create_order.php [L,QSA]
+  RewriteRule ^api/razorpay/verify$ /php-backend/razorpay_verify.php [L,QSA]
 
   # Map PayU API calls
-  RewriteRule ^api/payu/generate-hash$ /api/payu/generate-hash.php [L,QSA]
-  RewriteRule ^api/payu/success$ /api/payu/success.php [L,QSA]
-  RewriteRule ^api/payu/failure$ /api/payu/failure.php [L,QSA]
+  RewriteRule ^api/payu/generate-hash$ /php-backend/payu_generate_hash.php [L,QSA]
+  RewriteRule ^api/payu/success$ /php-backend/payu_success.php [L,QSA]
+  RewriteRule ^api/payu/failure$ /php-backend/payu_failure.php [L,QSA]
 
   # Map Packages API calls
-  RewriteRule ^api/packages$ /api/packages.php [L,QSA]
-  RewriteRule ^api/packages/([a-zA-Z0-9\-]+)$ /api/packages.php?id=$1 [L,QSA]
+  RewriteRule ^api/packages$ /php-backend/packages.php [L,QSA]
+  RewriteRule ^api/packages/([a-zA-Z0-9\-]+)$ /php-backend/packages.php?id=$1 [L,QSA]
 
   # Map Hotels API calls — secured, routes to php-backend
   RewriteRule ^api/hotels$ /php-backend/hotels.php [L,QSA]

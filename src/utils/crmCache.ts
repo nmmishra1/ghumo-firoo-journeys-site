@@ -258,10 +258,15 @@ export function installApiCacheInterceptor(): void {
       isForceRefresh = true;
     }
 
+    // Determine appropriate TTL: dynamic operational entities (leads, quotes, itineraries, follow-ups) use 3 minutes;
+    // master reference data (hotels, destinations, activities, sightseeings, countries, etc.) retain DEFAULT_TTL_MS (30 mins).
+    const isDynamicEntity = urlStr.includes('lead') || urlStr.includes('quote') || urlStr.includes('itinerar') || urlStr.includes('follow_up');
+    const effectiveTtl = isDynamicEntity ? (3 * 60 * 1000) : DEFAULT_TTL_MS;
+
     // If cached, valid, and not forced to refresh: return from memory cache immediately!
     if (!isForceRefresh) {
       const cached = apiMemoryCache.get(cacheKey);
-      if (cached && (Date.now() - cached.timestamp < DEFAULT_TTL_MS)) {
+      if (cached && (Date.now() - cached.timestamp < effectiveTtl)) {
         return createResponseFromCache(cached);
       }
     }
