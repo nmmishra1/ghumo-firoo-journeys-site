@@ -497,7 +497,7 @@ export function getDestinationFaqs(slugOrName: string = ""): DestinationFAQ[] {
     {
       id: "gen-faq-2",
       question: "Can I customize the itinerary and hotel categories?",
-      answer: "Yes! Every GhumoFiroo journey is 100% customizable. You can adjust the number of days, upgrade to boutique resorts or pool villas, add helicopter/adventure activities, and select customized meal plans."
+      answer: "Yes! Every Ghumo Firoo package is 100% customizable. You can adjust the number of days, upgrade to boutique resorts or pool villas, add helicopter/adventure activities, and select customized meal plans."
     },
     {
       id: "gen-faq-3",

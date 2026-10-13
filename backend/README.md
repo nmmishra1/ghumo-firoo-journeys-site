@@ -1,6 +1,6 @@
-# Ghumo Firoo Journeys - Backend API Service
+# Ghumo Firoo Travels - Backend API Service
 
-Standalone PHP REST API & Database engine for Ghumo Firoo Journeys travel platform.
+Standalone PHP REST API & Database engine for Ghumo Firoo Travels travel platform.
 
 ## 📁 Directory Structure
 ```

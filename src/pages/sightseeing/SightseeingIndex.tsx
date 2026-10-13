@@ -24,8 +24,8 @@ const SightseeingIndex: React.FC = () => {
   return (
     <Layout>
       <SEO
-        title="Top Sightseeing & Activities in India 2026 | Ghumo Firoo"
-        description="Explore popular attractions, scenic viewpoints, heritage monuments, and adventure activities across India with Ghumo Firoo. Plan your perfect journey."
+        title="Top Sightseeing & Activities in India 2026 | Ghumo Firoo Travels"
+        description="Explore popular attractions, scenic viewpoints, heritage monuments, and adventure activities across India with Ghumo Firoo Travels. Plan your perfect trip."
         keywords="top sightseeing India, activities Kutch, Road to Heaven Dholavira, Kalo Dungar, Kedarnath trek, tourist spots India 2026"
       />
 

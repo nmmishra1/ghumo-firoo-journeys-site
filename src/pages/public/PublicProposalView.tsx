@@ -354,7 +354,7 @@ export default function PublicProposalView() {
           </div>
           <div>
             <h2 className="text-lg font-black text-white tracking-wide">Retrieving Your Curated Holiday Proposal</h2>
-            <p className="text-xs text-slate-400 mt-1">Connecting to Ghumo Firoo luxury reservations desk...</p>
+            <p className="text-xs text-slate-400 mt-1">Connecting to Ghumo Firoo Travels luxury reservations desk...</p>
           </div>
         </div>
         {renderFooter()}
@@ -887,7 +887,7 @@ export default function PublicProposalView() {
                 </li>
                 <li className="flex items-start gap-2.5">
                   <Check className="w-3.5 h-3.5 text-emerald-400 mt-0.5 shrink-0" />
-                  <span>24x7 Dedicated Ghumo Firoo Travel Desk Concierge on WhatsApp and Call.</span>
+                  <span>24x7 Dedicated Ghumo Firoo Travels Travel Desk Concierge on WhatsApp and Call.</span>
                 </li>
               </ul>
             </div>

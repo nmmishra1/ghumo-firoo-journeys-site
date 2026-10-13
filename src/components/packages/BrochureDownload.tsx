@@ -717,7 +717,7 @@ const BrochureDownload: React.FC<BrochureDownloadProps> = ({
             
             <div class="contact-info">
               <h3>Contact Us for Booking</h3>
-              <p>Your trusted travel partner for unforgettable journeys</p>
+              <p>Your trusted travel partner for unforgettable travels</p>
               <div class="contact-details">
                 <div>
                   <strong>📞 Phone:</strong>

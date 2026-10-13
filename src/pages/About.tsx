@@ -73,7 +73,7 @@ const About: React.FC = () => {
             About Ghumo Firoo Travels
           </h1>
           <p className="text-lg sm:text-xl text-slate-200 font-medium max-w-2xl mx-auto leading-relaxed">
-            Your trusted travel partner for bespoke journeys, authentic cultural expeditions, and spiritual pilgrimages across India and the globe.
+            Your trusted travel partner for bespoke vacations, authentic cultural expeditions, and spiritual pilgrimages across India and the globe.
           </p>
         </div>
       </section>
@@ -108,10 +108,10 @@ const About: React.FC = () => {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
             <div className="space-y-6">
               <div className="inline-block text-xs font-bold text-blue-600 uppercase tracking-wider bg-blue-50 px-3 py-1 rounded-md">
-                Our Journey & Legacy
+                Our Story &amp; Legacy
               </div>
               <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-900 leading-tight">
-                Crafting Meaningful Journeys With Care & Precision
+                Crafting Meaningful Travels With Care &amp; Precision
               </h2>
               <p className="text-base sm:text-lg text-slate-600 leading-relaxed">
                 Ghumo Firoo Travels was founded with a clear, singular vision: to make holiday planning transparent, hassle-free, and truly personalized. Operating from New Delhi, our leadership brings over 10 years of rich industry experience working with India's top travel platforms, translating institutional know-how into personalized, customer-first holiday planning.

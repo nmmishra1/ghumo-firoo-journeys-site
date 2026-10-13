@@ -3387,7 +3387,7 @@ export default function QuoteWorkspace({ quotes: propQuotes = [], onCreateRevisi
                   <div>
                     <h1 className="text-2xl font-black uppercase tracking-wider text-slate-950 flex items-center gap-2">
                       <span>GHUMO FIROO</span>
-                      <span className="text-amber-600 text-sm font-bold border border-amber-500/40 px-2 py-0.5 rounded-md">JOURNEYS</span>
+                      <span className="text-amber-600 text-sm font-bold border border-amber-500/40 px-2 py-0.5 rounded-md">TRAVELS</span>
                     </h1>
                     <p className="text-xs text-slate-500 font-semibold mt-1">Bespoke Holiday Packages & Experiential Tours</p>
                     <p className="text-[11px] text-slate-500">📞 +91 99109 87264 • ✉️ info@ghumofiroo.com • 🌐 ghumofiroo.com</p>

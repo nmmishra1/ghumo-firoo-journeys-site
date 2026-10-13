@@ -14,7 +14,7 @@ const Profile = () => {
         description="Access your Ghumo Firoo traveler profile, manage booked holiday packages, check itinerary vouchers, and update your personal travel preferences."
         canonicalUrl="https://ghumofiroo.com/profile/"
         url="https://ghumofiroo.com/profile/"
-        keywords="Ghumo Firoo profile, traveler account, holiday booking status, download tour voucher, travel concierge, Ghumo Firoo guest portal"
+        keywords="Ghumo Firoo Travels profile, traveler account, holiday booking status, download tour voucher, travel concierge, Ghumo Firoo Travels guest portal"
       />
 
       <div className="min-h-screen bg-slate-950 text-slate-100 py-16 px-4 sm:px-6 lg:px-8">
@@ -25,7 +25,7 @@ const Profile = () => {
               <Sparkles className="w-3.5 h-3.5" /> Guest Portal
             </div>
             <h1 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
-              Ghumo Firoo Traveler Profile
+              Ghumo Firoo Travels Guest Profile
             </h1>
             <p className="text-slate-400 text-sm sm:text-base max-w-2xl mx-auto">
               Manage your vacation itineraries, download confirmed hotel vouchers, and connect with your dedicated 24x7 holiday concierge.
@@ -111,7 +111,7 @@ const Profile = () => {
 
             <div className="pt-6 space-y-4 text-xs sm:text-sm text-slate-300">
               <p>
-                Welcome to your Ghumo Firoo guest portal. If you have recently requested a custom quotation or confirmed a holiday booking for Char Dham Yatra, Rann Utsav Tent City, Kashmir, or International circuits, your dedicated holiday manager will share all real-time itinerary updates and payment receipts directly to your registered WhatsApp number and email.
+                Welcome to your Ghumo Firoo Travels guest portal. If you have recently requested a custom quotation or confirmed a holiday booking for Char Dham Yatra, Rann Utsav Tent City, Kashmir, or International circuits, your dedicated holiday manager will share all real-time itinerary updates and payment receipts directly to your registered WhatsApp number and email.
               </p>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
                 <div className="p-3 bg-slate-950/60 rounded-xl border border-slate-800/80 space-y-1">
@@ -126,7 +126,7 @@ const Profile = () => {
             </div>
 
             <div className="mt-6 pt-4 border-t border-slate-800 flex flex-wrap gap-3 items-center justify-between">
-              <span className="text-xs text-slate-500 font-medium">Ready to design your next journey?</span>
+              <span className="text-xs text-slate-500 font-medium">Ready to design your next holiday?</span>
               <div className="flex gap-2">
                 <Button asChild size="sm" className="bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 text-xs font-extrabold">
                   <Link to="/enquire-now">Plan New Holiday</Link>

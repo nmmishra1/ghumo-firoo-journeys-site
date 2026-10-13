@@ -312,23 +312,23 @@ export default function PublicDestinationDetail() {
     const gLower = groupName.toLowerCase();
 
     if (cLower === 'agra') {
-      return 'Agra Travel Guide: Taj Mahal & Top Places | Ghumo Firoo';
+      return 'Agra Travel Guide: Taj Mahal & Top Places | Ghumo Firoo Travels';
     }
     if (cLower === 'varanasi' || cLower === 'kashi') {
-      return 'Varanasi Travel Guide: Ghats & Temples | Ghumo Firoo';
+      return 'Varanasi Travel Guide: Ghats & Temples | Ghumo Firoo Travels';
     }
     if (cLower === 'jaipur') {
-      return 'Jaipur Travel Guide: Forts & Palaces | Ghumo Firoo';
+      return 'Jaipur Travel Guide: Forts & Palaces | Ghumo Firoo Travels';
     }
     if (cLower === 'goa') {
-      return 'Goa Travel Guide: Beaches & Top Places | Ghumo Firoo';
+      return 'Goa Travel Guide: Beaches & Top Places | Ghumo Firoo Travels';
     }
     if (cLower === 'rann of kutch' || cLower === 'kutch') {
-      return 'Rann of Kutch Guide: White Desert & Utsav | Ghumo Firoo';
+      return 'Rann of Kutch Guide: White Desert & Utsav | Ghumo Firoo Travels';
     }
 
     if (cLower.includes('statue of unity')) {
-      return 'Statue of Unity Guide: Kevadia Tour | Ghumo Firoo';
+      return 'Statue of Unity Guide: Kevadia Tour | Ghumo Firoo Travels';
     }
 
     // Dedicated Wildlife Reserves / National Parks
@@ -350,8 +350,8 @@ export default function PublicDestinationDetail() {
       cLower.includes('bandipur');
 
     if (isDedicatedWildlife) {
-      const t = `${displayCityName} Safari & Wildlife Guide | Ghumo Firoo`;
-      return t.length <= 60 ? t : `${displayCityName} Safari Guide | Ghumo Firoo`;
+      const t = `${displayCityName} Safari & Wildlife Guide | Ghumo Firoo Travels`;
+      return t.length <= 60 ? t : `${displayCityName} Safari Guide | Ghumo Firoo Travels`;
     }
 
     // Dedicated Pilgrimages / Temples
@@ -363,8 +363,8 @@ export default function PublicDestinationDetail() {
       ['badrinath', 'kedarnath', 'gangotri', 'yamunotri', 'ujjain', 'omkareshwar', 'somnath', 'tirupati', 'haridwar', 'rishikesh', 'ayodhya', 'mathura', 'vrindavan', 'puri', 'rameshwaram', 'dwarka', 'shirdi'].includes(cLower);
 
     if (isDedicatedPilgrimage) {
-      const t = `${displayCityName} Pilgrimage & Temple Guide | Ghumo Firoo`;
-      return t.length <= 60 ? t : `${displayCityName} Pilgrimage Guide | Ghumo Firoo`;
+      const t = `${displayCityName} Pilgrimage & Temple Guide | Ghumo Firoo Travels`;
+      return t.length <= 60 ? t : `${displayCityName} Pilgrimage Guide | Ghumo Firoo Travels`;
     }
 
     // Beach & Coastal
@@ -375,8 +375,8 @@ export default function PublicDestinationDetail() {
       ['goa', 'andaman', 'havelock', 'neil island', 'kovalam', 'varkala', 'gokarna', 'lakshadweep', 'puducherry', 'pondicherry', 'daman', 'diu'].includes(cLower);
 
     if (isBeach) {
-      const t = `${displayCityName} Beach & Holiday Guide | Ghumo Firoo`;
-      return t.length <= 60 ? t : `${displayCityName} Beach Guide | Ghumo Firoo`;
+      const t = `${displayCityName} Beach & Holiday Guide | Ghumo Firoo Travels`;
+      return t.length <= 60 ? t : `${displayCityName} Beach Guide | Ghumo Firoo Travels`;
     }
 
     // Hill Stations & Valleys
@@ -387,21 +387,21 @@ export default function PublicDestinationDetail() {
       ['manali', 'shimla', 'dharamshala', 'dalhousie', 'nainital', 'mussoorie', 'kullu', 'kashmir', 'srinagar', 'gulmarg', 'pahalgam', 'ladakh', 'leh', 'munnar', 'ooty', 'kodaikanal', 'coorg', 'chikmagalur', 'wayanad', 'darjeeling', 'gangtok', 'shillong', 'auli', 'chopta', 'spiti', 'kasol', 'jibhi'].includes(cLower);
 
     if (isHillStation) {
-      const t = `${displayCityName} Hill Station Travel Guide | Ghumo Firoo`;
-      return t.length <= 60 ? t : `${displayCityName} Travel Guide | Ghumo Firoo`;
+      const t = `${displayCityName} Hill Station Travel Guide | Ghumo Firoo Travels`;
+      return t.length <= 60 ? t : `${displayCityName} Travel Guide | Ghumo Firoo Travels`;
     }
 
     // Royal Heritage & UNESCO Palaces
     if (gLower.includes('heritage') || gLower.includes('unesco') || gLower.includes('fort') || gLower.includes('palace')) {
-      const t = `${displayCityName} Heritage & Travel Guide | Ghumo Firoo`;
-      return t.length <= 60 ? t : `${displayCityName} Travel Guide | Ghumo Firoo`;
+      const t = `${displayCityName} Heritage & Travel Guide | Ghumo Firoo Travels`;
+      return t.length <= 60 ? t : `${displayCityName} Travel Guide | Ghumo Firoo Travels`;
     }
 
-    const defaultTitle = `${displayCityName} Travel Guide: Top Places & Tour | Ghumo Firoo`;
-    return defaultTitle.length <= 60 ? defaultTitle : `${displayCityName} Travel Guide | Ghumo Firoo`;
+    const defaultTitle = `${displayCityName} Travel Guide: Top Places & Tour | Ghumo Firoo Travels`;
+    return defaultTitle.length <= 60 ? defaultTitle : `${displayCityName} Travel Guide | Ghumo Firoo Travels`;
   }, [curatedGuide?.title, displayCityName, groupName]);
 
-  const pageDescription = curatedGuide?.metaDescription || `Discover ${displayCityName}, ${stateName}. Comprehensive travel guide with top sightseeing places, local culture, best travel months, and custom private tour packages by Ghumo Firoo.`;
+  const pageDescription = curatedGuide?.metaDescription || `Discover ${displayCityName}, ${stateName}. Comprehensive travel guide with top sightseeing places, local culture, best travel months, and custom private tour packages by Ghumo Firoo Travels.`;
   const heroOverview = curatedGuide?.overview || cityData?.description || `Explore the timeless beauty, iconic landmarks, vibrant cuisine, and signature experiences of ${displayCityName}. Plan your customized private tour with verified chauffeur cars and hand-picked boutique stays.`;
 
   // Compute Sightseeings (Curated Signature / Live DB / Master popular attractions)
@@ -534,7 +534,7 @@ export default function PublicDestinationDetail() {
 
   // Handle WhatsApp Inquiry
   const handleWhatsApp = () => {
-    const message = encodeURIComponent(`Hello Ghumo Firoo! 👋 I am interested in planning a customized private holiday package to ${cityName} in ${stateName}. Please share itinerary options, boutique hotel choices, and price quote.`);
+    const message = encodeURIComponent(`Hello Ghumo Firoo Travels! 👋 I am interested in planning a customized private holiday package to ${cityName} in ${stateName}. Please share itinerary options, boutique hotel choices, and price quote.`);
     window.open(`https://wa.me/919910987264?text=${message}`, '_blank');
   };
 
@@ -610,8 +610,8 @@ export default function PublicDestinationDetail() {
     return (
       <Layout>
         <SEO
-          title="Destination Guide Coming Soon | Ghumo Firoo"
-          description="Explore curated travel guides, sightseeing circuits, and luxury tour packages across India with Ghumo Firoo."
+          title="Destination Guide Coming Soon | Ghumo Firoo Travels"
+          description="Explore curated travel guides, sightseeing circuits, and luxury tour packages across India with Ghumo Firoo Travels."
         />
         <div className="min-h-[80vh] flex flex-col items-center justify-center bg-[#060913] text-white px-4 pt-28 pb-16 text-center">
           <div className="max-w-md space-y-5">

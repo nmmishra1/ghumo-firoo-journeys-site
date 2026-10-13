@@ -1,6 +1,6 @@
 # Google Sheets Integration & Administration Guide
 
-This comprehensive guide explains the architecture, setup, and administration of the Google Sheets data integration for the Ghumo Firoo Journeys website.
+This comprehensive guide explains the architecture, setup, and administration of the Google Sheets data integration for the Ghumo Firoo Travels website.
 
 ## 1. System Architecture
 

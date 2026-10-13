@@ -6,7 +6,7 @@ const trustItems = [
     icon: Users,
     number: "5,000+",
     title: "Happy Travelers",
-    description: "Memorable journeys delivered"
+    description: "Memorable trips delivered"
   },
   {
     icon: Star,

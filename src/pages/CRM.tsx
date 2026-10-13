@@ -3306,7 +3306,7 @@ const CRM = () => {
                 <span className="flex items-center gap-0.5 text-xs font-black">
                   Ghumo<span className="text-[#C9A25A]">Firoo</span>
                 </span>
-                <span className="text-[8px] font-sans font-black tracking-[0.18em] text-[#D8B97A] uppercase mt-0.5">Journeys CRM</span>
+                <span className="text-[8px] font-sans font-black tracking-[0.18em] text-[#D8B97A] uppercase mt-0.5">Travels CRM</span>
               </span>
             )}
           </div>
@@ -3454,7 +3454,7 @@ const CRM = () => {
           <header className="bg-slate-900 border-b border-slate-800 px-6 py-3.5 flex flex-col sm:flex-row gap-4 justify-between sm:items-center sticky top-0 z-40 text-slate-100 shadow-md">
             <div>
               <h1 className="text-xl font-black tracking-wider text-white font-montserrat flex items-center gap-3 uppercase">
-                <img src="/ghumo-firoo-logo.png" alt="Ghumo Firoo" className="h-9 w-auto object-contain drop-shadow-md shrink-0 inline-block" />
+                <img src="/ghumo-firoo-logo.png" alt="Ghumo Firoo Travels" className="h-9 w-auto object-contain drop-shadow-md shrink-0 inline-block" />
                 {currentSection === 'dashboard' && 'Ghumo Firoo Travels Operations Center'}
                 {currentSection === 'user-dashboard' && 'User Performance Dashboard'}
                 {currentSection === 'leads' && 'Leads Pipeline'}

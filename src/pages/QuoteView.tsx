@@ -179,8 +179,8 @@ export default function QuoteView() {
           <div className="flex items-center gap-3">
             <Compass className="w-10 h-10 text-[#C9A25A]" />
             <div>
-              <h1 className="text-2xl font-display font-bold tracking-wider text-gradient-sunset">GHUMO FIROO</h1>
-              <p className="text-[10px] uppercase tracking-[0.2em] text-[#C9A25A]/80 font-medium">Bespoke Travel Journeys</p>
+              <h1 className="text-2xl font-display font-bold tracking-wider text-gradient-sunset">GHUMO FIROO TRAVELS</h1>
+              <p className="text-[10px] uppercase tracking-[0.2em] text-[#C9A25A]/80 font-medium">Bespoke Travel Packages &amp; Experiences</p>
             </div>
           </div>
           <div className="text-center sm:text-right">

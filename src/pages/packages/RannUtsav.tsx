@@ -878,7 +878,7 @@ const RannUtsav: React.FC = () => {
                   <FileText className="w-4 h-4 text-[#C9A25A]" /> Official Client-Ready Brochures
                 </div>
                 <h3 className="text-2xl sm:text-4xl font-serif font-bold text-white">
-                  Download Official Ghumo Firoo Kutch Brochures
+                  Download Official Ghumo Firoo Travels Kutch Brochures
                 </h3>
                 <p className="text-xs sm:text-sm text-slate-300 font-light leading-relaxed">
                   Download our high-definition, transparently priced client brochures complete with detailed day-wise itineraries, vehicle choices, and Tent City inclusions.

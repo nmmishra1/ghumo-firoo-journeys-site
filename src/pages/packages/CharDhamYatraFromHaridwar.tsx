@@ -92,7 +92,7 @@ const CharDhamYatraFromHaridwar: React.FC = () => {
         <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-3">Char Dham Yatra from Haridwar 2026</h1>
         <p className="text-gray-700 mb-8 leading-relaxed">
           Popular starting point with short itineraries and group-friendly pricing. Assistance throughout the yatra. 
-          Start your spiritual quest from the holy city of Haridwar with Ghumo Firoo.
+          Start your spiritual quest from the holy city of Haridwar with Ghumo Firoo Travels.
         </p>
         <div className="mb-12">
           <Link to="/enquire-now" className="inline-block bg-accent hover:bg-accent/90 text-white px-8 py-4 rounded-xl font-semibold shadow-lg transition-all hover:scale-105">

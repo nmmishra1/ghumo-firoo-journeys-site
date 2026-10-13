@@ -39,7 +39,7 @@ const Contact = () => {
   const contactFaqs = [
     {
       question: "What are the office hours of Ghumo Firoo Travels in Delhi?",
-      answer: "Our main office in Munirka, New Delhi, is open Monday to Saturday from 9:00 AM to 6:00 PM, and on Sundays from 10:00 AM to 4:00 PM. Our customer support helpline is available 24/7 for all travelers currently on their journeys."
+      answer: "Our main office in Munirka, New Delhi, is open Monday to Saturday from 9:00 AM to 6:00 PM, and on Sundays from 10:00 AM to 4:00 PM. Our customer support helpline is available 24/7 for all travelers currently on their trips."
     },
     {
       question: "How can I get a quote for a customized international tour?",
@@ -71,7 +71,7 @@ const Contact = () => {
   return (
     <Layout>
       <SEO 
-        title="Contact Us - Ghumo Firoo Travels | Plan Your Perfect Journey"
+        title="Contact Us - Ghumo Firoo Travels | Plan Your Perfect Trip"
         description="Contact Ghumo Firoo Travels for custom tour packages. Call +91-9910987264 or visit our Delhi office for expert travel planning & support."
         keywords="contact Ghumo Firoo Travels, Ghumofiroo contact, Ghumo Firo contact, Ghumo Phiro contact, Ghumophiro contact, travel agency contact Delhi, tour booking contact Delhi, Delhi travel agent, travel agency in Delhi, travel agency near Munirka, travel agency near Metro Gate 3, New Delhi travel services, travel consultation Delhi, custom tour packages contact, travel agent in South Delhi, tour operator Delhi contact, travel agency Munirka, Delhi travel booking, travel services New Delhi, best travel agency Delhi contact, travel planning Delhi, tour packages Delhi, travel agency near me Delhi, ghumophirotravel alternative contact, travel agent contact Delhi, Delhi tour operator contact, travel consultation New Delhi"
         canonicalUrl="https://ghumofiroo.com/contact"

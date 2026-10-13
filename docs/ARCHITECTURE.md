@@ -1,4 +1,4 @@
-# System Architecture — Ghumo Firoo Journeys
+# System Architecture — Ghumo Firoo Travels
 
 **Version:** 3.0 (rewritten from direct codebase inspection)
 **Author's note:** The existing `docs/ARCHITECTURE.md` describes a cleaner, more unified system than what's actually in the repository — e.g. it shows `cities → hotels/cab_vendors/sightseeings` as a clean FK hierarchy, which is not how the tables were actually built or connected. This document reflects what the code does, verified by reading it directly, including the parts that are messier than the previous doc suggests.

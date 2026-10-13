@@ -72,7 +72,7 @@ export default function Reviews() {
     <Layout>
       <SEO
         title="Traveler Reviews & Testimonials | Ghumo Firoo Travels"
-        description="Read authentic verified reviews and stories from guests who traveled across Rajasthan, Kerala, Rann of Kutch, Char Dham, and international destinations with Ghumo Firoo."
+        description="Read authentic verified reviews and stories from guests who traveled across Rajasthan, Kerala, Rann of Kutch, Char Dham, and international destinations with Ghumo Firoo Travels."
         canonicalUrl="https://ghumofiroo.com/reviews"
         url="https://ghumofiroo.com/reviews"
         structuredData={reviewSchema}
@@ -92,7 +92,7 @@ export default function Reviews() {
           </h1>
 
           <p className="text-base sm:text-lg text-slate-300 max-w-2xl mx-auto leading-relaxed mb-10">
-            Real stories, unedited photos, and genuine feedback from travelers who entrusted their memorable journeys to Ghumo Firoo.
+            Real stories, unedited photos, and genuine feedback from travelers who entrusted their memorable vacations to Ghumo Firoo Travels.
           </p>
 
           <div className="flex flex-wrap items-center justify-center gap-4">
@@ -321,7 +321,7 @@ export default function Reviews() {
           <div className="mt-20 p-8 rounded-3xl bg-gradient-to-r from-amber-500/10 via-[#101736] to-amber-500/10 border border-amber-500/30 text-center">
             <h3 className="text-2xl font-serif font-bold text-white mb-2">Have you traveled with us recently?</h3>
             <p className="text-sm text-slate-300 max-w-xl mx-auto mb-6">
-              Share your feedback, upload photos from your journey, and let fellow travelers discover what makes Ghumo Firoo special.
+              Share your feedback, upload photos from your trip, and let fellow travelers discover what makes Ghumo Firoo Travels special.
             </p>
             <Button
               onClick={() => navigate('/review')}

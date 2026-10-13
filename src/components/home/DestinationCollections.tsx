@@ -176,7 +176,7 @@ const DestinationCollections: React.FC = () => {
             Explore <span className="bg-gradient-to-r from-amber-200 via-amber-400 to-amber-600 bg-clip-text text-transparent">Top Destinations</span>
           </h2>
           <p className="text-xl text-slate-300 max-w-4xl mx-auto leading-relaxed font-light">
-            Handpicked journeys across India and the world.
+            Handpicked travel packages across India and the world.
           </p>
           
           {isUsingFallback && (

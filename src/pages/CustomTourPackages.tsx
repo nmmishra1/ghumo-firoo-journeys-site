@@ -100,7 +100,7 @@ const DESTINATION_THEMES = {
   },
   default: {
     heroImage: "https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=1920&fit=crop",
-    title: "Boutique Custom Journey",
+    title: "Boutique Custom Tour",
     desc: "Collaborate with our dedicated luxury travel consultants to design a bespoke itinerary that matches your unique tastes.",
     highlights: ["Bespoke Itinerary Planning", "Hand-selected Hotels", "Private Chauffeured Cars", "24/7 Concierge Support"],
     hotelCategory: "Luxury & Heritage Stays",
@@ -524,7 +524,7 @@ Please help me plan this amazing journey! 🎒✈️`;
               Bespoke Luxury Planning
             </span>
             <h1 className="text-3xl md:text-5xl lg:text-6xl font-serif font-normal text-white mb-3 tracking-tight leading-tight drop-shadow-2xl">
-              Plan Your Dream Trip To {theme.title === "Boutique Custom Journey" ? (customDest || "Your Destination") : theme.title}
+              Plan Your Dream Trip To {theme.title === "Boutique Custom Tour" ? (customDest || "Your Destination") : theme.title}
             </h1>
             <p className="text-sm md:text-lg text-slate-300 font-light max-w-2xl mx-auto leading-relaxed drop-shadow-md">
               Get a customized itinerary, best hotel options, private transfers and expert concierge guidance.
@@ -689,7 +689,7 @@ Please help me plan this amazing journey! 🎒✈️`;
 
                 <div className="text-center mb-6">
                   <h2 className="font-serif text-xl md:text-2xl font-bold tracking-tight text-white mb-1.5">
-                    Share Your Dream Journey
+                    Share Your Dream Trip
                   </h2>
                   <p className="text-slate-300 text-xs font-light">
                     Step {currentStep} of {totalSteps}: {currentStep === 1 ? 'Personal details' : currentStep === 2 ? 'Destinations & Dates' : 'Accommodations & Notes'}
@@ -850,7 +850,7 @@ Please help me plan this amazing journey! 🎒✈️`;
                     <div className="space-y-4 text-left">
                       <div className="text-center mb-6">
                         <MapPin className="w-10 h-10 mx-auto text-[#C9A25A] mb-2" />
-                        <h3 className="text-base font-serif font-bold text-white">Plan Your Journey</h3>
+                        <h3 className="text-base font-serif font-bold text-white">Plan Your Trip</h3>
                         <p className="text-slate-300 text-xs font-light">Tell us about your dream destination and travel plans</p>
                       </div>
 
@@ -1194,7 +1194,7 @@ Please help me plan this amazing journey! 🎒✈️`;
                               Submitting...
                             </>
                           ) : (
-                            <>Submit Journey Request 🚀</>
+                            <>Submit Enquiry Request 🚀</>
                           )}
                         </Button>
                       </div>
@@ -1255,7 +1255,7 @@ Please help me plan this amazing journey! 🎒✈️`;
           <div className="max-w-6xl mx-auto px-4 space-y-12">
             <div className="text-center space-y-2">
               <h2 className="font-serif text-2xl md:text-3xl font-bold tracking-tight text-white">
-                Highlights of {theme.title === "Boutique Custom Journey" ? "Bespoke Travels" : theme.title}
+                Highlights of {theme.title === "Boutique Custom Tour" ? "Bespoke Travels" : theme.title}
               </h2>
               <p className="text-slate-300 text-xs md:text-sm font-light">
                 Handpicked experiences to make your private consultation journey extraordinary.
@@ -1362,7 +1362,7 @@ Please help me plan this amazing journey! 🎒✈️`;
               Limited Availability Offer
             </div>
             <h2 className="font-serif text-2xl md:text-3xl font-bold tracking-tight text-white">
-              Secure Your Seasonal Journey Today
+              Secure Your Seasonal Holiday Today
             </h2>
             <p className="text-slate-300 text-xs md:text-sm max-w-2xl mx-auto font-light leading-relaxed">
               Highly popular travel periods book out months in advance. Secure the best hotels, flights, and seasonal rates by placing your custom enquiry today.
@@ -1386,7 +1386,7 @@ Please help me plan this amazing journey! 🎒✈️`;
           <div className="max-w-4xl mx-auto px-4">
             <FAQSection 
               faqs={theme.faqs}
-              title={`${theme.title === "Boutique Custom Journey" ? "Custom Planning" : theme.title} FAQs`}
+              title={`${theme.title === "Boutique Custom Tour" ? "Custom Planning" : theme.title} FAQs`}
               subtitle="Common questions about planning your dream vacation with us."
               className="py-0 bg-transparent text-white animate-fade-in"
               dark={true}

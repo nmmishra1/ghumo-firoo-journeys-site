@@ -1,4 +1,4 @@
-# Product Requirements Document — Ghumo Firoo Journeys
+# Product Requirements Document — Ghumo Firoo Travels
 
 **Version:** 3.0 (rewritten from direct codebase inspection, not the prior PRD)
 **Status:** Reflects the application as it actually exists today
@@ -8,7 +8,7 @@
 
 ## 1. What This Product Actually Is
 
-Ghumo Firoo Journeys is two products sharing one codebase and one database:
+Ghumo Firoo Travels is two products sharing one codebase and one database:
 
 1. **A public B2C travel marketing/booking site** — travelers browse tour packages (Char Dham, Rann Utsav, Kashmir, Singapore, Europe, and others), read blog/guide content, submit enquiries, and pay online via Razorpay.
 2. **An internal B2B CRM / travel operations system** (`/crm/*`) — travel agents manage leads, contract hotel and cab rates with suppliers, build day-by-day customer itineraries, and generate quotes/invoices/vouchers as PDFs.

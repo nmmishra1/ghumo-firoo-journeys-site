@@ -407,7 +407,7 @@ const Index: React.FC = () => {
                 type="submit"
                 className="w-full md:w-auto h-12 px-8 bg-gradient-to-r from-[#C9A25A] to-[#E5C378] text-[#070C1E] font-bold tracking-wider text-xs uppercase rounded-xl hover:brightness-110 shadow-lg shadow-[#C9A25A]/20 transition-all"
               >
-                <Search className="mr-2 h-4 w-4" /> Search Journeys
+                <Search className="mr-2 h-4 w-4" /> Search Packages
               </Button>
             </form>
           </ScrollReveal>

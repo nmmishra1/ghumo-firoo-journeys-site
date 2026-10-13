@@ -914,7 +914,7 @@ export default function ReviewForm() {
                   <div className="p-4 rounded-xl bg-blue-50 border border-blue-200 text-blue-950">
                     <div className="flex items-center gap-2 mb-1">
                       <Award className="w-4 h-4 text-blue-600" />
-                      <span className="text-xs font-bold uppercase tracking-wider text-blue-700">Response from Ghumo Firoo</span>
+                      <span className="text-xs font-bold uppercase tracking-wider text-blue-700">Response from Ghumo Firoo Travels</span>
                     </div>
                     <p className="text-sm font-medium leading-relaxed">{existingReview.response}</p>
                   </div>
@@ -954,7 +954,7 @@ export default function ReviewForm() {
                   onClick={() => navigate('/packages')}
                   className="w-full sm:w-1/2 bg-slate-900 hover:bg-slate-800 text-white rounded-xl py-5"
                 >
-                  Explore More Journeys
+                  Explore More Packages
                 </Button>
               </CardFooter>
             </Card>
@@ -1215,7 +1215,7 @@ export default function ReviewForm() {
                   <ChevronRight className="w-5 h-5" />
                 </Button>
                 <div className="text-center text-xs text-slate-400">
-                  By submitting, you verify that you were a passenger on this itinerary and authorize Ghumo Firoo to display this review on our website.
+                  By submitting, you verify that you were a passenger on this itinerary and authorize Ghumo Firoo Travels to display this review on our website.
                 </div>
               </CardFooter>
             </Card>

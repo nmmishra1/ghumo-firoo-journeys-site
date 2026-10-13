@@ -2,7 +2,7 @@
 
 ## Overview
 
-This document outlines the standardized components and patterns for package detail pages in the Ghumo Firoo Journeys website. The goal is to ensure consistency in UI, functionality (especially the "Book Now" flow), and code maintainability.
+This document outlines the standardized components and patterns for package detail pages in the Ghumo Firoo Travels website. The goal is to ensure consistency in UI, functionality (especially the "Book Now" flow), and code maintainability.
 
 ## Core Components
 

@@ -257,7 +257,7 @@ const QuickPayment = () => {
               onClick={() => navigate(-1)} 
               className="flex items-center gap-2 text-slate-400 hover:text-white hover:bg-white/5 px-3 py-1.5 rounded-lg text-xs"
             >
-              <ArrowLeft className="w-4 h-4" /> Back to Journeys
+              <ArrowLeft className="w-4 h-4" /> Back to Packages
             </Button>
             <div className="flex items-center gap-2 text-emerald-400 text-xs font-medium bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/20">
               <Shield className="w-3.5 h-3.5" /> 256-Bit SSL Encrypted

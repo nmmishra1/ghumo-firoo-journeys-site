@@ -1063,16 +1063,16 @@ async function main() {
   // 4. Explore India Destination Pages (All 200+ Indian Destinations)
   routesToGenerate.push({
     route: '/explore-india',
-    title: 'Explore India — 178+ Destinations | Ghumo Firoo',
+    title: 'Explore India — 178+ Destinations | Ghumo Firoo Travels',
     description: 'Comprehensive directory of 178+ Indian tourist destinations, UNESCO monuments, tiger safaris, spiritual circuits, and personalized holiday packages.',
     canonical: formatCanonical('/explore-india'),
     h1: 'Explore India Tourism Destinations & Travel Directory',
     h2: 'Discover 178+ Verified Tourist Cities & Circuits Across 28 States',
     bodyHtml: `<article>
-      <h2>Exploring India with Ghumo Firoo: Curated Journeys Across 178+ Destinations</h2>
-      <p>Welcome to Ghumo Firoo’s India Tourism Directory — your comprehensive portal to discovering 178+ celebrated holiday destinations, sacred pilgrimage circuits, wildlife tiger sanctuaries, and royal heritage monuments across 28 Indian states. India is a land of kaleidoscopic diversity where ancient heritage blends seamlessly with breathtaking natural landscapes. Whether you are seeking a spiritually transformative darshan at sacred Jyotirlingas, private tiger tracking drives in Madhya Pradesh, serene luxury houseboat cruises on Kerala backwaters, or walks along the shimmering white salt desert of the Rann of Kutch, Ghumo Firoo designs bespoke holiday packages tailored specifically to your pacing and preferences.</p>
+      <h2>Exploring India with Ghumo Firoo Travels: Curated Packages Across 178+ Destinations</h2>
+      <p>Welcome to Ghumo Firoo Travels’ India Tourism Directory — your comprehensive portal to discovering 178+ celebrated holiday destinations, sacred pilgrimage circuits, wildlife tiger sanctuaries, and royal heritage monuments across 28 Indian states. India is a land of kaleidoscopic diversity where ancient heritage blends seamlessly with breathtaking natural landscapes. Whether you are seeking a spiritually transformative darshan at sacred Jyotirlingas, private tiger tracking drives in Madhya Pradesh, serene luxury houseboat cruises on Kerala backwaters, or walks along the shimmering white salt desert of the Rann of Kutch, Ghumo Firoo Travels designs bespoke holiday packages tailored specifically to your pacing and preferences.</p>
       
-      <p>Unlike off-the-shelf group tour packages, every Ghumo Firoo journey features handpicked 4-star and 5-star boutique hotels, verified private chauffeur vehicles with all interstate taxes and tolls included, curated cultural experiences, and 24/7 dedicated on-trip concierge assistance to ensure complete peace of mind.</p>
+      <p>Unlike off-the-shelf group tour packages, every Ghumo Firoo Travels package features handpicked 4-star and 5-star boutique hotels, verified private chauffeur vehicles with all interstate taxes and tolls included, curated cultural experiences, and 24/7 dedicated on-trip concierge assistance to ensure complete peace of mind.</p>
 
       <h3>Signature Indian Travel Circuits &amp; Categories</h3>
       

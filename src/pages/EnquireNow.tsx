@@ -172,7 +172,7 @@ const DESTINATION_THEMES = {
   },
   default: {
     heroImage: "https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=1920&fit=crop",
-    title: "Boutique Custom Journey",
+    title: "Boutique Custom Tour",
     desc: "Collaborate with our dedicated luxury travel consultants to design a bespoke itinerary that matches your unique tastes.",
     highlights: ["Bespoke Itinerary Planning", "Hand-selected Hotels", "Private Chauffeured Cars", "24/7 Concierge Support"],
     hotelCategory: "Luxury & Heritage Stays",
@@ -574,7 +574,7 @@ ${data.fullName}
             Luxury Travel Consultation
           </span>
           <h1 className="text-3xl md:text-5xl font-display font-extrabold mb-4 tracking-tight leading-tight">
-            Plan Your Dream Trip To {theme.title === "Boutique Custom Journey" ? (destString || "Your Destination") : theme.title}
+            Plan Your Dream Trip To {theme.title === "Boutique Custom Tour" ? (destString || "Your Destination") : theme.title}
           </h1>
           <p className="text-sm md:text-lg text-white/80 font-medium max-w-2xl mx-auto leading-relaxed">
             Get a customized itinerary, best hotel options and expert guidance.
@@ -606,7 +606,7 @@ ${data.fullName}
           </div>
           <div className="flex-1 text-left space-y-2">
             <div className="flex items-center gap-2">
-              <span className="text-[10px] font-bold tracking-wider text-[#D4AF37] uppercase bg-[#D4AF37]/10 px-2 py-0.5 rounded">Selected Journey</span>
+              <span className="text-[10px] font-bold tracking-wider text-[#D4AF37] uppercase bg-[#D4AF37]/10 px-2 py-0.5 rounded">Selected Package</span>
               <span className="text-xs text-white/60 font-semibold">{theme.travelStyle}</span>
             </div>
             <h3 className="font-display text-lg font-bold text-white leading-tight">
@@ -1430,7 +1430,7 @@ ${data.fullName}
         <div className="max-w-6xl mx-auto px-4 space-y-12">
           <div className="text-center space-y-2">
             <h2 className="font-display text-2xl md:text-3xl font-bold tracking-tight text-white">
-              Highlights of {theme.title === "Boutique Custom Journey" ? "Bespoke Travels" : theme.title}
+              Highlights of {theme.title === "Boutique Custom Tour" ? "Bespoke Travels" : theme.title}
             </h2>
             <p className="text-white/60 text-xs md:text-sm">
               Handpicked experiences to make your private consultation journey extraordinary.
@@ -1537,7 +1537,7 @@ ${data.fullName}
             Limited Availability Offer
           </div>
           <h2 className="font-display text-2xl md:text-3xl font-bold tracking-tight text-white">
-            Secure Your Seasonal Journey Today
+            Secure Your Seasonal Holiday Today
           </h2>
           <p className="text-white/70 text-xs md:text-sm max-w-2xl mx-auto leading-relaxed">
             Highly popular travel periods book out months in advance. Secure the best hotels, flights, and seasonal rates by placing your custom enquiry today.
@@ -1561,7 +1561,7 @@ ${data.fullName}
         <div className="max-w-4xl mx-auto px-4">
           <FAQSection 
             faqs={theme.faqs}
-            title={`${theme.title === "Boutique Custom Journey" ? "Custom Planning" : theme.title} FAQs`}
+            title={`${theme.title === "Boutique Custom Tour" ? "Custom Planning" : theme.title} FAQs`}
             subtitle="Common questions about planning your dream vacation with us."
             className="py-0 bg-transparent text-white"
             dark={true}

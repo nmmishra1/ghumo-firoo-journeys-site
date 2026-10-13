@@ -193,7 +193,7 @@ const ThankYou = () => {
           if (res.ok && data.found) {
             setReceiptData(data);
           } else {
-            setReceiptError(data.error || 'Transaction record not found in Ghumo Firoo ledger');
+            setReceiptError(data.error || 'Transaction record not found in Ghumo Firoo Travels ledger');
           }
         } catch (err: any) {
           console.error('Receipt verification error:', err);
@@ -259,7 +259,7 @@ const ThankYou = () => {
                     Unverified Payment Record
                   </h1>
                   <p className="text-sm text-slate-300 max-w-lg mx-auto">
-                    The transaction ID <span className="font-mono text-rose-300 font-bold bg-rose-950/50 px-2 py-0.5 rounded border border-rose-500/30">{paymentId}</span> does not match any confirmed record in the Ghumo Firoo ledger.
+                    The transaction ID <span className="font-mono text-rose-300 font-bold bg-rose-950/50 px-2 py-0.5 rounded border border-rose-500/30">{paymentId}</span> does not match any confirmed record in the Ghumo Firoo Travels ledger.
                   </p>
                 </div>
 
@@ -399,14 +399,14 @@ const ThankYou = () => {
                       <p className="leading-relaxed">
                         {receiptData.verification_type === 'ONLINE_REALIZED' 
                           ? 'This digital payment is completed and verified via authorized banking gateways. Your official travel itinerary vouchers will be shared by your travel coordinator.' 
-                          : 'This payment submission is registered in the Ghumo Firoo ledger. Final booking confirmation voucher is issued post bank statement credit reconciliation.'}
+                          : 'This payment submission is registered in the Ghumo Firoo Travels ledger. Final booking confirmation voucher is issued post bank statement credit reconciliation.'}
                       </p>
                     </div>
 
                     {/* Next Steps Buttons */}
                     <div className="flex flex-col sm:flex-row gap-3 pt-2 no-print">
                       <a 
-                        href={`https://wa.me/919910987264?text=${encodeURIComponent(`Hi Ghumo Firoo! I have completed payment of ₹${receiptData.amount} (Ref: ${receiptData.id}, UTR: ${receiptData.reference_number}). Please share my tour confirmation.`)}`}
+                        href={`https://wa.me/919910987264?text=${encodeURIComponent(`Hi Ghumo Firoo Travels! I have completed payment of ₹${receiptData.amount} (Ref: ${receiptData.id}, UTR: ${receiptData.reference_number}). Please share my tour confirmation.`)}`}
                         target="_blank" 
                         rel="noreferrer"
                         className="flex-1"
@@ -417,7 +417,7 @@ const ThankYou = () => {
                       </a>
                       <Link to="/packages" className="flex-1">
                         <Button variant="outline" className="w-full border-white/20 text-white hover:bg-white/10 text-xs h-12 rounded-xl">
-                          Browse More Journeys
+                          Browse More Packages
                         </Button>
                       </Link>
                     </div>

@@ -4,7 +4,7 @@
 Approved
 
 ## Context
-In Ghumo Firoo Journeys, there are two distinct paths for managing tour designs:
+In Ghumo Firoo Travels, there are two distinct paths for managing tour designs:
 1.  **Public Tour Packages**: The self-service catalog containing standard itineraries with live pricing calculations shown to all visitors on the public website (read from `packages`, `package_template_items`, and mapped rate tables).
 2.  **CRM Custom Itineraries**: Private itineraries tailored for specific leads by agents (saved in `itineraries`, `itinerary_days`, `itinerary_hotels`, `itinerary_transport`, `itinerary_excursions`).
 

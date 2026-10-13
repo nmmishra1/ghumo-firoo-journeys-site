@@ -449,12 +449,12 @@ const Singapore: React.FC = () => {
     : attractions.filter(item => item.category === activeCategory)
 
   const faqItems = [
-    { id: "sg-faq-1", question: "Do Indian passport holders need a visa for Singapore, and how long does it take?", answer: "Yes, Indian passport holders require an electronic tourist visa (eVisa). Ghumo Firoo handles 100% of your Singapore eVisa filing with a guaranteed 3 to 5 working day approval turnaround." },
+    { id: "sg-faq-1", question: "Do Indian passport holders need a visa for Singapore, and how long does it take?", answer: "Yes, Indian passport holders require an electronic tourist visa (eVisa). Ghumo Firoo Travels handles 100% of your Singapore eVisa filing with a guaranteed 3 to 5 working day approval turnaround." },
     { id: "sg-faq-2", question: "What top attractions are included in the Sentosa Island & Universal Studios package?", answer: "Our Sentosa packages include Universal Studios Express passes (no waiting in lines), Singapore Cable Car skypass, S.E.A. Aquarium entry, Wings of Time laser show, and Sentosa Express beach monorail passes." },
     { id: "sg-faq-3", question: "Can we combine Singapore with Genting Dream Cruise or Malaysia?", answer: "Yes! We offer popular 6N/7D twin-country combos (Singapore + Kuala Lumpur / Genting Highlands) as well as 4-night land + 2-night Resort World Genting Dream luxury ocean cruise packages." },
     { id: "sg-faq-4", question: "What is the difference between Singapore 4D3N and 5D4N packages?", answer: "The 4D3N itinerary is ideal for a quick holiday covering Gardens by the Bay, Night Safari, and Universal Studios. The 5D4N package adds a free day for shopping at Orchard Road, Jewel Changi Rain Vortex, and Sentosa Beach Resorts." },
     { id: "sg-faq-5", question: "Is Indian vegetarian and Jain food easily available in Singapore?", answer: "Yes! Singapore features hundreds of authentic Indian restaurants in Little India (like Saravanaa Bhavan, Ananda Bhavan, and Komala Vilas) as well as vegetarian options in Marina Bay Sands and Sentosa." },
-    { id: "sg-faq-6", question: "What luxury hotel stay options are provided in Ghumo Firoo Singapore packages?", answer: "We provide 4-star and 5-star hotel options including Marina Bay Sands, Swissotel The Stamford, Pan Pacific, Shangri-La Sentosa, and Village Hotel Bugis with daily breakfast buffet." },
+    { id: "sg-faq-6", question: "What luxury hotel stay options are provided in Ghumo Firoo Travels Singapore packages?", answer: "We provide 4-star and 5-star hotel options including Marina Bay Sands, Swissotel The Stamford, Pan Pacific, Shangri-La Sentosa, and Village Hotel Bugis with daily breakfast buffet." },
     { id: "sg-faq-7", question: "Are flight-inclusive Singapore packages available from major Indian cities?", answer: "Yes, we customize flight-inclusive packages with direct non-stop flights from Delhi (DEL), Mumbai (BOM), Bengaluru (BLR), Chennai (MAA), and Kolkata (CCU)." }
   ]
 
@@ -468,7 +468,7 @@ const Singapore: React.FC = () => {
 
   const tripSchema = buildTouristTripJsonLd({
     name: "Singapore Luxury Vacation & Sentosa Packages 2026",
-    description: "Experience top-rated Singapore luxury packages with Ghumo Firoo. Gardens by the Bay, Marina Bay Sands, Universal Studios Sentosa & Genting Dream cruise combos.",
+    description: "Experience top-rated Singapore luxury packages with Ghumo Firoo Travels. Gardens by the Bay, Marina Bay Sands, Universal Studios Sentosa & Genting Dream cruise combos.",
     url: config.baseUrl + "/packages/singapore",
     image: "/singapore/gardens_by_the_bay.jpg",
     duration: "P5D",

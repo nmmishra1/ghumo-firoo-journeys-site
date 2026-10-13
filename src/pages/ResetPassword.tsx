@@ -361,7 +361,7 @@ export default function ResetPassword() {
 
               <div className="mt-6 text-center border-t border-white/10 pt-4">
                 <p className="text-[11px] font-medium text-slate-400">
-                  🔒 Protected by <span className="text-[#C9A25A] font-semibold">Ghumo Firoo Security Architecture</span>
+                  🔒 Protected by <span className="text-[#C9A25A] font-semibold">Ghumo Firoo Travels Security Architecture</span>
                 </p>
               </div>
             </CardContent>

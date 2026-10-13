@@ -238,7 +238,7 @@ export default function PublicIndiaExplorer() {
   const handleWhatsAppInquiry = (destination: any) => {
     const destName = destination.name || destination.city_name || destination.city;
     const stateName = destination.state_name || destination.state || '';
-    const message = encodeURIComponent(`Hello Ghumo Firoo! 👋 I am exploring ${destName}${stateName ? ` in ${stateName}` : ''} on your India Explorer guide. Please share customized itinerary options, verified boutique hotels, and pricing quote.`);
+    const message = encodeURIComponent(`Hello Ghumo Firoo Travels! 👋 I am exploring ${destName}${stateName ? ` in ${stateName}` : ''} on your India Explorer guide. Please share customized itinerary options, verified boutique hotels, and pricing quote.`);
     window.open(`https://wa.me/919910987264?text=${message}`, '_blank');
   };
 
@@ -300,7 +300,7 @@ export default function PublicIndiaExplorer() {
   return (
     <Layout>
       <SEO
-        title="Explore India — 178+ Destinations | Ghumo Firoo"
+        title="Explore India — 178+ Destinations | Ghumo Firoo Travels"
         description="Comprehensive directory of 178+ Indian tourist destinations, UNESCO monuments, tiger safaris, spiritual circuits, and personalized holiday packages."
         keywords={['Explore India', 'India tourism guide', 'Madhya Pradesh destinations', 'Indore food trail', 'Khajuraho temples guide', 'Pench safari booking', 'custom tour packages India']}
       />
@@ -764,13 +764,13 @@ export default function PublicIndiaExplorer() {
                 Travel Guide &amp; Regional Directory
               </Badge>
               <h2 className="text-2xl md:text-3xl font-black text-white font-montserrat">
-                Exploring India with Ghumo Firoo: A Curated Journey Across 178+ Destinations
+                Exploring India with Ghumo Firoo Travels: Curated Itineraries Across 178+ Destinations
               </h2>
               <p className="text-sm text-slate-300 leading-relaxed font-medium">
-                Welcome to Ghumo Firoo’s India Tourism Directory — your comprehensive portal to discovering 178+ celebrated holiday destinations, sacred pilgrimage circuits, wildlife tiger sanctuaries, and royal heritage monuments across 28 Indian states. India is a land of kaleidoscopic diversity where ancient heritage blends seamlessly with breathtaking natural landscapes. Whether you are seeking a spiritually transformative darshan at sacred Jyotirlingas, private tiger tracking drives in Madhya Pradesh, serene luxury houseboat cruises on Kerala backwaters, or walks along the shimmering white salt desert of the Rann of Kutch, Ghumo Firoo designs bespoke holiday packages tailored specifically to your pacing and preferences.
+                Welcome to Ghumo Firoo Travels’ India Tourism Directory — your comprehensive portal to discovering 178+ celebrated holiday destinations, sacred pilgrimage circuits, wildlife tiger sanctuaries, and royal heritage monuments across 28 Indian states. India is a land of kaleidoscopic diversity where ancient heritage blends seamlessly with breathtaking natural landscapes. Whether you are seeking a spiritually transformative darshan at sacred Jyotirlingas, private tiger tracking drives in Madhya Pradesh, serene luxury houseboat cruises on Kerala backwaters, or walks along the shimmering white salt desert of the Rann of Kutch, Ghumo Firoo Travels designs bespoke holiday packages tailored specifically to your pacing and preferences.
               </p>
               <p className="text-sm text-slate-300 leading-relaxed font-medium">
-                Unlike off-the-shelf group tour packages, every Ghumo Firoo journey features handpicked 4-star and 5-star boutique hotels, verified private chauffeur vehicles with all interstate taxes and tolls included, curated cultural experiences, and 24/7 dedicated on-trip concierge assistance to ensure complete peace of mind.
+                Unlike off-the-shelf group tour packages, every Ghumo Firoo Travels package features handpicked 4-star and 5-star boutique hotels, verified private chauffeur vehicles with all interstate taxes and tolls included, curated cultural experiences, and 24/7 dedicated on-trip concierge assistance to ensure complete peace of mind.
               </p>
             </div>
 
