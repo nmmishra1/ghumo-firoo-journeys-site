@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge';
 import {
   Building2, Plus, Search, Edit, Power, Download, Upload,
-  Info, HelpCircle, FileText, CheckCircle2, AlertTriangle, Loader2,
+  Info, HelpCircle, FileText, CheckCircle2, XCircle, AlertTriangle, Loader2,
   MapPin, Star, Users, Phone, Mail, Globe, Sparkles, DollarSign, IndianRupee,
   ArrowRight, Landmark, Calendar, Trash2, Layers, RefreshCw, Clock, ArrowLeft, Copy, Save
 } from 'lucide-react';
@@ -133,6 +133,7 @@ export const HotelContractWizard: React.FC<HotelContractWizardProps> = ({
   const { toast } = useToast();
   const [activeStep, setActiveStep] = useState(1);
   const [loading, setLoading] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [activeRateRowKey, setActiveRateRowKey] = useState<string | null>(null);
 
@@ -576,7 +577,14 @@ export const HotelContractWizard: React.FC<HotelContractWizardProps> = ({
     const nameNorm = hotelForm.hotel_name.toLowerCase().trim();
     const cityNorm = (hotelForm.city || '').toLowerCase().trim();
     return allHotelsList.find((h: any) => {
-      if (dialogMode === 'edit' && String(h.id) === String(selectedItemId)) return false;
+      if (dialogMode === 'edit') {
+        const hIdStr = String(h.id || '');
+        const selIdStr = String(selectedItemId || '');
+        if (hIdStr === selIdStr) return false;
+        const cleanH = hIdStr.replace(/^contracted-hotel-/, '');
+        const cleanSel = selIdStr.replace(/^contracted-hotel-/, '');
+        if (cleanH === cleanSel) return false;
+      }
       const hNameNorm = (h.hotel_name || h.name || '').toLowerCase().trim();
       const hCityNorm = (h.city || h.city_name || '').toLowerCase().trim();
       if (hNameNorm === nameNorm) {
@@ -592,6 +600,9 @@ export const HotelContractWizard: React.FC<HotelContractWizardProps> = ({
     if (dialogMode === 'edit' && selectedItemId) {
       const loadDetails = async () => {
         setLoading(true);
+        const safetyTimeout = setTimeout(() => {
+          setLoading(false);
+        }, 8000);
         try {
           // 1. Fetch hotel details with master list fallback for contracted-hotel items
           let hotel: any = null;
@@ -762,6 +773,7 @@ export const HotelContractWizard: React.FC<HotelContractWizardProps> = ({
         } catch (err: any) {
           toast({ title: 'Error Loading Details', description: err.message, variant: 'destructive' });
         } finally {
+          clearTimeout(safetyTimeout);
           setLoading(false);
         }
       };
@@ -1025,8 +1037,12 @@ export const HotelContractWizard: React.FC<HotelContractWizardProps> = ({
 
   // ---------------- SAVE WIZARD ACTION ----------------
   const handleSaveHotelContract = async (publishStatus: boolean) => {
-    if (!hotelForm.hotel_name) {
-      toast({ title: 'Missing Information', description: 'Please specify the Hotel Name on Step 2.', variant: 'warning' as any });
+    if (!hotelForm.hotel_name || !hotelForm.hotel_name.trim()) {
+      toast({ 
+        title: 'Missing Hotel Name', 
+        description: 'Please specify the Hotel Name on Step 2 before publishing.', 
+        variant: 'destructive' 
+      });
       setActiveStep(2);
       return;
     }
@@ -1048,20 +1064,68 @@ export const HotelContractWizard: React.FC<HotelContractWizardProps> = ({
     }
 
     if (!effectiveCityId && !effectiveCityName && !hotelForm.destination?.trim()) {
-      toast({ title: 'Missing Information', description: 'Please specify a City on Step 1.', variant: 'warning' as any });
+      toast({ 
+        title: 'Missing Destination City', 
+        description: 'Please specify a City on Step 1 before publishing.', 
+        variant: 'destructive' 
+      });
       setActiveStep(1);
       return;
     }
 
-    setLoading(true);
+    // Duplicate Check Protection
+    if (duplicateHotelMatch) {
+      toast({
+        title: "Duplicate Hotel Error",
+        description: `A hotel named "${duplicateHotelMatch.hotel_name}" already exists in ${hotelForm.city || 'this location'} (Code: ${duplicateHotelMatch.hotel_code || 'N/A'}). Please rename the hotel on Step 2.`,
+        variant: "destructive"
+      });
+      setActiveStep(2);
+      return;
+    }
+
+    // Pre-flight check: Rooms & Meal Plans
+    if (!rooms || rooms.length === 0) {
+      toast({
+        title: "Missing Room Categories",
+        description: "Please configure at least one room category on Step 3 before publishing.",
+        variant: "destructive"
+      });
+      setActiveStep(3);
+      return;
+    }
+
+    if (!selectedMealPlans || selectedMealPlans.length === 0) {
+      toast({
+        title: "Missing Meal Plans",
+        description: "Please select at least one meal plan on Step 4 before publishing.",
+        variant: "destructive"
+      });
+      setActiveStep(4);
+      return;
+    }
+
+    // Verify authenticated session
+    const { data: { session } } = await supabase.auth.getSession();
+    const token = session?.access_token;
+    if (!token) {
+      toast({
+        title: "Session Expired",
+        description: "Your CRM session token is missing. Please refresh the page or sign in again to publish contracts.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setIsSaving(true);
     try {
-      const authHeaders = await getAuthHeader();
+      const authHeaders: Record<string, string> = { 'Authorization': `Bearer ${token}` };
       const selectedCity = cities.find(c => String(c.id) === String(effectiveCityId));
       const selectedState = states.find(s => String(s.id) === String(hotelForm.state_id));
       const selectedCountry = countries.find(c => String(c.id) === String(hotelForm.country_id));
 
       const hotelPayload: any = {
-        hotel_name: hotelForm.hotel_name,
+        hotel_name: hotelForm.hotel_name.trim(),
         hotel_code: hotelForm.hotel_code || 'H-' + Date.now().toString().slice(-6),
         country_id: hotelForm.country_id || null,
         state_id: hotelForm.state_id || null,
@@ -1101,17 +1165,6 @@ export const HotelContractWizard: React.FC<HotelContractWizardProps> = ({
       };
 
       let hotelId = selectedItemId;
-
-      // Duplicate Check Protection
-      if (duplicateHotelMatch) {
-        toast({
-          title: "Duplicate Hotel Error",
-          description: `A hotel named "${duplicateHotelMatch.hotel_name}" already exists in ${hotelForm.city || 'this location'} (Code: ${duplicateHotelMatch.hotel_code || 'N/A'}). Duplicate records cannot be saved.`,
-          variant: "destructive"
-        });
-        setLoading(false);
-        return;
-      }
 
       // 1. Insert/Update Hotel
       if (dialogMode === 'add') {
@@ -1184,15 +1237,19 @@ export const HotelContractWizard: React.FC<HotelContractWizardProps> = ({
 
       const savedRooms = await Promise.all(
         roomInsertions.map(room => 
-          fetch(`${API_BASE}/api.php?table=room_categories`, {
+          crmFetch(`${API_BASE}/api.php?table=room_categories`, {
             method: 'POST',
             headers: { 
               'Content-Type': 'application/json',
               ...authHeaders
             },
             body: JSON.stringify(room)
+          }, {
+            action: 'create_hotel_room_category',
+            module: 'Hotels',
+            itemName: room.room_category_name
           }).then(async res => {
-            if (!res.ok) throw new Error('Failed to insert room');
+            if (!res.ok) throw new Error('Failed to insert room category');
             const data = await res.json();
             return {
               ...room,
@@ -1428,7 +1485,7 @@ export const HotelContractWizard: React.FC<HotelContractWizardProps> = ({
     } catch (err: any) {
       toast({ title: 'Contract Save Failed', description: err.message, variant: 'destructive' });
     } finally {
-      setLoading(false);
+      setIsSaving(false);
     }
   };
 
@@ -1498,17 +1555,32 @@ export const HotelContractWizard: React.FC<HotelContractWizardProps> = ({
             </div>
             
             <div className="flex items-center gap-2 shrink-0">
-              <Button variant="ghost" size="sm" className="h-9 px-3 text-xs font-bold text-muted-foreground hover:text-foreground rounded-xl" onClick={handleCancel}>
+              <Button type="button" variant="ghost" size="sm" className="h-9 px-3 text-xs font-bold text-muted-foreground hover:text-foreground rounded-xl cursor-pointer" onClick={handleCancel}>
                 <ArrowLeft className="w-3.5 h-3.5 mr-1" /> Back
               </Button>
-              <Button variant="outline" size="sm" className="h-9 px-3 text-xs font-bold border-border/80 bg-background text-foreground hover:bg-muted rounded-xl" onClick={handleDuplicateConfiguration}>
+              <Button type="button" variant="outline" size="sm" className="h-9 px-3 text-xs font-bold border-border/80 bg-background text-foreground hover:bg-muted rounded-xl cursor-pointer" onClick={handleDuplicateConfiguration}>
                 <Copy className="w-3.5 h-3.5 mr-1" /> Duplicate
               </Button>
-              <Button variant="outline" size="sm" className="h-9 px-3 text-xs font-bold border-amber-500/30 text-amber-500 hover:bg-amber-500/10 rounded-xl" onClick={() => handleSaveHotelContract(false)}>
+              <Button 
+                type="button" 
+                variant="outline" 
+                size="sm" 
+                disabled={isSaving}
+                className="h-9 px-3 text-xs font-bold border-amber-500/30 text-amber-500 hover:bg-amber-500/10 rounded-xl cursor-pointer" 
+                onClick={() => handleSaveHotelContract(false)}
+              >
+                {isSaving ? <Loader2 className="w-3.5 h-3.5 animate-spin mr-1" /> : null}
                 Save Draft
               </Button>
-              <Button size="sm" className="h-9 px-4 text-xs font-extrabold bg-gradient-to-r from-[#c5a059] to-[#d4af37] text-slate-950 hover:opacity-90 shadow-md shadow-[#c5a059]/20 rounded-xl" onClick={() => handleSaveHotelContract(true)}>
-                <Save className="w-3.5 h-3.5 mr-1" /> Publish Contract
+              <Button 
+                type="button"
+                size="sm" 
+                disabled={isSaving}
+                className="h-9 px-4 text-xs font-extrabold bg-gradient-to-r from-[#c5a059] to-[#d4af37] text-slate-950 hover:opacity-90 shadow-md shadow-[#c5a059]/20 rounded-xl cursor-pointer" 
+                onClick={() => handleSaveHotelContract(true)}
+              >
+                {isSaving ? <Loader2 className="w-3.5 h-3.5 animate-spin mr-1" /> : <Save className="w-3.5 h-3.5 mr-1" />}
+                {isSaving ? 'Publishing...' : 'Publish Contract'}
               </Button>
             </div>
           </CardContent>
@@ -3035,6 +3107,87 @@ export const HotelContractWizard: React.FC<HotelContractWizardProps> = ({
                     <p className="text-slate-600 dark:text-slate-400">By publishing, the negotiated contract rates will instantly become discoverable to Lead filters, Package generators, and the live Itinerary Builder. Click "Save Draft" to keep this contract hidden from operational workspaces.</p>
                   </div>
                 </div>
+
+                {/* 📋 PRE-FLIGHT PUBLICATION READINESS CHECKLIST */}
+                <div className="p-4 bg-background border border-border/80 rounded-2xl space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-extrabold uppercase tracking-wider text-foreground flex items-center gap-1.5">
+                      <Sparkles className="w-3.5 h-3.5 text-accent" /> Pre-Flight Publication Checklist
+                    </span>
+                    {(!hotelForm.hotel_name?.trim() || (!hotelForm.city_id && !hotelForm.city?.trim() && !hotelForm.destination?.trim()) || rooms.length === 0 || selectedMealPlans.length === 0 || duplicateHotelMatch) ? (
+                      <Badge variant="destructive" className="text-[10px] font-bold">Action Required Before Publishing</Badge>
+                    ) : (
+                      <Badge className="bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 text-[10px] font-bold">100% Ready to Publish</Badge>
+                    )}
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+                    <div className="flex items-center justify-between p-2 rounded-xl bg-slate-50 dark:bg-slate-900/50 border border-border/50">
+                      <div className="flex items-center gap-2">
+                        {hotelForm.hotel_name?.trim() ? (
+                          <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
+                        ) : (
+                          <XCircle className="w-4 h-4 text-rose-500 shrink-0" />
+                        )}
+                        <span className={hotelForm.hotel_name?.trim() ? "text-foreground font-medium" : "text-rose-500 font-semibold"}>Hotel Name</span>
+                      </div>
+                      {!hotelForm.hotel_name?.trim() && (
+                        <button type="button" onClick={() => setActiveStep(2)} className="text-[10px] text-accent underline hover:text-accent/80 font-bold">Set in Step 2</button>
+                      )}
+                    </div>
+
+                    <div className="flex items-center justify-between p-2 rounded-xl bg-slate-50 dark:bg-slate-900/50 border border-border/50">
+                      <div className="flex items-center gap-2">
+                        {(hotelForm.city_id || hotelForm.city?.trim() || hotelForm.destination?.trim()) ? (
+                          <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
+                        ) : (
+                          <XCircle className="w-4 h-4 text-rose-500 shrink-0" />
+                        )}
+                        <span className={(hotelForm.city_id || hotelForm.city?.trim() || hotelForm.destination?.trim()) ? "text-foreground font-medium" : "text-rose-500 font-semibold"}>Destination City</span>
+                      </div>
+                      {!(hotelForm.city_id || hotelForm.city?.trim() || hotelForm.destination?.trim()) && (
+                        <button type="button" onClick={() => setActiveStep(1)} className="text-[10px] text-accent underline hover:text-accent/80 font-bold">Set in Step 1</button>
+                      )}
+                    </div>
+
+                    <div className="flex items-center justify-between p-2 rounded-xl bg-slate-50 dark:bg-slate-900/50 border border-border/50">
+                      <div className="flex items-center gap-2">
+                        {rooms.length > 0 ? (
+                          <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
+                        ) : (
+                          <XCircle className="w-4 h-4 text-rose-500 shrink-0" />
+                        )}
+                        <span className={rooms.length > 0 ? "text-foreground font-medium" : "text-rose-500 font-semibold"}>Room Categories ({rooms.length})</span>
+                      </div>
+                      {rooms.length === 0 && (
+                        <button type="button" onClick={() => setActiveStep(3)} className="text-[10px] text-accent underline hover:text-accent/80 font-bold">Add in Step 3</button>
+                      )}
+                    </div>
+
+                    <div className="flex items-center justify-between p-2 rounded-xl bg-slate-50 dark:bg-slate-900/50 border border-border/50">
+                      <div className="flex items-center gap-2">
+                        {selectedMealPlans.length > 0 ? (
+                          <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
+                        ) : (
+                          <XCircle className="w-4 h-4 text-rose-500 shrink-0" />
+                        )}
+                        <span className={selectedMealPlans.length > 0 ? "text-foreground font-medium" : "text-rose-500 font-semibold"}>Meal Plans ({selectedMealPlans.length})</span>
+                      </div>
+                      {selectedMealPlans.length === 0 && (
+                        <button type="button" onClick={() => setActiveStep(4)} className="text-[10px] text-accent underline hover:text-accent/80 font-bold">Select in Step 4</button>
+                      )}
+                    </div>
+                  </div>
+
+                  {duplicateHotelMatch && (
+                    <div className="p-2.5 bg-rose-500/10 border border-rose-500/30 rounded-xl text-rose-600 dark:text-rose-400 text-xs flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <AlertTriangle className="w-4 h-4 shrink-0 text-rose-500" />
+                        <span>A hotel named "{duplicateHotelMatch.hotel_name}" already exists in this city.</span>
+                      </div>
+                      <button type="button" onClick={() => setActiveStep(2)} className="text-[10px] underline font-bold">Rename in Step 2</button>
+                    </div>
+                  )}
+                </div>
               </div>
             )}
             
@@ -3043,10 +3196,11 @@ export const HotelContractWizard: React.FC<HotelContractWizardProps> = ({
           {/* Wizard Navigation Footer */}
           <div className="border-t border-border p-4 flex justify-between items-center bg-slate-50 dark:bg-slate-950/40 rounded-b-2xl">
             <Button
+              type="button"
               variant="outline"
               size="sm"
-              disabled={activeStep === 1}
-              className="bg-background border-border text-foreground hover:bg-muted"
+              disabled={activeStep === 1 || isSaving}
+              className="bg-background border-border text-foreground hover:bg-muted cursor-pointer"
               onClick={() => setActiveStep(prev => Math.max(1, prev - 1))}
             >
               Previous Step
@@ -3054,21 +3208,23 @@ export const HotelContractWizard: React.FC<HotelContractWizardProps> = ({
 
             {activeStep < 7 ? (
               <Button
+                type="button"
                 size="sm"
-                className="bg-gradient-to-r from-[#c5a059] to-[#d4af37] text-slate-950 font-bold hover:opacity-90"
+                className="bg-gradient-to-r from-[#c5a059] to-[#d4af37] text-slate-950 font-bold hover:opacity-90 cursor-pointer"
                 onClick={() => setActiveStep(prev => Math.min(7, prev + 1))}
               >
                 Next Step <ArrowRight className="w-4 h-4 ml-1.5" />
               </Button>
             ) : (
               <Button
+                type="button"
                 size="sm"
-                className="bg-gradient-to-r from-[#c5a059] to-[#d4af37] text-slate-950 font-extrabold hover:opacity-90 uppercase px-6"
-                disabled={loading}
+                className="bg-gradient-to-r from-[#c5a059] to-[#d4af37] text-slate-950 font-extrabold hover:opacity-90 uppercase px-6 cursor-pointer shadow-lg shadow-[#c5a059]/20"
+                disabled={isSaving}
                 onClick={() => handleSaveHotelContract(true)}
               >
-                {loading ? <Loader2 className="w-4 h-4 animate-spin mr-1.5" /> : null}
-                Publish Live Contract
+                {isSaving ? <Loader2 className="w-4 h-4 animate-spin mr-1.5" /> : <Save className="w-4 h-4 mr-1.5" />}
+                {isSaving ? 'Publishing...' : 'Publish Live Contract'}
               </Button>
             )}
           </div>
