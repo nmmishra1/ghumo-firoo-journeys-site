@@ -22,13 +22,18 @@ import {
   MessageSquare,
   CreditCard,
   RefreshCw,
-  ExternalLink
+  ExternalLink,
+  Download,
+  Printer,
+  Mail,
+  Eye
 } from "lucide-react";
 import { 
   ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip as ChartTooltip, 
   PieChart, Pie, Cell 
 } from 'recharts';
 import { supabase } from '@/integrations/supabase/client';
+import { useToast } from "@/hooks/use-toast";
 
 interface ReportsAnalyticsViewProps {
   leads: any[];
@@ -287,27 +292,7 @@ export const ReportsAnalyticsView: React.FC<ReportsAnalyticsViewProps> = ({
     })).sort((a, b) => b.revenue - a.revenue);
   }, [filteredLeads]);
 
-  const handleExportReport = () => {
-    const headers = ['Executive Name', 'Total Leads Assigned', 'Confirmed Bookings', 'Conversion Rate %', 'Realized Revenue (INR)'];
-    const csvRows = [headers.join(',')];
-    execData.forEach(row => {
-      csvRows.push([
-        `"${row.name}"`,
-        row.count,
-        row.converted,
-        `"${row.rate}%"`,
-        row.revenue
-      ].join(','));
-    });
-    const blob = new Blob([csvRows.join('\n')], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.setAttribute('href', url);
-    link.setAttribute('download', `executive_performance_report_${reportsStartDate}_to_${reportsEndDate}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
+
 
   // Consolidate and filter rates for Rate Management Overview
   const allRatesList: any[] = React.useMemo(() => {
@@ -367,19 +352,237 @@ export const ReportsAnalyticsView: React.FC<ReportsAnalyticsViewProps> = ({
     });
   }, [allRatesList, rateCityFilter, rateTypeFilter, rateSearchTerm]);
 
+  const { toast } = useToast();
+  const [sendingDigest, setSendingDigest] = useState<boolean>(false);
+
+  // Generic CSV Download utility with UTF-8 BOM
+  const downloadCSV = (filename: string, headers: string[], rows: (string | number)[][]) => {
+    const escapeCsv = (val: string | number) => {
+      if (val === null || val === undefined) return '""';
+      const s = String(val).replace(/"/g, '""');
+      return `"${s}"`;
+    };
+    const csvContent = [
+      headers.map(escapeCsv).join(','),
+      ...rows.map(row => row.map(escapeCsv).join(','))
+    ].join('\r\n');
+
+    const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.setAttribute('href', url);
+    link.setAttribute('download', filename);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
+  const exportReceivablesCSV = () => {
+    const headers = [
+      'Lead / Booking ID',
+      'Guest Name',
+      'Contact Phone',
+      'Contact Email',
+      'Destination',
+      'Departure Date',
+      'Days Until Travel',
+      'Urgency Status',
+      'Total Value (INR)',
+      'Total Paid (INR)',
+      'Pending Balance (INR)',
+      'Paid Percentage (%)',
+      'Assigned Agent'
+    ];
+
+    const dataToExport = filteredReceivables.length > 0 ? filteredReceivables : receivablesList;
+    const rows = dataToExport.map(r => [
+      r.lead_id || '',
+      r.customer_name || 'Traveler',
+      r.customer_phone || '',
+      r.customer_email || '',
+      r.destination || '',
+      r.travel_date || '',
+      r.days_until_travel ?? '',
+      r.urgency || '',
+      r.total_value || 0,
+      r.total_paid || 0,
+      r.balance_pending || 0,
+      `${r.paid_percentage || 0}%`,
+      r.assigned_agent || 'Unassigned'
+    ]);
+
+    const dateStr = new Date().toISOString().split('T')[0];
+    downloadCSV(`ghumo_firoo_receivables_aging_${dateStr}.csv`, headers, rows);
+    toast({
+      title: "Receivables Exported",
+      description: `Downloaded ${rows.length} pending receivable records to CSV.`
+    });
+  };
+
+  const exportRatesCSV = () => {
+    const headers = [
+      'Service Type',
+      'Supplier / Name',
+      'Destination City',
+      'Specification / Rate Details',
+      'Contract Rate (INR)',
+      'Active Status'
+    ];
+
+    const dataToExport = filteredRates.length > 0 ? filteredRates : allRatesList;
+    const rows = dataToExport.map(r => [
+      r.type || '',
+      r.name || '',
+      r.city || '',
+      r.details || '',
+      r.rate || 0,
+      r.is_active ? 'Active' : 'Inactive'
+    ]);
+
+    const dateStr = new Date().toISOString().split('T')[0];
+    downloadCSV(`ghumo_firoo_contract_rates_${dateStr}.csv`, headers, rows);
+    toast({
+      title: "Contract Rates Exported",
+      description: `Downloaded ${rows.length} supplier rate contracts to CSV.`
+    });
+  };
+
+  const handleExportReport = () => {
+    const headers = [
+      'Category',
+      'Metric / Item',
+      'Assigned / Inquiries',
+      'Converted / Won',
+      'Win Rate %',
+      'Revenue Won (INR)'
+    ];
+
+    const rows: (string | number)[][] = [];
+
+    // Summary KPIs
+    rows.push(['Sales Funnel KPI', 'Total Inquiries Received', totalLeadsCount, convertedCount, `${winRate}%`, realizedRevenue]);
+    rows.push(['Sales Funnel KPI', 'Confirmed Bookings Won', convertedCount, convertedCount, '100%', realizedRevenue]);
+    rows.push(['Sales Funnel KPI', 'Closed Lost Inquiries', droppedCount, 0, '0%', 0]);
+    rows.push(['Sales Funnel KPI', 'Active Pipeline Value', totalLeadsCount - droppedCount, '-', '-', pipelineValue]);
+    rows.push(['Sales Funnel KPI', 'Payments Verified', allPayments?.length || 0, '-', '-', paymentsCollected]);
+
+    // Destination Performance
+    destData.forEach(d => {
+      rows.push(['Destination Performance', d.name, d.count, d.converted, `${d.rate}%`, d.revenue]);
+    });
+
+    // Executive Leaderboard
+    execData.forEach(e => {
+      rows.push(['Executive Leaderboard', e.name, e.count, e.converted, `${e.rate}%`, e.revenue]);
+    });
+
+    // Source Channels
+    sourceData.forEach(s => {
+      rows.push(['Lead Source Channel', s.name, s.value, s.converted, `${s.rate}%`, 0]);
+    });
+
+    downloadCSV(`ghumo_firoo_funnel_analytics_${reportsStartDate}_to_${reportsEndDate}.csv`, headers, rows);
+    toast({
+      title: "Funnel Report Exported",
+      description: `Downloaded executive sales funnel report (${reportsStartDate} to ${reportsEndDate}) to CSV.`
+    });
+  };
+
+  const handlePrint = () => {
+    window.print();
+  };
+
+  const handlePreviewDigest = () => {
+    window.open('/php-backend/cron_reports_digest.php?action=preview', '_blank');
+  };
+
+  const handleSendDigest = async () => {
+    setSendingDigest(true);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const token = session?.access_token;
+      const res = await fetch('/php-backend/cron_reports_digest.php?action=send_now', {
+        headers: token ? { 'Authorization': `Bearer ${token}` } : {}
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        toast({
+          title: "Executive Digest Dispatched",
+          description: data.message || "Weekly executive digest successfully sent to management.",
+        });
+      } else {
+        throw new Error(data.message || 'Server returned an error');
+      }
+    } catch (err: any) {
+      toast({
+        title: "Dispatch Notice",
+        description: err.message || "Failed to trigger email digest. Check system mail configuration.",
+        variant: "destructive"
+      });
+    } finally {
+      setSendingDigest(false);
+    }
+  };
+
   return (
     <div className="space-y-6 text-left font-poppins pb-12">
       {/* Header Card */}
       <Card className="border border-white/10 overflow-hidden shadow-2xl rounded-2xl bg-gradient-to-r from-[#0B1026] via-[#1E2942] to-[#0B1026] text-white">
-        <CardHeader className="p-6 border-b border-white/10">
+        <CardHeader className="p-6 border-b border-white/10 flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="space-y-1">
             <CardTitle className="text-xl font-extrabold flex items-center gap-2 text-white">
               <TrendingUp className="w-5.5 h-5.5 text-accent" />
               Operational Analytics & Rates Center
             </CardTitle>
             <CardDescription className="text-slate-300 text-xs font-semibold">
-              View business conversion performance, top destination rankings, export leaderboards, and inspect supplier rates.
+              View business conversion performance, aging receivables schedule, and supplier contract rates.
             </CardDescription>
+          </div>
+
+          <div className="flex items-center gap-2 flex-wrap">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={handlePrint}
+              className="h-9 px-3.5 text-xs font-bold rounded-xl border-white/20 bg-white/5 hover:bg-white/15 text-slate-100 flex items-center gap-1.5"
+            >
+              <Printer className="w-4 h-4 text-accent" />
+              <span>Print / PDF</span>
+            </Button>
+
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={handlePreviewDigest}
+              className="h-9 px-3 text-xs font-bold rounded-xl border-white/20 bg-white/5 hover:bg-white/15 text-slate-100 flex items-center gap-1.5"
+              title="Preview Weekly Executive Digest HTML"
+            >
+              <Eye className="w-4 h-4 text-blue-400" />
+              <span>Preview Digest</span>
+            </Button>
+
+            <Button
+              type="button"
+              size="sm"
+              onClick={handleSendDigest}
+              disabled={sendingDigest}
+              className="h-9 px-4 text-xs font-bold rounded-xl bg-gradient-warm text-[#0B1026] hover:opacity-90 flex items-center gap-1.5 shadow-lg"
+            >
+              {sendingDigest ? (
+                <>
+                  <RefreshCw className="w-4 h-4 animate-spin" />
+                  <span>Sending...</span>
+                </>
+              ) : (
+                <>
+                  <Mail className="w-4 h-4" />
+                  <span>Email Digest</span>
+                </>
+              )}
+            </Button>
           </div>
         </CardHeader>
       </Card>
@@ -880,7 +1083,7 @@ export const ReportsAnalyticsView: React.FC<ReportsAnalyticsViewProps> = ({
 
           {/* Receivables Table */}
           <Card className="border-white/10 bg-[#1A2342]/60 text-white backdrop-blur-xl shadow-xl rounded-2xl overflow-hidden">
-            <CardHeader className="p-5 border-b border-white/10 bg-white/5 flex flex-row items-center justify-between">
+            <CardHeader className="p-5 border-b border-white/10 bg-white/5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div>
                 <CardTitle className="text-xs font-black uppercase tracking-wider text-slate-300 flex items-center gap-1.5">
                   <CreditCard className="w-4 h-4 text-amber-400" />
@@ -890,9 +1093,21 @@ export const ReportsAnalyticsView: React.FC<ReportsAnalyticsViewProps> = ({
                   Confirmed departures sorted by nearest travel date with one-click payment reminder dispatch.
                 </CardDescription>
               </div>
-              <Badge className="bg-white/10 border-white/20 text-slate-200 text-[10px] font-extrabold px-2.5 py-1 rounded-full">
-                {filteredReceivables.length} Bookings Shown
-              </Badge>
+              <div className="flex items-center gap-2 flex-wrap">
+                <Badge className="bg-white/10 border-white/20 text-slate-200 text-[10px] font-extrabold px-2.5 py-1 rounded-full">
+                  {filteredReceivables.length} Bookings Shown
+                </Badge>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={exportReceivablesCSV}
+                  className="h-8 px-3 text-[11px] font-bold rounded-xl border-white/20 bg-white/5 hover:bg-white/15 text-emerald-400 flex items-center gap-1.5"
+                >
+                  <Download className="w-3.5 h-3.5" />
+                  <span>Export Receivables CSV</span>
+                </Button>
+              </div>
             </CardHeader>
             <CardContent className="p-0">
               {receivablesLoading ? (
@@ -1069,6 +1284,32 @@ export const ReportsAnalyticsView: React.FC<ReportsAnalyticsViewProps> = ({
 
           {/* Rates Grid Table */}
           <Card className="border-white/10 bg-[#1A2342]/60 text-white backdrop-blur-xl shadow-xl rounded-2xl overflow-hidden">
+            <CardHeader className="p-5 border-b border-white/10 bg-white/5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div>
+                <CardTitle className="text-xs font-black uppercase tracking-wider text-slate-300 flex items-center gap-1.5">
+                  <Landmark className="w-4 h-4 text-accent" />
+                  Contracted Supplier Rates Catalog
+                </CardTitle>
+                <CardDescription className="text-slate-400 text-[11px] mt-0.5">
+                  Hotels, cab tariffs, and activity rates negotiated with local partners.
+                </CardDescription>
+              </div>
+              <div className="flex items-center gap-2 flex-wrap">
+                <Badge className="bg-white/10 border-white/20 text-slate-200 text-[10px] font-extrabold px-2.5 py-1 rounded-full">
+                  {filteredRates.length} Rates Listed
+                </Badge>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={exportRatesCSV}
+                  className="h-8 px-3 text-[11px] font-bold rounded-xl border-white/20 bg-white/5 hover:bg-white/15 text-emerald-400 flex items-center gap-1.5"
+                >
+                  <Download className="w-3.5 h-3.5" />
+                  <span>Export Rates CSV</span>
+                </Button>
+              </div>
+            </CardHeader>
             <CardContent className="p-0">
               {ratesLoading ? (
                 <div className="p-12 text-center text-slate-400 text-xs font-semibold flex items-center justify-center gap-2">

@@ -136,6 +136,7 @@ ErrorDocument 500 /index.html
   RewriteRule ^api/upload$ /php-backend/upload.php [L,QSA]
 
   # Map Reports API — secured, routes to php-backend
+  RewriteRule ^api/reports/digest$ /php-backend/cron_reports_digest.php [L,QSA]
   RewriteRule ^api/reports$ /php-backend/reports.php [L,QSA]
 
   # Map Reviews API — secured, routes to php-backend
