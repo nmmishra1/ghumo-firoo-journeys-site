@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -15,12 +15,20 @@ import {
   IndianRupee, 
   Landmark, 
   MapPin, 
-  Search 
+  Search,
+  AlertTriangle,
+  Clock,
+  Phone,
+  MessageSquare,
+  CreditCard,
+  RefreshCw,
+  ExternalLink
 } from "lucide-react";
 import { 
   ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip as ChartTooltip, 
   PieChart, Pie, Cell 
 } from 'recharts';
+import { supabase } from '@/integrations/supabase/client';
 
 interface ReportsAnalyticsViewProps {
   leads: any[];
@@ -49,6 +57,113 @@ export const ReportsAnalyticsView: React.FC<ReportsAnalyticsViewProps> = ({
   const [rateCityFilter, setRateCityFilter] = useState<string>('all');
   const [rateTypeFilter, setRateTypeFilter] = useState<string>('all');
   const [rateSearchTerm, setRateSearchTerm] = useState<string>('');
+
+  // Receivables & Payment Due Aging state
+  const [receivablesList, setReceivablesList] = useState<any[]>([]);
+  const [receivablesLoading, setReceivablesLoading] = useState<boolean>(false);
+  const [receivablesUrgencyFilter, setReceivablesUrgencyFilter] = useState<string>('all');
+  const [receivablesSearch, setReceivablesSearch] = useState<string>('');
+
+  const loadReceivables = async () => {
+    setReceivablesLoading(true);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const token = session?.access_token;
+      const res = await fetch('/php-backend/reports.php?type=receivables_aging', {
+        headers: token ? { 'Authorization': `Bearer ${token}` } : {}
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (Array.isArray(data.receivables)) {
+          setReceivablesList(data.receivables);
+          return;
+        }
+      }
+      throw new Error('Fallback to local calculation');
+    } catch (e) {
+      // Robust client-side fallback from leads and allPayments
+      const confirmed = (leads || []).filter(l => l.status === 'Booking Confirmed');
+      const localList: any[] = [];
+      const nowTs = Date.now();
+      for (const l of confirmed) {
+        const totalVal = Number(l.expected_booking_value || l.package_cost || 0);
+        const leadPayments = (allPayments || []).filter(p => String(p.lead_id) === String(l.id) && (p.status === 'Success' || !p.status));
+        const totalPaid = leadPayments.reduce((s, p) => s + Number(p.amount_received || 0), 0);
+        const pending = Math.max(0, totalVal - totalPaid);
+        if (pending > 0) {
+          const tDate = l.travel_date || l.start_date || '';
+          const tTs = tDate ? new Date(tDate).getTime() : 0;
+          const days = tTs ? Math.round((tTs - nowTs) / (86400 * 1000)) : 999;
+          let urgency = 'Future Departure';
+          let badge = 'secondary';
+          if (days <= 0) { urgency = 'Immediate / Overdue'; badge = 'destructive'; }
+          else if (days <= 3) { urgency = 'Due in 3 Days'; badge = 'destructive'; }
+          else if (days <= 7) { urgency = 'Due in 7 Days'; badge = 'warning'; }
+          else if (days <= 15) { urgency = 'Due in 15 Days'; badge = 'default'; }
+          localList.push({
+            lead_id: l.id,
+            customer_name: l.customer_name || 'Traveler',
+            customer_phone: l.customer_phone || '',
+            customer_email: l.customer_email || '',
+            destination: l.destination || 'Custom Tour',
+            travel_date: tDate,
+            days_until_travel: days,
+            assigned_agent: l.assigned_agent || 'Unassigned',
+            urgency,
+            badge_variant: badge,
+            total_value: totalVal,
+            total_paid: totalPaid,
+            balance_pending: pending,
+            paid_percentage: totalVal > 0 ? Math.round((totalPaid / totalVal) * 100) : 0
+          });
+        }
+      }
+      localList.sort((a, b) => (a.days_until_travel ?? 999) - (b.days_until_travel ?? 999));
+      setReceivablesList(localList);
+    } finally {
+      setReceivablesLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadReceivables();
+  }, [leads, allPayments]);
+
+  const openWhatsAppReminder = (item: any) => {
+    const cleanPhone = (item.customer_phone || '').replace(/\D/g, '');
+    const phone = cleanPhone.length === 10 ? `91${cleanPhone}` : cleanPhone;
+    const msg = encodeURIComponent(
+      `Dear ${item.customer_name || 'Traveler'},\n\n` +
+      `Greetings from Ghumo Firoo Travels!\n\n` +
+      `Your upcoming journey to ${item.destination} is scheduled for ${item.travel_date || 'your confirmed travel date'}.\n\n` +
+      `Kindly note that an outstanding balance of ₹${Number(item.balance_pending || 0).toLocaleString('en-IN')} is due before departure to ensure seamless hotel vouchers and cab allocations.\n\n` +
+      `For payment assistance or itinerary queries, please feel free to reach us.\n\n` +
+      `Warm regards,\nGhumo Firoo Travels`
+    );
+    window.open(`https://wa.me/${phone}?text=${msg}`, '_blank');
+  };
+
+  const filteredReceivables = React.useMemo(() => {
+    return receivablesList.filter(item => {
+      const matchesUrgency = receivablesUrgencyFilter === 'all' || item.urgency === receivablesUrgencyFilter;
+      const term = receivablesSearch.toLowerCase().trim();
+      const matchesSearch = !term ||
+        (item.customer_name || '').toLowerCase().includes(term) ||
+        (item.destination || '').toLowerCase().includes(term) ||
+        (item.customer_phone || '').toLowerCase().includes(term) ||
+        (item.assigned_agent || '').toLowerCase().includes(term);
+      return matchesUrgency && matchesSearch;
+    });
+  }, [receivablesList, receivablesUrgencyFilter, receivablesSearch]);
+
+  const receivablesSummary = React.useMemo(() => {
+    const totalOutstanding = receivablesList.reduce((sum, r) => sum + (r.balance_pending || 0), 0);
+    const criticalCount = receivablesList.filter(r => r.urgency === 'Immediate / Overdue' || r.urgency === 'Due in 3 Days').length;
+    const due7Count = receivablesList.filter(r => r.urgency === 'Due in 7 Days').length;
+    const due15Count = receivablesList.filter(r => r.urgency === 'Due in 15 Days').length;
+    const futureCount = receivablesList.filter(r => r.urgency === 'Future Departure').length;
+    return { totalOutstanding, criticalCount, due7Count, due15Count, futureCount };
+  }, [receivablesList]);
 
   // Filter leads by date range safely
   const filteredLeads = React.useMemo(() => {
@@ -270,8 +385,16 @@ export const ReportsAnalyticsView: React.FC<ReportsAnalyticsViewProps> = ({
       </Card>
 
       <Tabs defaultValue="funnel" className="w-full">
-        <TabsList className="inline-flex bg-[#1A2342]/80 border border-white/10 p-1 rounded-2xl mb-4 h-12">
+        <TabsList className="inline-flex bg-[#1A2342]/80 border border-white/10 p-1 rounded-2xl mb-4 h-12 flex-wrap gap-1">
           <TabsTrigger value="funnel" className="rounded-xl text-xs font-bold py-2 px-5 data-[state=active]:bg-gradient-warm data-[state=active]:text-[#0B1026]">Sales & Conversion Funnel</TabsTrigger>
+          <TabsTrigger value="receivables" className="rounded-xl text-xs font-bold py-2 px-5 data-[state=active]:bg-gradient-warm data-[state=active]:text-[#0B1026] flex items-center gap-1.5">
+            <span>Receivables & Aging Schedule</span>
+            {receivablesSummary.criticalCount > 0 && (
+              <span className="bg-rose-500 text-white text-[10px] font-black px-1.5 py-0.2 rounded-full animate-pulse">
+                {receivablesSummary.criticalCount}
+              </span>
+            )}
+          </TabsTrigger>
           <TabsTrigger value="rates" className="rounded-xl text-xs font-bold py-2 px-5 data-[state=active]:bg-gradient-warm data-[state=active]:text-[#0B1026]">Rate Management Overview</TabsTrigger>
         </TabsList>
 
@@ -647,6 +770,250 @@ export const ReportsAnalyticsView: React.FC<ReportsAnalyticsViewProps> = ({
               </CardContent>
             </Card>
           </div>
+        </TabsContent>
+
+        {/* 2. RECEIVABLES & AGING SCHEDULE TAB */}
+        <TabsContent value="receivables" className="space-y-6">
+          {/* Top KPI Cards */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <Card className="border border-white/10 bg-[#1A2342]/70 text-white backdrop-blur-xl shadow-xl rounded-2xl p-5">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-[10px] font-black uppercase tracking-wider text-slate-300">Total Outstanding Balance</p>
+                  <h3 className="text-2xl font-black text-amber-400 mt-1">₹{receivablesSummary.totalOutstanding.toLocaleString('en-IN')}</h3>
+                  <p className="text-[10px] text-slate-400 mt-0.5">{receivablesList.length} confirmed bookings with balance</p>
+                </div>
+                <div className="w-10 h-10 rounded-xl bg-amber-500/20 border border-amber-500/30 flex items-center justify-center text-amber-400">
+                  <IndianRupee className="w-5 h-5" />
+                </div>
+              </div>
+            </Card>
+
+            <Card className="border border-rose-500/30 bg-rose-950/30 text-white backdrop-blur-xl shadow-xl rounded-2xl p-5">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-[10px] font-black uppercase tracking-wider text-rose-300">Immediate / Due ≤3 Days</p>
+                  <h3 className="text-2xl font-black text-rose-400 mt-1">{receivablesSummary.criticalCount}</h3>
+                  <p className="text-[10px] text-rose-300/80 mt-0.5 font-semibold">Immediate collection required</p>
+                </div>
+                <div className="w-10 h-10 rounded-xl bg-rose-500/20 border border-rose-500/40 flex items-center justify-center text-rose-400">
+                  <AlertTriangle className="w-5 h-5 animate-bounce" />
+                </div>
+              </div>
+            </Card>
+
+            <Card className="border border-amber-500/30 bg-amber-950/20 text-white backdrop-blur-xl shadow-xl rounded-2xl p-5">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-[10px] font-black uppercase tracking-wider text-amber-300">Due in Next 7 Days</p>
+                  <h3 className="text-2xl font-black text-amber-400 mt-1">{receivablesSummary.due7Count}</h3>
+                  <p className="text-[10px] text-amber-300/80 mt-0.5 font-semibold">Pre-departure reminders pending</p>
+                </div>
+                <div className="w-10 h-10 rounded-xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400">
+                  <Clock className="w-5 h-5" />
+                </div>
+              </div>
+            </Card>
+
+            <Card className="border border-blue-500/30 bg-blue-950/20 text-white backdrop-blur-xl shadow-xl rounded-2xl p-5">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-[10px] font-black uppercase tracking-wider text-blue-300">Future Departures (15+ Days)</p>
+                  <h3 className="text-2xl font-black text-blue-400 mt-1">{receivablesSummary.due15Count + receivablesSummary.futureCount}</h3>
+                  <p className="text-[10px] text-blue-300/80 mt-0.5 font-semibold">Scheduled collection pipeline</p>
+                </div>
+                <div className="w-10 h-10 rounded-xl bg-blue-500/20 border border-blue-500/40 flex items-center justify-center text-blue-400">
+                  <CheckCircle2 className="w-5 h-5" />
+                </div>
+              </div>
+            </Card>
+          </div>
+
+          {/* Filters Bar */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 bg-[#1A2342]/60 border border-white/10 p-4 rounded-2xl backdrop-blur-xl shadow-xl">
+            {/* Search */}
+            <div className="space-y-1 text-left sm:col-span-2">
+              <Label className="text-[10px] font-black uppercase tracking-wider text-slate-300">Search Guests / Destination / Agent</Label>
+              <div className="relative">
+                <Search className="absolute left-3 top-2.5 w-4 h-4 text-slate-400" />
+                <Input 
+                  type="text" 
+                  placeholder="Search by traveler name, destination, mobile, or agent..."
+                  value={receivablesSearch}
+                  onChange={(e) => setReceivablesSearch(e.target.value)}
+                  className="pl-9 h-9 text-xs rounded-xl bg-white/5 border-white/15 text-white shadow-sm font-semibold focus-visible:ring-accent"
+                />
+              </div>
+            </div>
+
+            {/* Urgency Filter */}
+            <div className="space-y-1 text-left flex items-end gap-2">
+              <div className="flex-1 space-y-1">
+                <Label className="text-[10px] font-black uppercase tracking-wider text-slate-300">Urgency Filter</Label>
+                <Select value={receivablesUrgencyFilter} onValueChange={setReceivablesUrgencyFilter}>
+                  <SelectTrigger className="h-9 text-xs rounded-xl bg-white/5 border-white/15 text-white font-semibold">
+                    <SelectValue placeholder="All Urgencies" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-slate-900 border-slate-700 text-white">
+                    <SelectItem value="all">All Urgency Levels</SelectItem>
+                    <SelectItem value="Immediate / Overdue">Immediate / Overdue</SelectItem>
+                    <SelectItem value="Due in 3 Days">Due in 3 Days</SelectItem>
+                    <SelectItem value="Due in 7 Days">Due in 7 Days</SelectItem>
+                    <SelectItem value="Due in 15 Days">Due in 15 Days</SelectItem>
+                    <SelectItem value="Future Departure">Future Departure</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <Button 
+                type="button" 
+                size="sm" 
+                variant="outline"
+                onClick={loadReceivables}
+                disabled={receivablesLoading}
+                className="h-9 px-3 rounded-xl border-white/15 bg-white/5 hover:bg-white/15 text-slate-200"
+                title="Refresh Receivables Data"
+              >
+                <RefreshCw className={`w-4 h-4 ${receivablesLoading ? 'animate-spin text-accent' : ''}`} />
+              </Button>
+            </div>
+          </div>
+
+          {/* Receivables Table */}
+          <Card className="border-white/10 bg-[#1A2342]/60 text-white backdrop-blur-xl shadow-xl rounded-2xl overflow-hidden">
+            <CardHeader className="p-5 border-b border-white/10 bg-white/5 flex flex-row items-center justify-between">
+              <div>
+                <CardTitle className="text-xs font-black uppercase tracking-wider text-slate-300 flex items-center gap-1.5">
+                  <CreditCard className="w-4 h-4 text-amber-400" />
+                  Pending Balance Aging Matrix
+                </CardTitle>
+                <CardDescription className="text-slate-400 text-[11px] mt-0.5">
+                  Confirmed departures sorted by nearest travel date with one-click payment reminder dispatch.
+                </CardDescription>
+              </div>
+              <Badge className="bg-white/10 border-white/20 text-slate-200 text-[10px] font-extrabold px-2.5 py-1 rounded-full">
+                {filteredReceivables.length} Bookings Shown
+              </Badge>
+            </CardHeader>
+            <CardContent className="p-0">
+              {receivablesLoading ? (
+                <div className="p-12 text-center text-slate-400 text-xs font-semibold flex items-center justify-center gap-2">
+                  <div className="animate-spin rounded-full h-4 w-4 border-2 border-slate-400 border-t-transparent" />
+                  Calculating real-time payment aging schedule...
+                </div>
+              ) : filteredReceivables.length === 0 ? (
+                <div className="p-12 text-center text-slate-400 text-xs font-semibold">
+                  No confirmed bookings match the active filter criteria. All balances clear!
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-xs text-left border-collapse">
+                    <thead>
+                      <tr className="bg-white/10 border-b border-white/10 text-[10px] font-black uppercase tracking-wider text-slate-300">
+                        <th className="p-3.5">Guest & Destination</th>
+                        <th className="p-3.5">Departure Date</th>
+                        <th className="p-3.5">Payment Urgency</th>
+                        <th className="p-3.5 text-right">Package Cost</th>
+                        <th className="p-3.5 text-right">Paid</th>
+                        <th className="p-3.5 text-right">Balance Due</th>
+                        <th className="p-3.5 text-center">Settlement Status</th>
+                        <th className="p-3.5 text-center">Action</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-white/10">
+                      {filteredReceivables.map((row) => (
+                        <tr key={row.lead_id} className="hover:bg-white/5 transition-colors">
+                          <td className="p-3.5">
+                            <div className="font-bold text-white text-sm flex items-center gap-1.5">
+                              {row.customer_name}
+                              <span className="text-[10px] font-mono text-slate-400 font-semibold">#{row.lead_id}</span>
+                            </div>
+                            <div className="text-[11px] text-slate-300 font-semibold flex items-center gap-1 mt-0.5">
+                              <MapPin className="w-3 h-3 text-accent shrink-0" />
+                              <span>{row.destination}</span>
+                              {row.assigned_agent && (
+                                <span className="text-slate-400 text-[10px] ml-1">· Agent: {row.assigned_agent}</span>
+                              )}
+                            </div>
+                          </td>
+
+                          <td className="p-3.5">
+                            <div className="font-bold text-slate-200">{row.travel_date || 'TBD'}</div>
+                            <div className="text-[10px] text-slate-400 font-mono mt-0.5">
+                              {row.days_until_travel <= 0 
+                                ? 'Departed / Departing Today' 
+                                : `${row.days_until_travel} days remaining`}
+                            </div>
+                          </td>
+
+                          <td className="p-3.5">
+                            <Badge 
+                              variant="outline" 
+                              className={`text-[10px] font-black px-2.5 py-0.5 rounded-full uppercase tracking-wider ${
+                                row.urgency === 'Immediate / Overdue' || row.urgency === 'Due in 3 Days'
+                                  ? 'bg-rose-500/20 text-rose-300 border-rose-500/40 animate-pulse'
+                                  : row.urgency === 'Due in 7 Days'
+                                  ? 'bg-amber-500/20 text-amber-300 border-amber-500/40'
+                                  : row.urgency === 'Due in 15 Days'
+                                  ? 'bg-blue-500/20 text-blue-300 border-blue-500/40'
+                                  : 'bg-slate-500/20 text-slate-300 border-slate-500/30'
+                              }`}
+                            >
+                              {row.urgency}
+                            </Badge>
+                          </td>
+
+                          <td className="p-3.5 text-right font-mono font-bold text-slate-300">
+                            ₹{row.total_value.toLocaleString('en-IN')}
+                          </td>
+
+                          <td className="p-3.5 text-right font-mono font-bold text-emerald-400">
+                            ₹{row.total_paid.toLocaleString('en-IN')}
+                          </td>
+
+                          <td className="p-3.5 text-right font-mono font-black text-amber-400 text-sm">
+                            ₹{row.balance_pending.toLocaleString('en-IN')}
+                          </td>
+
+                          <td className="p-3.5 text-center min-w-[120px]">
+                            <div className="flex items-center justify-between text-[10px] text-slate-400 font-mono mb-1">
+                              <span>Paid: {row.paid_percentage}%</span>
+                              <span>Pending</span>
+                            </div>
+                            <div className="w-full bg-white/10 rounded-full h-1.5 overflow-hidden">
+                              <div 
+                                className={`h-full rounded-full transition-all ${
+                                  row.paid_percentage >= 75 ? 'bg-emerald-400' :
+                                  row.paid_percentage >= 40 ? 'bg-amber-400' : 'bg-rose-500'
+                                }`} 
+                                style={{ width: `${Math.min(100, row.paid_percentage)}%` }} 
+                              />
+                            </div>
+                          </td>
+
+                          <td className="p-3.5 text-center">
+                            {row.customer_phone ? (
+                              <Button
+                                type="button"
+                                size="sm"
+                                onClick={() => openWhatsAppReminder(row)}
+                                className="h-7 px-2.5 rounded-lg text-[10px] font-bold bg-emerald-600 hover:bg-emerald-500 text-white flex items-center gap-1 shadow-sm"
+                                title="Send WhatsApp Payment Reminder"
+                              >
+                                <MessageSquare className="w-3 h-3" />
+                                Reminder
+                              </Button>
+                            ) : (
+                              <span className="text-slate-500 text-[10px]">No Phone</span>
+                            )}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </CardContent>
+          </Card>
         </TabsContent>
 
         <TabsContent value="rates" className="space-y-6">
