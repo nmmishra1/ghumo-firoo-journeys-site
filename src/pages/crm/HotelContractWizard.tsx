@@ -65,8 +65,12 @@ const formatDateForInput = (dateStr: string | null | undefined): string => {
   return dateStr;
 };
 
-const getSuggestedTaxRate = (countryName: string | undefined, rate: number, isInclusive: boolean): number => {
-  if (!countryName) return 18;
+const getSuggestedTaxRate = (countryName: string | number | undefined, rate: number = 0, isInclusive: boolean = false): number => {
+  if (typeof countryName === 'number') {
+    rate = countryName;
+    countryName = 'India';
+  }
+  if (!countryName || typeof countryName !== 'string') return 18;
   const c = countryName.toLowerCase();
   if (c.includes('india')) {
     if (isInclusive) {
@@ -209,6 +213,7 @@ export const HotelContractWizard: React.FC<HotelContractWizardProps> = ({
   // ---------------- WIZARD STATE ----------------
   const [googleSearchInput, setGoogleSearchInput] = useState('');
   const [isFetchingGoogleMeta, setIsFetchingGoogleMeta] = useState(false);
+  const isFetchingGoogle = isFetchingGoogleMeta;
 
   const handleFetchFromGoogle = async () => {
     if (!googleSearchInput.trim()) {
@@ -1840,11 +1845,11 @@ export const HotelContractWizard: React.FC<HotelContractWizardProps> = ({
                   <Button
                     type="button"
                     size="sm"
-                    disabled={isFetchingGoogle}
+                    disabled={isFetchingGoogleMeta}
                     onClick={handleFetchFromGoogle}
                     className="h-9 px-4 text-xs font-extrabold bg-amber-500 hover:bg-amber-600 text-slate-950 shrink-0 cursor-pointer"
                   >
-                    {isFetchingGoogle ? <Loader2 className="w-3.5 h-3.5 animate-spin mr-1" /> : <Sparkles className="w-3.5 h-3.5 mr-1" />}
+                    {isFetchingGoogleMeta ? <Loader2 className="w-3.5 h-3.5 animate-spin mr-1" /> : <Sparkles className="w-3.5 h-3.5 mr-1" />}
                     Auto-Fill
                   </Button>
                 </div>
@@ -1902,10 +1907,10 @@ export const HotelContractWizard: React.FC<HotelContractWizardProps> = ({
                 <div className="space-y-1">
                   <Label className="text-[11px] font-bold">Default Room Category</Label>
                   <Input
-                    value={rooms[0]?.name || 'Deluxe Room'}
+                    value={rooms[0]?.room_category_name || rooms[0]?.name || 'Deluxe Room'}
                     onChange={e => {
                       const val = e.target.value;
-                      setRooms(prev => prev.map((r, i) => i === 0 ? { ...r, name: val } : r));
+                      setRooms(prev => prev.map((r, i) => i === 0 ? { ...r, room_category_name: val, name: val } : r));
                     }}
                     className="h-9 text-xs"
                   />
@@ -1946,7 +1951,7 @@ export const HotelContractWizard: React.FC<HotelContractWizardProps> = ({
                   <span className="font-extrabold text-foreground">
                     ₹{(expressBaseRate + expressMarkup).toLocaleString('en-IN')}
                   </span>{' '}
-                  + {getSuggestedTaxRate(expressBaseRate + expressMarkup)}% GST • Meal Plans: {selectedMealPlans.join(', ')}
+                  + {getSuggestedTaxRate(hotelForm.country || 'India', expressBaseRate + expressMarkup, false)}% GST • Meal Plans: {selectedMealPlans.join(', ')}
                 </div>
                 <div className="flex items-center gap-2">
                   <Button
