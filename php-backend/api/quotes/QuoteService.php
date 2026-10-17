@@ -253,7 +253,7 @@ class QuoteService
         $update->execute([$shareToken, $message, $quoteId]);
 
         $baseUrl = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://" . ($_SERVER['HTTP_HOST'] ?? 'ghumofiroo.com');
-        $shareUrl = "$baseUrl/quote/view?token=$shareToken";
+        $shareUrl = "$baseUrl/quote/$shareToken";
 
         return [
             'success' => true,
@@ -263,12 +263,12 @@ class QuoteService
     }
 
     /**
-     * Public view by share token
+     * Public view by share token (or fallback quote ID)
      */
     public function getQuoteByToken(string $token): ?array
     {
-        $stmt = $this->pdo->prepare("SELECT * FROM quotes WHERE share_token = ?");
-        $stmt->execute([$token]);
+        $stmt = $this->pdo->prepare("SELECT * FROM quotes WHERE share_token = ? OR id = ? LIMIT 1");
+        $stmt->execute([$token, $token]);
         $quote = $stmt->fetch(PDO::FETCH_ASSOC);
         if (!$quote) return null;
 
@@ -286,8 +286,8 @@ class QuoteService
      */
     public function submitAction(string $token, string $action, ?string $message = null): array
     {
-        $stmt = $this->pdo->prepare("SELECT id, status FROM quotes WHERE share_token = ?");
-        $stmt->execute([$token]);
+        $stmt = $this->pdo->prepare("SELECT id, status FROM quotes WHERE share_token = ? OR id = ? LIMIT 1");
+        $stmt->execute([$token, $token]);
         $quote = $stmt->fetch(PDO::FETCH_ASSOC);
         if (!$quote) {
             return ['success' => false, 'error' => 'Invalid or expired quote token', 'status_code' => 404];

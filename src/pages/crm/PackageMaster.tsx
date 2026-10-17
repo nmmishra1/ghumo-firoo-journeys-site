@@ -678,6 +678,8 @@ export default function PackageMaster() {
   };
 
 
+  const [prefillBannerLead, setPrefillBannerLead] = useState<any | null>(null);
+
   useEffect(() => {
     if (isEdit && editId && packages.length > 0) {
       const item = packages.find(p => p.id === editId);
@@ -722,6 +724,7 @@ export default function PackageMaster() {
           is_active: item.is_active !== false
         });
         setEditingId(item.id);
+        setPrefillBannerLead(null);
 
         // Fetch pre-seeded / DB itinerary if form itinerary is empty
         if (!item.itinerary || item.itinerary.length === 0) {
@@ -740,11 +743,125 @@ export default function PackageMaster() {
           });
         }
       }
+    } else if (!isEdit && isFormView) {
+      // Check if opened via 1-Click "Convert Lead to Custom Package"
+      let rawPrefill: any = (location.state as any)?.prefillFromLead || null;
+      if (!rawPrefill) {
+        try {
+          const stored = sessionStorage.getItem('crm_lead_package_prefill');
+          if (stored) rawPrefill = JSON.parse(stored);
+        } catch (e) {}
+      }
+      if (rawPrefill) {
+        try {
+          sessionStorage.removeItem('crm_lead_package_prefill');
+        } catch (e) {}
+        const destList = Array.isArray(rawPrefill.destinations) && rawPrefill.destinations.length > 0
+          ? rawPrefill.destinations
+          : [rawPrefill.primaryDestination || 'Kashmir'];
+        const primaryDest = rawPrefill.primaryDestination || destList[0] || 'Kashmir';
+        const nights = Math.max(1, Number(rawPrefill.nights) || 5);
+        const days = Math.max(2, Number(rawPrefill.days) || (nights + 1));
+        const adults = Math.max(1, Number(rawPrefill.adultCount) || 2);
+        const children = Math.max(0, Number(rawPrefill.childCount) || 0);
+        const paxLabel = `${adults} Adult${adults > 1 ? 's' : ''}${children > 0 ? `, ${children} Child${children > 1 ? 'ren' : ''}` : ''}`;
+        const pkgName = `${primaryDest} Custom Tour (${days}D/${nights}N) - ${rawPrefill.customerName || 'Guest'}`;
+        const pkgSlug = `${primaryDest}-custom-${days}d${nights}n-${String(rawPrefill.leadId || Date.now()).slice(-4)}`
+          .toLowerCase()
+          .replace(/[^a-z0-9\s-]/g, '')
+          .trim()
+          .replace(/\s+/g, '-');
+        const hotelTier = rawPrefill.hotelCategory || 'Deluxe';
+        const transportPref = rawPrefill.transportPreference || 'Private AC Cab Transfers';
+        const pkgType = (rawPrefill.country && String(rawPrefill.country).toLowerCase() !== 'india') ? 'international' : 'domestic';
+
+        const generatedItinerary = Array.from({ length: days }, (_, idx) => {
+          const dayNum = idx + 1;
+          const cityForDay = destList[idx % destList.length] || primaryDest;
+          if (dayNum === 1) {
+            return {
+              day: 1,
+              title: `Arrival in ${cityForDay} & Check-in`,
+              description: `Private pickup upon arrival and transfer to your ${hotelTier} hotel in ${cityForDay}. Evening leisure walk and local sightseeing.`,
+              activities: [`Private Airport/Station Pickup`, `${hotelTier} Hotel Check-in`, `${cityForDay} Local Evening Exploration`]
+            };
+          }
+          if (dayNum === days) {
+            return {
+              day: days,
+              title: `${cityForDay} Morning Sightseeing & Departure`,
+              description: `After breakfast, complete final souvenir shopping and transfer to the airport/railway station for your onward journey.`,
+              activities: [`Breakfast & Check-out`, `Departure Transfer`]
+            };
+          }
+          return {
+            day: dayNum,
+            title: `${cityForDay} Signature Sightseeing & Excursions`,
+            description: `Full-day private sightseeing tour across ${cityForDay}'s iconic landmarks, viewpoints, and cultural attractions.`,
+            activities: [`Morning Guided Sightseeing in ${cityForDay}`, `Scenic Viewpoints & Cultural Trail`, `Overnight Stay in ${cityForDay}`]
+          };
+        });
+
+        setForm({
+          ...BLANK_FORM,
+          name: pkgName,
+          slug: pkgSlug,
+          price: Number(rawPrefill.budget) > 0 ? Number(rawPrefill.budget) : 24500,
+          duration: `${days} Days / ${nights} Nights`,
+          destinations: destList,
+          category: [rawPrefill.travelTheme || 'Custom Holiday', `${hotelTier} Stay`],
+          highlights: [
+            `Tailor-made ${days}D/${nights}N itinerary for ${rawPrefill.customerName} (${paxLabel})`,
+            `Handpicked ${hotelTier} accommodations across ${destList.join(', ')}`,
+            `Dedicated ${transportPref} for all intercity transfers & sightseeing`,
+            `24x7 Ghumo Firoo Travels on-trip concierge assistance`
+          ],
+          inclusions: [
+            `${nights} Nights accommodation in verified ${hotelTier} hotels`,
+            `Daily Breakfast & Dinner (MAP Plan)`,
+            `${transportPref} for complete tour as per itinerary`,
+            `All toll taxes, parking fees, state permits, and driver allowances`
+          ],
+          exclusions: [
+            `Airfare / Train tickets unless explicitly specified`,
+            `Monument entry tickets, camera fees & personal expenses`,
+            `5% GST as applicable`
+          ],
+          itinerary: generatedItinerary,
+          seo_title: `${primaryDest} ${days}D/${nights}N Custom Tour Package | Ghumo Firoo`,
+          seo_description: `Bespoke ${days} Days / ${nights} Nights ${primaryDest} holiday package with ${hotelTier} hotels, ${transportPref}, and curated sightseeing by Ghumo Firoo Travels.`,
+          seo_keywords: `${primaryDest} custom package, ${destList.join(', ')} tour, Ghumo Firoo Travels`,
+          best_time: rawPrefill.tripStartDate ? `Travel Date: ${rawPrefill.tripStartDate}` : 'Year Round',
+          group_size: paxLabel,
+          difficulty: 'Easy to Moderate',
+          quick_facts: {
+            groupSize: paxLabel,
+            bestTime: rawPrefill.tripStartDate || 'Flexible Dates',
+            difficulty: 'Easy to Moderate',
+            ageLimit: 'All Ages',
+            accommodation: `${hotelTier} Hotels`,
+            meals: 'Breakfast & Dinner Included',
+            transport: transportPref
+          },
+          package_type: pkgType,
+          is_active: true
+        });
+        setHotelLocation(primaryDest);
+        if (['Budget', 'Deluxe', 'Luxury'].includes(hotelTier)) {
+          setHotelCategory(hotelTier);
+        }
+        setPrefillBannerLead(rawPrefill);
+        toast({
+          title: '✨ Pre-filled from Lead Enquiry',
+          description: `Loaded ${primaryDest} (${days}D/${nights}N, ${paxLabel}) for ${rawPrefill.customerName} (${rawPrefill.enquiryNumber}).`
+        });
+      }
     } else if (!isEdit && !isFormView) {
       setForm({ ...BLANK_FORM });
       setEditingId(null);
+      setPrefillBannerLead(null);
     }
-  }, [isEdit, editId, packages, isFormView]);
+  }, [isEdit, editId, packages, isFormView, location.state]);
 
   const DEFAULT_PACKAGES_FALLBACK = [
     {
@@ -1171,6 +1288,50 @@ export default function PackageMaster() {
           </Button>
         )}
       </div>
+
+      {/* 1-CLICK LEAD CONVERSION BANNER */}
+      {isFormView && prefillBannerLead && (
+        <div className="p-4 rounded-2xl border border-purple-500/40 bg-gradient-to-r from-purple-950/60 via-slate-900 to-indigo-950/60 text-white shadow-lg flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+          <div className="space-y-1">
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="bg-purple-500/20 text-purple-300 border border-purple-500/40 text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full flex items-center gap-1">
+                <Sparkles className="w-3 h-3 text-purple-400" /> 1-Click Converted from Lead
+              </span>
+              <span className="text-xs font-mono font-bold text-amber-400">{prefillBannerLead.enquiryNumber}</span>
+              <span className="text-xs font-extrabold text-white">· {prefillBannerLead.customerName}</span>
+            </div>
+            <p className="text-xs text-slate-300 font-medium">
+              Pre-filled <strong className="text-amber-300">{prefillBannerLead.primaryDestination}</strong> ({prefillBannerLead.days}D/{prefillBannerLead.nights}N) ·{' '}
+              <strong>{prefillBannerLead.adultCount} Adults{prefillBannerLead.childCount ? `, ${prefillBannerLead.childCount} Children` : ''}</strong> ·{' '}
+              Hotel Tier: <strong>{prefillBannerLead.hotelCategory || 'Deluxe'}</strong> ·{' '}
+              Target Budget: <strong className="text-emerald-400">₹{Number(prefillBannerLead.budget || 0).toLocaleString('en-IN')}</strong>
+            </p>
+          </div>
+          <div className="flex items-center gap-2 shrink-0">
+            {prefillBannerLead.leadId && (
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                onClick={() => navigate(`/crm/leads/${prefillBannerLead.leadId}`)}
+                className="h-8 text-xs font-bold border-purple-500/40 text-purple-200 hover:bg-purple-500/20 bg-transparent rounded-xl"
+              >
+                View Lead Profile
+              </Button>
+            )}
+            <Button
+              type="button"
+              size="sm"
+              variant="ghost"
+              onClick={() => setPrefillBannerLead(null)}
+              className="h-8 w-8 p-0 text-slate-400 hover:text-white rounded-xl"
+              title="Dismiss banner"
+            >
+              <X className="w-4 h-4" />
+            </Button>
+          </div>
+        </div>
+      )}
 
       {/* KPI STAT CARDS */}
       {!isFormView && (

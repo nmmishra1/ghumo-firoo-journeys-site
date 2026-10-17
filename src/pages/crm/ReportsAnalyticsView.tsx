@@ -216,25 +216,49 @@ export const ReportsAnalyticsView: React.FC<ReportsAnalyticsViewProps> = ({
     { name: 'Closed Lost', value: droppedCount, color: '#ef4444' },
   ], [filteredLeads, convertedCount, droppedCount]);
 
-  // Lead source analysis
+  // Lead source analysis with Revenue, Profit & Good/Bad ROI Verdict
   const sourceData = React.useMemo(() => {
-    const sourceMap: Record<string, { count: number; converted: number }> = {};
+    const sourceMap: Record<string, { count: number; converted: number; lost: number; revenue: number; supplierCost: number; profit: number }> = {};
     filteredLeads.forEach(l => {
-      const src = l.customer_type || 'Direct Customer';
+      const src = (l.source || l.lead_source || l.utm_source || l.customer_type || 'Website / Organic SEO').trim();
       if (!sourceMap[src]) {
-        sourceMap[src] = { count: 0, converted: 0 };
+        sourceMap[src] = { count: 0, converted: 0, lost: 0, revenue: 0, supplierCost: 0, profit: 0 };
       }
       sourceMap[src].count++;
+      if (l.status === 'Closed Lost') {
+        sourceMap[src].lost++;
+      }
       if (l.status === 'Booking Confirmed') {
+        const rev = Number(l.expected_booking_value || l.package_cost || 0);
+        const cost = Number(l.supplier_cost || l.net_cost || Math.round(rev * 0.82));
         sourceMap[src].converted++;
+        sourceMap[src].revenue += rev;
+        sourceMap[src].supplierCost += cost;
+        sourceMap[src].profit += Math.max(0, rev - cost);
       }
     });
-    return Object.entries(sourceMap).map(([name, data]) => ({
-      name,
-      value: data.count,
-      converted: data.converted,
-      rate: data.count > 0 ? Math.round((data.converted / data.count) * 100) : 0
-    })).sort((a, b) => b.value - a.value);
+    return Object.entries(sourceMap).map(([name, data]) => {
+      const rate = data.count > 0 ? Math.round((data.converted / data.count) * 100) : 0;
+      const verdict: 'Good' | 'Average' | 'Bad' =
+        rate >= 25 || data.profit >= 30000 ? 'Good' :
+        rate >= 12 || data.converted >= 1 ? 'Average' : 'Bad';
+      const recommendation =
+        verdict === 'Good' ? 'High ROI — Scale SEO / Ad Budget' :
+        verdict === 'Average' ? 'Moderate — Speed up <15m WhatsApp follow-up' :
+        'Low Conversion — Audit lead quality & targeting';
+      return {
+        name,
+        value: data.count,
+        converted: data.converted,
+        lost: data.lost,
+        rate,
+        revenue: data.revenue,
+        supplierCost: data.supplierCost,
+        profit: data.profit,
+        verdict,
+        recommendation
+      };
+    }).sort((a, b) => b.profit - a.profit || b.value - a.value);
   }, [filteredLeads]);
 
   // Executive performance
@@ -260,37 +284,119 @@ export const ReportsAnalyticsView: React.FC<ReportsAnalyticsViewProps> = ({
     })).sort((a, b) => b.revenue - a.revenue);
   }, [filteredLeads]);
 
-  // Destination Revenue Performance Breakdown
+  // Destination Revenue, Profit & Good/Bad Performance Breakdown
   const destData = React.useMemo(() => {
-    const destMap: Record<string, { count: number; converted: number; revenue: number }> = {};
+    const destMap: Record<string, { count: number; converted: number; lost: number; revenue: number; supplierCost: number; profit: number }> = {};
     filteredLeads.forEach(l => {
-      const rawDest = (l.travel_interest || l.tour_description || 'Other Destinations').trim();
+      const rawDest = (l.destination || l.travel_interest || l.tour_description || 'Other Destinations').trim();
       let normDest = 'Other Destinations';
       const dLower = rawDest.toLowerCase();
       if (dLower.includes('rann') || dLower.includes('kutch') || dLower.includes('bhuj')) normDest = 'Rann Utsav Kutch';
       else if (dLower.includes('dham') || dLower.includes('kedarnath') || dLower.includes('badrinath')) normDest = 'Char Dham Yatra';
-      else if (dLower.includes('kashmir') || dLower.includes('srinagar')) normDest = 'Kashmir Paradise';
+      else if (dLower.includes('kashmir') || dLower.includes('srinagar') || dLower.includes('gulmarg')) normDest = 'Kashmir Paradise';
       else if (dLower.includes('kerala') || dLower.includes('munnar') || dLower.includes('alleppey')) normDest = 'Kerala Backwaters';
-      else if (dLower.includes('himachal') || dLower.includes('manali')) normDest = 'Himachal Adventure';
+      else if (dLower.includes('himachal') || dLower.includes('manali') || dLower.includes('shimla')) normDest = 'Himachal Adventure';
+      else if (dLower.includes('goa')) normDest = 'Goa Beach Escape';
+      else if (dLower.includes('rajasthan') || dLower.includes('jaipur') || dLower.includes('udaipur')) normDest = 'Royal Rajasthan';
+      else if (dLower.includes('andaman')) normDest = 'Andaman Islands';
+      else if (dLower.includes('ladakh') || dLower.includes('leh')) normDest = 'Leh Ladakh Circuit';
       else if (dLower.includes('europe') || dLower.includes('dubai') || dLower.includes('thailand') || dLower.includes('bali')) normDest = 'International Tours';
       else if (rawDest.length > 2) normDest = rawDest;
 
-      if (!destMap[normDest]) destMap[normDest] = { count: 0, converted: 0, revenue: 0 };
+      if (!destMap[normDest]) destMap[normDest] = { count: 0, converted: 0, lost: 0, revenue: 0, supplierCost: 0, profit: 0 };
       destMap[normDest].count++;
+      if (l.status === 'Closed Lost') {
+        destMap[normDest].lost++;
+      }
       if (l.status === 'Booking Confirmed') {
+        const rev = Number(l.expected_booking_value || l.package_cost || 0);
+        const cost = Number(l.supplier_cost || l.net_cost || Math.round(rev * 0.82));
         destMap[normDest].converted++;
-        destMap[normDest].revenue += (l.expected_booking_value || 0);
+        destMap[normDest].revenue += rev;
+        destMap[normDest].supplierCost += cost;
+        destMap[normDest].profit += Math.max(0, rev - cost);
       }
     });
 
-    return Object.entries(destMap).map(([name, data]) => ({
-      name,
-      count: data.count,
-      converted: data.converted,
-      rate: data.count > 0 ? Math.round((data.converted / data.count) * 100) : 0,
-      revenue: data.revenue
-    })).sort((a, b) => b.revenue - a.revenue);
+    return Object.entries(destMap).map(([name, data]) => {
+      const rate = data.count > 0 ? Math.round((data.converted / data.count) * 100) : 0;
+      const marginPct = data.revenue > 0 ? Math.round((data.profit / data.revenue) * 100) : 0;
+      const verdict: 'Good' | 'Moderate' | 'Bad' =
+        rate >= 25 || data.profit >= 25000 ? 'Good' :
+        rate >= 12 || data.converted >= 1 ? 'Moderate' : 'Bad';
+      const insight =
+        verdict === 'Good' ? 'Winning Destination — High conversion & margin' :
+        verdict === 'Moderate' ? 'Steady Performer — Bundle complimentary sightseeing' :
+        'Underperforming — Check contracted hotel/cab rates';
+      return {
+        name,
+        count: data.count,
+        converted: data.converted,
+        lost: data.lost,
+        rate,
+        revenue: data.revenue,
+        supplierCost: data.supplierCost,
+        profit: data.profit,
+        marginPct,
+        verdict,
+        insight
+      };
+    }).sort((a, b) => b.revenue - a.revenue || b.count - a.count);
   }, [filteredLeads]);
+
+  // Profit & Loss (P&L) Summary & Booking-Level Ledger
+  const pnlAnalytics = React.useMemo(() => {
+    let totalSellingRevenue = 0;
+    let totalSupplierCost = 0;
+    let estHotelCost = 0;
+    let estCabCost = 0;
+    let estSightseeingCost = 0;
+
+    const bookingRows = convertedLeads.map(l => {
+      const selling = Number(l.expected_booking_value || l.package_cost || 0);
+      const netCost = Number(l.supplier_cost || l.net_cost || Math.round(selling * 0.82));
+      const profit = selling - netCost;
+      const marginPct = selling > 0 ? Math.round((profit / selling) * 100) : 0;
+
+      const hotelShare = Math.round(netCost * 0.55);
+      const cabShare = Math.round(netCost * 0.28);
+      const sightShare = Math.max(0, netCost - hotelShare - cabShare);
+
+      totalSellingRevenue += selling;
+      totalSupplierCost += netCost;
+      estHotelCost += hotelShare;
+      estCabCost += cabShare;
+      estSightseeingCost += sightShare;
+
+      return {
+        id: l.id,
+        customerName: l.customer_name || 'Guest',
+        destination: l.destination || l.travel_interest || 'Custom Tour',
+        source: l.source || l.lead_source || l.customer_type || 'Website / Organic SEO',
+        sellingPrice: selling,
+        supplierCost: netCost,
+        hotelCost: hotelShare,
+        cabCost: cabShare,
+        sightseeingCost: sightShare,
+        netProfit: profit,
+        marginPct
+      };
+    });
+
+    const netGrossProfit = totalSellingRevenue - totalSupplierCost;
+    const overallMarginPct = totalSellingRevenue > 0 ? Math.round((netGrossProfit / totalSellingRevenue) * 100) : 0;
+
+    return {
+      totalSellingRevenue,
+      totalSupplierCost,
+      estHotelCost,
+      estCabCost,
+      estSightseeingCost,
+      netGrossProfit,
+      overallMarginPct,
+      bookingRows
+    };
+  }, [convertedLeads]);
 
 
 
@@ -590,6 +696,12 @@ export const ReportsAnalyticsView: React.FC<ReportsAnalyticsViewProps> = ({
       <Tabs defaultValue="funnel" className="w-full">
         <TabsList className="inline-flex bg-[#1A2342]/80 border border-white/10 p-1 rounded-2xl mb-4 h-12 flex-wrap gap-1">
           <TabsTrigger value="funnel" className="rounded-xl text-xs font-bold py-2 px-5 data-[state=active]:bg-gradient-warm data-[state=active]:text-[#0B1026]">Sales & Conversion Funnel</TabsTrigger>
+          <TabsTrigger value="pnl" className="rounded-xl text-xs font-bold py-2 px-5 data-[state=active]:bg-gradient-warm data-[state=active]:text-[#0B1026] flex items-center gap-1.5">
+            <span>Profit &amp; Loss (P&amp;L) &amp; Good/Bad ROI</span>
+            <span className="bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-[10px] font-black px-1.5 py-0.2 rounded-full">
+              NEW
+            </span>
+          </TabsTrigger>
           <TabsTrigger value="receivables" className="rounded-xl text-xs font-bold py-2 px-5 data-[state=active]:bg-gradient-warm data-[state=active]:text-[#0B1026] flex items-center gap-1.5">
             <span>Receivables & Aging Schedule</span>
             {receivablesSummary.criticalCount > 0 && (
@@ -734,9 +846,9 @@ export const ReportsAnalyticsView: React.FC<ReportsAnalyticsViewProps> = ({
 
             <Card className="border-white/10 p-5 bg-[#1A2342]/60 text-white backdrop-blur-xl shadow-xl rounded-2xl flex items-center justify-between">
               <div className="space-y-1">
-                <span className="text-[10px] font-black uppercase tracking-wider text-slate-400">Pipeline Value</span>
-                <h3 className="text-2xl font-black text-amber-400">₹{pipelineValue.toLocaleString()}</h3>
-                <p className="text-[10px] text-slate-400 font-semibold">Won: ₹{realizedRevenue.toLocaleString()}</p>
+                <span className="text-[10px] font-black uppercase tracking-wider text-slate-400">Realized Revenue &amp; Profit</span>
+                <h3 className="text-2xl font-black text-amber-400">₹{realizedRevenue.toLocaleString()}</h3>
+                <p className="text-[10px] text-emerald-400 font-bold">Net Profit: ₹{pnlAnalytics.netGrossProfit.toLocaleString()} ({pnlAnalytics.overallMarginPct}%)</p>
               </div>
               <div className="w-12 h-12 rounded-xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-amber-400">
                 <IndianRupee className="w-6 h-6" />
@@ -834,15 +946,15 @@ export const ReportsAnalyticsView: React.FC<ReportsAnalyticsViewProps> = ({
 
           {/* Leaderboards Grid & Destination Analytics */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Destination Revenue Leaderboard Card */}
+            {/* Destination Revenue & Good/Bad Leaderboard Card */}
             <Card className="border-white/10 bg-[#1A2342]/60 text-white backdrop-blur-xl shadow-xl rounded-2xl overflow-hidden">
               <CardHeader className="p-5 border-b border-white/10 bg-white/5 flex flex-row items-center justify-between">
                 <CardTitle className="text-xs font-black uppercase tracking-wider text-slate-300 flex items-center gap-1.5">
                   <MapPin className="w-4 h-4 text-accent" />
-                  Top Profit Destination Performance
+                  Good vs. Bad Destination Performance
                 </CardTitle>
                 <Badge className="bg-amber-500/15 border border-amber-500/30 text-amber-400 text-[10px] font-extrabold px-2 py-0.5 rounded-full">
-                  Revenue Ranking
+                  Profit &amp; Conversion
                 </Badge>
               </CardHeader>
               <CardContent className="p-0">
@@ -856,8 +968,8 @@ export const ReportsAnalyticsView: React.FC<ReportsAnalyticsViewProps> = ({
                           <th className="p-3.5">Destination</th>
                           <th className="p-3.5 text-center">Enquiries</th>
                           <th className="p-3.5 text-center">Won</th>
-                          <th className="p-3.5 text-center">Conversion</th>
-                          <th className="p-3.5 text-right">Revenue Won</th>
+                          <th className="p-3.5 text-center">Verdict</th>
+                          <th className="p-3.5 text-right">Net Profit</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-white/10">
@@ -868,9 +980,17 @@ export const ReportsAnalyticsView: React.FC<ReportsAnalyticsViewProps> = ({
                               {row.name}
                             </td>
                             <td className="p-3.5 text-center text-slate-300 font-semibold">{row.count}</td>
-                            <td className="p-3.5 text-center text-emerald-400 font-bold">{row.converted}</td>
-                            <td className="p-3.5 text-center font-bold text-slate-200">{row.rate}%</td>
-                            <td className="p-3.5 text-right font-black text-amber-400">₹{row.revenue.toLocaleString()}</td>
+                            <td className="p-3.5 text-center text-emerald-400 font-bold">{row.converted} ({row.rate}%)</td>
+                            <td className="p-3.5 text-center">
+                              <span className={`inline-flex px-2 py-0.5 rounded-full font-extrabold text-[10px] ${
+                                row.verdict === 'Good' ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' :
+                                row.verdict === 'Moderate' ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30' :
+                                'bg-rose-500/20 text-rose-300 border border-rose-500/30'
+                              }`}>
+                                {row.verdict === 'Good' ? '🟢 Good' : row.verdict === 'Moderate' ? '🟡 Moderate' : '🔴 Bad / Low'}
+                              </span>
+                            </td>
+                            <td className="p-3.5 text-right font-black text-emerald-400">₹{row.profit.toLocaleString('en-IN')}</td>
                           </tr>
                         ))}
                       </tbody>
@@ -929,11 +1049,14 @@ export const ReportsAnalyticsView: React.FC<ReportsAnalyticsViewProps> = ({
             </Card>
 
             <Card className="border-white/10 bg-[#1A2342]/60 text-white backdrop-blur-xl shadow-xl rounded-2xl overflow-hidden col-span-1 lg:col-span-2">
-              <CardHeader className="p-5 border-b border-white/10 bg-white/5">
+              <CardHeader className="p-5 border-b border-white/10 bg-white/5 flex flex-row items-center justify-between">
                 <CardTitle className="text-xs font-black uppercase tracking-wider text-slate-300 flex items-center gap-1.5">
                   <TrendingUp className="w-4 h-4 text-emerald-400" />
-                  Lead Source Performance Analysis
+                  Good vs. Bad Lead Source ROI Analysis
                 </CardTitle>
+                <Badge className="bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-[10px] font-extrabold px-2 py-0.5 rounded-full">
+                  Channel Quality Verdict
+                </Badge>
               </CardHeader>
               <CardContent className="p-0">
                 {sourceData.length === 0 ? (
@@ -947,7 +1070,10 @@ export const ReportsAnalyticsView: React.FC<ReportsAnalyticsViewProps> = ({
                           <th className="p-3.5 text-center">Total Leads</th>
                           <th className="p-3.5 text-center">Confirmed</th>
                           <th className="p-3.5 text-center">Conv. Rate</th>
-                          <th className="p-3.5 text-right">Share</th>
+                          <th className="p-3.5 text-right">Revenue</th>
+                          <th className="p-3.5 text-right">Net Profit</th>
+                          <th className="p-3.5 text-center">Source Verdict</th>
+                          <th className="p-3.5">Actionable Recommendation</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-white/10">
@@ -956,14 +1082,19 @@ export const ReportsAnalyticsView: React.FC<ReportsAnalyticsViewProps> = ({
                             <td className="p-3.5 font-bold text-white">{row.name}</td>
                             <td className="p-3.5 text-center text-slate-300 font-semibold">{row.value}</td>
                             <td className="p-3.5 text-center text-emerald-400 font-bold">{row.converted}</td>
+                            <td className="p-3.5 text-center font-bold text-slate-200">{row.rate}%</td>
+                            <td className="p-3.5 text-right font-bold text-amber-400">₹{row.revenue.toLocaleString('en-IN')}</td>
+                            <td className="p-3.5 text-right font-black text-emerald-400">₹{row.profit.toLocaleString('en-IN')}</td>
                             <td className="p-3.5 text-center">
-                              <span className="inline-flex px-2 py-0.5 rounded-full font-bold text-[10px] bg-slate-500/20 text-slate-300 border border-slate-500/30">
-                                {row.rate}%
+                              <span className={`inline-flex px-2.5 py-0.5 rounded-full font-extrabold text-[10px] ${
+                                row.verdict === 'Good' ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' :
+                                row.verdict === 'Average' ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30' :
+                                'bg-rose-500/20 text-rose-300 border border-rose-500/30'
+                              }`}>
+                                {row.verdict === 'Good' ? '🟢 Good Source' : row.verdict === 'Average' ? '🟡 Average' : '🔴 Bad Source'}
                               </span>
                             </td>
-                            <td className="p-3.5 text-right font-bold text-amber-400">
-                              {totalLeadsCount > 0 ? Math.round((row.value / totalLeadsCount) * 100) : 0}%
-                            </td>
+                            <td className="p-3.5 text-slate-300 text-[11px]">{row.recommendation}</td>
                           </tr>
                         ))}
                       </tbody>
@@ -973,6 +1104,158 @@ export const ReportsAnalyticsView: React.FC<ReportsAnalyticsViewProps> = ({
               </CardContent>
             </Card>
           </div>
+        </TabsContent>
+
+        {/* 1B. PROFIT & LOSS (P&L) & GOOD/BAD DESTINATION/SOURCE INTELLIGENCE TAB */}
+        <TabsContent value="pnl" className="space-y-6">
+          {/* P&L Top KPI Cards */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <Card className="border-white/10 p-5 bg-[#1A2342]/70 text-white backdrop-blur-xl shadow-xl rounded-2xl">
+              <p className="text-[10px] font-black uppercase tracking-wider text-slate-400">Total Selling Revenue (Won)</p>
+              <h3 className="text-2xl font-black text-amber-400 mt-1">₹{pnlAnalytics.totalSellingRevenue.toLocaleString('en-IN')}</h3>
+              <p className="text-[10px] text-slate-300 mt-1">Across {convertedCount} confirmed bookings</p>
+            </Card>
+
+            <Card className="border-white/10 p-5 bg-[#1A2342]/70 text-white backdrop-blur-xl shadow-xl rounded-2xl">
+              <p className="text-[10px] font-black uppercase tracking-wider text-slate-400">Net Supplier Cost (Hotel + Cab + Sight)</p>
+              <h3 className="text-2xl font-black text-rose-400 mt-1">₹{pnlAnalytics.totalSupplierCost.toLocaleString('en-IN')}</h3>
+              <p className="text-[10px] text-slate-300 mt-1">
+                Hotel: ₹{pnlAnalytics.estHotelCost.toLocaleString('en-IN')} • Cab: ₹{pnlAnalytics.estCabCost.toLocaleString('en-IN')}
+              </p>
+            </Card>
+
+            <Card className="border-emerald-500/30 p-5 bg-emerald-950/30 text-white backdrop-blur-xl shadow-xl rounded-2xl">
+              <p className="text-[10px] font-black uppercase tracking-wider text-emerald-300">Net Gross Profit (P&amp;L)</p>
+              <h3 className="text-2xl font-black text-emerald-400 mt-1">₹{pnlAnalytics.netGrossProfit.toLocaleString('en-IN')}</h3>
+              <p className="text-[10px] text-emerald-300/80 mt-1 font-semibold">Realized Agency Earnings</p>
+            </Card>
+
+            <Card className="border-white/10 p-5 bg-[#1A2342]/70 text-white backdrop-blur-xl shadow-xl rounded-2xl">
+              <p className="text-[10px] font-black uppercase tracking-wider text-slate-400">Average Profit Margin</p>
+              <h3 className="text-2xl font-black text-cyan-400 mt-1">{pnlAnalytics.overallMarginPct}%</h3>
+              <p className="text-[10px] text-slate-300 mt-1">Target B2C Margin: 15% – 22%</p>
+            </Card>
+          </div>
+
+          {/* Good vs. Bad Destinations Full Matrix */}
+          <Card className="border-white/10 bg-[#1A2342]/60 text-white backdrop-blur-xl shadow-xl rounded-2xl overflow-hidden">
+            <CardHeader className="p-5 border-b border-white/10 bg-white/5 flex flex-row items-center justify-between">
+              <div>
+                <CardTitle className="text-sm font-black uppercase tracking-wider text-white flex items-center gap-2">
+                  <MapPin className="w-4 h-4 text-amber-400" />
+                  Destination Profitability &amp; Good vs. Bad Classification
+                </CardTitle>
+                <CardDescription className="text-xs text-slate-300 mt-0.5">
+                  Identifies high-margin winning destinations vs. low-conversion destinations needing rate re-contracting.
+                </CardDescription>
+              </div>
+            </CardHeader>
+            <CardContent className="p-0">
+              <div className="overflow-x-auto">
+                <table className="w-full text-xs text-left border-collapse">
+                  <thead>
+                    <tr className="bg-white/10 border-b border-white/10 text-[10px] font-black uppercase tracking-wider text-slate-300">
+                      <th className="p-3.5">Destination</th>
+                      <th className="p-3.5 text-center">Enquiries</th>
+                      <th className="p-3.5 text-center">Won / Lost</th>
+                      <th className="p-3.5 text-center">Conv. %</th>
+                      <th className="p-3.5 text-right">Selling Revenue</th>
+                      <th className="p-3.5 text-right">Supplier Cost</th>
+                      <th className="p-3.5 text-right">Net Profit</th>
+                      <th className="p-3.5 text-center">Status Verdict</th>
+                      <th className="p-3.5">Strategic Action</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-white/10">
+                    {destData.map(d => (
+                      <tr key={d.name} className="hover:bg-white/5">
+                        <td className="p-3.5 font-extrabold text-white">{d.name}</td>
+                        <td className="p-3.5 text-center font-semibold text-slate-300">{d.count}</td>
+                        <td className="p-3.5 text-center">
+                          <span className="text-emerald-400 font-bold">{d.converted}W</span>
+                          <span className="text-slate-500 mx-1">/</span>
+                          <span className="text-rose-400 font-semibold">{d.lost}L</span>
+                        </td>
+                        <td className="p-3.5 text-center font-bold text-white">{d.rate}%</td>
+                        <td className="p-3.5 text-right font-bold text-amber-400">₹{d.revenue.toLocaleString('en-IN')}</td>
+                        <td className="p-3.5 text-right font-semibold text-rose-300">₹{d.supplierCost.toLocaleString('en-IN')}</td>
+                        <td className="p-3.5 text-right font-black text-emerald-400">₹{d.profit.toLocaleString('en-IN')}</td>
+                        <td className="p-3.5 text-center">
+                          <span className={`inline-flex px-2.5 py-0.5 rounded-full font-extrabold text-[10px] ${
+                            d.verdict === 'Good' ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' :
+                            d.verdict === 'Moderate' ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30' :
+                            'bg-rose-500/20 text-rose-300 border border-rose-500/30'
+                          }`}>
+                            {d.verdict === 'Good' ? '🟢 Good Destination' : d.verdict === 'Moderate' ? '🟡 Moderate' : '🔴 Bad / Underperforming'}
+                          </span>
+                        </td>
+                        <td className="p-3.5 text-[11px] text-slate-300">{d.insight}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Booking-by-Booking Profit & Loss Breakdown */}
+          <Card className="border-white/10 bg-[#1A2342]/60 text-white backdrop-blur-xl shadow-xl rounded-2xl overflow-hidden">
+            <CardHeader className="p-5 border-b border-white/10 bg-white/5 flex flex-row items-center justify-between">
+              <div>
+                <CardTitle className="text-sm font-black uppercase tracking-wider text-white flex items-center gap-2">
+                  <IndianRupee className="w-4 h-4 text-emerald-400" />
+                  Booking-Level Profit &amp; Loss (P&amp;L) Statement
+                </CardTitle>
+                <CardDescription className="text-xs text-slate-300 mt-0.5">
+                  Internal breakdown of Client Selling Price vs. Net Contracted Cost (Hotel, Cab, Sightseeing) and Net Margin.
+                </CardDescription>
+              </div>
+            </CardHeader>
+            <CardContent className="p-0">
+              {pnlAnalytics.bookingRows.length === 0 ? (
+                <div className="p-8 text-center text-slate-400 text-xs font-semibold">
+                  No confirmed bookings in the selected date range. Try clicking "All Time" in the Funnel period filter.
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-xs text-left border-collapse">
+                    <thead>
+                      <tr className="bg-white/10 border-b border-white/10 text-[10px] font-black uppercase tracking-wider text-slate-300">
+                        <th className="p-3.5">Client Name</th>
+                        <th className="p-3.5">Destination</th>
+                        <th className="p-3.5">Lead Source</th>
+                        <th className="p-3.5 text-right">Client Total Price</th>
+                        <th className="p-3.5 text-right">Est. Hotel Cost</th>
+                        <th className="p-3.5 text-right">Est. Cab Cost</th>
+                        <th className="p-3.5 text-right">Est. Sightseeing</th>
+                        <th className="p-3.5 text-right">Net Profit (₹)</th>
+                        <th className="p-3.5 text-center">Margin %</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-white/10">
+                      {pnlAnalytics.bookingRows.map((b, idx) => (
+                        <tr key={b.id || idx} className="hover:bg-white/5">
+                          <td className="p-3.5 font-bold text-white">{b.customerName}</td>
+                          <td className="p-3.5 text-slate-300 font-semibold">{b.destination}</td>
+                          <td className="p-3.5 text-slate-300">{b.source}</td>
+                          <td className="p-3.5 text-right font-extrabold text-amber-400">₹{b.sellingPrice.toLocaleString('en-IN')}</td>
+                          <td className="p-3.5 text-right text-slate-300">₹{b.hotelCost.toLocaleString('en-IN')}</td>
+                          <td className="p-3.5 text-right text-slate-300">₹{b.cabCost.toLocaleString('en-IN')}</td>
+                          <td className="p-3.5 text-right text-slate-300">₹{b.sightseeingCost.toLocaleString('en-IN')}</td>
+                          <td className="p-3.5 text-right font-black text-emerald-400">₹{b.netProfit.toLocaleString('en-IN')}</td>
+                          <td className="p-3.5 text-center">
+                            <Badge className="bg-emerald-500/20 text-emerald-300 border-emerald-500/30 text-[10px] font-bold">
+                              {b.marginPct}%
+                            </Badge>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </CardContent>
+          </Card>
         </TabsContent>
 
         {/* 2. RECEIVABLES & AGING SCHEDULE TAB */}

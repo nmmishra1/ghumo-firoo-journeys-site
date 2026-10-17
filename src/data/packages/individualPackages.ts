@@ -1,0 +1,597 @@
+// src/data/packages/individualPackages.ts
+// Canonical list of all individual packages displayed on /packages catalog page.
+
+export interface CatalogPackageItem {
+  id: string;
+  title: string;
+  destination: string;
+  category: 'domestic' | 'international';
+  region: string;
+  image: string;
+  price: string;
+  duration: string;
+  rating: number;
+  badge: string;
+  keywords: string[];
+  link: string;
+}
+
+export const individualPackages: CatalogPackageItem[] = [
+    // CHAR DHAM & UTTARAKHAND SHRINES
+    {
+      id: 'chardham-10d-9n',
+      title: 'Char Dham Yatra Deluxe Road Tour (10D/9N)',
+      destination: 'Char Dham Yatra',
+      category: 'domestic',
+      region: 'Uttarakhand',
+      image: '/Badrinath.png',
+      price: '₹26,500',
+      duration: '10 Days / 9 Nights',
+      rating: 4.95,
+      badge: 'Best Seller',
+      keywords: ['char dham', 'kedarnath', 'badrinath', 'gangotri', 'yamunotri', 'mana', 'bheem pul', 'saraswati river', 'vasudhara', 'triyugi narayan', 'tungnath', 'harsil', 'devprayag', 'uttarakhand', 'yatra', 'pilgrimage', 'haridwar'],
+      link: '/packages/char-dham-yatra'
+    },
+    {
+      id: 'chardham-heli-5d-4n',
+      title: 'Char Dham VVIP Helicopter Charter (5D/4N)',
+      destination: 'Char Dham Yatra',
+      category: 'domestic',
+      region: 'Uttarakhand',
+      image: '/Kedarnath.png',
+      price: '₹1,95,000',
+      duration: '5 Days / 4 Nights',
+      rating: 4.99,
+      badge: 'VVIP Heli Tour',
+      keywords: ['helicopter', 'heli tour', 'char dham helicopter', 'kedarnath heli', 'badrinath heli', 'sahastradhara', 'dehradun helicopter'],
+      link: '/packages/char-dham-yatra'
+    },
+    {
+      id: 'chardham-delhi-12d',
+      title: 'Char Dham Yatra Circuit from Delhi (12D/11N)',
+      destination: 'Char Dham Yatra',
+      category: 'domestic',
+      region: 'Uttarakhand',
+      image: '/Badrinath.png',
+      price: '₹32,500',
+      duration: '12 Days / 11 Nights',
+      rating: 4.93,
+      badge: 'Delhi Departure',
+      keywords: ['delhi', 'char dham from delhi', 'delhi pickup', 'rishikesh', 'haridwar'],
+      link: '/packages/char-dham-yatra-from-delhi'
+    },
+    {
+      id: 'dodham-kedar-badri',
+      title: 'Do Dham Kedarnath & Badrinath Yatra (6D/5N)',
+      destination: 'Char Dham Yatra',
+      category: 'domestic',
+      region: 'Uttarakhand',
+      image: '/Kedarnath.png',
+      price: '₹22,000',
+      duration: '6 Days / 5 Nights',
+      rating: 4.96,
+      badge: 'Do Dham Best Seller',
+      keywords: ['do dham', 'kedarnath badrinath', 'shiva vishnu', 'guptkashi', 'joshimath', 'tapt kund', 'mana'],
+      link: '/packages/do-dham-yatra'
+    },
+    {
+      id: 'dodham-gangotri-yamunotri',
+      title: 'Do Dham Gangotri & Yamunotri Yatra (5D/4N)',
+      destination: 'Char Dham Yatra',
+      category: 'domestic',
+      region: 'Uttarakhand',
+      image: '/Gangotri.png',
+      price: '₹18,500',
+      duration: '5 Days / 4 Nights',
+      rating: 4.89,
+      badge: 'River Source Circuit',
+      keywords: ['do dham', 'gangotri yamunotri', 'harsil', 'surya kund', 'uttarkashi', 'barkot'],
+      link: '/packages/do-dham-yatra'
+    },
+    {
+      id: 'ekdham-kedarnath',
+      title: 'Kedarnath Ek Dham Yatra (4D/3N)',
+      destination: 'Char Dham Yatra',
+      category: 'domestic',
+      region: 'Uttarakhand',
+      image: '/Kedarnath.png',
+      price: '₹14,500',
+      duration: '4 Days / 3 Nights',
+      rating: 4.96,
+      badge: 'Ek Dham Special',
+      keywords: ['kedarnath', 'ek dham', 'jyotirlinga', 'gaurikund', 'sonprayag', 'shiva temple'],
+      link: '/packages/kedarnath-yatra'
+    },
+    {
+      id: 'ekdham-badrinath',
+      title: 'Badrinath Ek Dham Yatra (3D/2N)',
+      destination: 'Char Dham Yatra',
+      category: 'domestic',
+      region: 'Uttarakhand',
+      image: '/Badrinath.png',
+      price: '₹12,500',
+      duration: '3 Days / 2 Nights',
+      rating: 4.92,
+      badge: 'Ek Dham Special',
+      keywords: ['badrinath', 'ek dham', 'vishnu temple', 'tapt kund', 'mana village', 'bheem pul'],
+      link: '/packages/badrinath-yatra'
+    },
+    {
+      id: 'ekdham-gangotri',
+      title: 'Gangotri Ek Dham Yatra (3D/2N)',
+      destination: 'Char Dham Yatra',
+      category: 'domestic',
+      region: 'Uttarakhand',
+      image: '/Gangotri.png',
+      price: '₹11,500',
+      duration: '3 Days / 2 Nights',
+      rating: 4.88,
+      badge: 'Ek Dham Special',
+      keywords: ['gangotri', 'ek dham', 'ganga origin', 'harsil apple valley', 'uttarkashi'],
+      link: '/packages/gangotri-yatra'
+    },
+    {
+      id: 'ekdham-yamunotri',
+      title: 'Yamunotri Ek Dham Yatra (3D/2N)',
+      destination: 'Char Dham Yatra',
+      category: 'domestic',
+      region: 'Uttarakhand',
+      image: '/Yamunotri.png',
+      price: '₹11,500',
+      duration: '3 Days / 2 Nights',
+      rating: 4.87,
+      badge: 'Ek Dham Special',
+      keywords: ['yamunotri', 'ek dham', 'surya kund', 'janki chatti', 'barkot'],
+      link: '/packages/yamunotri-yatra'
+    },
+
+    // KASHMIR & LADAKH
+    {
+      id: 'kashmir-paradise-6d',
+      title: 'Kashmir Paradise Srinagar, Gulmarg & Pahalgam (6D/5N)',
+      destination: 'Kashmir Paradise',
+      category: 'domestic',
+      region: 'Jammu & Kashmir',
+      image: '/kashmir/gulmarg_gondola.jpg',
+      price: '₹21,500',
+      duration: '6 Days / 5 Nights',
+      rating: 4.9,
+      badge: 'Best Seller',
+      keywords: ['kashmir', 'srinagar', 'gulmarg', 'pahalgam', 'dal lake', 'houseboat', 'gondola', 'sonamarg'],
+      link: '/packages/kashmir-paradise'
+    },
+    {
+      id: 'ladakh-pangong-6d',
+      title: 'Leh Ladakh Pangong Lake & Khardung La (6D/5N)',
+      destination: 'Leh Ladakh Tour',
+      category: 'domestic',
+      region: 'Ladakh',
+      image: '/ladakh.jpg',
+      price: '₹32,500',
+      duration: '6 Days / 5 Nights',
+      rating: 5.0,
+      badge: 'High Altitude',
+      keywords: ['ladakh', 'leh', 'pangong lake', 'khardung la', 'nubra valley', 'camel safari', 'magnetic hill'],
+      link: '/packages/leh-ladakh-tour'
+    },
+
+    // KERALA CIRCUITS
+    {
+      id: 'kerala-4d3n-munnar-alleppey',
+      title: 'Munnar Tea Hills & Alleppey Houseboat (4D/3N)',
+      destination: 'Kerala Backwaters & Munnar',
+      category: 'domestic',
+      region: 'Kerala',
+      image: '/kerala/alleppey_backwaters_houseboat.jpg',
+      price: '₹16,800',
+      duration: '4 Days / 3 Nights',
+      rating: 4.92,
+      badge: 'Best Value',
+      keywords: ['kerala', 'alleppey', 'houseboat', 'munnar', 'tea gardens', 'cochin'],
+      link: '/packages/kerala-4d3n-munnar-alleppey'
+    },
+    {
+      id: 'kerala-5d4n-tea-wildlife-backwaters',
+      title: 'Kerala Tea, Wildlife & Backwaters Classic (5D/4N)',
+      destination: 'Munnar, Thekkady & Alleppey',
+      category: 'domestic',
+      region: 'Kerala',
+      image: '/kerala/thekkady_periyar_sanctuary.jpg',
+      price: '₹21,500',
+      duration: '5 Days / 4 Nights',
+      rating: 4.95,
+      badge: 'Best Seller',
+      keywords: ['kerala', 'thekkady', 'periyar', 'wildlife', 'alleppey', 'houseboat', 'munnar'],
+      link: '/packages/kerala-5d4n-tea-wildlife-backwaters'
+    },
+    {
+      id: 'kerala-6d5n-hills-backwaters-kovalam',
+      title: 'Grand Kerala Hills, Backwaters & Kovalam Beach (6D/5N)',
+      destination: 'Munnar, Thekkady, Alleppey & Kovalam',
+      category: 'domestic',
+      region: 'Kerala',
+      image: '/kerala/alleppey_backwaters_houseboat.jpg',
+      price: '₹26,500',
+      duration: '6 Days / 5 Nights',
+      rating: 4.98,
+      badge: 'Flagship Tour',
+      keywords: ['kerala', 'alleppey', 'houseboat', 'munnar', 'tea gardens', 'thekkady', 'kovalam', 'beach'],
+      link: '/packages/kerala-6d5n-hills-backwaters-kovalam'
+    },
+    {
+      id: 'kerala-7d6n-grand-kerala-kanyakumari',
+      title: 'Complete Kerala & Kanyakumari Sunset Tour (7D/6N)',
+      destination: 'Kerala & Kanyakumari Cape',
+      category: 'domestic',
+      region: 'Kerala',
+      image: '/kerala/kovalam_lighthouse_beach.jpg',
+      price: '₹31,500',
+      duration: '7 Days / 6 Nights',
+      rating: 4.97,
+      badge: 'Grand Tour',
+      keywords: ['kerala', 'kanyakumari', 'kovalam', 'alleppey', 'houseboat', 'munnar', 'thekkady'],
+      link: '/packages/kerala-7d6n-grand-kerala-kanyakumari'
+    },
+
+    // HIMACHAL PRADESH
+    {
+      id: 'himachal-shimla-manali-6d',
+      title: 'Himachal Hill Stations Shimla, Manali & Solang (6D/5N)',
+      destination: 'Himachal Hill Stations',
+      category: 'domestic',
+      region: 'Himachal Pradesh',
+      image: '/himachal.jpg',
+      price: '₹24,500',
+      duration: '6 Days / 5 Nights',
+      rating: 4.9,
+      badge: 'Popular',
+      keywords: ['himachal', 'shimla', 'manali', 'solang valley', 'atal tunnel', 'rohtang pass', 'kasol', 'dharamshala', 'dalhousie', 'spiti'],
+      link: '/packages/himachal-hill-stations'
+    },
+
+    // GOA & GUJARAT
+    {
+      id: 'goa-beach-4d',
+      title: 'Goa Beach Retreat Baga, Dudhsagar & Sunset Cruise (4D/3N)',
+      destination: 'Goa Beach Holiday',
+      category: 'domestic',
+      region: 'Goa',
+      image: '/goa.jpg',
+      price: '₹16,500',
+      duration: '4 Days / 3 Nights',
+      rating: 4.8,
+      badge: 'Beach Special',
+      keywords: ['goa', 'baga beach', 'calangute', 'dudhsagar waterfall', 'sunset cruise', 'old goa', 'water sports'],
+      link: '/packages/goa-beach-holiday'
+    },
+    {
+      id: 'rann-utsav-3d',
+      title: 'Rann Utsav Kutch Tent City & White Desert (3D/2N)',
+      destination: 'Rann Utsav',
+      category: 'domestic',
+      region: 'Gujarat',
+      image: '/Rann-Utsav-Gujarat.png',
+      price: '₹7,999',
+      duration: '3 Days / 2 Nights',
+      rating: 4.9,
+      badge: 'Cultural Festival',
+      keywords: ['rann utsav', 'kutch', 'tent city', 'dhordo', 'white desert', 'road to heaven', 'dholavira', 'bhuj', 'gujarat'],
+      link: '/packages/rann-utsav'
+    },
+
+    // RAJASTHAN & GOLDEN TRIANGLE
+    {
+      id: 'rajasthan-royal-7d',
+      title: 'Rajasthan Royal Palaces Jaipur, Udaipur & Jaisalmer (7D/6N)',
+      destination: 'Rajasthan Royal',
+      category: 'domestic',
+      region: 'Rajasthan',
+      image: '/rajasthan.jpg',
+      price: '₹22,500',
+      duration: '7 Days / 6 Nights',
+      rating: 4.9,
+      badge: 'Heritage Royal',
+      keywords: ['rajasthan', 'jaipur', 'udaipur', 'jaisalmer', 'desert safari', 'amer fort', 'city palace', 'jodhpur'],
+      link: '/packages/rajasthan-royal'
+    },
+    {
+      id: 'golden-triangle-5d',
+      title: 'Golden Triangle Heritage Delhi, Agra Taj Mahal & Jaipur (5D/4N)',
+      destination: 'Golden Triangle',
+      category: 'domestic',
+      region: 'North India',
+      image: '/rajasthan.jpg',
+      price: '₹18,500',
+      duration: '5 Days / 4 Nights',
+      rating: 4.8,
+      badge: 'Classic Circuit',
+      keywords: ['golden triangle', 'delhi', 'agra', 'taj mahal', 'jaipur', 'hawa mahal'],
+      link: '/packages/golden-triangle'
+    },
+
+    // SINGAPORE PACKAGES
+    {
+      id: 'singapore-4d-3n',
+      title: 'Singapore Express City Highlights (4D/3N)',
+      destination: 'Singapore',
+      category: 'international',
+      region: 'Southeast Asia',
+      image: '/singapore/gardens_by_the_bay.jpg',
+      price: '₹42,000',
+      duration: '4 Days / 3 Nights',
+      rating: 4.9,
+      badge: 'City Express',
+      keywords: ['singapore', 'gardens by the bay', 'marina bay sands', 'merlion', 'express'],
+      link: '/packages/singapore-4d-3n'
+    },
+    {
+      id: 'singapore-5d-4n',
+      title: 'Singapore Sentosa & Universal Studios Special (5D/4N)',
+      destination: 'Singapore',
+      category: 'international',
+      region: 'Southeast Asia',
+      image: '/singapore/universal_studios.jpg',
+      price: '₹48,000',
+      duration: '5 Days / 4 Nights',
+      rating: 4.9,
+      badge: 'Best Seller',
+      keywords: ['singapore', 'universal studios', 'sentosa', 'gardens by the bay', 'cable car'],
+      link: '/packages/singapore-5d-4n'
+    },
+    {
+      id: 'singapore-cruise-6d',
+      title: 'Singapore & Resorts World Genting Dream Cruise (6D/5N)',
+      destination: 'Singapore',
+      category: 'international',
+      region: 'Southeast Asia',
+      image: '/singapore/cable_car_sentosa.jpg',
+      price: '₹62,500',
+      duration: '6 Days / 5 Nights',
+      rating: 4.95,
+      badge: 'Luxury Cruise',
+      keywords: ['singapore', 'genting cruise', 'resorts world', 'cruise', 'ocean balcony'],
+      link: '/packages/singapore-cruise'
+    },
+    {
+      id: 'singapore-malaysia-7d',
+      title: 'Singapore & Malaysia Dual Destination Combo (7D/6N)',
+      destination: 'Singapore & Malaysia',
+      category: 'international',
+      region: 'Southeast Asia',
+      image: '/singapore/jewel_changi.jpg',
+      price: '₹56,000',
+      duration: '7 Days / 6 Nights',
+      rating: 4.92,
+      badge: '2-Country Special',
+      keywords: ['singapore', 'malaysia', 'kuala lumpur', 'petronas towers', 'genting highlands', 'batu caves'],
+      link: '/packages/singapore-malaysia-combo'
+    },
+    {
+      id: 'singapore-family-5d',
+      title: 'Singapore Family Fun & Night Safari (5D/4N)',
+      destination: 'Singapore',
+      category: 'international',
+      region: 'Southeast Asia',
+      image: '/singapore/night_safari.jpg',
+      price: '₹49,500',
+      duration: '5 Days / 4 Nights',
+      rating: 4.91,
+      badge: 'Family Favorite',
+      keywords: ['singapore', 'night safari', 'river wonders', 'bird paradise', 'family tour'],
+      link: '/packages/singapore-family'
+    },
+    {
+      id: 'singapore-honeymoon-5d',
+      title: 'Singapore Romantic Honeymoon & Marina Bay (5D/4N)',
+      destination: 'Singapore',
+      category: 'international',
+      region: 'Southeast Asia',
+      image: '/singapore/marina_bay_sands.jpg',
+      price: '₹54,000',
+      duration: '5 Days / 4 Nights',
+      rating: 4.97,
+      badge: 'Honeymoon Special',
+      keywords: ['singapore', 'honeymoon', 'skypark', 'romantic dinner', 'cable car dining'],
+      link: '/packages/singapore-honeymoon'
+    },
+
+    // EUROPE PACKAGES
+    {
+      id: 'europe-grand-12d',
+      title: 'Europe Grand Collection Swiss, Paris & Italy (12D/11N)',
+      destination: 'Europe',
+      category: 'international',
+      region: 'Europe',
+      image: '/Europe Image New.png',
+      price: '₹1,85,000',
+      duration: '12 Days / 11 Nights',
+      rating: 4.95,
+      badge: 'Grand Europe',
+      keywords: ['europe', 'switzerland', 'paris', 'eiffel tower', 'rome', 'venice', 'florence', 'titlis', 'lucerne', 'schengen'],
+      link: '/packages/europe'
+    },
+    {
+      id: 'europe-swiss-paris-7d',
+      title: 'Europe Highlights Paris & Swiss Alps (7D/6N)',
+      destination: 'Europe',
+      category: 'international',
+      region: 'Europe',
+      image: '/Europe Image New.png',
+      price: '₹1,35,000',
+      duration: '7 Days / 6 Nights',
+      rating: 4.93,
+      badge: 'Paris & Swiss',
+      keywords: ['europe', 'paris', 'switzerland', 'eiffel tower', 'seine cruise', 'mount titlis', 'lucerne'],
+      link: '/packages/europe-switzerland-paris'
+    },
+    {
+      id: 'europe-switzerland-6d',
+      title: 'Switzerland Alpine Wonders & Mount Titlis (6D/5N)',
+      destination: 'Switzerland',
+      category: 'international',
+      region: 'Europe',
+      image: '/Europe Image New.png',
+      price: '₹1,25,000',
+      duration: '6 Days / 5 Nights',
+      rating: 4.96,
+      badge: 'Swiss Special',
+      keywords: ['switzerland', 'swiss alps', 'mount titlis', 'interlaken', 'jungfraujoch', 'lucerne', 'zermatt', 'matterhorn'],
+      link: '/packages/europe-switzerland'
+    },
+    {
+      id: 'europe-france-paris-5d',
+      title: 'France Paris Eiffel Tower & French Riviera (5D/4N)',
+      destination: 'France',
+      category: 'international',
+      region: 'Europe',
+      image: '/Europe Image New.png',
+      price: '₹1,15,000',
+      duration: '5 Days / 4 Nights',
+      rating: 4.91,
+      badge: 'France Special',
+      keywords: ['france', 'paris', 'louvre museum', 'eiffel tower', 'versailles', 'nice', 'french riviera'],
+      link: '/packages/europe-france'
+    },
+    {
+      id: 'europe-italy-rome-6d',
+      title: 'Italy Rome Colosseum, Venice Canals & Florence (6D/5N)',
+      destination: 'Italy',
+      category: 'international',
+      region: 'Europe',
+      image: '/Europe Image New.png',
+      price: '₹1,20,000',
+      duration: '6 Days / 5 Nights',
+      rating: 4.92,
+      badge: 'Italy Special',
+      keywords: ['italy', 'rome', 'colosseum', 'venice gondola', 'florence', 'vatican city', 'pisa'],
+      link: '/packages/europe-italy'
+    },
+
+    // OTHER INTERNATIONAL DESTINATIONS
+    {
+      id: 'dubai-delights-5d',
+      title: 'Dubai Burj Khalifa, Red Dune Safari & Dhow Cruise (5D/4N)',
+      destination: 'Dubai Delights',
+      category: 'international',
+      region: 'Middle East',
+      image: '/dubai.jpg',
+      price: '₹45,000',
+      duration: '5 Days / 4 Nights',
+      rating: 4.9,
+      badge: 'Luxury Escape',
+      keywords: ['dubai', 'burj khalifa', 'desert safari', 'dune bashing', 'dhow cruise', 'marina', 'miracle garden', 'uae'],
+      link: '/packages/dubai-delights'
+    },
+    {
+      id: 'bali-paradise-6d',
+      title: 'Bali Tropical Island & Nusa Penida Speedboat (6D/5N)',
+      destination: 'Bali Paradise',
+      category: 'international',
+      region: 'Southeast Asia',
+      image: '/bali.jpg',
+      price: '₹48,500',
+      duration: '6 Days / 5 Nights',
+      rating: 4.9,
+      badge: 'Tropical Bliss',
+      keywords: ['bali', 'nusa penida', 'ubud', 'kelingking beach', 'swing', 'kintamani volcano', 'uluwatu', 'indonesia'],
+      link: '/packages/bali-paradise'
+    },
+    {
+      id: 'thailand-tropical-6d',
+      title: 'Thailand Phuket, Krabi & Bangkok Island Hopping (6D/5N)',
+      destination: 'Thailand Tropical',
+      category: 'international',
+      region: 'Southeast Asia',
+      image: '/thailand.jpg',
+      price: '₹28,500',
+      duration: '6 Days / 5 Nights',
+      rating: 4.9,
+      badge: 'Visa Free',
+      keywords: ['thailand', 'phuket', 'krabi', 'phi phi island', 'maya bay', 'bangkok', 'coral island', 'pattaya'],
+      link: '/packages/thailand-tropical'
+    },
+    {
+      id: 'maldives-water-villa-5d',
+      title: 'Maldives 5-Star Overwater Villa & Seaplane Flight (5D/4N)',
+      destination: 'Maldives Paradise',
+      category: 'international',
+      region: 'Indian Ocean',
+      image: '/maldives.jpg',
+      price: '₹68,500',
+      duration: '5 Days / 4 Nights',
+      rating: 5.0,
+      badge: 'Overwater Villa',
+      keywords: ['maldives', 'water villa', 'overwater lagoon', 'seaplane', 'dolphin cruise', 'all inclusive', 'honeymoon'],
+      link: '/packages/maldives-paradise'
+    },
+    {
+      id: 'georgia-kazbegi-6d',
+      title: 'Georgia Caucasus Mountain & Kazbegi 4x4 Expedition (6D/5N)',
+      destination: 'Georgia Adventure',
+      category: 'international',
+      region: 'Europe / Caucasus',
+      image: '/georgia/kazbegi_caucasus_mountain.jpg',
+      price: '₹58,000',
+      duration: '6 Days / 5 Nights',
+      rating: 4.9,
+      badge: 'Easy E-Visa',
+      keywords: ['georgia', 'tbilisi', 'kazbegi', 'gudauri ski', 'gergeti trinity church', 'signagi wine'],
+      link: '/packages/georgia-adventure'
+    },
+    {
+      id: 'japan-cherry-blossom-7d',
+      title: 'Japan Cherry Blossom, Mount Fuji & Shinkansen (7D/6N)',
+      destination: 'Japan Cherry Blossom',
+      category: 'international',
+      region: 'East Asia',
+      image: '/japan.jpg',
+      price: '₹1,65,000',
+      duration: '7 Days / 6 Nights',
+      rating: 5.0,
+      badge: 'Bucket List',
+      keywords: ['japan', 'tokyo', 'mount fuji', 'bullet train', 'shinkansen', 'kyoto', 'osaka castle', 'cherry blossom'],
+      link: '/packages/japan-cherry-blossom'
+    },
+    {
+      id: 'seychelles-escape-6d',
+      title: 'Seychelles Island Escape & Anse Source d\'Argent (6D/5N)',
+      destination: 'Seychelles Escape',
+      category: 'international',
+      region: 'Indian Ocean',
+      image: '/seychelles.jpg',
+      price: '₹85,000',
+      duration: '6 Days / 5 Nights',
+      rating: 4.9,
+      badge: 'Visa Free',
+      keywords: ['seychelles', 'mahe', 'praslin', 'la digue', 'anse source d\'argent', 'granite rocks'],
+      link: '/packages/seychelles-escape'
+    },
+    {
+      id: 'turkey-cappadocia-7d',
+      title: 'Turkey Hot Air Balloons & Cappadocia Cave Suites (7D/6N)',
+      destination: 'Turkey Adventure',
+      category: 'international',
+      region: 'Eurasia',
+      image: '/turkey.jpg',
+      price: '₹78,000',
+      duration: '7 Days / 6 Nights',
+      rating: 4.9,
+      badge: 'E-Visa Available',
+      keywords: ['turkey', 'istanbul', 'cappadocia', 'hot air balloon', 'bosphorus cruise', 'pamukkale', 'hagia sophia'],
+      link: '/packages/turkey-adventure'
+    },
+    {
+      id: 'mauritius-bliss-6d',
+      title: 'Mauritius Beach Bliss & Île aux Cerfs Speedboat (6D/5N)',
+      destination: 'Mauritius Bliss',
+      category: 'international',
+      region: 'Indian Ocean',
+      image: '/mauritius.jpg',
+      price: '₹72,000',
+      duration: '6 Days / 5 Nights',
+      rating: 4.8,
+      badge: 'Free VOA',
+      keywords: ['mauritius', 'ile aux cerfs', 'chamarel', 'seven colored earth', 'undersea walk', 'catamaran'],
+      link: '/packages/mauritius-bliss'
+    }
+  ];

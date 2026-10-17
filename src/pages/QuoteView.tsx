@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, useSearchParams, Link } from 'react-router-dom';
 import { 
   CheckCircle, XCircle, MessageSquare, Phone, Check, X, 
-  Loader2, AlertTriangle, Calendar, FileText, Share2, Compass, Shield, Award, Hotel, Building2 
+  Loader2, AlertTriangle, Calendar, FileText, Share2, Compass, Shield, Award, Hotel, Building2,
+  Car, Camera, MapPin, Printer, Download, Sparkles
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -13,7 +14,10 @@ import { Helmet } from 'react-helmet-async';
 const API_BASE = import.meta.env.VITE_API_BASE_URL || '/php-backend';
 
 export default function QuoteView() {
-  const { token } = useParams<{ token: string }>();
+  const { token: paramToken } = useParams<{ token: string }>();
+  const [searchParams] = useSearchParams();
+  const effectiveToken = (paramToken && paramToken !== 'view') ? paramToken : (searchParams.get('token') || paramToken || '');
+
   const { toast } = useToast();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -25,14 +29,14 @@ export default function QuoteView() {
   const [submittingAction, setSubmittingAction] = useState(false);
 
   useEffect(() => {
-    if (!token) {
+    if (!effectiveToken) {
       setError('Missing quote reference token.');
       setLoading(false);
       return;
     }
 
     setLoading(true);
-    fetch(`${API_BASE}/quote_view.php?token=${token}`)
+    fetch(`${API_BASE}/quote_view.php?token=${encodeURIComponent(effectiveToken)}`)
       .then(res => {
         if (!res.ok) {
           if (res.status === 410) {
@@ -55,17 +59,17 @@ export default function QuoteView() {
       .finally(() => {
         setLoading(false);
       });
-  }, [token]);
+  }, [effectiveToken]);
 
   const handleAction = async (action: 'accept' | 'discuss' | 'reject', customMessage?: string) => {
-    if (!token) return;
+    if (!effectiveToken) return;
     setSubmittingAction(true);
     try {
       const res = await fetch(`${API_BASE}/quote_action.php`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          token,
+          token: effectiveToken,
           action,
           message: customMessage || ''
         })
@@ -158,19 +162,72 @@ export default function QuoteView() {
 
   const expiryDateFormatted = expiresAt 
     ? new Date(expiresAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })
-    : 'N/A';
+    : '7 Days from Issue';
 
   const waContactUrl = `https://wa.me/919910987264?text=Hi!+I+am+reviewing+proposal+V${versionNumber}+for+${encodeURIComponent(packageName)}+and+would+like+to+discuss+details.`;
 
+  const allItems = Array.isArray(costBreakdown?.items) ? costBreakdown.items : [];
+  const hotelItems = allItems.filter((i: any) => i.type === 'hotel');
+  const transferItems = allItems.filter((i: any) => i.type === 'transfer');
+  const excursionItems = allItems.filter((i: any) => i.type === 'excursion');
+
+  // Resolve Day-by-Day Itinerary (from saved itineraryDays or auto-generated from items)
+  const totalNights = hotelItems.reduce((sum: number, h: any) => sum + (Number(h.qty) || 0), 0) || 4;
+  const savedDays = Array.isArray(costBreakdown?.itineraryDays) && costBreakdown.itineraryDays.length > 0
+    ? costBreakdown.itineraryDays
+    : Array.from({ length: totalNights + 1 }, (_, i) => {
+        const dayNum = i + 1;
+        const primaryHotel = hotelItems[0]?.name || 'Handpicked Resort / Hotel';
+        const spot = excursionItems[i % Math.max(excursionItems.length, 1)]?.name;
+        if (dayNum === 1) {
+          return {
+            day: 1,
+            title: `Arrival & Welcome Transfer — Check-in at ${primaryHotel}`,
+            description: `Meet & Greet upon arrival by our representative and transfer in your private cab (${transferItems[0]?.name || 'Dedicated AC Vehicle'}) to ${primaryHotel}. Evening at leisure to acclimatize and explore nearby promenades.`
+          };
+        }
+        if (dayNum === totalNights + 1) {
+          return {
+            day: dayNum,
+            title: 'Breakfast, Check-out & Departure Drop',
+            description: `Enjoy a relaxed morning breakfast at the hotel. Complete check-out formalities and proceed via private cab transfer to the airport/railway station with unforgettable memories.`
+          };
+        }
+        return {
+          day: dayNum,
+          title: spot ? `Full-Day Guided Sightseeing: ${spot}` : `Day ${dayNum} Local Exploration & Curated Experiences`,
+          description: `After breakfast at ${primaryHotel}, embark on a full-day private excursion${spot ? ` covering ${spot}` : ''}. Enjoy scenic viewpoints, cultural landmarks, and return comfortably in the evening.`
+        };
+      });
+
+  const displayInclusions: string[] = Array.isArray(inclusions) && inclusions.length > 0
+    ? inclusions
+    : [
+        ...hotelItems.map((h: any) => `${h.qty} Night(s) accommodation at ${h.name}${h.detail ? ` (${h.detail})` : ''}`),
+        ...transferItems.map((t: any) => `Dedicated Private Cab: ${t.name}${t.detail ? ` (${t.detail})` : ''}`),
+        ...excursionItems.map((e: any) => `Guided Sightseeing & Excursion: ${e.name}`),
+        'All toll taxes, parking fees, state permits, and driver allowances included',
+        '24/7 Dedicated Ghumo Firoo Travel Concierge Support'
+      ];
+
+  const displayExclusions: string[] = Array.isArray(exclusions) && exclusions.length > 0
+    ? exclusions
+    : [
+        'Airfare / Train tickets unless explicitly mentioned in inclusions',
+        'Personal expenses such as laundry, telephone calls, tips, and room heater charges',
+        'Monument camera fees or optional adventure activities (paragliding, rafting, Gondola Phase 2)',
+        'Anything not specifically mentioned under "Package Inclusions"'
+      ];
+
   return (
-    <div className="min-h-screen bg-[#060A18] text-white py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+    <div className="min-h-screen bg-[#060A18] text-white py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden print:bg-white print:text-slate-900 print:py-4">
       <Helmet>
         <title>{packageName} Custom Proposal | Ghumo Firoo Travels</title>
       </Helmet>
 
       {/* Decorative blurred backdrops */}
-      <div className="absolute top-0 left-0 w-96 h-96 bg-[#C9A25A]/5 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute bottom-0 right-0 w-[500px] h-[500px] bg-[#1A2342]/10 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute top-0 left-0 w-96 h-96 bg-[#C9A25A]/5 rounded-full blur-3xl pointer-events-none print:hidden" />
+      <div className="absolute bottom-0 right-0 w-[500px] h-[500px] bg-[#1A2342]/10 rounded-full blur-3xl pointer-events-none print:hidden" />
 
       <div className="max-w-4xl mx-auto space-y-8 relative z-10">
         
@@ -183,9 +240,18 @@ export default function QuoteView() {
               <p className="text-[10px] uppercase tracking-[0.2em] text-[#C9A25A]/80 font-medium">Bespoke Travel Packages &amp; Experiences</p>
             </div>
           </div>
-          <div className="text-center sm:text-right">
-            <Badge variant="luxury" className="text-xs">Version V{versionNumber}</Badge>
-            <p className="text-xs text-gray-400 mt-1">Status: <span className="font-semibold text-white">{status}</span></p>
+          <div className="flex items-center gap-3">
+            <Button
+              onClick={() => window.print()}
+              variant="outline"
+              className="border-[#C9A25A]/40 bg-[#1A2342]/40 hover:bg-[#C9A25A] hover:text-[#0B1026] text-white text-xs font-bold gap-1.5 print:hidden"
+            >
+              <Printer className="w-3.5 h-3.5" /> Download / Print PDF
+            </Button>
+            <div className="text-center sm:text-right">
+              <Badge variant="luxury" className="text-xs">Version V{versionNumber}</Badge>
+              <p className="text-xs text-gray-400 mt-1">Status: <span className="font-semibold text-white">{status}</span></p>
+            </div>
           </div>
         </header>
 
@@ -197,7 +263,7 @@ export default function QuoteView() {
           </div>
         )}
 
-        {/* Core Summary Card */}
+        {/* Core Summary Card — STRICTLY SHOWS ONLY TOTAL PACKAGE INVESTMENT (NO ITEMIZED BREAKUP) */}
         <Card className="glass-card border-[#C9A25A]/25 overflow-hidden shadow-luxury-lg">
           <CardHeader className="bg-[#1A2342]/20 border-b border-[#C9A25A]/15 pb-6">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -206,16 +272,16 @@ export default function QuoteView() {
                 <CardTitle className="text-2xl sm:text-3xl font-display font-extrabold text-white mt-1">{packageName}</CardTitle>
               </div>
               <div className="text-left md:text-right">
-                <p className="text-xs text-gray-400 uppercase tracking-wider">Total Investment</p>
+                <p className="text-xs text-gray-400 uppercase tracking-wider">Total Package Cost</p>
                 <p className="text-3xl sm:text-4xl font-extrabold text-[#C9A25A] font-display mt-0.5">
-                  ₹{totalAmount.toLocaleString('en-IN')}
+                  ₹{Number(totalAmount || 0).toLocaleString('en-IN')}
                 </p>
-                <p className="text-[10px] text-gray-400 mt-0.5">All Inclusive Quote</p>
+                <p className="text-[10px] text-emerald-400 font-semibold mt-0.5">All-Inclusive Package Price (Hotel + Cab + Sightseeing)</p>
               </div>
             </div>
           </CardHeader>
           <CardContent className="pt-6 space-y-6">
-            {/* Validity and Cost Breakdown */}
+            {/* Validity and Package Price Guarantee */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               
               {/* Proposal Info */}
@@ -226,24 +292,24 @@ export default function QuoteView() {
                 </div>
                 <div className="flex items-center gap-2 text-sm text-gray-300">
                   <FileText className="w-4 h-4 text-[#C9A25A]" />
-                  <span>Proposal Reference: <strong>GF-QT-{quote.id.substring(0, 8).toUpperCase()}</strong></span>
+                  <span>Proposal Reference: <strong>GF-QT-{String(quote.id || '').substring(0, 8).toUpperCase()}</strong></span>
                 </div>
                 <div className="flex items-center gap-2 text-sm text-gray-300">
                   <Shield className="w-4 h-4 text-[#C9A25A]" />
-                  <span>Secure Checkout: <strong>Verified</strong></span>
+                  <span>Contracted Rate Guarantee: <strong>Verified Net Package</strong></span>
                 </div>
               </div>
 
               {/* All-Inclusive Package Summary */}
               <div className="bg-[#0B1026]/40 rounded-xl p-4 border border-[#C9A25A]/10 space-y-2">
-                <h4 className="text-xs text-[#C9A25A] uppercase tracking-wider font-semibold mb-2">Package Price Guarantee</h4>
+                <h4 className="text-xs text-[#C9A25A] uppercase tracking-wider font-semibold mb-2">Single Consolidated Package Price</h4>
                 <div className="space-y-2 text-xs text-gray-300">
                   <div className="flex items-center justify-between text-sm">
-                    <span className="text-gray-400">Total Package Investment</span>
-                    <span className="font-extrabold text-[#C9A25A] text-lg font-display">₹{totalAmount.toLocaleString('en-IN')}</span>
+                    <span className="text-gray-400">Consolidated Package Total</span>
+                    <span className="font-extrabold text-[#C9A25A] text-lg font-display">₹{Number(totalAmount || 0).toLocaleString('en-IN')}</span>
                   </div>
                   <p className="text-[11px] text-gray-400 leading-relaxed font-medium pt-1 border-t border-[#C9A25A]/10">
-                    Includes full accommodation, private vehicle transfers, taxes, guided sightseeing, and 24/7 dedicated trip assistance.
+                    Includes all listed hotel stays, private cab transfers, curated sightseeing, applicable taxes, and 24/7 trip concierge.
                   </p>
                 </div>
               </div>
@@ -251,20 +317,21 @@ export default function QuoteView() {
             </div>
           </CardContent>
         </Card>
-        {/* Handpicked Accommodations & Hotel Stay Breakdown */}
-        {quote.cost_breakdown && Array.isArray(quote.cost_breakdown.items) && quote.cost_breakdown.items.some((i: any) => i.type === 'hotel') && (
+
+        {/* Handpicked Accommodations & Hotel Stays (NO PRICE SHOWN) */}
+        {hotelItems.length > 0 && (
           <Card className="bg-[#0B1026]/30 border border-[#C9A25A]/20 shadow-md rounded-luxury-xl overflow-hidden">
             <CardHeader className="pb-3 border-b border-[#C9A25A]/15 bg-[#1A2342]/20">
               <CardTitle className="text-lg font-display text-white flex items-center justify-between">
                 <span className="flex items-center gap-2.5">
-                  <Hotel className="w-5 h-5 text-[#C9A25A]" /> Handpicked Accommodations & Hotel Stays
+                  <Hotel className="w-5 h-5 text-[#C9A25A]" /> Handpicked Accommodations &amp; Hotel Stays
                 </span>
-                <Badge variant="luxury" className="text-[10px]">Included in Package</Badge>
+                <Badge variant="luxury" className="text-[10px]">Included in Total Cost</Badge>
               </CardTitle>
             </CardHeader>
             <CardContent className="pt-4 space-y-3">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                {quote.cost_breakdown.items.filter((i: any) => i.type === 'hotel').map((item: any, idx: number) => (
+                {hotelItems.map((item: any, idx: number) => (
                   <div key={idx} className="p-4 bg-[#0B1026]/60 border border-[#C9A25A]/15 rounded-xl space-y-1.5">
                     <div className="flex items-center justify-between">
                       <span className="text-xs font-bold text-white flex items-center gap-1.5">
@@ -286,6 +353,99 @@ export default function QuoteView() {
           </Card>
         )}
 
+        {/* Dedicated Cab Transfers & Sightseeing Experiences (NO PRICE SHOWN) */}
+        {(transferItems.length > 0 || excursionItems.length > 0) && (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {transferItems.length > 0 && (
+              <Card className="bg-[#0B1026]/30 border border-[#C9A25A]/20 shadow-md rounded-luxury-xl overflow-hidden">
+                <CardHeader className="pb-3 border-b border-[#C9A25A]/15 bg-[#1A2342]/20">
+                  <CardTitle className="text-base font-display text-white flex items-center justify-between">
+                    <span className="flex items-center gap-2">
+                      <Car className="w-4 h-4 text-[#C9A25A]" /> Dedicated Private Cab &amp; Transfers
+                    </span>
+                    <Badge variant="luxury" className="text-[10px]">Included</Badge>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="pt-4 space-y-2.5">
+                  {transferItems.map((item: any, idx: number) => (
+                    <div key={idx} className="p-3 bg-[#0B1026]/60 border border-[#C9A25A]/15 rounded-xl flex items-center justify-between gap-2">
+                      <div>
+                        <p className="text-xs font-bold text-white">{item.name}</p>
+                        {item.detail && <p className="text-[11px] text-gray-400 mt-0.5">{item.detail}</p>}
+                      </div>
+                      <Badge className="bg-emerald-500/15 text-emerald-300 border-emerald-500/30 text-[10px]">
+                        {item.qty} {item.qty === 1 ? 'Day' : 'Days'}
+                      </Badge>
+                    </div>
+                  ))}
+                </CardContent>
+              </Card>
+            )}
+
+            {excursionItems.length > 0 && (
+              <Card className="bg-[#0B1026]/30 border border-[#C9A25A]/20 shadow-md rounded-luxury-xl overflow-hidden">
+                <CardHeader className="pb-3 border-b border-[#C9A25A]/15 bg-[#1A2342]/20">
+                  <CardTitle className="text-base font-display text-white flex items-center justify-between">
+                    <span className="flex items-center gap-2">
+                      <Camera className="w-4 h-4 text-[#C9A25A]" /> Curated Sightseeing &amp; Experiences
+                    </span>
+                    <Badge variant="luxury" className="text-[10px]">Included</Badge>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="pt-4 space-y-2.5">
+                  {excursionItems.map((item: any, idx: number) => (
+                    <div key={idx} className="p-3 bg-[#0B1026]/60 border border-[#C9A25A]/15 rounded-xl flex items-center justify-between gap-2">
+                      <div>
+                        <p className="text-xs font-bold text-white">{item.name}</p>
+                        {item.detail && <p className="text-[11px] text-gray-400 mt-0.5">{item.detail}</p>}
+                      </div>
+                      <Badge className="bg-[#C9A25A]/20 text-[#C9A25A] border-[#C9A25A]/30 text-[10px]">
+                        Included
+                      </Badge>
+                    </div>
+                  ))}
+                </CardContent>
+              </Card>
+            )}
+          </div>
+        )}
+
+        {/* Day-by-Day Travel Itinerary */}
+        {savedDays.length > 0 && (
+          <Card className="bg-[#0B1026]/30 border border-[#C9A25A]/20 shadow-md rounded-luxury-xl overflow-hidden">
+            <CardHeader className="pb-3 border-b border-[#C9A25A]/15 bg-[#1A2342]/20">
+              <CardTitle className="text-lg font-display text-white flex items-center justify-between">
+                <span className="flex items-center gap-2.5">
+                  <MapPin className="w-5 h-5 text-[#C9A25A]" /> Day-by-Day Travel Itinerary
+                </span>
+                <Badge variant="luxury" className="text-[10px]">{savedDays.length} Days Plan</Badge>
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="pt-5 space-y-4">
+              {savedDays.map((d: any, idx: number) => (
+                <div key={idx} className="relative pl-4 border-l-2 border-[#C9A25A]/40 bg-[#0B1026]/50 p-4 rounded-r-xl border-y border-r border-y-[#C9A25A]/10 border-r-[#C9A25A]/10 space-y-1.5">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <div className="flex items-center gap-2">
+                      <span className="px-2.5 py-0.5 rounded-md bg-[#C9A25A] text-[#0B1026] font-extrabold text-[11px] uppercase tracking-wider">
+                        Day {d.day || idx + 1}
+                      </span>
+                      <h4 className="text-sm sm:text-base font-bold text-white">{d.title}</h4>
+                    </div>
+                    {hotelItems[0]?.name && idx < savedDays.length - 1 && (
+                      <span className="text-[11px] text-[#C9A25A]/90 flex items-center gap-1 font-medium">
+                        <Hotel className="w-3 h-3" /> Stay: {d.hotel || hotelItems[Math.min(idx, hotelItems.length - 1)]?.name}
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-xs sm:text-sm text-gray-300 leading-relaxed whitespace-pre-line">
+                    {d.description}
+                  </p>
+                </div>
+              ))}
+            </CardContent>
+          </Card>
+        )}
+
         {/* Inclusions & Exclusions */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           
@@ -298,18 +458,14 @@ export default function QuoteView() {
               </CardTitle>
             </CardHeader>
             <CardContent className="pt-4">
-              {Array.isArray(inclusions) && inclusions.length > 0 ? (
-                <ul className="space-y-2.5 text-sm text-gray-300">
-                  {inclusions.map((inc: string, idx: number) => (
-                    <li key={idx} className="flex gap-2 items-start">
-                      <Check className="w-4 h-4 text-[#C9A25A] flex-shrink-0 mt-0.5" />
-                      <span>{inc}</span>
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <p className="text-xs text-gray-400 italic">Standard inclusions apply. Contact adviser for vouchers.</p>
-              )}
+              <ul className="space-y-2.5 text-sm text-gray-300">
+                {displayInclusions.map((inc: string, idx: number) => (
+                  <li key={idx} className="flex gap-2 items-start">
+                    <Check className="w-4 h-4 text-[#C9A25A] flex-shrink-0 mt-0.5" />
+                    <span>{inc}</span>
+                  </li>
+                ))}
+              </ul>
             </CardContent>
           </Card>
 
@@ -322,18 +478,14 @@ export default function QuoteView() {
               </CardTitle>
             </CardHeader>
             <CardContent className="pt-4">
-              {Array.isArray(exclusions) && exclusions.length > 0 ? (
-                <ul className="space-y-2.5 text-sm text-gray-300">
-                  {exclusions.map((exc: string, idx: number) => (
-                    <li key={idx} className="flex gap-2 items-start">
-                      <X className="w-4 h-4 text-red-500/80 flex-shrink-0 mt-0.5" />
-                      <span className="text-gray-400">{exc}</span>
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <p className="text-xs text-gray-400 italic">No exclusions declared. Contact adviser for details.</p>
-              )}
+              <ul className="space-y-2.5 text-sm text-gray-300">
+                {displayExclusions.map((exc: string, idx: number) => (
+                  <li key={idx} className="flex gap-2 items-start">
+                    <X className="w-4 h-4 text-red-500/80 flex-shrink-0 mt-0.5" />
+                    <span className="text-gray-400">{exc}</span>
+                  </li>
+                ))}
+              </ul>
             </CardContent>
           </Card>
 

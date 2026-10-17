@@ -3088,6 +3088,74 @@ const CRM = () => {
     return '#GF-1001';
   };
 
+  // 1-Click Convert Lead to Custom Package / Quote Builder pre-fill handler
+  const handleConvertLeadToPackage = (lead: any, targetMode: 'package' | 'quote' = 'package') => {
+    if (!lead) return;
+    let parsedDests: string[] = [];
+    if (typeof lead.destinations === 'string' && lead.destinations.trim()) {
+      if (lead.destinations.trim().startsWith('[')) {
+        try {
+          const arr = JSON.parse(lead.destinations);
+          if (Array.isArray(arr)) {
+            parsedDests = arr.map((d: any) => typeof d === 'string' ? d.trim() : String(d?.city || d?.name || d?.destination || '').trim()).filter(Boolean);
+          }
+        } catch (e) {}
+      }
+      if (parsedDests.length === 0) {
+        parsedDests = lead.destinations.split(/[,+→·-]/).map((d: string) => d.replace(/\(\d+N\)/gi, '').trim()).filter(Boolean);
+      }
+    } else if (Array.isArray(lead.destinations)) {
+      parsedDests = lead.destinations.map((d: any) => typeof d === 'string' ? d.trim() : String(d?.city || d?.name || d?.destination || '').trim()).filter(Boolean);
+    } else if (Array.isArray(lead.lead_destination)) {
+      parsedDests = lead.lead_destination.map((d: any) => typeof d === 'string' ? d.trim() : String(d?.city || d?.name || d?.destination || '').trim()).filter(Boolean);
+    }
+
+    const primaryDestination = parsedDests[0] || lead.state || (lead.country && lead.country !== 'India' ? lead.country : 'Kashmir');
+    if (parsedDests.length === 0 && primaryDestination) {
+      parsedDests = [primaryDestination];
+    }
+
+    const nights = Math.max(1, Number(lead.number_of_nights || lead.total_nights || 5));
+    const days = nights + 1;
+    const adultCount = Math.max(1, Number(lead.adult_count ?? lead.adultCount ?? lead.adults ?? 2));
+    const childCount = Math.max(0, Number(lead.child_count ?? lead.childCount ?? lead.children ?? 0));
+    const rawBudget = Number(String(lead.budget || lead.package_price || lead.packagePrice || lead.expected_booking_value || 0).replace(/[^0-9.]/g, '')) || 24500;
+    const startDate = getValidDateCandidate(lead.trip_start_date, lead.tripStartDate, lead.travel_dates, lead.travel_date, lead.travel_month) || '';
+
+    const prefillPayload = {
+      leadId: lead.id,
+      enquiryNumber: formatLeadId(lead),
+      customerName: lead.customer_name || 'Valued Traveler',
+      customerEmail: lead.email || lead.customer_email || '',
+      customerPhone: lead.contact_number || lead.customer_phone || lead.whatsapp_number || '',
+      destinations: parsedDests,
+      primaryDestination,
+      nights,
+      days,
+      adultCount,
+      childCount,
+      tripStartDate: startDate,
+      tripEndDate: lead.trip_end_date || lead.tripEndDate || '',
+      budget: rawBudget,
+      hotelCategory: lead.hotel_category || 'Deluxe',
+      transportPreference: lead.transport_preference || 'Private AC Cab Transfers',
+      travelTheme: lead.travel_theme || lead.package_type || 'Custom Holiday',
+      country: lead.country || 'India',
+      notes: lead.remarks || lead.notes || lead.discussion_notes || lead.tour_description || ''
+    };
+
+    try {
+      sessionStorage.setItem('crm_lead_package_prefill', JSON.stringify(prefillPayload));
+      sessionStorage.setItem('crm_lead_quote_prefill', JSON.stringify(prefillPayload));
+    } catch (e) {}
+
+    if (targetMode === 'quote') {
+      navigate('/crm/quotes', { state: { prefillFromLead: prefillPayload } });
+    } else {
+      navigate('/crm/packages/new', { state: { prefillFromLead: prefillPayload } });
+    }
+  };
+
   const renderAssignedExecutive = (assignedTo: string | null) => {
     const name = getAssignedUserName(assignedTo);
     if (name === 'Unassigned') {
@@ -4042,6 +4110,9 @@ const CRM = () => {
                         </div>
                       </div>
                       <div className="flex items-center gap-2 shrink-0">
+                        <Button size="sm" variant="ghost" className="text-[9px] font-extrabold h-7 rounded-lg px-2 text-purple-600 dark:text-purple-400 hover:bg-purple-500/15" onClick={() => handleConvertLeadToPackage(l, 'package')} title="1-Click Convert Lead to Custom Package">
+                          <Package className="w-3 h-3 mr-1" /> Convert to Package
+                        </Button>
                         <Button size="sm" variant="ghost" className="text-[9px] font-extrabold h-7 rounded-lg px-2 text-slate-700 dark:text-slate-300 hover:text-amber-500" onClick={() => navigate(`/crm/leads/${l.id}/itinerary`)}>
                           Itinerary
                         </Button>
@@ -4674,6 +4745,17 @@ Please let us know if you need any customizations. Looking forward to hosting yo
                                       type="button" 
                                       onClick={(e) => {
                                         e.stopPropagation();
+                                        handleConvertLeadToPackage(l, 'package');
+                                      }}
+                                      className="w-7 h-7 rounded-lg border-none cursor-pointer flex items-center justify-center bg-purple-500/15 text-purple-600 dark:text-purple-400 hover:bg-purple-500/25 transition-colors"
+                                      title="1-Click Convert Lead to Custom Package"
+                                    >
+                                      <Package className="w-3.5 h-3.5" />
+                                    </button>
+                                    <button 
+                                      type="button" 
+                                      onClick={(e) => {
+                                        e.stopPropagation();
                                         setSelectedLeadForFollowUp({ id: l.id, name: l.customer_name });
                                         setFollowUpModalOpen(true);
                                       }}
@@ -5150,6 +5232,15 @@ Ghumo Firoo Travels`
                               >
                                 <Sparkles className="w-3.5 h-3.5" /> Build Itinerary & Quote
                               </Button>
+
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => handleConvertLeadToPackage(activeLead, 'package')}
+                                className="w-full h-8 bg-purple-500/15 hover:bg-purple-500/25 text-purple-300 border border-purple-500/40 font-black text-xs rounded-lg flex items-center justify-center gap-1.5 cursor-pointer mt-1"
+                              >
+                                <Package className="w-3.5 h-3.5 text-purple-400" /> 1-Click Convert to Package
+                              </Button>
                             </>
                           )}
                         </div>
@@ -5284,6 +5375,26 @@ Ghumo Firoo Travels`
                           title="Open Itinerary Builder & Proposals for this Lead"
                         >
                           <Map className="w-3.5 h-3.5 text-[#0B1026]" /> Itinerary Builder
+                        </Button>
+
+                        {/* 1.5. 1-Click Convert Lead to Custom Package & Quote */}
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          onClick={() => handleConvertLeadToPackage(activeLead, 'package')}
+                          className="h-8 text-xs font-bold border-purple-500/40 text-purple-600 dark:text-purple-400 hover:bg-purple-500/10 rounded-lg px-3 cursor-pointer flex items-center gap-1"
+                          title="1-Click Convert Lead to Custom Package (Pre-fills destination, dates, pax, and hotel tier)"
+                        >
+                          <Package className="w-3.5 h-3.5 text-purple-500" /> Convert to Package
+                        </Button>
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          onClick={() => handleConvertLeadToPackage(activeLead, 'quote')}
+                          className="h-8 text-xs font-bold border-indigo-500/40 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-500/10 rounded-lg px-3 cursor-pointer flex items-center gap-1"
+                          title="1-Click Convert Lead to Custom Quote in Quote Workspace"
+                        >
+                          <FileText className="w-3.5 h-3.5 text-indigo-500" /> Convert to Quote
                         </Button>
 
                         {/* 2. Record Payment Button */}

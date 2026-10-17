@@ -466,6 +466,33 @@ class LeadService {
 
   // Create a new lead
   async createLead(leadData: Omit<Lead, 'id' | 'createdAt' | 'updatedAt'>): Promise<Lead> {
+    // Client-side Anti-Spam Rate Limit Guard
+    try {
+      const now = Date.now();
+      const rateKey = 'gf_lead_sub_history';
+      const rawHistory = localStorage.getItem(rateKey);
+      let history: number[] = rawHistory ? JSON.parse(rawHistory) : [];
+      // Keep only timestamps within the last 15 minutes (900,000 ms)
+      history = history.filter(ts => (now - ts) < 15 * 60 * 1000);
+
+      // Check 1: Rapid submission debounce (within 15 seconds)
+      if (history.length > 0 && (now - history[history.length - 1]) < 15000) {
+        throw new Error('Please wait 15 seconds before submitting another request.');
+      }
+
+      // Check 2: Maximum 5 lead submissions per 15 minutes per device
+      if (history.length >= 5) {
+        throw new Error('Submission limit reached. You can submit up to 5 inquiries every 15 minutes. Our team will contact you shortly.');
+      }
+
+      history.push(now);
+      localStorage.setItem(rateKey, JSON.stringify(history));
+    } catch (e: any) {
+      if (e?.message && (e.message.includes('Please wait') || e.message.includes('Submission limit'))) {
+        throw e;
+      }
+    }
+
     const snakeToCamel: { [key: string]: string } = {
       customer_name: 'customerName',
       customer_email: 'customerEmail',

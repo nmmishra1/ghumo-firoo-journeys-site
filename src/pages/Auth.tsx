@@ -40,6 +40,29 @@ const Auth = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Anti Brute-Force Rate Limiting (Max 5 failed attempts per 5 minutes)
+    const now = Date.now();
+    const lockoutWindowMs = 5 * 60 * 1000;
+    const maxAttempts = 5;
+    const authRateKey = 'gf_auth_failed_logins';
+    let failedAttempts: number[] = [];
+    try {
+      const raw = localStorage.getItem(authRateKey);
+      failedAttempts = raw ? JSON.parse(raw) : [];
+      failedAttempts = failedAttempts.filter(ts => (now - ts) < lockoutWindowMs);
+    } catch {}
+
+    if (failedAttempts.length >= maxAttempts) {
+      const remainingSeconds = Math.ceil((lockoutWindowMs - (now - failedAttempts[0])) / 1000);
+      toast({
+        title: "Account Temporarily Locked",
+        description: `Too many failed login attempts. Please wait ${Math.max(remainingSeconds, 15)} seconds before trying again.`,
+        variant: "destructive",
+      });
+      return;
+    }
+
     loading_start();
 
     try {
@@ -49,6 +72,11 @@ const Auth = () => {
       });
 
       if (error) throw error;
+
+      // Clear failed login attempts on success
+      try {
+        localStorage.removeItem(authRateKey);
+      } catch {}
 
       // Update last activity timestamp on fresh login
       try {
@@ -74,6 +102,12 @@ const Auth = () => {
 
       navigate('/crm');
     } catch (error: any) {
+      // Record failed attempt
+      try {
+        failedAttempts.push(Date.now());
+        localStorage.setItem(authRateKey, JSON.stringify(failedAttempts));
+      } catch {}
+
       toast({
         title: "Error",
         description: error.message,

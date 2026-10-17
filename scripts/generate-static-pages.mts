@@ -3,6 +3,8 @@ import path from 'path';
 import { blogPosts } from '../src/data/blogData.tsx';
 import { MASTER_DESTINATIONS } from '../src/data/masterDestinations.ts';
 import { CURATED_DESTINATION_GUIDES, getCuratedGuide } from '../src/data/curatedDestinationContent.ts';
+import { STATIC_PACKAGE_REGISTRY } from '../src/data/packages/staticRegistry.ts';
+import { individualPackages } from '../src/data/packages/individualPackages.ts';
 
 const siteUrl = 'https://ghumofiroo.com';
 const distDir = path.resolve(process.cwd(), 'dist');
@@ -870,8 +872,10 @@ async function main() {
     });
   }
 
-  // 2. Package Routes
+  // 2. Package Routes (Static + Modular STATIC_PACKAGE_REGISTRY + individualPackages + Optional DB Sync)
+  const seenPackageRoutes = new Set<string>();
   for (const [route, data] of Object.entries(packageRoutesMeta)) {
+    seenPackageRoutes.add(route);
     routesToGenerate.push({
       route,
       title: data.title,
@@ -884,8 +888,83 @@ async function main() {
     });
   }
 
-  // 3. Blog Routes
+  const addDynamicPackageRoute = (slug: string, pkg: any) => {
+    if (!slug || typeof slug !== 'string') return;
+    const cleanSlug = slug.trim().replace(/^\/+|\/+$/g, '');
+    if (!cleanSlug) return;
+    const route = `/packages/${cleanSlug}`;
+    if (seenPackageRoutes.has(route)) return;
+    seenPackageRoutes.add(route);
+
+    const pkgName = pkg.name || pkg.title || cleanSlug.replace(/-/g, ' ');
+    const duration = pkg.duration || '5 Days / 4 Nights';
+    const priceNum = Number(pkg.price || 0);
+    const priceText = priceNum > 0 ? `₹${priceNum.toLocaleString('en-IN')}` : 'Best Available Price';
+    const dests = Array.isArray(pkg.destinations) ? pkg.destinations.join(', ') : (pkg.destinations || pkgName);
+    const highlights = Array.isArray(pkg.highlights) ? pkg.highlights : [];
+    const inclusions = Array.isArray(pkg.inclusions) ? pkg.inclusions : [];
+    const itinerary = Array.isArray(pkg.itinerary) ? pkg.itinerary : [];
+
+    const title = pkg.seo_title || (pkgName.includes('Ghumo Firoo') ? pkgName : `${pkgName} (${duration}) | Ghumo Firoo`);
+    const description = pkg.seo_description || `Book ${pkgName} (${duration}) starting at ${priceText}. Explore ${dests} with verified hotels, private cab transfers, and 24x7 support by Ghumo Firoo Travels.`;
+
+    const bodyHtml = `
+      <article>
+        <section>
+          <h2>${pkgName} — ${duration} Curated Tour Package</h2>
+          <p>${description}</p>
+          <p><strong>Destinations Covered:</strong> ${dests} | <strong>Duration:</strong> ${duration} | <strong>Starting Price:</strong> ${priceText}</p>
+        </section>
+        ${highlights.length > 0 ? `
+        <section>
+          <h2>Package Highlights</h2>
+          <ul>
+            ${highlights.map((h: string) => `<li>${h}</li>`).join('')}
+          </ul>
+        </section>` : ''}
+        ${inclusions.length > 0 ? `
+        <section>
+          <h2>What's Included</h2>
+          <ul>
+            ${inclusions.map((inc: string) => `<li>${inc}</li>`).join('')}
+          </ul>
+        </section>` : ''}
+        ${itinerary.length > 0 ? `
+        <section>
+          <h2>Day-by-Day Itinerary</h2>
+          <ol>
+            ${itinerary.map((d: any, idx: number) => `<li><strong>Day ${d.day || idx + 1}: ${d.title || 'Sightseeing & Exploration'}</strong> — ${d.description || (Array.isArray(d.activities) ? d.activities.join(', ') : '')}</li>`).join('')}
+          </ol>
+        </section>` : ''}
+      </article>
+    `;
+
+    routesToGenerate.push({
+      route,
+      title,
+      description,
+      canonical: formatCanonical(route),
+      h1: pkgName,
+      h2: `${duration} · ${dests}`,
+      bodyHtml,
+      ogImage: pkg.image || (Array.isArray(pkg.images) ? pkg.images[0] : undefined),
+      ogType: 'website'
+    });
+  };
+
+  for (const [slug, pkg] of Object.entries(STATIC_PACKAGE_REGISTRY)) {
+    addDynamicPackageRoute(slug, pkg);
+  }
+  for (const pkg of individualPackages) {
+    if (pkg?.slug) {
+      addDynamicPackageRoute(pkg.slug, pkg);
+    }
+  }
+
+  // 3. Blog Routes (Static blogPosts + php-backend/blogs_data.json + Optional DB Sync)
+  const seenBlogSlugs = new Set<string>();
   for (const post of blogPosts) {
+    seenBlogSlugs.add(post.slug);
     const postTitle = post.title.includes('Ghumo Firoo') ? post.title : `${post.title} | Ghumo Firoo Travels`;
     let blogBodyHtml = `
       <article>
@@ -954,6 +1033,79 @@ async function main() {
       h2: `${post.category} · ${post.readTime} · By ${post.author}`,
       bodyHtml: blogBodyHtml
     });
+  }
+
+  const addDynamicBlogRoute = (b: any) => {
+    const slug = b?.slug ? String(b.slug).trim() : '';
+    if (!slug || seenBlogSlugs.has(slug)) return;
+    seenBlogSlugs.add(slug);
+
+    const rawTitle = b.seo_title || b.title || slug;
+    const postTitle = rawTitle.includes('Ghumo Firoo') ? rawTitle : `${rawTitle} | Ghumo Firoo Travels`;
+    const desc = b.seo_description || b.metaDescription || b.excerpt || `Read ${rawTitle} on Ghumo Firoo Travels blog.`;
+    const author = b.author || 'Sangita Kumari';
+    const category = b.category || 'Travel Guide';
+    const readTime = b.read_time || b.readTime || '8 min read';
+    const date = b.date || b.publish_date || '2026-01-01';
+
+    const blogBodyHtml = `
+      <article>
+        <header>
+          <p><strong>Published on:</strong> ${date} | <strong>Author:</strong> ${author} | <strong>Category:</strong> ${category}</p>
+        </header>
+        <section>
+          <p>${b.excerpt || desc}</p>
+          ${b.content ? `<div>${b.content}</div>` : ''}
+        </section>
+      </article>
+    `;
+
+    routesToGenerate.push({
+      route: `/blog/${slug}`,
+      title: postTitle,
+      description: desc,
+      canonical: formatCanonical(`/blog/${slug}`),
+      ogImage: b.image,
+      ogType: 'article',
+      publishedTime: date,
+      author,
+      h1: b.title || rawTitle,
+      h2: `${category} · ${readTime} · By ${author}`,
+      bodyHtml: blogBodyHtml
+    });
+  };
+
+  try {
+    const blogsJsonPath = path.resolve(process.cwd(), 'php-backend', 'blogs_data.json');
+    const rawBlogsJson = await fs.readFile(blogsJsonPath, 'utf8');
+    const parsedBlogs = JSON.parse(rawBlogsJson);
+    if (Array.isArray(parsedBlogs)) {
+      parsedBlogs.forEach(addDynamicBlogRoute);
+    }
+  } catch (e) {}
+
+  // Optional build-time sync from live MySQL API if configured via env
+  const syncApiBase = process.env.SEO_SYNC_API_URL || process.env.VITE_API_BASE_URL || '';
+  if (syncApiBase && syncApiBase.startsWith('http')) {
+    try {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 3000);
+      const [livePkgs, liveBlogs] = await Promise.all([
+        fetch(`${syncApiBase.replace(/\/$/, '')}/packages.php`, { signal: controller.signal }).then(r => r.ok ? r.json() : []).catch(() => []),
+        fetch(`${syncApiBase.replace(/\/$/, '')}/blogs.php`, { signal: controller.signal }).then(r => r.ok ? r.json() : []).catch(() => [])
+      ]);
+      clearTimeout(timeout);
+      if (Array.isArray(livePkgs)) {
+        livePkgs.forEach((p: any) => {
+          if (p?.slug && p.is_active !== false && p.is_active !== 0) {
+            addDynamicPackageRoute(p.slug, p);
+          }
+        });
+      }
+      if (Array.isArray(liveBlogs)) {
+        liveBlogs.forEach(addDynamicBlogRoute);
+      }
+    } catch (e) {}
   }
 
   // 4. Guide Routes from JSON

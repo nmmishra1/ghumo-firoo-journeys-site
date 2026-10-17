@@ -55,14 +55,15 @@ The platform combines a **high-speed pre-rendered static storefront** optimized 
 
 ---
 
-### 2. 🔍 Automated Static SEO Engine (113+ Pre-Rendered Pages)
-- **Pre-Render Build Script** (`scripts/generate-static-pages.mts`): Automatically compiles 113+ unique standalone HTML files into `dist/` with customized OpenGraph tags, canonical tags, and structured JSON-LD data.
+### 2. 🔍 Automated Static SEO Engine (317+ Pre-Rendered Pages & DB Sync)
+- **Database-to-SEO Build Sync** (`scripts/sync-seo-from-db.mts`): Automatically fetches newly published packages and blog posts from MySQL into `src/data/dbSyncedSeoRoutes.json` before every build.
+- **Pre-Render Build Script** (`scripts/generate-static-pages.mts`): Automatically compiles **317+ unique standalone HTML files** (core pages, tour packages, sightseeing spots, 36 Indian state/UT hubs, and 60+ city guides) into `dist/` with customized OpenGraph tags, canonical URLs, and structured JSON-LD data.
 - **Schema.org Rich Snippets**:
   - `TravelAgency` Schema with official business registration (NIDHI / Ministry of Tourism).
   - `TouristTrip`, `Offer`, and `AggregateRating` schemas for all package routes.
   - `FAQPage` schema for rich Google search result accordions.
   - `BreadcrumbList` navigation schemas.
-- **Dynamic `sitemap.xml` Generator**: Auto-updates all published packages, blog articles, and landing pages on every production build.
+- **Dynamic `sitemap.xml` Generator** (`scripts/generate-sitemap.mts`): Auto-updates 233+ canonical URLs on every production build and validates SEO metadata via `scripts/seo-validate.mjs`.
 
 ---
 
@@ -73,14 +74,20 @@ The platform combines a **high-speed pre-rendered static storefront** optimized 
 </div>
 
 #### **Key CRM Capabilities:**
-- **Kanban Lead Pipeline**: Visual drag-and-drop workflow tracking leads from *New Inquiry ➔ Contacted ➔ Proposal Sent ➔ Negotiating ➔ Confirmed / Won ➔ Lost*.
-- **Visual Itinerary Workspace**: Drag-and-drop day-by-day itinerary creator with hotel check-ins, sightseeing highlights, cab pickups, and inclusions/exclusions.
-- **Hotel Contracting & Rate Master**:
-  - Multi-season rate sheets (Peak, Regular, Off-Season).
-  - Room categories (Deluxe, Super Deluxe, Premium Tents, Luxury Suites).
-  - Meal plan modifiers (EP, CP, MAP, AP) and extra adult/child matrix.
-- **Transport & Cab Routing Engine**: Distance and tariff calculation for Sedans, SUVs, Innova Crysta, and Tempo Travellers across North India, Gujarat, and South India.
-- **Automated Quotation & Voucher PDF Generator**: One-click generation of branded PDF proposals, booking confirmations, tax invoices, and service vouchers.
+- **Kanban Lead Pipeline & 1-Click Quote Conversion**: Visual workflow tracking leads from *New Inquiry ➔ Assigned ➔ Follow-up Due ➔ Quote Sent ➔ Booking Confirmed / Closed Lost*, with 1-Click **"Convert Lead to Custom Package"** pre-filling dates, pax, and destination directly into the Quote & Itinerary Builder.
+- **Contracted Rates Master Engine (Hotels, Cabs & Sightseeing)**:
+  - **Hotels (`/crm/hotels` & `/crm/hotels/new`)**: Multi-season rate sheets (Peak, Regular, Off-Season), room categories, meal plan modifiers (`EP`, `CP`, `MAP`, `AP`), extra bed matrix, and net supplier vs. B2C selling rates.
+  - **Cabs & Transfers (`/crm/cabs`)**: Fleet tariff engine for Sedans, SUVs, Innova Crysta, and Tempo Travellers with daily rates, per-km tariffs, driver allowances, and state tolls.
+  - **Sightseeing & Excursions (`/crm/sightseeing`)**: Curated destination sightseeing tariffs and entry permits dynamically served via `php-backend/get_contracts.php`.
+- **Day-Wise Travel Itinerary Creator & Client-Safe Quote Sharing (PDF + Public URL)**:
+  - Builds complete day-by-day travel itineraries alongside handpicked **Hotel Names**, **Room & Meal Plans**, **Dedicated Cab Details**, **Sightseeing Highlights**, **Inclusions**, and **Exclusions**.
+  - **Dual Sharing (PDF & Public URL)**: Shareable via 1-Click **Client PDF** and interactive **Public Proposal URL** (`/quote/:token` via `src/pages/QuoteView.tsx` and `/proposal/:leadId` via `src/pages/public/PublicProposalView.tsx`).
+  - **Strict Client Pricing Rule (Total Cost Only)**: Real contracted rates for Hotels, Cabs, and Sightseeing are fetched and summed internally with agency margin, while the shared Client URL and Client PDF **strictly display ONLY the Total Consolidated Package Cost** and **never expose individual component cost breakups**.
+- **Profit & Loss (P&L) & Good/Bad ROI Reporting Center (`src/pages/crm/ReportsAnalyticsView.tsx`)**:
+  - **Profit & Loss (P&L) Statement**: Tracks Gross Selling Revenue vs. Net Supplier Cost (Hotel + Cab + Sightseeing), Net Gross Profit (₹), and Profit Margin (%) across all confirmed bookings.
+  - **Good vs. Bad Destination Intelligence**: Automatically classifies destinations as **🟢 Good Destination** (high conversion & profit), **🟡 Moderate**, or **🔴 Bad / Underperforming** (needs rate re-contracting).
+  - **Good vs. Bad Lead Source ROI Analysis**: Evaluates every acquisition channel (Organic SEO, Website, WhatsApp, Meta/Google Ads, Referrals) with conversion rate, revenue, net profit, and **🟢 Good Source / 🟡 Average / 🔴 Bad Source** verdicts.
+  - **Receivables & Aging Schedule**: Tracks pending customer balances by departure urgency (Overdue, Due in 3/7/15 Days) with 1-Click WhatsApp payment reminders.
 - **Role-Based Access Control (RBAC)**: Secure multi-tier permissions for Super Admin, Travel Directors, Operations Managers, and Sales Executives.
 
 ---

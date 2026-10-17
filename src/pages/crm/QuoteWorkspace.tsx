@@ -272,27 +272,81 @@ export default function QuoteWorkspace({ quotes: propQuotes = [], onCreateRevisi
         });
       });
 
-      // Add dedicated Private AC Vehicle for the circuit duration
+      // Add dedicated Private AC Vehicle using real contracted transfer rates
       const totalHotelNights = initialItems.reduce((sum, it) => sum + it.qty, 0);
       const totalTourDays = Math.max(2, totalHotelNights + 1);
 
+      const transferList = contracts?.transfers || [];
+      const matchedCab = transferList.find((t: any) => {
+        const destStr = `${t.destination || ''} ${t.source || ''} ${t.state_name || ''}`.toLowerCase();
+        return targetCities.some(tc => destStr.includes(tc));
+      }) || transferList[0];
+
+      const cabRate = Number(matchedCab?.rate || 3500);
+      const cabVehicleName = matchedCab?.vehicle_type || 'Private AC SUV / Sedan';
+
       initialItems.push({
         type: 'transfer',
-        name: `Dedicated Private AC Vehicle (${totalTourDays} Days)`,
-        detail: `Full-circuit transfers, airport/railway pickup & all state toll permits`,
+        name: `Dedicated ${cabVehicleName} (${totalTourDays} Days)`,
+        detail: `Full-circuit transfers, airport/railway pickup, driver allowance & state toll permits`,
         qty: totalTourDays,
-        rate: 3200,
-        total: totalTourDays * 3200
+        rate: cabRate,
+        total: totalTourDays * cabRate
       });
 
-      // Add Sightseeing & Excursion entry
-      initialItems.push({
-        type: 'excursion',
-        name: `Curated Sightseeing Excursions & Heritage Entries (${rawDest})`,
-        detail: `Guided landmark visits, wildlife/boat permits & cultural highlights`,
-        qty: 1,
-        rate: 2500,
-        total: 2500
+      // Add Sightseeing & Excursion entry using real contracted excursion rates
+      const excursionList = contracts?.excursions || [];
+      const matchedExcursions = excursionList.filter((e: any) => {
+        const eCity = (e.city_name || e.name || '').toLowerCase();
+        return targetCities.some(tc => eCity.includes(tc));
+      });
+
+      if (matchedExcursions.length > 0) {
+        matchedExcursions.slice(0, 3).forEach((ex: any) => {
+          const exRate = Number(ex.adult_rate || 1500);
+          initialItems.push({
+            type: 'excursion',
+            name: `${ex.name}${ex.city_name ? ` (${ex.city_name})` : ''}`,
+            detail: `Guided sightseeing excursion, entry permits & local transfers`,
+            qty: 1,
+            rate: exRate,
+            total: exRate
+          });
+        });
+      } else {
+        initialItems.push({
+          type: 'excursion',
+          name: `Curated Sightseeing Excursions & Heritage Entries (${rawDest})`,
+          detail: `Guided landmark visits, wildlife/boat permits & cultural highlights`,
+          qty: 1,
+          rate: 2500,
+          total: 2500
+        });
+      }
+
+      // Auto-build Day-by-Day Itinerary alongside Hotels, Cab, and Sightseeing
+      const autoItineraryDays = Array.from({ length: totalTourDays }, (_, idx) => {
+        const dayNum = idx + 1;
+        const stayHotel = matchedHotels[Math.min(idx, matchedHotels.length - 1)];
+        if (dayNum === 1) {
+          return {
+            day: 1,
+            title: `Arrival in ${stayHotel?.city || rawDest} & Transfer to ${stayHotel?.name || 'Hotel'}`,
+            description: `Pickup from Airport / Railway Station by your dedicated ${cabVehicleName}. Check-in at ${stayHotel?.name || 'your hotel'} (${stayHotel?.star || 4}★). Evening leisure walk and overnight stay.`
+          };
+        }
+        if (dayNum === totalTourDays) {
+          return {
+            day: dayNum,
+            title: `Morning Breakfast, Check-out & Departure Transfer`,
+            description: `After breakfast at the hotel, complete check-out formalities and proceed in your dedicated ${cabVehicleName} to the Airport / Railway Station for your onward journey.`
+          };
+        }
+        return {
+          day: dayNum,
+          title: `Day ${dayNum}: ${stayHotel?.city || rawDest} Guided Sightseeing & Local Experiences`,
+          description: `Full-day private sightseeing tour in ${stayHotel?.city || rawDest} covering signature landmarks, scenic viewpoints, and cultural highlights. Dinner & overnight stay at ${stayHotel?.name || 'Hotel'}.`
+        };
       });
 
       const totalCost = initialItems.reduce((sum, item) => sum + item.total, 0);
@@ -306,6 +360,7 @@ export default function QuoteWorkspace({ quotes: propQuotes = [], onCreateRevisi
         createdBy: 'Sales Agent',
         status: 'Draft',
         items: initialItems,
+        itineraryDays: autoItineraryDays,
         totalCost: totalCost,
         margin: marginVal,
         sellingPrice: sellingPrice
@@ -635,8 +690,9 @@ export default function QuoteWorkspace({ quotes: propQuotes = [], onCreateRevisi
     sightseeing_spots: any[];
     activities: any[];
     contracted_hotels: any[];
+    contracted_cabs?: any[];
   } | null>(null);
-  const [drawerTab, setDrawerTab] = useState<'sightseeing' | 'activities' | 'hotels' | 'ai_planner'>('sightseeing');
+  const [drawerTab, setDrawerTab] = useState<'sightseeing' | 'activities' | 'hotels' | 'cabs' | 'ai_planner'>('sightseeing');
   const [selectedDrawerCity, setSelectedDrawerCity] = useState<string>('All');
 
   // Edit Line Item Modal state (allows editing hotel name, room plan, qty, and rate)
@@ -804,11 +860,34 @@ export default function QuoteWorkspace({ quotes: propQuotes = [], onCreateRevisi
 
       const combinedHotels = Array.from(hotelMap.values());
 
+      // 4. Contracted Cabs / Transfers for Destination
+      const rawTransfers = contracts?.transfers || [];
+      const matchedCabs = rawTransfers.filter((t: any) => {
+        const destStr = `${t.destination || ''} ${t.source || ''} ${t.state_name || ''} ${t.vehicle_type || ''}`.toLowerCase();
+        return targetKeywords.some(k => destStr.includes(k));
+      });
+      const resolvedCabs = (matchedCabs.length > 0 ? matchedCabs : rawTransfers).map((t: any, idx: number) => ({
+        id: t.id || `cab_${idx}`,
+        vehicle_type: t.vehicle_type || 'Private AC Sedan (Dzire / Etios)',
+        capacity: Number(t.capacity || 4),
+        rate: Number(t.rate || 3200),
+        route: t.destination ? `${t.source || query} ➔ ${t.destination}` : `${query} Full Circuit & Local Sightseeing`
+      }));
+      if (resolvedCabs.length === 0) {
+        resolvedCabs.push(
+          { id: 'def_sedan', vehicle_type: 'Private AC Sedan (Swift Dzire / Etios)', capacity: 4, rate: 3000, route: `${query} Full Circuit Transfers & Sightseeing` },
+          { id: 'def_ertiga', vehicle_type: 'Private AC SUV (Maruti Ertiga)', capacity: 6, rate: 3800, route: `${query} Full Circuit Transfers & Sightseeing` },
+          { id: 'def_crysta', vehicle_type: 'Luxury AC SUV (Toyota Innova Crysta)', capacity: 6, rate: 4800, route: `${query} Full Circuit Transfers & Sightseeing` },
+          { id: 'def_tempo', vehicle_type: 'Force Tempo Traveller (12 Seater AC)', capacity: 12, rate: 6800, route: `${query} Group Circuit Transfers & Sightseeing` }
+        );
+      }
+
       setDestData({
         destination: query,
         sightseeing_spots: resolvedSightseeing,
         activities: resolvedActivities,
-        contracted_hotels: combinedHotels
+        contracted_hotels: combinedHotels,
+        contracted_cabs: resolvedCabs
       });
     } catch (e) {
       console.error("Failed to load destination context:", e);
@@ -994,6 +1073,24 @@ export default function QuoteWorkspace({ quotes: propQuotes = [], onCreateRevisi
     });
   };
 
+  const handleAddCabToQuote = (cab: any) => {
+    const rate = Number(cab.rate) || 3500;
+    const newItem: QuoteItem = {
+      type: 'transfer',
+      name: `Dedicated ${cab.vehicle_type || 'Private Cab'} (${cab.capacity || 4} Seater)`,
+      detail: `${cab.route || 'Full circuit transfers, sightseeing & airport pickup'} • Driver Allowance & Tolls Included`,
+      qty: 1,
+      rate: rate,
+      total: rate
+    };
+    appendItemToActiveVersion(newItem);
+    toast({
+      title: "Added Cab / Transfer to Proposal",
+      description: `Added "${cab.vehicle_type}" (₹${rate.toLocaleString('en-IN')}/day) to line items.`,
+      className: 'bg-slate-900 text-white border-amber-500/40'
+    });
+  };
+
   // Cascading Location selections by Row Index
   const [selectedStatesByRow, setSelectedStatesByRow] = useState<Record<number, string>>({});
   const [selectedCitiesByRow, setSelectedCitiesByRow] = useState<Record<number, string>>({});
@@ -1031,6 +1128,50 @@ export default function QuoteWorkspace({ quotes: propQuotes = [], onCreateRevisi
         }
       })
       .catch(err => console.warn("Failed to load leads for quote omni-search:", err));
+
+    // Check if navigated from 1-Click "Convert Lead to Quote"
+    try {
+      const rawStored = sessionStorage.getItem('crm_lead_quote_prefill');
+      if (rawStored) {
+        sessionStorage.removeItem('crm_lead_quote_prefill');
+        const prefill = JSON.parse(rawStored);
+        if (prefill) {
+          const primaryDest = prefill.primaryDestination || (Array.isArray(prefill.destinations) ? prefill.destinations[0] : '') || 'Kashmir';
+          const totalPax = Math.max(1, (Number(prefill.adultCount) || 2) + (Number(prefill.childCount) || 0));
+          const days = Math.max(2, Number(prefill.days) || (Number(prefill.nights || 4) + 1));
+
+          setNewQuoteData({
+            customerName: prefill.customerName || '',
+            customerEmail: prefill.customerEmail || '',
+            customerPhone: prefill.customerPhone || '',
+            destination: primaryDest,
+            margin: 15
+          });
+          setAiFormData(prev => ({
+            ...prev,
+            destination: primaryDest,
+            durationDays: days,
+            passengerCount: totalPax,
+            budgetTier: prefill.hotelCategory === 'Luxury' ? '5-Star Luxury' : prefill.hotelCategory === 'Budget' ? '3-Star Value' : '4-Star Premium',
+            customerName: prefill.customerName || '',
+            customerEmail: prefill.customerEmail || '',
+            customerPhone: prefill.customerPhone || '',
+            customNotes: prefill.notes || (prefill.tripStartDate ? `Travel Date: ${prefill.tripStartDate}` : '')
+          }));
+          if (prefill.leadId && !isNaN(Number(prefill.leadId))) {
+            setSelectedLeadId(Number(prefill.leadId));
+            setIsNewLeadSelected(false);
+          }
+          setLeadSearchQuery(prefill.customerName || '');
+          setNewQuoteModalOpen(true);
+          toast({
+            title: "✨ Quote Builder Pre-filled from Lead",
+            description: `Loaded ${primaryDest} (${days} Days, ${totalPax} Pax) for ${prefill.customerName}.`,
+            className: 'bg-slate-900 text-white border-amber-500/40'
+          });
+        }
+      }
+    } catch (e) {}
   }, []);
 
   // Update internal quotes list if prop changes
@@ -1153,6 +1294,53 @@ export default function QuoteWorkspace({ quotes: propQuotes = [], onCreateRevisi
       const isTempId = !vA.id || vA.id.startsWith('ver-') || vA.id.startsWith('q-') || vA.id.startsWith('prop_');
       const leadId = selectedQuote.leadId || 0;
 
+      const hotelLines = editItems.filter(i => i.type === 'hotel');
+      const cabLines = editItems.filter(i => i.type === 'transfer');
+      const sightLines = editItems.filter(i => i.type === 'excursion');
+
+      const computedInclusions = [
+        ...hotelLines.map(h => `${h.qty} Night(s) stay at ${h.name}${h.detail ? ` — ${h.detail}` : ''}`),
+        ...cabLines.map(c => `Private Cab & Transfers: ${c.name} (${c.qty} Days) — ${c.detail || 'All tolls, parking & driver allowance included'}`),
+        ...sightLines.map(s => `Guided Sightseeing & Excursion: ${s.name}${s.detail ? ` — ${s.detail}` : ''}`),
+        'All applicable hotel taxes, toll charges, state permits, and driver allowances',
+        '24/7 Ghumo Firoo Travel Concierge Support'
+      ];
+
+      const computedExclusions = [
+        'Airfare / Train tickets unless explicitly mentioned in inclusions',
+        'Personal expenses (laundry, tips, room heater, extra meals)',
+        'Optional adventure sports, monument camera fees, or Gondola Phase-2 tickets unless specified'
+      ];
+
+      const totalNights = hotelLines.reduce((sum, h) => sum + (Number(h.qty) || 0), 0) || 4;
+      const resolvedDays = (vA.itineraryDays && vA.itineraryDays.length > 0)
+        ? vA.itineraryDays
+        : Array.from({ length: totalNights + 1 }, (_, idx) => {
+            const dayNum = idx + 1;
+            const stayHotel = hotelLines[Math.min(idx, Math.max(0, hotelLines.length - 1))]?.name || selectedQuote.destination;
+            const cabName = cabLines[0]?.name || 'Dedicated Private Cab';
+            const sightName = sightLines[idx % Math.max(1, sightLines.length)]?.name;
+            if (dayNum === 1) {
+              return {
+                day: 1,
+                title: `Arrival & Private Transfer — Check-in at ${stayHotel}`,
+                description: `Welcome pickup upon arrival by ${cabName} and transfer to ${stayHotel}. Complete check-in formalities and enjoy the evening at leisure.`
+              };
+            }
+            if (dayNum === totalNights + 1) {
+              return {
+                day: dayNum,
+                title: `Breakfast, Check-out & Departure Transfer`,
+                description: `Enjoy morning breakfast at the hotel, check out, and transfer via ${cabName} to the Airport / Railway Station for your onward journey.`
+              };
+            }
+            return {
+              day: dayNum,
+              title: sightName ? `Day ${dayNum} Sightseeing: ${sightName}` : `Day ${dayNum} Guided Local Exploration`,
+              description: `After breakfast at ${stayHotel}, proceed for a full-day private excursion${sightName ? ` covering ${sightName}` : ''} in your ${cabName}. Return to the hotel for overnight stay.`
+            };
+          });
+
       const response = await quoteService.saveQuote({
         id: isTempId ? null : vA.id,
         lead_id: leadId,
@@ -1166,11 +1354,11 @@ export default function QuoteWorkspace({ quotes: propQuotes = [], onCreateRevisi
           sightseeing: sightseeingCost,
           // @ts-ignore
           items: editItems,
-          itineraryDays: vA.itineraryDays || [],
+          itineraryDays: resolvedDays,
           margin: editMargin
         },
-        inclusions: [],
-        exclusions: [],
+        inclusions: computedInclusions,
+        exclusions: computedExclusions,
         validity_days: 7,
         is_revision: false,
         expected_version: vA.versionNumber
@@ -2136,6 +2324,12 @@ export default function QuoteWorkspace({ quotes: propQuotes = [], onCreateRevisi
                 🏨 Hotels ({destData?.contracted_hotels?.length || 0})
               </button>
               <button
+                onClick={() => setDrawerTab('cabs')}
+                className={`py-2 px-3 border-b-2 transition-all ${drawerTab === 'cabs' ? 'border-amber-400 text-amber-400 font-black' : 'border-transparent text-slate-400 hover:text-white'}`}
+              >
+                🚗 Cabs ({destData?.contracted_cabs?.length || 0})
+              </button>
+              <button
                 onClick={() => setDrawerTab('ai_planner')}
                 className={`py-2 px-3 border-b-2 transition-all ${drawerTab === 'ai_planner' ? 'border-amber-400 text-amber-400 font-black' : 'border-transparent text-slate-400 hover:text-white'}`}
               >
@@ -2289,6 +2483,38 @@ export default function QuoteWorkspace({ quotes: propQuotes = [], onCreateRevisi
                               </Button>
                             </div>
                           ))
+                      )}
+                    </div>
+                  )}
+
+                  {drawerTab === 'cabs' && (
+                    <div className="space-y-3">
+                      {(!destData?.contracted_cabs || destData.contracted_cabs.length === 0) ? (
+                        <div className="text-center py-12 text-slate-400 text-xs font-bold">No contracted cabs found for "{destDrawerQuery}".</div>
+                      ) : (
+                        destData.contracted_cabs.map((cab: any, i: number) => (
+                          <div key={i} className="p-3 bg-[#161d2f] border border-slate-800 rounded-xl flex justify-between items-center hover:border-slate-700 transition-all">
+                            <div className="space-y-1">
+                              <div className="flex items-center gap-2">
+                                <span className="font-extrabold text-xs text-white">{cab.vehicle_type}</span>
+                                <Badge className="bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 text-[10px] font-black px-1.5 py-0">
+                                  {cab.capacity || 4} Seater
+                                </Badge>
+                              </div>
+                              <div className="flex items-center gap-2 text-[11px] text-slate-400 font-medium">
+                                <span>🛣️ {cab.route}</span>
+                                <span className="text-amber-300 font-bold">• ₹{Number(cab.rate || 3500).toLocaleString('en-IN')}/day</span>
+                              </div>
+                            </div>
+                            <Button
+                              size="sm"
+                              onClick={() => handleAddCabToQuote(cab)}
+                              className="bg-amber-500 hover:bg-amber-600 text-slate-950 font-extrabold text-[11px] h-7 px-2.5 rounded-lg shadow-xs"
+                            >
+                              <Plus className="w-3.5 h-3.5 mr-1" /> Add Cab
+                            </Button>
+                          </div>
+                        ))
                       )}
                     </div>
                   )}
