@@ -25,8 +25,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { 
   Building2, Plus, Search, Edit, Power, Download, Upload, UploadCloud,
   Info, HelpCircle, FileText, CheckCircle2, AlertTriangle, Loader2,
-  MapPin, Star, Users, Phone, Mail, Globe, Sparkles, DollarSign,
-  ArrowRight, Landmark, Calendar, Trash2, Layers, RefreshCw, Clock
+  MapPin, Star, Users, Phone, Mail, Globe, Sparkles, DollarSign, IndianRupee,
+  ArrowRight, Landmark, Calendar, Trash2, Layers, RefreshCw, Clock, Save
 } from 'lucide-react';
 import { reviewService, type GoogleReview } from '@/services/reviewService';
 import { getContractedHotelsMasterList } from '@/data/contractedHotelsDataLoader';
