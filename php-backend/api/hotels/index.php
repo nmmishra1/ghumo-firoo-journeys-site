@@ -62,6 +62,19 @@ try {
     }
 
     // -------------------------------------------------------------------------
+    // ACTION: Atomic Save Bundle (Hotel + Rooms + Seasons + Contract + Rates)
+    // -------------------------------------------------------------------------
+    if ($action === 'save_bundle' && ($method === 'POST' || $method === 'PUT')) {
+        $input = json_decode(file_get_contents('php://input'), true) ?? [];
+        $res = $hotelService->saveHotelBundle($input, $user);
+        if (empty($res['success'])) {
+            http_response_code($res['status_code'] ?? 400);
+        }
+        echo json_encode($res);
+        exit;
+    }
+
+    // -------------------------------------------------------------------------
     // RESTful Routes
     // -------------------------------------------------------------------------
     if ($method === 'GET') {

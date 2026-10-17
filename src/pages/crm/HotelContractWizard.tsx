@@ -1035,15 +1035,83 @@ export const HotelContractWizard: React.FC<HotelContractWizardProps> = ({
 
   const costing = getCostingMetrics();
 
+  // ---------------- EXPRESS 30-SECOND MODE & LOCALSTORAGE DRAFT AUTO-SAVE ----------------
+  const [wizardEntryMode, setWizardEntryMode] = useState<'express' | 'full'>('full');
+  const [expressBaseRate, setExpressBaseRate] = useState<number>(4500);
+  const [expressExtraBedRate, setExpressExtraBedRate] = useState<number>(1200);
+  const [expressMarkup, setExpressMarkup] = useState<number>(800);
+
+  // Restore saved draft when opening Add Hotel wizard
+  useEffect(() => {
+    if (dialogMode !== 'add') return;
+    try {
+      const savedDraft = localStorage.getItem('gf_hotel_wizard_draft_v1');
+      if (savedDraft) {
+        const parsed = JSON.parse(savedDraft);
+        if (parsed?.hotelForm?.hotel_name && !hotelForm.hotel_name) {
+          setHotelForm(prev => ({ ...prev, ...parsed.hotelForm }));
+          if (Array.isArray(parsed.rooms) && parsed.rooms.length > 0) setRooms(parsed.rooms);
+          if (Array.isArray(parsed.selectedMealPlans) && parsed.selectedMealPlans.length > 0) setSelectedMealPlans(parsed.selectedMealPlans);
+          if (parsed.gridRates && typeof parsed.gridRates === 'object') setGridRates(parsed.gridRates);
+        }
+      }
+    } catch (e) {}
+  }, [dialogMode]);
+
+  // Auto-save draft to localStorage on changes in Add mode
+  useEffect(() => {
+    if (dialogMode !== 'add' || !hotelForm.hotel_name) return;
+    try {
+      localStorage.setItem('gf_hotel_wizard_draft_v1', JSON.stringify({
+        hotelForm,
+        rooms,
+        selectedMealPlans,
+        gridRates,
+        savedAt: new Date().toISOString()
+      }));
+    } catch (e) {}
+  }, [dialogMode, hotelForm, rooms, selectedMealPlans, gridRates]);
+
+  // Sync Express Mode rate inputs into gridRates automatically
+  const applyExpressRatesToGrid = (baseDouble: number, extraBed: number, markupVal: number) => {
+    setExpressBaseRate(baseDouble);
+    setExpressExtraBedRate(extraBed);
+    setExpressMarkup(markupVal);
+    setGridRates(prev => {
+      const next = { ...prev };
+      seasons.forEach(s => {
+        rooms.forEach(r => {
+          selectedMealPlans.forEach((plan, pIdx) => {
+            const key = `${s.id}-${r.id}-${plan}`;
+            const mealAddon = plan === 'MAP' ? 900 : plan === 'AP' ? 1600 : plan === 'EP' ? -400 : 0;
+            const rateVal = Math.max(500, baseDouble + mealAddon + (pIdx * 0));
+            next[key] = {
+              ...(next[key] || {}),
+              single_rate: Math.round(rateVal * 0.85),
+              double_rate: rateVal,
+              triple_rate: rateVal + extraBed,
+              extra_adult_rate: extraBed,
+              child_with_bed_rate: Math.round(extraBed * 0.75),
+              child_without_bed_rate: Math.round(extraBed * 0.4),
+              markup: markupVal,
+              rate_type: 'exclusive'
+            };
+          });
+        });
+      });
+      return next;
+    });
+  };
+
   // ---------------- SAVE WIZARD ACTION ----------------
   const handleSaveHotelContract = async (publishStatus: boolean) => {
     if (!hotelForm.hotel_name || !hotelForm.hotel_name.trim()) {
       toast({ 
         title: 'Missing Hotel Name', 
-        description: 'Please specify the Hotel Name on Step 2 before publishing.', 
+        description: 'Please specify the Hotel Name before publishing.', 
         variant: 'destructive' 
       });
-      setActiveStep(2);
+      if (wizardEntryMode === 'full') setActiveStep(2);
       return;
     }
 
@@ -1066,10 +1134,10 @@ export const HotelContractWizard: React.FC<HotelContractWizardProps> = ({
     if (!effectiveCityId && !effectiveCityName && !hotelForm.destination?.trim()) {
       toast({ 
         title: 'Missing Destination City', 
-        description: 'Please specify a City on Step 1 before publishing.', 
+        description: 'Please specify a City / Destination before publishing.', 
         variant: 'destructive' 
       });
-      setActiveStep(1);
+      if (wizardEntryMode === 'full') setActiveStep(1);
       return;
     }
 
@@ -1077,10 +1145,10 @@ export const HotelContractWizard: React.FC<HotelContractWizardProps> = ({
     if (duplicateHotelMatch) {
       toast({
         title: "Duplicate Hotel Error",
-        description: `A hotel named "${duplicateHotelMatch.hotel_name}" already exists in ${hotelForm.city || 'this location'} (Code: ${duplicateHotelMatch.hotel_code || 'N/A'}). Please rename the hotel on Step 2.`,
+        description: `A hotel named "${duplicateHotelMatch.hotel_name}" already exists in ${hotelForm.city || 'this location'} (Code: ${duplicateHotelMatch.hotel_code || 'N/A'}). Please rename the hotel.`,
         variant: "destructive"
       });
-      setActiveStep(2);
+      if (wizardEntryMode === 'full') setActiveStep(2);
       return;
     }
 
@@ -1088,20 +1156,20 @@ export const HotelContractWizard: React.FC<HotelContractWizardProps> = ({
     if (!rooms || rooms.length === 0) {
       toast({
         title: "Missing Room Categories",
-        description: "Please configure at least one room category on Step 3 before publishing.",
+        description: "Please configure at least one room category before publishing.",
         variant: "destructive"
       });
-      setActiveStep(3);
+      if (wizardEntryMode === 'full') setActiveStep(3);
       return;
     }
 
     if (!selectedMealPlans || selectedMealPlans.length === 0) {
       toast({
         title: "Missing Meal Plans",
-        description: "Please select at least one meal plan on Step 4 before publishing.",
+        description: "Please select at least one meal plan before publishing.",
         variant: "destructive"
       });
-      setActiveStep(4);
+      if (wizardEntryMode === 'full') setActiveStep(4);
       return;
     }
 
@@ -1164,9 +1232,119 @@ export const HotelContractWizard: React.FC<HotelContractWizardProps> = ({
         updated_at: new Date().toISOString()
       };
 
+      // Try Single Atomic Transaction (save_bundle) first for <300ms atomic save
+      try {
+        const bundleRates: any[] = [];
+        seasons.forEach(s => {
+          rooms.forEach(r => {
+            selectedMealPlans.forEach(planCode => {
+              const rateKey = `${s.id}-${r.id}-${planCode}`;
+              const clientRate = gridRates[rateKey] || {};
+              const isInclusive = clientRate.rate_type === 'inclusive';
+              const roomRate = Number(clientRate.double_rate) || Number(clientRate.single_rate) || expressBaseRate || 4500;
+              const countryName = selectedCountry?.country_name || hotelForm.country || 'India';
+              const suggestedGst = getSuggestedTaxRate(countryName, roomRate, isInclusive);
+              const gstPercent = (clientRate.gst_percentage !== undefined && clientRate.gst_percentage !== null && clientRate.gst_percentage !== '')
+                ? Number(clientRate.gst_percentage)
+                : suggestedGst;
+              const markup = Number(clientRate.markup) || expressMarkup || 0;
+              const netCost = isInclusive ? roomRate / (1 + (gstPercent / 100)) : roomRate;
+              const gstAmt = isInclusive ? roomRate - netCost : roomRate * (gstPercent / 100);
+              const supplierCost = isInclusive ? roomRate : roomRate + gstAmt;
+
+              bundleRates.push({
+                room_category_id: r.id,
+                room_category_name: r.room_category_name || 'Standard Room',
+                season_id: s.id,
+                season_name: s.name || 'Standard Season',
+                meal_plan_id: planCode,
+                single_rate: Number(clientRate.single_rate) || Math.round(roomRate * 0.85),
+                double_rate: roomRate,
+                triple_rate: Number(clientRate.triple_rate) || (roomRate + expressExtraBedRate),
+                extra_adult_rate: Number(clientRate.extra_adult_rate) || expressExtraBedRate,
+                extra_child_rate: Number(clientRate.extra_child_rate) || Math.round(expressExtraBedRate * 0.75),
+                child_with_bed_rate: Number(clientRate.child_with_bed_rate) || Math.round(expressExtraBedRate * 0.75),
+                child_without_bed_rate: Number(clientRate.child_without_bed_rate) || Math.round(expressExtraBedRate * 0.4),
+                active_status: true,
+                markup,
+                rate_type: clientRate.rate_type || 'exclusive',
+                gst_percentage: gstPercent,
+                gst_amount: gstAmt,
+                net_cost: netCost,
+                supplier_cost: supplierCost,
+                selling_cost: supplierCost + markup,
+                created_at: new Date().toISOString()
+              });
+            });
+          });
+        });
+
+        const bundleRes = await crmFetch('/php-backend/hotels.php?action=save_bundle', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', ...authHeaders },
+          body: JSON.stringify({
+            mode: dialogMode || 'add',
+            hotel_id: selectedItemId || null,
+            hotel: { ...hotelPayload, created_at: new Date().toISOString() },
+            rooms: rooms.map(r => ({
+              client_id: r.id,
+              room_category_name: r.room_category_name || 'Standard Room',
+              room_size: r.room_size || null,
+              max_adults: r.max_adults,
+              max_children: r.max_children,
+              bed_type: r.bed_type || null,
+              room_description: r.room_description || null,
+              facilities: parseJsonArray(r.facilities),
+              room_images: parseJsonArray(r.room_images),
+              active_status: true
+            })),
+            seasons: seasons.map(s => ({
+              client_id: s.id,
+              season_name: s.name || 'Standard Season',
+              season_type: s.type || 'Normal Season',
+              start_date: s.start_date || new Date().toISOString().slice(0, 10),
+              end_date: s.end_date || new Date(Date.now() + 31536000000).toISOString().slice(0, 10)
+            })),
+            contract: {
+              supplier_id: contractDetails.supplier_id === 'none' ? null : contractDetails.supplier_id,
+              contract_name: contractDetails.contract_name || `${hotelForm.hotel_name} Contract`,
+              valid_from: contractDetails.valid_from || new Date().toISOString().slice(0, 10),
+              valid_to: contractDetails.valid_to || new Date(Date.now() + 31536000000).toISOString().slice(0, 10),
+              currency: contractDetails.currency || 'INR',
+              gst_percentage: contractDetails.gst_percentage || 18,
+              payment_policy: contractDetails.payment_policy || null,
+              cancellation_policy: contractDetails.cancellation_policy || null,
+              active_status: publishStatus ? 1 : 0,
+              created_at: new Date().toISOString()
+            },
+            rates: bundleRates,
+            facilities: selectedFacilities
+          })
+        }, {
+          action: 'save_hotel_bundle',
+          module: 'Hotels',
+          itemName: hotelPayload.hotel_name
+        });
+
+        if (bundleRes.ok) {
+          const bData = await bundleRes.json().catch(() => null);
+          if (bData && bData.success) {
+            try { localStorage.removeItem('gf_hotel_wizard_draft_v1'); } catch (e) {}
+            toast({
+              title: publishStatus ? 'Hotel Contract Published' : 'Draft Saved',
+              description: `Atomically saved "${hotelForm.hotel_name}" with ${bData.rooms_saved || rooms.length} rooms and ${bData.rates_saved || bundleRates.length} contracted rates.`
+            });
+            handleCancel();
+            return;
+          }
+        }
+      } catch (bundleErr) {
+        console.warn('Atomic save_bundle fallback to sequential persistence:', bundleErr);
+      }
+
       let hotelId = selectedItemId;
 
-      // 1. Insert/Update Hotel
+      // 1. Insert/Update Hotel (Sequential Fallback)
       if (dialogMode === 'add') {
         const res = await crmFetch('/php-backend/hotels.php', {
           method: 'POST',
@@ -1586,6 +1764,219 @@ export const HotelContractWizard: React.FC<HotelContractWizardProps> = ({
           </CardContent>
         </Card>
 
+        {/* DUAL-MODE ONBOARDING BAR: EXPRESS 30S MODE vs FULL 7-STEP MODE */}
+        <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-2.5 rounded-xl border border-amber-500/30 bg-gradient-to-r from-amber-500/10 via-card to-card">
+          <div className="flex items-center gap-2">
+            <Sparkles className="w-4 h-4 text-amber-500 shrink-0" />
+            <span className="text-xs font-extrabold uppercase tracking-wider text-foreground">Onboarding Mode:</span>
+            <span className="text-[11px] text-muted-foreground hidden sm:inline">
+              {wizardEntryMode === 'express'
+                ? 'Single-card 30-second setup for fast quote turnaround (Atomic Save)'
+                : 'Comprehensive 7-step seasonal & room matrix contracting'}
+            </span>
+          </div>
+          <div className="flex items-center gap-1.5 bg-muted/70 p-1 rounded-lg border border-border">
+            <button
+              type="button"
+              onClick={() => {
+                setWizardEntryMode('express');
+                applyExpressRatesToGrid(expressBaseRate, expressExtraBedRate, expressMarkup);
+              }}
+              className={`px-3 py-1 rounded-md text-[11px] font-extrabold transition-all cursor-pointer ${
+                wizardEntryMode === 'express'
+                  ? 'bg-amber-500 text-slate-950 shadow-sm'
+                  : 'text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              ⚡ Quick 30s Express Mode
+            </button>
+            <button
+              type="button"
+              onClick={() => setWizardEntryMode('full')}
+              className={`px-3 py-1 rounded-md text-[11px] font-extrabold transition-all cursor-pointer ${
+                wizardEntryMode === 'full'
+                  ? 'bg-accent text-slate-950 shadow-sm'
+                  : 'text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              📋 Full 7-Step Contract Mode
+            </button>
+          </div>
+        </div>
+
+        {/* ⚡ EXPRESS 30-SECOND SINGLE-CARD ONBOARDING */}
+        {wizardEntryMode === 'express' && (
+          <Card className="border-amber-500/40 bg-card shadow-md rounded-2xl">
+            <CardHeader className="pb-3 border-b border-border/60">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <div>
+                  <CardTitle className="text-sm font-extrabold flex items-center gap-2 text-foreground">
+                    <Sparkles className="w-4 h-4 text-amber-500" />
+                    ⚡ Express 30-Second Hotel & Tariff Onboarding
+                  </CardTitle>
+                  <CardDescription className="text-xs">
+                    Auto-fetch hotel metadata from Google, enter base tariff &amp; markup, and publish in 1 click via atomic transaction.
+                  </CardDescription>
+                </div>
+                <Badge variant="outline" className="text-[10px] border-emerald-500/40 text-emerald-500 font-bold">
+                  Atomic Bundle Save Active
+                </Badge>
+              </div>
+            </CardHeader>
+            <CardContent className="p-5 space-y-4">
+              {/* 1. Google Auto-Fetch Row */}
+              <div className="p-3 bg-amber-500/10 rounded-xl border border-amber-500/30 space-y-2">
+                <Label className="text-[11px] font-extrabold uppercase tracking-wider text-amber-500 flex items-center gap-1.5">
+                  <Globe className="w-3.5 h-3.5" /> Step 1: Search Google Places / Maps URL (Auto-Fills Name, City, Star Rating &amp; Contact)
+                </Label>
+                <div className="flex gap-2">
+                  <Input
+                    value={googleSearchInput}
+                    onChange={e => setGoogleSearchInput(e.target.value)}
+                    placeholder="e.g., Taj Fort Aguada Resort Goa or paste Google Maps URL..."
+                    className="h-9 text-xs bg-background"
+                    onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); handleFetchFromGoogle(); } }}
+                  />
+                  <Button
+                    type="button"
+                    size="sm"
+                    disabled={isFetchingGoogle}
+                    onClick={handleFetchFromGoogle}
+                    className="h-9 px-4 text-xs font-extrabold bg-amber-500 hover:bg-amber-600 text-slate-950 shrink-0 cursor-pointer"
+                  >
+                    {isFetchingGoogle ? <Loader2 className="w-3.5 h-3.5 animate-spin mr-1" /> : <Sparkles className="w-3.5 h-3.5 mr-1" />}
+                    Auto-Fill
+                  </Button>
+                </div>
+              </div>
+
+              {/* 2. Core Identity & Destination */}
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+                <div className="md:col-span-2 space-y-1">
+                  <Label className="text-[11px] font-bold">Hotel Name *</Label>
+                  <Input
+                    value={hotelForm.hotel_name}
+                    onChange={e => setHotelForm(prev => ({ ...prev, hotel_name: e.target.value }))}
+                    placeholder="Enter hotel or resort name"
+                    className="h-9 text-xs"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <Label className="text-[11px] font-bold">City / Destination *</Label>
+                  <Input
+                    value={hotelForm.city}
+                    onChange={e => {
+                      const cityVal = e.target.value;
+                      const geo = resolveGeography(cityVal);
+                      setHotelForm(prev => ({
+                        ...prev,
+                        city: cityVal,
+                        state: geo?.state || prev.state,
+                        country: geo?.country || prev.country || 'India'
+                      }));
+                    }}
+                    placeholder="e.g., Manali, Goa, Leh"
+                    className="h-9 text-xs"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <Label className="text-[11px] font-bold">Star Category</Label>
+                  <Select
+                    value={String(hotelForm.star_rating || 3)}
+                    onValueChange={val => setHotelForm(prev => ({ ...prev, star_rating: Number(val), category: `${val} Star` }))}
+                  >
+                    <SelectTrigger className="h-9 text-xs">
+                      <SelectValue placeholder="Select Star" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {[2, 3, 4, 5].map(st => (
+                        <SelectItem key={st} value={String(st)}>{st} Star {st === 5 ? 'Luxury' : st === 4 ? 'Premium' : 'Standard'}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              {/* 3. Express Tariff Row */}
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-3 pt-2 border-t border-border/60">
+                <div className="space-y-1">
+                  <Label className="text-[11px] font-bold">Default Room Category</Label>
+                  <Input
+                    value={rooms[0]?.name || 'Deluxe Room'}
+                    onChange={e => {
+                      const val = e.target.value;
+                      setRooms(prev => prev.map((r, i) => i === 0 ? { ...r, name: val } : r));
+                    }}
+                    className="h-9 text-xs"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <Label className="text-[11px] font-bold text-emerald-500">Net Double Rate (₹ / Night) *</Label>
+                  <Input
+                    type="number"
+                    value={expressBaseRate}
+                    onChange={e => applyExpressRatesToGrid(Number(e.target.value) || 0, expressExtraBedRate, expressMarkup)}
+                    className="h-9 text-xs font-bold"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <Label className="text-[11px] font-bold">Extra Bed / Adult (₹)</Label>
+                  <Input
+                    type="number"
+                    value={expressExtraBedRate}
+                    onChange={e => applyExpressRatesToGrid(expressBaseRate, Number(e.target.value) || 0, expressMarkup)}
+                    className="h-9 text-xs"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <Label className="text-[11px] font-bold text-amber-500">Agency Markup (₹ / Night)</Label>
+                  <Input
+                    type="number"
+                    value={expressMarkup}
+                    onChange={e => applyExpressRatesToGrid(expressBaseRate, expressExtraBedRate, Number(e.target.value) || 0)}
+                    className="h-9 text-xs font-bold"
+                  />
+                </div>
+              </div>
+
+              {/* 4. Express Action Footer */}
+              <div className="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-border/60">
+                <div className="text-[11px] text-muted-foreground">
+                  Client Selling Rate (CP Double):{' '}
+                  <span className="font-extrabold text-foreground">
+                    ₹{(expressBaseRate + expressMarkup).toLocaleString('en-IN')}
+                  </span>{' '}
+                  + {getSuggestedTaxRate(expressBaseRate + expressMarkup)}% GST • Meal Plans: {selectedMealPlans.join(', ')}
+                </div>
+                <div className="flex items-center gap-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setWizardEntryMode('full')}
+                    className="h-9 text-xs font-bold rounded-xl cursor-pointer"
+                  >
+                    Fine-Tune in 7-Step Grid
+                  </Button>
+                  <Button
+                    type="button"
+                    size="sm"
+                    disabled={isSaving}
+                    onClick={() => {
+                      applyExpressRatesToGrid(expressBaseRate, expressExtraBedRate, expressMarkup);
+                      setTimeout(() => handleSaveHotelContract(true), 50);
+                    }}
+                    className="h-9 px-5 text-xs font-extrabold bg-gradient-to-r from-[#c5a059] to-[#d4af37] text-slate-950 hover:opacity-90 rounded-xl shadow-md cursor-pointer"
+                  >
+                    {isSaving ? <Loader2 className="w-3.5 h-3.5 animate-spin mr-1.5" /> : <Save className="w-3.5 h-3.5 mr-1.5" />}
+                    ⚡ 1-Click Publish Hotel &amp; Rates
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
         {/* PROGRESS INDICATOR */}
         <Card className="border-border bg-card shadow-sm rounded-xl">
           <CardContent className="p-4">
@@ -1606,7 +1997,10 @@ export const HotelContractWizard: React.FC<HotelContractWizardProps> = ({
                   <div 
                     key={stepName} 
                     className="flex items-center gap-1.5 cursor-pointer"
-                    onClick={() => setActiveStep(stepNum)}
+                    onClick={() => {
+                      setWizardEntryMode('full');
+                      setActiveStep(stepNum);
+                    }}
                   >
                     <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold transition-all ${
                       isCurrent 

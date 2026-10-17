@@ -998,25 +998,36 @@ export const HotelContracting: React.FC = () => {
 
   const fetchRoomsAndSeasons = async (hotelId: string) => {
     try {
-      const res = await fetch('/php-backend/api.php?table=room_categories');
-      if (!res.ok) throw new Error('Failed to fetch room categories');
-      const allRooms = await res.json();
-      const rooms = allRooms.filter((r: any) => r.hotel_id === hotelId);
-      setRoomCategories(rooms || []);
+      const [roomsRes, seasonsRes] = await Promise.all([
+        fetch('/php-backend/api.php?table=room_categories').catch(() => null),
+        fetch('/php-backend/api.php?table=seasons').catch(() => null)
+      ]);
 
-      // Only query Supabase for proper UUID hotel IDs; local MySQL hotels use integers
-      if (!isUUID(hotelId)) {
-        setSeasons([]);
-        return;
+      if (roomsRes && roomsRes.ok) {
+        const allRooms = await roomsRes.json();
+        const rooms = Array.isArray(allRooms) ? allRooms.filter((r: any) => String(r.hotel_id) === String(hotelId)) : [];
+        setRoomCategories(rooms);
       }
 
-      const { data: sns, error: sErr } = await supabase
-        .from('seasons')
-        .select('*')
-        .eq('hotel_id', hotelId)
-        .order('start_date');
-      if (sErr) throw sErr;
-      setSeasons(sns || []);
+      if (seasonsRes && seasonsRes.ok) {
+        const allSeasons = await seasonsRes.json();
+        const mySeasons = Array.isArray(allSeasons) ? allSeasons.filter((s: any) => String(s.hotel_id) === String(hotelId)) : [];
+        if (mySeasons.length > 0 || !isUUID(hotelId)) {
+          setSeasons(mySeasons);
+          return;
+        }
+      }
+
+      if (isUUID(hotelId)) {
+        const { data: sns } = await supabase
+          .from('seasons')
+          .select('*')
+          .eq('hotel_id', hotelId)
+          .order('start_date');
+        setSeasons(sns || []);
+      } else {
+        setSeasons([]);
+      }
     } catch (err: any) {
       toast({ title: 'Error loading master configurations', description: err.message, variant: 'destructive' });
     }
@@ -1024,7 +1035,20 @@ export const HotelContracting: React.FC = () => {
 
   const fetchContractsForHotel = async (hotelId: string) => {
     try {
-      // Local MySQL hotels use integer IDs — Supabase requires UUID; skip to avoid 400 errors
+      // First query MySQL hotel_contracts via api.php (supports all hotel ID formats)
+      const res = await fetch('/php-backend/api.php?table=hotel_contracts').catch(() => null);
+      if (res && res.ok) {
+        const allContracts = await res.json();
+        const myContracts = Array.isArray(allContracts)
+          ? allContracts.filter((c: any) => String(c.hotel_id) === String(hotelId))
+          : [];
+        if (myContracts.length > 0 || !isUUID(hotelId)) {
+          setContracts(myContracts);
+          setSelectedContractId(myContracts.length > 0 ? String(myContracts[0].id) : '');
+          return;
+        }
+      }
+
       if (!isUUID(hotelId)) {
         setContracts([]);
         setSelectedContractId('');
@@ -1038,12 +1062,7 @@ export const HotelContracting: React.FC = () => {
         .order('valid_from', { ascending: false });
       if (error) throw error;
       setContracts(data || []);
-      
-      if (data && data.length > 0) {
-        setSelectedContractId(data[0].id);
-      } else {
-        setSelectedContractId('');
-      }
+      setSelectedContractId(data && data.length > 0 ? data[0].id : '');
     } catch (err: any) {
       console.error('Error fetching hotel contracts:', err);
     }
@@ -1051,6 +1070,35 @@ export const HotelContracting: React.FC = () => {
 
   const fetchContractRates = async (contractId: string) => {
     try {
+      const [ratesRes, roomsRes, seasonsRes] = await Promise.all([
+        fetch('/php-backend/api.php?table=hotel_contract_rates').catch(() => null),
+        fetch('/php-backend/api.php?table=room_categories').catch(() => null),
+        fetch('/php-backend/api.php?table=seasons').catch(() => null)
+      ]);
+
+      const allRooms = (roomsRes && roomsRes.ok) ? await roomsRes.json() : [];
+      const allSeasons = (seasonsRes && seasonsRes.ok) ? await seasonsRes.json() : [];
+
+      if (ratesRes && ratesRes.ok) {
+        const allRates = await ratesRes.json();
+        const myRates = Array.isArray(allRates)
+          ? allRates.filter((r: any) => String(r.contract_id) === String(contractId))
+          : [];
+        if (myRates.length > 0 || !isUUID(contractId)) {
+          const mapped = myRates.map((rate: any) => {
+            const roomCat = Array.isArray(allRooms) ? allRooms.find((rc: any) => String(rc.id) === String(rate.room_category_id)) : null;
+            const sn = Array.isArray(allSeasons) ? allSeasons.find((s: any) => String(s.id) === String(rate.season_id)) : null;
+            return {
+              ...rate,
+              seasons: sn ? { season_name: sn.season_name } : null,
+              room_categories: roomCat ? { room_category_name: roomCat.room_category_name } : null
+            };
+          });
+          setContractRates(mapped);
+          return;
+        }
+      }
+
       const { data: rates, error } = await supabase
         .from('hotel_contract_rates')
         .select('*, seasons(season_name)')
@@ -1058,12 +1106,8 @@ export const HotelContracting: React.FC = () => {
         .order('created_at');
       if (error) throw error;
 
-      const res = await fetch('/php-backend/api.php?table=room_categories');
-      if (!res.ok) throw new Error('Failed to fetch room categories');
-      const allRooms = await res.json();
-
       const mappedRates = (rates || []).map((rate: any) => {
-        const roomCat = allRooms.find((rc: any) => rc.id === rate.room_category_id);
+        const roomCat = Array.isArray(allRooms) ? allRooms.find((rc: any) => rc.id === rate.room_category_id) : null;
         return {
           ...rate,
           room_categories: roomCat ? { room_category_name: roomCat.room_category_name } : null

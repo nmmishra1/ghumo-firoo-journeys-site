@@ -514,4 +514,153 @@ class HotelService
             ]
         ];
     }
+
+    /**
+     * Atomic Save Bundle: Saves Hotel + Room Categories + Seasons + Contract + Rates + Facilities in a single transaction
+     */
+    public function saveHotelBundle(array $bundle, ?array $user = null): array
+    {
+        $mode = $bundle['mode'] ?? 'add';
+        $hotelInput = $bundle['hotel'] ?? [];
+        $roomsInput = $bundle['rooms'] ?? [];
+        $seasonsInput = $bundle['seasons'] ?? [];
+        $contractInput = $bundle['contract'] ?? [];
+        $ratesInput = $bundle['rates'] ?? [];
+        $facilitiesInput = $bundle['facilities'] ?? [];
+
+        if (empty($hotelInput['hotel_name'])) {
+            return ['success' => false, 'error' => 'Hotel name is required', 'status_code' => 400];
+        }
+
+        $startedTx = false;
+        if (!$this->pdo->inTransaction()) {
+            $this->pdo->beginTransaction();
+            $startedTx = true;
+        }
+
+        try {
+            // 1. Create or Update Hotel
+            if ($mode === 'edit' && !empty($bundle['hotel_id'])) {
+                $hotelId = (string)$bundle['hotel_id'];
+                $hRes = $this->updateHotel($hotelId, $hotelInput, 'update_hotel_bundle', $user);
+                if (empty($hRes['success'])) {
+                    if ($startedTx) $this->pdo->rollBack();
+                    return $hRes;
+                }
+            } else {
+                $hRes = $this->createHotel($hotelInput, $user);
+                if (empty($hRes['success'])) {
+                    if ($startedTx) $this->pdo->rollBack();
+                    return $hRes;
+                }
+                $hotelId = (string)$hRes['id'];
+            }
+
+            // Helper to dynamically insert into child tables based on DESCRIBE columns
+            $insertRow = function (string $table, array $row): string {
+                $colsStmt = $this->pdo->query("DESCRIBE `$table`");
+                $validCols = $colsStmt->fetchAll(PDO::FETCH_COLUMN) ?: [];
+                $filtered = [];
+                foreach ($row as $k => $v) {
+                    if (in_array($k, $validCols, true)) {
+                        $filtered[$k] = (is_array($v) || is_object($v)) ? json_encode($v) : $v;
+                    }
+                }
+                if (in_array('id', $validCols, true) && empty($filtered['id'])) {
+                    $filtered['id'] = substr($table, 0, 4) . '-' . uniqid('', true);
+                }
+                $cols = array_keys($filtered);
+                $placeholders = array_map(fn($c) => ":$c", $cols);
+                $sql = "INSERT INTO `$table` (`" . implode("`, `", $cols) . "`) VALUES (" . implode(", ", $placeholders) . ")";
+                $params = array_combine($placeholders, array_values($filtered));
+                $this->pdo->prepare($sql)->execute($params);
+                return (string)($filtered['id'] ?? $this->pdo->lastInsertId());
+            };
+
+            // 2. Refresh child records cleanly inside the transaction
+            if ($mode === 'edit') {
+                foreach (['room_categories', 'seasons', 'hotel_contracts', 'hotel_facility_mapping'] as $tbl) {
+                    try {
+                        $this->pdo->prepare("DELETE FROM `$tbl` WHERE hotel_id = ?")->execute([$hotelId]);
+                    } catch (Throwable $ignore) {}
+                }
+            }
+
+            // 3. Insert Room Categories and map client room name/key -> saved ID
+            $roomMap = [];
+            foreach ($roomsInput as $r) {
+                $r['hotel_id'] = $hotelId;
+                $savedRoomId = $insertRow('room_categories', $r);
+                $roomMap[$r['room_category_name'] ?? 'Standard Room'] = $savedRoomId;
+                if (!empty($r['client_id'])) {
+                    $roomMap[$r['client_id']] = $savedRoomId;
+                }
+            }
+
+            // 4. Insert Seasons and map client season name/key -> saved ID
+            $seasonMap = [];
+            foreach ($seasonsInput as $s) {
+                $s['hotel_id'] = $hotelId;
+                $savedSeasonId = $insertRow('seasons', $s);
+                $seasonMap[$s['season_name'] ?? 'Standard Season'] = $savedSeasonId;
+                if (!empty($s['client_id'])) {
+                    $seasonMap[$s['client_id']] = $savedSeasonId;
+                }
+            }
+
+            // 5. Insert Contract
+            $contractInput['hotel_id'] = $hotelId;
+            $savedContractId = $insertRow('hotel_contracts', $contractInput);
+
+            // 6. Insert Contract Rates
+            $savedRatesCount = 0;
+            foreach ($ratesInput as $rate) {
+                $rate['contract_id'] = $savedContractId;
+                $rKey = $rate['room_category_id'] ?? ($rate['room_category_name'] ?? '');
+                $sKey = $rate['season_id'] ?? ($rate['season_name'] ?? '');
+                if (isset($roomMap[$rKey])) {
+                    $rate['room_category_id'] = $roomMap[$rKey];
+                }
+                if (isset($seasonMap[$sKey])) {
+                    $rate['season_id'] = $seasonMap[$sKey];
+                }
+                try {
+                    $insertRow('hotel_contract_rates', $rate);
+                    $savedRatesCount++;
+                } catch (Throwable $rateErr) {}
+            }
+
+            // 7. Insert Facility Mappings
+            foreach (array_unique(array_filter($facilitiesInput)) as $facId) {
+                try {
+                    $insertRow('hotel_facility_mapping', [
+                        'hotel_id' => $hotelId,
+                        'facility_id' => (string)$facId
+                    ]);
+                } catch (Throwable $facErr) {}
+            }
+
+            if ($startedTx) {
+                $this->pdo->commit();
+            }
+
+            return [
+                'success' => true,
+                'hotel_id' => $hotelId,
+                'contract_id' => $savedContractId,
+                'rooms_saved' => count($roomMap),
+                'rates_saved' => $savedRatesCount,
+                'message' => 'Hotel contract bundle saved atomically.'
+            ];
+        } catch (Throwable $e) {
+            if ($startedTx && $this->pdo->inTransaction()) {
+                $this->pdo->rollBack();
+            }
+            return [
+                'success' => false,
+                'error' => 'Bundle transaction failed: ' . $e->getMessage(),
+                'status_code' => 500
+            ];
+        }
+    }
 }
