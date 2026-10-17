@@ -261,7 +261,18 @@ export const HotelContracting: React.FC = () => {
     max_children: 2,
     bed_type: 'King Bed',
     room_description: '',
-    active_status: true
+    active_status: true,
+    meal_plan_id: 'CP',
+    season_id: '',
+    single_rate: 0 as number | string,
+    double_rate: 0 as number | string,
+    triple_rate: 0 as number | string,
+    extra_adult_rate: 0 as number | string,
+    child_with_bed_rate: 0 as number | string,
+    child_without_bed_rate: 0 as number | string,
+    map_double_rate: 0 as number | string,
+    rate_type: 'exclusive' as 'exclusive' | 'inclusive',
+    gst_percentage: 12 as number | string
   });
 
   const [seasonForm, setSeasonForm] = useState({
@@ -464,8 +475,11 @@ export const HotelContracting: React.FC = () => {
           });
         }
       } else if (dialogType === 'room' && roomCategories.length > 0) {
-        const item = roomCategories.find(r => r.id === selectedItemId);
+        const item = roomCategories.find(r => String(r.id) === String(selectedItemId));
         if (item) {
+          const roomRates = contractRates.filter(cr => String(cr.room_category_id) === String(item.id));
+          const cpRate = roomRates.find(cr => String(cr.meal_plan_id).toUpperCase() === 'CP') || roomRates[0] || null;
+          const mapRate = roomRates.find(cr => String(cr.meal_plan_id).toUpperCase() === 'MAP') || null;
           setRoomForm({
             room_category_name: item.room_category_name,
             room_size: item.room_size || '',
@@ -473,7 +487,18 @@ export const HotelContracting: React.FC = () => {
             max_children: item.max_children,
             bed_type: item.bed_type || '',
             room_description: item.room_description || '',
-            active_status: item.active_status
+            active_status: item.active_status,
+            meal_plan_id: cpRate?.meal_plan_id || 'CP',
+            season_id: cpRate?.season_id ? String(cpRate.season_id) : (seasons[0]?.id ? String(seasons[0].id) : ''),
+            single_rate: cpRate ? Number(cpRate.single_rate || 0) : 0,
+            double_rate: cpRate ? Number(cpRate.double_rate || 0) : 0,
+            triple_rate: cpRate ? Number(cpRate.triple_rate || 0) : 0,
+            extra_adult_rate: cpRate ? Number(cpRate.extra_adult_rate || 0) : 0,
+            child_with_bed_rate: cpRate ? Number(cpRate.child_with_bed_rate || 0) : 0,
+            child_without_bed_rate: cpRate ? Number(cpRate.child_without_bed_rate || 0) : 0,
+            map_double_rate: mapRate ? Number(mapRate.double_rate || 0) : 0,
+            rate_type: (cpRate?.rate_type as 'exclusive' | 'inclusive') || 'exclusive',
+            gst_percentage: cpRate?.gst_percentage !== undefined && cpRate?.gst_percentage !== null ? Number(cpRate.gst_percentage) : 12
           });
         }
       } else if (dialogType === 'season' && seasons.length > 0) {
@@ -543,7 +568,24 @@ export const HotelContracting: React.FC = () => {
         });
       } else if (dialogType === 'room') {
         setRoomForm({
-          room_category_name: '', room_size: '', max_adults: 2, max_children: 1, bed_type: '', room_description: '', active_status: true
+          room_category_name: '',
+          room_size: '280',
+          max_adults: 2,
+          max_children: 1,
+          bed_type: 'Double Bed',
+          room_description: '',
+          active_status: true,
+          meal_plan_id: 'CP',
+          season_id: seasons[0]?.id ? String(seasons[0].id) : '',
+          single_rate: 0,
+          double_rate: 0,
+          triple_rate: 0,
+          extra_adult_rate: 0,
+          child_with_bed_rate: 0,
+          child_without_bed_rate: 0,
+          map_double_rate: 0,
+          rate_type: 'exclusive',
+          gst_percentage: 12
         });
       } else if (dialogType === 'season') {
         setSeasonForm({
@@ -998,24 +1040,48 @@ export const HotelContracting: React.FC = () => {
 
   const fetchRoomsAndSeasons = async (hotelId: string) => {
     try {
-      const [roomsRes, seasonsRes] = await Promise.all([
+      const [roomsRes, seasonsRes, ratesRes] = await Promise.all([
         fetch('/php-backend/api.php?table=room_categories').catch(() => null),
-        fetch('/php-backend/api.php?table=seasons').catch(() => null)
+        fetch('/php-backend/api.php?table=seasons').catch(() => null),
+        fetch('/php-backend/api.php?table=hotel_contract_rates').catch(() => null)
       ]);
 
+      let hotelRooms: any[] = [];
       if (roomsRes && roomsRes.ok) {
         const allRooms = await roomsRes.json();
-        const rooms = Array.isArray(allRooms) ? allRooms.filter((r: any) => String(r.hotel_id) === String(hotelId)) : [];
-        setRoomCategories(rooms);
+        hotelRooms = Array.isArray(allRooms) ? allRooms.filter((r: any) => String(r.hotel_id) === String(hotelId)) : [];
+        setRoomCategories(hotelRooms);
       }
 
+      let hotelSeasons: any[] = [];
       if (seasonsRes && seasonsRes.ok) {
         const allSeasons = await seasonsRes.json();
-        const mySeasons = Array.isArray(allSeasons) ? allSeasons.filter((s: any) => String(s.hotel_id) === String(hotelId)) : [];
-        if (mySeasons.length > 0 || !isUUID(hotelId)) {
-          setSeasons(mySeasons);
-          return;
+        hotelSeasons = Array.isArray(allSeasons) ? allSeasons.filter((s: any) => String(s.hotel_id) === String(hotelId)) : [];
+      }
+
+      if (ratesRes && ratesRes.ok && hotelRooms.length > 0) {
+        const allRates = await ratesRes.json();
+        const roomIds = new Set(hotelRooms.map((r: any) => String(r.id)));
+        const matchingRates = Array.isArray(allRates)
+          ? allRates.filter((rt: any) => roomIds.has(String(rt.room_category_id)))
+          : [];
+        if (matchingRates.length > 0) {
+          const mapped = matchingRates.map((rate: any) => {
+            const roomCat = hotelRooms.find((rc: any) => String(rc.id) === String(rate.room_category_id));
+            const sn = hotelSeasons.find((s: any) => String(s.id) === String(rate.season_id));
+            return {
+              ...rate,
+              seasons: sn ? { season_name: sn.season_name } : null,
+              room_categories: roomCat ? { room_category_name: roomCat.room_category_name } : null
+            };
+          });
+          setContractRates(mapped);
         }
+      }
+
+      if (hotelSeasons.length > 0 || !isUUID(hotelId)) {
+        setSeasons(hotelSeasons);
+        return;
       }
 
       if (isUUID(hotelId)) {
@@ -1078,11 +1144,16 @@ export const HotelContracting: React.FC = () => {
 
       const allRooms = (roomsRes && roomsRes.ok) ? await roomsRes.json() : [];
       const allSeasons = (seasonsRes && seasonsRes.ok) ? await seasonsRes.json() : [];
+      const hotelRoomIds = new Set(
+        Array.isArray(allRooms)
+          ? allRooms.filter((rc: any) => String(rc.hotel_id) === String(selectedHotelId)).map((rc: any) => String(rc.id))
+          : []
+      );
 
       if (ratesRes && ratesRes.ok) {
         const allRates = await ratesRes.json();
         const myRates = Array.isArray(allRates)
-          ? allRates.filter((r: any) => String(r.contract_id) === String(contractId))
+          ? allRates.filter((r: any) => String(r.contract_id) === String(contractId) || hotelRoomIds.has(String(r.room_category_id)))
           : [];
         if (myRates.length > 0 || !isUUID(contractId)) {
           const mapped = myRates.map((rate: any) => {
@@ -1287,25 +1358,171 @@ export const HotelContracting: React.FC = () => {
           setSuppliers(data || []);
         }
       } else if (dialogType === 'room') {
-        const payload = { ...roomForm, hotel_id: selectedHotelId };
+        const authHeaders = await getAuthHeader();
+        const roomPayload = {
+          room_category_name: roomForm.room_category_name,
+          room_size: roomForm.room_size,
+          max_adults: Number(roomForm.max_adults) || 2,
+          max_children: Number(roomForm.max_children) || 1,
+          bed_type: roomForm.bed_type,
+          room_description: roomForm.room_description,
+          active_status: roomForm.active_status,
+          hotel_id: selectedHotelId
+        };
+
+        let savedRoomId = selectedItemId || '';
         if (dialogMode === 'add') {
           const res = await fetch('/php-backend/api.php?table=room_categories', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
+            headers: { 'Content-Type': 'application/json', ...authHeaders },
+            body: JSON.stringify(roomPayload)
           });
           if (!res.ok) throw new Error('Failed to add room category');
-          toast({ title: 'Success', description: 'Room Category added' });
+          const resData = await res.json().catch(() => ({}));
+          if (resData?.id) savedRoomId = String(resData.id);
         } else {
           const res = await fetch(`/php-backend/api.php?table=room_categories&id=${selectedItemId}`, {
             method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
+            headers: { 'Content-Type': 'application/json', ...authHeaders },
+            body: JSON.stringify(roomPayload)
           });
           if (!res.ok) throw new Error('Failed to update room category');
-          toast({ title: 'Success', description: 'Room Category updated' });
         }
-        fetchRoomsAndSeasons(selectedHotelId);
+
+        // Direct Room Category Tariff Save: if a price is entered, automatically upsert contract + rate rows
+        const doubleRateVal = Number(roomForm.double_rate) || 0;
+        const singleRateVal = Number(roomForm.single_rate) || (doubleRateVal > 0 ? Math.round(doubleRateVal * 0.85) : 0);
+        const extraAdultVal = Number(roomForm.extra_adult_rate) || 0;
+        const tripleRateVal = Number(roomForm.triple_rate) || (doubleRateVal > 0 ? doubleRateVal + extraAdultVal : 0);
+        const cwbVal = Number(roomForm.child_with_bed_rate) || 0;
+        const cwobVal = Number(roomForm.child_without_bed_rate) || 0;
+        const mapDoubleVal = Number(roomForm.map_double_rate) || 0;
+
+        if (savedRoomId && (doubleRateVal > 0 || singleRateVal > 0 || mapDoubleVal > 0)) {
+          let targetContractId = selectedContractId || (contracts[0]?.id ? String(contracts[0].id) : '');
+
+          // Auto-create an active contract for this hotel if none exists yet
+          if (!targetContractId) {
+            const targetHotel = hotels.find(h => String(h.id) === String(selectedHotelId));
+            const todayStr = new Date().toISOString().split('T')[0];
+            const nextYearStr = new Date(Date.now() + 365 * 86400000).toISOString().split('T')[0];
+            const cRes = await fetch('/php-backend/api.php?table=hotel_contracts', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json', ...authHeaders },
+              body: JSON.stringify({
+                hotel_id: selectedHotelId,
+                contract_name: `${targetHotel?.hotel_name || 'Hotel'} - Direct Tariff Contract`,
+                valid_from: todayStr,
+                valid_to: nextYearStr,
+                currency: 'INR',
+                gst_percentage: Number(roomForm.gst_percentage) || (doubleRateVal >= 7500 ? 18 : 12),
+                active_status: true
+              })
+            });
+            if (cRes.ok) {
+              const cData = await cRes.json().catch(() => ({}));
+              if (cData?.id) {
+                targetContractId = String(cData.id);
+                setSelectedContractId(targetContractId);
+              }
+            }
+          }
+
+          const targetSeasonId = roomForm.season_id || (seasons[0]?.id ? String(seasons[0].id) : 'season-normal');
+          const primaryPlan = (roomForm.meal_plan_id || 'CP').toUpperCase();
+          const autoGst = Number(roomForm.gst_percentage) || (doubleRateVal >= 7500 ? 18 : 12);
+
+          if (targetContractId && (doubleRateVal > 0 || singleRateVal > 0)) {
+            const existingPrimary = contractRates.find(
+              cr => String(cr.room_category_id) === String(savedRoomId) && String(cr.meal_plan_id).toUpperCase() === primaryPlan
+            );
+            const gstAmt = Math.round(doubleRateVal * (autoGst / 100));
+            const supplierTotal = doubleRateVal + gstAmt;
+            const ratePayload = {
+              contract_id: targetContractId,
+              room_category_id: savedRoomId,
+              season_id: targetSeasonId,
+              meal_plan_id: primaryPlan,
+              single_rate: singleRateVal,
+              double_rate: doubleRateVal,
+              triple_rate: tripleRateVal,
+              extra_adult_rate: extraAdultVal,
+              child_with_bed_rate: cwbVal,
+              child_without_bed_rate: cwobVal,
+              rate_type: roomForm.rate_type || 'exclusive',
+              gst_percentage: autoGst,
+              gst_amount: gstAmt,
+              net_cost: doubleRateVal,
+              supplier_cost: supplierTotal,
+              selling_cost: supplierTotal,
+              active_status: true
+            };
+            if (existingPrimary?.id) {
+              await fetch(`/php-backend/api.php?table=hotel_contract_rates&id=${existingPrimary.id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json', ...authHeaders },
+                body: JSON.stringify(ratePayload)
+              });
+            } else {
+              await fetch('/php-backend/api.php?table=hotel_contract_rates', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', ...authHeaders },
+                body: JSON.stringify(ratePayload)
+              });
+            }
+          }
+
+          // Also save MAP rate if entered alongside CP
+          if (targetContractId && mapDoubleVal > 0 && primaryPlan !== 'MAP') {
+            const existingMap = contractRates.find(
+              cr => String(cr.room_category_id) === String(savedRoomId) && String(cr.meal_plan_id).toUpperCase() === 'MAP'
+            );
+            const mapGst = mapDoubleVal >= 7500 ? 18 : 12;
+            const mapGstAmt = Math.round(mapDoubleVal * (mapGst / 100));
+            const mapSupplierTotal = mapDoubleVal + mapGstAmt;
+            const mapPayload = {
+              contract_id: targetContractId,
+              room_category_id: savedRoomId,
+              season_id: targetSeasonId,
+              meal_plan_id: 'MAP',
+              single_rate: Math.round(mapDoubleVal * 0.85),
+              double_rate: mapDoubleVal,
+              triple_rate: mapDoubleVal + extraAdultVal,
+              extra_adult_rate: extraAdultVal,
+              child_with_bed_rate: cwbVal,
+              child_without_bed_rate: cwobVal,
+              rate_type: roomForm.rate_type || 'exclusive',
+              gst_percentage: mapGst,
+              gst_amount: mapGstAmt,
+              net_cost: mapDoubleVal,
+              supplier_cost: mapSupplierTotal,
+              selling_cost: mapSupplierTotal,
+              active_status: true
+            };
+            if (existingMap?.id) {
+              await fetch(`/php-backend/api.php?table=hotel_contract_rates&id=${existingMap.id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json', ...authHeaders },
+                body: JSON.stringify(mapPayload)
+              });
+            } else {
+              await fetch('/php-backend/api.php?table=hotel_contract_rates', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', ...authHeaders },
+                body: JSON.stringify(mapPayload)
+              });
+            }
+          }
+        }
+
+        toast({
+          title: dialogMode === 'add' ? 'Room Category & Price Added' : 'Room Category & Price Updated',
+          description: doubleRateVal > 0
+            ? `${roomForm.room_category_name} saved with ${roomForm.meal_plan_id} tariff ₹${doubleRateVal.toLocaleString('en-IN')}/night.`
+            : `${roomForm.room_category_name} saved successfully.`
+        });
+        await fetchRoomsAndSeasons(selectedHotelId);
+        await fetchContractsForHotel(selectedHotelId);
       } else if (dialogType === 'season') {
         const payload = { ...seasonForm, hotel_id: selectedHotelId };
         const authHeaders = await getAuthHeader();
@@ -2103,12 +2320,12 @@ export const HotelContracting: React.FC = () => {
               </div>
             )}
 
-            {/* C. ROOM CATEGORY CRUD FORM */}
+            {/* C. ROOM CATEGORY CRUD FORM + DIRECT TARIFF PRICING */}
             {dialogType === 'room' && (
-              <div className="space-y-3.5">
+              <div className="space-y-4">
                 <div className="space-y-1">
-                  <Label htmlFor="r_name">Room Category Name</Label>
-                  <Input autoComplete="name" id="r_name" value={roomForm.room_category_name} onChange={e => setRoomForm({...roomForm, room_category_name: e.target.value})} placeholder="e.g. Deluxe Garden View" required />
+                  <Label htmlFor="r_name">Room Category Name *</Label>
+                  <Input autoComplete="name" id="r_name" value={roomForm.room_category_name} onChange={e => setRoomForm({...roomForm, room_category_name: e.target.value})} placeholder="e.g. Deluxe Garden View / Super Deluxe / Suite" required />
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-1">
@@ -2130,6 +2347,153 @@ export const HotelContracting: React.FC = () => {
                     <Input id="r_chi" type="number" value={roomForm.max_children} onChange={e => setRoomForm({...roomForm, max_children: parseInt(e.target.value) || 2})} required />
                   </div>
                 </div>
+
+                {/* 💰 DIRECT ROOM CATEGORY PRICE / TARIFF SECTION */}
+                <div className="p-4 rounded-xl border border-amber-500/40 bg-amber-500/5 space-y-3">
+                  <div className="flex flex-wrap items-center justify-between gap-2 border-b border-amber-500/20 pb-2">
+                    <div>
+                      <h4 className="text-xs font-extrabold uppercase tracking-wider text-amber-500 flex items-center gap-1.5">
+                        <IndianRupee className="w-3.5 h-3.5" /> Room Category Price / Tariff (Direct Save)
+                      </h4>
+                      <p className="text-[10px] text-muted-foreground font-normal">
+                        Enter the price for this room category directly—no need to edit the entire hotel.
+                      </p>
+                    </div>
+                    <Badge variant="outline" className="text-[10px] border-emerald-500/40 text-emerald-500 font-bold">
+                      Auto-Syncs to Quote Builder
+                    </Badge>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div className="space-y-1">
+                      <Label htmlFor="r_meal">Primary Meal Plan</Label>
+                      <Select value={roomForm.meal_plan_id} onValueChange={val => setRoomForm({...roomForm, meal_plan_id: val})}>
+                        <SelectTrigger id="r_meal" className="h-9 text-xs"><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="CP">CP (Room + Breakfast)</SelectItem>
+                          <SelectItem value="MAP">MAP (Breakfast + Lunch/Dinner)</SelectItem>
+                          <SelectItem value="EP">EP (Room Only)</SelectItem>
+                          <SelectItem value="AP">AP (All Meals)</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-1">
+                      <Label htmlFor="r_season">Applicable Season</Label>
+                      <Select
+                        value={roomForm.season_id || (seasons[0]?.id ? String(seasons[0].id) : 'season-normal')}
+                        onValueChange={val => setRoomForm({...roomForm, season_id: val})}
+                      >
+                        <SelectTrigger id="r_season" className="h-9 text-xs"><SelectValue placeholder="All / Normal Season" /></SelectTrigger>
+                        <SelectContent>
+                          {seasons.length > 0 ? (
+                            seasons.map(sn => (
+                              <SelectItem key={sn.id} value={String(sn.id)}>{sn.season_name} ({sn.season_type})</SelectItem>
+                            ))
+                          ) : (
+                            <SelectItem value="season-normal">Standard / All-Year Season</SelectItem>
+                          )}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div className="space-y-1">
+                      <Label htmlFor="r_dbl" className="text-emerald-500 font-extrabold">
+                        {roomForm.meal_plan_id} Double Rate (₹ / Night) *
+                      </Label>
+                      <Input
+                        id="r_dbl"
+                        type="number"
+                        value={roomForm.double_rate}
+                        onChange={e => {
+                          const dbl = Number(e.target.value) || 0;
+                          const ext = Number(roomForm.extra_adult_rate) || 0;
+                          setRoomForm(prev => ({
+                            ...prev,
+                            double_rate: e.target.value,
+                            single_rate: Number(prev.single_rate) > 0 ? prev.single_rate : Math.round(dbl * 0.85),
+                            triple_rate: Number(prev.triple_rate) > 0 ? prev.triple_rate : (dbl + ext),
+                            gst_percentage: dbl >= 7500 ? 18 : 12
+                          }));
+                        }}
+                        placeholder="e.g. 3500"
+                        className="h-9 text-xs font-extrabold border-emerald-500/40"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <Label htmlFor="r_sgl">Single Occupancy Rate (₹)</Label>
+                      <Input
+                        id="r_sgl"
+                        type="number"
+                        value={roomForm.single_rate}
+                        onChange={e => setRoomForm({...roomForm, single_rate: e.target.value})}
+                        placeholder="e.g. 3000"
+                        className="h-9 text-xs"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <Label htmlFor="r_ext">Extra Bed / Adult Rate (₹)</Label>
+                      <Input
+                        id="r_ext"
+                        type="number"
+                        value={roomForm.extra_adult_rate}
+                        onChange={e => {
+                          const ext = Number(e.target.value) || 0;
+                          const dbl = Number(roomForm.double_rate) || 0;
+                          setRoomForm(prev => ({
+                            ...prev,
+                            extra_adult_rate: e.target.value,
+                            triple_rate: dbl > 0 ? dbl + ext : prev.triple_rate
+                          }));
+                        }}
+                        placeholder="e.g. 1000"
+                        className="h-9 text-xs"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    {roomForm.meal_plan_id !== 'MAP' && (
+                      <div className="space-y-1">
+                        <Label htmlFor="r_map" className="text-amber-500 font-bold">
+                          MAP Double Rate (₹ - Optional)
+                        </Label>
+                        <Input
+                          id="r_map"
+                          type="number"
+                          value={roomForm.map_double_rate}
+                          onChange={e => setRoomForm({...roomForm, map_double_rate: e.target.value})}
+                          placeholder="Breakfast + Dinner Rate"
+                          className="h-9 text-xs border-amber-500/30"
+                        />
+                      </div>
+                    )}
+                    <div className="space-y-1">
+                      <Label htmlFor="r_cwb">Child With Bed (₹)</Label>
+                      <Input
+                        id="r_cwb"
+                        type="number"
+                        value={roomForm.child_with_bed_rate}
+                        onChange={e => setRoomForm({...roomForm, child_with_bed_rate: e.target.value})}
+                        placeholder="e.g. 800"
+                        className="h-9 text-xs"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <Label htmlFor="r_cwob">Child Without Bed (₹)</Label>
+                      <Input
+                        id="r_cwob"
+                        type="number"
+                        value={roomForm.child_without_bed_rate}
+                        onChange={e => setRoomForm({...roomForm, child_without_bed_rate: e.target.value})}
+                        placeholder="e.g. 500"
+                        className="h-9 text-xs"
+                      />
+                    </div>
+                  </div>
+                </div>
+
                 <div className="space-y-1">
                   <Label htmlFor="r_desc">Room Description / Highlights</Label>
                   <Textarea id="r_desc" value={roomForm.room_description} onChange={e => setRoomForm({...roomForm, room_description: e.target.value})} placeholder="Room inclusions, mini-bar, balcony details" rows={2} />
@@ -2886,50 +3250,90 @@ return (
                   </div>
                 ) : (
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-4">
-                    {roomCategories.map(rc => (
-                      <Card key={rc.id} className="overflow-hidden border-border/60 hover:border-accent/30 hover:shadow-md transition-all flex flex-col justify-between p-4 bg-card/65 backdrop-blur-sm">
-                        <div className="space-y-3">
-                          <div className="flex justify-between items-start gap-2">
-                            <div className="space-y-1">
-                              <h4 className="font-extrabold text-xs text-foreground uppercase tracking-wide">{rc.room_category_name}</h4>
-                              {rc.room_size && (
-                                <Badge variant="outline" className="text-[9px] px-1.5 py-0.5 font-bold uppercase tracking-wider bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-100 border border-slate-300 dark:border-slate-700">
-                                  {rc.room_size} Sq Ft
-                                </Badge>
+                    {roomCategories.map(rc => {
+                      const rcRates = contractRates.filter(cr => String(cr.room_category_id) === String(rc.id));
+                      return (
+                        <Card key={rc.id} className="overflow-hidden border-border/60 hover:border-accent/30 hover:shadow-md transition-all flex flex-col justify-between p-4 bg-card/65 backdrop-blur-sm">
+                          <div className="space-y-3">
+                            <div className="flex justify-between items-start gap-2">
+                              <div className="space-y-1">
+                                <h4 className="font-extrabold text-xs text-foreground uppercase tracking-wide">{rc.room_category_name}</h4>
+                                {rc.room_size && (
+                                  <Badge variant="outline" className="text-[9px] px-1.5 py-0.5 font-bold uppercase tracking-wider bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-100 border border-slate-300 dark:border-slate-700">
+                                    {rc.room_size} Sq Ft
+                                  </Badge>
+                                )}
+                              </div>
+                              <Badge className={rc.active_status ? 'bg-emerald-500/10 text-emerald-600 font-bold shrink-0' : 'bg-rose-500/10 text-rose-600 font-bold shrink-0'} variant="outline">
+                                {rc.active_status ? 'Active' : 'Inactive'}
+                              </Badge>
+                            </div>
+
+                            <div className="space-y-1.5 text-xs font-semibold text-slate-800 dark:text-slate-200 pt-2.5 border-t border-border/30">
+                              <p className="flex justify-between">
+                                <span>Bed Type:</span> 
+                                <strong className="text-foreground">{rc.bed_type || '---'}</strong>
+                              </p>
+                              <p className="flex justify-between">
+                                <span>Max Occupancy:</span> 
+                                <strong className="text-foreground">{rc.max_adults} Adults + {rc.max_children} Child</strong>
+                              </p>
+
+                              {/* Live Room Category Tariff Summary */}
+                              <div className="mt-2 pt-2 border-t border-border/30 space-y-1">
+                                <span className="text-[10px] uppercase tracking-wider font-extrabold text-amber-500 block">
+                                  Room Tariff (Per Night):
+                                </span>
+                                {rcRates.length > 0 ? (
+                                  <div className="flex flex-wrap gap-1.5">
+                                    {rcRates.map((rt, rIdx) => (
+                                      <Badge
+                                        key={rt.id || rIdx}
+                                        variant="outline"
+                                        className="text-[10px] font-extrabold bg-emerald-500/10 text-emerald-500 border-emerald-500/30"
+                                      >
+                                        {rt.meal_plan_id}: ₹{Number(rt.double_rate || 0).toLocaleString('en-IN')}
+                                        {Number(rt.extra_adult_rate) > 0 ? ` (+₹${Number(rt.extra_adult_rate).toLocaleString('en-IN')} Ext)` : ''}
+                                      </Badge>
+                                    ))}
+                                  </div>
+                                ) : (
+                                  <span className="text-[10px] text-muted-foreground italic block">
+                                    No price set yet — click &quot;₹ Set Price&quot; below
+                                  </span>
+                                )}
+                              </div>
+
+                              {rc.room_description && (
+                                <p className="text-[10px] font-normal leading-relaxed text-slate-500 mt-2 bg-muted/30 p-2 rounded border border-border/20 italic">
+                                  "{rc.room_description}"
+                                </p>
                               )}
                             </div>
-                            <Badge className={rc.active_status ? 'bg-emerald-500/10 text-emerald-600 font-bold shrink-0' : 'bg-rose-500/10 text-rose-600 font-bold shrink-0'} variant="outline">
-                              {rc.active_status ? 'Active' : 'Inactive'}
-                            </Badge>
                           </div>
 
-                          <div className="space-y-1.5 text-xs font-semibold text-slate-800 dark:text-slate-200 pt-2.5 border-t border-border/30">
-                            <p className="flex justify-between">
-                              <span>Bed Type:</span> 
-                              <strong className="text-foreground">{rc.bed_type || '---'}</strong>
-                            </p>
-                            <p className="flex justify-between">
-                              <span>Max Occupancy:</span> 
-                              <strong className="text-foreground">{rc.max_adults} Adults + {rc.max_children} Child</strong>
-                            </p>
-                            {rc.room_description && (
-                              <p className="text-[10px] font-normal leading-relaxed text-slate-500 mt-2 bg-muted/30 p-2 rounded border border-border/20 italic">
-                                "{rc.room_description}"
-                              </p>
-                            )}
+                          <div className="mt-3 flex items-center justify-between gap-1 border-t border-border/40 pt-2.5">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="h-7 px-2.5 text-[10px] font-extrabold border-amber-500/40 text-amber-500 hover:bg-amber-500/10 rounded-lg cursor-pointer"
+                              onClick={() => handleOpenEditDialog('room', rc)}
+                            >
+                              <IndianRupee className="w-3 h-3 mr-1" />
+                              {rcRates.length > 0 ? 'Edit Price' : 'Set Price'}
+                            </Button>
+                            <div className="flex items-center gap-1">
+                              <Button size="icon" variant="ghost" className="w-6.5 h-6.5 hover:bg-accent/10 text-accent" onClick={() => handleOpenEditDialog('room', rc)}>
+                                <Edit className="w-3.5 h-3.5" />
+                              </Button>
+                              <Button size="icon" variant="ghost" className="w-6.5 h-6.5 hover:bg-rose-500/10 text-rose-500" onClick={() => handleDeleteItem('room', rc.id)}>
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </Button>
+                            </div>
                           </div>
-                        </div>
-
-                        <div className="mt-3 flex justify-end gap-1 border-t border-border/40 pt-2.5">
-                          <Button size="icon" variant="ghost" className="w-6.5 h-6.5 hover:bg-accent/10 text-accent" onClick={() => handleOpenEditDialog('room', rc)}>
-                            <Edit className="w-3.5 h-3.5" />
-                          </Button>
-                          <Button size="icon" variant="ghost" className="w-6.5 h-6.5 hover:bg-rose-500/10 text-rose-500" onClick={() => handleDeleteItem('room', rc.id)}>
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </Button>
-                        </div>
-                      </Card>
-                    ))}
+                        </Card>
+                      );
+                    })}
                   </div>
                 )}
               </CardContent>
