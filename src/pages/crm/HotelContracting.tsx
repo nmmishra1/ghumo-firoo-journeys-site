@@ -697,6 +697,169 @@ export const HotelContracting: React.FC = () => {
     fetchGeographicMasterData();
   }, []);
 
+  const [allContractsOverview, setAllContractsOverview] = useState<any[]>([]);
+  const [allRatesOverview, setAllRatesOverview] = useState<any[]>([]);
+  const [isSavingInlineRate, setIsSavingInlineRate] = useState(false);
+  const [inlineQuickRate, setInlineQuickRate] = useState({
+    room_category_id: '',
+    meal_plan_id: 'CP',
+    season_id: '',
+    single_rate: 0 as number | string,
+    double_rate: 0 as number | string,
+    extra_adult_rate: 0 as number | string,
+    child_with_bed_rate: 0 as number | string,
+    markup: 800 as number | string
+  });
+
+  const fetchAllContractsOverview = async () => {
+    try {
+      const [cRes, rRes, sRes] = await Promise.all([
+        fetch('/php-backend/api.php?table=hotel_contracts').catch(() => null),
+        fetch('/php-backend/api.php?table=hotel_contract_rates').catch(() => null),
+        fetch('/php-backend/api.php?table=hotel_suppliers').catch(() => null)
+      ]);
+      const cList = (cRes && cRes.ok) ? await cRes.json() : [];
+      const rList = (rRes && rRes.ok) ? await rRes.json() : [];
+      const sList = (sRes && sRes.ok) ? await sRes.json() : [];
+      if (Array.isArray(cList)) setAllContractsOverview(cList);
+      if (Array.isArray(rList)) setAllRatesOverview(rList);
+      if (Array.isArray(sList) && sList.length > 0) setSuppliers(sList);
+    } catch (e) {}
+  };
+
+  const handleSaveQuickInlineRate = async () => {
+    if (!selectedHotelId) {
+      toast({ title: 'Select Hotel First', description: 'Please select a target hotel on the left.', variant: 'destructive' });
+      return;
+    }
+    const dbl = Number(inlineQuickRate.double_rate) || 0;
+    if (dbl <= 0) {
+      toast({ title: 'Enter Double Rate', description: 'Please enter a valid Double Occupancy Rate (₹).', variant: 'destructive' });
+      return;
+    }
+    setIsSavingInlineRate(true);
+    try {
+      const authHeaders = await getAuthHeader();
+      let targetContractId = selectedContractId || (contracts[0]?.id ? String(contracts[0].id) : '');
+
+      // Auto-create contract in MySQL if hotel has none yet
+      if (!targetContractId) {
+        const targetHotel = hotels.find(h => String(h.id) === String(selectedHotelId));
+        const todayStr = new Date().toISOString().split('T')[0];
+        const nextYearStr = new Date(Date.now() + 365 * 86400000).toISOString().split('T')[0];
+        const cRes = await fetch('/php-backend/api.php?table=hotel_contracts', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', ...authHeaders },
+          body: JSON.stringify({
+            hotel_id: selectedHotelId,
+            contract_name: `${targetHotel?.hotel_name || 'Hotel'} - Annual B2B Contract`,
+            valid_from: todayStr,
+            valid_to: nextYearStr,
+            currency: 'INR',
+            gst_percentage: dbl >= 7500 ? 18 : 12,
+            active_status: true
+          })
+        });
+        if (cRes.ok) {
+          const cData = await cRes.json().catch(() => ({}));
+          if (cData?.id) {
+            targetContractId = String(cData.id);
+            setSelectedContractId(targetContractId);
+          }
+        }
+      }
+
+      let targetRoomId = inlineQuickRate.room_category_id || (roomCategories[0]?.id ? String(roomCategories[0].id) : '');
+      // Auto-create Standard Room in MySQL if hotel has no rooms yet
+      if (!targetRoomId) {
+        const rmRes = await fetch('/php-backend/api.php?table=room_categories', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', ...authHeaders },
+          body: JSON.stringify({
+            hotel_id: selectedHotelId,
+            room_category_name: 'Standard / Deluxe Room',
+            room_size: '280',
+            max_adults: 2,
+            max_children: 1,
+            bed_type: 'Double Bed',
+            active_status: true
+          })
+        });
+        if (rmRes.ok) {
+          const rmData = await rmRes.json().catch(() => ({}));
+          if (rmData?.id) targetRoomId = String(rmData.id);
+        }
+      }
+
+      const targetSeasonId = inlineQuickRate.season_id || (seasons[0]?.id ? String(seasons[0].id) : 'season-normal');
+      const sgl = Number(inlineQuickRate.single_rate) || Math.round(dbl * 0.85);
+      const ext = Number(inlineQuickRate.extra_adult_rate) || 0;
+      const cwb = Number(inlineQuickRate.child_with_bed_rate) || 0;
+      const mkp = Number(inlineQuickRate.markup) || 0;
+      const gstPct = dbl >= 7500 ? 18 : 12;
+      const gstAmt = Math.round(dbl * (gstPct / 100));
+      const supplierCost = dbl + gstAmt;
+      const sellingCost = supplierCost + mkp;
+      const planCode = (inlineQuickRate.meal_plan_id || 'CP').toUpperCase();
+
+      const existing = contractRates.find(
+        cr => String(cr.room_category_id) === String(targetRoomId) &&
+              String(cr.meal_plan_id).toUpperCase() === planCode &&
+              String(cr.season_id || '') === String(targetSeasonId || '')
+      );
+
+      const ratePayload = {
+        contract_id: targetContractId,
+        room_category_id: targetRoomId,
+        season_id: targetSeasonId,
+        meal_plan_id: planCode,
+        single_rate: sgl,
+        double_rate: dbl,
+        triple_rate: dbl + ext,
+        extra_adult_rate: ext,
+        child_with_bed_rate: cwb,
+        child_without_bed_rate: Math.round(cwb * 0.6),
+        rate_type: 'exclusive',
+        gst_percentage: gstPct,
+        gst_amount: gstAmt,
+        net_cost: dbl,
+        supplier_cost: supplierCost,
+        markup: mkp,
+        selling_cost: sellingCost,
+        active_status: true
+      };
+
+      if (existing?.id) {
+        const res = await fetch(`/php-backend/api.php?table=hotel_contract_rates&id=${existing.id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json', ...authHeaders },
+          body: JSON.stringify(ratePayload)
+        });
+        if (!res.ok) throw new Error('Failed to update rate in MySQL');
+      } else {
+        const res = await fetch('/php-backend/api.php?table=hotel_contract_rates', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', ...authHeaders },
+          body: JSON.stringify(ratePayload)
+        });
+        if (!res.ok) throw new Error('Failed to save rate in MySQL');
+      }
+
+      toast({
+        title: 'Saved to MySQL Database',
+        description: `${planCode} Tariff ₹${dbl.toLocaleString('en-IN')} (Selling: ₹${sellingCost.toLocaleString('en-IN')}) saved for this contract.`
+      });
+      await fetchRoomsAndSeasons(selectedHotelId);
+      await fetchContractsForHotel(selectedHotelId);
+      if (targetContractId) await fetchContractRates(targetContractId);
+      await fetchAllContractsOverview();
+    } catch (err: any) {
+      toast({ title: 'MySQL Save Failed', description: err.message, variant: 'destructive' });
+    } finally {
+      setIsSavingInlineRate(false);
+    }
+  };
+
   const fetchMainTabData = async () => {
     setLoading(true);
     try {
@@ -708,7 +871,10 @@ export const HotelContracting: React.FC = () => {
       } else if (activeMainTab === 'rooms-seasons') {
         await fetchHotels(); // load hotels for the hotel picker
       } else if (activeMainTab === 'contracts') {
-        await fetchHotels(); // load hotels for hotel picker
+        await Promise.all([
+          fetchHotels(),
+          fetchAllContractsOverview()
+        ]);
       }
     } catch (err: any) {
       toast({ title: 'Error loading page data', description: err.message, variant: 'destructive' });
@@ -3396,8 +3562,142 @@ return (
           </div>
         </TabsContent>
 
-        {/* 4. CONTRACT MANAGEMENT & RATES GRID */}
+        {/* 4. CONTRACT MANAGEMENT & RATES GRID (MYSQL-BACKED) */}
         <TabsContent value="contracts" className="space-y-6 pt-4 animate-in fade-in duration-200">
+          {/* 📊 TOP OVERVIEW: ALL MYSQL HOTEL CONTRACTS & EXPIRY ALERTS */}
+          {(() => {
+            const nowMs = Date.now();
+            const enrichedContracts = allContractsOverview.map(c => {
+              const hObj = hotels.find(h => String(h.id) === String(c.hotel_id));
+              const supObj = suppliers.find(s => String(s.id) === String(c.supplier_id));
+              const cRates = allRatesOverview.filter(r => String(r.contract_id) === String(c.id));
+              const lowestDouble = cRates.reduce((min, r) => {
+                const d = Number(r.double_rate || r.net_cost || 0);
+                return d > 0 && (min === 0 || d < min) ? d : min;
+              }, 0);
+              const validToMs = c.valid_to ? new Date(c.valid_to).getTime() : 0;
+              const daysLeft = validToMs ? Math.ceil((validToMs - nowMs) / 86400000) : 365;
+              const statusType = validToMs && daysLeft < 0 ? 'expired' : (validToMs && daysLeft <= 30 ? 'expiring' : 'active');
+              return {
+                ...c,
+                hotel_name: hObj?.hotel_name || `Hotel #${c.hotel_id}`,
+                city: hObj?.city || '---',
+                supplier_name: supObj?.supplier_name || 'Direct Hotel B2B',
+                ratesCount: cRates.length,
+                lowestDouble,
+                daysLeft,
+                statusType
+              };
+            });
+            const expiringCount = enrichedContracts.filter(c => c.statusType === 'expiring').length;
+            const expiredCount = enrichedContracts.filter(c => c.statusType === 'expired').length;
+
+            return (
+              <div className="space-y-4">
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                  <Card className="border-border/60 bg-card/70 p-4">
+                    <span className="text-[10px] font-extrabold uppercase tracking-wider text-muted-foreground block">MySQL Active Contracts</span>
+                    <div className="text-2xl font-black text-foreground mt-1">{enrichedContracts.length}</div>
+                    <span className="text-[10px] text-emerald-500 font-bold">Synced with hotel_contracts table</span>
+                  </Card>
+                  <Card className="border-border/60 bg-card/70 p-4">
+                    <span className="text-[10px] font-extrabold uppercase tracking-wider text-muted-foreground block">Negotiated Rate Rows</span>
+                    <div className="text-2xl font-black text-emerald-500 mt-1">{allRatesOverview.length}</div>
+                    <span className="text-[10px] text-muted-foreground font-semibold">Live in hotel_contract_rates</span>
+                  </Card>
+                  <Card className="border-amber-500/30 bg-amber-500/5 p-4">
+                    <span className="text-[10px] font-extrabold uppercase tracking-wider text-amber-500 block">Expiring Soon (&le;30 Days)</span>
+                    <div className="text-2xl font-black text-amber-500 mt-1">{expiringCount}</div>
+                    <span className="text-[10px] text-muted-foreground font-semibold">Renew B2B tariff sheets soon</span>
+                  </Card>
+                  <Card className="border-rose-500/30 bg-rose-500/5 p-4">
+                    <span className="text-[10px] font-extrabold uppercase tracking-wider text-rose-500 block">Expired Contracts</span>
+                    <div className="text-2xl font-black text-rose-500 mt-1">{expiredCount}</div>
+                    <span className="text-[10px] text-muted-foreground font-semibold">Requires validity extension</span>
+                  </Card>
+                </div>
+
+                {enrichedContracts.length > 0 && (
+                  <Card className="border-border/60 overflow-hidden">
+                    <CardHeader className="p-3.5 border-b border-border/40 bg-slate-50/40 dark:bg-slate-900/20 flex flex-row items-center justify-between">
+                      <div>
+                        <CardTitle className="text-xs font-extrabold uppercase tracking-wider flex items-center gap-1.5">
+                          <FileText className="w-3.5 h-3.5 text-accent" /> All Hotel Contracts Registry (Click Any Row to Manage Rates)
+                        </CardTitle>
+                      </div>
+                      <Badge variant="outline" className="text-[10px] border-emerald-500/40 text-emerald-500 font-bold">
+                        MySQL Live Storage
+                      </Badge>
+                    </CardHeader>
+                    <CardContent className="p-0 max-h-56 overflow-y-auto">
+                      <table className="w-full text-left border-collapse text-xs">
+                        <thead className="bg-muted/60 text-[10px] uppercase font-extrabold text-muted-foreground sticky top-0">
+                          <tr>
+                            <th className="py-2 px-3">Hotel &amp; City</th>
+                            <th className="py-2 px-3">Contract / Supplier DMC</th>
+                            <th className="py-2 px-3">Validity &amp; Status</th>
+                            <th className="py-2 px-3">Starting Tariff</th>
+                            <th className="py-2 px-3 text-right">Action</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-border/40">
+                          {enrichedContracts.map(ec => {
+                            const isSelected = String(selectedContractId) === String(ec.id);
+                            return (
+                              <tr
+                                key={ec.id}
+                                onClick={() => {
+                                  setSelectedHotelId(String(ec.hotel_id));
+                                  setTimeout(() => setSelectedContractId(String(ec.id)), 80);
+                                }}
+                                className={`cursor-pointer transition-colors ${
+                                  isSelected ? 'bg-accent/15 font-bold' : 'hover:bg-muted/40'
+                                }`}
+                              >
+                                <td className="py-2 px-3">
+                                  <div className="font-extrabold text-foreground">{ec.hotel_name}</div>
+                                  <div className="text-[10px] text-muted-foreground">{ec.city}</div>
+                                </td>
+                                <td className="py-2 px-3">
+                                  <div className="font-bold text-foreground">{ec.contract_name}</div>
+                                  <div className="text-[10px] text-muted-foreground">{ec.supplier_name} • {ec.ratesCount} rate rows</div>
+                                </td>
+                                <td className="py-2 px-3">
+                                  <div className="text-[11px] font-mono">{ec.valid_from || '---'} &rarr; {ec.valid_to || '---'}</div>
+                                  {ec.statusType === 'expired' ? (
+                                    <Badge variant="outline" className="text-[9px] bg-rose-500/10 text-rose-500 border-rose-500/30 font-extrabold">
+                                      Expired ({Math.abs(ec.daysLeft)}d ago)
+                                    </Badge>
+                                  ) : ec.statusType === 'expiring' ? (
+                                    <Badge variant="outline" className="text-[9px] bg-amber-500/10 text-amber-500 border-amber-500/30 font-extrabold">
+                                      Expiring in {ec.daysLeft}d
+                                    </Badge>
+                                  ) : (
+                                    <Badge variant="outline" className="text-[9px] bg-emerald-500/10 text-emerald-500 border-emerald-500/30 font-extrabold">
+                                      Active ({ec.daysLeft}d left)
+                                    </Badge>
+                                  )}
+                                </td>
+                                <td className="py-2 px-3 font-mono font-extrabold text-emerald-500">
+                                  {ec.lowestDouble > 0 ? `₹${ec.lowestDouble.toLocaleString('en-IN')}/nt` : 'No rates yet'}
+                                </td>
+                                <td className="py-2 px-3 text-right">
+                                  <Button size="sm" variant="outline" className="h-7 text-[10px] font-bold">
+                                    Manage Rates
+                                  </Button>
+                                </td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
+                    </CardContent>
+                  </Card>
+                )}
+              </div>
+            );
+          })()}
+
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
             
             {/* Left col - selectors & contracts list */}
@@ -3425,11 +3725,11 @@ return (
                 </CardHeader>
                 <CardContent className="p-2 space-y-1">
                   {contracts.map(contract => {
-                    const isActive = selectedContractId === contract.id;
+                    const isActive = String(selectedContractId) === String(contract.id);
                     return (
                       <button
                         key={contract.id}
-                        onClick={() => setSelectedContractId(contract.id)}
+                        onClick={() => setSelectedContractId(String(contract.id))}
                         className={`w-full text-left p-3 rounded-lg border text-xs transition-all flex flex-col gap-1.5 ${
                           isActive 
                             ? 'bg-accent/10 border-accent/40 text-accent dark:text-amber-300 font-bold' 
@@ -3449,19 +3749,139 @@ return (
                     );
                   })}
                   {contracts.length === 0 && (
-                    <p className="text-center py-6 text-muted-foreground text-xs">No contracts negotiated.</p>
+                    <p className="text-center py-6 text-muted-foreground text-xs">No contracts negotiated yet. Use the Quick Rate Bar on the right to auto-create one in MySQL.</p>
                   )}
                 </CardContent>
               </Card>
             </div>
 
-            {/* Right col - contract detail, rates grid & history log */}
+            {/* Right col - Quick MySQL Rate Entry, contract detail, rates grid & history log */}
             <div className="space-y-6 lg:col-span-3">
+              {/* ⚡ FAST INLINE MYSQL RATE ENTRY BAR (Works even before a contract is created!) */}
+              {selectedHotelId && (
+                <Card className="border-amber-500/40 bg-amber-500/5 shadow-sm">
+                  <CardHeader className="p-4 pb-2 border-b border-amber-500/20 flex flex-row items-center justify-between">
+                    <div>
+                      <CardTitle className="text-xs font-extrabold uppercase tracking-wider text-amber-500 flex items-center gap-1.5">
+                        <IndianRupee className="w-4 h-4" /> ⚡ Quick Add / Update Room Tariff in MySQL
+                      </CardTitle>
+                      <CardDescription className="text-[11px]">
+                        Select room category &amp; meal plan, enter B2B rate &amp; markup, and save directly to MySQL without leaving this screen.
+                      </CardDescription>
+                    </div>
+                    <Badge variant="outline" className="text-[10px] border-emerald-500/40 text-emerald-500 font-bold">
+                      Direct MySQL Upsert
+                    </Badge>
+                  </CardHeader>
+                  <CardContent className="p-4 space-y-3">
+                    <div className="grid grid-cols-2 sm:grid-cols-6 gap-2.5">
+                      <div className="space-y-1 sm:col-span-2">
+                        <Label className="text-[10px] font-bold">Room Category</Label>
+                        <Select
+                          value={inlineQuickRate.room_category_id || (roomCategories[0]?.id ? String(roomCategories[0].id) : '')}
+                          onValueChange={val => setInlineQuickRate(prev => ({ ...prev, room_category_id: val }))}
+                        >
+                          <SelectTrigger className="h-8 text-xs bg-background"><SelectValue placeholder="Standard / Deluxe Room" /></SelectTrigger>
+                          <SelectContent>
+                            {roomCategories.length > 0 ? (
+                              roomCategories.map(rc => (
+                                <SelectItem key={rc.id} value={String(rc.id)}>{rc.room_category_name}</SelectItem>
+                              ))
+                            ) : (
+                              <SelectItem value="auto">Standard / Deluxe Room (Auto-Create)</SelectItem>
+                            )}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-1">
+                        <Label className="text-[10px] font-bold">Meal Plan</Label>
+                        <Select
+                          value={inlineQuickRate.meal_plan_id}
+                          onValueChange={val => setInlineQuickRate(prev => ({ ...prev, meal_plan_id: val }))}
+                        >
+                          <SelectTrigger className="h-8 text-xs bg-background"><SelectValue /></SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="CP">CP (Breakfast)</SelectItem>
+                            <SelectItem value="MAP">MAP (Bfast+Dinner)</SelectItem>
+                            <SelectItem value="EP">EP (Room Only)</SelectItem>
+                            <SelectItem value="AP">AP (All Meals)</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-1">
+                        <Label className="text-[10px] font-extrabold text-emerald-500">Double Rate (₹) *</Label>
+                        <Input
+                          type="number"
+                          value={inlineQuickRate.double_rate}
+                          onChange={e => {
+                            const dbl = Number(e.target.value) || 0;
+                            setInlineQuickRate(prev => ({
+                              ...prev,
+                              double_rate: e.target.value,
+                              single_rate: Math.round(dbl * 0.85)
+                            }));
+                          }}
+                          placeholder="e.g. 4200"
+                          className="h-8 text-xs font-extrabold bg-background"
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <Label className="text-[10px] font-bold">Extra Bed (₹)</Label>
+                        <Input
+                          type="number"
+                          value={inlineQuickRate.extra_adult_rate}
+                          onChange={e => setInlineQuickRate(prev => ({ ...prev, extra_adult_rate: e.target.value }))}
+                          placeholder="e.g. 1200"
+                          className="h-8 text-xs bg-background"
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <Label className="text-[10px] font-bold text-amber-500">Markup (₹)</Label>
+                        <Input
+                          type="number"
+                          value={inlineQuickRate.markup}
+                          onChange={e => setInlineQuickRate(prev => ({ ...prev, markup: e.target.value }))}
+                          placeholder="e.g. 800"
+                          className="h-8 text-xs font-bold bg-background"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-amber-500/20">
+                      <div className="text-[11px] text-muted-foreground">
+                        {(() => {
+                          const dbl = Number(inlineQuickRate.double_rate) || 0;
+                          const gstPct = dbl >= 7500 ? 18 : 12;
+                          const gstAmt = Math.round(dbl * (gstPct / 100));
+                          const supCost = dbl + gstAmt;
+                          const sellCost = supCost + (Number(inlineQuickRate.markup) || 0);
+                          return (
+                            <span>
+                              B2B Net + {gstPct}% GST: <strong className="text-foreground">₹{supCost.toLocaleString('en-IN')}</strong> • Client Selling Rate:{' '}
+                              <strong className="text-emerald-500">₹{sellCost.toLocaleString('en-IN')}/night</strong>
+                            </span>
+                          );
+                        })()}
+                      </div>
+                      <Button
+                        type="button"
+                        size="sm"
+                        disabled={isSavingInlineRate}
+                        onClick={handleSaveQuickInlineRate}
+                        className="h-8 px-4 text-xs font-extrabold bg-gradient-to-r from-[#c5a059] to-[#d4af37] text-slate-950 hover:opacity-90 rounded-lg cursor-pointer"
+                      >
+                        {isSavingInlineRate ? 'Saving to MySQL...' : '💾 Save Rate to MySQL'}
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
               {selectedContractId ? (
                 <>
                   {/* Contract Details */}
                   {(() => {
-                    const activeContract = contracts.find(c => c.id === selectedContractId);
+                    const activeContract = contracts.find(c => String(c.id) === String(selectedContractId));
                     if (!activeContract) return null;
                     return (
                       <Card className="border-border/60">
@@ -3498,7 +3918,7 @@ return (
                             </p>
                           </div>
                           <div className="space-y-2">
-                            <p>Payment Terms & Policies:</p>
+                            <p>Payment Terms &amp; Policies:</p>
                             <p className="font-normal text-[11px] text-foreground leading-normal p-2 bg-muted/20 border border-border/40 rounded-lg whitespace-pre-wrap">
                               {activeContract.payment_policy || 'No specific payment terms configured.'}
                             </p>
@@ -3513,9 +3933,9 @@ return (
                     <CardHeader className="flex flex-row justify-between items-center p-4 border-b border-border/40">
                       <div>
                         <CardTitle className="text-sm font-bold flex items-center gap-1.5">
-                          <Landmark className="w-4.5 h-4.5 text-accent" /> Negotiated Rates Grid
+                          <Landmark className="w-4.5 h-4.5 text-accent" /> Negotiated Rates Grid (MySQL Stored)
                         </CardTitle>
-                        <CardDescription className="text-xs text-muted-foreground">Direct contract prices, seasonal surcharges, and child policies.</CardDescription>
+                        <CardDescription className="text-xs text-muted-foreground">Direct contract prices, GST, supplier cost, and client selling rates.</CardDescription>
                       </div>
                       
                       <div className="flex gap-2">
@@ -3523,64 +3943,83 @@ return (
                           <Download className="w-3.5 h-3.5 mr-1" /> Export Rates
                         </Button>
                         <Button size="sm" onClick={() => handleOpenAddDialog('rate')} className="h-8 text-xs bg-gradient-to-r from-[#c5a059] to-[#d4af37] text-slate-950 font-bold hover:opacity-90">
-                          <Plus className="w-3.5 h-3.5 mr-1" /> Add Rate Row
+                          <Plus className="w-3.5 h-3.5 mr-1" /> Full Rate Form
                         </Button>
                       </div>
                     </CardHeader>
                     <CardContent className="p-0">
                       {contractRates.length === 0 ? (
                         <div className="text-center py-12 text-muted-foreground text-xs font-semibold">
-                          No rates added. Download the CSV template below or upload rates using the bulk uploader.
+                          No rates added yet. Use the ⚡ Quick Add Rate Bar above or upload a CSV file.
                         </div>
                       ) : (
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-6">
-                          {contractRates.map((rate) => (
-                            <Card key={rate.id} className="overflow-hidden border-border/60 hover:border-accent/30 hover:shadow-md transition-all flex flex-col justify-between bg-card/65 backdrop-blur-sm">
-                              <div className="p-4 space-y-3">
-                                <div className="flex justify-between items-start gap-2">
-                                  <div className="space-y-1 truncate">
-                                    <h4 className="font-extrabold text-xs text-foreground uppercase tracking-wide truncate" title={rate.room_categories?.room_category_name || '---'}>
-                                      {rate.room_categories?.room_category_name || '---'}
-                                    </h4>
-                                    <Badge variant="outline" className="text-[9px] px-1.5 py-0.5 font-black uppercase tracking-wider bg-secondary/5 text-muted-foreground">
-                                      {rate.meal_plan_id}
+                          {contractRates.map((rate) => {
+                            const baseVal = Number(rate.net_cost || rate.double_rate || 0);
+                            const gstVal = Number(rate.gst_amount || Math.round(baseVal * (Number(rate.gst_percentage || 12) / 100)));
+                            const supCostVal = Number(rate.supplier_cost || (baseVal + gstVal));
+                            const markupVal = Number(rate.markup || 0);
+                            const sellVal = Number(rate.selling_cost || (supCostVal + markupVal));
+                            return (
+                              <Card key={rate.id} className="overflow-hidden border-border/60 hover:border-accent/30 hover:shadow-md transition-all flex flex-col justify-between bg-card/65 backdrop-blur-sm">
+                                <div className="p-4 space-y-3">
+                                  <div className="flex justify-between items-start gap-2">
+                                    <div className="space-y-1 truncate">
+                                      <h4 className="font-extrabold text-xs text-foreground uppercase tracking-wide truncate" title={rate.room_categories?.room_category_name || 'Standard Room'}>
+                                        {rate.room_categories?.room_category_name || 'Standard Room'}
+                                      </h4>
+                                      <Badge variant="outline" className="text-[9px] px-1.5 py-0.5 font-black uppercase tracking-wider bg-secondary/5 text-muted-foreground">
+                                        {rate.meal_plan_id}
+                                      </Badge>
+                                    </div>
+                                    <Badge className={rate.active_status ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-600 hover:bg-emerald-500/20 shrink-0 font-bold' : 'bg-rose-500/10 border-rose-500/30 text-rose-600 shrink-0 font-bold'}>
+                                      {rate.active_status ? 'Active' : 'Inactive'}
                                     </Badge>
                                   </div>
-                                  <Badge className={rate.active_status ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-600 hover:bg-emerald-500/20 shrink-0 font-bold' : 'bg-rose-500/10 border-rose-500/30 text-rose-600 shrink-0 font-bold'}>
-                                    {rate.active_status ? 'Active' : 'Inactive'}
-                                  </Badge>
+
+                                  <div className="space-y-2 text-xs font-semibold text-muted-foreground pt-3 border-t border-border/30">
+                                    <div className="flex justify-between">
+                                      <span>Double Base Rate:</span>
+                                      <span className="text-foreground font-mono">₹{baseVal.toLocaleString('en-IN')}</span>
+                                    </div>
+                                    {Number(rate.extra_adult_rate) > 0 && (
+                                      <div className="flex justify-between">
+                                        <span>Extra Bed / Adult:</span>
+                                        <span className="text-foreground font-mono">₹{Number(rate.extra_adult_rate).toLocaleString('en-IN')}</span>
+                                      </div>
+                                    )}
+                                    <div className="flex justify-between">
+                                      <span>GST Applied:</span>
+                                      <span className="text-foreground">{Number(rate.gst_percentage || 12)}% (₹{gstVal.toLocaleString('en-IN')})</span>
+                                    </div>
+                                    <div className="flex justify-between text-xs border-t border-border/20 pt-2 mt-1.5 font-bold">
+                                      <span>B2B Supplier Cost:</span>
+                                      <span className="text-emerald-500 font-extrabold font-mono">₹{supCostVal.toLocaleString('en-IN')}</span>
+                                    </div>
+                                    {markupVal > 0 && (
+                                      <div className="flex justify-between text-xs font-extrabold text-amber-500">
+                                        <span>Client Selling Price:</span>
+                                        <span className="font-mono">₹{sellVal.toLocaleString('en-IN')}</span>
+                                      </div>
+                                    )}
+                                    <div className="flex justify-between">
+                                      <span>Validity Season:</span>
+                                      <span className="text-foreground font-semibold">{rate.seasons?.season_name || 'Standard'}</span>
+                                    </div>
+                                  </div>
                                 </div>
 
-                                <div className="space-y-2 text-xs font-semibold text-muted-foreground pt-3 border-t border-border/30">
-                                  <div className="flex justify-between">
-                                    <span>Base Rate:</span>
-                                    <span className="text-foreground font-mono">₹{Number(rate.net_cost || rate.double_rate).toLocaleString('en-IN')}</span>
-                                  </div>
-                                  <div className="flex justify-between">
-                                    <span>GST Applied:</span>
-                                    <span className="text-foreground">{Number(rate.gst_percentage || 0)}% (₹{Number(rate.gst_amount || 0).toLocaleString('en-IN')})</span>
-                                  </div>
-                                  <div className="flex justify-between text-xs border-t border-border/20 pt-2 mt-1.5 font-bold">
-                                    <span>Final Cost:</span>
-                                    <span className="text-emerald-500 dark:text-emerald-450 font-extrabold font-mono">₹{Number(rate.supplier_cost || rate.double_rate).toLocaleString('en-IN')}</span>
-                                  </div>
-                                  <div className="flex justify-between">
-                                    <span>Validity Season:</span>
-                                    <span className="text-foreground font-semibold">{rate.seasons?.season_name || 'Standard'}</span>
-                                  </div>
+                                <div className="p-3 border-t border-border/50 bg-slate-50/50 dark:bg-slate-900/30 flex justify-end gap-1.5">
+                                  <Button size="icon" variant="ghost" className="w-7 h-7 hover:bg-accent/10 text-accent" onClick={() => handleOpenEditDialog('rate', rate)}>
+                                    <Edit className="w-3.5 h-3.5" />
+                                  </Button>
+                                  <Button size="icon" variant="ghost" className="w-7 h-7 hover:bg-rose-500/10 text-rose-500" onClick={() => handleDeleteItem('rate', rate.id)}>
+                                    <Trash2 className="w-3.5 h-3.5" />
+                                  </Button>
                                 </div>
-                              </div>
-
-                              <div className="p-3 border-t border-border/50 bg-slate-50/50 dark:bg-slate-900/30 flex justify-end gap-1.5">
-                                <Button size="icon" variant="ghost" className="w-7 h-7 hover:bg-accent/10 text-accent" onClick={() => handleOpenEditDialog('rate', rate)}>
-                                  <Edit className="w-3.5 h-3.5" />
-                                </Button>
-                                <Button size="icon" variant="ghost" className="w-7 h-7 hover:bg-rose-500/10 text-rose-500" onClick={() => handleDeleteItem('rate', rate.id)}>
-                                  <Trash2 className="w-3.5 h-3.5" />
-                                </Button>
-                              </div>
-                            </Card>
-                          ))}
+                              </Card>
+                            );
+                          })}
                         </div>
                       )}
                     </CardContent>
@@ -3590,7 +4029,7 @@ return (
                   <Card className="border-border/60">
                     <CardHeader className="p-4 border-b border-border/40">
                       <CardTitle className="text-xs font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-2">
-                        <Clock className="w-4 h-4 text-accent animate-pulse" /> Contract Version & Audit History
+                        <Clock className="w-4 h-4 text-accent animate-pulse" /> Contract Version &amp; Audit History
                       </CardTitle>
                     </CardHeader>
                     <CardContent className="p-4 max-h-48 overflow-y-auto">
@@ -3616,8 +4055,8 @@ return (
                 <Card className="border-border/60 py-12 flex flex-col justify-center items-center text-center space-y-3 bg-slate-50/20 dark:bg-slate-900/5">
                   <Landmark className="w-12 h-12 text-slate-300 dark:text-slate-700 animate-bounce" />
                   <div>
-                    <h3 className="font-extrabold text-foreground text-base">Select Contract to Manage</h3>
-                    <p className="text-xs text-muted-foreground max-w-sm mt-1">Please select an existing contract from the left panel or click "Add Contract" to configure new terms.</p>
+                    <h3 className="font-extrabold text-foreground text-base">Select a Hotel Target on the Left</h3>
+                    <p className="text-xs text-muted-foreground max-w-sm mt-1">Choose any hotel from the dropdown (or click a row in the All Hotel Contracts Registry above) to add or edit MySQL contracted rates immediately.</p>
                   </div>
                 </Card>
               )}

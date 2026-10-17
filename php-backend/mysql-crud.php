@@ -231,6 +231,85 @@ if ($table === 'hotel_facility_mapping') {
             `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
     } catch (Throwable $e) {}
+} elseif ($table === 'room_categories') {
+    try {
+        $pdo->exec("CREATE TABLE IF NOT EXISTS `room_categories` (
+            `id` VARCHAR(100) PRIMARY KEY,
+            `hotel_id` VARCHAR(100) NOT NULL,
+            `room_category_name` VARCHAR(255) NOT NULL,
+            `room_size` VARCHAR(100) DEFAULT NULL,
+            `max_adults` INT DEFAULT 2,
+            `max_children` INT DEFAULT 1,
+            `bed_type` VARCHAR(100) DEFAULT NULL,
+            `room_description` TEXT DEFAULT NULL,
+            `facilities` TEXT DEFAULT NULL,
+            `room_images` TEXT DEFAULT NULL,
+            `active_status` TINYINT(1) DEFAULT 1,
+            `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+    } catch (Throwable $e) {}
+} elseif ($table === 'seasons') {
+    try {
+        $pdo->exec("CREATE TABLE IF NOT EXISTS `seasons` (
+            `id` VARCHAR(100) PRIMARY KEY,
+            `hotel_id` VARCHAR(100) NOT NULL,
+            `season_name` VARCHAR(255) NOT NULL,
+            `season_type` VARCHAR(100) DEFAULT 'Standard',
+            `start_date` VARCHAR(50) DEFAULT NULL,
+            `end_date` VARCHAR(50) DEFAULT NULL,
+            `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+    } catch (Throwable $e) {}
+} elseif ($table === 'hotel_contracts') {
+    try {
+        $pdo->exec("CREATE TABLE IF NOT EXISTS `hotel_contracts` (
+            `id` INT AUTO_INCREMENT PRIMARY KEY,
+            `hotel_id` VARCHAR(100) NOT NULL,
+            `supplier_id` VARCHAR(100) DEFAULT NULL,
+            `contract_name` VARCHAR(255) NOT NULL,
+            `valid_from` VARCHAR(50) DEFAULT NULL,
+            `valid_to` VARCHAR(50) DEFAULT NULL,
+            `currency` VARCHAR(20) DEFAULT 'INR',
+            `gst_percentage` DECIMAL(5,2) DEFAULT 12.00,
+            `payment_policy` TEXT DEFAULT NULL,
+            `cancellation_policy` TEXT DEFAULT NULL,
+            `active_status` TINYINT(1) DEFAULT 1,
+            `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+    } catch (Throwable $e) {}
+} elseif ($table === 'hotel_contract_rates') {
+    try {
+        $pdo->exec("CREATE TABLE IF NOT EXISTS `hotel_contract_rates` (
+            `id` VARCHAR(100) PRIMARY KEY,
+            `contract_id` VARCHAR(100) NOT NULL,
+            `room_category_id` VARCHAR(100) NOT NULL,
+            `season_id` VARCHAR(100) DEFAULT NULL,
+            `meal_plan_id` VARCHAR(50) DEFAULT 'CP',
+            `single_rate` DECIMAL(12,2) DEFAULT 0,
+            `double_rate` DECIMAL(12,2) DEFAULT 0,
+            `triple_rate` DECIMAL(12,2) DEFAULT 0,
+            `quad_rate` DECIMAL(12,2) DEFAULT 0,
+            `five_bed_rate` DECIMAL(12,2) DEFAULT 0,
+            `six_bed_rate` DECIMAL(12,2) DEFAULT 0,
+            `extra_adult_rate` DECIMAL(12,2) DEFAULT 0,
+            `child_with_bed_rate` DECIMAL(12,2) DEFAULT 0,
+            `child_without_bed_rate` DECIMAL(12,2) DEFAULT 0,
+            `weekend_surcharge` DECIMAL(12,2) DEFAULT 0,
+            `peak_season_surcharge` DECIMAL(12,2) DEFAULT 0,
+            `rate_type` VARCHAR(30) DEFAULT 'exclusive',
+            `gst_percentage` DECIMAL(5,2) DEFAULT 12.00,
+            `gst_amount` DECIMAL(12,2) DEFAULT 0,
+            `net_cost` DECIMAL(12,2) DEFAULT 0,
+            `supplier_cost` DECIMAL(12,2) DEFAULT 0,
+            `markup` DECIMAL(12,2) DEFAULT 0,
+            `selling_cost` DECIMAL(12,2) DEFAULT 0,
+            `is_tax_overridden` TINYINT(1) DEFAULT 0,
+            `tax_override_reason` TEXT DEFAULT NULL,
+            `tax_audit_logs` TEXT DEFAULT NULL,
+            `active_status` TINYINT(1) DEFAULT 1,
+            `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+    } catch (Throwable $e) {}
 }
 
 try {
